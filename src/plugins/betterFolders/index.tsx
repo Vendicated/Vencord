@@ -61,7 +61,7 @@ function filterTreeWithTargetNode(children: any, predicate: (node: any) => boole
             return true;
         }
 
-        return filterTreeWithTargetNode(children.props.children, predicate);
+        return filterTreeWithTargetNode(children.props?.children, predicate);
     }
 
 
@@ -150,7 +150,7 @@ export default definePlugin({
                 },
                 // Export the isBetterFolders and betterFoldersExpandedIds variable to the Guild List component
                 {
-                    match: /0,\i\.jsxs?[^0}]{0,100}guildDiscoveryButton:\i,/g,
+                    match: /,{guildDiscoveryButton:\i,/g,
                     replace: "$&isBetterFolders:arguments[0]?.isBetterFolders,betterFoldersExpandedIds:arguments[0]?.betterFoldersExpandedIds,"
                 },
                 // Export the isBetterFolders variable to the folders component
@@ -349,7 +349,12 @@ export default definePlugin({
                 return true;
             }
 
-            return filterTreeWithTargetNode(child, child => child?.props?.renderTreeNode != null);
+            try {
+                return filterTreeWithTargetNode(child, child => child?.props?.renderTreeNode != null);
+            } catch (e) {
+                console.error(e);
+                return true;
+            }
         };
     },
 
