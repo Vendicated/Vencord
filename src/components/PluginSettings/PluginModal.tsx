@@ -250,10 +250,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             count={plugin.authors.length}
                             guildId={undefined}
                             renderIcon={false}
-                            max={6}
                             showDefaultAvatarsForNullUsers
                             showUserPopout
-                            renderMoreUsers={renderMoreUsers}
+                            renderMoreUsers={plugin.authors.length > 6 ? renderMoreUsers : undefined}
                             renderUser={(user: User) => (
                                 <Clickable
                                     className={AvatarStyles.clickableAvatar}
