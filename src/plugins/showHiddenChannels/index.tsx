@@ -347,7 +347,8 @@ export default definePlugin({
                     // Show only the plus text without overflowed children amount
                     // if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
                     match: /(?<="\+"\.concat\()\i/,
-                    replace: amount => `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&${amount}-1<=0?"":${amount}`
+                    replace: overflowTextAmount => "" +
+                        `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&(${overflowTextAmount}-1)<=0?"":${overflowTextAmount}`
                 }
             ]
         },
