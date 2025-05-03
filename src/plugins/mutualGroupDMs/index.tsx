@@ -88,7 +88,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".MUTUAL_FRIENDS?(",
+            find: ".BOT_DATA_ACCESS?(",
             replacement: [
                 {
                     match: /\i\.useEffect.{0,100}(\i)\[0\]\.section/,
