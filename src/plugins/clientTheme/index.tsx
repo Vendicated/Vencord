@@ -9,11 +9,13 @@ import "./clientTheme.css";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { isNonNullish } from "@utils/guards";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
+import { traceFunction } from "debug/Tracer";
 
 const cl = classNameFactory("vc-clientTheme-");
 
@@ -130,10 +132,7 @@ export default definePlugin({
     }
 });
 
-const visualRefreshVariableRegex = /(--neutral-\d{1,3}-hsl):.*?(\S*)%;/g;
-const oldVariableRegex = /(--primary-\d{3}-hsl):.*?(\S*)%;/g;
-const lightVariableRegex = /^--primary-[1-5]\d{2}-hsl/g;
-const darkVariableRegex = /^--primary-[5-9]\d{2}-hsl/g;
+const visualRefreshVariableRegex = /(--neutral-\d{1,3}-hsl):.*?(\S*?)%;/g;
 
 // generates variables per theme by:
 // - matching regex (so we can limit what variables are included in light/dark theme, otherwise text becomes unreadable)
@@ -148,28 +147,20 @@ function genThemeSpecificOffsets(variableLightness: Record<string, number>, rege
         .join("\n");
 }
 
-function generateColorOffsets(styles) {
-    const oldVariableLightness = {} as Record<string, number>;
+const generateColorOffsets = traceFunction("ClientTheme:generateColorOffsets", function generateColorOffsets(styles) {
     const visualRefreshVariableLightness = {} as Record<string, number>;
-
-    // Get lightness values of --primary variables
-    for (const [, variable, lightness] of styles.matchAll(oldVariableRegex)) {
-        oldVariableLightness[variable] = parseFloat(lightness);
-    }
 
     for (const [, variable, lightness] of styles.matchAll(visualRefreshVariableRegex)) {
         visualRefreshVariableLightness[variable] = parseFloat(lightness);
     }
 
     createStyleSheet("clientThemeOffsets", [
-        `.theme-light {\n ${genThemeSpecificOffsets(oldVariableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
-        `.theme-dark {\n ${genThemeSpecificOffsets(oldVariableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
         `.visual-refresh.theme-light {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-2-hsl")} \n}`,
         `.visual-refresh.theme-dark {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-69-hsl")} \n}`,
     ].join("\n\n"));
-}
+});
 
-function generateLightModeFixes(styles: string) {
+const generateLightModeFixes = traceFunction("ClientTheme:generateLightModeFixes", function generateLightModeFixes(styles: string) {
     const groupLightUsesW500Regex = /\.theme-light[^{]*\{[^}]*var\(--white-500\)[^}]*}/gm;
     // get light capturing groups that mention --white-500
     const relevantStyles = [...styles.matchAll(groupLightUsesW500Regex)].flat();
@@ -177,8 +168,8 @@ function generateLightModeFixes(styles: string) {
     const groupBackgroundRegex = /^([^{]*)\{background:var\(--white-500\)/m;
     const groupBackgroundColorRegex = /^([^{]*)\{background-color:var\(--white-500\)/m;
     // find all capturing groups that assign background or background-color directly to w500
-    const backgroundGroups = mapReject(relevantStyles, entry => captureOne(entry, groupBackgroundRegex)).join(",\n");
-    const backgroundColorGroups = mapReject(relevantStyles, entry => captureOne(entry, groupBackgroundColorRegex)).join(",\n");
+    const backgroundGroups = mapNotNull(relevantStyles, entry => getFirstCapture(entry, groupBackgroundRegex)).join(",\n");
+    const backgroundColorGroups = mapNotNull(relevantStyles, entry => getFirstCapture(entry, groupBackgroundColorRegex)).join(",\n");
     // create css to reassign them to --primary-100
     const reassignBackgrounds = `${backgroundGroups} {\n background: var(--primary-100) \n}`;
     const reassignBackgroundColors = `${backgroundColorGroups} {\n background-color: var(--primary-100) \n}`;
@@ -186,9 +177,9 @@ function generateLightModeFixes(styles: string) {
     const groupBgVarRegex = /\.theme-light\{([^}]*--[^:}]*(?:background|bg)[^:}]*:var\(--white-500\)[^}]*)\}/m;
     const bgVarRegex = /^(--[^:]*(?:background|bg)[^:]*):var\(--white-500\)/m;
     // get all global variables used for backgrounds
-    const lightVars = mapReject(relevantStyles, style => captureOne(style, groupBgVarRegex)) // get the insides of capture groups that have at least one background var with w500
+    const lightVars = mapNotNull(relevantStyles, style => getFirstCapture(style, groupBgVarRegex)) // get the insides of capture groups that have at least one background var with w500
         .map(str => str.split(";")).flat(); // captureGroupInsides[] -> cssRule[]
-    const lightBgVars = mapReject(lightVars, variable => captureOne(variable, bgVarRegex)); // remove vars that aren't for backgrounds or w500
+    const lightBgVars = mapNotNull(lightVars, variable => getFirstCapture(variable, bgVarRegex)); // remove vars that aren't for backgrounds or w500
     // create css to reassign every var
     const reassignVariables = `.theme-light {\n ${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")} \n}`;
 
@@ -197,15 +188,15 @@ function generateLightModeFixes(styles: string) {
         reassignBackgroundColors,
         reassignVariables,
     ].join("\n\n"));
-}
+});
 
-function captureOne(str, regex) {
+function getFirstCapture(str: string, regex: RegExp) {
     const result = str.match(regex);
-    return (result === null) ? null : result[1];
+    return result?.[1];
 }
 
-function mapReject(arr, mapFunc) {
-    return arr.map(mapFunc).filter(Boolean);
+function mapNotNull<T, R>(arr: T[], mapFunc: (item: T) => R | null) {
+    return arr.map(mapFunc).filter(isNonNullish);
 }
 
 function updateColorVars(color: string) {
@@ -232,16 +223,16 @@ function createStyleSheet(id, content = "") {
 
 // returns all of discord's native styles in a single string
 async function getStyles(): Promise<string> {
-    let out = "";
-    const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
-    for (const styleLinkNode of styleLinkNodes) {
-        const cssLink = styleLinkNode.getAttribute("href");
-        if (!cssLink) continue;
+    const styleLinkNodes = document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]');
 
-        const res = await fetch(cssLink);
-        out += await res.text();
-    }
-    return out;
+    const cssTexts = await Promise.all(Array.from(styleLinkNodes, async node => {
+        if (!node.href)
+            return null;
+
+        return fetch(node.href).then(res => res.text());
+    }));
+
+    return cssTexts.filter(isNonNullish).join("\n");
 }
 
 // https://css-tricks.com/converting-color-spaces-in-javascript/
