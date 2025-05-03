@@ -89,7 +89,7 @@ export default definePlugin({
             predicate: () => settings.store.toolbarDevMenu
         },
 
-        // Makes the Favourites Server experiment allow favouriting DMs and threads
+        // Make the Favourites Server experiment allow favouriting DMs and threads
         {
             find: "useCanFavoriteChannel",
             replacement: {
