@@ -176,7 +176,6 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
 
     if (!box) return null;
 
-
     return (
         <div
             className={cl("lens", { "nearest-neighbor": settings.store.nearestNeighbour, square: settings.store.square })}
