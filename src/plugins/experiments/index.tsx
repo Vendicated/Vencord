@@ -109,10 +109,17 @@ export default definePlugin({
         // Enable experiment embed on sent experiment links
         {
             find: "dev://experiment/",
-            replacement: {
-                match: /\i\.isStaff\(\)/,
-                replace: "true"
-            }
+            replacement: [
+                {
+                    match: /\i\.isStaff\(\)/,
+                    replace: "true"
+                },
+                // Fix some tricky experiments name causing a client crash
+                {
+                    match: /.getRegisteredExperiments\(\)(?<=(\i)=.+?).+?if\(null==(\i)(?=\)return null;)/,
+                    replace: "$&||!Object.hasOwn($1,$2)"
+                }
+            ]
         },
     ],
 
