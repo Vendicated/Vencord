@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>171 additional plugins</summary>
+<summary>170 additional plugins</summary>
 
 ### All Platforms
 
@@ -53,7 +53,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - DontFilterMe by Samwich
 - EmojiDumper by Cortex, Samwich, Woosh
 - Encryptcord by Inbestigator
-- EquicordCSS by thororen, Panniku, Dablulite, Coolesding, MiniDiscordThemes, LuckFire, gold_me
 - EquicordHelper by thororen & nyx
 - Equissant by SomeAspy & thororen
 - ExportContacts by dat_insanity

@@ -1,9 +1,0 @@
-@import url("https://raw.githubusercontent.com/Equicord/Equicord/main/src/equicordplugins/equicordCSS/css/main.min.css");
-
-/* https://github.com/MiniDiscordThemes/SettingsIcons#customisation */
-
-:root {
-    --settingsicons: 1;
-    --si-size: 18px;
-    --si-gap: 14px;
-}

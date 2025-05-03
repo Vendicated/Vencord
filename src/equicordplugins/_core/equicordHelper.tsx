@@ -18,9 +18,25 @@
 
 import "@equicordplugins/_misc/styles.css";
 
+import { definePluginSettings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Forms } from "@webpack/common";
+
+import clanBadges from "../_misc/clanBadges.css?managed";
+
+const settings = definePluginSettings({
+    hideClanBadges: {
+        type: OptionType.BOOLEAN,
+        description: "Hide clan badges",
+        default: false,
+        onChange: value => {
+            if (value) enableStyle(clanBadges);
+            else disableStyle(clanBadges);
+        }
+    }
+});
 
 export default definePlugin({
     name: "EquicordHelper",
@@ -31,6 +47,7 @@ export default definePlugin({
             This Plugin is used for fixing misc issues with discord such as some crashes
         </Forms.FormText>
     </>,
+    settings,
     required: true,
     patches: [
         {
@@ -46,5 +63,11 @@ export default definePlugin({
                 }
             ]
         }
-    ]
+    ],
+    start() {
+        if (settings.store.hideClanBadges) enableStyle(clanBadges);
+    },
+    stop() {
+        if (settings.store.hideClanBadges) disableStyle(clanBadges);
+    }
 });

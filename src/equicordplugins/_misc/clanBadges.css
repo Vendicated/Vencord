@@ -1,0 +1,3 @@
+[class*="chipletContainerInner_"]:has([src *="/clan-badges/"]) {
+    display: none;
+}
