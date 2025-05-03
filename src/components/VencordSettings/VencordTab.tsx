@@ -82,7 +82,7 @@ function EquicordSettings() {
             (!IS_DISCORD_DESKTOP || !isWindows
                 ? {
                     key: "frameless",
-                    title: "Disable the window frame",
+                    title: "Disable the Window Frame",
                     note: "Requires a full restart",
                     warning: { enabled: false },
                 }
@@ -95,7 +95,7 @@ function EquicordSettings() {
                 }),
             !IS_WEB && {
                 key: "transparent",
-                title: "Enable window transparency.",
+                title: "Enable Window Transparency",
                 note: "You need a theme that supports transparency or this will do nothing. Requires a full restart!",
                 warning: {
                     enabled: isWindows,
@@ -112,7 +112,7 @@ function EquicordSettings() {
             },
             IS_DISCORD_DESKTOP && {
                 key: "disableMinSize",
-                title: "Disable minimum window size",
+                title: "Disable Minimum Window Size",
                 note: "Requires a full restart",
                 warning: { enabled: false },
             },
