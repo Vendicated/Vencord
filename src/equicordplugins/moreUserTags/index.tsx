@@ -41,14 +41,16 @@ export default definePlugin({
         // Make discord actually use our tags
         {
             find: ".STAFF_ONLY_DM:",
-            replacement: [{
-                match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})default:(\i)=/,
-                replace: "default:$2=$self.getTagText($self.localTags[$1]);",
-            }, {
-                match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})\.BOT:(?=default:)/,
-                replace: "$&return null;",
-                predicate: () => settings.store.dontShowBotTag
-            },
+            replacement: [
+                {
+                    match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})default:(\i)=/,
+                    replace: "default:$2=$self.getTagText($self.localTags[$1]);",
+                },
+                {
+                    match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})\.BOT:(?=default:)/,
+                    replace: "$&return null;",
+                    predicate: () => settings.store.dontShowBotTag
+                },
             ],
         }
     ],
