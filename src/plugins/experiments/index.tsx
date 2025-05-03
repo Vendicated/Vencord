@@ -79,9 +79,9 @@ export default definePlugin({
                 replace: "$&$self.WarningCard(),"
             }
         },
-        // change top right chat toolbar button from the help one to the dev one
+        // Change top right chat toolbar button from the help one to the dev one
         {
-            find: "AppTitleBar",
+            find: ".CONTEXTLESS,isActivityPanelMode:",
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"
@@ -89,7 +89,7 @@ export default definePlugin({
             predicate: () => settings.store.toolbarDevMenu
         },
 
-        // makes the Favourites Server experiment allow favouriting DMs and threads
+        // Makes the Favourites Server experiment allow favouriting DMs and threads
         {
             find: "useCanFavoriteChannel",
             replacement: {
@@ -97,7 +97,7 @@ export default definePlugin({
                 replace: "false",
             }
         },
-        // enable option to always record clips even if you are not streaming
+        // Enable option to always record clips even if you are not streaming
         {
             find: "isDecoupledGameClippingEnabled(){",
             replacement: {
@@ -106,7 +106,7 @@ export default definePlugin({
             }
         },
 
-        // enable experiment embed on sent experiment links
+        // Enable experiment embed on sent experiment links
         {
             find: "dev://experiment/",
             replacement: {
