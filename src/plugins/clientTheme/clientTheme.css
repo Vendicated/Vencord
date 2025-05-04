@@ -19,16 +19,8 @@
     border: thin solid var(--background-modifier-accent) !important;
 }
 
-.vc-clientTheme-warning-text {
-    color: var(--text-danger);
-}
-
-.vc-clientTheme-contrast-warning {
-    background-color: var(--background-primary);
-    padding: 0.5rem;
-    border-radius: .5rem;
+.vc-clientTheme-buttons-container {
+    margin-top: 16px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    gap: 4px;
 }
