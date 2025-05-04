@@ -1,3 +1,7 @@
-.vc-mutual-gdms-tab-bar {
+.vc-mutual-gdms-modal-tab-bar {
     gap: 0;
+}
+
+.vc-mutual-gdms-modal-v2-tab-bar {
+    gap: 6px;
 }

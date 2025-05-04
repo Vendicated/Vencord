@@ -55,7 +55,7 @@ export default definePlugin({
     settings,
 
     patches: [
-        // User Popout, Full Size Profile, Direct Messages Side Profile
+        // User Popout, User Profile Modal, Direct Messages Side Profile
         {
             find: "#{intl::USER_PROFILE_LOAD_ERROR}",
             replacement: {

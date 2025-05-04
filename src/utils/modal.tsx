@@ -140,7 +140,7 @@ export type MediaModalProps = {
     shouldHideMediaOptions?: boolean;
 };
 
-// modal key: "Media Viewer Modal"
+// Modal key: "Media Viewer Modal"
 export const openMediaModal: (props: MediaModalProps) => void = findByCodeLazy("hasMediaOptions", "shouldHideMediaOptions");
 
 interface ModalAPI {

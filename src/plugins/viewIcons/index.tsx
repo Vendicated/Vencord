@@ -190,7 +190,7 @@ export default definePlugin({
     },
 
     patches: [
-        // Avatar component used in User DMs "User Profile" popup in the right and Profiles Modal pfp
+        // Avatar component used in User DMs "User Profile" popup in the right and User Profile Modal pfp
         {
             find: ".overlay:void 0,status:",
             replacement: [
