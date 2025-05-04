@@ -15,8 +15,7 @@ export default definePlugin({
 
     noop: () => { },
     acceptInvite: () => {
-        const server_invite = document.location.href.slice("https://discord.com/invite/".length);
-        open(`https://discord.com/app/invite-with-guild-onboarding/${server_invite}`, "_self");
+        open(document.location.href.replace(/invite/, "app/invite-with-guild-onboarding"), "_self");
     },
 
     patches: [
@@ -30,7 +29,7 @@ export default definePlugin({
         { // This says that it has no effect, but it does
             find: /openApp\(/,
             replacement: {
-                match: /(\i)\.(\i)\.launch\((\i),(\i)=>\{(\i)\.(\i)\.dispatch\((\i)\?(\{.*?\}):(\{.*?\})\)\}\)/,
+                match: /\i\.\i\.launch\(\i,\i=>\{\i\.\i\.dispatch\(\i\?\{.*?\}:\{.*?\}\)\}\)/,
                 replace: "$self.acceptInvite()",
             },
             all: true
