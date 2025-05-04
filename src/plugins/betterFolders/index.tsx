@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./sidebarFix.css";
+import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
