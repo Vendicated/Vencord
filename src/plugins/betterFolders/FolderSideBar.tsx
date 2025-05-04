@@ -42,7 +42,8 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
-    // Also display flex otherwise to fix scrolling
+    // Also display flex otherwise to fix scrolling.
+    // gridArea is needed to align properly with the base app grid.
     const barStyle = {
         display: isFullscreen ? "none" : "flex",
         gridArea: "betterFoldersSidebar"
@@ -62,7 +63,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
             leave={{ width: 0 }}
             config={{ duration: 200 }}
         >
-            {(animationStyle, show) =>
+            {(animationStyle: any, show: any) =>
                 show && (
                     <Animations.animated.div style={{ ...animationStyle, ...barStyle }}>
                         {Sidebar}
