@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
@@ -30,8 +32,8 @@ const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
-const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"');
-const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
+const MutualsListClasses = findByPropsLazy("row", "icon", "name", "nick");
+const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"', ".header");
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||
@@ -57,7 +59,7 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
     return mutualDms.map(c => (
         <Clickable
             key={c.id}
-            className={ProfileListClasses.listRow}
+            className={MutualsListClasses.row}
             onClick={() => {
                 onClose();
                 SelectedChannelActionCreators.selectPrivateChannel(c.id);
@@ -66,12 +68,12 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
             <Avatar
                 src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
                 size="SIZE_40"
-                className={ProfileListClasses.listAvatar}
+                className={MutualsListClasses.icon}
             >
             </Avatar>
-            <div className={ProfileListClasses.listRowContent}>
-                <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
-                <div className={GuildLabelClasses.guildNick}>{c.recipients.length + 1} Members</div>
+            <div className={MutualsListClasses.details}>
+                <div className={MutualsListClasses.name}>{getGroupDMName(c)}</div>
+                <div className={MutualsListClasses.nick}>{c.recipients.length + 1} Members</div>
             </div>
         </Clickable>
     ));
@@ -86,7 +88,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".MUTUAL_FRIENDS?(",
+            find: ".BOT_DATA_ACCESS?(",
             replacement: [
                 {
                     match: /\i\.useEffect.{0,100}(\i)\[0\]\.section/,
@@ -95,6 +97,12 @@ export default definePlugin({
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
                     replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):$&"
+                },
+                // Discord adds spacing between each item which pushes our tab off screen.
+                // set the gap to zero to ensure ours stays on screen
+                {
+                    match: /className:\i\.tabBar/,
+                    replace: "$& + ' vc-mutual-gdms-tab-bar'"
                 }
             ]
         },
