@@ -143,7 +143,8 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Signature by Ven, Rini, ImBanana, KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
-- - SplitLargeMessages by Reycko
+- SplitLargeMessages by Reycko
+- SpotifyActivityToggle by thororen
 - SpotifyLyrics by Joona
 - StatsfmPresence by Crxa
 - StatusPresets by iamme
