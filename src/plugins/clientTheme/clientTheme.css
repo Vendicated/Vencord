@@ -1,25 +1,25 @@
-.vc-clientTheme-settings {
+.vc-client-theme-settings {
     display: flex;
     flex-direction: column;
 }
 
-.vc-clientTheme-container {
+.vc-client-theme-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
 
-.vc-clientTheme-labels {
+.vc-client-theme-labels {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
 }
 
-.vc-clientTheme-container [class^="swatch"] {
+.vc-client-theme-container [class^="swatch"] {
     border: thin solid var(--background-modifier-accent) !important;
 }
 
-.vc-clientTheme-buttons-container {
+.vc-client-theme-buttons-container {
     margin-top: 16px;
     display: flex;
     gap: 4px;
