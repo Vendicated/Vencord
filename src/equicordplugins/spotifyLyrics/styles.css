@@ -76,11 +76,3 @@
     text-align: center;
     padding: 1rem;
 }
-
-.theme-light .vc-spotify-lyrics {
-    background: var(--bg-overlay-3, var(--background-secondary-alt));
-}
-
-.theme-dark .vc-spotify-lyrics {
-    background: var(--bg-overlay-1, var(--background-secondary-alt));
-}
