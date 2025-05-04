@@ -11,11 +11,11 @@
     cursor: pointer;
     pointer-events: initial;
     vertical-align: top;
-}
 
-.vc-sbic-image-container img {
+    & img {
     width: calc(1.5rem + 4px);
     height: calc(1.5rem + 4px);
+    }
 }
 
 .vc-sbic-image-container[data-is-enabled="false"] {
