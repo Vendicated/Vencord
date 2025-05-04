@@ -23,7 +23,8 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, useMemo } from "@webpack/common";
+import { FluxDispatcher } from "@webpack/common";
+import { ReactNode } from "react";
 
 import FolderSideBar from "./FolderSideBar";
 
@@ -129,6 +130,10 @@ export const settings = definePluginSettings({
     }
 });
 
+const IS_BETTER_FOLDERS_VAR = "typeof isBetterFolders!=='undefined'?isBetterFolders:arguments[0]?.isBetterFolders";
+const BETTER_FOLDERS_EXPANDED_IDS_VAR = "typeof betterFoldersExpandedIds!=='undefined'?betterFoldersExpandedIds:arguments[0]?.betterFoldersExpandedIds";
+const GRID_STYLE_NAME = "vc-betterFolders-sidebar-grid";
+
 export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
@@ -141,28 +146,33 @@ export default definePlugin({
             find: '("guildsnav")',
             predicate: () => settings.store.sidebar,
             replacement: [
-                // Create the isBetterFolders variable in the GuildsBar component
+                // Create the isBetterFolders and betterFoldersExpandedIds variables in the GuildsBar component
                 // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
                     match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
-                    replace: "$&,isBetterFolders"
+                    replace: "$&,isBetterFolders,betterFoldersExpandedIds"
                 },
                 // Export the isBetterFolders and betterFoldersExpandedIds variable to the Guild List component
                 {
                     match: /,{guildDiscoveryButton:\i,/g,
                     replace: "$&isBetterFolders:arguments[0]?.isBetterFolders,betterFoldersExpandedIds:arguments[0]?.betterFoldersExpandedIds,"
                 },
-                // Export the isBetterFolders variable to the folders component
+                // Wrap the guild node (guild or folder) component in a div with display: none if it's not an expanded folder or a guild in an expanded folder
+                {
+                    match: /switch\((\i)\.type\){.+?default:return null}/,
+                    replace: `return $self.wrapGuildNodeComponent($1,()=>{$&},${IS_BETTER_FOLDERS_VAR},${BETTER_FOLDERS_EXPANDED_IDS_VAR});`
+                },
+                // Export the isBetterFolders variable to the folder component
                 {
                     match: /switch\(\i\.type\){case \i\.\i\.FOLDER:.+?folderNode:\i,/,
-                    replace: '$&isBetterFolders:typeof isBetterFolders!=="undefined"?isBetterFolders:false,'
+                    replace: `$&isBetterFolders:${IS_BETTER_FOLDERS_VAR},`
                 },
-                // If we are rendering the Better Folders sidebar, we filter out guilds that are not in folders and unexpanded folders
+                // Make the callback for returning the guild node component depend on isBetterFolders and betterFoldersExpandedIds
                 {
-                    match: /\[(\i)\]=(\(0,\i\.\i\).{0,40}getGuildsTree\(\).+?}\))(?=,)/,
-                    replace: (_, originalTreeVar, rest) => `[betterFoldersOriginalTree]=${rest},${originalTreeVar}=$self.getGuildTree(!!arguments[0]?.isBetterFolders,betterFoldersOriginalTree,arguments[0]?.betterFoldersExpandedIds)`
+                    match: /switch\(\i\.type\).+?,\i,\i\.setNodeRef/,
+                    replace: "$&,arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds"
                 },
-                // If we are rendering the Better Folders sidebar, we filter out everything but the servers and folders from the Guild List children
+                // If we are rendering the Better Folders sidebar, we filter out everything but the guilds and folders from the Guild List children
                 {
                     match: /lastTargetNode:\i\[\i\.length-1\].+?}\)(?::null)?\](?=}\))/,
                     replace: "$&.filter($self.makeGuildsBarGuildListFilter(!!arguments[0]?.isBetterFolders))"
@@ -248,8 +258,8 @@ export default definePlugin({
                 },
                 {
                     // Add grid styles to fix aligment with other visual refresh elements
-                    match: /(?<=className:)(\i\.base)(?=,)/,
-                    replace: "`${$self.gridStyle} ${$1}`"
+                    match: /(?<=className:)\i\.base(?=,)/,
+                    replace: `"${GRID_STYLE_NAME} "+$&`
                 }
             ]
         },
@@ -308,27 +318,25 @@ export default definePlugin({
     FolderSideBar,
     closeFolders,
 
-    gridStyle: "vc-betterFolders-sidebar-grid",
 
-    getGuildTree(isBetterFolders: boolean, originalTree: any, expandedFolderIds?: Set<any>) {
-        return useMemo(() => {
-            if (!isBetterFolders || expandedFolderIds == null) return originalTree;
+    wrapGuildNodeComponent(node: any, originalComponent: () => ReactNode, isBetterFolders: boolean, expandedFolderIds?: Set<any>) {
+        if (
+            !isBetterFolders ||
+            node.type === "folder" && expandedFolderIds?.has(node.id) ||
+            node.type === "guild" && expandedFolderIds?.has(node.parentId)
+        ) {
+            return originalComponent();
+        }
 
-            const newTree = new GuildsTree();
-            // Children is every folder and guild which is not in a folder, this filters out only the expanded folders
-            newTree.root.children = originalTree.root.children.filter(guildOrFolder => expandedFolderIds.has(guildOrFolder.id));
-            // Nodes is every folder and guild, even if it's in a folder, this filters out only the expanded folders and guilds inside them
-            newTree.nodes = Object.fromEntries(
-                Object.entries(originalTree.nodes)
-                    .filter(([_, guildOrFolder]: any[]) => expandedFolderIds.has(guildOrFolder.id) || expandedFolderIds.has(guildOrFolder.parentId))
-            );
-
-            return newTree;
-        }, [isBetterFolders, originalTree, expandedFolderIds]);
+        return (
+            <div style={{ display: "none" }}>
+                {originalComponent()}
+            </div>
+        );
     },
 
     makeGuildsBarGuildListFilter(isBetterFolders: boolean) {
-        return child => {
+        return (child: any) => {
             if (!isBetterFolders) {
                 return true;
             }
@@ -343,7 +351,7 @@ export default definePlugin({
     },
 
     makeGuildsBarSidebarFilter(isBetterFolders: boolean) {
-        return child => {
+        return (child: any) => {
             if (!isBetterFolders) {
                 return true;
             }
