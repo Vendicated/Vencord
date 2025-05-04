@@ -44,11 +44,9 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     let renderBody: boolean = true;
     let footer: boolean = false;
 
-    if (attachments > 0)
-        footer = true;
+    if (attachments > 0) footer = true;
 
-    if (body === "")
-        renderBody = false;
+    if (body === "") renderBody = false;
 
     // Precompute appearance settings.
     const AppearanceSettings = {

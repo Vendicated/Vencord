@@ -18,46 +18,68 @@ function SettingsComponent() {
 
     return (
         <Flex flexDirection="column">
-            {tags.map(t => (
-                <Card key={t.name} style={{ padding: "1em 1em 0" }}>
-                    <Forms.FormTitle style={{ width: "fit-content" }}>
-                        <Tooltip text={t.description}>
-                            {({ onMouseEnter, onMouseLeave }) => (
-                                <div
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                >
-                                    {t.displayName} Tag <Tag type={localTags[t.name]}></Tag>
-                                </div>
-                            )}
-                        </Tooltip>
-                    </Forms.FormTitle>
-
-                    <TextInput
-                        type="text"
-                        value={tagSettings[t.name]?.text ?? t.displayName}
-                        placeholder={`Text on tag (default: ${t.displayName})`}
-                        onChange={v => tagSettings[t.name].text = v}
-                        className={Margins.bottom16}
-                    />
-
-                    <Switch
-                        value={tagSettings[t.name]?.showInChat ?? true}
-                        onChange={v => tagSettings[t.name].showInChat = v}
-                        hideBorder
+            <div
+                style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "16px",
+                }}
+            >
+                {tags.map(t => (
+                    <Card
+                        key={t.name}
+                        style={{
+                            padding: "1em 1em 0",
+                            width: "calc(33.333% - 11px)",
+                            boxSizing: "border-box",
+                        }}
                     >
-                        Show in messages
-                    </Switch>
+                        <Forms.FormTitle style={{ width: "fit-content" }}>
+                            <Tooltip text={t.description}>
+                                {({ onMouseEnter, onMouseLeave }) => (
+                                    <div
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                    >
+                                        {t.displayName} Tag
+                                    </div>
+                                )}
+                            </Tooltip>
+                        </Forms.FormTitle>
 
-                    <Switch
-                        value={tagSettings[t.name]?.showInNotChat ?? true}
-                        onChange={v => tagSettings[t.name].showInNotChat = v}
-                        hideBorder
-                    >
-                        Show in member list and profiles
-                    </Switch>
-                </Card>
-            ))}
+                        <div style={{ marginBottom: "10px" }}>
+                            <Forms.FormText style={{ fontSize: "13px" }}>
+                                Example:
+                            </Forms.FormText>
+                            <Tag type={localTags[t.name]} />
+                        </div>
+
+                        <TextInput
+                            type="text"
+                            value={tagSettings[t.name]?.text ?? t.displayName}
+                            placeholder={`Text on tag (default: ${t.displayName})`}
+                            onChange={v => tagSettings[t.name].text = v}
+                            className={Margins.bottom16}
+                        />
+
+                        <Switch
+                            value={tagSettings[t.name]?.showInChat ?? true}
+                            onChange={v => tagSettings[t.name].showInChat = v}
+                            hideBorder
+                        >
+                            Show in messages
+                        </Switch>
+
+                        <Switch
+                            value={tagSettings[t.name]?.showInNotChat ?? true}
+                            onChange={v => tagSettings[t.name].showInNotChat = v}
+                            hideBorder
+                        >
+                            Show in member list and profiles
+                        </Switch>
+                    </Card>
+                ))}
+            </div>
         </Flex>
     );
 }
