@@ -171,6 +171,12 @@ export default definePlugin({
                 {
                     match: /unreadMentionsFixedFooter\].+?\]/,
                     replace: "$&.filter($self.makeGuildsBarSidebarFilter(!!arguments[0]?.isBetterFolders))"
+                },
+                // Disocrd's amazing code will get stuck in an infinite loop
+                // for some reason, this is a loop that only ever has one iteration
+                {
+                    match: /(?<=(\i)=this\.nodeRefs\[\i\.parentId\])(?=\})/,
+                    replace: ";if(!$1)break;"
                 }
             ]
         },
