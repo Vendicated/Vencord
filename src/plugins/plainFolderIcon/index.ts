@@ -16,28 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "PlainFolderIcon",
-    description: "Doesn't show the small guild icons in folders",
+    description: "Dont show the small guild icons in folders",
     authors: [Devs.botato],
-    patches: [{
-        find: ".expandedFolderIconWrapper",
-        replacement: [
-            // there are two elements, the first one is the plain folder icon
-            // the second is the four guild preview icons
-            // always show this one (the plain icons)
-            {
-                match: /\(\i\|\|\i\)&&(\(.{0,40}\(\i\.animated)/,
-                replace: "$1",
-            },
-            // and never show this one (the guild preview icons)
-            {
-                match: /\(\i\|\|!\i\)&&(\(.{0,40}\(\i\.animated)/,
-                replace: "false&&$1",
-            }
-        ]
-    }]
+
+    patches: [
+        {
+            find: ".folderPreviewGuildIconError",
+            replacement: [
+                {
+                    // Discord always renders both plain and guild icons folders and uses a css transtion to switch between them
+                    match: /(?<=.folderButtonContent]:(!\i))/,
+                    replace: (_, hasFolderButtonContentClass) => `,"vc-plainFolderIcon-plain":${hasFolderButtonContentClass}`
+                }
+
+            ]
+        }
+    ]
 });
