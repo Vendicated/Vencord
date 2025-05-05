@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
@@ -106,7 +106,7 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
     },
     apiKey: {
-        description: "last.fm api key",
+        description: "last.fm api key, or path to the api key",
         type: OptionType.STRING,
     },
     shareUsername: {
@@ -192,6 +192,8 @@ const settings = definePluginSettings({
     }
 });
 
+const Native = VencordNative.pluginHelpers.LastFMRichPresence as PluginNative<typeof import("./native")>;
+
 export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
@@ -229,9 +231,17 @@ export default definePlugin({
             return null;
 
         try {
+            let apiKey: string;
+
+            if (IS_DISCORD_DESKTOP || IS_VESKTOP) {
+                apiKey = await Native.loadApiKey(settings.store.apiKey);
+            } else {
+                apiKey = settings.store.apiKey;
+            }
+
             const params = new URLSearchParams({
                 method: "user.getrecenttracks",
-                api_key: settings.store.apiKey,
+                api_key: apiKey,
                 user: settings.store.username,
                 limit: "1",
                 format: "json"
