@@ -35,9 +35,24 @@ function makeSpotifyIcon(enabled: boolean) {
     );
 }
 
+async function setSpotifyActivity(value: boolean) {
+    const { body } = await RestAPI.get({
+        url: Constants.Endpoints.CONNECTIONS
+    });
+
+    if (!body) return;
+    const spotifyId = body.find(conn => conn.type === "spotify")?.id;
+
+    await RestAPI.patch({
+        url: Constants.Endpoints.CONNECTION("spotify", spotifyId),
+        body: {
+            show_activity: value,
+        },
+    });
+}
+
 function SpotifyActivityToggleButton() {
     const { spotifyConnection } = settings.store;
-    const setSpotifyConnection = value => settings.store.spotifyConnection = value;
 
     return (
         <Button
@@ -48,20 +63,8 @@ function SpotifyActivityToggleButton() {
             redGlow={!spotifyConnection}
             onClick={async () => {
                 const newValue = !spotifyConnection;
-                setSpotifyConnection(newValue);
-
-                const { body } = await RestAPI.get({
-                    url: Constants.Endpoints.CONNECTIONS
-                });
-
-                const spotifyId = body.find(conn => conn.type === "spotify")?.id;
-
-                await RestAPI.patch({
-                    url: Constants.Endpoints.CONNECTION("spotify", spotifyId),
-                    body: {
-                        show_activity: newValue,
-                    },
-                });
+                settings.store.spotifyConnection = newValue;
+                setSpotifyActivity(newValue);
             }}
         />
     );
@@ -72,7 +75,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show Spotify activity",
         default: false,
-        hidden: true
+        onChange: async value => setSpotifyActivity(value),
     }
 });
 
