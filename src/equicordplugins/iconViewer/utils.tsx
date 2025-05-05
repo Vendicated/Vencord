@@ -6,7 +6,7 @@
 
 import { saveFile } from "@utils/web";
 import { filters, findAll, findByPropsLazy, waitFor } from "@webpack";
-import { React, ReactDOM } from "@webpack/common";
+import { createRoot, React, ReactDOM } from "@webpack/common";
 import * as t from "@webpack/types";
 export let _cssColors: string[] = [];
 export type IconsDef = { [k: string]: t.Icon; };
@@ -82,7 +82,7 @@ export function saveIcon(iconName: string, icon: EventTarget & SVGSVGElement | E
 
 export function convertComponentToHtml(component?: React.ReactElement): string {
     const container = document.createElement("div");
-    const root = ReactDOM.createRoot(container);
+    const root = createRoot(container);
 
     ReactDOM.flushSync(() => root.render(component));
     const content = container.innerHTML;
