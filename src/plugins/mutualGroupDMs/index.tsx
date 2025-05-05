@@ -127,7 +127,7 @@ export default definePlugin({
                 // Make the tab bar item text smaller so our tab can fit.
                 {
                     match: /(\.tabBarItem.+?variant:)"heading-lg\/medium"/,
-                    replace: '$1"heading-md/medium"'
+                    replace: '$1"heading-sm/medium"'
                 }
             ]
         },
