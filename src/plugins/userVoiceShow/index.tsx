@@ -56,34 +56,6 @@ export default definePlugin({
     settings,
 
     patches: [
-        // User Popout, User Profile Modal, Direct Messages Side Profile
-        {
-            find: "#{intl::USER_PROFILE_LOAD_ERROR}",
-            replacement: {
-                match: /(\.fetchError.+?\?)null/,
-                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId})`
-            },
-            predicate: () => settings.store.showInUserProfileModal
-        },
-        // To use without the MemberList decorator API
-        /* // Guild Members List
-        {
-            find: ".lostPermission)",
-            replacement: {
-                match: /\.lostPermission\).+?(?=avatar:)/,
-                replace: "$&children:[$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})],"
-            },
-            predicate: () => settings.store.showVoiceChannelIndicator
-        },
-        // Direct Messages List
-        {
-            find: "PrivateChannel.renderAvatar",
-            replacement: {
-                match: /#{intl::CLOSE_DM}.+?}\)(?=])/,
-                replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
-            },
-            predicate: () => settings.store.showVoiceChannelIndicator
-        }, */
         // Friends List
         {
             find: "null!=this.peopleListItemRef.current",
