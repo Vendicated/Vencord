@@ -57,7 +57,8 @@ export const settings = definePluginSettings({
         options: [
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
-            { label: "DeepL Pro", value: "deepl-pro" }
+            { label: "DeepL Pro", value: "deepl-pro" },
+            { label: "Kagi Translate", value: "kagi" }
         ] as const,
         onChange: resetLanguageDefaults
     },
@@ -66,6 +67,13 @@ export const settings = definePluginSettings({
         description: "DeepL API key",
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
+        disabled: () => IS_WEB
+    },
+    kagiSession: {
+        type: OptionType.STRING,
+        description: "Kagi Session Token",
+        default: "",
+        placeholder: "Get your session token from https://kagi.com/settings?p=user_details",
         disabled: () => IS_WEB
     },
     autoTranslate: {
@@ -83,7 +91,7 @@ export const settings = definePluginSettings({
 }>();
 
 export function resetLanguageDefaults() {
-    if (IS_WEB || settings.store.service === "google") {
+    if (IS_WEB || settings.store.service === "google" || settings.store.service === "kagi") {
         settings.store.receivedInput = "auto";
         settings.store.receivedOutput = "en";
         settings.store.sentInput = "auto";
