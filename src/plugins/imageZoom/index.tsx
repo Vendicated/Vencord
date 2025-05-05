@@ -23,7 +23,7 @@ import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, ReactDOM } from "@webpack/common";
+import { createRoot, Menu } from "@webpack/common";
 import { JSX } from "react";
 import type { Root } from "react-dom/client";
 
@@ -242,7 +242,7 @@ export default definePlugin({
             if (instance.props.id === ELEMENT_ID) {
                 if (!this.currentMagnifierElement) {
                     this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
-                    this.root = ReactDOM.createRoot(this.element!);
+                    this.root = createRoot(this.element!);
                     this.root.render(this.currentMagnifierElement);
                 }
             }

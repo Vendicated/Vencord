@@ -136,7 +136,7 @@ function makeShortcuts() {
                 });
             }
 
-            const root = Common.ReactDOM.createRoot(doc.body.appendChild(document.createElement("div")));
+            const root = Common.createRoot(doc.body.appendChild(document.createElement("div")));
             root.render(Common.React.createElement(component, props));
 
             doc.addEventListener("close", () => root.unmount(), { once: true });
