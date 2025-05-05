@@ -295,6 +295,49 @@ function Info({ track }: { track: Track; }) {
         return (
             <div id={cl("album-expanded-wrapper")}>
                 {i}
+                {Settings.plugins.SpotifyControls.showAlbumInfoOnExpand && <div id={cl("titles")}>
+                    <Forms.FormText
+                        variant="text-sm/semibold"
+                        id={cl("song-title")}
+                        className={cl("ellipoverflow")}
+                        title={track.name}
+                        {...makeLinkProps("Song", track.id, `/track/${track.id}`)}
+                    >
+                        {track.name}
+                    </Forms.FormText>
+                    {track.artists.some(a => a.name) && (
+                        <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                            <span className={cl("song-info-prefix")}>by&nbsp;</span>
+                            {track.artists.map((a, i) => (
+                                <React.Fragment key={a.name}>
+                                    <span
+                                        className={cl("artist")}
+                                        style={{ fontSize: "inherit" }}
+                                        title={a.name}
+                                        {...makeLinkProps("Artist", a.id, `/artist/${a.id}`)}
+                                    >
+                                        {a.name}
+                                    </span>
+                                    {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
+                                </React.Fragment>
+                            ))}
+                        </Forms.FormText>
+                    )}
+                    {track.album.name && (
+                        <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                            <span className={cl("song-info-prefix")}>on&nbsp;</span>
+                            <span
+                                id={cl("album-title")}
+                                className={cl("album")}
+                                style={{ fontSize: "inherit" }}
+                                title={track.album.name}
+                                {...makeLinkProps("Album", track.album.id, `/album/${track.album.id}`)}
+                            >
+                                {track.album.name}
+                            </span>
+                        </Forms.FormText>
+                    )}
+                </div>}
             </div>
         );
 
