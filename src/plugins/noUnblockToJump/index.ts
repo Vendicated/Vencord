@@ -19,53 +19,17 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
 export default definePlugin({
     name: "NoUnblockToJump",
     description: "Allows you to jump to messages of blocked users without unblocking them",
     authors: [Devs.dzshn],
     patches: [
         {
-            // Clicking on search results to jump
-            find: '.id,"Search Results"',
-            replacement: [
-                {
-                    match: /if\(.{1,40}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
-                    replace: "if(false)$1"
-                },
-                {
-                    match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNIGNORE_TO_JUMP_TITLE})/,
-                    replace: "if(false)$1"
-                },
-            ]
-        },
-        {
-            // Jump buttton in top right corner of messages
-            find: "renderJumpButton()",
-            replacement: [
-                {
-                    match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
-                    replace: "if(false)$1"
-                },
-                {
-                    match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNIGNORE_TO_JUMP_TITLE})/,
-                    replace: "if(false)$1"
-                },
-            ]
-        },
-        {
-            // Clicking on replied messages to jump
-            find: '("interactionUsernameProfile',
-            replacement: [
-                {
-                    match: /.\?(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
-                    replace: "false?$1"
-                },
-                {
-                    match: /.\?(.{1,10}\.show\({.{1,50}#{intl::UNIGNORE_TO_JUMP_TITLE})/,
-                    replace: "false?$1"
-                },
-            ]
+            find: "#{intl::UNIGNORE_TO_JUMP_BODY}",
+            replacement: {
+                match: /return \i\.\i\.isBlockedForMessage\(/,
+                replace: "return true;$&"
+            }
         }
     ]
 });
