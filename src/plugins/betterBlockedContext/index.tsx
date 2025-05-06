@@ -79,43 +79,36 @@ export default definePlugin({
         },
         // Allow opening DMs from the popout even if a user is blocked, so you can read the chat logs if needed.
         {
-            find: "UserProfileModalHeaderActionButtons",
+            find: /if\(\i===\i.\i.BLOCKED\)/,
             group: true,
             replacement:  [
                 // make the profile modal type "friend" so the message button is on it (if we keep it as "blocked", then you won't be able to get to DMs)
                 {
-                    match: /(?<=return \i)\|\|(\i)===.*?.FRIEND/,
-                    replace: (_, type) => `?null:${type} === ${RelationshipTypes.FRIEND} || ${type} === ${RelationshipTypes.BLOCKED}`,
+                    match: /if\((?=\i===\i.\i.BLOCKED\))/,
+                    replace: "if (false&&",
+                },
+                {
+                    match: /(?<=if\((\i)===\i.\i.FRIEND\|\|\i.bot)\)/,
+                    replace: (_, type) => `||${type}===${RelationshipTypes.BLOCKED})`,
                 },
                 // fix settings not closing when clicking the Message button
                 {
-                    match: /(?<=\i.bot.{0,50}children:.*?onClose:)(\i)/,
+                    match: /(?<=\i.bot.{0,65}children:.*?onClose:)(\i)/,
                     replace: "() => {$1();$self.closeSettingsWindow()}",
                 }
             ],
         },
-        // Skip the warning about blocked/ignored users when opening the profile through the blocked menu.
-        // You will already know that you blocked the user, so it's completely useless.
+        // Allows users to skip the warning about blocked users when opening their profile.
         {
-            find: ',["user"])',
-            replacement: {
-                match: /(?<=isIgnored:.*?,\[\i,\i]=\i.useState\()\i\|\|\i\|\|\i.*?]\);/,
-                replace: "false);"
-            },
-        },
-
-        // If the users wishes to, they can disable the warning in all other places as well.
-        ...[
-            "UserProfilePanelWrapper: currentUser cannot be undefined",
-            "UserProfilePopoutWrapper: currentUser cannot be undefined",
-        ].map(x => ({
-            find: x,
-            replacement: {
-                match: /(?<=isIgnored:.*?,\[\i,\i]=\i.useState\()\i\|\|\i\|\|\i\)(?:;\i.useEffect.*?]\))?/,
-                replace: "false)",
-            },
+            find: ".useSetting(),{isBlocked:",
+            replacement: [
+                {
+                    match: /(?<=,\[\i,\i\]=)\(0.*?\);/,
+                    replace: "[false, () => {}];",
+                },
+            ],
             predicate: () => settings.store.hideBlockedWarning,
-        })),
+        },
 
         {
             find: ".BLOCKED:return",
@@ -134,7 +127,7 @@ export default definePlugin({
             predicate: () => settings.store.showUnblockConfirmationEverywhere,
         },
         {
-            find: ".showUnblockSuccessToast",
+            find: ".l4EmaW),action",
             replacement: {
                 match: /(?<=id:"block".{0,100}action:\i\?)\(\)=>(\{.{0,25}unblockUser\((\i).{0,60}:void 0\)})/,
                 replace: "event => {$self.openConfirmationModal(event, ()=>$1,$2)}",
