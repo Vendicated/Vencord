@@ -7,7 +7,8 @@
 import { classes } from "@utils/misc";
 import { ModalProps } from "@utils/modal";
 import { findByCode, findByCodeLazy, findByProps, findComponentByCodeLazy } from "@webpack";
-import { Clipboard, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
+import { copyToClipboard } from "@utils/clipboard";
 
 import noteHandler from "../../noteHandler";
 import { HolyNotes } from "../../types";
@@ -139,13 +140,13 @@ const NoteContextMenu = (
             <Menu.MenuItem
                 label="Copy Text"
                 id="copy-text"
-                action={() => Clipboard.copy(note.content)}
+                action={() => copyToClipboard(note.content)}
             />
             {note?.attachments.length ? (
                 <Menu.MenuItem
                     label="Copy Attachment URL"
                     id="copy-url"
-                    action={() => Clipboard.copy(note.attachments[0].url)}
+                    action={() => copyToClipboard(note.attachments[0].url)}
                 />) : null}
             <Menu.MenuItem
                 color="danger"
@@ -180,7 +181,7 @@ const NoteContextMenu = (
             <Menu.MenuItem
                 label="Copy ID"
                 id="copy-id"
-                action={() => Clipboard.copy(note.id)}
+                action={() => copyToClipboard(note.id)}
             />
         </Menu.Menu>
     );

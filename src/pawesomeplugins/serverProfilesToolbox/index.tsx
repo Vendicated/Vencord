@@ -9,13 +9,13 @@ import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
-    Clipboard,
     GuildMemberStore,
     Text,
     Toasts,
     UserProfileStore,
     UserStore
 } from "@webpack/common";
+import { copyToClipboard } from "@utils/clipboard";
 import { GuildMember } from "discord-types/general";
 
 const SummaryItem = findComponentByCodeLazy("borderType", "showBorder", "hideDivider");
@@ -111,9 +111,9 @@ export default definePlugin({
             }
         };
 
-        const copyToClipboard = () => {
+        const copyToClipboardB = () => {
             copy();
-            Clipboard.copy(JSON.stringify(savedProfile));
+            copyToClipboard(JSON.stringify(savedProfile));
         };
 
         const pasteFromClipboard = async () => {
@@ -166,7 +166,7 @@ export default definePlugin({
                     </Button>
                 </div>
                 <div style={{ display: "flex", gap: "5px" }}>
-                    <Button onClick={copyToClipboard}>
+                    <Button onClick={copyToClipboardB}>
                         Copy to clipboard
                     </Button>
                     <Button onClick={pasteFromClipboard}>
