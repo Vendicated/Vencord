@@ -77,7 +77,6 @@ interface Modals {
     ModalContent: ComponentType<PropsWithChildren<{
         className?: string;
         scrollerRef?: Ref<HTMLElement>;
-        scrollbarType?: unknown;
         [prop: string]: any;
     }>>;
     ModalFooter: ComponentType<PropsWithChildren<{
@@ -141,7 +140,7 @@ export type MediaModalProps = {
     shouldHideMediaOptions?: boolean;
 };
 
-// modal key: "Media Viewer Modal"
+// Modal key: "Media Viewer Modal"
 export const openMediaModal: (props: MediaModalProps) => void = findByCodeLazy("hasMediaOptions", "shouldHideMediaOptions");
 
 interface ModalAPI {
