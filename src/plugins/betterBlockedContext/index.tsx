@@ -30,7 +30,7 @@ const settings = definePluginSettings({
     hideBlockedWarning: {
         default: false,
         type: OptionType.BOOLEAN,
-        description: "Skip the warning about blocked/ignored users when opening any profile anywhere on discord outside of the blocklist.",
+        description: "Skip the warning about blocked/ignored users when opening their profile.",
         restartNeeded: true,
     },
     showUnblockConfirmation: {
