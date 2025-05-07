@@ -82,7 +82,6 @@ export default definePlugin({
             find: /if\(\i===\i.\i.BLOCKED\)/,
             group: true,
             replacement:  [
-                // make the profile modal type "friend" so the message button is on it (if we keep it as "blocked", then you won't be able to get to DMs)
                 {
                     match: /if\((?=\i===\i.\i.BLOCKED\))/,
                     replace: "if (false&&",
