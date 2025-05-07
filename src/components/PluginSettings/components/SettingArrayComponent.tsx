@@ -59,11 +59,12 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         if (pluginSettings[id] == null || Array.isArray(pluginSettings[id])) {
             return pluginSettings[id];
         }
+        const sep = option.oldStringSeparator || ",";
         let migrated: string[];
-        if (typeof option.oldStringSeparator === "string" || option.oldStringSeparator instanceof RegExp) {
-            migrated = pluginSettings[id]?.split(option.oldStringSeparator);
-        } else if (typeof option.oldStringSeparator === "function") {
-            migrated = option.oldStringSeparator(pluginSettings[id]);
+        if (typeof sep === "string" || sep instanceof RegExp) {
+            migrated = pluginSettings[id]?.split(sep);
+        } else if (typeof sep === "function") {
+            migrated = sep(pluginSettings[id]);
         } else {
             throw new Error(`Invalid oldStringSeparator for in setting ${id} for plugin ${definedSettings?.pluginName || "Unknown plugin"}`);
         }
