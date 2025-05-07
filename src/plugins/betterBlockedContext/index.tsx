@@ -58,7 +58,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "BetterBlockedContext",
-    description: "Improves the way the blocked and ignored list behaves and improves the interactions with blocked user profiles.",
+    description: "Allows clicking on blocked users to view their profile from the blocked list.",
     authors: [Devs.Elvyra],
     settings,
     patches: [
