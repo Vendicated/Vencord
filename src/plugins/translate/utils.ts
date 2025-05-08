@@ -158,7 +158,7 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
 export async function ctrlLeftClickShortcut(message, _, e) {
     if (e.button === 0 && e.ctrlKey && settings.store.enableCtrlLeftClickShortcut) {
 
-        if (!message.content) {
+        if (!message.content || !message.id) {
             return;
         }
 
