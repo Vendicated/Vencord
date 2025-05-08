@@ -175,7 +175,7 @@ const enum SearchStatus {
 
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
-        .filter(([name]) => name.toLowerCase().includes(search));
+        .filter(([searchName]) => searchName.includes(search));
 
     const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
         desktop: "Discord Desktop app or Vesktop",
@@ -191,9 +191,9 @@ function ExcludedPluginsList({ search }: { search: string; }) {
                 ? <>
                     <Forms.FormText>Are you looking for:</Forms.FormText>
                     <ul>
-                        {matchingExcludedPlugins.map(([name, reason]) => (
-                            <li key={name}>
-                                <b>{name}</b>: Only available on the {ExcludedReasons[reason]}
+                        {matchingExcludedPlugins.map(([, info]) => (
+                            <li key={info.name}>
+                                <b>{info.name}</b>: Only available on the {ExcludedReasons[info.reason]}
                             </li>
                         ))}
                     </ul>
@@ -202,6 +202,12 @@ function ExcludedPluginsList({ search }: { search: string; }) {
             }
         </Text>
     );
+}
+
+interface SearchInfo {
+    name: string,
+    description: string,
+    tags?: string[],
 }
 
 export default function PluginSettings() {
@@ -241,13 +247,24 @@ export default function PluginSettings() {
         }
         return o;
     }, []);
+    const searchInfo = React.useMemo(() => {
+        const o = {} as Record<string, SearchInfo>;
+        Object.values(Plugins).map(plugin => {
+            o[plugin.name] = {
+                name: plugin.name.toLowerCase().replace(/\s+/g, ""),
+                description: plugin.description.toLowerCase().replace(/\s+/g, ""),
+                tags: plugin.tags?.map(tag => tag.toLowerCase().replace(/\s+/g, "")),
+            };
+        });
+        return o;
+    }, []);
 
     const sortedPlugins = useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
 
-    const search = searchValue.value.toLowerCase();
+    const search = searchValue.value.toLowerCase().replace(/\s+/g, "");
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
@@ -260,9 +277,9 @@ export default function PluginSettings() {
         if (!search.length) return true;
 
         return (
-            plugin.name.toLowerCase().includes(search) ||
-            plugin.description.toLowerCase().includes(search) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(search))
+            searchInfo[plugin.name].name.includes(search) ||
+            searchInfo[plugin.name].description.includes(search) ||
+            searchInfo[plugin.name].tags?.some(t => t.includes(search))
         );
     };
 
