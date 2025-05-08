@@ -30,8 +30,6 @@ import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { ctrlLeftClickShortcut, translate } from "./utils";
 
 
-const ctrlHeld = false;
-
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
     if (!message.content) return;
 
