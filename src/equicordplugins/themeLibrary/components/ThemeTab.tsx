@@ -121,7 +121,10 @@ function ThemeTab() {
     }, []);
 
     useEffect(() => {
-        setThemeLinks(Vencord.Settings.themeLinks);
+        const newLinks = Vencord.Settings.themeLinks;
+        if (JSON.stringify(themeLinks) !== JSON.stringify(newLinks)) {
+            setThemeLinks(newLinks);
+        }
     }, [Vencord.Settings.themeLinks]);
 
     useEffect(() => {
