@@ -221,8 +221,8 @@ export default definePlugin({
         {
             find: "AppTitleBar",
             replacement: {
-                match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[.*?)\]/,
-                replace: ",$self.renderQuestButton()]"
+                match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[)/,
+                replace: "$self.renderQuestButton(),"
             }
         }
     ],
