@@ -44,6 +44,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    spoilerMessages: {
+        description: "Spoiler messages",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
     method: {
         description: "Anonymising method",
         type: OptionType.SELECT,
@@ -65,11 +70,6 @@ const settings = definePluginSettings({
         default: "image",
         disabled: () => settings.store.method !== Methods.Consistent,
     },
-    spoilerMessages: {
-        description: "Spoiler messages",
-        type: OptionType.BOOLEAN,
-        default: false,
-    }
 });
 
 export default definePlugin({
