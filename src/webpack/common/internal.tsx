@@ -21,7 +21,41 @@ import { LazyComponent, LazyComponentWrapper } from "@utils/react";
 // eslint-disable-next-line path-alias/no-relative
 import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
 
-export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]) {
+const SYM_FORWARD_REF = Symbol.for("react.forward_ref");
+const SYM_MEMO = Symbol.for("react.memo");
+/**
+ * calls {@link setComponentName} on the given component
+ * @returns maybeComponent
+ */
+export function wrapComponentName<T>(maybeComponent: T, name?: string): T {
+    if (name) setComponentName(maybeComponent, name);
+    return maybeComponent;
+}
+export function setComponentName(maybeComponent: any, name: string): void {
+    try {
+        if (typeof maybeComponent === "function") {
+            // classes
+            // arrow functions dont have a prototype
+            if ("isReactComponent" in (maybeComponent.prototype ?? {}))
+                Object.defineProperty(maybeComponent, "displayName", { value: name });
+            // functional components, normal and arrow
+            else
+                Object.defineProperty(maybeComponent, "name", { value: name });
+        } else if (
+            "$$typeof" in maybeComponent &&
+            typeof maybeComponent.$$typeof === "symbol" &&
+            (maybeComponent.$$typeof === SYM_FORWARD_REF || maybeComponent.$$typeof === SYM_MEMO)
+        ) {
+            Object.defineProperty(maybeComponent, "displayName", { value: name });
+        } else {
+            throw new Error("Unknown component type, not a function, class, memo or a forwardRef");
+        }
+
+    } catch (e) {
+        (IS_DEV ? console.warn : console.debug)(e, maybeComponent, name);
+    }
+}
+export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForComponent", Array.isArray(filter) ? filter : [filter]]);
 
     let myValue: T = function () {
@@ -32,6 +66,7 @@ export function waitForComponent<T extends React.ComponentType<any> = React.Comp
     waitFor(filter, (v: any) => {
         myValue = v;
         Object.assign(lazyComponent, v);
+        setComponentName(v, name);
     }, { isIndirect: true });
 
     return lazyComponent;
