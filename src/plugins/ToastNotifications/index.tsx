@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { Button, ChannelStore, MessageStore, PresenceStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
 import type { Channel, Message } from "discord-types/general";
 import { Webpack } from "Vencord";
 
@@ -40,6 +40,16 @@ export const settings = definePluginSettings({
             },
         ]
     },
+    respectDoNotDisturb: {
+        type: OptionType.BOOLEAN,
+        description: "Do not show notifications when your status is Do Not Disturb.",
+        default: false
+    },
+    disableInStreamerMode: {
+        type: OptionType.BOOLEAN,
+        description: "Do not show notifications when streamer mode is enabled.",
+        default: true
+    },
     timeout: {
         type: OptionType.SLIDER,
         description: "Time in seconds notifications will be shown for.",
@@ -48,7 +58,7 @@ export const settings = definePluginSettings({
     },
     opacity: {
         type: OptionType.SLIDER,
-        description: "Opacity of the notification.",
+        description: "The visible opacity of the notification.",
         default: 100,
         markers: makeRange(10, 100, 10)
     },
@@ -79,8 +89,10 @@ export default definePlugin({
             if (
                 (channel.guild_id) // If this is a guild message and not a private message.
                 || (message.author.id === currentUser.id) // If message is from the user.
-                || (!MuteStore.allowAllMessages(channel)) // If user has muted the channel.
                 || (channel.id === SelectedChannelStore.getChannelId()) // If the user is currently in the channel.
+                || (!MuteStore.allowAllMessages(channel)) // If user has muted the channel.
+                || (settings.store.respectDoNotDisturb && PresenceStore.getStatus(currentUser.id) === "dnd") // If respect DND is enabled while in DND mode.
+                || (settings.store.disableInStreamerMode && StreamerModeStore.enabled) // If streamer mode is enabled and notifications are disabled.
             ) return;
 
             // Retrieve the message component for the message.
