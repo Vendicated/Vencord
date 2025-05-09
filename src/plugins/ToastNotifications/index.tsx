@@ -21,21 +21,17 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, GuildStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
-import type { Channel, Message, User } from "discord-types/general";
+import { Button, ChannelStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import type { Channel, Message } from "discord-types/general";
 import { ReactNode } from "react";
 import { Webpack } from "Vencord";
 
-import { NotificationData, showNotification } from "./components/Notifications";
-import { MessageTypes } from "./types";
+import MentionComponent from "./components/MentionComponent";
+import { getUserDisplayName, showNotification } from "./components/Notifications";
+import { MentionType, MessageTypes, NotificationData } from "./types";
 
-// Functional variables.
 const MuteStore = Webpack.findByPropsLazy("isSuppressEveryoneEnabled");
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
-const UserUtils = findByPropsLazy("getGlobalName");
-
-// Adjustable variables.
-const USER_MENTION_REGEX = /<@!?(\d{17,20})>|<#(\d{17,20})>|<@&(\d{17,20})>/g; // This regex captures user, channel, and role mentions.
 
 export const settings = definePluginSettings({
     position: {
@@ -90,41 +86,31 @@ export const settings = definePluginSettings({
 });
 
 /**
- * getName()
- * Helper function to get a user's nickname if they have one, otherwise their username.
+ * Helper function to enrich the notification body with mentionable elements.
  *
- * @param   {User}      user    The user to get the name of.
- * @returns {String}            The name of the user.
+ * @param   {NotificationData} 	notification 	The notification data object.
+ * @param   {string}    		guildId     	Optional guild ID for role mentioned.
  */
-function getName(user: User): string {
-    return RelationshipStore.getNickname(user.id) ?? UserUtils.getName(user);
+const MENTIONABLES_REGEX = /<([@#&])(\d{17,20})>/g;
+function enrichMentionables(notification: NotificationData, guildId: string): void {
+    if (!MENTIONABLES_REGEX.test(notification.body)) return; // No enrichment required if there are no mentions.
+
+    const mentions: ReactNode[] = [];
+    let lastIndex = 0;
+
+    notification.body.replace(MENTIONABLES_REGEX, (match, type: MentionType, id: string, offset: number) => {
+        mentions.push(
+            notification.body.slice(lastIndex, offset), // Push the text before the mentionable element.
+            <MentionComponent type={type} id={id} guildId={guildId} /> // Add the mention itself as a styled span.
+        );
+
+        // Update the last index to the end of the match.
+        lastIndex = offset + match.length;
+        return match;
+    });
+
+    notification.richBody = <>{mentions}</>;
 }
-
-/**
- * addMention()
- * Helper function to add a mention to a notification.
- *
- * @param   {string}    id          The id of the user, channel or role.
- * @param   {string}    type        The type of mention.
- * @param   {string}    guildId     The id of the guild.
- * @returns {ReactNode}             The mention as a ReactNode.
- */
-const addMention = (id: string, type: string, guildId?: string): ReactNode => {
-    let name;
-    if (type === "user")
-        name = `@${UserStore.getUser(id)?.username || "unknown-user"}`;
-    else if (type === "channel")
-        name = `#${ChannelStore.getChannel(id)?.name || "unknown-channel"}`;
-    else if (type === "role" && guildId)
-        name = `@${GuildStore.getGuild(guildId).getRole(id)?.name || "unknown-role"}`;
-
-    // Return the mention as a styled span.
-    return (
-        <span key={`${type}-${id}`} className={"toastnotifications-mention-class"}>
-            {name}
-        </span>
-    );
-};
 
 export default definePlugin({
     name: "ToastNotifications",
@@ -148,16 +134,15 @@ export default definePlugin({
 
             // Prepare the notification.
             const Notification: NotificationData = {
-                title: getName(message.author),
-                icon: `https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`,
+                title: getUserDisplayName(message.author),
+                icon: `https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.webp?size=128`,
                 body: message.content,
                 richBody: null,
                 permanent: false,
-                onClick() { SelectedChannelActionCreators.selectPrivateChannel(message.channel_id); }
+                onClick: () => SelectedChannelActionCreators.selectPrivateChannel(message.channel_id),
             };
 
             const notificationText = message.content.length > 0 ? message.content : false;
-            const richBodyElements: React.ReactNode[] = [];
 
             // If this channel is a group DM, include the channel name.
             if (channel.isGroupDM()) {
@@ -172,7 +157,7 @@ export default definePlugin({
             }
             else if (channel.guild_id) // If this is a guild message and not a private message.
             {
-                Notification.title = `${getName(message.author)} (#${channel.name})`;
+                Notification.title = `${getUserDisplayName(message.author)} (#${channel.name})`;
             }
 
             // Handle specific message types.
@@ -183,17 +168,17 @@ export default definePlugin({
                 }
                 case MessageTypes.CHANNEL_RECIPIENT_ADD: {
                     const actor = UserStore.getUser(message.author.id);
-                    const targetUser = UserStore.getUser(message.mentions[0]?.id);
+                    const targetUser = UserStore.getUser((message.mentions as any)[0]?.id);
 
-                    Notification.body = `${getName(targetUser)} was added to the group by ${getName(actor)}.`;
+                    Notification.body = `${getUserDisplayName(targetUser)} was added to the group by ${getUserDisplayName(actor)}.`;
                     break;
                 }
                 case MessageTypes.CHANNEL_RECIPIENT_REMOVE: {
                     const actor = UserStore.getUser(message.author.id);
-                    const targetUser = UserStore.getUser(message.mentions[0]?.id);
+                    const targetUser = UserStore.getUser((message.mentions as any)[0]?.id);
 
                     if (actor.id !== targetUser.id) {
-                        Notification.body = `${getName(targetUser)} was removed from the group by ${getName(actor)}.`;
+                        Notification.body = `${getUserDisplayName(targetUser)} was removed from the group by ${getUserDisplayName(actor)}.`;
                     } else {
                         Notification.body = "Left the group.";
                     }
@@ -244,37 +229,15 @@ export default definePlugin({
             }
 
             // Replace any mention of users, roles and channels.
-            if (message.mentions.length !== 0 || message.mentionRoles?.length > 0) {
-                let lastIndex = 0;
-                Notification.body.replace(USER_MENTION_REGEX, (match, userId, channelId, roleId, offset) => {
-                    richBodyElements.push(Notification.body.slice(lastIndex, offset));
+            enrichMentionables(Notification, channel.guild_id);
 
-                    // Add the mention itself as a styled span.
-                    if (userId) {
-                        richBodyElements.push(addMention(userId, "user"));
-                    } else if (channelId) {
-                        richBodyElements.push(addMention(channelId, "channel"));
-                    } else if (roleId) {
-                        richBodyElements.push(addMention(roleId, "role", channel.guild_id));
-                    }
-
-                    lastIndex = offset + match.length;
-                    return match; // This value is not used but is necessary for the replace function
-                });
-            }
-
-            if (richBodyElements.length > 0) {
-                const MyRichBodyComponent = () => <>{richBodyElements}</>;
-                Notification.richBody = <MyRichBodyComponent />;
-            }
-
+            // Show the notification.
             showNotification(Notification);
         }
     }
 });
 
 /**
- * showExampleNotification()
  * Helper function to show an example notification.
  *
  * @returns {Promise<void>} A promise that resolves when the notification is shown.
@@ -282,7 +245,7 @@ export default definePlugin({
 function showExampleNotification(): Promise<void> {
     return showNotification({
         title: "Example Notification",
-        icon: `https://cdn.discordapp.com/avatars/${UserStore.getCurrentUser().id}/${UserStore.getCurrentUser().avatar}.png?size=128`,
+        icon: `https://cdn.discordapp.com/avatars/${UserStore.getCurrentUser().id}/${UserStore.getCurrentUser().avatar}.webp?size=128`,
         body: "This is an example toast notification!",
         permanent: false
     });
