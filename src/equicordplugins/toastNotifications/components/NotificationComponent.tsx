@@ -123,14 +123,12 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                         </button>
                     </div>
                     <div>
-                        {renderBody ? (
-                            richBody ?? (
-                                <p className="toastnotifications-notification-p">
-                                    {body.length > 500 ? body.slice(0, 500) + "..." : body}
-                                </p>
-                            )
-                        ) : null}
-
+                        {renderBody && (
+                            <p className="toastnotifications-notification-p">
+                                {(richBody ?? body).toString().slice(0, 500)}
+                                {(richBody ?? body).toString().length > 500 && "..."}
+                            </p>
+                        )}
                         {PluginSettings.store.renderImages && image && <img className="toastnotifications-notification-img" src={image} alt="ToastNotification Image" />}
                         {footer && <p className="toastnotifications-notification-footer">{`${attachments} attachment${attachments > 1 ? "s" : ""} ${attachments > 1 ? "were" : "was"} sent.`}</p>}
                     </div>
@@ -139,7 +137,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
             {AppearanceSettings.timeout !== 0 && !permanent && (
                 <div
                     className="toastnotifications-notification-progressbar"
-                    style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: "var(--brand-experiment)" }}
+                    style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: "var(--toastnotifications-progressbar-color)" }}
                 />
             )}
         </button>
