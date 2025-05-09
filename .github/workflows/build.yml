@@ -39,7 +39,7 @@ jobs:
               run: pnpm buildStandalone
 
             - name: Generate plugin list
-              run: pnpm generatePluginJson dist/vencordplugins.json
+              run: pnpm generatePluginJson dist/plugins.json
 
             - name: Generate Equicord plugin list
               run: pnpm generateEquicordPluginJson dist/equicordplugins.json
