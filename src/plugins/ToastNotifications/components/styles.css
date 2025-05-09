@@ -130,7 +130,6 @@
 .toastnotifications-mention-class {
     color: var(--mention-foreground);
     background: var(--mention-background);
-    unicode-bidi: -moz-plaintext;
     unicode-bidi: plaintext;
     font-weight: 500;
 }
