@@ -25,6 +25,7 @@
 
     /* Progress Bar */
     --toastnotifications-progressbar-height: 0.25rem;
+    --toastnotifications-progressbar-color: var(--brand-500);
 
     /* Position Offset - Global inherited offset by all positions */
     --toastnotifications-position-offset: 1rem;
