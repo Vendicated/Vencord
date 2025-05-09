@@ -10,7 +10,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Menu, Select, Switch, Text, TextInput, UploadHandler, useEffect, UserStore, useState } from "@webpack/common";
+import { Button, Menu, Select, Switch, Text, UploadHandler, useEffect, useState } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { QuoteIcon } from "./components";
@@ -49,7 +49,6 @@ let recentmessage: Message;
 let grayscale;
 let setStyle: ImageStyle = ImageStyle.inspirational;
 let customMessage: string = "";
-let isUserCustomCapable = false;
 
 enum userIDOptions {
     displayName,
@@ -89,14 +88,7 @@ const preparingSentence: string[] = [];
 const lines: string[] = [];
 
 async function createQuoteImage(avatarUrl: string, quoteOld: string, grayScale: boolean): Promise<Blob> {
-    let quote;
-
-    if (isUserCustomCapable && customMessage.length > 0) {
-        quote = FixUpQuote(customMessage);
-    }
-    else {
-        quote = FixUpQuote(quoteOld);
-    }
+    const quote = FixUpQuote(quoteOld);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
@@ -194,13 +186,7 @@ function registerStyleChange(style) {
     GeneratePreview();
 }
 
-async function setIsUserCustomCapable() {
-    const allowList: string[] = await fetch("https://equicord.org/quoter").then(e => e.json()); // Override for memes - IF THIS IS ABUSED WILL WE TAKEN AWAY
-    isUserCustomCapable = allowList.includes(UserStore.getCurrentUser().id);
-}
-
 function QuoteModal(props: ModalProps) {
-    setIsUserCustomCapable();
     const [gray, setGray] = useState(true);
     useEffect(() => {
         grayscale = gray;
@@ -226,13 +212,6 @@ function QuoteModal(props: ModalProps) {
             <ModalContent scrollbarType="none">
                 <img alt="" src="" id={"quoterPreview"} style={{ borderRadius: "20px", width: "100%" }}></img>
                 <br></br><br></br>
-                {isUserCustomCapable &&
-                    (
-                        <>
-                            <TextInput onChange={setCustom} value={custom} placeholder="Custom Message"></TextInput>
-                            <br />
-                        </>
-                    )}
                 <Switch value={gray} onChange={setGray}>Grayscale</Switch>
                 <Select look={1}
                     options={Object.keys(ImageStyle).filter(key => isNaN(parseInt(key, 10))).map(key => ({
@@ -278,14 +257,7 @@ async function GeneratePreview() {
 }
 
 function generateFileNamePreview(message) {
-    let words;
-
-    if (isUserCustomCapable && customMessage.length) {
-        words = customMessage.split(" ");
-    }
-    else {
-        words = message.split(" ");
-    }
+    const words = message.split(" ");
     let preview;
     if (words.length >= 6) {
         preview = words.slice(0, 6).join(" ");
