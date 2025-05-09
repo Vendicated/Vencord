@@ -3,25 +3,12 @@
     --toastnotifications-background-color: var(--background-secondary-alt);
     --toastnotifications-text-color: var(--text-normal);
     --toastnotifications-border-radius: 6px;
-    --toastnotifications-width: 25vw;
-    --toastnotifications-padding: 1.25rem;
-
-    /* Title */
-    --toastnotifications-title-color: var(--header-primary);
-    --toastnotifications-title-font-size: 1rem;
-    --toastnotifications-title-font-weight: 600;
-    --toastnotifications-title-line-height: 1.25rem;
-
-    /* Close Button */
-    --toastnotifications-close-button-color: var(--interactive-normal);
-    --toastnotifications-close-button-hover-color: var(--interactive-hover);
-    --toastnotifications-close-button-opacity: 0.5;
-    --toastnotifications-close-button-hover-opacity: 1;
-
-    /* Message Author Image */
-    --toastnotifications-image-height: 4rem;
-    --toastnotifications-image-width: var(--toastnotifications-image-height);
-    --toastnotifications-image-border-radius: 6px;
+    --toastnotifications-width: fit-content;
+    --toastnotifications-min-width: 25rem;
+    --toastnotifications-max-width: 50%;
+    --toastnotifications-min-height: 10vh;
+    --toastnotifications-max-height: 50%;
+    --toastnotifications-padding: 1rem;
 
     /* Progress Bar */
     --toastnotifications-progressbar-height: 0.25rem;
@@ -43,66 +30,27 @@
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
+    min-width: var(--toastnotifications-min-width);
     width: var(--toastnotifications-width);
-    min-height: 10vh;
-    bottom: calc(1rem + var(--notification-index) * 12vh);
-}
-
-.toastnotifications-notification {
-    display: flex;
-    flex-direction: row;
-    padding: var(--toastnotifications-padding);
-    gap: 1.25rem;
+    max-width: var(--toastnotifications-max-width);
+    min-height: var(--toastnotifications-min-height);
+    max-height: var(--toastnotifications-max-height);
 }
 
 .toastnotifications-notification-content {
-    width: 100%;
-}
-
-.toastnotifications-notification-header {
     display: flex;
-    justify-content: space-between;
-}
-
-.toastnotifications-notification-title {
-    color: var(--toastnotifications-title-color);
-    font-size: var(--toastnotifications-title-font-size);
-    font-weight: var(--toastnotifications-title-font-weight);
-    line-height: var(--toastnotifications-title-line-height);
-}
-
-.toastnotifications-notification-close-btn {
-    all: unset;
-    cursor: pointer;
-    color: var(--toastnotifications-close-button-color);
-    opacity: var(--toastnotifications-close-button-opacity);
-    transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
-}
-
-.toastnotifications-notification-close-btn:hover {
-    color: var(--toastnotifications-close-button-hover-color);
-    opacity: var(--toastnotifications-close-button-hover-opacity);
-}
-
-.toastnotifications-notification-icon {
-    height: var(--toastnotifications-image-height);
-    width: var(--toastnotifications-image-width);
-    border-radius: var(--toastnotifications-image-border-radius);
+    flex-direction: row;
+    padding: var(--toastnotifications-padding) 0.2rem;
 }
 
 .toastnotifications-notification-progressbar {
     height: var(--toastnotifications-progressbar-height);
+    background-color: var(--toastnotifications-progressbar-color);
     border-radius: 5px;
     margin-top: auto;
-}
-
-.toastnotifications-notification-p {
-    margin: 0.5rem 0 0;
-    line-height: 140%;
-}
-
-.toastnotifications-notification-img {
-    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
 }
 
 /* Notification Positioning CSS */
@@ -124,12 +72,4 @@
 .toastnotifications-position-bottom-right {
     bottom: var(--toastnotifications-position-offset);
     right: var(--toastnotifications-position-offset);
-}
-
-/* Rich Body classes */
-.toastnotifications-mention-class {
-    color: var(--mention-foreground);
-    background: var(--mention-background);
-    unicode-bidi: plaintext;
-    font-weight: 500;
 }

@@ -4,17 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByPropsLazy } from "@webpack";
-import { createRoot, React, RelationshipStore } from "@webpack/common";
-import { User } from "discord-types/general";
+import { createRoot, React } from "@webpack/common";
 import type { JSX } from "react";
 import type { Root } from "react-dom/client";
 
 import { settings as PluginSettings } from "../index";
-import { NotificationData } from "../types";
-import NotificationComponent from "./NotificationComponent";
-
-const UserUtils = findByPropsLazy("getGlobalName");
+import NotificationComponent, { NotificationData } from "./NotificationComponent";
 
 let NotificationQueue: JSX.Element[] = [];
 let notificationID = 0;
@@ -33,16 +28,6 @@ function getNotificationContainer() {
     }
 
     return RootContainer;
-}
-
-/**
- * Helper function to get a user's nickname if they have one, otherwise their username.
- *
- * @param   {User}      user    The user to get the name of.
- * @returns {String}            The name of the user.
- */
-export function getUserDisplayName(user: User): string {
-    return RelationshipStore.getNickname(user.id) ?? UserUtils.getName(user);
 }
 
 /**

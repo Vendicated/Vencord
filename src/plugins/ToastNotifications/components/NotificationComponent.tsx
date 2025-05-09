@@ -8,23 +8,26 @@ import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { React, useEffect, useMemo, useState } from "@webpack/common";
+import { Channel, Message } from "discord-types/general";
 
 import { settings as PluginSettings } from "../index";
-import { NotificationData } from "../types";
 
-export default ErrorBoundary.wrap(function NotificationComponent({
-    title,
-    body,
-    richBody,
-    icon,
-    image,
-    permanent,
-    dismissOnClick,
-    index,
-    onClick,
-    onClose
-}: NotificationData & { index?: number; }) {
+const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
+const MessageComponent = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
+
+export interface NotificationData {
+    message: Message; // The Discord message object.
+    mockedMessage: Message;
+    channel: Channel;
+    permanent?: boolean; // Whether or not the notification should be permanent or timeout.
+    dismissOnClick?: boolean; // Whether or not the notification should be dismissed when clicked.
+    onClick?(): void;
+    onClose?(): void;
+}
+
+export default ErrorBoundary.wrap(function NotificationComponent(props: NotificationData & { index?: number; }) {
     const [isHover, setIsHover] = useState(false);
     const [elapsed, setElapsed] = useState(0);
 
@@ -37,25 +40,26 @@ export default ErrorBoundary.wrap(function NotificationComponent({
 
     const start = useMemo(() => Date.now(), [isHover]); // Reset the timer when the user hovers over the notification.
 
-    // Precompute the position style.
-    const positionStyle = useMemo(() => {
-        if (index === undefined) return {};
+    // Compute the notification styles such as position and opacity.
+    const notificationStyles = useMemo(() => {
+        if (props.index === undefined) return {};
         const isTopPosition = AppearanceSettings.position.includes("top");
-        const actualHeight = 115; // TODO: Update this with the actual height including margin.
-        const effectiveIndex = index % PluginSettings.store.maxNotifications;
+        const actualHeight = 100; // TODO: Calculate the actual height of the notification.
+        const effectiveIndex = props.index % PluginSettings.store.maxNotifications;
         const offset = 10 + (effectiveIndex * actualHeight); // 10 is the base offset.
 
-        return isTopPosition ? { top: `${offset}px` } : { bottom: `${offset}px` };
-    }, [index, AppearanceSettings.position]);
+        const position = isTopPosition ? { top: `${offset}px` } : { bottom: `${offset}px` };
+        return { ...position, opacity: AppearanceSettings.opacity };
+    }, [props.index, AppearanceSettings.position, AppearanceSettings.opacity]);
 
     // Handle notification timeout.
     useEffect(() => {
-        if (isHover || permanent) return void setElapsed(0);
+        if (isHover || props?.permanent) return void setElapsed(0);
 
         const intervalId = setInterval(() => {
             const elapsed = Date.now() - start;
             if (elapsed >= AppearanceSettings.timeout)
-                onClose!();
+                props?.onClose!();
             else
                 setElapsed(elapsed);
         }, 10);
@@ -68,50 +72,32 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     // Render the notification.
     return (
         <button
-            style={positionStyle}
+            style={notificationStyles}
             className={classes("toastnotifications-notification-root", AppearanceSettings.position)}
             onClick={() => {
-                onClick?.();
-                if (dismissOnClick !== false)
-                    onClose!();
+                SelectedChannelActionCreators.selectPrivateChannel(props.message.channel_id); // Navigate to the channel.
+                if (props?.dismissOnClick !== false) props?.onClose!();
             }}
             onContextMenu={e => {
                 e.preventDefault();
                 e.stopPropagation();
-                onClose!();
+                props?.onClose!();
             }}
             onMouseEnter={() => setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
         >
-            <div className="toastnotifications-notification">
-                {icon && <img className="toastnotifications-notification-icon" src={icon} alt="User Avatar" />}
-                <div className="toastnotifications-notification-content">
-                    <div className="toastnotifications-notification-header">
-                        <h2 className="toastnotifications-notification-title">{title}</h2>
-                        <button
-                            className="toastnotifications-notification-close-btn"
-                            onClick={e => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onClose!();
-                            }}
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" role="img" aria-labelledby="toastnotifications-notification-dismiss-title">
-                                <title id="toastnotifications-notification-dismiss-title">Dismiss Notification</title>
-                                <path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div>
-                        {<p className="toastnotifications-notification-p">{richBody ?? body}</p>}
-                    </div>
-                </div>
+            <div className="toastnotifications-notification-content">
+                <MessageComponent
+                    id={`toastnotification-mock-${props.message.id}`}
+                    message={props.mockedMessage} // Use the mocked message.
+                    channel={props.channel}
+                    subscribeToComponentDispatch={false}
+                />
             </div>
-            {image && <img className="toastnotifications-notification-img" src={image} alt="ToastNotification Image" />}
-            {AppearanceSettings.timeout !== 0 && !permanent && (
+            {AppearanceSettings.timeout !== 0 && !props?.permanent && (
                 <div
                     className="toastnotifications-notification-progressbar"
-                    style={{ width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: "var(--toastnotifications-progressbar-color)" }}
+                    style={{ width: `${(1 - timeoutProgress) * 100}%` }}
                 />
             )}
         </button>
