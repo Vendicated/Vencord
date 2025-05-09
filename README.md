@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>170 additional plugins</summary>
+<summary>171 additional plugins</summary>
 
 ### All Platforms
 
@@ -31,6 +31,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BetterQuickReact by Ven & Sqaaakoi
 - BlockKeywords by catcraft
 - BlockKrisp by D3SOX
+- BypassPinPrompt by thororen
 - BypassStatus by Inbestigator & thororen
 - ChannelBadges by Creations
 - ChannelTabs by TheSun, TheKodeToad, keifufu, Nickyux
