@@ -233,3 +233,13 @@ export type useStateFromStores = <T>(
     dependencies?: any,
     isEqual?: (old: T, newer: T) => boolean
 ) => T;
+
+export class StreamerModeStore extends FluxStore {
+    autoToggle: boolean;
+    disableNotifications: boolean;
+    disableSounds: boolean;
+    enableContentProtection: boolean;
+    enabled: boolean;
+    hideInstantInvites: boolean;
+    hidePersonalInformation: boolean;
+}
