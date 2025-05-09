@@ -14,11 +14,12 @@ import { React } from "@webpack/common";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
+let song, boopSound;
+
 function SoggyModal(props: ModalProps) {
-    if (settings.store.enableSong) {
+    if (settings.store.songVolume !== 0) {
         React.useEffect(() => {
-            const song = document.createElement("audio");
-            song.src = settings.store.songLink;
+            song.volume = settings.store.songVolume;
             song.play();
 
             return () => {
@@ -29,19 +30,18 @@ function SoggyModal(props: ModalProps) {
     }
 
     const boop = (e: React.MouseEvent<HTMLImageElement>) => {
-        const img = e.currentTarget;
         const { offsetX, offsetY } = e.nativeEvent;
 
         const region = { x: 155, y: 220, width: 70, height: 70 };
 
         if (
-            settings.store.enableBoop &&
+            settings.store.boopVolume !== 0 &&
             offsetX >= region.x &&
             offsetX <= region.x + region.width &&
             offsetY >= region.y &&
             offsetY <= region.y + region.height
         ) {
-            const boopSound = new Audio(settings.store.boopLink);
+            boopSound.volume = settings.store.boopVolume;
             boopSound.play();
         }
     };
@@ -84,15 +84,20 @@ function SoggyButton() {
 }
 
 const settings = definePluginSettings({
-    enableSong: {
-        description: "Enable the song that plays after clicking the button",
-        type: OptionType.BOOLEAN,
-        default: true,
+    songVolume: {
+        description: "Volume of the song. 0 to disable",
+        type: OptionType.SLIDER,
+        default: 0.25,
+        markers: [0, 0.25, 0.5, 0.75, 1],
+        stickToMarkers: false,
+
     },
-    enableBoop: {
-        description: "Let's you boop soggy's nose",
-        type: OptionType.BOOLEAN,
-        default: true,
+    boopVolume: {
+        description: "Volume of the boop sound",
+        type: OptionType.SLIDER,
+        default: 0.2,
+        markers: [0, 0.25, 0.5, 0.75, 1],
+        stickToMarkers: false,
     },
     tooltipText: {
         description: "The text shown when hovering over the button",
@@ -107,12 +112,18 @@ const settings = definePluginSettings({
     songLink: {
         description: "URL for the song to play",
         type: OptionType.STRING,
-        default: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Sneaky%20Snitch.mp3",
+        default: "https://github.com/Equicord/Equibored/raw/main/sounds/soggy/song.mp3?raw=true",
+        onChange: (value: string) => {
+            song = new Audio(value);
+        }
     },
     boopLink: {
         description: "URL for the boop sound",
         type: OptionType.STRING,
-        default: "https://github.com/Capeling/soggy-mod/raw/refs/heads/main/resources/honk.wav",
+        default: "https://github.com/Equicord/Equibored/raw/main/sounds/soggy/honk.wav?raw=true",
+        onChange: (value: string) => {
+            boopSound = new Audio(value);
+        }
     }
 });
 
@@ -130,6 +141,11 @@ export default definePlugin({
             }
         }
     ],
+
+    start: () => {
+        song = new Audio(settings.store.songLink);
+        boopSound = new Audio(settings.store.boopLink);
+    },
 
     // taken from message logger lol
     addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
