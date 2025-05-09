@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>171 additional plugins</summary>
+<summary>172 additional plugins</summary>
 
 ### All Platforms
 
@@ -143,6 +143,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - SidebarChat by Joona
 - Signature by Ven, Rini, ImBanana, KrystalSkull
 - Slap by Korbo
+- Soggy by sliwka
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
 - SplitLargeMessages by Reycko
 - SpotifyActivityToggle by thororen
