@@ -10,11 +10,12 @@ import { getCurrentChannel, sendMessage } from "@utils/discord";
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 const randmeow = [
-    "meow", "mrrp", "mreow", "nya", "miau", "miaou", "mia", "mew", "mrow", "myah",
-    "myaa", "mrrrr", "myuuu", "myaaow", "mrowr", "meeeow", "mewmew", "mewow",
-    "mewr", "mewp", "mewww", "mewy", "mewyow", "mewrr", "mewwwr", "mewyrr",
-    "mewyowr", "mewyowww", "mewyowwwwr", "mewyowwwww",
-    "meowmeow", "meowr", "meowww", "meowwwr", "meowy", "meowyow"
+    "meow", "mrrp", "prr", "nya", "miau", "mreow", "rawr",
+        "meoow", "mrrrp", "prrrr", "nyaaa", "miauu", "mreowww", "rawrr",
+        "meoww", "mrp", "prrr", "nyan", "miuu", "mrew",
+        "meeow", "merp", "purr", "nyaan", "miauuu", "mraow",
+        "moew", "mrrrrp", "nyaa", "miaau", "mreoow",
+        "meooow", "nyaaaa", "miauuuu", "mreeow"
 ];
 
 const settings = definePluginSettings({
