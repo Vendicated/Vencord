@@ -16,19 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, ReactDOM } from "@webpack/common";
-import type { ReactNode } from "react";
+import { findByPropsLazy } from "@webpack";
+import { createRoot, React, RelationshipStore } from "@webpack/common";
+import { User } from "discord-types/general";
+import type { JSX } from "react";
 import type { Root } from "react-dom/client";
 
 import { settings as PluginSettings } from "../index";
+import { NotificationData } from "../types";
 import NotificationComponent from "./NotificationComponent";
+
+const UserUtils = findByPropsLazy("getGlobalName");
 
 let NotificationQueue: JSX.Element[] = [];
 let notificationID = 0;
 let RootContainer: Root;
 
 /**
- * getNotificationContainer()
  * Gets the root container for the notifications, creating it if it doesn't exist.
  * @returns {Root} The root DOM container.
  */
@@ -37,24 +41,26 @@ function getNotificationContainer() {
         const container = document.createElement("div");
         container.id = "toastnotifications-container";
         document.body.append(container);
-        RootContainer = ReactDOM.createRoot(container);
+        RootContainer = createRoot(container);
     }
 
     return RootContainer;
 }
 
-export interface NotificationData {
-    title: string; // Title to display in the notification.
-    body: string; // Notification body text.
-    richBody?: ReactNode; // Same as body, though a rich ReactNode to be rendered within the notification.
-    icon?: string; // Avatar image of the message author or source.
-    image?: string; // Large image to display in the notification for attachments.
-    permanent?: boolean; // Whether or not the notification should be permanent or timeout.
-    dismissOnClick?: boolean; // Whether or not the notification should be dismissed when clicked.
-    onClick?(): void;
-    onClose?(): void;
+/**
+ * Helper function to get a user's nickname if they have one, otherwise their username.
+ *
+ * @param   {User}      user    The user to get the name of.
+ * @returns {String}            The name of the user.
+ */
+export function getUserDisplayName(user: User): string {
+    return RelationshipStore.getNickname(user.id) ?? UserUtils.getName(user);
 }
 
+/**
+ * Renders the NotificationComponent to the DOM.
+ * @param {NotificationData} notification The notification data.
+ */
 export async function showNotification(notification: NotificationData) {
     const root = getNotificationContainer();
     const thisNotificationID = notificationID++;
@@ -69,7 +75,7 @@ export async function showNotification(notification: NotificationData) {
                     // Remove this notification from the queue.
                     NotificationQueue = NotificationQueue.filter(n => n.key !== thisNotificationID.toString());
                     notification.onClose?.(); // Trigger the onClose callback if it exists.
-                    console.log(`[DEBUG] [ToastNotifications] Removed #${thisNotificationID} from queue.`);
+                    console.debug(`[DEBUG] [ToastNotifications] Removed #${thisNotificationID} from queue.`);
 
                     // Re-render remaining notifications with new reversed indices.
                     root.render(
@@ -88,7 +94,7 @@ export async function showNotification(notification: NotificationData) {
 
         // Add this notification to the queue.
         NotificationQueue.push(ToastNotification);
-        console.log(`[DEBUG] [ToastNotifications] Added #${thisNotificationID} to queue.`);
+        console.debug(`[DEBUG] [ToastNotifications] Added #${thisNotificationID} to queue.`);
 
         // Limit the number of notifications to the configured maximum.
         if (NotificationQueue.length > PluginSettings.store.maxNotifications) NotificationQueue.shift();
