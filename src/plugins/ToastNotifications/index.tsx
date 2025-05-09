@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, MessageStore, PresenceStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
+import { ApplicationStreamingStore, Button, ChannelStore, MessageStore, PresenceStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
 import type { Channel, Message } from "discord-types/general";
 import { Webpack } from "Vencord";
 
@@ -43,6 +43,11 @@ export const settings = definePluginSettings({
     respectDoNotDisturb: {
         type: OptionType.BOOLEAN,
         description: "Do not show notifications when your status is Do Not Disturb.",
+        default: false
+    },
+    disableWhileScreenSharing: {
+        type: OptionType.BOOLEAN,
+        description: "Do not show notifications when sharing your screen on Discord.",
         default: false
     },
     disableInStreamerMode: {
@@ -91,8 +96,9 @@ export default definePlugin({
                 || (message.author.id === currentUser.id) // If message is from the user.
                 || (channel.id === SelectedChannelStore.getChannelId()) // If the user is currently in the channel.
                 || (!MuteStore.allowAllMessages(channel)) // If user has muted the channel.
-                || (settings.store.respectDoNotDisturb && PresenceStore.getStatus(currentUser.id) === "dnd") // If respect DND is enabled while in DND mode.
-                || (settings.store.disableInStreamerMode && StreamerModeStore.enabled) // If streamer mode is enabled and notifications are disabled.
+                || (settings.store.respectDoNotDisturb && PresenceStore.getStatus(currentUser.id) === "dnd") // If notifications are disabled while in DND.
+                || (settings.store.disableWhileScreenSharing && ApplicationStreamingStore.getCurrentUserActiveStream()?.state === "ACTIVE") // If notifications are disabled while screen sharing.
+                || (settings.store.disableInStreamerMode && StreamerModeStore.enabled) // If notifications are disabled in streamer mode.
             ) return;
 
             // Retrieve the message component for the message.
