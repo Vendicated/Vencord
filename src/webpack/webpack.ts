@@ -728,7 +728,7 @@ export function extract(id: string | number) {
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
 0,${mod.toString()}
-//# sourceURL=ExtractedWebpackModule${id}
+//# sourceURL=file:///ExtractedWebpackModule${id}
 `;
     const extracted = (0, eval)(code);
     return extracted as Function;
