@@ -16,6 +16,8 @@ import { showNotification } from "./components/Notifications";
 
 const MuteStore = Webpack.findByPropsLazy("isSuppressEveryoneEnabled");
 
+let ignoredUsers: string[] = [];
+
 export const settings = definePluginSettings({
     position: {
         type: OptionType.SELECT,
@@ -39,6 +41,13 @@ export const settings = definePluginSettings({
                 value: "bottom-right"
             },
         ]
+    },
+    ignoredUsers: {
+        type: OptionType.STRING,
+        description: "A list of user IDs (separate by commas) to ignore displaying notifications for.",
+        onChange: () => { ignoredUsers = settings.store.ignoredUsers.split(",").filter(userId => /^\d{17,20}$/.test(userId)); },
+        default: "",
+        placeholder: "000000000000000000,111111111111111111,222222222222222222"
     },
     respectDoNotDisturb: {
         type: OptionType.BOOLEAN,
@@ -96,6 +105,7 @@ export default definePlugin({
                 || (message.author.id === currentUser.id) // If message is from the user.
                 || (channel.id === SelectedChannelStore.getChannelId()) // If the user is currently in the channel.
                 || (!MuteStore.allowAllMessages(channel)) // If user has muted the channel.
+                || (ignoredUsers.includes(message.author.id)) // If the user is ignored.
                 || (settings.store.respectDoNotDisturb && PresenceStore.getStatus(currentUser.id) === "dnd") // If notifications are disabled while in DND.
                 || (settings.store.disableWhileScreenSharing && ApplicationStreamingStore.getCurrentUserActiveStream()?.state === "ACTIVE") // If notifications are disabled while screen sharing.
                 || (settings.store.disableInStreamerMode && StreamerModeStore.enabled) // If notifications are disabled in streamer mode.
@@ -103,7 +113,7 @@ export default definePlugin({
 
             // Retrieve the message component for the message.
             const mockedMessage: Message = MessageStore.getMessages(message.channel_id).receiveMessage(message).get(message.id);
-            if (!mockedMessage) return;
+            if (!mockedMessage) return console.error(`[ToastNotifications] Failed to retrieve mocked message from MessageStore for message ID ${message.id}!`);
 
             // Show the notification.
             showNotification({ message, mockedMessage, channel });
