@@ -20,7 +20,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { createRoot, Menu } from "@webpack/common";
@@ -30,6 +30,19 @@ import type { Root } from "react-dom/client";
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
 import managedStyle from "./styles.css?managed";
+
+
+interface ImageMetadata {
+    filename: string;
+    dimensions: string;
+    size?: string;
+    fetching?: boolean;
+}
+
+const imageMetadataCache = new Map<string, ImageMetadata>();
+
+let lastClickTime = 0;
+const DOUBLE_CLICK_THRESHOLD = 300;
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -78,6 +91,12 @@ export const settings = definePluginSettings({
         default: 0.5,
         stickToMarkers: false,
     },
+
+    showMetadata: {
+        type: OptionType.BOOLEAN,
+        description: "Show image metadata when double clicking on selected image",
+        default: true,
+    }
 });
 
 
@@ -87,7 +106,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
     // emojis in user statuses
     if (props.target?.classList?.contains("emoji")) return;
 
-    const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
+    const { square, nearestNeighbour, showMetadata } = settings.use(["square", "nearestNeighbour", "showMetadata"]);
 
     children.push(
         <Menu.MenuGroup id="image-zoom">
@@ -150,14 +169,138 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
                     />
                 )}
             />
+            <Menu.MenuSeparator />
+            <Menu.MenuCheckboxItem
+                id="vc-show-metadata"
+                label="Show Image Metadata"
+                checked={showMetadata}
+                action={() => {
+                    settings.store.showMetadata = !showMetadata;
+                }}
+            />
+            <Menu.MenuItem
+                id="vc-view-metadata"
+                label="View Metadata"
+                action={() => {
+                    const target = props.target as HTMLImageElement;
+                    if (target && target.src) {
+                        toggleMetadata(target);
+                    }
+                }}
+            />
         </Menu.MenuGroup>
     );
 };
 
+function toggleMetadata(imgElement: HTMLImageElement) {
+    if (!imgElement || !imgElement.src) return;
+    const parent = imgElement.parentElement;
+    if (!parent) return;
+
+    const metadataContainer = parent.querySelector(".vc-image-metadata");
+    if (metadataContainer) {
+        metadataContainer.remove();
+        return;
+    }
+
+    createMetadataDisplay(imgElement);
+}
+
+function createMetadataDisplay(imgElement: HTMLImageElement) {
+    if (!imgElement || !imgElement.src) return;
+
+    const { src } = imgElement;
+    const parent = imgElement.parentElement;
+    if (!parent) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "vc-image-wrapper";
+    parent.insertBefore(wrapper, imgElement);
+    wrapper.appendChild(imgElement);
+
+    let metadata = imageMetadataCache.get(src);
+
+    if (!metadata) {
+        metadata = {
+            filename: getFilenameFromURL(src),
+            dimensions: `${imgElement.naturalWidth || imgElement.width} × ${imgElement.naturalHeight || imgElement.height} px`,
+            fetching: true
+        };
+
+        imageMetadataCache.set(src, metadata);
+        fetchFileSize(src).then(size => {
+            if (size !== undefined) {
+                const cachedMetadata = imageMetadataCache.get(src);
+                if (cachedMetadata) {
+                    cachedMetadata.size = formatFileSize(size);
+                    cachedMetadata.fetching = false;
+                    imageMetadataCache.set(src, cachedMetadata);
+
+                    const container = parent.querySelector(".vc-image-metadata");
+                    if (container) {
+                        const sizeElement = container.querySelector(".vc-metadata-row:last-child span:last-child");
+                        if (sizeElement) {
+                            sizeElement.textContent = formatFileSize(size);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const container = document.createElement("div");
+    container.className = "vc-image-metadata";
+    container.innerHTML = `
+        <div class="vc-metadata-row">
+            <span class="vc-metadata-label">Filename:</span>
+            <span>${metadata.filename}</span>
+        </div>
+        <div class="vc-metadata-row">
+            <span class="vc-metadata-label">Dimensions:</span>
+            <span>${metadata.dimensions}</span>
+        </div>
+        <div class="vc-metadata-row">
+            <span class="vc-metadata-label">Size:</span>
+            <span>${metadata.size || "Loading..."}</span>
+        </div>
+    `;
+
+    wrapper.appendChild(container);
+
+    return container;
+}
+
+function getFilenameFromURL(url: string): string {
+    try {
+        const cleanUrl = url.split("?")[0];
+        const parts = cleanUrl.split("/");
+        return decodeURIComponent(parts[parts.length - 1]);
+    } catch {
+        return "Unknown";
+    }
+}
+
+async function fetchFileSize(url: string): Promise<number | undefined> {
+    try {
+        const response = await fetch(url, { method: "HEAD" });
+        return parseInt(response.headers.get("content-length") || "0");
+    } catch {
+        return undefined;
+    }
+}
+
+function formatFileSize(bytes: number): string {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
 export default definePlugin({
     name: "ImageZoom",
-    description: "Lets you zoom in to images and gifs. Use scroll wheel to zoom in and shift + scroll wheel to increase lens radius / size",
-    authors: [Devs.Aria],
+    description: "Lets you zoom in to images and gifs as well as displays image metadata. Use scroll wheel to zoom in and shift + scroll wheel to increase lens radius.",
+    authors: [Devs.Aria, EquicordDevs.Campfire],
     tags: ["ImageUtilities"],
 
     managedStyle,
@@ -171,7 +314,6 @@ export default definePlugin({
                     replace: `id:"${ELEMENT_ID}",$&`
                 },
                 {
-                    // This patch needs to be above the next one as it uses the zoomed class as an anchor
                     match: /\.zoomed]:.+?,(?=children:)/,
                     replace: "$&onClick:()=>{},"
                 },
@@ -181,7 +323,6 @@ export default definePlugin({
                 },
             ]
         },
-        // Make media viewer options not hide when zoomed in with the default Discord feature
         {
             find: '="FOCUS_SENSITIVE",',
             replacement: {
@@ -189,7 +330,6 @@ export default definePlugin({
                 replace: "false"
             }
         },
-
         {
             find: ".handleImageLoad)",
             replacement: [
@@ -197,17 +337,14 @@ export default definePlugin({
                     match: /placeholderVersion:\i,(?=.{0,50}children:)/,
                     replace: "...$self.makeProps(this),$&"
                 },
-
                 {
                     match: /componentDidMount\(\){/,
                     replace: "$&$self.renderMagnifier(this);",
                 },
-
                 {
                     match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
                 },
-
                 {
                     match: /componentDidUpdate\(\i\){/,
                     replace: "$&$self.updateMagnifier(this);"
@@ -221,20 +358,33 @@ export default definePlugin({
         "image-context": imageContextMenuPatch
     },
 
-    // to stop from rendering twice /shrug
     currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
     element: null as HTMLDivElement | null,
-
     Magnifier,
     root: null as Root | null,
+
     makeProps(instance) {
         return {
             onMouseOver: () => this.onMouseOver(instance),
             onMouseOut: () => this.onMouseOut(instance),
             onMouseDown: (e: React.MouseEvent) => this.onMouseDown(e, instance),
             onMouseUp: () => this.onMouseUp(instance),
+            onClick: (e: React.MouseEvent) => this.handleImageClick(e, instance),
             id: instance.props.id,
         };
+    },
+
+    handleImageClick(e: React.MouseEvent | MouseEvent, instance: any) {
+        if (!settings.store.showMetadata) return;
+
+        const target = e.target as HTMLImageElement;
+        if (target && target.tagName === "IMG" && target.src) {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < DOUBLE_CLICK_THRESHOLD) {
+                toggleMetadata(target);
+            }
+            lastClickTime = currentTime;
+        }
     },
 
     renderMagnifier(instance) {
@@ -280,11 +430,41 @@ export default definePlugin({
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
         document.body.appendChild(this.element);
+
+        const style = document.createElement("style");
+        style.id = "image-metadata-styles";
+        style.textContent = `
+            .vc-image-metadata {
+                padding: 8px;
+                margin: 6px 0;
+                background-color: var(--background-secondary);
+                border-radius: 4px;
+                font-size: 14px;
+                color: var(--text-normal);
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .vc-metadata-row {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .vc-metadata-label {
+                font-weight: 600;
+                margin-right: 8px;
+            }
+        `;
+        document.head.appendChild(style);
     },
 
     stop() {
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
+
+        document.getElementById("image-metadata-styles")?.remove();
+        document.querySelectorAll(".vc-image-metadata").forEach(el => el.remove());
     }
 });
