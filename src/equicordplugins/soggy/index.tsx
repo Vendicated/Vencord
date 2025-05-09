@@ -14,11 +14,12 @@ import { React } from "@webpack/common";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
-let song, boopSound;
+let preloadSong, preloadBoopSound, song, boopSound;
 
 function SoggyModal(props: ModalProps) {
     if (settings.store.songVolume !== 0) {
         React.useEffect(() => {
+            song = new Audio(preloadSong.src);
             song.volume = settings.store.songVolume;
             song.play();
 
@@ -41,6 +42,7 @@ function SoggyModal(props: ModalProps) {
             offsetY >= region.y &&
             offsetY <= region.y + region.height
         ) {
+            boopSound = new Audio(preloadBoopSound.src);
             boopSound.volume = settings.store.boopVolume;
             boopSound.play();
         }
@@ -143,8 +145,8 @@ export default definePlugin({
     ],
 
     start: () => {
-        song = new Audio(settings.store.songLink);
-        boopSound = new Audio(settings.store.boopLink);
+        preloadSong = new Audio(settings.store.songLink);
+        preloadBoopSound = new Audio(settings.store.boopLink);
     },
 
     // taken from message logger lol
