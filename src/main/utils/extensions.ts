@@ -67,7 +67,7 @@ export async function installExt(id: string) {
     try {
         await access(extDir, fsConstants.F_OK);
     } catch (err) {
-        const url = id === "fmkadmapgofadopljbjfkapdkoienihi"
+        const url = id === "fmkadmapgofadopljbjfkapdkoienihi" && 0
             // React Devtools v4.25
             // v4.27 is broken in Electron, see https://github.com/facebook/react/issues/25843
             // Unfortunately, Google does not serve old versions, so this is the only way
