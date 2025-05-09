@@ -21,6 +21,7 @@ import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
+import * as $ExpressionPickerTabs from "./ExpressionPickerTabs";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
@@ -119,6 +120,11 @@ export const ChatButtons = $ChatButtons;
 export const MessageUpdater = $MessageUpdater;
 
 /**
- * An API allowing you to get an user setting
+ * An API allowing you to add panels to the expression picker
+ */
+export const ExpressionPickerTabs = $ExpressionPickerTabs;
+
+/**
+* An API allowing you to get an user setting
  */
 export const UserSettings = $UserSettings;
