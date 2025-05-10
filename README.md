@@ -52,7 +52,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - DisableAnimations by S€th
 - DisableCameras by Joona
 - DontFilterMe by Samwich
-- EmojiDumper by Cortex, Samwich, Woosh
 - Encryptcord by Inbestigator
 - EquicordHelper by thororen & nyx
 - Equissant by SomeAspy & thororen
@@ -77,6 +76,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GoogleThat by Samwich
+- GuildPickerDumper by Cortex, Samwich, Woosh, thororen
 - HideChatButtons by iamme
 - HideServers by bepvte
 - HolyNotes by Wolfie
