@@ -57,6 +57,8 @@ export let EmojiStore: t.EmojiStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+export let StreamerModeStore: t.StreamerModeStore;
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 
 /**
  * React hook that returns stateful data for one or more stores
@@ -87,3 +89,5 @@ waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("ThemeStore", m => ThemeStore = m);
+waitForStore("StreamerModeStore", m => StreamerModeStore = m);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
