@@ -709,9 +709,9 @@ export const EquicordDevs = Object.freeze({
         name: "Megal",
         id: 387790666484285441n
     },
-    Woosh: {
-        name: "w00shh.",
-        id: 919239894327521361n
+    Synth: {
+        name: "synthxcx",
+        id: 934393331562205195n
     },
     Hanzy: {
         name: "hanzydev",

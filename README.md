@@ -76,7 +76,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GoogleThat by Samwich
-- GuildPickerDumper by Cortex, Samwich, Woosh, thororen
+- GuildPickerDumper by Cortex, Samwich, Synth, thororen
 - HideChatButtons by iamme
 - HideServers by bepvte
 - HolyNotes by Wolfie
