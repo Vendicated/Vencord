@@ -66,8 +66,9 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=\.username.{0,50}?)style:/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:"
+                // Override colorString with our custom color and make colorStrings always undefined to disable gradient colors
+                match: /colorString:(\i),colorStrings:(\i)/,
+                replace: "_colorString:$1=$self.calculateNameColorForMessageContext(arguments[0]),_colorStrings:$2"
             }
         },
         {
