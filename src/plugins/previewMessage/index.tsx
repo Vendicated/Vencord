@@ -105,8 +105,8 @@ const PreviewButton: ChatBarButtonFactory = ({ isMainChat, isEmpty, type: { atta
             <svg
                 fill="currentColor"
                 fillRule="evenodd"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 style={{ scale: "1.096", translate: "0 -1px" }}
             >
