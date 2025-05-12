@@ -7,80 +7,33 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, GuildStore, Menu, Parser, UserStore, useState } from "@webpack/common";
+import { ChannelStore, Menu, UserStore } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
-import { JSX, ReactNode, } from "react";
+import { ReactNode, } from "react";
 
-const cl = classNameFactory("vc-bdnd-");
+import BypassManager from "./settings";
 
-type BypassedItem = `g:${string}` | `c:${string}`;
-
-const settings = definePluginSettings({
-    bypasseds: {
+export const settings = definePluginSettings({
+    bypassManager: {
         type: OptionType.COMPONENT,
-        component: () => {
-            const [isGuildExtended, setIsGuildExtended] = useState(false);
-            const [isChannelExtended, setIsChannelExtended] = useState(false);
-            const list = getList();
-            const channels = list.filter(x => x.startsWith("c:"));
-            const guilds = list.filter(x => x.startsWith("g:"));
-            return (
-                <>
-                    <Forms.FormSection title="Allowed channels">
-                        <div className={cl("list-container")}>
-                            {(isChannelExtended ? channels : channels.slice(0, 5)).map(c => {
-                                const channel = ChannelStore.getChannel(c.slice(2));
-                                if (!channel) {
-                                    setList(getList().filter(x => x !== c));
-                                    return null;
-                                }
-                                const guildId = channel.guild_id ? channel.guild_id : "@me";
-                                return (
-                                    <BypassListItem key={c} id={c}>
-                                        {Parser.parse(`https://discord.com/channels/${guildId}/${channel.id}`)}
-                                    </BypassListItem>
-                                );
-                            })}
-                        </div>
-                        <ListOverflowUnderFlow length={channels.length} setIsExtended={setIsChannelExtended} isExtended={isChannelExtended} type="channel" />
-                    </Forms.FormSection>
-                    <Forms.FormSection title="Allowed guilds">
-                        <div className={cl("list-container")}>
-                            {(isGuildExtended ? guilds : guilds.slice(0, 5)).map(g => {
-                                const guild = GuildStore.getGuild(g.slice(2));
-                                if (!guild) {
-                                    setList(getList().filter(x => x !== g));
-                                    return null;
-                                }
-                                const mention = Parser.parse(`https://discord.com/channels/${guild.id}/0`);
-                                (mention[0] as JSX.Element).props.children = [(mention[0] as JSX.Element).props.children[0]];
-                                return <BypassListItem key={g} id={g} >{mention}</BypassListItem>;
-                            })}
-                        </div>
-                        <ListOverflowUnderFlow length={guilds.length} setIsExtended={setIsGuildExtended} isExtended={isGuildExtended} type="guild" />
-                    </Forms.FormSection>
-                </>
-            );
-        },
-        default: [] as BypassedItem[]
+        component: BypassManager,
     },
+    guilds: {
+        type: OptionType.CUSTOM,
+        default: [] as string[]
+    },
+    channels: {
+        type: OptionType.CUSTOM,
+        default: [] as string[]
+    }
 });
-
-function getList() {
-    return settings.store.bypasseds;
-}
-
-function setList(value: BypassedItem[]) {
-    settings.store.bypasseds = value;
-}
 
 export default definePlugin({
     name: "BypassDND",
-    description: "Receive notifications and calls from specific channels when in do not disturb mode. Right-click on channels/guilds to allow them to bypass DND mode.",
-    authors: [Devs.Inbestigator, Devs.rosemary],
+    description: "Receive notifications and calls from specific channels and guilds when in do not disturb mode. Right-click on channels/guilds to allow them to bypass DND mode.",
+    authors: [Devs.Inbestigator],
     patches: [{
         find: ".allowAllMessages",
         replacement: [{
@@ -99,9 +52,8 @@ export default definePlugin({
     }],
     settings,
     shouldNotify(id: string) {
-        const list = getList();
         const channel = ChannelStore.getChannel(id);
-        return list.includes(`c:${id}`) || (channel && list.includes(`g:${channel.guild_id}`));
+        return settings.store.channels.includes(id) || settings.store.guilds.includes(channel.guild_id);
     },
     contextMenus: {
         "guild-context": patchContext,
@@ -112,13 +64,19 @@ export default definePlugin({
     }
 });
 
-function patchContext(children: ReactNode[], props: { channel: Channel; guildId?: string; user?: User; } | { guild: Guild; }) {
-    // Escape user context when in a guild channel
-    if ("guildId" in props && "user" in props || "user" in props && props.user?.id === UserStore.getCurrentUser().id || "channel" in props && props.channel.type === 4) return;
-    const id = "channel" in props ? props.channel.id : "guild" in props ? props.guild.id : undefined;
+function patchContext(children: ReactNode[], props: { channel: Channel; user?: User; } | { guild: Guild; }) {
+    if ("guildId" in props && "user" in props) return; // It would add the guild/current channel to be bypassed instead of that user's DMs
+    if ("user" in props && props.user?.id === UserStore.getCurrentUser().id) return;
+    if ("channel" in props && props.channel.type === 4) return; // This is a category
+
+    const isChannel = "channel" in props;
+    const isGuild = "guild" in props && !isChannel;
+    const list = settings.store[isChannel ? "channels" : "guilds"];
+    const id = isChannel ? props.channel.id : isGuild ? props.guild.id : undefined;
+
     if (!id) return;
-    let list = getList();
-    const isEnabled = list.some(x => x.endsWith(`:${id}`));
+
+    const isEnabled = list.includes(id);
 
     children.push(
         <Menu.MenuItem
@@ -127,11 +85,10 @@ function patchContext(children: ReactNode[], props: { channel: Channel; guildId?
             icon={() => <Icon enabled={isEnabled} />}
             action={() => {
                 if (isEnabled) {
-                    list = list.filter(x => !x.endsWith(`:${id}`));
+                    list.splice(list.indexOf(id), 1);
                 } else {
-                    list.push(`${("channel" in props) ? "c" : "g"}:${id}`);
+                    list.push(id);
                 }
-                setList(list);
             }}
         />
     );
@@ -143,22 +100,5 @@ function Icon({ enabled }: { enabled: boolean; }) {
             <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "var(--status-danger)"} />
             <circle cx="9" cy="9" r="3.75" fill={enabled ? "black" : "white"} />
         </svg>
-    );
-}
-
-function BypassListItem({ children, id }: { children: ReactNode; id: string; }) {
-    return (
-        {
-            ...children![0], props: { ...children![0].props, className: `${children![0].props.className} ${cl("list-item")}`, onClick: () => setList(getList().filter(x => x !== id)) }
-        }
-    );
-}
-
-function ListOverflowUnderFlow({ length, setIsExtended, isExtended, type }: { length: number; setIsExtended: (val: boolean) => void; isExtended: boolean; type: string; }) {
-    return (
-        <>
-            {length > 5 && <Button style={{ marginTop: "4px" }} look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setIsExtended(!isExtended)}>Show {isExtended ? "less" : "more"}</Button>}
-            {length === 0 && <Forms.FormText style={{ color: "var(--text-muted)" }}>No {type}s are allowed to bypass yet.</Forms.FormText>}
-        </>
     );
 }
