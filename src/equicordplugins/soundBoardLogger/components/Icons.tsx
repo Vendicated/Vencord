@@ -58,7 +58,8 @@ export function IconWithTooltip({ text, icon, onClick }) {
     </Tooltip>;
 }
 
-export const ChatBarIcon: ChatBarButtonFactory = () => {
+export const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
+    if (!isMainChat) return null;
     return (
         <ChatBarButton tooltip="Open SoundBoard Log"
             onClick={openSoundBoardLog}>
