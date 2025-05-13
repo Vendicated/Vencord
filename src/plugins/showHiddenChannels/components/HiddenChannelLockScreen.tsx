@@ -141,7 +141,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     useEffect(() => {
         const membersToFetch: Array<string> = [];
 
-        const guildOwnerId = GuildStore.getGuild(guild_id).ownerId;
+        const guildOwnerId = GuildStore.getGuild(guild_id)?.ownerId;
         if (!GuildMemberStore.getMember(guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
 
         Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
