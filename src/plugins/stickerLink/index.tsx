@@ -39,7 +39,10 @@ interface Sticker {
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(id: string, formatType: number) {
-  return new URL(`${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${id}.${StickerExt[formatType]}?size=4096&lossless=true`, location.toString()).toString();
+  return new URL(
+    `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${id}.${StickerExt[formatType]}?size=4096&lossless=true`,
+    location.toString()
+  ).toString();
 }
 
 
@@ -65,13 +68,13 @@ function buildMenuItem(fetchUrl: () => Promise<string> | string) {
       <Menu.MenuItem
         id="copy-sticker-link"
         key="copy-sticker-link"
-        label={`Copy Link`}
+        label="Copy Link"
         action={async () => copyWithToast(await fetchUrl())}
       />
       <Menu.MenuItem
         id="open-sticker-link"
         key="open-sticker-link"
-        label={`Open Link`}
+        label="Open Link"
         action={async () => open(await fetchUrl())}
       />
     </Menu.MenuGroup>
@@ -82,7 +85,7 @@ function buildMenuItem(fetchUrl: () => Promise<string> | string) {
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
   const { favoriteableId, favoriteableType } = props ?? {};
 
-  if (!favoriteableId || favoriteableType !== 'sticker') return;
+  if (!favoriteableId || favoriteableType !== "sticker") return;
 
   const menuItem = (() => {
     switch (favoriteableType) {
