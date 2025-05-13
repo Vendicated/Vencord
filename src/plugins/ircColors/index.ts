@@ -96,19 +96,13 @@ export default definePlugin({
         const color = calculateNameColorForUser(userId);
         const customColor = userId && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(userId, true) : null;
 
-        // Color preview in role settings
-        if (context?.message?.channel_id === "1337" && userId === "313337")
-            return customColor ?? colorString;
+        if (
+            (context?.message?.channel_id === "1337" && userId === "313337") ||
+            (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) ||
+            (settings.store.applyColorOnlyToUsersWithoutColor && colorString)
+        ) return customColor ?? colorString;
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return customColor ?? colorString;
-        }
-
-        if (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString) {
-            return customColor ?? color;
-        } else {
-            return customColor ?? colorString;
-        }
+        return customColor ?? color;
     },
 
     calculateNameColorForListContext(context: any) {
@@ -117,14 +111,11 @@ export default definePlugin({
         const color = calculateNameColorForUser(id);
         const customColor = id && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(id, true) : null;
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return customColor ?? colorString;
-        }
+        if (
+            (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) ||
+            (settings.store.applyColorOnlyToUsersWithoutColor && colorString)
+        ) return customColor ?? colorString;
 
-        if (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString) {
-            return customColor ?? color;
-        } else {
-            return customColor ?? colorString;
-        }
+        return customColor ?? color;
     }
 });
