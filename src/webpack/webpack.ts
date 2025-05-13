@@ -156,7 +156,14 @@ export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire
 
     let hasOnlyBadProperties = true;
     for (const exportKey in exports) {
-        if (shouldIgnoreValue(exports[exportKey])) {
+        // Some exports might have not been initialized yet due to circular imports, so try catch it.
+        try {
+            var exportValue = exports[exportKey];
+        } catch {
+            continue;
+        }
+
+        if (shouldIgnoreValue(exportValue)) {
             makePropertyNonEnumerable(exports, exportKey);
         } else {
             hasOnlyBadProperties = false;

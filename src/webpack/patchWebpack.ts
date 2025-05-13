@@ -442,7 +442,12 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
             }
 
             for (const exportKey in exports) {
-                const exportValue = exports[exportKey];
+                // Some exports might have not been initialized yet due to circular imports, so try catch it.
+                try {
+                    var exportValue = exports[exportKey];
+                } catch {
+                    continue;
+                }
 
                 if (exportValue != null && filter(exportValue)) {
                     waitForSubscriptions.delete(filter);
