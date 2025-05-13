@@ -412,12 +412,9 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
     exports = module.exports;
 
     if (typeof require === "function" && require.c) {
-        // module might not have been fully initialised yet
-        try {
-            if (_blacklistBadModules(require.c, exports, module.id)) {
-                return factoryReturn;
-            }
-        } catch { }
+        if (_blacklistBadModules(require.c, exports, module.id)) {
+            return factoryReturn;
+        }
     }
 
     if (exports == null) {
@@ -445,15 +442,18 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
             }
 
             for (const exportKey in exports) {
+                // Some exports might have not been initialized yet due to circular imports, so try catch it.
                 try {
-                    const exportValue = exports[exportKey];
+                    var exportValue = exports[exportKey];
+                } catch {
+                    continue;
+                }
 
-                    if (exportValue != null && filter(exportValue)) {
-                        waitForSubscriptions.delete(filter);
-                        callback(exportValue, module.id);
-                        break;
-                    }
-                } catch { }
+                if (exportValue != null && filter(exportValue)) {
+                    waitForSubscriptions.delete(filter);
+                    callback(exportValue, module.id);
+                    break;
+                }
             }
         } catch (err) {
             logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
