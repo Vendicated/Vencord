@@ -445,13 +445,15 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
             }
 
             for (const exportKey in exports) {
-                const exportValue = exports[exportKey];
+                try {
+                    const exportValue = exports[exportKey];
 
-                if (exportValue != null && filter(exportValue)) {
-                    waitForSubscriptions.delete(filter);
-                    callback(exportValue, module.id);
-                    break;
-                }
+                    if (exportValue != null && filter(exportValue)) {
+                        waitForSubscriptions.delete(filter);
+                        callback(exportValue, module.id);
+                        break;
+                    }
+                } catch { }
             }
         } catch (err) {
             logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);

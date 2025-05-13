@@ -27,10 +27,13 @@ waitFor(m => m.name === "MenuCheckboxItem", (_, id) => {
     // we have to do this manual require by ID because m is in this case the MenuCheckBoxItem instead of the entire module
     const module = wreq(id);
 
-    for (const e of Object.values(module)) {
-        if (typeof e === "function" && e.name.startsWith("Menu")) {
-            Menu[e.name] = e;
-        }
+    for (const key in module) {
+        try {
+            const e = module[key];
+            if (typeof e === "function" && e.name.startsWith("Menu")) {
+                Menu[e.name] = e;
+            }
+        } catch { }
     }
 });
 
