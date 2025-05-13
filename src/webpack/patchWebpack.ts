@@ -412,9 +412,12 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
     exports = module.exports;
 
     if (typeof require === "function" && require.c) {
-        if (_blacklistBadModules(require.c, exports, module.id)) {
-            return factoryReturn;
-        }
+        // module might not have been fully initialised yet
+        try {
+            if (_blacklistBadModules(require.c, exports, module.id)) {
+                return factoryReturn;
+            }
+        } catch { }
     }
 
     if (exports == null) {
