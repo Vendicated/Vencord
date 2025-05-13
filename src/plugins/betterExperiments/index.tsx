@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { GuildStore } from "@webpack/common";
+import { Button, FluxDispatcher, GuildStore } from "@webpack/common";
 
 const ExperimentStore = findStoreLazy("ExperimentStore");
 // const GuildTooltip = findByCodeLazy("GuildTooltip");
@@ -25,10 +26,38 @@ export default definePlugin({
             replacement: {
                 match: /Guild Assignments"}\),\(0,.\.jsx.+?}\)/,
                 replace: "Guild Assignments\"}),$self.getExperimentsComponent(e)"
+            },
+        },
+        // stole from experiments plugin troll
+        {
+            find: 'H1,title:"Experiments"',
+            replacement: {
+                match: 'title:"Experiments",children:[',
+                replace: "$&$self.refreshButton(),"
             }
-        }
-
+        },
     ],
+    settings: definePluginSettings({
+
+    }),
+    refreshButton: () => {
+        return <Button
+            size={Button.Sizes.LARGE}
+            color={Button.Colors.PRIMARY}
+            look={Button.Looks.FILLED}
+            onClick={() => {
+                FluxDispatcher.dispatch({ type: "EXPERIMENTS_FETCH", withGuildExperiments: true });
+            }}
+            // TODO should probably move these to css file
+            style={{
+                marginTop: "4px",
+                marginBottom: "8px",
+                fontSize: "16px",
+            }}
+        >
+            Refresh Experiments
+        </Button>;
+    },
     getExperimentsComponent: (e: any) => {
         const experiments: Object = ExperimentStore.getRegisteredExperiments();
 
