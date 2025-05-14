@@ -48,7 +48,7 @@ async function runReporter() {
 
         for (const patch of patches) {
             if (!patch.all) {
-                new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+                new Logger("WebpackPatcher").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
                 if (IS_COMPANION_TEST)
                     reporterData.failedPatches.foundNoModule.push(patch);
             }
@@ -56,7 +56,7 @@ async function runReporter() {
 
         for (const [plugin, moduleId, match, totalTime] of patchTimings) {
             if (totalTime > 5) {
-                new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
+                new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
 

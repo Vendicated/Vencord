@@ -261,7 +261,7 @@ page.on("console", async e => {
         const [, tag, message, otherMessage] = args as Array<string>;
 
         switch (tag) {
-            case "WebpackInterceptor:":
+            case "WebpackPatcher:":
                 const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/);
                 const patchSlowMatch = message.match(/Patch by (.+?) (took [\d.]+?ms) \(Module id is (.+?)\): (.+)/);
                 const match = patchFailMatch ?? patchSlowMatch;
