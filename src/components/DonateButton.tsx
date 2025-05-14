@@ -41,7 +41,7 @@ export function VCDonateButton({
     );
 }
 
-export default function DonateButton({
+export function DonateButton({
     look = Button.Looks.LINK,
     color = Button.Colors.TRANSPARENT,
     ...props
