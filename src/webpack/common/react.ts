@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
-import { findByCodeLazy, findByPropsLazy, waitFor } from "../webpack";
+import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
 
 export let React: typeof import("react");
 export let useState: typeof React.useState;

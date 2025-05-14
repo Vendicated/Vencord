@@ -19,7 +19,6 @@
 import { Settings, SettingsStore } from "@api/Settings";
 import { ThemeStore } from "@webpack/common";
 
-
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
 
@@ -61,7 +60,10 @@ async function initThemes() {
     const { themeLinks, enabledThemes } = Settings;
 
     // "darker" and "midnight" both count as dark
-    const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
+    // This function is first called on DOMContentLoaded, so ThemeStore may not have been loaded yet
+    const activeTheme = ThemeStore == null
+        ? undefined
+        : ThemeStore.theme === "light" ? "light" : "dark";
 
     const links = themeLinks
         .map(rawLink => {
@@ -90,13 +92,22 @@ async function initThemes() {
 
 document.addEventListener("DOMContentLoaded", () => {
     initSystemValues();
-    initThemes();
 
     toggle(Settings.useQuickCss);
     SettingsStore.addChangeListener("useQuickCss", toggle);
 
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+
+    if (!IS_WEB) {
+        VencordNative.quickCss.addThemeChangeListener(initThemes);
+    }
+
+    initThemes();
+});
+
+export function initQuickCssThemeStore() {
+    initThemes();
 
     let currentTheme = ThemeStore.theme;
     ThemeStore.addChangeListener(() => {
@@ -105,7 +116,4 @@ document.addEventListener("DOMContentLoaded", () => {
         currentTheme = ThemeStore.theme;
         initThemes();
     });
-
-    if (!IS_WEB)
-        VencordNative.quickCss.addThemeChangeListener(initThemes);
-});
+}
