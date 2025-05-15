@@ -12,7 +12,7 @@
 }
 
 .visual-refresh .vc-notification-root {
-    background-color: var(--bg-overlay-floating, var(--background-base-low));
+    background-color: var(--background-base-low);
 }
 
 .vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
