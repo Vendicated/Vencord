@@ -58,6 +58,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ExportContacts by dat_insanity
 - FakeProfileThemesAndEffects by ryan
 - CopyProfileColors by Crxa
+- FastDeleteChannels by thororen
 - FindReply by newwares
 - FixFileExtensions by thororen
 - FollowVoiceUser by TheArmagan
