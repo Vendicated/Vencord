@@ -1,0 +1,26 @@
+{
+    "Notifications": {
+        "Notificationslog": {
+            "noNotifications": "No notifications yet",
+            "notificationLog": "Notification Log",
+            "notificationSettings": "Notification Settings",
+            "areYouSure": "Are you sure?",
+            "removeNotifications": "This will permanently remove {count} notification{plural}. This action cannot be undone.",
+            "doIt": "Do it!",
+            "nevermind": "Nevermind",
+            "clearLog": "Clear Notification Log"
+        },
+        "NotificationComponent": {
+            "dismissNotification": "Dismiss Notification"
+        }
+    },
+    "MemberListDecorators": {
+        "failedRender": "Failed to render {key} Member List Decorator"
+    },
+    "MessageAccessories": {
+        "failedRender": "Failed to render {key} Message Accessor"
+    },
+    "MessageDecorations": {
+        "failedRender": "Failed to render {key} Message Decoration"
+    }
+}

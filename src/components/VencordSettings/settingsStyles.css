@@ -1,0 +1,78 @@
+.vc-settings-tab-bar {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid var(--background-modifier-accent);
+}
+
+.vc-settings-tab-bar-item {
+    margin-right: 32px;
+    padding-bottom: 16px;
+    margin-bottom: -2px;
+}
+
+.vc-settings-donate {
+    display: flex;
+    flex-direction: row;
+}
+
+.vc-settings-card {
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+.vc-backup-restore-card {
+    background-color: var(--info-warning-background);
+    border-color: var(--info-warning-foreground);
+    color: var(--info-warning-text);
+}
+
+.vc-settings-theme-links {
+    /* Needed to fix bad themes that hide certain textarea elements for whatever eldritch reason */
+    display: inline-block !important;
+    color: var(--text-normal) !important;
+    padding: 0.5em;
+    border: 1px solid var(--background-modifier-accent);
+    max-height: unset;
+    background-color: transparent;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 14px;
+    resize: none;
+    width: 100%;
+}
+
+.vc-settings-theme-links::placeholder {
+    color: var(--header-secondary);
+}
+
+.vc-settings-theme-links:focus {
+    background-color: var(--background-tertiary);
+}
+
+.vc-cloud-settings-sync-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 1em;
+}
+
+.vc-cloud-erase-data-danger-btn {
+    color: var(--white-500);
+    background-color: var(--button-danger-background);
+}
+
+.vc-text-selectable,
+.vc-text-selectable :where([class*="text" i], [class*="title" i]) {
+    /* make text selectable, silly discord makes the entirety of settings not selectable */
+    user-select: text;
+
+    /* discord also sets cursor: default which prevents the cursor from showing as text */
+    cursor: initial;
+}
+
+.vc-updater-modal {
+    padding: 1.5em !important;
+}
+
+.vc-updater-modal-close-button {
+    float: right;
+}

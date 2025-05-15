@@ -1,0 +1,374 @@
+{
+    "PluginSettings": {
+        "components": {
+            "providedInput": "Неверный ввод",
+            "SettingNumericComponent": {
+                "enterNumber": "Введите число"
+            },
+            "SettingSelectComponent": {
+                "selectOption": "Выберите опцию"
+            },
+            "SettingTextComponent": {
+                "enterValue": "Введите значение"
+            }
+        },
+        "ContributorModal": {
+            "contributed": "внес вклад",
+            "pluginContributed": "Этот человек {hyperLink} к {pluginsCount}!",
+            "plugin": "плагинам",
+            "otherContributed": "Этот человек не создавал плагинов. Вероятно, он {hyperLink} к Vencord другими способами!",
+            "restart": "Перезапустите, чтобы применить изменения!"
+        },
+        "index": {
+            "ReloadRequiredCard": {
+                "required": "Требуется перезагрузка!",
+                "info": "Перезапустите сейчас, чтобы применить новые плагины и их настройки.",
+                "restartButton": "Перезапустить",
+                "management": "Управление Плагинами",
+                "pluginInfo": "Нажмите на значок шестеренки или информации, чтобы получить более подробную информацию о плагине",
+                "settings": "Плагины с шестеренкой имеют настройки, которые вы можете изменять!"
+            },
+            "PluginCard": {
+                "failedStart": "Не удалось запустить зависимости: {failures}",
+                "close": "Закрыть",
+                "pluginError": "Ошибка при {wasEnabled} плагина {pluginname}",
+                "stopping": "остановке",
+                "starting": "запуске"
+            },
+            "ExcludedPluginsList": {
+                "desktop": "Приложение Discord для компьютера или Vesktop",
+                "discordDesktop": "Приложение Discord для компьютера",
+                "vesktop": "Приложение Vesktop",
+                "web": "Приложение Vesktop и веб-версия Discord",
+                "dev": "Разработческая версия Vencord",
+                "areYouLooking": "Вы ищете:",
+                "onlyAvailable": ": Доступно только на {reason}",
+                "noPluginsFound": "Ни один плагин не соответствует критериям поиска."
+            },
+            "PluginSettings": {
+                "required": "Требуется перезагрузка",
+                "info": "Следующие плагины требуют перезагрузки:",
+                "restartNow": "Пеоезапустить сейчас",
+                "later": "Позже!",
+                "vencordRequired": "Этот плагин необходим для работы функций Vencord."
+            },
+            "SettingsTab": {
+                "title": "Плагины",
+                "filters": "Фильтры",
+                "searchPlugin": "Поиск плагина...",
+                "showAll": "Показать все",
+                "showEnabled": "Показать включённые",
+                "showDisabled": "Показать выключённые",
+                "showNew": "Показать новые",
+                "noPluginsFound": "Ни один плагин не соответствует критериям поиска.",
+                "required": "Необходимые Плагины"
+            },
+            "pluginRequired": "Этот плагин необходим для:"
+        },
+        "PluginModal": {
+            "noPluginSettings": "Для этого плагина нет настроек.",
+            "viewMoreInfo": "Посмотреть больше информации",
+            "viewSourceCode": "Посмотреть исходный код",
+            "authors": "Авторы",
+            "errorInfoComponent": "Ошибка при отображении пользовательской информации плагина",
+            "settings": "Настройки",
+            "cancel": "Отмена",
+            "fixErrors": "Вам надо исправить все ошибки до сохранения",
+            "saveClose": "Сохранить & Закрыть",
+            "errorSaving": "Ошибка при сохранении:"
+        }
+    },
+    "VencordSettings": {
+        "AddonCard": {
+            "new": "НОВОЕ"
+        },
+        "BackupAndRestoreTab": {
+            "warning": "Предупреждение",
+            "warningInfo": "Импорт файла настроек приведет к перезаписыванию текущих настроек.",
+            "importExportInfo": "Вы можете импортировать и экспортировать настройки Vencord в виде файла JSON. Это позволяет вам легко переносить настройки на другое устройство или восстанавливать настройки после переустановки Vencord или Discord.",
+            "settingsExportContains": "Настройки Экспорт содержит:",
+            "customQuickcss": "Кастомный QuickCSS",
+            "themeLinks": "Ссылки на Темы",
+            "pluginSettings": "Настройки Плагинов",
+            "importSettings": "Импортировать Настройки",
+            "exportSettings": "Экспортировать Настройки",
+            "wrapTab": "Backup & Востановление"
+        },
+        "CloudTab": {
+            "eraseAllData": {
+                "cloudIntegrations": "Облачная Интеграция",
+                "eraseFailed": "Не удалось удалить все данные (API вернул {status}), обратитесь в службу поддержки.",
+                "eraseSuccess": "Успешно удалены все данные."
+            },
+            "SettingsSyncSection": {
+                "syncInfo": "Синхронизировать ваши настройки в облако. Это обеспечивает простую синхронизацию между несколькими устройствами с минимальными усилиями.",
+                "settingsSync": "Настройки Синхронизации",
+                "syncToCloud": "Синхр. в Облако",
+                "overwriteSettings": "Это перезапишет ваши локальные настройки на те, что в облаке. Используйте разумно!",
+                "syncFromCloud": "Синхр. из Облака",
+                "deleteSettings": "Удалить Настройки Облака"
+            },
+            "CloudTab": {
+                "title": "Vencord Облако",
+                "formTitle": "Настройки Облака",
+                "respectsPrivacy": "хранит вашу конфиденциальность",
+                "sourceCode": "исходный код",
+                "integrationInfo": "Vencord поставляется с облачной интеграцией, которая добавляет такие приятные мелочи, как синхронизация настроек между устройствами. Он {privacyRespect}, а {sourceCode} имеет лицензию AGPL 3.0, поэтому вы можете разместить его самостоятельно.",
+                "authInfo": "Это запросит авторизацию, если вы ещё не настроили интеграцию с облаком.",
+                "enableIntegrations": "Включить интеграцию с облаком",
+                "backendUrl": "Сервера URL",
+                "backedInfo": "Какой сервер использовать для облачных интеграций",
+                "reauth": "Повторно авторизовать",
+                "areYouSure": "Вы уверены?",
+                "eraseWarning": "После удаления данных мы не сможем их восстановить. Возврата назад не будет!",
+                "eraseIt": "Удалить!",
+                "nevermind": "Отмена",
+                "eraseAllData": "Удалить все данные"
+            },
+            "wrapTab": "Облако"
+        },
+        "LanguageTab": {
+            "ReloadRequiredCard": {
+                "required": "Требуется перезагрузка!",
+                "info": "Перезапустите сейчас, чтобы применить выбранный язык.",
+                "restartButton": "Перезапустить",
+                "translation": "Vencord Перевод",
+                "changeInfo": "Здесь вы можете выбрать язык Vencord.",
+                "notOfficial": "Это не официальный перевод Vencord."
+            },
+            "LanguageTab": {
+                "title": "Vencord Настройки Языка",
+                "chooseLanguage": "Выберите язык",
+                "languages": "Языки"
+            },
+            "wrapTab": "Настройки Языка"
+        },
+        "NotificationSettings": {
+            "style": "Тип уведомлений",
+            "permDeniedTitle": "Уведомления на рабочем столе заблокированы",
+            "permDeniedText": "Вы запретили уведомления, поэтому они не будут работать на рабочем столе!",
+            "notificationsInfo": "Некоторые плагины могут присылать уведомления. Их два вида:",
+            "vencordNotification": "Уведомления Vencord",
+            "vencordNotificationInfo": "Это уведомления внутри приложения",
+            "desktopNotification": "Уведомления на рабочем столе",
+            "desktopNotificationInfo": "Системные уведомления, как при упоминании в Discord",
+            "onlyWhenUnfocused": "Показывать уведомления на рабочем столе, только если Discord свёрнут",
+            "alwaysDesktopNotif": "Всегда показывать уведомления на рабочем столе",
+            "alwaysVencordNotif": "Всегда показывать уведомления Vencord",
+            "notificationPosition": "Расположение Уведомлений",
+            "posBottomRight": "Внизу Справа",
+            "posTopRight": "Сверху Справа",
+            "timeoutNotif": "Время отображения уведомлений",
+            "timeoutNotifInfo": "Установите значение 0 сек, чтобы автоматически не срабатывать тайм-аут",
+            "logNotifLimit": "Лимит Логов Уведомлений",
+            "logNotifInfo": "Количество уведомлений, сохраняемых в логах, пока старые не будут удалены. Установите {code0}, чтобы отключить логи уведомлений, и {infinity}, чтобы никогда автоматически не удалять старые уведомления.",
+            "notifSettings": "Настройки уведомлений"
+        },
+        "PatchHelperTab": {
+            "noMatch": "No match. Perhaps that module is lazy loaded?",
+            "multipleMatches": "Multiple matches. Please refine your filter",
+            "ReplacementComponent": {
+                "noMatch": "Regex doesn't match!",
+                "module": "Module",
+                "match": "Match",
+                "diff": "Diff",
+                "compiledSuccess": "Compiled successfully",
+                "compile": "Compile"
+            },
+            "ReplacementInput": {
+                "replacementFunc": "Replacement must be a function",
+                "replacement": "replacement",
+                "cheatSheet": "Cheat Sheet",
+                "regexId": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
+                "dollar": "Insert a $",
+                "entireMatch": "Insert the entire match",
+                "substringBeforeMatch": "Insert the substring before the match",
+                "substringAfterMatch": "Insert the substring after the match",
+                "capturingGroup": "Insert the nth capturing group ($1, $2...)",
+                "pluginInstance": "Insert the plugin instance",
+                "evaledReplacement": "'replacement' will be evaled if this is toggled",
+                "treatFunc": "Treat as Function"
+            },
+            "pasteJson": "Paste your full JSON patch here to fill out the fields",
+            "PatchHelper": {
+                "title": "Patch Helper",
+                "fullPatch": "full patch",
+                "find": "find",
+                "match": "match",
+                "code": "Code",
+                "copyToClipboard": "Copy to Clipboard",
+                "copyAsCodeblock": "Copy as Codeblock"
+            },
+            "wrapTab": "PatchHelper"
+        },
+        "PluginsTab": {
+            "wrapTab": "Плагинов"
+        },
+        "shared": {
+            "failedRenderTab": "Не удалось загрузить вкладку {tab}. Если проблема не исчезнет, попробуй переустановить через установщик!"
+        },
+        "ThemesTab": {
+            "Validator": {
+                "checking": "Проверка...",
+                "error": "Ошибка: {errorMessage}",
+                "valid": "Всё ок!"
+            },
+            "Validators": {
+                "validator": "Проверка",
+                "themesSuccessLoad": "В этом разделе вы узнаете, могут ли ваши темы быть успешно загружены",
+                "modeOnly": "[Только в режиме {mode}] {link}"
+            },
+            "ThemeCard": {
+                "website": "ВебСайт",
+                "invalidInvite": "Недействительное или просроченное приглашение",
+                "dsServer": "Discord Сервер"
+            },
+            "renderLocalThemes": {
+                "fingThemes": "Найти Темы:",
+                "BDThemes": "BetterDiscord Темы",
+                "BDInfo": "Если используете BD сайт, нажмите \"Download\" и перекиньте скаченый .theme.css файл в папку с темами.",
+                "github": "GitHub",
+                "localThemes": "Локальные Темы",
+                "uploadThemes": "Загрузить Тему",
+                "themesFolder": "Открыть Папку Тем",
+                "loadThemes": "Загрузить отсут. темы",
+                "editQuickCSS": "Редакт. QuickCSS",
+                "editClientTheme": "Редакт. ClientTheme"
+            },
+            "renderOnlineThemes": {
+                "cssLink": "Вставте ссылка на CSS-файл сюда",
+                "oneLink": "Одна ссылка на строку",
+                "linesPrefix": "Можете добавлять @light или @dark в начало строки, чтобы переключать темы в зависимости от темы Discord",
+                "directLinks": "Используй прямые ссылки на файлы (raw или github.io)!",
+                "onlineThemes": "Онлайны Темы",
+                "themesLinks": "Ссылка на Тему",
+                "themes": "Темы",
+                "localThemes": "Локальные Темы"
+            },
+            "wrapTab": "Тем"
+        },
+        "UpdaterTab": {
+            "withDispatcher": {
+                "undefinedError": "Произошла неизвестная ошибка (ошибка не определена).\nПожалуйста, попробуйте снова.",
+                "commandNotFound": "Команда \\`{path}\\` не найдена.\nПожалуйста, установите и попробуйте снова.",
+                "errorWhileRun": "Произошла ошибка при запуске \\`{cmd}\\`:\n",
+                "code": "Код \\`{code}\\`. Для доп. информации посмотрите в консоль`",
+                "unknownError": "Не известная ошибка. Для доп. информации посмотрите в консоль.",
+                "oops": "Упсс!"
+            },
+            "Updatable": {
+                "failedCheck": "Не удалось проверить обновления. Для доп. информации проверьте консоль",
+                "unknownError": "Произошла неизвестная ошибка",
+                "oneUpdate": "Доступно 1 обновление",
+                "moreUpdates": "Доступно {updatesLength} обновлений",
+                "upToDate": "Обновить!",
+                "updateSuccess": "Успешно!",
+                "restartToApplyTheChanges": "Успешно обновлено. Перезапустите сейчас, чтобы применить изменения.?",
+                "restart": "Перезапустить",
+                "notNow": "Не сейчас!",
+                "updateNow": "Обновить сейчас",
+                "noUpdates": "Не найдено обновлений!",
+                "checkUpdates": "Проверить обновления"
+            },
+            "Newer": {
+                "localCopyWarning": "В вашей локальной копии есть более поздние коммиты. Пожалуйста, спрячьте или сбросьте их."
+            },
+            "Updater": {
+                "loading": "Загрузка...",
+                "title": "Vencord Обновления",
+                "settings": "Настройки Обновлений",
+                "autoUpdateInfo": "Автоматически обновлять Vencord без запроса подтверждения",
+                "autoUpdate": "Автоматически обновлять",
+                "autoUpdateNotifInfo": "Показывает уведомление, когда Vencord автоматически обновляется",
+                "autoUpdateNotif": "Получать уведомление о завершении автоматического обновления",
+                "repo": "Репозиторий",
+                "failedRetrive": "Не удалось получить — проверьте консоль",
+                "updates": "Обновления"
+            },
+            "updaterModal": "Модальное окно Обновлений",
+            "wrapTab": "Обновлений"
+        },
+        "VencordTab": {
+            "loading": "Загрузка...",
+            "Switches": {
+                "useQuickCssTitle": "Включить пользовательский CSS",
+                "useQuickCssNote": "Загружает ваш пользовательский CSS",
+                "enableReactDevtoolsTitle": "Включить инструменты разработчика React",
+                "enableReactDevtoolsNote": "Требуется полный перезапуск",
+                "framelessTitle": "Отключить рамку окна",
+                "framelessNote": "Требуется полный перезапуск",
+                "winNativeTitleBarTitle": "Использовать панель заголовка Windows вместо пользовательской от Discord",
+                "winNativeTitleBarNote": "Требуется полный перезапуск",
+                "transparentTitle": "Включить прозрачность окна",
+                "transparentNote": "Нужна тема с поддержкой прозрачности, иначе ничего не изменится. ОКНО ПЕРЕСТАНЕТ МЕНЯТЬ РАЗМЕР! Требуется полный перезапуск",
+                "winCtrlQTitle": "Назначить Ctrl+Q для закрытия Discord (альтернатива Alt+F4)",
+                "winCtrlQNote": "Требуется полный перезапуск",
+                "disableMinSizeTitle": "Отключить минимальный размер окна",
+                "disableMinSizeNote": "Требуется полный перезапуск"
+            },
+            "title": "Vencord Настройки",
+            "isDonorTrue": {
+                "title": "Донат",
+                "subtitle": "Спасибо за ваш донат!",
+                "description": "Вы можете управлять своими бонусами, написав @vending.machine."
+            },
+            "isDonorFalse": {
+                "title": "Поддержите проект",
+                "description": "Пожалуйста, рассмотрите возможность поддержать разработку Vencord донатом!"
+            },
+            "isPluginDev": {
+                "title": "Вклад",
+                "subtitle": "Спасибо за ваш вклад!",
+                "description": "Вы внесли вклад в Vencord, и теперь у вас есть новый крутой значок!",
+                "buttonTitle": "Посмотрите, в чём вы помогли"
+            },
+            "QuickActionCard": {
+                "title": "Быстрые Действия",
+                "notificationLog": "Логи Уведомлений",
+                "editQuickCSS": "Редакт. QuickCSS",
+                "relaunchDS": "Перезапуск Discord",
+                "settingsFolder": "Папка Настроек",
+                "sourceCode": "Исходный Код"
+            },
+            "SettingsPosition": {
+                "title": "Настройки",
+                "description": "Подсказка: Вы можете изменить положение раздела настроек в",
+                "link": "настройках плагина Настройки"
+            },
+            "VibrancyStyle": {
+                "title": "Window vibrancy style (requires restart)",
+                "placeholder": "Window vibrancy style",
+                "valueNull": "Без прозрачности",
+                "underPage": "Под страницей (тонировка)",
+                "content": "Контент",
+                "window": "Окно",
+                "selection": "Выделение",
+                "titlebar": "Заголовок",
+                "header": "Шапка",
+                "sidebar": "Боковая панель",
+                "tooltip": "Подсказка",
+                "menu": "Меню",
+                "popover": "Всплывашка",
+                "fullscreenUI": "Полноэкранный UI (прозрачный, чуть приглушённый)",
+                "hud": "HUD (самый прозрачный)"
+            },
+            "Notifications": {
+                "title": "Уведомления Vencord",
+                "notificationSettings": "Настройки Уведомлений",
+                "notificationLog": "Посмотреть Логи Уведомлений"
+            }
+        }
+    },
+    "DonateButton": {
+        "donate": "Задонатить"
+    },
+    "ErrorBoundary": {
+        "msg": "Произошла ошибка при рендеринге этого компонента. Более подробную информацию можно найти ниже и в консоли.",
+        "ohNo": "Упс!"
+    },
+    "handleComponentFailed": {
+        "error": "Упс! Не удалось загрузить эту страницу.",
+        "updateAvailable": " Доступно обновление, которое может исправить ошибку.",
+        "promptUpdate": " Хотите обновиться и перезапустить сейчас?"
+    }
+}

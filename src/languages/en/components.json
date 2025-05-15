@@ -1,0 +1,374 @@
+{
+    "PluginSettings": {
+        "components": {
+            "providedInput": "Invalid input provided.",
+            "SettingNumericComponent": {
+                "enterNumber": "Enter a number"
+            },
+            "SettingSelectComponent": {
+                "selectOption": "Select an option"
+            },
+            "SettingTextComponent": {
+                "enterValue": "Enter a value"
+            }
+        },
+        "ContributorModal": {
+            "contributed": "contributed",
+            "pluginContributed": "This person has {hyperLink} to {pluginsCount}!",
+            "plugin": "plugin",
+            "otherContributed": "This person has not made any plugins. They likely {hyperLink} to Vencord in other ways!",
+            "restart": "Restart to apply changes!"
+        },
+        "index": {
+            "ReloadRequiredCard": {
+                "required": "Restart required!",
+                "info": "Restart now to apply new plugins and their settings",
+                "restartButton": "Restart",
+                "management": "Plugin Management",
+                "pluginInfo": "Press the cog wheel or info icon to get more info on a plugin",
+                "settings": "Plugins with a cog wheel have settings you can modify!"
+            },
+            "PluginCard": {
+                "failedStart": "Failed to start dependencies: {failures}",
+                "close": "Close",
+                "pluginError": "Error while {wasEnabled} plugin {pluginName}",
+                "stopping": "stopping",
+                "starting": "starting"
+            },
+            "ExcludedPluginsList": {
+                "desktop": "Discord Desktop app or Vesktop",
+                "discordDesktop": "Discord Desktop app",
+                "vesktop": "Vesktop app",
+                "web": "Vesktop app and the Web version of Discord",
+                "dev": "Developer version of Vencord",
+                "areYouLooking": "Are you looking for:",
+                "onlyAvailable": "Only available on the {reason}",
+                "noPluginsFound": "No plugins meet the search criteria."
+            },
+            "PluginSettings": {
+                "required": "Restart required",
+                "info": "The following plugins require a restart:",
+                "restartNow": "Restart now",
+                "later": "Later!",
+                "vencordRequired": "This plugin is required for Vencord to function."
+            },
+            "SettingsTab": {
+                "title": "Plugins",
+                "filters": "Filters",
+                "searchPlugin": "Search for a plugin...",
+                "showAll": "Show All",
+                "showEnabled": "Show Enabled",
+                "showDisabled": "Show Disabled",
+                "showNew": "Show New",
+                "noPluginsFound": "No plugins meet the search criteria.",
+                "required": "Required Plugins"
+            },
+            "pluginRequired": "This plugin is required by:"
+        },
+        "PluginModal": {
+            "noPluginSettings": "There are no settings for this plugin.",
+            "viewMoreInfo": "View more info",
+            "viewSourceCode": "View source code",
+            "authors": "Authors",
+            "errorInfoComponent": "An error occurred while rendering this plugin's custom InfoComponent",
+            "settings": "Settings",
+            "cancel": "Cancel",
+            "fixErrors": "You must fix all errors before saving",
+            "saveClose": "Save & Close",
+            "errorSaving": "Error while saving:"
+        }
+    },
+    "VencordSettings": {
+        "AddonCard": {
+            "new": "NEW"
+        },
+        "BackupAndRestoreTab": {
+            "warning": "Warning",
+            "warningInfo": "Importing a settings file will overwrite your current settings.",
+            "importExportInfo": "You can import and export your Vencord settings as a JSON file. This allows you to easily transfer your settings to another device, or recover your settings after reinstalling Vencord or Discord.",
+            "settingsExportContains": "Settings Export contains:",
+            "customQuickcss": "Custom QuickCSS",
+            "themeLinks": "Theme Links",
+            "pluginSettings": "Plugin Settings",
+            "importSettings": "Import Settings",
+            "exportSettings": "Export Settings",
+            "wrapTab": "Backup & Restore"
+        },
+        "CloudTab": {
+            "eraseAllData": {
+                "cloudIntegrations": "Cloud Integrations",
+                "eraseFailed": "Could not erase all data (API returned {status}), please contact support.",
+                "eraseSuccess": "Successfully erased all data."
+            },
+            "SettingsSyncSection": {
+                "syncInfo": "Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with minimal effort",
+                "settingsSync": "Settings Sync",
+                "syncToCloud": "Sync to Cloud",
+                "overwriteSettings": "This will overwrite your local settings with the ones on the cloud. Use wisely!",
+                "syncFromCloud": "Sync from Cloud",
+                "deleteSettings": "Delete Cloud Settings"
+            },
+            "CloudTab": {
+                "title": "Vencord Cloud",
+                "formTitle": "Cloud Settings",
+                "respectsPrivacy": "respects your privacy",
+                "sourceCode": "source code",
+                "integrationInfo": "Vencord comes with a cloud integration that adds goodies like settings sync across devices. It {privacyRespect}, and the {sourceCode} is AGPL 3.0 licensed so you can host it yourself.",
+                "authInfo": "This will request authorization if you have not yet set up cloud integrations.",
+                "enableIntegrations": "Enable Cloud Integrations",
+                "backendUrl": "Backend URL",
+                "backedInfo": "Which backend to use when using cloud integrations.",
+                "reauth": "Reauthorise",
+                "areYouSure": "Are you sure?",
+                "eraseWarning": "Once your data is erased, we cannot recover it. There's no going back!",
+                "eraseIt": "Erase it!",
+                "nevermind": "Nevermind",
+                "eraseAllData": "Erase All Data"
+            },
+            "wrapTab": "Cloud"
+        },
+        "LanguageTab": {
+            "ReloadRequiredCard": {
+                "required": "Restart required!",
+                "info": "Restart now to apply the selected Language",
+                "restartButton": "Restart",
+                "translation": "Language",
+                "changeInfo": "Here you can change the language of Vencord.",
+                "notOfficial": "This is not an official translation of Vencord."
+            },
+            "LanguageTab": {
+                "title": "Language Settings",
+                "chooseLanguage": "Choose your language",
+                "languages": "Languages"
+            },
+            "wrapTab": "Language Settings"
+        },
+        "NotificationSettings": {
+            "style": "Notification Style",
+            "permDeniedTitle": "Desktop Notification Permission denied",
+            "permDeniedText": "You have denied Notification Permissions. Thus, Desktop notifications will not work!",
+            "notificationsInfo": "Some plugins may show you notifications. These come in two styles:",
+            "vencordNotification": "Vencord Notifications",
+            "vencordNotificationInfo": "These are in-app notifications",
+            "desktopNotification": "Desktop Notifications",
+            "desktopNotificationInfo": "Native Desktop notifications (like when you get a ping)",
+            "onlyWhenUnfocused": "Only use Desktop notifications when Discord is not focused",
+            "alwaysDesktopNotif": "Always use Desktop notifications",
+            "alwaysVencordNotif": "Always use Vencord notifications",
+            "notificationPosition": "Notification Position",
+            "posBottomRight": "Bottom Right",
+            "posTopRight": "Top Right",
+            "timeoutNotif": "Notification Timeout",
+            "timeoutNotifInfo": "Set to 0s to never automatically time out",
+            "logNotifLimit": "Notification Log Limit",
+            "logNotifInfo": "The amount of notifications to save in the log until old ones are removed. Set to {code0} to disable Notification log and {infinity} to never automatically remove old Notifications",
+            "notifSettings": "Notification Settings"
+        },
+        "PatchHelperTab": {
+            "noMatch": "No match. Perhaps that module is lazy loaded?",
+            "multipleMatches": "Multiple matches. Please refine your filter",
+            "ReplacementComponent": {
+                "noMatch": "Regex doesn't match!",
+                "module": "Module",
+                "match": "Match",
+                "diff": "Diff",
+                "compiledSuccess": "Compiled successfully",
+                "compile": "Compile"
+            },
+            "ReplacementInput": {
+                "replacementFunc": "Replacement must be a function",
+                "replacement": "replacement",
+                "cheatSheet": "Cheat Sheet",
+                "regexId": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
+                "dollar": "Insert a $",
+                "entireMatch": "Insert the entire match",
+                "substringBeforeMatch": "Insert the substring before the match",
+                "substringAfterMatch": "Insert the substring after the match",
+                "capturingGroup": "Insert the nth capturing group ($1, $2...)",
+                "pluginInstance": "Insert the plugin instance",
+                "evaledReplacement": "'replacement' will be evaled if this is toggled",
+                "treatFunc": "Treat as Function"
+            },
+            "pasteJson": "Paste your full JSON patch here to fill out the fields",
+            "PatchHelper": {
+                "title": "Patch Helper",
+                "fullPatch": "full patch",
+                "find": "find",
+                "match": "match",
+                "code": "Code",
+                "copyToClipboard": "Copy to Clipboard",
+                "copyAsCodeblock": "Copy as Codeblock"
+            },
+            "wrapTab": "PatchHelper"
+        },
+        "PluginsTab": {
+            "wrapTab": "Plugins"
+        },
+        "shared": {
+            "failedRenderTab": "Failed to render the {tab} tab. If this issue persists, try using the installer to reinstall!"
+        },
+        "ThemesTab": {
+            "Validator": {
+                "checking": "Checking...",
+                "error": "Error: {errorMessage}",
+                "valid": "Valid!"
+            },
+            "Validators": {
+                "validator": "Validator",
+                "themesSuccessLoad": "This section will tell you whether your themes can successfully be loaded",
+                "modeOnly": "[{mode} mode only] {link}"
+            },
+            "ThemeCard": {
+                "website": "Website",
+                "invalidInvite": "Invalid or expired invite",
+                "dsServer": "Discord Server"
+            },
+            "renderLocalThemes": {
+                "fingThemes": "Find Themes:",
+                "BDThemes": "BetterDiscord Themes",
+                "BDInfo": "If using the BD site, click on \"Download\" and place the downloaded .theme.css file into your themes folder.",
+                "github": "GitHub",
+                "localThemes": "Local Themes",
+                "uploadThemes": "Upload Theme",
+                "themesFolder": "Open Themes Folder",
+                "loadThemes": "Load missing Themes",
+                "editQuickCSS": "Edit QuickCSS",
+                "editClientTheme": "Edit ClientTheme"
+            },
+            "renderOnlineThemes": {
+                "cssLink": "Paste links to css files here",
+                "oneLink": "One link per line",
+                "linesPrefix": "You can prefix lines with @light or @dark to toggle them based on your Discord theme",
+                "directLinks": "Make sure to use direct links to files (raw or github.io)!",
+                "onlineThemes": "Online Themes",
+                "themesLinks": "Theme Links",
+                "themes": "Themes",
+                "localThemes": "Local Themes"
+            },
+            "wrapTab": "Themes"
+        },
+        "UpdaterTab": {
+            "withDispatcher": {
+                "undefinedError": "An unknown error occurred (error is undefined).\nPlease try again.",
+                "commandNotFound": "Command \\`{path}\\` not found.\nPlease install it and try again",
+                "errorWhileRun": "An error occurred while running \\`{cmd}\\`:\n",
+                "code": "Code \\`{code}\\`. See the console for more info`",
+                "unknownError": "An unknown error occurred. See the console for more info.",
+                "oops": "Oops!"
+            },
+            "Updatable": {
+                "failedCheck": "Failed to check updates. Check the console for more info",
+                "unknownError": "An unknown error occurred",
+                "oneUpdate": "There is 1 Update",
+                "moreUpdates": "There are {updatesLength} Updates",
+                "upToDate": "Up to Date!",
+                "updateSuccess": "Update Success!",
+                "restartToApplyTheChanges": "Successfully updated. Restart now to apply the changes?",
+                "restart": "Restart",
+                "notNow": "Not now!",
+                "updateNow": "Update Now",
+                "noUpdates": "No updates found!",
+                "checkUpdates": "Check for Updates"
+            },
+            "Newer": {
+                "localCopyWarning": "Your local copy has more recent commits. Please stash or reset them."
+            },
+            "Updater": {
+                "loading": "Loading...",
+                "title": "Vencord Updater",
+                "settings": "Updater Settings",
+                "autoUpdateInfo": "Automatically update Vencord without confirmation prompt",
+                "autoUpdate": "Automatically update",
+                "autoUpdateNotifInfo": "Shows a notification when Vencord automatically updates",
+                "autoUpdateNotif": "Get notified when an automatic update completes",
+                "repo": "Repo",
+                "failedRetrive": "Failed to retrieve - check console",
+                "updates": "Updates"
+            },
+            "updaterModal": "UpdaterModal",
+            "wrapTab": "Updater"
+        },
+        "VencordTab": {
+            "loading": "Loading...",
+            "Switches": {
+                "useQuickCssTitle": "Enable Custom CSS",
+                "useQuickCssNote": "Loads your Custom CSS",
+                "enableReactDevtoolsTitle": "Enable React Developer Tools",
+                "enableReactDevtoolsNote": "Requires a full restart",
+                "framelessTitle": "Disable the window frame",
+                "framelessNote": "Requires a full restart",
+                "winNativeTitleBarTitle": "Use Windows' native title bar instead of Discord's custom one",
+                "winNativeTitleBarNote": "Requires a full restart",
+                "transparentTitle": "Enable window transparency.",
+                "transparentNote": "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart",
+                "winCtrlQTitle": "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+                "winCtrlQNote": "Requires a full restart",
+                "disableMinSizeTitle": "Disable minimum window size",
+                "disableMinSizeNote": "Requires a full restart"
+            },
+            "title": "Vencord Settings",
+            "isDonorTrue": {
+                "title": "Donations",
+                "subtitle": "Thank you for donating!",
+                "description": "You can manage your perks at any time by messaging @vending.machine."
+            },
+            "isDonorFalse": {
+                "title": "Support the Project",
+                "description": "Please consider supporting the development of Vencord by donating!"
+            },
+            "isPluginDev": {
+                "title": "Contributions",
+                "subtitle": "Thank you for contributing!",
+                "description": "Since you've contributed to Vencord you now have a cool new badge!",
+                "buttonTitle": "See what you've contributed to"
+            },
+            "QuickActionCard": {
+                "title": "Quick Actions",
+                "notificationLog": "Notification Log",
+                "editQuickCSS": "Edit QuickCSS",
+                "relaunchDS": "Relaunch Discord",
+                "settingsFolder": "Open Settings Folder",
+                "sourceCode": "View Source Code"
+            },
+            "SettingsPosition": {
+                "title": "Settings",
+                "description": "Hint: You can change the position of this settings section in the",
+                "link": "settings of the Settings plugin"
+            },
+            "VibrancyStyle": {
+                "title": "Window vibrancy style (requires restart)",
+                "placeholder": "Window vibrancy style",
+                "valueNull": "No vibrancy",
+                "underPage": "Under Page (window tinting)",
+                "content": "Content",
+                "window": "Window",
+                "selection": "Selection",
+                "titlebar": "Titlebar",
+                "header": "Header",
+                "sidebar": "Sidebar",
+                "tooltip": "Tooltip",
+                "menu": "Menu",
+                "popover": "Popover",
+                "fullscreenUI": "Fullscreen UI (transparent but slightly muted)",
+                "hud": "HUD (Most transparent)"
+            },
+            "Notifications": {
+                "title": "Vencord Notifications",
+                "notificationSettings": "Notification Settings",
+                "notificationLog": "View Notification Log"
+            }
+        }
+    },
+    "DonateButton": {
+        "donate": "Donate"
+    },
+    "ErrorBoundary": {
+        "msg": "An error occurred while rendering this Component. More info can be found below and in your console.",
+        "ohNo": "Oh no!"
+    },
+    "handleComponentFailed": {
+        "error": "Uh Oh! Failed to render this Page.",
+        "updateAvailable": " However, there is an update available that might fix it.",
+        "promptUpdate": " Would you like to update and restart now?"
+    }
+}
