@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./messageColors.css";
+
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { makeRange } from "@components/PluginSettings/components";
@@ -153,13 +155,14 @@ export default definePlugin({
         },
         // Messages
         {
-            find: "#{intl::MESSAGE_EDITED}",
-            replacement: {
-                match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
-                replace: "style:$self.useMessageColorsStyle($1),"
-            },
+            find: "Message must not be a thread starter message",
+            replacement: [{
+                match: /\i\.messageListItem/,
+                replace: "$&+' '+$self.useMessageColorsStyle(arguments[0].message)?.class," +
+                    "style:$self.useMessageColorsStyle(arguments[0].message)?.styles"
+            }],
             predicate: () => settings.store.colorChatMessages
-        }
+        },
     ],
 
     getColorString(userId: string, channelOrGuildId: string) {
@@ -194,12 +197,11 @@ export default definePlugin({
             const author = useMessageAuthor(message);
 
             if (author.colorString != null && messageSaturation !== 0) {
-                const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
-
                 return {
-                    color: value.replace("{DEFAULT}", "--text-normal"),
-                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
-                    "--text-muted": value.replace("{DEFAULT}", "--text-muted")
+                    styles: {
+                        "--role-color": author.colorString,
+                        "--saturation": messageSaturation + "%",
+                    }, class: "vc-role-color-wrapper"
                 };
             }
         } catch (e) {
