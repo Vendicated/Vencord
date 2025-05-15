@@ -24,12 +24,19 @@ export const Menu = {} as t.Menu;
 
 // Relies on .name properties added by the MenuItemDemanglerAPI
 waitFor(m => m.name === "MenuCheckboxItem", (_, id) => {
-    // we have to do this manual require by ID because m is in this case the MenuCheckBoxItem instead of the entire module
-    const module = wreq(id);
+    // We have to do this manual require by ID because m in this case is the MenuCheckBoxItem instead of the entire module
+    const exports = wreq(id);
 
-    for (const e of Object.values(module)) {
-        if (typeof e === "function" && e.name.startsWith("Menu")) {
-            Menu[e.name] = e;
+    for (const exportKey in exports) {
+        // Some exports might have not been initialized yet due to circular imports, so try catch it.
+        try {
+            var exportValue = exports[exportKey];
+        } catch {
+            continue;
+        }
+
+        if (typeof exportValue === "function" && exportValue.name.startsWith("Menu")) {
+            Menu[exportValue.name] = exportValue;
         }
     }
 });
