@@ -60,7 +60,7 @@ export function getFactoryPatchedBy(moduleId: PropertyKey, webpackRequire = wreq
     return webpackRequire.m[moduleId]?.[SYM_PATCHED_BY];
 }
 
-const logger = new Logger("WebpackInterceptor", "#8caaee");
+const logger = new Logger("WebpackPatcher", "#8caaee");
 
 /** Whether we tried to fallback to the WebpackRequire of the factory, or disabled patches */
 let wreqFallbackApplied = false;
@@ -436,12 +436,21 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
                 callback(exports, module.id);
                 continue;
             }
+        } catch (err) {
+            logger.error(
+                "Error while filtering or firing callback for Webpack waitFor subscription:\n", err,
+                "\n\nModule exports:", exports,
+                "\n\nFilter:", filter,
+                "\n\nCallback:", callback
+            );
+        }
 
-            if (typeof exports !== "object") {
-                continue;
-            }
+        if (typeof exports !== "object") {
+            continue;
+        }
 
-            for (const exportKey in exports) {
+        for (const exportKey in exports) {
+            try {
                 // Some exports might have not been initialized yet due to circular imports, so try catch it.
                 try {
                     var exportValue = exports[exportKey];
@@ -454,9 +463,14 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
                     callback(exportValue, module.id);
                     break;
                 }
+            } catch (err) {
+                logger.error(
+                    "Error while filtering or firing callback for Webpack waitFor subscription:\n", err,
+                    "\n\nExport value:", exports,
+                    "\n\nFilter:", filter,
+                    "\n\nCallback:", callback
+                );
             }
-        } catch (err) {
-            logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
         }
     }
 
@@ -567,7 +581,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 }
 
                 code = newCode;
-                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(moduleId)}`;
+                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
                 patchedFactory = (0, eval)(patchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {
