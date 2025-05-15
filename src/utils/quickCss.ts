@@ -94,17 +94,17 @@ async function initThemes() {
 document.addEventListener("DOMContentLoaded", () => {
     initSystemValues();
 
-    toggle(Settings.useQuickCss);
-    SettingsStore.addChangeListener("useQuickCss", toggle);
-
-    SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
-    SettingsStore.addChangeListener("enabledThemes", initThemes);
-
     if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);
     }
 
     initThemes();
+
+    toggle(Settings.useQuickCss);
+    SettingsStore.addChangeListener("useQuickCss", toggle);
+
+    SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
+    SettingsStore.addChangeListener("enabledThemes", initThemes);
 });
 
 export function initQuickCssThemeStore() {
