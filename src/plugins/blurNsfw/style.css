@@ -1,0 +1,9 @@
+.vc-nsfw-img [class^="imageContainer"],
+.vc-nsfw-img [class^="wrapperPaused"] {
+    filter: blur([--blur-amount]px);
+    transition: filter 0.2s;
+
+    &:hover {
+        filter: blur(0);
+    }
+}
