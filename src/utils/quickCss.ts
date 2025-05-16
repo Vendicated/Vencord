@@ -42,7 +42,10 @@ async function initThemes() {
     const { themeLinks, enabledThemes } = Settings;
 
     // "darker" and "midnight" both count as dark
-    const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
+    // This function is first called on DOMContentLoaded, so ThemeStore may not have been loaded yet
+    const activeTheme = ThemeStore == null
+        ? undefined
+        : ThemeStore.theme === "light" ? "light" : "dark";
 
     const links = themeLinks
         .map(rawLink => {
@@ -72,7 +75,6 @@ async function initThemes() {
 
 document.addEventListener("DOMContentLoaded", () => {
     initSystemValues();
-    initThemes();
 
     toggle(Settings.useQuickCss);
     VencordNative.quickCss.addChangeListener(css => {
@@ -83,16 +85,11 @@ document.addEventListener("DOMContentLoaded", () => {
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
 
-    let currentTheme = ThemeStore.theme;
-    ThemeStore.addChangeListener(() => {
-        if (currentTheme === ThemeStore.theme) return;
-
-        currentTheme = ThemeStore.theme;
-        initThemes();
-    });
-
-    if (!IS_WEB)
+    if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);
+    }
+
+    initThemes();
 
     window.addEventListener("message", event => {
         const { discordPopoutEvent } = event.data || {};
@@ -102,3 +99,15 @@ document.addEventListener("DOMContentLoaded", () => {
         addStylesToDocument(popoutWindow.document);
     });
 });
+
+export function initQuickCssThemeStore() {
+    initThemes();
+
+    let currentTheme = ThemeStore.theme;
+    ThemeStore.addChangeListener(() => {
+        if (currentTheme === ThemeStore.theme) return;
+
+        currentTheme = ThemeStore.theme;
+        initThemes();
+    });
+}
