@@ -464,19 +464,21 @@ export default definePlugin({
 
         {
             // Message content renderer
+            find: ".SEND_FAILED,",
+            replacement: {
+                // Render editHistory behind the message content
+                match: /\.isFailed]:.+?children:\[/,
+                replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
+            }
+        },
+
+        {
             find: "#{intl::MESSAGE_EDITED}",
-            replacement: [
-                {
-                    // Render editHistory in the deepest div for message content
-                    match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace: "$1 (!!arguments[0].message.editHistory?.length && $self.renderEdits(arguments[0])),"
-                },
-                {
-                    // Make edit marker clickable
-                    match: /"span",\{(?=className:\i\.edited,)/,
-                    replace: "$self.EditMarker,{message:arguments[0].message,"
-                }
-            ]
+            replacement: {
+                // Make edit marker clickable
+                match: /"span",\{(?=className:\i\.edited,)/,
+                replace: "$self.EditMarker,{message:arguments[0].message,"
+            }
         },
 
         {
