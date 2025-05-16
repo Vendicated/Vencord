@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
+import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref } from "react";
 
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
@@ -197,6 +197,36 @@ export type Switch = ComponentType<PropsWithChildren<{
     tooltipNote?: ReactNode;
 }>>;
 
+export type CheckboxAligns = {
+    CENTER: "center";
+    TOP: "top";
+};
+
+export type CheckboxTypes = {
+    DEFAULT: "default";
+    INVERTED: "inverted";
+    GHOST: "ghost";
+    ROW: "row";
+};
+
+export type Checkbox = ComponentType<PropsWithChildren<{
+    value: boolean;
+    onChange(event: PointerEvent, value: boolean): void;
+
+    align?: "center" | "top";
+    disabled?: boolean;
+    displayOnly?: boolean;
+    readOnly?: boolean;
+    reverse?: boolean;
+    shape?: string;
+    size?: number;
+    type?: "default" | "inverted" | "ghost" | "row";
+}>> & {
+    Shapes: Record<"BOX" | "ROUND" | "SMALL_BOX", string>;
+    Aligns: CheckboxAligns;
+    Types: CheckboxTypes;
+};
+
 export type Timestamp = ComponentType<PropsWithChildren<{
     timestamp: Date;
     isEdited?: boolean;
@@ -215,7 +245,8 @@ export type TextInput = ComponentType<PropsWithChildren<{
     onChange?(value: string, name?: string): void;
     placeholder?: string;
     editable?: boolean;
-    maxLength?: number;
+    /** defaults to 999. Pass null to disable this default */
+    maxLength?: number | null;
     error?: string;
 
     inputClassName?: string;
@@ -227,13 +258,13 @@ export type TextInput = ComponentType<PropsWithChildren<{
 
     /** TextInput.Sizes.DEFAULT */
     size?: string;
-} & Omit<HTMLProps<HTMLInputElement>, "onChange">>> & {
+} & Omit<HTMLProps<HTMLInputElement>, "onChange" | "maxLength">>> & {
     Sizes: Record<"DEFAULT" | "MINI", string>;
 };
 
-export type TextArea = ComponentType<PropsWithRef<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
+export type TextArea = ComponentType<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
     onChange(v: string): void;
-}>>;
+}>;
 
 interface SelectOption {
     disabled?: boolean;
@@ -325,7 +356,7 @@ export type SearchableSelect = ComponentType<PropsWithChildren<{
     "aria-labelledby"?: boolean;
 }>>;
 
-export type Slider = ComponentType<PropsWithChildren<{
+export type Slider = ComponentClass<PropsWithChildren<{
     initialValue: number;
     defaultValue?: number;
     keyboardStep?: number;
@@ -496,7 +527,7 @@ export type Avatar = ComponentType<PropsWithChildren<{
 }>>;
 
 type FocusLock = ComponentType<PropsWithChildren<{
-    containerRef: RefObject<HTMLElement>;
+    containerRef: Ref<HTMLElement>;
 }>>;
 
 export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {

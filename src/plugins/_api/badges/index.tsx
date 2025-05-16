@@ -46,8 +46,6 @@ const ContributorBadge: ProfileBadge = {
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
 async function loadBadges(noCache = false) {
-    DonorBadges = {};
-
     const init = {} as RequestInit;
     if (noCache)
         init.cache = "no-cache";
@@ -56,6 +54,8 @@ async function loadBadges(noCache = false) {
         .then(r => r.json());
 }
 
+let intervalId: any;
+
 export default definePlugin({
     name: "BadgeAPI",
     description: "API to add badges to users.",
@@ -63,33 +63,36 @@ export default definePlugin({
     required: true,
     patches: [
         {
-            find: ".FULL_SIZE]:26",
+            find: ".MODAL]:26",
             replacement: {
-                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\);)return 0===\i.length\?/,
-                replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
+                match: /(?=;return 0===(\i)\.length\?)(?<=(\i)\.useMemo.+?)/,
+                replace: ";$1=$2.useMemo(()=>[...$self.getBadges(arguments[0].displayProfile),...$1],[$1])"
             }
         },
         {
-            find: ".description,delay:",
+            find: "#{intl::PROFILE_USER_BADGES}",
             replacement: [
                 {
-                    // alt: "", aria-hidden: false, src: originalSrc
-                    match: /alt:" ","aria-hidden":!0,src:(?=.{0,20}(\i)\.icon)/,
-                    // ...badge.props, ..., src: badge.image ?? ...
-                    replace: "...$1.props,$& $1.image??"
+                    match: /(alt:" ","aria-hidden":!0,src:)(.+?)(?=,)(?<=href:(\i)\.link.+?)/,
+                    replace: (_, rest, originalSrc, badge) => `...${badge}.props,${rest}${badge}.image??(${originalSrc})`
                 },
                 {
                     match: /(?<="aria-label":(\i)\.description,.{0,200})children:/,
-                    replace: "children:$1.component ? $self.renderBadgeComponent({ ...$1 }) :"
+                    replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
                 // conditionally override their onClick with badge.onClick if it exists
                 {
                     match: /href:(\i)\.link/,
-                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, $1) }),$&"
+                    replace: "...($1.onClick&&{onClick:vcE=>$1.onClick(vcE,$1)}),$&"
                 }
             ]
         }
     ],
+
+    // for access from the console or other plugins
+    get DonorBadges() {
+        return DonorBadges;
+    },
 
     toolboxActions: {
         async "Refetch Badges"() {
@@ -106,6 +109,13 @@ export default definePlugin({
 
     async start() {
         await loadBadges();
+
+        clearInterval(intervalId);
+        intervalId = setInterval(loadBadges, 1000 * 60 * 30); // 30 minutes
+    },
+
+    async stop() {
+        clearInterval(intervalId);
     },
 
     getBadges(props: { userId: string; user?: User; guildId: string; }) {
