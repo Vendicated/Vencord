@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>172 additional plugins</summary>
+<summary>174 additional plugins</summary>
 
 ### All Platforms
 
@@ -90,6 +90,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - IgnoreTerms by D3SOX
 - ImagePreview by Creations
 - ImgToGif by zyqunix
+- Ingtoninator by zyqunix
 - InRole by nin0dev
 - InstantScreenshare by HAHALOSAH & thororen
 - IRememberYou by zoodogood
