@@ -126,7 +126,7 @@ export function initWs(isManual = false) {
         function reply(error?: string) {
             const toSend = { nonce: d.nonce, ok: !error } as Record<string, unknown>;
             if (error) toSend.error = error;
-            logger.debug(`Replying with:`, toSend);
+            logger.debug("Replying with:", toSend);
             ws.send(JSON.stringify(toSend));
         }
         function replyData(data: OutgoingMessage) {
