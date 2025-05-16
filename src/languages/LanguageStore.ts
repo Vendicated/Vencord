@@ -43,3 +43,4 @@ export const LangPack: Record<LanguageType, langPackSample> = {
 };
 
 export type PluginsLangDataType = Partial<Record<LanguageType, any>>;
+export const { language } = VencordNative.settings.get();

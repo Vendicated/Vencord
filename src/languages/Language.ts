@@ -6,51 +6,24 @@
 
 import { Logger } from "@utils/Logger";
 
-import { Directories, DirType, LangPack, LangPackType, Languages, LanguageType } from "./LanguageStore";
+import { Directories, DirType, LangPack, LangPackType, language, Languages, LanguageType } from "./LanguageStore";
 
 const logger = new Logger("Language");
 
-export function getText(type: DirType, pluginName?: string) {
-    const { language } = VencordNative.settings.get();
+export function getText(type: DirType) {
+    if (!Languages[language as keyof typeof Languages]) throw new Error("Error, the wrong language is set in the settings.");
+    if (!Directories[type as keyof typeof Languages]) throw new Error("Error, not working directory type");
 
-    if (!Languages[language as keyof typeof Languages]) {
-        logger.error("Error, the wrong language is set in the settings.");
-        return {};
-    }
+    let loadedText: any;
+    if (!LangPack[language][type]) loadedText = LangPack.en[type];
 
-    if (type === "api" || type === "components") {
-        let loadedText: any;
-        try {
-            loadedText = LangPack[language][type];
-        } catch {
-            loadedText = LangPack.en[type];
-        }
-        return loadedText;
-
-    } else if (type === "plugins") {
-        let loadedText: any;
-        if (pluginName) {
-            try {
-                loadedText = LangPack[language][type];
-            } catch {
-                loadedText = LangPack.en[type];
-            }
-        }
-        return loadedText;
-    } else {
-        logger.error("Error, not working type");
-        return {};
-    }
+    loadedText = LangPack[language][type];
+    return loadedText;
 }
 
-export function getLanguage<T extends DirType>(type: T, pluginName?: string): LangPackType<T> {
+export function getLanguage<T extends DirType>(type: T): LangPackType<T> {
     try {
-        let data: LangPackType<T>;
-        if (pluginName) {
-            data = getText(type, pluginName);
-        } else {
-            data = getText(type);
-        }
+        const data = getText(type);
         return data;
     } catch (error) {
         logger.error("Error loading language:", error);
@@ -58,4 +31,23 @@ export function getLanguage<T extends DirType>(type: T, pluginName?: string): La
     }
 }
 
-export { Directories, DirType, Languages, LanguageType };
+export function defineLanguage<L>(pluginName: string, langData: Partial<Record<LanguageType, L>>): L {
+    if (!pluginName || !langData) throw new Error("Plugin name or language data not found");
+
+    const plName = pluginName.charAt(0).toLowerCase() + pluginName.slice(1);
+
+    const data = langData[language];
+    if (!data || Object.keys(data).length === 0) {
+        const langPlugins = LangPack[language].plugins;
+        if (!langPlugins[plName]) throw new Error("No language pack found with this plugin name");
+
+        if (langPlugins) {
+            return langPlugins[plName] as L;
+        }
+
+        return LangPack.en.plugins[plName] as L;
+    }
+    return data;
+}
+
+export { DirType, Languages, LanguageType };
