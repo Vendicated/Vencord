@@ -39,11 +39,7 @@ const settings = definePluginSettings({
         description: "Format of the attribution text.",
         default: "{channelName}"
     },
-    notificationShowPfp: {
-        type: OptionType.BOOLEAN,
-        description: "Includes sender's profile picture in notification. View available variables above.",
-        default: true
-    },
+
     notificationPfpCircle: {
         type: OptionType.BOOLEAN,
         description: "Crop the sender's profile picture to a circle (Windows only)",
