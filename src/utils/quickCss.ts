@@ -92,6 +92,7 @@ async function initThemes() {
 
 document.addEventListener("DOMContentLoaded", () => {
     initSystemValues();
+    initThemes();
 
     toggle(Settings.useQuickCss);
     SettingsStore.addChangeListener("useQuickCss", toggle);
@@ -102,8 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);
     }
-
-    initThemes();
 });
 
 export function initQuickCssThemeStore() {
