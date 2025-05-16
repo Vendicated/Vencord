@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getLanguage } from "@languages/Language";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -13,6 +14,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, useEffect, useRef } from "@webpack/common";
 import { User } from "discord-types/general";
 
+const langData = getLanguage("plugins").accountPanelServerProfile;
 interface UserProfileProps {
     popoutProps: Record<string, any>;
     currentUser: User;
@@ -34,7 +36,7 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
         >
             <Menu.MenuItem
                 id="vc-ap-view-alternate-popout"
-                label={prioritizeServerProfile ? "View Account Profile" : "View Server Profile"}
+                label={prioritizeServerProfile ? langData.viewAccountProfile : langData.viewServerProfile}
                 disabled={getCurrentChannel()?.getGuildId() == null}
                 action={e => {
                     openAlternatePopout = true;
@@ -44,7 +46,7 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
             />
             <Menu.MenuCheckboxItem
                 id="vc-ap-prioritize-server-profile"
-                label="Prioritize Server Profile"
+                label={langData.prioritizeProfile}
                 checked={prioritizeServerProfile}
                 action={() => settings.store.prioritizeServerProfile = !prioritizeServerProfile}
             />
@@ -55,14 +57,16 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
 const settings = definePluginSettings({
     prioritizeServerProfile: {
         type: OptionType.BOOLEAN,
-        description: "Prioritize Server Profile when left clicking your account panel",
+        description: langData.settingsDescription,
         default: false
     }
 });
 
+const des = langData.description;
+
 export default definePlugin({
     name: "AccountPanelServerProfile",
-    description: "Right click your account panel in the bottom left to view your profile in the current server",
+    description: des,
     authors: [Devs.Nuckyz, Devs.relitrix],
     settings,
 
