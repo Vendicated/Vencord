@@ -93,11 +93,6 @@ async function initThemes() {
 
 document.addEventListener("DOMContentLoaded", () => {
     initSystemValues();
-
-    if (!IS_WEB) {
-        VencordNative.quickCss.addThemeChangeListener(initThemes);
-    }
-
     initThemes();
 
     toggle(Settings.useQuickCss);
@@ -105,6 +100,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+
+    if (!IS_WEB) {
+        VencordNative.quickCss.addThemeChangeListener(initThemes);
+    }
 });
 
 export function initQuickCssThemeStore() {
