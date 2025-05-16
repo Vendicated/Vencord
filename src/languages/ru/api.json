@@ -1,0 +1,26 @@
+{
+    "Notifications": {
+        "Notificationslog": {
+            "noNotifications": "Пока нет уведомлений",
+            "notificationLog": "Логи Уведомлений",
+            "notificationSettings": "Настройки Уведомлений",
+            "areYouSure": "Вы уверены?",
+            "removeNotifications": "Это навсегда удалит {count} уведомлений. Это действие невозможно отменить.",
+            "doIt": "Выполнить!",
+            "nevermind": "Отмена",
+            "clearLog": "Очистить Логи Уведомлпений"
+        },
+        "NotificationComponent": {
+            "dismissNotification": "Закрыть Уведомление"
+        }
+    },
+    "MemberListDecorators": {
+        "failedRender": "Не удалось отобразить декоратор списка участников {key}"
+    },
+    "MessageAccessories": {
+        "failedRender": "Не удалось отобразить аксессуар сообщений {key}"
+    },
+    "MessageDecorations": {
+        "failedRender": "Не удалось отобразить украшение сообщений {key}"
+    }
+}
