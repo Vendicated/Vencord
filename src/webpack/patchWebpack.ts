@@ -105,6 +105,9 @@ define(Function.prototype, "m", {
         }
 
         const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
+        if (fileName?.includes("libdiscore")) {
+            return;
+        }
 
         // Define a setter for the bundlePath property of WebpackRequire. Only Webpack instances which include chunk loading functionality,
         // like the main Discord Webpack, have this property.
