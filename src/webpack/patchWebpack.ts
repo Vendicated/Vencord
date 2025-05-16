@@ -105,7 +105,11 @@ define(Function.prototype, "m", {
         }
 
         const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
-        if (fileName?.includes("libdiscore")) {
+
+        // Currently, sentry and libDiscore Webpack instances are not meant to be patched.
+        // As an extra measure, take advatange of the fact their files include the names and return early if it's one of them.
+        // Later down we also include other measures to avoid patching them.
+        if (["sentry", "libdiscore"].some(name => fileName?.toLowerCase()?.includes(name))) {
             return;
         }
 
@@ -119,7 +123,10 @@ define(Function.prototype, "m", {
                 define(this, "p", { value: bundlePath });
                 clearTimeout(bundlePathTimeout);
 
-                if (bundlePath !== "/assets/") {
+                // libDiscore init Webpack instance always returns a constanst string for the js filename of a chunk.
+                // In that case, avoid patching this instance,
+                // as it runs before the main Webpack instance and will make the WebpackRequire fallback not work properly, or init an wrongful main WebpackRequire.
+                if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]/.exec(String(this.u))) {
                     return;
                 }
 
@@ -132,9 +139,9 @@ define(Function.prototype, "m", {
             }
         });
 
-        // In the past, the sentry Webpack instance which we also wanted to patch used to rely on chunks being loaded before initting sentry.
+        // In the past, the sentry Webpack instance which we also wanted to patch used to rely on chunks being loaded before initing sentry.
         // This Webpack instance did not include actual chunk loading, and only awaited for them to be loaded, which means it did not include the bundlePath property.
-        // To keep backwards compability, in case this is ever the case again, and keep patching this type of instance, we explicity patch instances which include wreq.O and not wreq.p.
+        // To keep backwards compability, if this is ever the case again, and keep patching this type of instance, we explicity patch instances which include wreq.O and not wreq.p.
         // Since we cannot check what is the bundlePath of the instance to filter for the Discord bundlePath, we only patch it if wreq.p is not included,
         // which means the instance relies on another instance which does chunk loading, and that makes it very likely to only target Discord Webpack instances like the old sentry.
 
