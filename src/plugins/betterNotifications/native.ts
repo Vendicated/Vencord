@@ -113,6 +113,7 @@ function generateXml(
         <header
             id="${extraOptions.wHeaderOptions.channelId}"
             title="#${extraOptions.wHeaderOptions.channelName}"
+            arguments="discord://-/channels/${notificationData.guildId}/${notificationData.channelId}"
             />
             `
             :
