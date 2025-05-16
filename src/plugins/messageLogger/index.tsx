@@ -487,13 +487,13 @@ export default definePlugin({
             ],
         },
 
-        // Message content renderer
         {
+            // Message content renderer
             find: ".SEND_FAILED,",
             replacement: {
-                // Render editHistory in the deepest div for message content
-                match: /(\)\("div",\{id:.+?children:\[)/,
-                replace: "$1 (!!arguments[0].message.editHistory?.length && $self.renderEdits(arguments[0])),"
+                // Render editHistory behind the message content
+                match: /\.isFailed]:.+?children:\[/,
+                replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
 

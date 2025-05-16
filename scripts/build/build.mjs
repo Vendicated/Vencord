@@ -115,7 +115,7 @@ const buildConfigs = ([
         ...nodeCommonOpts,
         entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
         outfile: "dist/desktop/patcher.js",
-        footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
+        footer: { js: "//# sourceURL=file:///VencordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
         plugins: [
             // @ts-ignore this is never undefined
@@ -135,7 +135,7 @@ const buildConfigs = ([
         outfile: "dist/desktop/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
+        footer: { js: "//# sourceURL=file:///VencordRenderer\n" + sourceMapFooter("renderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
@@ -153,7 +153,7 @@ const buildConfigs = ([
         ...nodeCommonOpts,
         entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
         outfile: "dist/desktop/preload.js",
-        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
+        footer: { js: "//# sourceURL=file:///VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
         define: {
             ...defines,
@@ -168,7 +168,7 @@ const buildConfigs = ([
         ...nodeCommonOpts,
         entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
         outfile: "dist/equibop/main.js",
-        footer: { js: "//# sourceURL=VencordMain\n" + sourceMapFooter("main") },
+        footer: { js: "//# sourceURL=file:///VencordDesktopMain\n" + sourceMapFooter("main") },
         sourcemap,
         plugins: [
             ...nodeCommonOpts.plugins,
@@ -187,7 +187,7 @@ const buildConfigs = ([
         outfile: "dist/equibop/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
+        footer: { js: "//# sourceURL=file:///VencordDesktopRenderer\n" + sourceMapFooter("renderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
@@ -205,7 +205,7 @@ const buildConfigs = ([
         ...nodeCommonOpts,
         entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
         outfile: "dist/equibop/preload.js",
-        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
+        footer: { js: "//# sourceURL=file:///VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
         define: {
             ...defines,
