@@ -17,7 +17,8 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, SelectedChannelStore } from "@webpack/common";
 
 const timers = {} as Record<string, {
@@ -25,10 +26,21 @@ const timers = {} as Record<string, {
     i: number;
 }>;
 
+const settings = definePluginSettings({
+    pressTimeout: {
+        description: "How quickly you need to double-click to join a voice channel.",
+        type: OptionType.SLIDER,
+        markers: [0.1, 0.5, 1.0, 1.5, 2.0],
+        default: 0.5,
+        stickToMarkers: false,
+    },    
+});
+
 export default definePlugin({
     name: "VoiceChatDoubleClick",
     description: "Join voice chats via double click instead of single click",
     authors: [Devs.Ven, Devs.D3SOX],
+    settings,
     patches: [
         ...[
             ".handleVoiceStatusClick", // voice channels
@@ -64,6 +76,7 @@ export default definePlugin({
     },
 
     schedule(cb: () => void, e: any) {
+        const { pressTimeout } = settings.store;
         const id = e.props.channel.id as string;
         if (SelectedChannelStore.getVoiceChannelId() === id) {
             cb();
@@ -82,7 +95,7 @@ export default definePlugin({
             // else reset the counter in 500ms
             data.timeout = setTimeout(() => {
                 delete timers[id];
-            }, 500);
+            }, pressTimeout*1000);
         }
     }
 });
