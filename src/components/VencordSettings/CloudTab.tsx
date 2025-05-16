@@ -21,12 +21,16 @@ import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
+import { getLanguage } from "@languages/Language";
+import { formatText, formatWithReactComponent } from "@languages/LanguageUtils";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
+
+const langData = getLanguage("components");
 
 function validateUrl(url: string) {
     try {
@@ -42,12 +46,13 @@ async function eraseAllData() {
         method: "DELETE",
         headers: { Authorization: await getCloudAuth() }
     });
+    const l = langData.VencordSettings.CloudTab.eraseAllData;
 
     if (!res.ok) {
         cloudLogger.error(`Failed to erase data, API returned ${res.status}`);
         showNotification({
-            title: "Cloud Integrations",
-            body: `Could not erase all data (API returned ${res.status}), please contact support.`,
+            title: l.cloudIntegrations,
+            body: formatText(l.eraseFailed, { status: res.status }),
             color: "var(--red-360)"
         });
         return;
@@ -57,8 +62,8 @@ async function eraseAllData() {
     await deauthorizeCloud();
 
     showNotification({
-        title: "Cloud Integrations",
-        body: "Successfully erased all data.",
+        title: l.cloudIntegrations,
+        body: l.eraseSuccess,
         color: "var(--green-360)"
     });
 }
@@ -66,12 +71,12 @@ async function eraseAllData() {
 function SettingsSyncSection() {
     const { cloud } = useSettings(["cloud.authenticated", "cloud.settingsSync"]);
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
+    const l = langData.VencordSettings.CloudTab.SettingsSyncSection;
 
     return (
-        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
+        <Forms.FormSection title={l.settingsSync} className={Margins.top16}>
             <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
-                Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
-                minimal effort.
+                {l.syncInfo}
             </Forms.FormText>
             <Switch
                 key="cloud-sync"
@@ -79,7 +84,7 @@ function SettingsSyncSection() {
                 value={cloud.settingsSync}
                 onChange={v => { cloud.settingsSync = v; }}
             >
-                Settings Sync
+                {l.settingsSync}
             </Switch>
             <div className="vc-cloud-settings-sync-grid">
                 <Button
@@ -87,9 +92,9 @@ function SettingsSyncSection() {
                     disabled={!sectionEnabled}
                     onClick={() => putCloudSettings(true)}
                 >
-                    Sync to Cloud
+                    {l.syncToCloud}
                 </Button>
-                <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
+                <Tooltip text={l.overwriteSettings}>
                     {({ onMouseLeave, onMouseEnter }) => (
                         <Button
                             onMouseLeave={onMouseLeave}
@@ -99,7 +104,7 @@ function SettingsSyncSection() {
                             disabled={!sectionEnabled}
                             onClick={() => getCloudSettings(true, true)}
                         >
-                            Sync from Cloud
+                            {l.syncToCloud}
                         </Button>
                     )}
                 </Tooltip>
@@ -109,7 +114,7 @@ function SettingsSyncSection() {
                     disabled={!sectionEnabled}
                     onClick={() => deleteCloudSettings()}
                 >
-                    Delete Cloud Settings
+                    {l.deleteSettings}
                 </Button>
             </div>
         </Forms.FormSection>
@@ -118,15 +123,17 @@ function SettingsSyncSection() {
 
 function CloudTab() {
     const settings = useSettings(["cloud.authenticated", "cloud.url"]);
+    const l = langData.VencordSettings.CloudTab.CloudTab;
 
     return (
-        <SettingsTab title="Vencord Cloud">
-            <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
+        <SettingsTab title={l.title}>
+            <Forms.FormSection title={l.formTitle} className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
-                    Vencord comes with a cloud integration that adds goodies like settings sync across devices.
-                    It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
-                    the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
-                    can host it yourself.
+                    {formatWithReactComponent(l.integrationInfo,
+                        {
+                            privacyRespect: <Link href="https://vencord.dev/cloud/privacy">{l.respectsPrivacy}</Link>,
+                            sourceCode: <Link href="https://github.com/Vencord/Backend">{l.sourceCode}</Link>
+                        })}
                 </Forms.FormText>
                 <Switch
                     key="backend"
@@ -137,13 +144,13 @@ function CloudTab() {
                         else
                             settings.cloud.authenticated = v;
                     }}
-                    note="This will request authorization if you have not yet set up cloud integrations."
+                    note={l.authInfo}
                 >
-                    Enable Cloud Integrations
+                    {l.enableIntegrations}
                 </Switch>
-                <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
+                <Forms.FormTitle tag="h5">{l.backendUrl}</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom8}>
-                    Which backend to use when using cloud integrations.
+                    {l.backedInfo}
                 </Forms.FormText>
                 <CheckedTextInput
                     key="backendUrl"
@@ -166,22 +173,22 @@ function CloudTab() {
                             await authorizeCloud();
                         }}
                     >
-                        Reauthorise
+                        {l.reauth}
                     </Button>
                     <Button
                         size={Button.Sizes.MEDIUM}
                         color={Button.Colors.RED}
                         disabled={!settings.cloud.authenticated}
                         onClick={() => Alerts.show({
-                            title: "Are you sure?",
-                            body: "Once your data is erased, we cannot recover it. There's no going back!",
+                            title: l.areYouSure,
+                            body: l.eraseWarning,
                             onConfirm: eraseAllData,
-                            confirmText: "Erase it!",
+                            confirmText: l.eraseIt,
                             confirmColor: "vc-cloud-erase-data-danger-btn",
-                            cancelText: "Nevermind"
+                            cancelText: l.nevermind
                         })}
                     >
-                        Erase All Data
+                        {l.eraseAllData}
                     </Button>
                 </Grid>
 
@@ -192,4 +199,4 @@ function CloudTab() {
     );
 }
 
-export default wrapTab(CloudTab, "Cloud");
+export default wrapTab(CloudTab, langData.VencordSettings.CloudTab.wrapTab);

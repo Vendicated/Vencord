@@ -21,6 +21,8 @@ import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { openNotificationSettingsModal } from "@components/VencordSettings/NotificationSettings";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Alerts, Button, Forms, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
@@ -29,6 +31,8 @@ import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
 import type { NotificationData } from "./Notifications";
+
+const langData = getLanguage("api");
 
 interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color"> {
     timestamp: number;
@@ -145,7 +149,7 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
             <div className={cl("container")}>
                 <div className={cl("empty")} />
                 <Forms.FormText style={{ textAlign: "center" }}>
-                    No notifications yet
+                    {langData.Notifications.Notificationslog.noNotifications}
                 </Forms.FormText>
             </div>
         );
@@ -163,7 +167,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Log</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{langData.Notifications.Notificationslog.notificationLog}</Text>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
@@ -174,7 +178,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
             <ModalFooter>
                 <Flex>
                     <Button onClick={openNotificationSettingsModal}>
-                        Notification Settings
+                        {langData.Notifications.Notificationslog.notificationSettings}
                     </Button>
 
                     <Button
@@ -182,19 +186,19 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                         color={Button.Colors.RED}
                         onClick={() => {
                             Alerts.show({
-                                title: "Are you sure?",
-                                body: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
+                                title: langData.Notifications.Notificationslog.areYouSure,
+                                body: formatText(langData.Notifications.Notificationslog.removeNotifications, { count: log.length, plural: log.length === 1 ? "" : "s" }),
                                 async onConfirm() {
                                     await DataStore.set(KEY, []);
                                     signals.forEach(x => x());
                                 },
-                                confirmText: "Do it!",
+                                confirmText: langData.Notifications.Notificationslog.doIt,
                                 confirmColor: "vc-notification-log-danger-btn",
-                                cancelText: "Nevermind"
+                                cancelText: langData.Notifications.Notificationslog.nevermind
                             });
                         }}
                     >
-                        Clear Notification Log
+                        {langData.Notifications.Notificationslog.clearLog}
                     </Button>
                 </Flex>
             </ModalFooter>

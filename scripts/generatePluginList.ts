@@ -121,8 +121,11 @@ async function parseFile(fileName: string) {
             switch (key) {
                 case "name":
                 case "description":
-                    if (!isStringLiteral(value)) throw fail(`${key} is not a string literal`);
-                    data[key] = value.text;
+                    if (isStringLiteral(value)) {
+                        data[key] = value.text;
+                    } else if (isIdentifier(value)) {
+                        data[key] = value.text;
+                    } else throw fail(`${key} is not a string literal or an identifier`);
                     break;
                 case "patches":
                     data.hasPatches = true;

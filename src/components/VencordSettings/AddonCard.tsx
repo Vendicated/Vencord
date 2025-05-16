@@ -21,10 +21,13 @@ import "./addonCard.css";
 import { classNameFactory } from "@api/Styles";
 import { Badge } from "@components/Badge";
 import { Switch } from "@components/Switch";
+import { getLanguage } from "@languages/Language";
 import { Text, useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
 const cl = classNameFactory("vc-addon-");
+
+const langData = getLanguage("components");
 
 interface Props {
     name: ReactNode;
@@ -67,7 +70,7 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                             >
                                 {name}
                             </div>
-                        </div>{isNew && <Badge text="NEW" color="#ED4245" />}
+                        </div>{isNew && <Badge text={langData.VencordSettings.AddonCard.new} color="#ED4245" />}
                     </Text>
                     {!!author && (
                         <Text variant="text-md/normal" className={cl("author")}>

@@ -5,6 +5,8 @@
  */
 
 import { useSettings } from "@api/Settings";
+import { getLanguage } from "@languages/Language";
+import { formatWithReactComponent } from "@languages/LanguageUtils";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -12,31 +14,34 @@ import { Forms, Select, Slider, Text } from "@webpack/common";
 
 import { ErrorCard } from "..";
 
+const langData = getLanguage("components");
+
 export function NotificationSettings() {
     const settings = useSettings().notifications;
+    const l = langData.VencordSettings.NotificationSettings;
 
     return (
         <div style={{ padding: "1em 0" }}>
-            <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
+            <Forms.FormTitle tag="h5">{l.style}</Forms.FormTitle>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
-                    <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
-                    <Forms.FormText>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Forms.FormText>
+                    <Forms.FormTitle tag="h5">{l.permDeniedTitle}</Forms.FormTitle>
+                    <Forms.FormText>{l.permDeniedText}</Forms.FormText>
                 </ErrorCard>
             )}
             <Forms.FormText className={Margins.bottom8}>
-                Some plugins may show you notifications. These come in two styles:
+                {l.notificationsInfo}
                 <ul>
-                    <li><strong>Vencord Notifications</strong>: These are in-app notifications</li>
-                    <li><strong>Desktop Notifications</strong>: Native Desktop notifications (like when you get a ping)</li>
+                    <li><strong>{l.vencordNotification}</strong>: {l.vencordNotificationInfo}</li>
+                    <li><strong>{l.desktopNotification}</strong>: {l.desktopNotificationInfo}</li>
                 </ul>
             </Forms.FormText>
             <Select
-                placeholder="Notification Style"
+                placeholder={l.style}
                 options={[
-                    { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
-                    { label: "Always use Desktop notifications", value: "always" },
-                    { label: "Always use Vencord notifications", value: "never" },
+                    { label: l.onlyWhenUnfocused, value: "not-focused", default: true },
+                    { label: l.alwaysDesktopNotif, value: "always" },
+                    { label: l.alwaysVencordNotif, value: "never" },
                 ] satisfies Array<{ value: typeof settings["useNative"]; } & Record<string, any>>}
                 closeOnSelect={true}
                 select={v => settings.useNative = v}
@@ -44,21 +49,21 @@ export function NotificationSettings() {
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>{l.notificationPosition}</Forms.FormTitle>
             <Select
                 isDisabled={settings.useNative === "always"}
-                placeholder="Notification Position"
+                placeholder={l.notificationPosition}
                 options={[
-                    { label: "Bottom Right", value: "bottom-right", default: true },
-                    { label: "Top Right", value: "top-right" },
+                    { label: l.posBottomRight, value: "bottom-right", default: true },
+                    { label: l.posTopRight, value: "top-right" },
                 ] satisfies Array<{ value: typeof settings["position"]; } & Record<string, any>>}
                 select={v => settings.position = v}
                 isSelected={v => v === settings.position}
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>{l.timeoutNotif}</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom16}>{l.timeoutNotifInfo}</Forms.FormText>
             <Slider
                 disabled={settings.useNative === "always"}
                 markers={[0, 1000, 2500, 5000, 10_000, 20_000]}
@@ -71,10 +76,9 @@ export function NotificationSettings() {
                 stickToMarkers={false}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>{l.logNotifLimit}</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom16}>
-                The amount of notifications to save in the log until old ones are removed.
-                Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications
+                {formatWithReactComponent(l.logNotifInfo, { code0: <code>0</code>, infinity: <code>∞</code> })}
             </Forms.FormText>
             <Slider
                 markers={[0, 25, 50, 75, 100, 200]}
@@ -94,7 +98,7 @@ export function openNotificationSettingsModal() {
     openModal(props => (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Settings</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{langData.VencordSettings.NotificationSettings.notifSettings}</Text>
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
 

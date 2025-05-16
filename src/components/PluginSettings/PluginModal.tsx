@@ -23,6 +23,7 @@ import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { getLanguage } from "@languages/Language";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
@@ -54,6 +55,8 @@ const cl = classNameFactory("vc-plugin-modal-");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+
+const langData = getLanguage("components");
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
@@ -100,6 +103,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
+    const l = langData.PluginSettings.PluginModal;
+
     React.useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
@@ -141,7 +146,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     function renderSettings() {
         if (!hasSettings || !plugin.options) {
-            return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
+            return <Forms.FormText>{l.noPluginSettings}</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
                 if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
@@ -196,7 +201,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     function switchToPopout() {
         onClose();
 
-        const PopoutKey = `DISCORD_VENCORD_PLUGIN_SETTINGS_MODAL_${plugin.name}`;
+        const PopoutKey = `DISCORD_VENCORD_pluginSettings_MODAL_${plugin.name}`;
         PopoutActions.open(
             PopoutKey,
             () => <PluginModal
@@ -230,17 +235,17 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         {!pluginMeta.userPlugin && (
                             <div className="vc-settings-modal-links">
                                 <WebsiteButton
-                                    text="View more info"
+                                    text={l.viewMoreInfo}
                                     href={`https://vencord.dev/plugins/${plugin.name}`}
                                 />
                                 <GithubButton
-                                    text="View source code"
+                                    text={l.viewSourceCode}
                                     href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
                                 />
                             </div>
                         )}
                     </Flex>
-                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0 }}>Authors</Forms.FormTitle>
+                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0 }}>{l.authors}</Forms.FormTitle>
                     <div style={{ width: "fit-content", marginBottom: 8 }}>
                         <UserSummaryItem
                             users={authors}
@@ -270,14 +275,14 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 {!!plugin.settingsAboutComponent && (
                     <div className={classes(Margins.bottom8, "vc-text-selectable")}>
                         <Forms.FormSection>
-                            <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
+                            <ErrorBoundary message={l.errorInfoComponent}>
                                 <plugin.settingsAboutComponent tempSettings={tempSettings} />
                             </ErrorBoundary>
                         </Forms.FormSection>
                     </div>
                 )}
                 <Forms.FormSection className={Margins.bottom16}>
-                    <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
+                    <Forms.FormTitle tag="h3">{l.settings}</Forms.FormTitle>
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>
@@ -290,9 +295,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             color={Button.Colors.PRIMARY}
                             look={Button.Looks.LINK}
                         >
-                            Cancel
+                            {l.cancel}
                         </Button>
-                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                        <Tooltip text={l.fixErrors} shouldShow={!canSubmit()}>
                             {({ onMouseEnter, onMouseLeave }) => (
                                 <Button
                                     size={Button.Sizes.SMALL}
@@ -302,12 +307,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     onMouseLeave={onMouseLeave}
                                     disabled={!canSubmit()}
                                 >
-                                    Save & Close
+                                    {l.saveClose}
                                 </Button>
                             )}
                         </Tooltip>
                     </Flex>
-                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
+                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>{l.errorSaving} {saveError}</Text>}
                 </Flex>
             </ModalFooter>}
         </ModalRoot>

@@ -21,10 +21,14 @@ import "./themesStyles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
 import { Forms, Text } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
+
+const langData = getLanguage("components").VencordSettings.shared;
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
@@ -46,7 +50,9 @@ export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
 export function wrapTab(component: ComponentType<any>, tab: string) {
     return ErrorBoundary.wrap(component, {
-        message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
+        message: formatText(langData.failedRenderTab, { tab: tab }),
         onError: handleSettingsTabError,
     });
 }
+
+

@@ -16,10 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getLanguage } from "@languages/Language";
 import { Button } from "@webpack/common";
 import { ButtonProps } from "@webpack/types";
 
 import { Heart } from "./Heart";
+
+const langData = getLanguage("components");
 
 export default function DonateButton({
     look = Button.Looks.LINK,
@@ -35,7 +38,7 @@ export default function DonateButton({
             innerClassName="vc-donate-button"
         >
             <Heart />
-            Donate
+            {langData.DonateButton.donate}
         </Button>
     );
 }

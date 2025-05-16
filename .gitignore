@@ -23,3 +23,13 @@ src/userplugins
 
 ExtensionCache/
 settings/
+
+browser/
+packages/
+patches/
+src/debug/
+src/main/
+src/shared/
+src/utils/
+src/webpack/
+pnpm-lock.yaml

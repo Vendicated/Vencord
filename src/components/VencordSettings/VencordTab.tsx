@@ -22,6 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { getLanguage } from "@languages/Language";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -39,6 +40,8 @@ import { SpecialCard } from "./SpecialCard";
 
 const cl = classNameFactory("vc-settings-");
 
+const langData = getLanguage("components");
+
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
 
@@ -53,8 +56,9 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function VencordSettings() {
+    const l = langData.VencordSettings.VencordTab;
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
-        fallbackValue: "Loading..."
+        fallbackValue: l.loading
     });
     const settings = useSettings();
 
@@ -66,6 +70,8 @@ function VencordSettings() {
 
     const user = UserStore.getCurrentUser();
 
+    const switchesData = l.Switches;
+
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
         title: string;
@@ -74,48 +80,48 @@ function VencordSettings() {
         [
             {
                 key: "useQuickCss",
-                title: "Enable Custom CSS",
-                note: "Loads your Custom CSS"
+                title: switchesData.useQuickCssTitle,
+                note: switchesData.useQuickCssNote
             },
             !IS_WEB && {
                 key: "enableReactDevtools",
-                title: "Enable React Developer Tools",
-                note: "Requires a full restart"
+                title: switchesData.enableReactDevtoolsTitle,
+                note: switchesData.enableReactDevtoolsNote
             },
             !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
                 key: "frameless",
-                title: "Disable the window frame",
-                note: "Requires a full restart"
+                title: switchesData.framelessTitle,
+                note: switchesData.framelessNote
             } : {
                 key: "winNativeTitleBar",
-                title: "Use Windows' native title bar instead of Discord's custom one",
-                note: "Requires a full restart"
+                title: switchesData.winNativeTitleBarTitle,
+                note: switchesData.winNativeTitleBarNote
             }),
             !IS_WEB && {
                 key: "transparent",
-                title: "Enable window transparency.",
-                note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
+                title: switchesData.transparentTitle,
+                note: switchesData.transparentNote
             },
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",
-                title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
-                note: "Requires a full restart"
+                title: switchesData.winCtrlQTitle,
+                note: switchesData.winCtrlQNote
             },
             IS_DISCORD_DESKTOP && {
                 key: "disableMinSize",
-                title: "Disable minimum window size",
-                note: "Requires a full restart"
+                title: switchesData.disableMinSizeTitle,
+                note: switchesData.disableMinSizeNote
             },
         ];
 
     return (
-        <SettingsTab title="Vencord Settings">
+        <SettingsTab title={l.title}>
             {isDonor(user?.id)
                 ? (
                     <SpecialCard
-                        title="Donations"
-                        subtitle="Thank you for donating!"
-                        description="You can manage your perks at any time by messaging @vending.machine."
+                        title={l.isDonorTrue.title}
+                        subtitle={l.isDonorTrue.subtitle}
+                        description={l.isDonorTrue.description}
                         cardImage={VENNIE_DONATOR_IMAGE}
                         backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"
@@ -125,8 +131,8 @@ function VencordSettings() {
                 )
                 : (
                     <SpecialCard
-                        title="Support the Project"
-                        description="Please consider supporting the development of Vencord by donating!"
+                        title={l.isDonorFalse.title}
+                        description={l.isDonorFalse.description}
                         cardImage={donateImage}
                         backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#c3a3ce"
@@ -137,46 +143,46 @@ function VencordSettings() {
             }
             {isPluginDev(user?.id) && (
                 <SpecialCard
-                    title="Contributions"
-                    subtitle="Thank you for contributing!"
-                    description="Since you've contributed to Vencord you now have a cool new badge!"
+                    title={l.isPluginDev.title}
+                    subtitle={l.isPluginDev.subtitle}
+                    description={l.isPluginDev.description}
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
-                    buttonTitle="See what you've contributed to"
+                    buttonTitle={l.isPluginDev.buttonTitle}
                     buttonOnClick={() => openContributorModal(user)}
                 />
             )}
 
-            <Forms.FormSection title="Quick Actions">
+            <Forms.FormSection title={l.QuickActionCard.title}>
                 <QuickActionCard>
                     <QuickAction
                         Icon={LogIcon}
-                        text="Notification Log"
+                        text={l.QuickActionCard.notificationLog}
                         action={openNotificationLogModal}
                     />
                     <QuickAction
                         Icon={PaintbrushIcon}
-                        text="Edit QuickCSS"
+                        text={l.QuickActionCard.editQuickCSS}
                         action={() => VencordNative.quickCss.openEditor()}
                     />
                     {!IS_WEB && (
                         <QuickAction
                             Icon={RestartIcon}
-                            text="Relaunch Discord"
+                            text={l.QuickActionCard.relaunchDS}
                             action={relaunch}
                         />
                     )}
                     {!IS_WEB && (
                         <QuickAction
                             Icon={FolderIcon}
-                            text="Open Settings Folder"
+                            text={l.QuickActionCard.settingsFolder}
                             action={() => showItemInFolder(settingsDir)}
                         />
                     )}
                     <QuickAction
                         Icon={GithubIcon}
-                        text="View Source Code"
+                        text={l.QuickActionCard.sourceCode}
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
                 </QuickActionCard>
@@ -184,15 +190,15 @@ function VencordSettings() {
 
             <Forms.FormDivider />
 
-            <Forms.FormSection className={Margins.top16} title="Settings" tag="h5">
+            <Forms.FormSection className={Margins.top16} title={l.SettingsPosition.title} tag="h5">
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
-                    Hint: You can change the position of this settings section in the
+                    {l.SettingsPosition.description}
                     {" "}<Button
                         look={Button.Looks.BLANK}
                         style={{ color: "var(--text-link)", display: "inline-block" }}
                         onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}
                     >
-                        settings of the Settings plugin
+                        {l.SettingsPosition.link}
                     </Button>!
                 </Forms.FormText>
 
@@ -210,61 +216,61 @@ function VencordSettings() {
 
 
             {needsVibrancySettings && <>
-                <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
+                <Forms.FormTitle tag="h5">{l.VibrancyStyle.title}</Forms.FormTitle>
                 <Select
                     className={Margins.bottom20}
                     placeholder="Window vibrancy style"
                     options={[
                         // Sorted from most opaque to most transparent
                         {
-                            label: "No vibrancy", value: undefined
+                            label: l.VibrancyStyle.valueNull, value: undefined
                         },
                         {
-                            label: "Under Page (window tinting)",
+                            label: l.VibrancyStyle.underPage,
                             value: "under-page"
                         },
                         {
-                            label: "Content",
+                            label: l.VibrancyStyle.content,
                             value: "content"
                         },
                         {
-                            label: "Window",
+                            label: l.VibrancyStyle.window,
                             value: "window"
                         },
                         {
-                            label: "Selection",
+                            label: l.VibrancyStyle.selection,
                             value: "selection"
                         },
                         {
-                            label: "Titlebar",
+                            label: l.VibrancyStyle.titlebar,
                             value: "titlebar"
                         },
                         {
-                            label: "Header",
+                            label: l.VibrancyStyle.header,
                             value: "header"
                         },
                         {
-                            label: "Sidebar",
+                            label: l.VibrancyStyle.sidebar,
                             value: "sidebar"
                         },
                         {
-                            label: "Tooltip",
+                            label: l.VibrancyStyle.tooltip,
                             value: "tooltip"
                         },
                         {
-                            label: "Menu",
+                            label: l.VibrancyStyle.menu,
                             value: "menu"
                         },
                         {
-                            label: "Popover",
+                            label: l.VibrancyStyle.popover,
                             value: "popover"
                         },
                         {
-                            label: "Fullscreen UI (transparent but slightly muted)",
+                            label: l.VibrancyStyle.fullscreenUI,
                             value: "fullscreen-ui"
                         },
                         {
-                            label: "HUD (Most transparent)",
+                            label: l.VibrancyStyle.hud,
                             value: "hud"
                         },
                     ]}
@@ -273,13 +279,13 @@ function VencordSettings() {
                     serialize={identity} />
             </>}
 
-            <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
+            <Forms.FormSection className={Margins.top16} title={l.Notifications.title} tag="h5">
                 <Flex>
                     <Button onClick={openNotificationSettingsModal}>
-                        Notification Settings
+                        {l.Notifications.notificationSettings}
                     </Button>
                     <Button onClick={openNotificationLogModal}>
-                        View Notification Log
+                        {l.Notifications.notificationSettings}
                     </Button>
                 </Flex>
             </Forms.FormSection>
@@ -302,4 +308,4 @@ function isDonor(userId: string): boolean {
     return GuildMemberStore.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
 }
 
-export default wrapTab(VencordSettings, "Vencord Settings");
+export default wrapTab(VencordSettings, langData.VencordSettings.VencordTab.title);

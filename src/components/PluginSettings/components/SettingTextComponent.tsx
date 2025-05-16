@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getLanguage } from "@languages/Language";
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionString } from "@utils/types";
 import { Forms, React, TextInput } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
+
+const langData = getLanguage("components");
 
 export function SettingTextComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {
     const [state, setState] = React.useState(pluginSettings[id] ?? option.default ?? null);
@@ -34,7 +37,7 @@ export function SettingTextComponent({ option, pluginSettings, definedSettings, 
     function handleChange(newValue) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
+        else if (!isValid) setError(langData.PluginSettings.components.providedInput);
         else setError(null);
 
         setState(newValue);
@@ -49,7 +52,7 @@ export function SettingTextComponent({ option, pluginSettings, definedSettings, 
                 type="text"
                 value={state}
                 onChange={handleChange}
-                placeholder={option.placeholder ?? "Enter a value"}
+                placeholder={option.placeholder ?? langData.PluginSettings.components.SettingTextComponent.enterValue}
                 disabled={option.disabled?.call(definedSettings) ?? false}
                 maxLength={null}
                 {...option.componentProps}

@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getLanguage } from "@languages/Language";
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionNumber } from "@utils/types";
 import { Forms, React, TextInput } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
+
+const langData = getLanguage("components");
 
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
@@ -43,7 +46,7 @@ export function SettingNumericComponent({ option, pluginSettings, definedSetting
 
         setError(null);
         if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
+        else if (!isValid) setError(langData.PluginSettings.components.providedInput);
 
         if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
             setState(`${Number.MAX_SAFE_INTEGER}`);
@@ -63,7 +66,7 @@ export function SettingNumericComponent({ option, pluginSettings, definedSetting
                 pattern="-?[0-9]+"
                 value={state}
                 onChange={handleChange}
-                placeholder={option.placeholder ?? "Enter a number"}
+                placeholder={option.placeholder ?? langData.PluginSettings.components.SettingNumericComponent.enterNumber}
                 disabled={option.disabled?.call(definedSettings) ?? false}
                 {...option.componentProps}
             />

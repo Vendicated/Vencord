@@ -22,6 +22,8 @@ import { Flex } from "@components/Flex";
 import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import type { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -37,6 +39,8 @@ import { AddonCard } from "./AddonCard";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
+const langData = getLanguage("components");
+
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
     onChange: (e: SyntheticEvent<HTMLInputElement>) => void;
@@ -49,6 +53,7 @@ const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue &
 const cl = classNameFactory("vc-settings-theme-");
 
 function Validator({ link }: { link: string; }) {
+    const l = langData.VencordSettings.ThemesTab.Validator;
     const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
         if (res.status > 300) throw `${res.status} ${res.statusText}`;
         const contentType = res.headers.get("Content-Type");
@@ -59,10 +64,10 @@ function Validator({ link }: { link: string; }) {
     }));
 
     const text = pending
-        ? "Checking..."
+        ? l.checking
         : err
-            ? `Error: ${err instanceof Error ? err.message : String(err)}`
-            : "Valid!";
+            ? formatText(l.error, { errorMessage: err instanceof Error ? err.message : String(err) })
+            : l.valid;
 
     return <Forms.FormText style={{
         color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--text-positive)"
@@ -70,12 +75,13 @@ function Validator({ link }: { link: string; }) {
 }
 
 function Validators({ themeLinks }: { themeLinks: string[]; }) {
+    const l = langData.VencordSettings.ThemesTab.Validators;
     if (!themeLinks.length) return null;
 
     return (
         <>
-            <Forms.FormTitle className={Margins.top20} tag="h5">Validator</Forms.FormTitle>
-            <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
+            <Forms.FormTitle className={Margins.top20} tag="h5">{l.validator}</Forms.FormTitle>
+            <Forms.FormText>{l.themesSuccessLoad}</Forms.FormText>
             <div>
                 {themeLinks.map(rawLink => {
                     const { label, link } = (() => {
@@ -83,7 +89,7 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
                         if (!match) return { label: rawLink, link: rawLink };
 
                         const [, mode, link] = match;
-                        return { label: `[${mode} mode only] ${link}`, link };
+                        return { label: formatText(l.modeOnly, { mode: mode, link: link }), link };
                     })();
 
                     return <Card style={{
@@ -112,6 +118,7 @@ interface ThemeCardProps {
 }
 
 function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
+    const l = langData.VencordSettings.ThemesTab.ThemeCard;
     return (
         <AddonCard
             name={theme.name}
@@ -128,20 +135,21 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
             }
             footer={
                 <Flex flexDirection="row" style={{ gap: "0.2em" }}>
-                    {!!theme.website && <Link href={theme.website}>Website</Link>}
+                    {!!theme.website && <Link href={theme.website}>{l.website}</Link>}
                     {!!(theme.website && theme.invite) && " • "}
                     {!!theme.invite && (
                         <Link
                             href={`https://discord.gg/${theme.invite}`}
                             onClick={async e => {
                                 e.preventDefault();
-                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast("Invalid or expired invite"));
-                            }}
+                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast(l.invalidInvite));
+                            }
+                            }
                         >
-                            Discord Server
-                        </Link>
+                            {l.dsServer}
+                        </Link >
                     )}
-                </Flex>
+                </Flex >
             }
         />
     );
@@ -206,20 +214,21 @@ function ThemesTab() {
     }
 
     function renderLocalThemes() {
+        const l = langData.VencordSettings.ThemesTab.renderLocalThemes;
         return (
             <>
                 <Card className="vc-settings-card">
-                    <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">{l.fingThemes}</Forms.FormTitle>
                     <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
                         <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
-                            BetterDiscord Themes
+                            {l.BDThemes}
                         </Link>
-                        <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
+                        <Link href="https://github.com/search?q=discord+theme">{l.github}</Link>
                     </div>
-                    <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
+                    <Forms.FormText>{l.BDInfo}</Forms.FormText>
                 </Card>
 
-                <Forms.FormSection title="Local Themes">
+                <Forms.FormSection title={l.localThemes}>
                     <QuickActionCard>
                         <>
                             {IS_WEB ?
@@ -227,7 +236,7 @@ function ThemesTab() {
                                     <QuickAction
                                         text={
                                             <span style={{ position: "relative" }}>
-                                                Upload Theme
+                                                {l.uploadThemes}
                                                 <FileInput
                                                     ref={fileInputRef}
                                                     onChange={onFileUpload}
@@ -240,26 +249,26 @@ function ThemesTab() {
                                     />
                                 ) : (
                                     <QuickAction
-                                        text="Open Themes Folder"
+                                        text={l.themesFolder}
                                         action={() => showItemInFolder(themeDir!)}
                                         disabled={themeDirPending}
                                         Icon={FolderIcon}
                                     />
                                 )}
                             <QuickAction
-                                text="Load missing Themes"
+                                text={l.loadThemes}
                                 action={refreshLocalThemes}
                                 Icon={RestartIcon}
                             />
                             <QuickAction
-                                text="Edit QuickCSS"
+                                text={l.editQuickCSS}
                                 action={() => VencordNative.quickCss.openEditor()}
                                 Icon={PaintbrushIcon}
                             />
 
                             {Settings.plugins.ClientTheme.enabled && (
                                 <QuickAction
-                                    text="Edit ClientTheme"
+                                    text={l.editClientTheme}
                                     action={() => openPluginModal(Plugins.ClientTheme)}
                                     Icon={PencilIcon}
                                 />
@@ -299,21 +308,22 @@ function ThemesTab() {
     }
 
     function renderOnlineThemes() {
+        const l = langData.VencordSettings.ThemesTab.renderOnlineThemes;
         return (
             <>
                 <Card className="vc-settings-card vc-text-selectable">
-                    <Forms.FormTitle tag="h5">Paste links to css files here</Forms.FormTitle>
-                    <Forms.FormText>One link per line</Forms.FormText>
-                    <Forms.FormText>You can prefix lines with @light or @dark to toggle them based on your Discord theme</Forms.FormText>
-                    <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
+                    <Forms.FormTitle tag="h5">{l.cssLink}</Forms.FormTitle>
+                    <Forms.FormText>{l.oneLink}</Forms.FormText>
+                    <Forms.FormText>{l.linesPrefix}</Forms.FormText>
+                    <Forms.FormText>{l.directLinks}</Forms.FormText>
                 </Card>
 
-                <Forms.FormSection title="Online Themes" tag="h5">
+                <Forms.FormSection title={l.onlineThemes} tag="h5">
                     <TextArea
                         value={themeText}
                         onChange={setThemeText}
                         className={"vc-settings-theme-links"}
-                        placeholder="Theme Links"
+                        placeholder={l.themesLinks}
                         spellCheck={false}
                         onBlur={onBlur}
                         rows={10}
@@ -323,9 +333,9 @@ function ThemesTab() {
             </>
         );
     }
-
+    const l = langData.VencordSettings.ThemesTab.renderOnlineThemes;
     return (
-        <SettingsTab title="Themes">
+        <SettingsTab title={l.themes}>
             <TabBar
                 type="top"
                 look="brand"
@@ -337,13 +347,13 @@ function ThemesTab() {
                     className="vc-settings-tab-bar-item"
                     id={ThemeTab.LOCAL}
                 >
-                    Local Themes
+                    {l.localThemes}
                 </TabBar.Item>
                 <TabBar.Item
                     className="vc-settings-tab-bar-item"
                     id={ThemeTab.ONLINE}
                 >
-                    Online Themes
+                    {l.onlineThemes}
                 </TabBar.Item>
             </TabBar>
 

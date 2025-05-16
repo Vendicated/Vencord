@@ -10,6 +10,8 @@ import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
+import { getLanguage } from "@languages/Language";
+import { formatWithReactComponent } from "@languages/LanguageUtils";
 import { DevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
@@ -21,6 +23,8 @@ import Plugins from "~plugins";
 
 import { PluginCard } from ".";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
+
+const langData = getLanguage("components");
 
 const cl = classNameFactory("vc-author-modal-");
 
@@ -60,8 +64,8 @@ function ContributorModal({ user }: { user: User; }) {
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
-    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
-
+    const ContributedHyperLink = <Link href="https://vencord.dev/source">{langData.PluginSettings.ContributorModal.contributed}</Link>;
+    const l = langData.PluginSettings.ContributorModal;
     return (
         <>
             <div className={cl("header")}>
@@ -90,11 +94,11 @@ function ContributorModal({ user }: { user: User; }) {
 
             {plugins.length ? (
                 <Forms.FormText>
-                    This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
+                    {formatWithReactComponent(l.pluginContributed, { hyperLink: ContributedHyperLink, pluginsCount: pluralise(plugins.length, l.plugin) })}
                 </Forms.FormText>
             ) : (
                 <Forms.FormText>
-                    This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
+                    {formatWithReactComponent(l.otherContributed, { hyperLink: ContributedHyperLink })}
                 </Forms.FormText>
             )}
 
@@ -105,7 +109,7 @@ function ContributorModal({ user }: { user: User; }) {
                             key={p.name}
                             plugin={p}
                             disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast("Restart to apply changes!")}
+                            onRestartNeeded={() => showToast(langData.PluginSettings.ContributorModal.restart)}
                         />
                     )}
                 </div>

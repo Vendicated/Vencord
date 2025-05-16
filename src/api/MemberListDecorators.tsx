@@ -17,8 +17,12 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import { Channel, User } from "discord-types/general/index.js";
 import { JSX } from "react";
+
+const langData = getLanguage("api");
 
 interface DecoratorProps {
     type: "guild" | "dm";
@@ -50,7 +54,7 @@ export function __getDecorators(props: DecoratorProps, type: "guild" | "dm"): JS
                 return null;
 
             return (
-                <ErrorBoundary noop key={key} message={`Failed to render ${key} Member List Decorator`}>
+                <ErrorBoundary noop key={key} message={formatText(langData.MemberListDecorators.failedRender, { key: key })}>
                     <Decorator {...props} type={type} />
                 </ErrorBoundary>
             );

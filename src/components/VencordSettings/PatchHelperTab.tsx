@@ -17,6 +17,7 @@
 */
 
 import { CodeBlock } from "@components/CodeBlock";
+import { getLanguage } from "@languages/Language";
 import { debounce } from "@shared/debounce";
 import { copyToClipboard } from "@utils/clipboard";
 import { Margins } from "@utils/margins";
@@ -28,6 +29,8 @@ import { Button, Forms, Parser, React, Switch, TextArea, TextInput } from "@webp
 
 import { SettingsTab, wrapTab } from "./shared";
 
+const langData = getLanguage("components");
+
 // Do not include diff in non dev builds (side effects import)
 if (IS_DEV) {
     var differ = require("diff") as typeof import("diff");
@@ -38,9 +41,9 @@ const findCandidates = debounce(function ({ find, setModule, setError }) {
     const keys = Object.keys(candidates);
     const len = keys.length;
     if (len === 0)
-        setError("No match. Perhaps that module is lazy loaded?");
+        setError(langData.VencordSettings.PatchHelperTab.noMatch);
     else if (len !== 1)
-        setError("Multiple matches. Please refine your filter");
+        setError(langData.VencordSettings.PatchHelperTab.multipleMatches);
     else
         setModule([keys[0], candidates[keys[0]]]);
 });
@@ -55,6 +58,7 @@ interface ReplacementComponentProps {
 function ReplacementComponent({ module, match, replacement, setReplacementError }: ReplacementComponentProps) {
     const [id, fact] = module;
     const [compileResult, setCompileResult] = React.useState<[boolean, string]>();
+    const l = langData.VencordSettings.PatchHelperTab.ReplacementComponent;
 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
@@ -96,7 +100,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
     function renderMatch() {
         if (!matchResult)
-            return <Forms.FormText>Regex doesn't match!</Forms.FormText>;
+            return <Forms.FormText>{l.noMatch}</Forms.FormText>;
 
         const fullMatch = matchResult[0] ? makeCodeblock(matchResult[0], "js") : "";
         const groups = matchResult.length > 1
@@ -120,18 +124,18 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 
     return (
         <>
-            <Forms.FormTitle>Module {id}</Forms.FormTitle>
+            <Forms.FormTitle>{l.module} {id}</Forms.FormTitle>
 
             {!!matchResult?.[0]?.length && (
                 <>
-                    <Forms.FormTitle>Match</Forms.FormTitle>
+                    <Forms.FormTitle>{l.match}</Forms.FormTitle>
                     {renderMatch()}
                 </>)
             }
 
             {!!diff?.length && (
                 <>
-                    <Forms.FormTitle>Diff</Forms.FormTitle>
+                    <Forms.FormTitle>{l.diff}</Forms.FormTitle>
                     {renderDiff()}
                 </>
             )}
@@ -140,11 +144,11 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
                 <Button className={Margins.top20} onClick={() => {
                     try {
                         Function(patchedCode.replace(/^function\(/, "function patchedModule("));
-                        setCompileResult([true, "Compiled successfully"]);
+                        setCompileResult([true, l.compiledSuccess]);
                     } catch (err) {
                         setCompileResult([false, (err as Error).message]);
                     }
-                }}>Compile</Button>
+                }}>{l.compile}</Button>
             )}
 
             {compileResult &&
@@ -159,6 +163,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
 function ReplacementInput({ replacement, setReplacement, replacementError }) {
     const [isFunc, setIsFunc] = React.useState(false);
     const [error, setError] = React.useState<string>();
+    const l = langData.VencordSettings.PatchHelperTab.ReplacementInput;
 
     function onChange(v: string) {
         setError(void 0);
@@ -169,7 +174,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 if (typeof func === "function")
                     setReplacement(() => func);
                 else
-                    setError("Replacement must be a function");
+                    setError(l.replacementFunc);
             } catch (e) {
                 setReplacement(v);
                 setError((e as Error).message);
@@ -187,7 +192,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
     return (
         <>
             {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
-            <Forms.FormTitle className="">replacement</Forms.FormTitle>
+            <Forms.FormTitle className="">{l.replacement}</Forms.FormTitle>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
@@ -197,13 +202,13 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 <div className="vc-text-selectable">
                     <Forms.FormTitle className={Margins.top8}>Cheat Sheet</Forms.FormTitle>
                     {Object.entries({
-                        "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
-                        "$$": "Insert a $",
-                        "$&": "Insert the entire match",
-                        "$`\u200b": "Insert the substring before the match",
-                        "$'": "Insert the substring after the match",
-                        "$n": "Insert the nth capturing group ($1, $2...)",
-                        "$self": "Insert the plugin instance",
+                        "\\i": l.regexId,
+                        "$$": l.dollar,
+                        "$&": l.entireMatch,
+                        "$`\u200b": l.substringBeforeMatch,
+                        "$'": l.substringAfterMatch,
+                        "$n": l.capturingGroup,
+                        "$self": l.pluginInstance,
                     }).map(([placeholder, desc]) => (
                         <Forms.FormText key={placeholder}>
                             {Parser.parse("`" + placeholder + "`")}: {desc}
@@ -216,10 +221,10 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 className={Margins.top8}
                 value={isFunc}
                 onChange={setIsFunc}
-                note="'replacement' will be evaled if this is toggled"
+                note={l.evaledReplacement}
                 hideBorder={true}
             >
-                Treat as Function
+                {l.treatFunc}
             </Switch>
         </>
     );
@@ -276,7 +281,7 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
     }
 
     return <>
-        <Forms.FormText className={Margins.bottom8}>Paste your full JSON patch here to fill out the fields</Forms.FormText>
+        <Forms.FormText className={Margins.bottom8}>{langData.VencordSettings.PatchHelperTab.pasteJson}</Forms.FormText>
         <TextArea value={fullPatch} onChange={setFullPatch} onBlur={update} />
         {fullPatchError !== "" && <Forms.FormText style={{ color: "var(--text-danger)" }}>{fullPatchError}</Forms.FormText>}
     </>;
@@ -293,6 +298,7 @@ function PatchHelper() {
     const [module, setModule] = React.useState<[number, Function]>();
     const [findError, setFindError] = React.useState<string>();
     const [matchError, setMatchError] = React.useState<string>();
+    const l = langData.VencordSettings.PatchHelperTab.PatchHelper;
 
     const code = React.useMemo(() => {
         return `
@@ -336,8 +342,8 @@ function PatchHelper() {
     }
 
     return (
-        <SettingsTab title="Patch Helper">
-            <Forms.FormTitle>full patch</Forms.FormTitle>
+        <SettingsTab title={l.title}>
+            <Forms.FormTitle>{l.fullPatch}</Forms.FormTitle>
             <FullPatchInput
                 setFind={onFindChange}
                 setParsedFind={setParsedFind}
@@ -345,7 +351,7 @@ function PatchHelper() {
                 setReplacement={setReplacement}
             />
 
-            <Forms.FormTitle className={Margins.top8}>find</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top8}>{l.find}</Forms.FormTitle>
             <TextInput
                 type="text"
                 value={find}
@@ -353,7 +359,7 @@ function PatchHelper() {
                 error={findError}
             />
 
-            <Forms.FormTitle className={Margins.top8}>match</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top8}>{l.match}</Forms.FormTitle>
             <TextInput
                 type="text"
                 value={match}
@@ -380,14 +386,14 @@ function PatchHelper() {
 
             {!!(find && match && replacement) && (
                 <>
-                    <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
+                    <Forms.FormTitle className={Margins.top20}>{l.code}</Forms.FormTitle>
                     <CodeBlock lang="js" content={code} />
-                    <Button onClick={() => copyToClipboard(code)}>Copy to Clipboard</Button>
-                    <Button className={Margins.top8} onClick={() => copyToClipboard("```ts\n" + code + "\n```")}>Copy as Codeblock</Button>
+                    <Button onClick={() => copyToClipboard(code)}>{l.copyToClipboard}</Button>
+                    <Button className={Margins.top8} onClick={() => copyToClipboard("```ts\n" + code + "\n```")}>{l.copyAsCodeblock}</Button>
                 </>
             )}
         </SettingsTab>
     );
 }
 
-export default IS_DEV ? wrapTab(PatchHelper, "PatchHelper") : null;
+export default IS_DEV ? wrapTab(PatchHelper, langData.VencordSettings.PatchHelperTab.wrapTab) : null;

@@ -17,7 +17,10 @@
 */
 
 import PluginSettings from "@components/PluginSettings";
+import { getLanguage } from "@languages/Language";
 
 import { wrapTab } from "./shared";
 
-export default wrapTab(PluginSettings, "Plugins");
+const langData = getLanguage("components");
+
+export default wrapTab(PluginSettings, langData.VencordSettings.PluginsTab.wrapTab);

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { LanguageType } from "@languages/Language";
 import { debounce } from "@shared/debounce";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { localStorage } from "@utils/localStorage";
@@ -35,6 +36,7 @@ export interface Settings {
     eagerPatches: boolean;
     enabledThemes: string[];
     enableReactDevtools: boolean;
+    language: LanguageType;
     themeLinks: string[];
     frameless: boolean;
     transparent: boolean;
@@ -85,6 +87,7 @@ const DefaultSettings: Settings = {
     eagerPatches: IS_REPORTER,
     enabledThemes: [],
     enableReactDevtools: false,
+    language: "en",
     frameless: false,
     transparent: false,
     winCtrlQ: false,
@@ -112,6 +115,7 @@ const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
 const saveSettingsOnFrequentAction = debounce(async () => {
+    logger.log(Settings.language);
     if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
         await putCloudSettings();
         delete localStorage.Vencord_settingsDirty;

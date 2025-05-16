@@ -17,8 +17,12 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import { Channel, Message } from "discord-types/general/index.js";
 import { JSX } from "react";
+
+const langData = getLanguage("api");
 
 export interface MessageDecorationProps {
     author: {
@@ -62,7 +66,7 @@ export function __addDecorationsToMessage(props: MessageDecorationProps): JSX.El
     const decorations = Array.from(
         decorationsFactories.entries(),
         ([key, Decoration]) => (
-            <ErrorBoundary noop message={`Failed to render ${key} Message Decoration`} key={key}>
+            <ErrorBoundary noop message={formatText(langData.MessageDecorations.failedRender, { key: key })} key={key}>
                 <Decoration {...props} />
             </ErrorBoundary>
         )

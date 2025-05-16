@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getLanguage } from "@languages/Language";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionBoolean } from "@utils/types";
 import { Forms, React, Switch } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
+
+const langData = getLanguage("components");
 
 export function SettingBooleanComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;
@@ -35,7 +38,7 @@ export function SettingBooleanComponent({ option, pluginSettings, definedSetting
     function handleChange(newValue: boolean): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
+        else if (!isValid) setError(langData.PluginSettings.components.providedInput);
         else {
             setError(null);
             setState(newValue);

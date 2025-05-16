@@ -17,7 +17,11 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import { JSX, ReactNode } from "react";
+
+const langData = getLanguage("api");
 
 export type MessageAccessoryFactory = (props: Record<string, any>) => ReactNode;
 export type MessageAccessory = {
@@ -48,7 +52,7 @@ export function _modifyAccessories(
 ) {
     for (const [key, accessory] of accessories.entries()) {
         const res = (
-            <ErrorBoundary message={`Failed to render ${key} Message Accessory`} key={key}>
+            <ErrorBoundary message={formatText(langData.MessageAccessories.failedRender, { key: key })} key={key}>
                 <accessory.render {...props} />
             </ErrorBoundary>
         );

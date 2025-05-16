@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getLanguage } from "@languages/Language";
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionSelect } from "@utils/types";
 import { Forms, React, Select } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
+
+const langData = getLanguage("components");
 
 export function SettingSelectComponent({ option, pluginSettings, definedSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
     const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
@@ -36,7 +39,7 @@ export function SettingSelectComponent({ option, pluginSettings, definedSettings
     function handleChange(newValue) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
+        else if (!isValid) setError(langData.PluginSettings.components.providedInput);
         else {
             setError(null);
             setState(newValue);
@@ -51,7 +54,7 @@ export function SettingSelectComponent({ option, pluginSettings, definedSettings
             <Select
                 isDisabled={option.disabled?.call(definedSettings) ?? false}
                 options={option.options}
-                placeholder={option.placeholder ?? "Select an option"}
+                placeholder={option.placeholder ?? langData.PluginSettings.components.SettingSelectComponent.selectOption}
                 maxVisibleItems={5}
                 closeOnSelect={true}
                 select={handleChange}

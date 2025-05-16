@@ -26,6 +26,8 @@ import { CogWheel, InfoIcon } from "@components/Icons";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import { ChangeList } from "@utils/ChangeList";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
@@ -48,6 +50,7 @@ const logger = new Logger("PluginSettings", "#a6d189");
 const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
+const langData = getLanguage("components");
 
 function showErrorToast(message: string) {
     Toasts.show({
@@ -61,23 +64,24 @@ function showErrorToast(message: string) {
 }
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
+    const l = langData.PluginSettings.index.ReloadRequiredCard;
     return (
         <Card className={cl("info-card", { "restart-card": required })}>
             {required ? (
                 <>
-                    <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">{l.required}</Forms.FormTitle>
                     <Forms.FormText className={cl("dep-text")}>
-                        Restart now to apply new plugins and their settings
+                        {l.info}
                     </Forms.FormText>
                     <Button onClick={() => location.reload()} className={cl("restart-button")}>
-                        Restart
+                        {l.restartButton}
                     </Button>
                 </>
             ) : (
                 <>
-                    <Forms.FormTitle tag="h5">Plugin Management</Forms.FormTitle>
-                    <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
-                    <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
+                    <Forms.FormTitle tag="h5">{l.management}</Forms.FormTitle>
+                    <Forms.FormText>{l.pluginInfo}</Forms.FormText>
+                    <Forms.FormText>{l.settings}</Forms.FormText>
                 </>
             )}
         </Card>
@@ -93,6 +97,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
+    const l = langData.PluginSettings.index.PluginCard;
 
     const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
 
@@ -104,7 +109,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             const { restartNeeded, failures } = startDependenciesRecursive(plugin);
             if (failures.length) {
                 logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
-                showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
+                showNotice(formatText(l.failedStart, { failures: failures.join(", ") }), l.close, () => null);
                 return;
             } else if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
@@ -132,7 +137,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         if (!result) {
             settings.enabled = false;
 
-            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
+            const msg = formatText(l.pluginError, { wasEnabled: wasEnabled ? l.stopping : l.starting, pluginName: plugin.name });
             logger.error(msg);
             showErrorToast(msg);
             return;
@@ -176,29 +181,30 @@ const enum SearchStatus {
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
+    const l = langData.PluginSettings.index.ExcludedPluginsList;
 
     const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
-        desktop: "Discord Desktop app or Vesktop",
-        discordDesktop: "Discord Desktop app",
-        vesktop: "Vesktop app",
-        web: "Vesktop app and the Web version of Discord",
-        dev: "Developer version of Vencord"
+        desktop: l.desktop,
+        discordDesktop: l.discordDesktop,
+        vesktop: l.vesktop,
+        web: l.web,
+        dev: l.dev
     };
 
     return (
         <Text variant="text-md/normal" className={Margins.top16}>
             {matchingExcludedPlugins.length
                 ? <>
-                    <Forms.FormText>Are you looking for:</Forms.FormText>
+                    <Forms.FormText>{l.areYouLooking}</Forms.FormText>
                     <ul>
                         {matchingExcludedPlugins.map(([name, reason]) => (
                             <li key={name}>
-                                <b>{name}</b>: Only available on the {ExcludedReasons[reason]}
+                                <b>{name}</b>: {formatText(l.onlyAvailable, { reason: ExcludedReasons[reason] })}
                             </li>
                         ))}
                     </ul>
                 </>
-                : "No plugins meet the search criteria."
+                : l.noPluginsFound
             }
         </Text>
     );
@@ -207,13 +213,14 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 export default function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
+    const l = langData.PluginSettings.index.PluginSettings;
 
     React.useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
+            title: l.required,
             body: (
                 <>
-                    <p>The following plugins require a restart:</p>
+                    <p>{l.vencordRequired}</p>
                     <div>{changes.map((s, i) => (
                         <>
                             {i > 0 && ", "}
@@ -222,8 +229,8 @@ export default function PluginSettings() {
                     ))}</div>
                 </>
             ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
+            confirmText: l.restartNow,
+            cancelText: l.later,
             onConfirm: () => location.reload()
         }));
     }, []);
@@ -297,7 +304,7 @@ export default function PluginSettings() {
 
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for Vencord to function."
+                ? l.vencordRequired
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(
@@ -326,24 +333,25 @@ export default function PluginSettings() {
             );
         }
     }
+    const setTab = langData.PluginSettings.index.SettingsTab;
 
     return (
-        <SettingsTab title="Plugins">
+        <SettingsTab title={setTab.title}>
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
-                Filters
+                {setTab.filters}
             </Forms.FormTitle>
 
             <div className={classes(Margins.bottom20, cl("filter-controls"))}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
+                <TextInput autoFocus value={searchValue.value} placeholder={setTab.searchPlugin} onChange={onSearch} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         options={[
-                            { label: "Show All", value: SearchStatus.ALL, default: true },
-                            { label: "Show Enabled", value: SearchStatus.ENABLED },
-                            { label: "Show Disabled", value: SearchStatus.DISABLED },
-                            { label: "Show New", value: SearchStatus.NEW }
+                            { label: setTab.showAll, value: SearchStatus.ALL, default: true },
+                            { label: setTab.showEnabled, value: SearchStatus.ENABLED },
+                            { label: setTab.showDisabled, value: SearchStatus.DISABLED },
+                            { label: setTab.showNew, value: SearchStatus.NEW }
                         ]}
                         serialize={String}
                         select={onStatusChange}
@@ -354,14 +362,14 @@ export default function PluginSettings() {
                 </div>
             </div>
 
-            <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>{setTab.title}</Forms.FormTitle>
 
             {plugins.length || requiredPlugins.length
                 ? (
                     <div className={cl("grid")}>
                         {plugins.length
                             ? plugins
-                            : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
+                            : <Text variant="text-md/normal">{setTab.noPluginsFound}</Text>
                         }
                     </div>
                 )
@@ -372,12 +380,12 @@ export default function PluginSettings() {
             <Forms.FormDivider className={Margins.top20} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
-                Required Plugins
+                {setTab.required}
             </Forms.FormTitle>
             <div className={cl("grid")}>
                 {requiredPlugins.length
                     ? requiredPlugins
-                    : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
+                    : <Text variant="text-md/normal">{setTab.noPluginsFound}</Text>
                 }
             </div>
         </SettingsTab >
@@ -387,7 +395,7 @@ export default function PluginSettings() {
 function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
-            <Forms.FormText>This plugin is required by:</Forms.FormText>
+            <Forms.FormText>{langData.PluginSettings.index.pluginRequired}</Forms.FormText>
             {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );

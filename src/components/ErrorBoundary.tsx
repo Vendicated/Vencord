@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LazyComponent, LazyComponentWrapper } from "@utils/lazyReact";
+import { getLanguage } from "@languages/Language";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import type { React } from "@webpack/common";
+import { LazyComponent, LazyComponentWrapper } from "@utils/react";
+import { React } from "@webpack/common";
 
 import { ErrorCard } from "./ErrorCard";
+
+const langData = getLanguage("components");
 
 interface Props<T = any> {
     /** Render nothing if an error occurs */
@@ -46,9 +49,7 @@ const NO_ERROR = {};
 // We might want to import this in a place where React isn't ready yet.
 // Thus, wrap in a LazyComponent
 const ErrorBoundary = LazyComponent(() => {
-    // This component is used in a lot of files which end up importing other Webpack commons and causing circular imports.
-    // For this reason, use a non import access here.
-    return class ErrorBoundary extends Vencord.Webpack.Common.React.PureComponent<React.PropsWithChildren<Props>> {
+    return class ErrorBoundary extends React.PureComponent<React.PropsWithChildren<Props>> {
         state = {
             error: NO_ERROR as any,
             stack: "",
@@ -90,11 +91,11 @@ const ErrorBoundary = LazyComponent(() => {
                     </this.props.fallback>
                 );
 
-            const msg = this.props.message || "An error occurred while rendering this Component. More info can be found below and in your console.";
+            const msg = this.props.message || langData.ErrorBoundary.msg;
 
             return (
                 <ErrorCard style={{ overflow: "hidden" }}>
-                    <h1>Oh no!</h1>
+                    <h1>{langData.ErrorBoundary.ohNo}</h1>
                     <p>{msg}</p>
                     <code>
                         {this.state.message}

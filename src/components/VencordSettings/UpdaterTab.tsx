@@ -20,6 +20,8 @@ import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { getLanguage } from "@languages/Language";
+import { formatText } from "@languages/LanguageUtils";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -32,7 +34,10 @@ import gitHash from "~git-hash";
 
 import { handleSettingsTabError, SettingsTab, wrapTab } from "./shared";
 
+const langData = getLanguage("components");
+
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
+    const l = langData.VencordSettings.UpdaterTab.withDispatcher;
     return async () => {
         dispatcher(true);
         try {
@@ -42,23 +47,23 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
 
             let err: string;
             if (!e) {
-                err = "An unknown error occurred (error is undefined).\nPlease try again.";
+                err = l.undefinedError;
             } else if (e.code && e.cmd) {
                 const { code, path, cmd, stderr } = e;
 
                 if (code === "ENOENT")
-                    err = `Command \`${path}\` not found.\nPlease install it and try again`;
+                    err = formatText(l.commandNotFound, { path: path });
                 else {
-                    err = `An error occurred while running \`${cmd}\`:\n`;
-                    err += stderr || `Code \`${code}\`. See the console for more info`;
+                    err = formatText(l.errorWhileRun, { cmd: cmd });
+                    err += stderr || formatText(l.code, { code: code });
                 }
 
             } else {
-                err = "An unknown error occurred. See the console for more info.";
+                err = l.unknownError;
             }
 
             Alerts.show({
-                title: "Oops!",
+                title: l.oops,
                 body: (
                     <ErrorCard>
                         {err.split("\n").map((line, idx) => <div key={idx}>{Parser.parse(line)}</div>)}
@@ -108,19 +113,20 @@ function Updatable(props: CommonProps) {
     const [isUpdating, setIsUpdating] = React.useState(false);
 
     const isOutdated = (updates?.length ?? 0) > 0;
+    const l = langData.VencordSettings.UpdaterTab.Updatable;
 
     return (
         <>
             {!updates && updateError ? (
                 <>
-                    <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
+                    <Forms.FormText>{l.failedCheck}</Forms.FormText>
                     <ErrorCard style={{ padding: "1em" }}>
-                        <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
+                        <p>{updateError.stderr || updateError.stdout || l.unknownError}</p>
                     </ErrorCard>
                 </>
             ) : (
                 <Forms.FormText className={Margins.bottom8}>
-                    {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
+                    {isOutdated ? (updates.length === 1 ? l.oneUpdate : formatText(l.moreUpdates, { updatesLength: updates.length })) : l.upToDate}
                 </Forms.FormText>
             )}
 
@@ -135,10 +141,10 @@ function Updatable(props: CommonProps) {
                             setUpdates([]);
                             await new Promise<void>(r => {
                                 Alerts.show({
-                                    title: "Update Success!",
-                                    body: "Successfully updated. Restart now to apply the changes?",
-                                    confirmText: "Restart",
-                                    cancelText: "Not now!",
+                                    title: l.updateSuccess,
+                                    body: l.restartToApplyTheChanges,
+                                    confirmText: l.restart,
+                                    cancelText: l.notNow,
                                     onConfirm() {
                                         relaunch();
                                         r();
@@ -149,7 +155,7 @@ function Updatable(props: CommonProps) {
                         }
                     })}
                 >
-                    Update Now
+                    {l.updateNow}
                 </Button>}
                 <Button
                     size={Button.Sizes.SMALL}
@@ -161,7 +167,7 @@ function Updatable(props: CommonProps) {
                         } else {
                             setUpdates([]);
                             Toasts.show({
-                                message: "No updates found!",
+                                message: l.noUpdates,
                                 id: Toasts.genId(),
                                 type: Toasts.Type.MESSAGE,
                                 options: {
@@ -171,7 +177,7 @@ function Updatable(props: CommonProps) {
                         }
                     })}
                 >
-                    Check for Updates
+                    {l.checkUpdates}
                 </Button>
             </Flex>
         </>
@@ -182,7 +188,7 @@ function Newer(props: CommonProps) {
     return (
         <>
             <Forms.FormText className={Margins.bottom8}>
-                Your local copy has more recent commits. Please stash or reset them.
+                {langData.VencordSettings.UpdaterTab.Newer.localCopyWarning}
             </Forms.FormText>
             <Changes {...props} updates={changes} />
         </>
@@ -191,8 +197,9 @@ function Newer(props: CommonProps) {
 
 function Updater() {
     const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
+    const l = langData.VencordSettings.UpdaterTab.Updater;
 
-    const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
+    const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: l.loading });
 
     React.useEffect(() => {
         if (err)
@@ -205,31 +212,31 @@ function Updater() {
     };
 
     return (
-        <SettingsTab title="Vencord Updater">
-            <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
+        <SettingsTab title={l.title}>
+            <Forms.FormTitle tag="h5">{l.title}</Forms.FormTitle>
             <Switch
                 value={settings.autoUpdate}
                 onChange={(v: boolean) => settings.autoUpdate = v}
-                note="Automatically update Vencord without confirmation prompt"
+                note={l.autoUpdateInfo}
             >
-                Automatically update
+                {l.autoUpdate}
             </Switch>
             <Switch
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => settings.autoUpdateNotification = v}
-                note="Shows a notification when Vencord automatically updates"
+                note={l.autoUpdateNotifInfo}
                 disabled={!settings.autoUpdate}
             >
-                Get notified when an automatic update completes
+                {l.autoUpdateNotif}
             </Switch>
 
-            <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
+            <Forms.FormTitle tag="h5">{l.repo}</Forms.FormTitle>
 
             <Forms.FormText className="vc-text-selectable">
                 {repoPending
                     ? repo
                     : err
-                        ? "Failed to retrieve - check console"
+                        ? l.failedRetrive
                         : (
                             <Link href={repo}>
                                 {repo.split("/").slice(-2).join("/")}
@@ -241,17 +248,17 @@ function Updater() {
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
 
-            <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
+            <Forms.FormTitle tag="h5">{l.updates}</Forms.FormTitle>
 
             {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
         </SettingsTab>
     );
 }
 
-export default IS_UPDATER_DISABLED ? null : wrapTab(Updater, "Updater");
+export default IS_UPDATER_DISABLED ? null : wrapTab(Updater, langData.VencordSettings.UpdaterTab.wrapTab);
 
 export const openUpdaterModal = IS_UPDATER_DISABLED ? null : function () {
-    const UpdaterTab = wrapTab(Updater, "Updater");
+    const UpdaterTab = wrapTab(Updater, langData.VencordSettings.UpdaterTab.wrapTab);
 
     try {
         openModal(wrapTab((modalProps: ModalProps) => (
@@ -261,7 +268,7 @@ export const openUpdaterModal = IS_UPDATER_DISABLED ? null : function () {
                     <UpdaterTab />
                 </ModalContent>
             </ModalRoot>
-        ), "UpdaterModal"));
+        ), langData.VencordSettings.UpdaterTab.updaterModal));
     } catch {
         handleSettingsTabError();
     }

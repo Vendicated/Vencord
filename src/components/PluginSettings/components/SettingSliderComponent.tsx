@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getLanguage } from "@languages/Language";
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionSlider } from "@utils/types";
 import { Forms, React, Slider } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
+
+const langData = getLanguage("components");
 
 export function makeRange(start: number, end: number, step = 1) {
     const ranges: number[] = [];
@@ -43,7 +46,7 @@ export function SettingSliderComponent({ option, pluginSettings, definedSettings
     function handleChange(newValue: number): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
+        else if (!isValid) setError(langData.PluginSettings.components.providedInput);
         else {
             setError(null);
             onChange(newValue);
