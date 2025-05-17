@@ -89,7 +89,7 @@ export async function exportLogs() {
     const messages = await getAllMessagesIDB();
     const data = JSON.stringify({ messages }, null, 2);
 
-    if (IS_WEB || IS_VESKTOP) {
+    if (IS_WEB || IS_VESKTOP || IS_EQUIBOP || !DiscordNative) {
         const file = new File([data], filename, { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(file);
