@@ -109,9 +109,7 @@ function replaceVariables(advancedNotification, body, channelInfo, texts: string
 }
 
 Native.checkIsMac().then(isMac => {
-    console.log("REcieved mac status");
-    console.log(isMac);
-    if (settings.store.notificationPatchType === "custom") {
+    if (isMac && settings.store.notificationPatchType === "custom") {
         setTimeout(() => {
             showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
             settings.store.notificationPatchType = "variable";
