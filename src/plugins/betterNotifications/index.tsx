@@ -7,10 +7,11 @@ import { AdvancedNotification } from "./types/advancedNotification";
 import { BasicNotification } from "./types/basicNotification";
 import { MessageStore } from "@webpack/common";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const Kangaroo = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
-
+const logger = new Logger("BetterNotifications");
 
 const Replacements = [
     "username",
@@ -38,6 +39,11 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Format the notification body.",
         default: "{body}"
+    },
+    allowBotNotifications: {
+        type: OptionType.BOOLEAN,
+        description: "Allow desktop notifications from bots",
+        default: true
     },
     notificationAttribute: {
         type: OptionType.BOOLEAN,
@@ -76,7 +82,14 @@ const settings = definePluginSettings({
 
 function getChannelInfoFromTitle(title: string) {
     try {
-        let innerInfo = title.split(" (#")[1];
+        let parts = title.split(" (#");
+        if (parts === undefined) {
+            return {
+                channel: "unknown",
+                groupName: "unknown"
+            };
+        }
+        let innerInfo = parts[1];
         let data = innerInfo.slice(0, -1).split(", ");
         return {
             channel: data[0],
@@ -92,6 +105,14 @@ function getChannelInfoFromTitle(title: string) {
 
 }
 
+function notificationShouldBeShown(advancedData: AdvancedNotification): boolean {
+    if (advancedData.messageRecord.bot && !settings.store.allowBotNotifications) {
+        return false;
+    }
+
+    return true;
+}
+
 function replaceVariables(advancedNotification, body, channelInfo, texts: string[]): string[] {
     let replacementMap: Map<string, string> = new Map();
 
@@ -102,7 +123,7 @@ function replaceVariables(advancedNotification, body, channelInfo, texts: string
     replacementMap.set("groupName", channelInfo.groupName);
 
     replacementMap.forEach((value, key) => {
-        console.log(`Replacing ${key} - ${value}`);
+        logger.debug(`Replacing ${key} - ${value}`);
         texts = texts.map((text) => text.replaceAll(`{${key}}`, value));
     });
     return texts;
@@ -110,6 +131,7 @@ function replaceVariables(advancedNotification, body, channelInfo, texts: string
 
 Native.checkIsMac().then(isMac => {
     if (isMac && settings.store.notificationPatchType === "custom") {
+        logger.warn("User is on macOS but has notificationPatchType as custom");
         setTimeout(() => {
             showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
             settings.store.notificationPatchType = "variable";
@@ -146,13 +168,19 @@ export default definePlugin({
     ],
 
     NotificationHandlerHook(...args) {
-        console.log("Recieved hooked notification");
-        console.log(args);
+        logger.info(`Recieved hooked notification with args the following args`);
+        logger.info(args);
+
         let replacementMap: Map<string, string> = new Map();
 
         let basicNotification: BasicNotification = args[3];
         let advancedNotification: AdvancedNotification = args[4];
         let attachmentUrl: string | undefined;
+
+        if (!notificationShouldBeShown(advancedNotification)) {
+            logger.info("Notification blocked");
+            return;
+        }
 
         let attachments = advancedNotification.messageRecord.attachments;
         let contentType;
@@ -166,12 +194,22 @@ export default definePlugin({
                 attachmentUrl = attachments[0].proxy_url;
                 imageType = contentType.split("/")[1];
             } else {
-                console.log(`[BN] Unsupported image type ${contentType}, or size (or image is a spoiler)`);
+                logger.info(`Unsupported image type (${contentType}), size, or image is a spoiler`);
             }
         }
+        let channelInfo;
 
-        let channelInfo = getChannelInfoFromTitle(args[1]);
+        switch (basicNotification.channel_type) {
+            case 0: // servers 
+                channelInfo = getChannelInfoFromTitle(args[1]);
+                break;
 
+            case 1: // Direct messages
+                channelInfo = {
+                    channel: "DM",
+                    groupName: advancedNotification.messageRecord.author.globalName ?? "@" + advancedNotification.messageRecord.author.username
+                };
+        }
 
         console.log(replacementMap);
 
@@ -181,13 +219,6 @@ export default definePlugin({
 
         [title, body, attributeText] = replaceVariables(advancedNotification, args[2], channelInfo, [title, body, attributeText]);
 
-        replacementMap.forEach((value, key) => {
-            console.log(`[BN] replacing key ${key} -> ${value}`);
-            title = title.replace(`{${key}}`, value);
-            body = body.replace(`{${key}}`, value);
-            attributeText = attributeText.replace(`{${key}}`, value);
-        });
-
         Native.notify(
             title,
             body,
@@ -196,7 +227,7 @@ export default definePlugin({
             {
                 channelId: `${advancedNotification.messageRecord.channel_id}`,
                 messageId: `${basicNotification.message_id}`,
-                guildId: `${basicNotification.guild_id}`
+                guildId: basicNotification.guild_id
             },
             {
                 wMessageOptions: {
@@ -215,7 +246,7 @@ export default definePlugin({
     },
 
     NotificationClickEvent(channelId: string, messageId: string) {
-        console.log(`Recieved click! ${channelId}`);
+        logger.debug(`Recieved click to channel ${channelId}`);
         ChannelRouter.transitionToChannel(channelId);
         Kangaroo.jumpToMessage({
             channelId,
@@ -226,6 +257,7 @@ export default definePlugin({
     },
 
     NotificationReplyEvent(text: string, channelId: string, messageId: string) {
+        logger.info(`Recieved reply event to channel ${channelId}`);
         sendMessage(
             channelId,
             { content: text },
@@ -244,12 +276,20 @@ export default definePlugin({
     },
 
     VariableReplacement(avatarUrl: string, notificationTitle: string, notificationBody: string, notificationData: BasicNotification, advancedData: AdvancedNotification) {
-        console.log(`Recieved ${avatarUrl} ${notificationTitle} ${notificationBody}`);
+        if (!notificationShouldBeShown(advancedData)) {
+            logger.info("Notification blocked");
+            return;
+        }
+        logger.info(notificationData);
+        logger.info(advancedData);
+
         let channelInfo = getChannelInfoFromTitle(notificationTitle);
         let title = settings.store.notificationTitleFormat;
         let body = settings.store.notificationBodyFormat;
 
         [title, body] = replaceVariables(advancedData, notificationBody, channelInfo, [title, body]);
+        logger.info("Succesfully patched notification");
+
         return [avatarUrl, title, body, notificationData, advancedData];
     }
 });

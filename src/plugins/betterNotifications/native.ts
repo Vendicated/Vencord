@@ -8,7 +8,7 @@ const path = require("path");
 interface NotificationData {
     channelId: string;
     messageId: string;
-    guildId: string;
+    guildId?: string; // Doesn't exist in DMs
 }
 
 interface MessageOptions {
@@ -106,15 +106,19 @@ function generateXml(
     extraOptions?: ExtraOptions,
     attachmentLoc?: string,
 ): string {
+    let guildId = notificationData.guildId ?? "@me";
+
+    let notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}"`;
+    let headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
     return `     
-       <toast activationType="protocol" launch="discord://-/channels/${notificationData.guildId}/${notificationData.channelId}/${notificationData.messageId}">
+       <toast activationType="protocol" launch="${notificationClickPath}">
             ${extraOptions?.wHeaderOptions ?
             `
         <header
             id="${extraOptions.wHeaderOptions.channelId}"
             title="#${extraOptions.wHeaderOptions.channelName}"
             activationType="protocol"
-            arguments="discord://-/channels/${notificationData.guildId}/${notificationData.channelId}"
+            arguments="${headerClickPath}"
             />
             `
             :
