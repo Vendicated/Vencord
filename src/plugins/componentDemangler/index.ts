@@ -8,8 +8,11 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 
+// This plugin is just used to mark that discord components should have their displayName set
 export default definePlugin({
     name: "ComponentDemangler",
     description: "Adds known component names to discords components. Can be seen in the component tree and in react component stacks",
     authors: [Devs.sadan],
+
+    requiresRestart: true,
 });
