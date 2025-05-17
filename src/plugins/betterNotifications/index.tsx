@@ -211,6 +211,7 @@ export default definePlugin({
                     channel: "DM",
                     groupName: advancedNotification.messageRecord.author.globalName ?? "@" + advancedNotification.messageRecord.author.username
                 };
+                break;
         }
 
         console.log(replacementMap);
@@ -285,7 +286,21 @@ export default definePlugin({
         logger.info(notificationData);
         logger.info(advancedData);
 
-        let channelInfo = getChannelInfoFromTitle(notificationTitle);
+        let channelInfo;
+
+        switch (notificationData.channel_type) {
+            case 0: // servers 
+                channelInfo = getChannelInfoFromTitle(notificationTitle);
+                break;
+
+            case 1: // Direct messages
+                channelInfo = {
+                    channel: "DM",
+                    groupName: advancedData.messageRecord.author.globalName ?? "@" + advancedData.messageRecord.author.username
+                };
+                break;
+        }
+
         let title = settings.store.notificationTitleFormat;
         let body = settings.store.notificationBodyFormat;
 
