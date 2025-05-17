@@ -108,7 +108,7 @@ function generateXml(
 ): string {
     let guildId = notificationData.guildId ?? "@me";
 
-    let notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}"`;
+    let notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}`;
     let headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
     return `     
        <toast activationType="protocol" launch="${notificationClickPath}">
