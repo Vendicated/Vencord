@@ -182,19 +182,19 @@ export function checkIsMac(_) {
 
 
 // TODO future: app.on("second-instance") with deeplinks on Windows notifications to allow button actions
-app.on("second-instance", (event, arg) => {
-    console.log("[BN] second instance activated");
-    console.log(arg);
-    let params = new URL(arg[arg.length - 1]).searchParams;
-    let channelId = params.get("c");
-    let messageId = params.get("m");
-    if (webContents) {
-        webContents.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationReplyButtonEvent("${channelId}", "${messageId}")`);
-    } else {
-        console.error("[BN] webContents not defined!");
-    }
-    event.preventDefault();
-});
+// app.on("second-instance", (event, arg) => {
+//     console.log("[BN] second instance activated");
+//     console.log(arg);
+//     let params = new URL(arg[arg.length - 1]).searchParams;
+//     let channelId = params.get("c");
+//     let messageId = params.get("m");
+//     if (webContents) {
+//         webContents.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationReplyButtonEvent("${channelId}", "${messageId}")`);
+//     } else {
+//         console.error("[BN] webContents not defined!");
+//     }
+//     event.preventDefault();
+// });
 
 app.on("browser-window-created", (_, win) => {
     console.log("[BN] Browser window created!");

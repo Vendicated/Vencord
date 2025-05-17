@@ -94,7 +94,7 @@ export interface Author {
     guildMemberAvatars: GuildMemberAvatars;
     hasBouncedEmail: boolean;
     personalConnectionId: any;
-    globalName: any;
+    globalName?: string;
     primaryGuild: any;
     collectibles: any;
 }

@@ -15,6 +15,7 @@ const logger = new Logger("BetterNotifications");
 
 const Replacements = [
     "username",
+    "nickname",
     "body",
     "channelId",
     "channelName",
@@ -33,7 +34,7 @@ const settings = definePluginSettings({
     notificationTitleFormat: {
         type: OptionType.STRING,
         description: "Format of the notification title.",
-        default: "{username} #{channelName}",
+        default: "@{username} #{channelName}",
     },
     notificationBodyFormat: {
         type: OptionType.STRING,
@@ -113,7 +114,7 @@ function notificationShouldBeShown(advancedData: AdvancedNotification): boolean 
     return true;
 }
 
-function replaceVariables(advancedNotification, body, channelInfo, texts: string[]): string[] {
+function replaceVariables(advancedNotification: AdvancedNotification, body, channelInfo, texts: string[]): string[] {
     let replacementMap: Map<string, string> = new Map();
 
     replacementMap.set("username", advancedNotification.messageRecord.author.username);
@@ -121,6 +122,7 @@ function replaceVariables(advancedNotification, body, channelInfo, texts: string
     replacementMap.set("channelName", channelInfo.channel);
     replacementMap.set("channelId", advancedNotification.messageRecord.channel_id);
     replacementMap.set("groupName", channelInfo.groupName);
+    replacementMap.set("nickname", advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username);
 
     replacementMap.forEach((value, key) => {
         logger.debug(`Replacing ${key} - ${value}`);
