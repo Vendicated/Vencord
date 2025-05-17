@@ -1,5 +1,5 @@
 import definePlugin, { PluginNative, OptionType } from "@utils/types";
-import { Button, ChannelRouter, FluxDispatcher, Select, showToast, Toasts } from "@webpack/common";
+import { Button, ChannelRouter, FluxDispatcher, Forms, Select, showToast, Toasts } from "@webpack/common";
 import { findByPropsLazy } from "@webpack";
 import { definePluginSettings, SettingsStore } from "@api/Settings";
 import { sendMessage } from "@utils/discord";
@@ -79,6 +79,25 @@ const settings = definePluginSettings({
             { label: "Inline (Legacy)", value: "inline" }
         ]
     },
+    notificationMediaCache: {
+        type: OptionType.COMPONENT,
+        component: () => (
+            <>
+                <Forms.FormTitle>Cache options</Forms.FormTitle>
+                <Button look={Button.Looks.OUTLINED} onClick={_ => { Native.openTempFolder(); }}> Open cache folder</Button>
+            </>
+        )
+    },
+    notificationMediaClear: {
+        type: OptionType.COMPONENT,
+        component: () => (
+            <Button style={{ backgroundColor: "var(--status-danger)" }} look={Button.Looks.FILLED} onClick={_ => {
+                Native.deleteTempFolder().then(_ => {
+                    showToast("Deleted cache folder", Toasts.Type.SUCCESS);
+                });
+            }}>Clear cache</Button>
+        )
+    }
 });
 
 function getChannelInfoFromTitle(title: string) {
@@ -156,12 +175,12 @@ export default definePlugin({
                 replace: `
                 async function $1($2,$3,$4,$5,$6) {
                     if(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc()) {
-                        Vencord.Plugins.plugins.BetterNotifications.NotificationHandlerHook($2, $3, $4, $5, $6); 
-                        console.log("Replaced notification function \`$1\` with own notification handler");
-                        return;
+                    Vencord.Plugins.plugins.BetterNotifications.NotificationHandlerHook($2, $3, $4, $5, $6);
+                console.log("Replaced notification function \`$1\` with own notification handler");
+                return;
                     } else {
-                        [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.VariableReplacement($2, $3, $4, $5, $6); 
-                        console.log("Patched using variable replacement");
+                    [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.VariableReplacement($2, $3, $4, $5, $6);
+                console.log("Patched using variable replacement");
                     }
 
                 `
@@ -202,7 +221,7 @@ export default definePlugin({
         let channelInfo;
 
         switch (basicNotification.channel_type) {
-            case 0: // servers 
+            case 0: // servers
                 channelInfo = getChannelInfoFromTitle(args[1]);
                 break;
 
@@ -289,7 +308,7 @@ export default definePlugin({
         let channelInfo;
 
         switch (notificationData.channel_type) {
-            case 0: // servers 
+            case 0: // servers
                 channelInfo = getChannelInfoFromTitle(notificationTitle);
                 break;
 

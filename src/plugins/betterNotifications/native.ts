@@ -1,4 +1,4 @@
-import { Notification, IpcMainInvokeEvent, WebContents, app } from "electron";
+import { Notification, IpcMainInvokeEvent, WebContents, shell, app } from "electron";
 
 const fs = require("fs");
 const https = require("https");
@@ -180,6 +180,18 @@ export function checkIsMac(_) {
     return os.platform() === "darwin";
 }
 
+export function openTempFolder(_) {
+    let directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
+    shell.openPath(directory);
+}
+
+export function deleteTempFolder(_) {
+    let directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    fs.rmSync(directory, { recursive: true, force: true });
+}
 
 // TODO future: app.on("second-instance") with deeplinks on Windows notifications to allow button actions
 // app.on("second-instance", (event, arg) => {
