@@ -14,7 +14,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, React, TextInput, Tooltip, useEffect, useState } from "@webpack/common";
 import { FunctionComponent } from "react";
 
-import { CustomKeywords, GenericKeywords, setKeywords,ToneKeywords } from "./keywords";
+import { CustomKeywords, GenericKeywords, setKeywords, ToneKeywords } from "./keywords";
+import { openIndicatorsModal } from "./modal/KeywordsModal";
 
 let combinedKeywords = { ...CustomKeywords };
 
@@ -42,8 +43,8 @@ const keywordsMap = makeEmptyKeywordsMap();
 
 export const setKeywordsList = () => {
     let keywords = { ...CustomKeywords };
-    if(settings.store.toneKeywords) keywords = { ...keywords, ...ToneKeywords };
-    if(settings.store.genericKeywords) keywords = { ...keywords, ...GenericKeywords };
+    if (settings.store.toneKeywords) keywords = { ...keywords, ...ToneKeywords };
+    if (settings.store.genericKeywords) keywords = { ...keywords, ...GenericKeywords };
 
     combinedKeywords = keywords;
 };
@@ -52,12 +53,32 @@ const settings = definePluginSettings({
     genericKeywords: {
         type: OptionType.BOOLEAN,
         description: "Highlight keywords  like brb, gtg, lol, etc.",
-        onChange: setKeywordsList
+        onChange: setKeywordsList,
+        default: false
+    },
+    keywordsModal: {
+        type: OptionType.COMPONENT,
+        description: "Opens a modal with a list of all the default tone indicators.",
+        component: () => {
+            return (
+                <Button onClick={() => { openIndicatorsModal(GenericKeywords, "Keywords"); }}>Default Keywords List</Button>
+            );
+        }
     },
     toneKeywords: {
         type: OptionType.BOOLEAN,
         description: "Highlight keywords for tones like /j, /srs, etc.",
-        onChange: setKeywordsList
+        onChange: setKeywordsList,
+        default: false
+    },
+    tonesModal: {
+        type: OptionType.COMPONENT,
+        description: "Opens a modal with a list of all the default tone indicators.",
+        component: () => {
+            return (
+                <Button onClick={() => { openIndicatorsModal(ToneKeywords, "Tone Indicators"); }}>Default Indicator List</Button>
+            );
+        }
     },
     replace: {
         type: OptionType.COMPONENT,
@@ -285,7 +306,8 @@ export default definePlugin({
     description: "Adds tooltips for keywords",
     authors: [
         Devs.Moxxie,
-        Devs.Ethan
+        Devs.Ethan,
+        Devs.Fres
     ],
 
     settings,

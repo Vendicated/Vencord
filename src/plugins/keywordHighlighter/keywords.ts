@@ -8,7 +8,7 @@ import { DataStore } from "@api/index";
 
 import { KEYWORD_KEY_STRING, setKeywordsList } from "./index";
 
-export const ToneKeywords = {
+export const ToneKeywords: Record<string, string> = {
     "/j": "Joking",
     "/hj": "Half Joking",
     "/s": "Sarcastic",
@@ -59,9 +59,9 @@ export const ToneKeywords = {
     "/ot": "Off-Topic",
     "/nj": "Not Joking",
     "/naj": "Not A Joke",
-};
+} as const;
 
-export const GenericKeywords = {
+export const GenericKeywords: Record<string, string> = {
     lol: "Laugh out loud",
     lmao: "Laughing my ass off",
     rofl: "Rolling on the floor laughing",
@@ -107,7 +107,7 @@ export const GenericKeywords = {
     bbl: "Be back later",
     bbs: "Be back soon",
     tldr: "Too long; didn't read",
-};
+} as const;
 
 interface Tone {
     abbreviation: string;
