@@ -106,7 +106,7 @@ define(Function.prototype, "m", {
 
         const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
 
-        // Currently, sentry and libDiscore Webpack instances are not meant to be patched.
+        // Currently, sentry and libdiscore Webpack instances are not meant to be patched.
         // As an extra measure, take advatange of the fact their files include the names and return early if it's one of them.
         // Later down we also include other measures to avoid patching them.
         if (["sentry", "libdiscore"].some(name => fileName?.toLowerCase()?.includes(name))) {
@@ -123,7 +123,7 @@ define(Function.prototype, "m", {
                 define(this, "p", { value: bundlePath });
                 clearTimeout(bundlePathTimeout);
 
-                // libDiscore init Webpack instance always returns a constanst string for the js filename of a chunk.
+                // libdiscore init Webpack instance always returns a constant string for the js filename of a chunk.
                 // In that case, avoid patching this instance,
                 // as it runs before the main Webpack instance and will make the WebpackRequire fallback not work properly, or init an wrongful main WebpackRequire.
                 if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]/.exec(String(this.u))) {
