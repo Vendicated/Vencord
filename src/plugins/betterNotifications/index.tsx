@@ -106,7 +106,7 @@ function getChannelInfoFromTitle(title: string) {
 }
 
 function notificationShouldBeShown(advancedData: AdvancedNotification): boolean {
-    if (advancedData.messageRecord.bot && !settings.store.allowBotNotifications) {
+    if (advancedData.messageRecord.author.discriminator !== "0" && !settings.store.allowBotNotifications) {
         return false;
     }
 
