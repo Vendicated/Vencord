@@ -17,9 +17,7 @@
 */
 
 import { LazyComponent, LazyComponentWrapper } from "@utils/react";
-
-// eslint-disable-next-line path-alias/no-relative
-import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
+import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "@webpack";
 
 const SYM_FORWARD_REF = Symbol.for("react.forward_ref");
 const SYM_MEMO = Symbol.for("react.memo");
