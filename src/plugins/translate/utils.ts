@@ -23,6 +23,7 @@ import { showToast, Toasts } from "@webpack/common";
 
 import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
 import { resetLanguageDefaults, settings } from "./settings";
+import { handleTranslate } from "./TranslationAccessory";
 
 export const cl = classNameFactory("vc-trans-");
 
@@ -152,4 +153,16 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
         sourceLanguage: DeeplLanguages[src] ?? src,
         text: translations[0].text
     };
+}
+
+export async function ctrlLeftClickShortcut(message, _, e) {
+    if (e.button === 0 && e.ctrlKey && settings.store.enableCtrlLeftClickShortcut) {
+
+        if (!message.content || !message.id) {
+            return;
+        }
+
+        const trans = await translate("received", message.content);
+        handleTranslate(message.id, trans);
+    }
 }
