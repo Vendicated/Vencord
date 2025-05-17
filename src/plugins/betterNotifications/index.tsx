@@ -1,5 +1,5 @@
 import definePlugin, { PluginNative, OptionType } from "@utils/types";
-import { Button, ChannelRouter, FluxDispatcher, Select } from "@webpack/common";
+import { Button, ChannelRouter, FluxDispatcher, Select, showToast, Toasts } from "@webpack/common";
 import { findByPropsLazy } from "@webpack";
 import { definePluginSettings, SettingsStore } from "@api/Settings";
 import { sendMessage } from "@utils/discord";
@@ -11,6 +11,7 @@ import { Devs } from "@utils/constants";
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const Kangaroo = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 
+
 const Replacements = [
     "username",
     "body",
@@ -20,10 +21,18 @@ const Replacements = [
 ];
 
 const settings = definePluginSettings({
+    notificationPatchType: {
+        type: OptionType.SELECT,
+        description: "How notifications are going to be patched. Custom enables features such as attachment previews, but does not work with macOS",
+        options: [
+            { label: "Custom", value: "custom", default: true },
+            { label: "Variable replacement (macOS)", value: "variable" }
+        ]
+    },
     notificationTitleFormat: {
         type: OptionType.STRING,
         description: "Format of the notification title.",
-        default: "{username}",
+        default: "{username} #{channelName}",
     },
     notificationBodyFormat: {
         type: OptionType.STRING,
@@ -36,7 +45,7 @@ const settings = definePluginSettings({
     },
     notificationAttributeText: {
         type: OptionType.STRING,
-        description: "Format of the attribution text.",
+        description: "Format of the attribution text (Windows only, Anniversary Update required).",
         default: "{channelName}"
     },
 
@@ -83,6 +92,33 @@ function getChannelInfoFromTitle(title: string) {
 
 }
 
+function replaceVariables(advancedNotification, body, channelInfo, texts: string[]): string[] {
+    let replacementMap: Map<string, string> = new Map();
+
+    replacementMap.set("username", advancedNotification.messageRecord.author.username);
+    replacementMap.set("body", body);
+    replacementMap.set("channelName", channelInfo.channel);
+    replacementMap.set("channelId", advancedNotification.messageRecord.channel_id);
+    replacementMap.set("groupName", channelInfo.groupName);
+
+    replacementMap.forEach((value, key) => {
+        console.log(`Replacing ${key} - ${value}`);
+        texts = texts.map((text) => text.replaceAll(`{${key}}`, value));
+    });
+    return texts;
+}
+
+Native.checkIsMac().then(isMac => {
+    console.log("REcieved mac status");
+    console.log(isMac);
+    if (settings.store.notificationPatchType === "custom") {
+        setTimeout(() => {
+            showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
+            settings.store.notificationPatchType = "variable";
+        }, 4000);
+    }
+});
+
 export default definePlugin({
     name: "BetterNotifications",
     description: `Improves discord's desktop notifications. \n List of available notification variables: ${Replacements}`,
@@ -97,12 +133,18 @@ export default definePlugin({
                 match: /async function (\i)\((\i),(\i),(\i),(\i),(\i)\){/,
                 replace: `
                 async function $1($2,$3,$4,$5,$6) {
-                    Vencord.Plugins.plugins.BetterNotifications.NotificationHandlerHook($2, $3, $4, $5, $6); 
-                    console.log("Replaced function \`$1\` with own notification handler");
-                    return;
+                    if(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc()) {
+                        Vencord.Plugins.plugins.BetterNotifications.NotificationHandlerHook($2, $3, $4, $5, $6); 
+                        console.log("Replaced notification function \`$1\` with own notification handler");
+                        return;
+                    } else {
+                        [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.VariableReplacement($2, $3, $4, $5, $6); 
+                        console.log("Patched using variable replacement");
+                    }
+
                 `
             }
-        },
+        }
     ],
 
     NotificationHandlerHook(...args) {
@@ -118,6 +160,7 @@ export default definePlugin({
         let contentType;
         let imageType;
 
+
         if (attachments.length > 0) {
             contentType = attachments[0].content_type;
             // Windows has a 3mb limit on Notification attachments
@@ -131,21 +174,14 @@ export default definePlugin({
 
         let channelInfo = getChannelInfoFromTitle(args[1]);
 
-        Replacements.forEach((value) => {
-            replacementMap.set(value, "");
-        });
-
-        replacementMap.set("username", advancedNotification.messageRecord.author.username);
-        replacementMap.set("body", args[2]);
-        replacementMap.set("channelName", channelInfo.channel);
-        replacementMap.set("channelId", advancedNotification.messageRecord.channel_id);
-        replacementMap.set("groupName", channelInfo.groupName);
 
         console.log(replacementMap);
 
         let title = settings.store.notificationTitleFormat;
         let body = settings.store.notificationBodyFormat;
         let attributeText = settings.store.notificationAttributeText;
+
+        [title, body, attributeText] = replaceVariables(advancedNotification, args[2], channelInfo, [title, body, attributeText]);
 
         replacementMap.forEach((value, key) => {
             console.log(`[BN] replacing key ${key} -> ${value}`);
@@ -203,5 +239,19 @@ export default definePlugin({
                 }
             }
         );
+    },
+
+    ShouldUseCustomFunc() {
+        return settings.store.notificationPatchType === "custom";
+    },
+
+    VariableReplacement(avatarUrl: string, notificationTitle: string, notificationBody: string, notificationData: BasicNotification, advancedData: AdvancedNotification) {
+        console.log(`Recieved ${avatarUrl} ${notificationTitle} ${notificationBody}`);
+        let channelInfo = getChannelInfoFromTitle(notificationTitle);
+        let title = settings.store.notificationTitleFormat;
+        let body = settings.store.notificationBodyFormat;
+
+        [title, body] = replaceVariables(advancedData, notificationBody, channelInfo, [title, body]);
+        return [avatarUrl, title, body, notificationData, advancedData];
     }
-});;
+});

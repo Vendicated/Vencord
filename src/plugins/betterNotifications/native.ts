@@ -148,9 +148,6 @@ export function notify(event: IpcMainInvokeEvent,
     console.log("Creating promise...");
 
     Promise.all(promises).then((results) => {
-        console.log("results!");
-        console.log(results);
-
         //@ts-ignore
         let avatar: string = results.at(0);
         //@ts-ignore
@@ -175,6 +172,9 @@ export function notify(event: IpcMainInvokeEvent,
     });
 }
 
+export function checkIsMac(_) {
+    return os.platform() === "darwin";
+}
 
 
 // TODO future: app.on("second-instance") with deeplinks on Windows notifications to allow button actions
