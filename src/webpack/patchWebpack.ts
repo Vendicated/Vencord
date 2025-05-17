@@ -60,7 +60,7 @@ export function getFactoryPatchedBy(moduleId: PropertyKey, webpackRequire = wreq
     return webpackRequire.m[moduleId]?.[SYM_PATCHED_BY];
 }
 
-const logger = new Logger("WebpackInterceptor", "#8caaee");
+const logger = new Logger("WebpackPatcher", "#8caaee");
 
 /** Whether we tried to fallback to the WebpackRequire of the factory, or disabled patches */
 let wreqFallbackApplied = false;
@@ -106,6 +106,13 @@ define(Function.prototype, "m", {
 
         const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
 
+        // Currently, sentry and libDiscore Webpack instances are not meant to be patched.
+        // As an extra measure, take advatange of the fact their files include the names and return early if it's one of them.
+        // Later down we also include other measures to avoid patching them.
+        if (["sentry", "libdiscore"].some(name => fileName?.toLowerCase()?.includes(name))) {
+            return;
+        }
+
         // Define a setter for the bundlePath property of WebpackRequire. Only Webpack instances which include chunk loading functionality,
         // like the main Discord Webpack, have this property.
         // So if the setter is called with the Discord bundlePath, this means we should patch this instance and initialize the internal references to WebpackRequire.
@@ -116,7 +123,10 @@ define(Function.prototype, "m", {
                 define(this, "p", { value: bundlePath });
                 clearTimeout(bundlePathTimeout);
 
-                if (bundlePath !== "/assets/") {
+                // libDiscore init Webpack instance always returns a constanst string for the js filename of a chunk.
+                // In that case, avoid patching this instance,
+                // as it runs before the main Webpack instance and will make the WebpackRequire fallback not work properly, or init an wrongful main WebpackRequire.
+                if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]/.exec(String(this.u))) {
                     return;
                 }
 
@@ -129,9 +139,9 @@ define(Function.prototype, "m", {
             }
         });
 
-        // In the past, the sentry Webpack instance which we also wanted to patch used to rely on chunks being loaded before initting sentry.
+        // In the past, the sentry Webpack instance which we also wanted to patch used to rely on chunks being loaded before initing sentry.
         // This Webpack instance did not include actual chunk loading, and only awaited for them to be loaded, which means it did not include the bundlePath property.
-        // To keep backwards compability, in case this is ever the case again, and keep patching this type of instance, we explicity patch instances which include wreq.O and not wreq.p.
+        // To keep backwards compability, if this is ever the case again, and keep patching this type of instance, we explicity patch instances which include wreq.O and not wreq.p.
         // Since we cannot check what is the bundlePath of the instance to filter for the Discord bundlePath, we only patch it if wreq.p is not included,
         // which means the instance relies on another instance which does chunk loading, and that makes it very likely to only target Discord Webpack instances like the old sentry.
 
@@ -436,12 +446,21 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
                 callback(exports, module.id);
                 continue;
             }
+        } catch (err) {
+            logger.error(
+                "Error while filtering or firing callback for Webpack waitFor subscription:\n", err,
+                "\n\nModule exports:", exports,
+                "\n\nFilter:", filter,
+                "\n\nCallback:", callback
+            );
+        }
 
-            if (typeof exports !== "object") {
-                continue;
-            }
+        if (typeof exports !== "object") {
+            continue;
+        }
 
-            for (const exportKey in exports) {
+        for (const exportKey in exports) {
+            try {
                 // Some exports might have not been initialized yet due to circular imports, so try catch it.
                 try {
                     var exportValue = exports[exportKey];
@@ -454,9 +473,14 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
                     callback(exportValue, module.id);
                     break;
                 }
+            } catch (err) {
+                logger.error(
+                    "Error while filtering or firing callback for Webpack waitFor subscription:\n", err,
+                    "\n\nExport value:", exports,
+                    "\n\nFilter:", filter,
+                    "\n\nCallback:", callback
+                );
             }
-        } catch (err) {
-            logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
         }
     }
 
@@ -567,7 +591,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 }
 
                 code = newCode;
-                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(moduleId)}`;
+                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
                 patchedFactory = (0, eval)(patchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {
