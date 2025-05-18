@@ -1,3 +1,8 @@
+/*
+* Vencord, a Discord client mod
+* Copyright (c) 2025 Vendicated and contributors*
+* SPDX-License-Identifier: GPL-3.0-or-later
+*/
 import definePlugin from "@utils/types";
 import { Devs } from "@utils/constants";
 
@@ -11,7 +16,7 @@ export default definePlugin({
     start() {
         const style = document.createElement("style");
         style.id = "better-titlebar-gridfix";
-        style.textContent = `
+        style.textContent = ` 
             @supports (grid-template-columns:subgrid) and (white-space-collapse:collapse) {
             .visual-refresh [class^="base_"] {
                 grid-template-rows: [top] 0 [titleBarEnd] min-content [noticeEnd] 1fr [end] !important;
