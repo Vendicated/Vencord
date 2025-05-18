@@ -29,11 +29,12 @@ export default definePlugin({
 
         const tryMove = () => {
             const upper = document.querySelector('[class^="upperContainer_"]');
-
-
+            document.querySelector('[class^="subtitleContainer:"]')?.remove();
             if (this.storedTrailing && upper && !upper.contains(this.storedTrailing)) {
+                (upper as HTMLElement)?.style?.setProperty("webkitAppRegion", "drag");
                 upper.appendChild(this.storedTrailing);
                 this.storedTrailing.setAttribute("style", "margin-left: auto; display: flex; align-items: center;");
+
             }
 
 
@@ -54,6 +55,7 @@ export default definePlugin({
         });
 
         this.observer.observe(document.body, { childList: true, subtree: true });
+
     },
 
     stop() {
