@@ -16,7 +16,7 @@ permissions: write-all
 jobs:
     Build:
         name: Build Equicord
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v4
