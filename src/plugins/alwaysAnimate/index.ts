@@ -54,6 +54,20 @@ export default definePlugin({
                 match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
                 replace: "$1!0"
             }
+        },
+        {
+            // Role Gradients
+            find: "animateGradient:",
+            all: true,
+            noWarn: true,
+            replacement: {
+                match: /animateGradient:.+?([,}].*?\))/g,
+                replace: (m, rest) => {
+                    const destructuringMatch = rest.match(/}=.+/);
+                    if (destructuringMatch == null) return `animateGradient:!0${rest}`;
+                    return m;
+                }
+            }
         }
     ]
 });
