@@ -15,13 +15,14 @@ import {
     Forms,
     GuildChannelStore,
     GuildStore,
+    NavigationRouter,
     Parser,
     React,
     ScrollerAuto,
     TextInput,
     useEffect,
     useMemo,
-    useState,
+    useState
 } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
@@ -32,7 +33,6 @@ const cl = classNameFactory("vc-all-notes-");
 const logger = new LoggerClass("ServerNotes");
 
 const IconUtils = findByProps("getGuildIconURL", "getChannelIconURL", "getUserAvatarURL");
-const NavigationRouter = findByProps("transitionToGuild", "transitionTo");
 const MarkupClasses = findByProps("markup", "markdown", "markupRtl");
 
 interface TagPillProps {
@@ -136,6 +136,8 @@ export const AllNotesViewerModalComponent: React.FC<AllNotesViewerModalProps> = 
         const defaultChannelId = defaultChannel?.id;
         if (NavigationRouter && typeof NavigationRouter.transitionToGuild === "function") {
             NavigationRouter.transitionToGuild(guildId, defaultChannelId);
+        } else {
+            logger.error("NavigationRouter.transitionToGuild not found or is not a function.");
         }
         modalProps.onClose();
     };
