@@ -1,0 +1,295 @@
+.vc-all-notes-modal-root {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-primary);
+}
+
+.vc-all-notes-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    flex-shrink: 0;
+}
+
+.vc-all-notes-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--header-primary);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.vc-all-notes-filter-controls-area {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    background-color: var(--background-secondary-alt);
+    flex-shrink: 0;
+}
+
+.vc-all-notes-filter-input {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.vc-all-notes-filter-input input {
+    font-size: 15px;
+}
+
+.vc-all-notes-filter-tags-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--header-secondary);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.vc-all-notes-tag-filter-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.vc-all-notes-tag-filter-button {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 3px 8px !important;
+    border-radius: 4px;
+    line-height: 1.2;
+    min-height: auto !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.vc-all-notes-tag-filter-button.lookOutlined-3sRXeN {
+    border-width: 1px;
+}
+
+.vc-all-notes-tag-filter-button.lookOutlined-3sRXeN:hover {
+     background-color: var(--background-modifier-hover);
+}
+
+.vc-all-notes-tag-filter-button.lookFilled-1Gx00P.colorBrand-3pXr91 {
+    color: var(--white-500);
+}
+
+.vc-all-notes-tag-filter-button.lookFilled-1Gx00P.colorBrand-3pXr91:hover {
+    background-color: var(--brand-experiment-560);
+}
+
+
+.vc-all-notes-no-tags-available {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 4px 0;
+}
+
+.vc-all-notes-clear-tags-button {
+    font-size: 12px;
+    margin-left: 4px;
+    color: var(--text-link);
+}
+
+.vc-all-notes-clear-tags-button:hover {
+    text-decoration: underline;
+    color: var(--text-link-hover, var(--text-link));
+}
+
+.vc-all-notes-modal-content {
+    flex-grow: 1;
+    min-height: 200px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-all-notes-list-scroller {
+    flex-grow: 1;
+}
+
+.vc-all-notes-list-container {
+    padding: 0 20px 16px;
+}
+
+.vc-all-notes-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    height: 100%;
+    color: var(--text-muted);
+}
+
+.vc-all-notes-empty-state-text {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.vc-all-notes-list-item {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 5px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.vc-all-notes-list-item:last-child {
+    margin-bottom: 0;
+}
+
+.vc-all-notes-list-item:hover {
+    border-color: var(--background-modifier-hover);
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-all-notes-list-item-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.vc-all-notes-list-item-guild-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+    background-color: var(--background-accent);
+    flex-shrink: 0;
+}
+
+.vc-all-notes-list-item-guild-icon-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--interactive-normal);
+}
+
+.vc-all-notes-list-item-guild-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--header-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.vc-all-notes-list-item-tags-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.vc-all-notes-tag-pill.vc-all-notes-display-tag-pill {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background-color: var(--background-tertiary);
+    color: var(--text-normal);
+    border: 1px solid var(--background-modifier-accent);
+    line-height: 1.2;
+}
+
+.vc-all-notes-list-item-note-snippet {
+    font-size: 14px;
+    color: var(--text-normal);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: calc(1.4em * 4);
+    overflow: hidden;
+    margin: 0;
+}
+
+.vc-all-notes-list-item-note-snippet.empty-text,
+.vc-all-notes-list-item-note-snippet.parse-error {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.vc-all-notes-list-item-note-snippet.parse-error {
+    color: var(--text-danger);
+}
+
+.vc-all-notes-list-item-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    align-items: center;
+}
+
+.vc-all-notes-action-button {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.vc-all-notes-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--background-secondary-alt);
+    border: 1px solid var(--input-background);
+    color: var(--text-normal);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: default;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.vc-all-notes-tag-pill-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.vc-all-notes-tag-pill-remove {
+    background: none;
+    border: none;
+    color: var(--interactive-muted);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.vc-all-notes-tag-pill-remove:hover {
+    color: var(--interactive-hover);
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-all-notes-tag-pill-icon {
+    width: 12px;
+    height: 12px;
+}
+
+.vc-all-notes-tag-pill[role="button"]:hover,
+.vc-all-notes-tag-pill[role="button"]:focus-within {
+    border-color: var(--interactive-hover);
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-all-notes-tag-filter-button:focus,
+.vc-all-notes-clear-tags-button:focus,
+.vc-all-notes-action-button:focus {
+    box-shadow: 0 0 0 2px var(--focus-primary);
+}
