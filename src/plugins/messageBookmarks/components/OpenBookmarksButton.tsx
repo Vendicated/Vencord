@@ -15,15 +15,16 @@ export function BookmarkIcon() {
         <svg
             stroke="currentColor"
             fill="none"
-            strokeWidth="0"
+            strokeWidth="2"
             viewBox="0 0 24 24"
             height={24}
             width={24}
             xmlns="http://www.w3.org/2000/svg"
         >
             <path
-                fill="currentColor"
                 d="M6 4c-1.1 0-2 .9-2 2v14l8-3.5 8 3.5V6c0-1.1-.9-2-2-2H6z"
+                stroke="currentColor"
+                fill="none"
             />
         </svg>
     );
