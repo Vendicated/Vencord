@@ -21,8 +21,12 @@ export default definePlugin({
                     replace: '"x-google-max-bitrate=".concat("80_000")'
                 },
                 {
-                    match: /;level-asymmetry-allowed=1/,
+                    match: ";level-asymmetry-allowed=1",
                     replace: ";b=AS:800000;level-asymmetry-allowed=1"
+                },
+                {
+                    match: "useinbandfec=1",
+                    replace: "useinbandfec=1;stereo=1;sprop-stereo=1"
                 }
             ]
         }
