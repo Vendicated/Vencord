@@ -27,14 +27,10 @@ const settings = definePluginSettings({
 
 const isLegal = (word: string) => {
     if (word.startsWith("<@")) return false;
+    if (word.endsWith("ington")) return false;
     if (/^https?:\/\//i.test(word)) return false;
-    if (word.length < 4) return false;
-
+    if (/[aeouy]$/i.test(word)) return false;
     return true;
-};
-
-const ingtonize = (word: string) => {
-    return word.endsWith("ton") ? word + "ton" : word + "ington";
 };
 
 const handleMessage = ((channelId, message) => {
@@ -53,9 +49,19 @@ const handleMessage = ((channelId, message) => {
 
     if (isLegal(words[index])) {
         const word = words[index];
-        words[index] = word.endsWith("ing")
-            ? (word === word.toUpperCase() ? word + "TON" : word + "ton")
-            : word;
+        if (word.endsWith("ing")) {
+            words[index] = word === word.toUpperCase() ? word + "TON" : word + "ton";
+        } else if (word.endsWith("i") || word.endsWith("I")) {
+            words[index] = word === word.toUpperCase() ? word + "NGTON" : word + "ngton";
+        } else if (word.endsWith("in") || word.endsWith("IN")) {
+            words[index] = word === word.toUpperCase() ? word + "GTON" : word + "gton";
+        } else if (word.endsWith("ing") || word.endsWith("ING")) {
+            words[index] = word === word.toUpperCase() ? word + "TON" : word + "ton";
+        } else if (word.endsWith("ingt") || word.endsWith("INGT")) {
+            words[index] = word === word.toUpperCase() ? word + "ON" : word + "on";
+        } else {
+            words[index] = word === word.toUpperCase() ? word + "INGTON" : word + "ington";
+        }
     }
 
     message.content = words.join(" ");
