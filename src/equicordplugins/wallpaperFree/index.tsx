@@ -48,8 +48,8 @@ export default definePlugin({
                     replace: "$&vcWpFreeCustom||"
                 },
                 {
-                    match: /(\i=)(.{1,50}""\))/,
-                    replace: "$1arguments[0].chatWallpaperState.vcWallpaperUrl||$2"
+                    match: /(\i=).{0,25}\.asset\):null/,
+                    replace: "$1arguments[0].chatWallpaperState.vcWallpaperUrl"
                 },
                 {
                     match: /(\i\.isViewable&&)(null!=\i)/,
