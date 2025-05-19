@@ -1,0 +1,79 @@
+.bookmarks-modal-root {
+    max-height: 80vh;
+    min-height: 80vh;
+    min-width: 85vw;
+    max-width: 85vw;
+}
+
+.bookmarks-modal-content {
+    padding: 1rem 2rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.bookmarks-modal-header {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1rem 2rem 0 2rem;
+}
+
+.bookmarks-modal-header > div:has(input) {
+    width: 100%;
+}
+
+.bookmarks-modal-entry {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    gap: 12px;
+    align-items: flex-start;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.bookmarks-modal-entryHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.bookmarks-modal-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.bookmarks-modal-contentInner {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.bookmarks-modal-username {
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.bookmarks-modal-timestamp {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.bookmarks-modal-body {
+    color: var(--text-normal);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.bookmarks-modal-actions {
+    display: flex;
+    gap: 8px;
+}
