@@ -198,7 +198,7 @@ export default definePlugin({
         },
         // Patches Discord generic logger function
         {
-            find: "Σ:",
+            find: '"file-only"!==',
             predicate: () => settings.store.disableLoggers,
             replacement: {
                 match: /(?<=&&)(?=console)/,
