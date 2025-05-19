@@ -21,7 +21,7 @@ import "./style.css";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
-import { definePluginSettings, migratePluginSetting } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
@@ -146,7 +146,7 @@ interface PlatformIndicatorProps {
 }
 
 const PlatformIndicator = ({ user, isProfile, isMessage, isMemberList }: PlatformIndicatorProps) => {
-    if (user == null || user.bot) return null;
+    if (user == null || (user.bot && !Settings.plugins.PlatformIndicators.showBots)) return null;
     useEnsureOwnStatus(user);
 
     const status: Record<Platform, string> | undefined = useStateFromStores([PresenceStore], () => PresenceStore.getState()?.clientStatuses?.[user.id]);
@@ -226,6 +226,12 @@ const settings = definePluginSettings({
         description: "Whether to make the mobile indicator match the color of the user status.",
         default: true,
         restartNeeded: true
+    },
+    showBots: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to show platform indicators on bots",
+        default: false,
+        restartNeeded: false
     },
     ConsoleIcon: {
         type: OptionType.SELECT,
