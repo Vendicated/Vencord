@@ -1,4 +1,4 @@
-import { Notification, IpcMainInvokeEvent, WebContents, shell, app } from "electron";
+import { Notification, SystemPreferences, IpcMainInvokeEvent, WebContents, shell, app, systemPreferences } from "electron";
 
 const fs = require("fs");
 const https = require("https");
@@ -144,6 +144,16 @@ export function notify(event: IpcMainInvokeEvent,
     notificationData: NotificationData,
     extraOptions?: ExtraOptions
 ) {
+
+    let supported = Notification.isSupported();
+    console.log(supported);
+
+    let notif = new Notification({
+        title: "HEaaallo",
+        body: "heii!!",
+    });
+    notif.show();
+
     let promises = [saveAssetToDisk("avatar", { userId, avatarId })];
 
     if (extraOptions?.attachmentUrl) {
@@ -212,3 +222,7 @@ app.on("browser-window-created", (_, win) => {
     console.log("[BN] Browser window created!");
     webContents = win.webContents;
 });
+
+app.whenReady().then(_ => {
+    new Notification({ title: "HELLO", body: "HOOO" }).show();
+}); 

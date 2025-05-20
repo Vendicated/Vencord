@@ -8,10 +8,21 @@ import { BasicNotification } from "./types/basicNotification";
 import { MessageStore } from "@webpack/common";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { GuildStore } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const Kangaroo = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 const logger = new Logger("BetterNotifications");
+
+interface ChannelInfo {
+    channel: string; // Channel name
+    groupName: string;
+}
+
+interface GuildInfo {
+    name: string;
+    description: string;
+}
 
 const Replacements = [
     "username",
@@ -20,7 +31,13 @@ const Replacements = [
     "channelId",
     "channelName",
     "groupName",
-];
+    "guildName",
+    "guildDescription"
+] as const;
+
+type ReplacementMap = {
+    [k in typeof Replacements[number]]: string
+};
 
 const settings = definePluginSettings({
     notificationPatchType: {
@@ -79,25 +96,30 @@ const settings = definePluginSettings({
             { label: "Inline (Legacy)", value: "inline" }
         ]
     },
+    notificationDmChannelname: {
+        type: OptionType.STRING,
+        description: "What channel name to use when notification is from direct messages",
+        default: "DM"
+    },
+    notificationDmGuildname: {
+        type: OptionType.STRING,
+        description: "What guild name to use when notification is from direct messages",
+        default: "@me"
+    },
     notificationMediaCache: {
         type: OptionType.COMPONENT,
         component: () => (
             <>
                 <Forms.FormTitle>Cache options</Forms.FormTitle>
                 <Button look={Button.Looks.OUTLINED} onClick={_ => { Native.openTempFolder(); }}> Open cache folder</Button>
+                <Button style={{ backgroundColor: "var(--status-danger)" }} look={Button.Looks.FILLED} onClick={_ => {
+                    Native.deleteTempFolder().then(_ => {
+                        showToast("Deleted cache folder", Toasts.Type.SUCCESS);
+                    });
+                }}>Clear cache</Button>
             </>
         )
     },
-    notificationMediaClear: {
-        type: OptionType.COMPONENT,
-        component: () => (
-            <Button style={{ backgroundColor: "var(--status-danger)" }} look={Button.Looks.FILLED} onClick={_ => {
-                Native.deleteTempFolder().then(_ => {
-                    showToast("Deleted cache folder", Toasts.Type.SUCCESS);
-                });
-            }}>Clear cache</Button>
-        )
-    }
 });
 
 function getChannelInfoFromTitle(title: string) {
@@ -129,21 +151,45 @@ function notificationShouldBeShown(advancedData: AdvancedNotification): boolean 
     if (advancedData.messageRecord.author.discriminator !== "0" && !settings.store.allowBotNotifications) {
         return false;
     }
-
     return true;
 }
 
-function replaceVariables(advancedNotification: AdvancedNotification, body, channelInfo, texts: string[]): string[] {
-    let replacementMap: Map<string, string> = new Map();
+function replaceVariables(advancedNotification: AdvancedNotification, basicNotification: BasicNotification, title: string, body: string, texts: string[]): string[] {
+    let guildInfo: GuildInfo;
+    let channelInfo: ChannelInfo;
 
-    replacementMap.set("username", advancedNotification.messageRecord.author.username);
-    replacementMap.set("body", body);
-    replacementMap.set("channelName", channelInfo.channel);
-    replacementMap.set("channelId", advancedNotification.messageRecord.channel_id);
-    replacementMap.set("groupName", channelInfo.groupName);
-    replacementMap.set("nickname", advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username);
+    if (basicNotification.channel_type === 1) {
+        channelInfo = {
+            channel: settings.store.notificationDmChannelname,
+            groupName: advancedNotification.messageRecord.author.globalName ?? "@" + advancedNotification.messageRecord.author.username
+        };
+        guildInfo = {
+            name: settings.store.notificationDmGuildname,
+            description: ""
+        };
 
-    replacementMap.forEach((value, key) => {
+    } else {
+        channelInfo = getChannelInfoFromTitle(title);
+        let guildData = GuildStore.getGuild(basicNotification.guild_id);
+
+        guildInfo = {
+            name: guildData.name,
+            description: guildData.description ?? ""
+        };
+    }
+
+    let replacementMap: ReplacementMap = {
+        username: advancedNotification.messageRecord.author.username,
+        body,
+        channelName: channelInfo.channel,
+        channelId: advancedNotification.messageRecord.channel_id,
+        groupName: channelInfo.groupName,
+        nickname: advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username,
+        guildName: guildInfo.name,
+        guildDescription: guildInfo.description
+    };
+
+    new Map(Object.entries(replacementMap)).forEach((value, key) => {
         logger.debug(`Replacing ${key} - ${value}`);
         texts = texts.map((text) => text.replaceAll(`{${key}}`, value));
     });
@@ -239,7 +285,7 @@ export default definePlugin({
         let body = settings.store.notificationBodyFormat;
         let attributeText = settings.store.notificationAttributeText;
 
-        [title, body, attributeText] = replaceVariables(advancedNotification, args[2], channelInfo, [title, body, attributeText]);
+        [title, body, attributeText] = replaceVariables(advancedNotification, basicNotification, args[1], args[2], [title, body, attributeText]);
 
         Native.notify(
             title,
@@ -323,7 +369,7 @@ export default definePlugin({
         let title = settings.store.notificationTitleFormat;
         let body = settings.store.notificationBodyFormat;
 
-        [title, body] = replaceVariables(advancedData, notificationBody, channelInfo, [title, body]);
+        [title, body] = replaceVariables(advancedData, notificationData, notificationTitle, notificationBody, [title, body]);
         logger.info("Succesfully patched notification");
 
         return [avatarUrl, title, body, notificationData, advancedData];
