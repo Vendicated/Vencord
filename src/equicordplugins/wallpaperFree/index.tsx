@@ -13,7 +13,7 @@ import { useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { ChannelContextPatch, GuildContextPatch, UserContextPatch } from "./components/ctxmenu";
-import { GlobalDefaultComponent, Wallpaper } from "./components/util";
+import { GlobalDefaultComponent, TipsComponent, Wallpaper } from "./components/util";
 import { WallpaperFreeStore } from "./store";
 
 
@@ -22,6 +22,11 @@ const settings = definePluginSettings({
         description: "If a dm wallpaper is already set, your custom wallpaper will be used instead.",
         type: OptionType.BOOLEAN,
         default: false,
+    },
+    stylingTips: {
+        description: "",
+        type: OptionType.COMPONENT,
+        component: TipsComponent,
     },
     globalDefault: {
         description: "Set a global default wallpaper for all channels.",
@@ -48,8 +53,8 @@ export default definePlugin({
                     replace: "$&vcWpFreeCustom||"
                 },
                 {
-                    match: /(\i=).{0,25}\.asset\):null/,
-                    replace: "$1arguments[0].chatWallpaperState.vcWallpaperUrl"
+                    match: /(\i)=(.{1,50}asset.+?(?=,\i=))(?=.+?concat\(\1)/,
+                    replace: "$1=arguments[0].chatWallpaperState.vcWallpaperUrl||($2)"
                 },
                 {
                     match: /(\i\.isViewable&&)(null!=\i)/,

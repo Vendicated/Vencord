@@ -5,8 +5,9 @@
  */
 
 import { openModal } from "@utils/modal";
+import { makeCodeblock } from "@utils/text";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher } from "@webpack/common";
+import { Button, FluxDispatcher, Parser } from "@webpack/common";
 
 import { SetCustomWallpaperModal, SetDiscordWallpaperModal } from "./modal";
 
@@ -47,6 +48,16 @@ export function GlobalDefaultComponent() {
             >Reset wallpaper data</Button>
         </>
     );
+}
+
+export function TipsComponent() {
+    const tipText = `
+    [class^=wallpaperContainer] {
+        transform: scaleX(-1); /* flip it horizontally */
+        filter: blur(4px); /* apply a blur */
+        opacity: 0.7; /* self-explanatory */
+    }`;
+    return Parser.parse(makeCodeblock(tipText, "css"));
 }
 
 export interface Wallpaper {
