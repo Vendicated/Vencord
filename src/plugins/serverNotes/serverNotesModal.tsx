@@ -17,7 +17,7 @@ import {
     ModalSize,
     openModal
 } from "@utils/modal";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import {
     Button,
     Forms,
@@ -39,10 +39,12 @@ import { getNoteForServer, NoteData, saveNoteForServer } from "./settingsUtils";
 const cl = classNameFactory("vc-snotes-");
 const EditIcon = PencilIcon;
 
-const MarkupClasses = findByProps("markup", "markdown", "markupRtl");
-const IconUtils = findByProps("getGuildIconURL", "getChannelIconURL", "getUserAvatarURL");
+const MarkupClasses = findByPropsLazy("markup");
+const MarkDownClasses = findByPropsLazy("markdown");
+const MarkDown_Classes = findByPropsLazy("markdown");
+const IconUtils = findByPropsLazy("getGuildIconURL");
 
-const ConfirmationModalModule = findByProps("openModalLazy", "openConfirmationModal");
+const ConfirmationModalModule = findByPropsLazy("openModalLazy", "openConfirmationModal");
 
 interface TagComponentProps {
     tag: string;
@@ -200,19 +202,37 @@ const ServerNotesModalComponent: React.FC<ServerNotesModalProps> = ({ guild, mod
         setCurrentTagsForEdit(currentTagsForEdit.filter(tag => tag !== tagToRemove));
     };
 
+    const discordMessageStyleClasses = [
+        MarkupClasses?.markup,
+        MarkDownClasses?.markdown,
+        (MarkDown_Classes as any)?.markdown_5f,
+    ].filter(Boolean).join(" ");
+
     const renderNoteContentViewMode = (noteDataToRender: NoteData, inGuildId: string) => {
         if (isLoading) {
-            return <div className={cl("rendered-note-area", "empty", MarkupClasses?.markup)}>Loading note...</div>;
+            return <div className={cl("rendered-note-area", "empty", MarkupClasses?.markup, MarkDownClasses?.markdown, MarkDown_Classes?.markdown_5f)}>Loading note...</div>;
         }
         const { text: noteText, tags: noteTags } = noteDataToRender;
         if (!noteText.trim() && noteTags.length === 0) {
-            return <div className={cl("rendered-note-area", "empty", MarkupClasses?.markup)}>No note or tags yet. Click the edit icon to add some!</div>;
+            return <div className={cl("rendered-note-area", "empty", MarkupClasses?.markup, MarkDownClasses?.markdown, MarkDown_Classes?.markdown_5f)}>No note or tags yet. Click the edit icon to add some!</div>;
         }
 
         let parsedTextContent: React.ReactNode = null;
         if (noteText.trim()) {
             try {
-                parsedTextContent = Parser.parse(noteText, true, { channelId: "", guildId: inGuildId, mentioned: true });
+                const isStateInline = false;
+
+                const parseOptions = {
+                    channelId: "",
+                    guildId: inGuildId,
+                    mentioned: true,
+                    renderSpoilers: true,
+                    allowLinks: true,
+                    allowHeading: true,
+                    allowList: true,
+                    allowEmojiLinks: true,
+                };
+                parsedTextContent = Parser.parse(noteText, isStateInline, parseOptions);
             } catch (e) {
                 console.error("ServerNotes: Error parsing note text:", e);
                 parsedTextContent = <div className={cl("parse-error-text")}>Error displaying note content.</div>;
@@ -220,7 +240,7 @@ const ServerNotesModalComponent: React.FC<ServerNotesModalProps> = ({ guild, mod
         }
 
         return (
-            <ScrollerAuto className={cl("rendered-note-area", MarkupClasses?.markup)}>
+            <ScrollerAuto className={`${cl("rendered-note-area")} ${discordMessageStyleClasses}`}>
                 {noteTags.length > 0 && (
                     <div className={cl("tags-view-area")}>
                         {noteTags.map(tag => <TagComponent key={tag} tag={tag} readOnly className={cl("view-mode-tag")} />)}

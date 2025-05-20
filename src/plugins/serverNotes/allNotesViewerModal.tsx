@@ -9,7 +9,7 @@ import "./allNotesViewerStyles.css";
 import { classNameFactory } from "@api/Styles";
 import { Logger as LoggerClass } from "@utils/Logger";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import {
     Button,
     Forms,
@@ -32,8 +32,10 @@ import { getAllNotes, getAllUniqueTags, NoteData } from "./settingsUtils";
 const cl = classNameFactory("vc-all-notes-");
 const logger = new LoggerClass("ServerNotes");
 
-const IconUtils = findByProps("getGuildIconURL", "getChannelIconURL", "getUserAvatarURL");
-const MarkupClasses = findByProps("markup", "markdown", "markupRtl");
+const MarkupClasses = findByPropsLazy("markup");
+const MarkDownClasses = findByPropsLazy("markdown");
+const MarkDown_Classes = findByPropsLazy("markdown");
+const IconUtils = findByPropsLazy("getGuildIconURL");
 
 interface TagPillProps {
     tag: string;
@@ -119,12 +121,31 @@ export const AllNotesViewerModalComponent: React.FC<AllNotesViewerModalProps> = 
         );
     };
 
+    const discordMessageStyleClasses = [
+        MarkupClasses?.markup,
+        MarkDownClasses?.markdown,
+        (MarkDown_Classes as any)?.markdown_5f,
+    ].filter(Boolean).join(" ");
+
     const ParsedNoteSnippet: React.FC<{ noteText: string; guildId: string; }> = ({ noteText, guildId }) => {
         if (!noteText) return <div className={cl("list-item-note-snippet", "empty-text")}>(No text content)</div>;
         const snippet = noteText.length > 200 ? noteText.substring(0, 200) + "..." : noteText;
+        let parsedTextContent: React.ReactNode = null;
         try {
+            const isStateInline = false;
+
+            const parseOptions = {
+                channelId: "",
+                mentioned: true,
+                renderSpoilers: true,
+                allowLinks: true,
+                allowHeading: true,
+                allowList: true,
+                allowEmojiLinks: true,
+            };
+            parsedTextContent = Parser.parse(noteText, isStateInline, parseOptions);
             const parsedContent = Parser.parse(snippet, true, { channelId: "", guildId, mentioned: true });
-            return <div className={cl("list-item-note-snippet", MarkupClasses?.markup)}>{parsedContent}</div>;
+            return <div className={`${cl("list-item-note-snippet")} ${discordMessageStyleClasses}`}>{parsedContent}</div>;
         } catch (e) {
             logger.error("Error parsing note snippet in AllNotesViewerModal", e);
             return <p className={cl("list-item-note-snippet", "parse-error")}>{snippet}</p>;
