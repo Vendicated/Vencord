@@ -222,7 +222,3 @@ app.on("browser-window-created", (_, win) => {
     console.log("[BN] Browser window created!");
     webContents = win.webContents;
 });
-
-app.whenReady().then(_ => {
-    new Notification({ title: "HELLO", body: "HOOO" }).show();
-}); 
