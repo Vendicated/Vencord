@@ -18,7 +18,7 @@ const BookmarkHeaderButton = () => (
 );
 
 export default definePlugin({
-    name: "Bookmark Messages",
+    name: "BookmarkMessages",
     description: "Globally bookmark messages and view them using the top right button.",
     authors: [Devs.zolu],
 
