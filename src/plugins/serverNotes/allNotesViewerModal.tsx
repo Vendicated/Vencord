@@ -242,7 +242,7 @@ export const AllNotesViewerModalComponent: React.FC<AllNotesViewerModalProps> = 
                                         <ParsedNoteSnippet noteText={noteText} guildId={guildId} />
                                         <div className={cl("list-item-actions")}>
                                             <Button size={Button.Sizes.SMALL} onClick={() => guild && openServerNotesModal(guild)} className={cl("action-button")}>Edit</Button>
-                                            <Button size={Button.Sizes.SMALL} look={Button.Looks.LINK} color={Button.Colors.PRIMARY} onClick={() => handleGoToGuild(guildId)} className={cl("action-button", "go-to-server")}>Go to Server</Button>
+                                            <Button size={Button.Sizes.SMALL} color={Button.Colors.GREEN} onClick={() => handleGoToGuild(guildId)} className={cl("action-button", "go-to-server")}>Go to Server</Button>
                                         </div>
                                     </div>
                                 );

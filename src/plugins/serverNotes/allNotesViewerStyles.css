@@ -6,21 +6,33 @@
 
 .vc-all-notes-modal-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     padding: 16px 20px;
     border-bottom: 1px solid var(--background-modifier-accent);
     flex-shrink: 0;
+    background-color: var(--background-secondary-alt);
 }
 
 .vc-all-notes-title {
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--header-primary);
-    line-height: 1.2;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+.vc-all-notes-modal-header .vc-modal-close-button {
+    color: var(--interactive-normal);
+}
+
+.vc-all-notes-modal-header .vc-modal-close-button:hover {
+    color: var(--interactive-hover);
+}
+
 
 .vc-all-notes-filter-controls-area {
     padding: 16px 20px;
@@ -36,67 +48,73 @@
 
 .vc-all-notes-filter-input input {
     font-size: 15px;
+    background-color: var(--input-background);
+    border: 1px solid var(--input-border-color, var(--background-tertiary));
+    border-radius: 4px;
 }
 
-.vc-all-notes-filter-tags-title {
+.vc-all-notes-filter-input input:focus {
+    border-color: var(--input-border-color-focus, var(--brand-experiment));
+}
+
+.vc-all-notes-tag-filter-section .vc-form-title {
     font-size: 12px;
     font-weight: 600;
     color: var(--header-secondary);
     text-transform: uppercase;
     margin-bottom: 8px;
+    padding-left: 0;
 }
 
-.vc-all-notes-tag-filter-buttons-container {
+.vc-all-notes-tag-filter-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    align-items: center;
 }
 
-.vc-all-notes-tag-filter-button {
-    font-size: 13px;
+.vc-all-notes-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 16px;
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-tertiary);
+    color: var(--interactive-normal);
+    font-size: 12px;
     font-weight: 500;
-    padding: 3px 8px !important;
-    border-radius: 4px;
     line-height: 1.2;
-    min-height: auto !important;
+    cursor: default;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.vc-all-notes-tag-filter-button.lookOutlined-3sRXeN {
-    border-width: 1px;
+.vc-all-notes-tag-pill.vc-all-notes-filter {
+    cursor: pointer;
 }
 
-.vc-all-notes-tag-filter-button.lookOutlined-3sRXeN:hover {
-     background-color: var(--background-modifier-hover);
+.vc-all-notes-tag-pill.vc-all-notes-filter:hover,
+.vc-all-notes-tag-pill.vc-all-notes-filter:focus-within {
+    border-color: var(--interactive-hover);
+    background-color: var(--background-modifier-hover);
 }
 
-.vc-all-notes-tag-filter-button.lookFilled-1Gx00P.colorBrand-3pXr91 {
+.vc-all-notes-tag-pill.vc-all-notes-filter.vc-all-notes-selected {
+    background-color: var(--brand-experiment);
+    border-color: var(--brand-experiment-hover);
     color: var(--white-500);
 }
 
-.vc-all-notes-tag-filter-button.lookFilled-1Gx00P.colorBrand-3pXr91:hover {
+.vc-all-notes-tag-pill.vc-all-notes-filter.vc-all-notes-selected:hover {
     background-color: var(--brand-experiment-560);
 }
 
 
-.vc-all-notes-no-tags-available {
-    font-size: 13px;
-    color: var(--text-muted);
-    font-style: italic;
-    padding: 4px 0;
-}
-
-.vc-all-notes-clear-tags-button {
+.vc-all-notes-tag-pill.vc-all-notes-display-tag-pill {
+    background-color: var(--background-secondary-alt);
     font-size: 12px;
-    margin-left: 4px;
-    color: var(--text-link);
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
-.vc-all-notes-clear-tags-button:hover {
-    text-decoration: underline;
-    color: var(--text-link-hover, var(--text-link));
-}
 
 .vc-all-notes-modal-content {
     flex-grow: 1;
@@ -104,6 +122,7 @@
     padding: 0;
     display: flex;
     flex-direction: column;
+    background-color: var(--background-primary);
 }
 
 .vc-all-notes-list-scroller {
@@ -111,7 +130,7 @@
 }
 
 .vc-all-notes-list-container {
-    padding: 0 20px 16px;
+    padding: 16px 20px;
 }
 
 .vc-all-notes-empty-state {
@@ -125,7 +144,7 @@
     color: var(--text-muted);
 }
 
-.vc-all-notes-empty-state-text {
+.vc-all-notes-empty-state p {
     font-size: 16px;
     line-height: 1.4;
 }
@@ -133,8 +152,8 @@
 .vc-all-notes-list-item {
     background-color: var(--background-secondary);
     border: 1px solid var(--background-modifier-accent);
-    border-radius: 5px;
-    padding: 12px 16px;
+    border-radius: 8px;
+    padding: 16px;
     margin-bottom: 12px;
     transition: border-color 0.2s ease, background-color 0.2s ease;
 }
@@ -144,37 +163,37 @@
 }
 
 .vc-all-notes-list-item:hover {
-    border-color: var(--background-modifier-hover);
+    border-color: var(--interactive-hover);
     background-color: var(--background-secondary-alt);
 }
 
 .vc-all-notes-list-item-header {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .vc-all-notes-list-item-guild-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
     margin-right: 10px;
     object-fit: cover;
     background-color: var(--background-accent);
     flex-shrink: 0;
 }
 
-.vc-all-notes-list-item-guild-icon-placeholder {
+.vc-all-notes-list-item-guild-icon.vc-all-notes-placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--interactive-normal);
 }
 
 .vc-all-notes-list-item-guild-name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--header-primary);
     white-space: nowrap;
@@ -187,38 +206,25 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
-.vc-all-notes-tag-pill.vc-all-notes-display-tag-pill {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 2px 6px;
-    border-radius: 3px;
-    background-color: var(--background-tertiary);
-    color: var(--text-normal);
-    border: 1px solid var(--background-modifier-accent);
-    line-height: 1.2;
-}
 
 .vc-all-notes-list-item-note-snippet {
     font-size: 14px;
     color: var(--text-normal);
-    line-height: 1.4;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    max-height: calc(1.4em * 4);
+    line-height: 1.5;
     overflow: hidden;
-    margin: 0;
+    margin: 0 0 12px;
 }
 
-.vc-all-notes-list-item-note-snippet.empty-text,
-.vc-all-notes-list-item-note-snippet.parse-error {
+.vc-all-notes-list-item-note-snippet.vc-all-notes-empty-text,
+.vc-all-notes-list-item-note-snippet.vc-all-notes-parse-error {
     font-style: italic;
     color: var(--text-muted);
 }
 
-.vc-all-notes-list-item-note-snippet.parse-error {
+.vc-all-notes-list-item-note-snippet.vc-all-notes-parse-error {
     color: var(--text-danger);
 }
 
@@ -232,64 +238,13 @@
 .vc-all-notes-action-button {
     font-size: 13px;
     font-weight: 500;
+    min-width: 80px;
 }
 
-.vc-all-notes-tag-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background-color: var(--background-secondary-alt);
-    border: 1px solid var(--input-background);
-    color: var(--text-normal);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1;
-    cursor: default;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.vc-all-notes-tag-pill-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-}
-
-.vc-all-notes-tag-pill-remove {
-    background: none;
-    border: none;
-    color: var(--interactive-muted);
-    cursor: pointer;
-    padding: 0;
-    margin-left: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    transition: color 0.15s ease, background-color 0.15s ease;
-}
-
-.vc-all-notes-tag-pill-remove:hover {
-    color: var(--interactive-hover);
-    background-color: var(--background-modifier-hover);
-}
-
-.vc-all-notes-tag-pill-icon {
-    width: 12px;
-    height: 12px;
-}
-
-.vc-all-notes-tag-pill[role="button"]:hover,
-.vc-all-notes-tag-pill[role="button"]:focus-within {
-    border-color: var(--interactive-hover);
-    background-color: var(--background-modifier-hover);
-}
-
+.vc-all-notes-tag-pill[role="button"]:focus,
 .vc-all-notes-tag-filter-button:focus,
 .vc-all-notes-clear-tags-button:focus,
 .vc-all-notes-action-button:focus {
+    outline: none;
     box-shadow: 0 0 0 2px var(--focus-primary);
 }

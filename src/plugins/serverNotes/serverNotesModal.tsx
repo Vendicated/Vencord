@@ -331,11 +331,11 @@ const ServerNotesModalComponent: React.FC<ServerNotesModalProps> = ({ guild, mod
             <ModalFooter className={cl("modal-footer")}>
                 {isEditing ? (
                     <>
-                        <Button onClick={handleCancelClick} look={Button.Looks.LINK} color={Button.Colors.PRIMARY} className={cl("cancel-button")}>Cancel</Button>
+                        <Button onClick={handleCancelClick} color={Button.Colors.RED} className={cl("cancel-button")}>Cancel</Button>
                         <Button onClick={handleSaveClick} className={cl("save-button")} disabled={!hasUnsavedChanges}>Save</Button>
                     </>
                 ) : (
-                    <div style={{ height: "40px" }} />
+                    <div style={{ minHeight: "40px" }} />
                 )}
             </ModalFooter>
         </ModalRoot>
