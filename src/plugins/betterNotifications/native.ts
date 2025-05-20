@@ -144,16 +144,6 @@ export function notify(event: IpcMainInvokeEvent,
     notificationData: NotificationData,
     extraOptions?: ExtraOptions
 ) {
-
-    let supported = Notification.isSupported();
-    console.log(supported);
-
-    let notif = new Notification({
-        title: "HEaaallo",
-        body: "heii!!",
-    });
-    notif.show();
-
     let promises = [saveAssetToDisk("avatar", { userId, avatarId })];
 
     if (extraOptions?.attachmentUrl) {
