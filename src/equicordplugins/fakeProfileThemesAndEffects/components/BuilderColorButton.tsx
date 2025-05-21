@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Popout } from "@webpack/common";
+import { Popout, useRef } from "@webpack/common";
 
 import { BuilderButton, type BuilderButtonProps, CustomColorPicker, type CustomColorPickerProps } from ".";
 
@@ -13,9 +13,12 @@ export interface BuilderColorButtonProps extends Pick<BuilderButtonProps, "label
     setColor: (color: number | null) => void;
 }
 
+export const buttonRef = useRef(null);
+
 export const BuilderColorButton = ({ label, color, setColor, suggestedColors }: BuilderColorButtonProps) => (
     <Popout
         position="bottom"
+        targetElementRef={buttonRef}
         renderPopout={() => (
             <CustomColorPicker
                 value={color}

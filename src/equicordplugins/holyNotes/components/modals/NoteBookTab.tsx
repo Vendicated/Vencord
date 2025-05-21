@@ -6,7 +6,7 @@
 
 import { classes } from "@utils/misc";
 import { findByCode } from "@webpack";
-import { Button, Clickable, Menu, Popout, React } from "@webpack/common";
+import { Button, Clickable, Menu, Popout, React, useRef } from "@webpack/common";
 
 import { SvgOverFlowIcon } from "../icons/overFlowIcon";
 
@@ -101,6 +101,8 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
         );
     }, [tabs, selectedTabId, onSelectTab, overflowedTabs]);
 
+    const buttonRef = useRef(null);
+
     return (
         <div
             className={classes("vc-notebook-tabbar")}
@@ -137,9 +139,11 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
                     position="bottom"
                     align="right"
                     spacing={0}
+                    targetElementRef={buttonRef}
                 >
                     {props => (
                         <Button
+                            ref={buttonRef}
                             {...props}
                             className={"vc-notebook-overflow-chevron"}
                             size={Button.Sizes.ICON}

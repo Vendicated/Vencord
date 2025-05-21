@@ -7,6 +7,8 @@
 import { Text, Tooltip } from "@webpack/common";
 import type { ComponentProps } from "react";
 
+import { buttonRef } from "./BuilderColorButton";
+
 export interface BuilderButtonProps {
     label?: string | undefined;
     tooltip?: string | undefined;
@@ -32,6 +34,7 @@ export const BuilderButton = ({ label, tooltip, selectedStyle, buttonProps }: Bu
                         borderRadius: "4px",
                         cursor: "pointer"
                     }}
+                    ref={buttonRef}
                 >
                     {!selectedStyle && (
                         <svg
