@@ -34,11 +34,10 @@ export default definePlugin({
     patches: [
         // Taken from AnonymiseFileNames
         {
-            find: "instantBatchUpload:",
+            find: 'type:"UPLOAD_START"',
             replacement: {
-                match: /uploadFiles:(\i),/,
-                replace:
-                    "uploadFiles:(...args)=>(args[0].uploads.forEach(f=>f.filename=$self.fixExt(f)),$1(...args)),",
+                match: /await \i\.uploadFiles\((\i),/,
+                replace: "$1.forEach($self.fixExt),$&"
             },
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
         },
