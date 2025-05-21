@@ -24,7 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Menu, Popout, useState } from "@webpack/common";
+import { Menu, Popout, useRef, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
@@ -95,6 +95,7 @@ function VencordPopoutIcon(isShown: boolean) {
 }
 
 function VencordPopoutButton() {
+    const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 
     return (
@@ -104,10 +105,12 @@ function VencordPopoutButton() {
             animation={Popout.Animation.NONE}
             shouldShow={show}
             onRequestClose={() => setShow(false)}
+            targetElementRef={buttonRef}
             renderPopout={() => VencordPopout(() => setShow(false))}
         >
             {(_, { isShown }) => (
                 <HeaderBarIcon
+                    ref={buttonRef}
                     className="vc-toolbox-btn"
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : "Vencord Toolbox"}
