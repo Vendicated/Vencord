@@ -10,6 +10,8 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { GuildStore } from "@webpack/common";
 
+import VariableString from "./components/VariableString";
+
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const Kangaroo = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 const logger = new Logger("BetterNotifications");
@@ -24,7 +26,7 @@ interface GuildInfo {
     description: string;
 }
 
-const Replacements = [
+export const Replacements = [
     "username",
     "nickname",
     "body",
@@ -39,7 +41,7 @@ type ReplacementMap = {
     [k in typeof Replacements[number]]: string
 };
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     notificationPatchType: {
         type: OptionType.SELECT,
         description: "How notifications are going to be patched. Custom enables features such as attachment previews, but does not work with macOS",
@@ -49,15 +51,61 @@ const settings = definePluginSettings({
         ]
     },
     notificationTitleFormat: {
-        type: OptionType.STRING,
-        description: "Format of the notification title.",
+        type: OptionType.COMPONENT,
+        component: props => {
+            return (
+                <>
+                    <Forms.FormDivider />
+                    < Forms.FormSection title="Notification format settings" >
+                        <Forms.FormText>Available variables:</Forms.FormText>
+                        <ul>
+                            {Replacements.map((variable, index) => {
+                                return <li><Forms.FormText>&#123;{variable}&#125;</Forms.FormText></li>;
+                            })}
+                        </ul>
+                        <Forms.FormDivider />
+
+                        <Forms.FormText>Notification title format</Forms.FormText>
+                        <VariableString setValue={props.setValue} defaultValue={settings.store.notificationTitleFormat} />
+                    </Forms.FormSection >
+                </>
+            );
+        },
         default: "@{username} #{channelName}",
     },
+
     notificationBodyFormat: {
-        type: OptionType.STRING,
-        description: "Format the notification body.",
-        default: "{body}"
+        type: OptionType.COMPONENT,
+        component: props => {
+            return (
+                <>
+                    < Forms.FormSection>
+                        <Forms.FormText>Notification body format</Forms.FormText>
+                        <VariableString setValue={props.setValue} defaultValue={settings.store.notificationBodyFormat} />
+                    </Forms.FormSection >
+                </>
+            );
+        },
+        default: "{body}",
     },
+
+    notificationAttributeText: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            return (
+                <>
+                    < Forms.FormSection>
+                        <Forms.FormText>Attribute text format (Windows only, Anniversary Update required)</Forms.FormText>
+                        <VariableString setValue={props.setValue} defaultValue={settings.store.notificationAttributeText} />
+                    </Forms.FormSection >
+
+                    <Forms.FormDivider />
+                </>
+            );
+        },
+        default: "{groupName}",
+    },
+
     allowBotNotifications: {
         type: OptionType.BOOLEAN,
         description: "Allow desktop notifications from bots",
@@ -66,11 +114,6 @@ const settings = definePluginSettings({
     notificationAttribute: {
         type: OptionType.BOOLEAN,
         description: "Enables attribute text (Windows only, Anniversary Update required)"
-    },
-    notificationAttributeText: {
-        type: OptionType.STRING,
-        description: "Format of the attribution text (Windows only, Anniversary Update required).",
-        default: "{channelName}"
     },
 
     notificationPfpCircle: {
@@ -208,7 +251,7 @@ Native.checkIsMac().then(isMac => {
 
 export default definePlugin({
     name: "BetterNotifications",
-    description: `Improves discord's desktop notifications. \n List of available notification variables: ${Replacements}`,
+    description: `Improves discord's desktop notifications.`,
     authors: [Devs.ctih],
     tags: ["native", "notifications", "better"],
     settings: settings,
@@ -350,21 +393,6 @@ export default definePlugin({
         }
         logger.info(notificationData);
         logger.info(advancedData);
-
-        let channelInfo;
-
-        switch (notificationData.channel_type) {
-            case 0: // servers
-                channelInfo = getChannelInfoFromTitle(notificationTitle);
-                break;
-
-            case 1: // Direct messages
-                channelInfo = {
-                    channel: "DM",
-                    groupName: advancedData.messageRecord.author.globalName ?? "@" + advancedData.messageRecord.author.username
-                };
-                break;
-        }
 
         let title = settings.store.notificationTitleFormat;
         let body = settings.store.notificationBodyFormat;
