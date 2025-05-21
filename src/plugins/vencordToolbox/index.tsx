@@ -25,7 +25,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
@@ -119,7 +119,8 @@ function VencordPopoutButton() {
     );
 }
 
-function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
+function ToolboxFragmentWrapper({ children }: { children: Array<ReactElement<any> | boolean | null>; }) {
+
     children.splice(
         children.length - 1, 0,
         <ErrorBoundary noop={true}>
@@ -132,14 +133,14 @@ function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
 
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
-    authors: [Devs.Ven, Devs.AutumnVN],
+    description: "Adds a button to the window decorations that houses Vencord quick actions",
+    authors: [Devs.Ven, Devs.AutumnVN, Devs.niko],
 
     patches: [
         {
-            find: "toolbar:function",
+            find: "AppTitleBar",
             replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
+                match: /(?<=trailing:.{0,70}\()\i\.Fragment,/,
                 replace: "$self.ToolboxFragmentWrapper,"
             }
         }
