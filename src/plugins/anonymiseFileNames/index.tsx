@@ -21,12 +21,10 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-
-type AnonUpload = Upload & { anonymise?: boolean; };
+import { findByCodeLazy } from "@webpack";
+import { useState } from "@webpack/common";
 
 const ActionBarIcon = findByCodeLazy(".actionBarIcon)");
-const UploadDraft = findByPropsLazy("popFirstFile", "update");
 
 const enum Methods {
     Random,
@@ -34,6 +32,7 @@ const enum Methods {
     Timestamp,
 }
 
+const ANONYMISE_UPLOAD_SYMBOL = Symbol("vcAnonymise");
 const tarExtMatcher = /\.tar\.\w+$/;
 
 const settings = definePluginSettings({
@@ -69,41 +68,44 @@ export default definePlugin({
     name: "AnonymiseFileNames",
     authors: [Devs.fawn],
     description: "Anonymise uploaded file names",
+    settings,
+
     patches: [
         {
-            find: "instantBatchUpload:",
+            find: 'type:"UPLOAD_START"',
             replacement: {
-                match: /uploadFiles:(\i),/,
-                replace:
-                    "uploadFiles:(...args)=>(args[0].uploads.forEach(f=>f.filename=$self.anonymise(f)),$1(...args)),",
+                match: /await \i\.uploadFiles\((\i),/,
+                replace: "$1.forEach($self.anonymise),$&"
             },
         },
         {
             find: 'addFilesTo:"message.attachments"',
             replacement: {
-                match: /(\i.uploadFiles\((\i),)/,
-                replace: "$2.forEach(f=>f.filename=$self.anonymise(f)),$1"
+                match: /\i.uploadFiles\((\i),/,
+                replace: "$1.forEach($self.anonymise),$&"
             }
         },
         {
             find: "#{intl::ATTACHMENT_UTILITIES_SPOILER}",
             replacement: {
                 match: /(?<=children:\[)(?=.{10,80}tooltip:.{0,100}#{intl::ATTACHMENT_UTILITIES_SPOILER})/,
-                replace: "arguments[0].canEdit!==false?$self.renderIcon(arguments[0]):null,"
+                replace: "arguments[0].canEdit!==false?$self.AnonymiseUploadButton(arguments[0]):null,"
             },
         },
     ],
-    settings,
 
-    renderIcon: ErrorBoundary.wrap(({ upload, channelId, draftType }: { upload: AnonUpload; draftType: unknown; channelId: string; }) => {
-        const anonymise = upload.anonymise ?? settings.store.anonymiseByDefault;
+    AnonymiseUploadButton: ErrorBoundary.wrap(({ upload }: { upload: Upload; }) => {
+        const [anonymise, setAnonymise] = useState(upload[ANONYMISE_UPLOAD_SYMBOL] ?? settings.store.anonymiseByDefault);
+
+        function onToggleAnonymise() {
+            upload[ANONYMISE_UPLOAD_SYMBOL] = !anonymise;
+            setAnonymise(!anonymise);
+        }
+
         return (
             <ActionBarIcon
                 tooltip={anonymise ? "Using anonymous file name" : "Using normal file name"}
-                onClick={() => {
-                    upload.anonymise = !anonymise;
-                    UploadDraft.update(channelId, upload.id, draftType, {}); // dummy update so component rerenders
-                }}
+                onClick={onToggleAnonymise}
             >
                 {anonymise
                     ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17.06 13C15.2 13 13.64 14.33 13.24 16.1C12.29 15.69 11.42 15.8 10.76 16.09C10.35 14.31 8.79 13 6.94 13C4.77 13 3 14.79 3 17C3 19.21 4.77 21 6.94 21C9 21 10.68 19.38 10.84 17.32C11.18 17.08 12.07 16.63 13.16 17.34C13.34 19.39 15 21 17.06 21C19.23 21 21 19.21 21 17C21 14.79 19.23 13 17.06 13M6.94 19.86C5.38 19.86 4.13 18.58 4.13 17S5.39 14.14 6.94 14.14C8.5 14.14 9.75 15.42 9.75 17S8.5 19.86 6.94 19.86M17.06 19.86C15.5 19.86 14.25 18.58 14.25 17S15.5 14.14 17.06 14.14C18.62 14.14 19.88 15.42 19.88 17S18.61 19.86 17.06 19.86M22 10.5H2V12H22V10.5M15.53 2.63C15.31 2.14 14.75 1.88 14.22 2.05L12 2.79L9.77 2.05L9.72 2.04C9.19 1.89 8.63 2.17 8.43 2.68L6 9H18L15.56 2.68L15.53 2.63Z" /></svg>
@@ -113,25 +115,31 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    anonymise(upload: AnonUpload) {
-        if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return upload.filename;
-
-        const file = upload.filename;
-        const tarMatch = tarExtMatcher.exec(file);
-        const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
-        const ext = extIdx !== -1 ? file.slice(extIdx) : "";
-
-        switch (settings.store.method) {
-            case Methods.Random:
-                const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                return Array.from(
-                    { length: settings.store.randomisedLength },
-                    () => chars[Math.floor(Math.random() * chars.length)]
-                ).join("") + ext;
-            case Methods.Consistent:
-                return settings.store.consistent + ext;
-            case Methods.Timestamp:
-                return Date.now() + ext;
+    anonymise(upload: Upload) {
+        if ((upload[ANONYMISE_UPLOAD_SYMBOL] ?? settings.store.anonymiseByDefault) === false) {
+            return;
         }
-    },
+
+        const originalFileName = upload.filename;
+        const tarMatch = tarExtMatcher.exec(originalFileName);
+        const extIdx = tarMatch?.index ?? originalFileName.lastIndexOf(".");
+        const ext = extIdx !== -1 ? originalFileName.slice(extIdx) : "";
+
+        const newFilename = (() => {
+            switch (settings.store.method) {
+                case Methods.Random:
+                    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                    return Array.from(
+                        { length: settings.store.randomisedLength },
+                        () => chars[Math.floor(Math.random() * chars.length)]
+                    ).join("") + ext;
+                case Methods.Consistent:
+                    return settings.store.consistent + ext;
+                case Methods.Timestamp:
+                    return Date.now() + ext;
+            }
+        })();
+
+        upload.filename = newFilename;
+    }
 });
