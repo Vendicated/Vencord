@@ -11,8 +11,7 @@ import { ChannelStore, UploadHandler } from "@webpack/common";
 
 import { FFmpegState, Sticker } from "./types";
 
-// eslint-disable-next-line @stylistic/quotes
-const MessageUpload = findByPropsLazy(`type:"UPLOAD_START"`, "uploadFiles");
+const MessageUpload = findByPropsLazy("uploadFiles");
 const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
