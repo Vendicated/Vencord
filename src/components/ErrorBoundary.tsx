@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { LazyComponent, LazyComponentWrapper } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { LazyComponent, LazyComponentWrapper } from "@utils/react";
-import { React } from "@webpack/common";
+import type { React } from "@webpack/common";
 
 import { ErrorCard } from "./ErrorCard";
 
@@ -46,7 +46,9 @@ const NO_ERROR = {};
 // We might want to import this in a place where React isn't ready yet.
 // Thus, wrap in a LazyComponent
 const ErrorBoundary = LazyComponent(() => {
-    return class ErrorBoundary extends React.PureComponent<React.PropsWithChildren<Props>> {
+    // This component is used in a lot of files which end up importing other Webpack commons and causing circular imports.
+    // For this reason, use a non import access here.
+    return class ErrorBoundary extends Vencord.Webpack.Common.React.PureComponent<React.PropsWithChildren<Props>> {
         state = {
             error: NO_ERROR as any,
             stack: "",
