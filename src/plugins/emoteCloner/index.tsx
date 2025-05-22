@@ -66,16 +66,20 @@ async function fetchSticker(id: string) {
     const cached = StickersStore.getStickerById(id);
     if (cached) return cached;
 
-    const { body } = await RestAPI.get({
-        url: Constants.Endpoints.STICKER(id)
-    });
+    try {
+        const { body } = await RestAPI.get({
+            url: Constants.Endpoints.STICKER(id)
+        });
 
-    FluxDispatcher.dispatch({
-        type: "STICKER_FETCH_SUCCESS",
-        sticker: body
-    });
+        FluxDispatcher.dispatch({
+            type: "STICKER_FETCH_SUCCESS",
+            sticker: body
+        });
 
-    return body as Sticker;
+        return body as Sticker;
+    } catch (err) {
+        return null;
+    }
 }
 
 async function cloneSticker(guildId: string, sticker: Sticker) {
@@ -317,6 +321,20 @@ function isGifUrl(url: string) {
     return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
 
+function buildFakeSticker(sticker: Partial<Sticker>) {
+    return {
+        id: sticker?.id,
+        name: sticker?.name,
+        format_type: sticker?.format_type,
+        // Discord has a character limit of at least 1 for tags (aka related emoji)
+        tags: " ",
+        description: "",
+        type: 2,
+        available: true,
+        guild_id: 0
+    };
+}
+
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
@@ -336,10 +354,14 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     isAnimated: isGifUrl(itemHref ?? itemSrc)
                 }));
             case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                const sticker: Partial<Sticker> | undefined = props.message.stickerItems.find(s => s.id === favoriteableId);
                 if (sticker?.format_type === 3 /* LOTTIE */) return;
 
-                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
+                // Workaround for cases when it's not available
+                // (e.g when using MessageLinkEmkbeds)
+                if (sticker === undefined) return;
+
+                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId).then(s => s ?? buildFakeSticker(sticker)));
         }
     })();
 
