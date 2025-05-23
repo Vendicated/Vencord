@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "MoreKaomoji",
-    description: "Adds more Kaomoji to discord. ヽ(´▽`)/",
+    description: "Adds more Kaomoji to discord. ヽ(´▽`)/ (They are all slash commands)",
     authors: [Devs.JacobTm],
     commands: [
         { name: "dissatisfaction", description: " ＞﹏＜" },
@@ -36,6 +36,27 @@ export default definePlugin({
         { name: "confused", description: "(•ิ_•ิ)?" },
         { name: "sleeping", description: "(ᴗ_ᴗ)" },
         { name: "laughing", description: "o(≧▽≦)o" },
+        { name: "laughing1", description: "(＾▽＾)" },
+        { name: "laughing2", description: "（⌒▽⌒）" },
+        { name: "wave", description: "( ´ ∀ ` )ﾉ" },
+        { name: "wave1", description: "ヾ(・ω・)" },
+        { name: "shrug", description: "¯\\_(ツ)_/¯" },
+        { name: "surprised", description: "(O_O)" },
+        { name: "surprised1", description: "Σ(°ロ°)" },
+        { name: "love", description: "(❤ω❤)" },
+        { name: "excited", description: "☆*:.｡.o(≧▽≦)o.｡.:*☆" },
+        { name: "wink", description: "(^_-)-☆" },
+        { name: "lenny", description: "( ͡° ͜ʖ ͡°)" },
+        { name: "cute", description: "(｡◕‿◕｡)" },
+        { name: "bear", description: "ʕ •ᴥ•ʔ" },
+        { name: "bearhug", description: "(/・ω・)/" },
+        { name: "love1", description: "（*＾3＾）/～♡" },
+        { name: "dance", description: "♪┏(°.°)┛┗(°.°)┓┗(°.°)┛┏(°.°)┓♪" },
+        { name: "neko", description: "(≽^°ω°^≼)" },
+        { name: "happy_simple", description: ":)" },
+        { name: "sad_simple", description: ":(" },
+        { name: "tongue_simple", description: ":P" },
+        { name: "surprised_simple", description: ":O" }
 
     ].map(data => ({
         ...data,
