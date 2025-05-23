@@ -449,7 +449,7 @@ export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
                 <div>
                     <div className={clPicker("search-box")}>
                         <TextInput
-                            style={{ height: "30px" }}
+                            style={{ height: "30px", border: "none" }}
 
                             placeholder="Search stickers"
                             autoFocus={true}

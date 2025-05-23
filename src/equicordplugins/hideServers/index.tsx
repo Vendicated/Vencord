@@ -77,8 +77,8 @@ export default definePlugin({
             find: '("guildsnav")',
             replacement: [
                 {
-                    match: /(?<=#{intl::SERVERS}\),children:)(\i)(\)?\.map\(\i\))/g,
-                    replace: "$self.useFilteredGuilds($1)$2",
+                    match: /(?<=#{intl::SERVERS}\),gap:"xs",children:.{0,100}?)(\i)(\.map\(.{5,30}\}\))/,
+                    replace: "$self.useFilteredGuilds($1)$2"
                 },
                 // despite my best efforts, the above doesnt trigger a rerender
                 {

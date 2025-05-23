@@ -1,0 +1,27 @@
+.vc-message-decorations-wrapper .vc-mut-message-tag {
+    margin-bottom: 1px;
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.vc-mut-message-tag {
+    /* Remove default margin from tags in messages */
+    margin-top: unset !important;
+
+    /* Align with Discord default tags in messages */
+    /* stylelint-disable-next-line length-zero-no-unit */
+    bottom: 0px;
+    top: -2px;
+    margin-right: 3px;
+}
+
+.vc-mut-message-verified {
+    height: 1rem !important;
+}
+
+span[class*="botTagCozy"][data-moreTags-darkFg="true"]>svg>path {
+    fill: #000;
+}
+
+span[class*="botTagCozy"][data-moreTags-darkFg="false"]>svg>path {
+    fill: #fff;
+}

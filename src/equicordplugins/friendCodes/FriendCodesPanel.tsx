@@ -6,8 +6,9 @@
 
 import "./styles.css";
 
+import { copyToClipboard } from "@utils/clipboard";
 import { findByPropsLazy } from "@webpack";
-import { Button, Clipboard, Flex, Forms, Parser, Text, useEffect, useState } from "@webpack/common";
+import { Button, Flex, Forms, Parser, Text, useEffect, useState } from "@webpack/common";
 
 import { FriendInvite } from "./types";
 
@@ -51,7 +52,7 @@ function FriendInviteCard({ invite }: { invite: FriendInvite; }) {
                     <CopyButton
                         copyText="Copy"
                         copiedText="Copied!"
-                        onClick={() => Clipboard.copy(`https://discord.gg/${invite.code}`)}
+                        onClick={() => copyToClipboard(`https://discord.gg/${invite.code}`)}
                     />
                 </Flex>
             </Flex>

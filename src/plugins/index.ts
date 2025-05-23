@@ -25,6 +25,7 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
@@ -96,7 +97,7 @@ function isReporterTestable(p: Plugin, part: ReporterTestable) {
 
 const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
     "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-    "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+    "renderChatBarButton", "renderMemberListDecorator", "renderNicknameIcon", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
 ];
 
 const neededApiPlugins = new Set<string>();
@@ -128,10 +129,11 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
     if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
     if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
     if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
+    if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
     if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
     if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
     if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
-    if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+    if (p.userProfileBadges) neededApiPlugins.add("BadgeAPI");
 
     for (const key of pluginKeysToBind) {
         p[key] &&= p[key].bind(p) as any;
@@ -259,9 +261,9 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.start) {
@@ -305,7 +307,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     if (managedStyle) enableStyle(managedStyle);
 
-    if (userProfileBadge) addProfileBadge(userProfileBadge);
+    if (userProfileBadges) userProfileBadges.forEach(e => addProfileBadge(e));
 
     if (onBeforeMessageEdit) addMessagePreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
@@ -313,6 +315,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
+    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
@@ -322,9 +325,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.stop) {
@@ -366,7 +369,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (managedStyle) disableStyle(managedStyle);
 
-    if (userProfileBadge) removeProfileBadge(userProfileBadge);
+    if (userProfileBadges) userProfileBadges.forEach(e => removeProfileBadge(e));
 
     if (onBeforeMessageEdit) removeMessagePreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
@@ -374,6 +377,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (renderChatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
+    if (renderNicknameIcon) removeNicknameIcon(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (renderMessagePopoverButton) removeMessagePopoverButton(name);

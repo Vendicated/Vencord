@@ -15,11 +15,13 @@ export default definePlugin({
 
     noop: () => { },
 
-    patches: [{
-        find: /\.openNativeAppModal\(.{0,50}?\.DEEP_LINK/,
-        replacement: {
-            match: /\i\.\i\.openNativeAppModal/,
-            replace: "$self.noop",
+    patches: [
+        {
+            find: /\.openNativeAppModal\(.{0,50}?\.DEEP_LINK/,
+            replacement: {
+                match: /\i\.\i\.openNativeAppModal/,
+                replace: "$self.noop",
+            }
         }
-    }]
+    ]
 });

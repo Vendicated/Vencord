@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -27,8 +28,7 @@ export type ClickableProps<T extends "a" | "div" | "span" | "li" = "div"> = Prop
 export function IconTooltip({ children, copy, className, ...props }: ClickableProps & { children: string; copy: string; }) {
     return <TooltipContainer text={"Click to copy"} className={className}>
         <Clickable onClick={() => {
-            // @ts-ignore
-            Clipboard.copy(copy);
+            copyToClipboard(copy);
         }} {...props}>{children}</Clickable>
     </TooltipContainer>;
 }

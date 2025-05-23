@@ -39,7 +39,6 @@ export interface Settings {
     themeLinks: string[];
     frameless: boolean;
     transparent: boolean;
-    updateRelaunch: boolean;
     winCtrlQ: boolean;
     macosVibrancyStyle:
     | "content"
@@ -101,7 +100,6 @@ const DefaultSettings: Settings = {
     winCtrlQ: false,
     macosVibrancyStyle: undefined,
     disableMinSize: false,
-    updateRelaunch: false,
     winNativeTitleBar: false,
     plugins: {},
 

@@ -62,8 +62,16 @@ check_for_updates() {
     local_modified=$(stat -c "%y" "$INSTALLER_PATH" | cut -d' ' -f1-2) || error "Failed to get local modified date"
 
     if [ "$local_modified" != "$latest_modified" ]; then
-        echo -e "${YELLOW}Installer is outdated. Updating...${NC}"
-        download_installer
+        echo -e "${YELLOW}Installer is outdated. Do you wish to update? [y/n]${NC}"
+        read -p "" -n 1 -r retval
+
+        # Create a new line before printing our next notice, otherwise it will be printed on the same line
+        # that the prompt was created on!
+        echo ""
+        case "$retval" in
+            y|Y ) download_installer;;
+            n|N ) echo -e "${YELLOW}Update cancelled. Running installer...${NC}" && return;;
+        esac
     else
         echo -e "${GREEN}Installer is up-to-date.${NC}"
     fi

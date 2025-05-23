@@ -1,4 +1,4 @@
-# Equicord [<img src="./browser/icon.png" width="225" align="left" alt="Equicord">](https://github.com/Equicord/Equicord)
+# [<img src="./browser/icon.png" width="40" align="left" alt="Equicord">](https://github.com/Equicord/Equicord) Equicord
 
 [![Equibop](https://img.shields.io/badge/Equibop-grey?style=flat)](https://github.com/Equicord/Equibop)
 [![Tests](https://github.com/Equicord/Equicord/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Equicord/Equicord/actions/workflows/test.yml)
@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>163 additional plugins</summary>
+<summary>175 additional plugins</summary>
 
 ### All Platforms
 
@@ -25,20 +25,21 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterAudioPlayer by creations
 - BetterBanReasons by Inbestigator
-- BetterBlockedUsers by TheArmagan & Elvyra
+- BetterBlockedUsers by TheArmagan
 - BetterInvites by iamme
 - BetterPlusReacts by Joona
 - BetterQuickReact by Ven & Sqaaakoi
 - BlockKeywords by catcraft
 - BlockKrisp by D3SOX
+- BypassPinPrompt by thororen
 - BypassStatus by Inbestigator & thororen
 - ChannelBadges by Creations
 - ChannelTabs by TheSun, TheKodeToad, keifufu, Nickyux
 - CharacterCounter by Creations & Panniku
 - CleanChannelName by AutumnVN
 - ClientSideBlock by Samwich
-- ClipsEnhancements by niko
 - CommandPalette by Ethan
+- CopyStickerLinks by Byeoon
 - CopyUserMention by Cortex & castdrian
 - CustomSounds by TheKodeToad & SpikeHD
 - CustomTimestamps by Rini & nvhrr
@@ -51,17 +52,18 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - DisableAnimations by S€th
 - DisableCameras by Joona
 - DontFilterMe by Samwich
-- EmojiDumper by Cortex, Samwich, Woosh
 - Encryptcord by Inbestigator
-- EquicordCSS by thororen, Panniku, Dablulite, Coolesding, MiniDiscordThemes, LuckFire, gold_me
 - EquicordHelper by thororen & nyx
 - Equissant by SomeAspy & thororen
 - ExportContacts by dat_insanity
 - FakeProfileThemesAndEffects by ryan
+- CopyProfileColors by Crxa
+- FastDeleteChannels by thororen
 - FindReply by newwares
 - FixFileExtensions by thororen
 - FollowVoiceUser by TheArmagan
 - FontLoader by vmohammad
+- ForwardAnywhere by thororen
 - Freaky by nyx
 - FrequentQuickSwitcher by Samwich
 - FriendCodes by HypedDomi
@@ -75,6 +77,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GoogleThat by Samwich
+- GuildPickerDumper by Cortex, Samwich, Synth, thororen
 - HideChatButtons by iamme
 - HideServers by bepvte
 - HolyNotes by Wolfie
@@ -87,6 +90,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - IgnoreTerms by D3SOX
 - ImagePreview by Creations
 - ImgToGif by zyqunix
+- Ingtoninator by zyqunix
 - InRole by nin0dev
 - InstantScreenshare by HAHALOSAH & thororen
 - IRememberYou by zoodogood
@@ -94,6 +98,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
 - KeywordNotify by camila314 & x3rt
+- LastActive by Crxa
 - LimitMiddleClickPaste by no dev listed
 - LoginWithQR by nexpid
 - MediaPlaybackSpeed by D3SOX
@@ -105,6 +110,8 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
 - MoreStickers by Leko & Arjix
+- MoreUserTags by Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN, hen
+- Morse by zyqunix
 - NeverPausePreviews by vappstar
 - NewPluginsManager by Sqaaakoi
 - NoAppsAllowed by kvba
@@ -113,9 +120,9 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - NoMirroredCamera by Nyx
 - NoModalAnimation by AutumnVN
 - NoNitroUpsell by thororen
+- NoOnboarding by omaw & Glitch
 - NoRoleHeaders by Samwich
 - NotificationTitle by Kyuuhachi
-- OnePingPerDM by ProffDea
 - PingNotifications by smuki
 - PinIcon by iamme
 - PlatformSpoofer by Drag
@@ -124,7 +131,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - QuestCompleter by Amia
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
-- RandomVoice by xijexo & omaw
+- RandomVoice by xijexo, omaw, thororen
 - Remix by MrDiamond
 - RemixMe by kvba
 - RepeatMessage by Tolgchu
@@ -138,7 +145,10 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - SidebarChat by Joona
 - Signature by Ven, Rini, ImBanana, KrystalSkull
 - Slap by Korbo
+- Soggy by sliwka
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
+- SplitLargeMessages by Reycko
+- SpotifyActivityToggle by thororen
 - SpotifyLyrics by Joona
 - StatsfmPresence by Crxa
 - StatusPresets by iamme
@@ -150,6 +160,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ThemeLibrary by Fafa
 - Timezones by Aria
 - Title by Kyuuhachi
+- ToastNotifications by Skully, Ethan, Buzzy
 - ToggleVideoBind by mochie
 - TosuRPC by AutumnVN
 - Translate+ by Prince527 & Ven
@@ -166,6 +177,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ViewRawVariant by Kyuuhachi
 - VoiceChatUtilities by D3SOX
 - VoiceJoinMessages by Sqaaakoi & maintained by thororen
+- WallpaperFree by Joona
 - WebpackTarball by Kyuuhachi
 - WhitelistedEmojis by Creations
 - WhosWatching by fres
@@ -184,6 +196,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Discord Desktop Only
 
+- ClipsEnhancements by niko
 - MediaDownloader by Colorman
 - StatusWhilePlaying by thororen
 
@@ -209,7 +222,6 @@ MacOS
 Linux
 
 - [GUI-X11](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-x11)
-- [GUI-Wayland](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-wayland)
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
 - [AUR](https://aur.archlinux.org/packages?O=0&K=equicord)
 

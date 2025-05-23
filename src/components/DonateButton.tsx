@@ -22,7 +22,26 @@ import { ButtonProps } from "@webpack/types";
 
 import { Heart } from "./Heart";
 
-export default function DonateButton({
+export function VCDonateButton({
+    look = Button.Looks.LINK,
+    color = Button.Colors.TRANSPARENT,
+    ...props
+}: Partial<ButtonProps>) {
+    return (
+        <Button
+            {...props}
+            look={look}
+            color={color}
+            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
+            innerClassName="vc-donate-button"
+        >
+            <Heart />
+            Donate
+        </Button>
+    );
+}
+
+export function DonateButton({
     look = Button.Looks.LINK,
     color = Button.Colors.TRANSPARENT,
     ...props

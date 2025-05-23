@@ -55,7 +55,7 @@ interface ContextMenuProps {
 }
 
 const ArrowsLeftRightIcon = findComponentByCodeLazy("18.58V3a1");
-const XSmallIcon = findComponentByCodeLazy("12l4.94-4.94a1.5")
+const XSmallIcon = findComponentByCodeLazy("12l4.94-4.94a1.5");
 
 function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallback {
     return (children, { user, channel, guildId }: ContextMenuProps) => {
@@ -149,7 +149,7 @@ export default definePlugin({
                                 }}
                             />
                             <HeaderBarIcon
-                                icon={() => (<XSmallIcon style={{width: "24px",height: "24px"}} />)}
+                                icon={() => (<XSmallIcon style={{ width: "24px",height: "24px" }} />)}
                                 tooltip="Close Sidebar Chat"
                                 onClick={() => {
                                     FluxDispatcher.dispatch({

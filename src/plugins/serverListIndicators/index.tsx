@@ -25,7 +25,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { GuildStore, PresenceStore, RelationshipStore, Tooltip, useStateFromStores } from "@webpack/common";
+import { GuildStore, PresenceStore, RelationshipStore, Text, Tooltip, useStateFromStores } from "@webpack/common";
 
 const enum IndicatorType {
     SERVER = 1 << 0,
@@ -74,9 +74,11 @@ function FriendsIndicator() {
                     </path>
                 </svg>
             }
-            <span id="vc-friendcount-text">{onlineFriendsCount}
-                {!!settings.store.useCompact && <span id="vc-friendcount-text-compact">Friends</span>}
-            </span>
+            <Text
+                variant="text-xs/normal"
+                id="vc-friendcount-text">{onlineFriendsCount}
+            </Text>
+            {!!settings.store.useCompact && <Text variant="text-xs/normal" id="vc-friendcount-text-compact">Friends</Text>}
         </div>
     );
 }
@@ -108,9 +110,11 @@ function ServersIndicator() {
                     </path>
                 </svg>
             }
-            <span id="vc-guildcount-text">{guildCount}
-                {!!settings.store.useCompact && <span id="vc-guildcount-text-compact">Servers</span>}
-            </span>
+            <Text
+                variant="text-xs/normal"
+                id="vc-guildcount-text">{guildCount}
+            </Text>
+            {!!settings.store.useCompact && <Text variant="text-xs/normal" id="vc-guildcount-text-compact">Servers</Text>}
         </div>
     );
 }

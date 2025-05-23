@@ -261,7 +261,7 @@ page.on("console", async e => {
         const [, tag, message, otherMessage] = args as Array<string>;
 
         switch (tag) {
-            case "WebpackInterceptor:":
+            case "WebpackPatcher:":
                 const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/);
                 const patchSlowMatch = message.match(/Patch by (.+?) (took [\d.]+?ms) \(Module id is (.+?)\): (.+)/);
                 const match = patchFailMatch ?? patchSlowMatch;
@@ -315,11 +315,9 @@ page.on("console", async e => {
                         report.badWebpackFinds.push(otherMessage);
                         break;
                     case "Finished test":
+                        await browser.close();
                         await printReport();
-                        setTimeout(async () => {
-                            await browser.close();
-                            process.exit();
-                        }, 10000);
+                        process.exit();
                 }
         }
     }
@@ -358,4 +356,4 @@ await page.evaluateOnNewDocument(`
     }
 `);
 
-await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
+await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login", { timeout: 120000 });

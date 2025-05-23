@@ -9,7 +9,7 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, ReactDOM, useEffect, useState } from "@webpack/common";
+import { createRoot, FluxDispatcher, useEffect, useState } from "@webpack/common";
 import { Root } from "react-dom/client";
 
 let jumpscareRoot: Root | undefined;
@@ -38,7 +38,7 @@ function getJumpscareRoot(): Root {
         element.id = "jumpscare-root";
         element.classList.add("jumpscare-root");
         document.body.append(element);
-        jumpscareRoot = ReactDOM.createRoot(element);
+        jumpscareRoot = createRoot(element);
     }
 
     return jumpscareRoot;

@@ -49,7 +49,7 @@ export async function getLyricsLrclib(track: Track): Promise<LyricsData | null> 
     if (!data.syncedLyrics) return null;
 
     const lyrics = data.syncedLyrics;
-    const lines = lyrics.split("\n");
+    const lines = lyrics.split("\n").filter(line => line.trim() !== "");
 
     return {
         useLyric: Provider.Lrclib,

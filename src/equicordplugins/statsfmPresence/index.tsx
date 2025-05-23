@@ -160,11 +160,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
-    enableGameActivity: {
-        description: "Enable game activity for Stats.fm", // Credit to LastfmPresence for this setting
-        type: OptionType.BOOLEAN,
-        default: false,
-    },
     statusName: {
         description: "Custom status text",
         type: OptionType.STRING,
@@ -275,11 +270,6 @@ export default definePlugin({
             }
 
             const trackData = json.item.track;
-            if (settings.store.enableGameActivity && trackData) {
-                ShowCurrentGame.updateSetting(true);
-            } else if (settings.store.enableGameActivity) {
-                ShowCurrentGame.updateSetting(false);
-            }
             if (!trackData) return null;
             return {
                 name: trackData.name || "Unknown",

@@ -41,17 +41,15 @@
     border-bottom: 2px solid var(--background-modifier-accent);
     margin: 20px 12px 0;
     display: flex;
-    gap: 40px;
     align-items: stretch;
     flex-direction: row;
+    justify-content: center;
 }
 
 .vc-gp-tab {
     border-bottom: 2px solid transparent;
     color: var(--interactive-normal);
     cursor: pointer;
-    height: 39px;
-    margin-right: -10px;
     line-height: 14px;
 }
 

@@ -167,22 +167,16 @@ export default definePlugin({
         },
     ],
 
-    patches: [{
-        find: ".isPureReactComponent=!0;",
-        predicate: () => settings.store.uwuEverything,
-        replacement: {
-            match: /(?<=.defaultProps\)void 0.{0,60})props:(\i)/,
-            replace: "props:$self.uwuifyProps($1)"
+    patches: [
+        {
+            find: ".isPureReactComponent=!0;",
+            predicate: () => settings.store.uwuEverything,
+            replacement: {
+                match: /(?<=.defaultProps\)void 0.{0,60})(\i)\)/,
+                replace: "$self.uwuifyProps($1))"
+            }
         }
-    }, {
-        find: ".__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner",
-        predicate: () => settings.store.uwuEverything,
-        replacement: {
-            match: /(?<=.defaultProps\)void 0.{0,60})props:(\i)/,
-            replace: "props:$self.uwuifyProps($1)"
-        },
-        all: true
-    }],
+    ],
 
     uwuifyProps(props: any) {
         if (!props.children) return props;

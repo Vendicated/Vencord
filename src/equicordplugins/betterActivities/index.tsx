@@ -35,7 +35,7 @@ export default definePlugin({
     patches: [
         {
             // Patch activity icons
-            find: '"activity-status-web"',
+            find: "isBlockedOrIgnored(null",
             replacement: {
                 match: /(?<=hideTooltip:.{0,4}}=(\i).*?{}\))\]/,
                 replace: ",$self.patchActivityList($1)]"
@@ -44,9 +44,9 @@ export default definePlugin({
         },
         {
             // Show all activities in the user popout/sidebar
-            find: '"UserProfilePopoutBody"',
+            find: "hasAvatarForGuild(null",
             replacement: {
-                match: /(?<=(\i)\.id\)\}\)\),(\i).*?)\(0,.{0,100}\i\.activity\}\)/,
+                match: /(?<=(\i)\.id\)\}\)\),(\i).*?)\(0,.{0,100}\i\.id,onClose:\i\}\)/,
                 replace: "$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
             },
             predicate: () => settings.store.userPopout

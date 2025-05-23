@@ -11,8 +11,7 @@ import { ChannelStore, UploadHandler } from "@webpack/common";
 
 import { FFmpegState, Sticker } from "./types";
 
-
-const MessageUpload = findByPropsLazy("instantBatchUpload");
+const MessageUpload = findByPropsLazy("uploadFiles");
 const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");

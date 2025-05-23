@@ -58,8 +58,8 @@ export default definePlugin({
             replacement: [
                 {
                     // We add the banner as a property while we can still access the user id
-                    match: /(?<=nameplate:(\i).*?)verified:(\i).isVerifiedBot.*?name:null.*?(?=avatar:)/,
-                    replace: "$&banner:$self.memberListBannerHook($2, $1),",
+                    match: /user:(\i).{0,150}nameplate:(\i).*?name:null.*?(?=avatar:)/,
+                    replace: "$&banner:$self.memberListBannerHook($1, $2),",
                 },
                 {
                     match: /(?<=\),nameplate:)(\i)/,
@@ -112,7 +112,7 @@ export default definePlugin({
         }
 
         return (
-            <img id={`vc-banners-everywhere-${user.id}`} src={url} className="vc-banners-everywhere-memberlist"></img>
+            <img alt="" id={`vc-banners-everywhere-${user.id}`} src={url} className="vc-banners-everywhere-memberlist"></img>
         );
     },
 

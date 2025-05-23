@@ -102,38 +102,20 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
                 store.emitChange();
                 return;
             }
-            // stops spamming noftications for translation when there is no lyrics x1
+
             if (provider === Provider.Translated || provider === Provider.Romanized) {
-                if (!currentInfo?.useLyric || !currentInfo.lyricsVersions[currentInfo.useLyric]) {
-                    console.log("Failed to Translate");
-                    const now = Date.now();
-                    if (!window.__lastTranslateFailure) {
-                        window.__lastTranslateFailure = now;
-                    } else if (now - window.__lastTranslateFailure < 120000) { // 2 minutes
-                        window.__lastTranslateFailure = null;
-                        return null;
-                    } else {
-                        window.__lastTranslateFailure = now;
-                    }
-                    return null;
+                if (!currentInfo?.lyricsVersions[Provider.Spotify] && !currentInfo?.lyricsVersions[Provider.Lrclib]) {
+                    showNotif("No lyrics", `No lyrics to ${provider === Provider.Translated ? "translate" : "romanize"}`);
+                    return;
                 }
 
                 const fetcher = provider === Provider.Translated ? translateLyrics : romanizeLyrics;
 
                 const fetchResult = await fetcher(currentInfo.lyricsVersions[currentInfo.useLyric]);
-                // stops spamming noftications for when there is no lyrics / cannot be translated x2
+
                 if (!fetchResult) {
-                    console.log("Lyrics fetch failed", `Failed to fetch ${provider === Provider.Translated ? "translation" : "romanization"}`);
-                    const now = Date.now();
-                    if (!window.__lastTranslateFailure) {
-                        window.__lastTranslateFailure = now;
-                    } else if (now - window.__lastTranslateFailure < 120000) { // 2 minutes
-                        window.__lastTranslateFailure = null;
-                        return null;
-                    } else {
-                        window.__lastTranslateFailure = now;
-                    }
-                    return null;
+                    showNotif("Lyrics fetch failed", `Failed to fetch ${provider === Provider.Translated ? "translation" : "romanization"}`);
+                    return;
                 }
 
                 store.lyricsInfo = {
@@ -141,7 +123,7 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
                     useLyric: provider,
                     lyricsVersions: {
                         ...currentInfo.lyricsVersions,
-                        [Provider.Translated]: fetchResult
+                        [provider]: fetchResult
                     }
                 };
 
@@ -152,19 +134,9 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
             }
 
             const newLyricsInfo = await lyricFetchers[e.provider](store.track!);
-            // stops spamming noftications for when there is no lyrics / cannot be translated x3
             if (!newLyricsInfo) {
-                console.log("Lyrics fetch failed", `Failed to fetch ${e.provider} lyrics`);
-                const now = Date.now();
-                if (!window.__lastLyricsFetchFailure) {
-                    window.__lastLyricsFetchFailure = now;
-                } else if (now - window.__lastLyricsFetchFailure < 120000) { // 2 minutes
-                    window.__lastLyricsFetchFailure = null;
-                    return null;
-                } else {
-                    window.__lastLyricsFetchFailure = now;
-                }
-                return null;
+                showNotif("Lyrics fetch failed", `Failed to fetch ${e.provider} lyrics`);
+                return;
             }
 
             store.lyricsInfo = newLyricsInfo;

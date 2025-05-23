@@ -32,7 +32,7 @@ export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & GenericStore
     getMessages(chanId: string): any;
 };
 
-// this is not actually a FluxStore
+// TODO: The correct name for this is ChannelActionCreators and it has already been exported again from utils. Remove this export once enough time has passed
 export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
 export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
@@ -54,6 +54,7 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
 };
 
 export let EmojiStore: t.EmojiStore;
+export let StickersStore: t.StickersStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
@@ -86,5 +87,10 @@ waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
-waitForStore("ThemeStore", m => ThemeStore = m);
+waitForStore("ThemeStore", m => {
+    ThemeStore = m;
+    // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
+    Vencord.QuickCss.initQuickCssThemeStore();
+});

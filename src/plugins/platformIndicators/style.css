@@ -2,6 +2,16 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    vertical-align: top;
+    gap: 2px;
+}
+
+.vc-platform-indicator-profile {
+    margin: 0 1px;
+    padding: 0 1px;
+}
+
+.vc-platform-indicator-message {
     position: relative;
+    vertical-align: top;
+    top: -1px;
 }

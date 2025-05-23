@@ -122,7 +122,7 @@ function ThemeTab() {
 
     useEffect(() => {
         setThemeLinks(Vencord.Settings.themeLinks);
-    }, [Vencord.Settings.themeLinks]);
+    }, []);
 
     useEffect(() => {
         // likes only update after 12_000 due to cache

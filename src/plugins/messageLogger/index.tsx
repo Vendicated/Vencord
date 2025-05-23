@@ -14,7 +14,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, VC_SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
@@ -318,16 +318,9 @@ export default definePlugin({
                 ChannelStore.getChannel(message.channel_id)?.parent_id,
             ) ||
             (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(
-                ChannelStore.getChannel(message.channel_id)?.guild_id,
-            ) ||
-            // Ignore Venbot in the support channel
-            (message.channel_id === "1026515880080842772" &&
-                message.author?.id === "1017176847865352332") ||
-            // Ignore VOT on dev-playground
-            (message.channel_id === "1297239805972709521" &&
-                message.author?.id === "1199905841004937257")
-        );
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            // Ignore Venbot in the support channels
+            (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === VC_SUPPORT_CATEGORY_ID));
     },
 
     EditMarker({ message, className, children, ...props }: any) {
@@ -496,20 +489,21 @@ export default definePlugin({
 
         {
             // Message content renderer
+            find: ".SEND_FAILED,",
+            replacement: {
+                // Render editHistory behind the message content
+                match: /\.isFailed]:.+?children:\[/,
+                replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
+            }
+        },
+
+        {
             find: "#{intl::MESSAGE_EDITED}",
-            replacement: [
-                {
-                    // Render editHistory in the deepest div for message content
-                    match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace:
-                        "$1 (!!arguments[0].message.editHistory?.length && $self.renderEdits(arguments[0])),",
-                },
-                {
-                    // Make edit marker clickable
-                    match: /"span",\{(?=className:\i\.edited,)/,
-                    replace: "$self.EditMarker,{message:arguments[0].message,",
-                },
-            ],
+            replacement: {
+                // Make edit marker clickable
+                match: /"span",\{(?=className:\i\.edited,)/,
+                replace: "$self.EditMarker,{message:arguments[0].message,"
+            }
         },
 
         {

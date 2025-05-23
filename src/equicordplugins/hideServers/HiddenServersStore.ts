@@ -24,7 +24,7 @@ export const HiddenServersStore = proxyLazyWebpack(() => {
         // id try to use .initialize() but i dont know how it works
         public async load() {
             const data = await DataStore.get(DB_KEY);
-            if (data) {
+            if (data && data instanceof Set) {
                 this._hiddenGuilds = data;
             }
         }

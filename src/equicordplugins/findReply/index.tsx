@@ -21,7 +21,7 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, MessageStore, ReactDOM, Toasts } from "@webpack/common";
+import { ChannelStore, createRoot, MessageStore, Toasts } from "@webpack/common";
 import Message from "discord-types/general/Message";
 import { Root } from "react-dom/client";
 
@@ -101,7 +101,7 @@ export default definePlugin({
                                 madeComponent = true;
                                 element = document.createElement("div");
                                 document.querySelector("[class^=base_]")!.appendChild(element);
-                                root = ReactDOM.createRoot(element);
+                                root = createRoot(element);
                             }
                             root!.render(<ReplyNavigator replies={replies} />);
                         }

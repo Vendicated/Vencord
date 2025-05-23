@@ -10,6 +10,10 @@ on:
                     - stable
                     - canary
                 default: both
+            webhook_url:
+                type: string
+                description: "Webhook URL that the report will be posted to. This will be visible for everyone, so DO NOT pass sensitive webhooks like discord webhook. This is meant to be used by Venbot."
+                required: false
     schedule:
         #   # Every day at midnight
         - cron: 0 0 * * *
@@ -17,7 +21,7 @@ on:
 jobs:
     TestPlugins:
         name: Test Patches
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v4
@@ -87,5 +91,5 @@ jobs:
                   cat "$stable_output_file" "$canary_output_file" >> $GITHUB_STEP_SUMMARY
                   exit $exit_code
               env:
-                  WEBHOOK_URL: ${{ secrets.WEBHOOK }}
+                  WEBHOOK_URL: ${{ inputs.webhook_url || secrets.WEBHOOK_URL }}
                   WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}

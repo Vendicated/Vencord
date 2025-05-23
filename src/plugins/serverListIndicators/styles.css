@@ -12,10 +12,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
     border-radius: 24%;
     height: var(--guildbar-avatar-size);
     width: var(--guildbar-avatar-size);
-    background-color: var(--background-surface-higher);
+    background-color: var(--background-mod-subtle);
     transition: border-radius 0.15s ease-out, background-color 0.15s ease-out;
 }
 
@@ -56,7 +57,8 @@
 #vc-guildcount {
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 4px;
     font-size: 12px;
     font-weight: 600;
     width: 100%;
@@ -65,6 +67,6 @@
 
 #vc-friendcount-icon,
 #vc-guildcount-icon {
-    width: var(--size-12);
-    height: var(--size-12);
+    width: var(--size-14);
+    height: var(--size-14);
 }

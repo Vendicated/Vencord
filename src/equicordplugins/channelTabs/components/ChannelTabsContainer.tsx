@@ -20,6 +20,8 @@ const PlusSmallIcon = findComponentByCodeLazy("0v-5h5a1");
 
 const cl = classNameFactory("vc-channeltabs-");
 
+const isMac = navigator.platform.toLowerCase().startsWith("mac");
+
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     const [userId, setUserId] = useState("");
     const { showBookmarkBar, widerTabsAndBookmarks } = settings.use(["showBookmarkBar", "widerTabsAndBookmarks"]);
@@ -66,6 +68,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
             className={cl("container")}
             ref={ref}
             onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
+            style={{ marginTop: isMac ? "28px" : "0" }}
         >
             <div className={cl("tab-container")}>
                 {openedTabs.map((tab, i) =>

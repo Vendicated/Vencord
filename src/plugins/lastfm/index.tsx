@@ -132,11 +132,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
-    enableGameActivity: {
-        description: "Enable game activity for last.fm",
-        type: OptionType.BOOLEAN,
-        default: false,
-    },
     statusName: {
         description: "custom status text",
         type: OptionType.STRING,
@@ -306,11 +301,6 @@ export default definePlugin({
         }
 
         const trackData = await this.fetchTrackData();
-        if (settings.store.enableGameActivity && trackData) {
-            ShowCurrentGame.updateSetting(true);
-        } else if (settings.store.enableGameActivity) {
-            ShowCurrentGame.updateSetting(false);
-        }
         if (!trackData) return null;
 
         const largeImage = this.getLargeImage(trackData);

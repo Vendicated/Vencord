@@ -10,10 +10,11 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
+import { copyToClipboard } from "@utils/clipboard";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, Button, Clipboard, ContextMenuApi, FluxDispatcher, Forms, Menu, React, showToast, TextInput, Toasts, useCallback, useState } from "@webpack/common";
+import { Alerts, Button, ContextMenuApi, FluxDispatcher, Forms, Menu, React, showToast, TextInput, Toasts, useCallback, useState } from "@webpack/common";
 
 import { addToCollection, cache_collections, createCollection, DATA_COLLECTION_NAME, deleteCollection, fixPrefix, getCollections, getGifById, getItemCollectionNameFromId, moveGifToCollection, refreshCacheCollection, removeFromCollection, renameCollection } from "./utils/collectionManager";
 import { getFormat } from "./utils/getFormat";
@@ -526,7 +527,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                     action={() => {
                         const gifInfo = getGifById(nameOrId);
                         if (!gifInfo) return;
-                        Clipboard.copy(gifInfo.url);
+                        copyToClipboard(gifInfo.url);
                         showToast("URL copied to clipboard", Toasts.Type.SUCCESS);
                     }}
                 />

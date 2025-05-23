@@ -62,7 +62,7 @@ export type FindData = {
     args: FindNode[];
 };
 
-export type IncomingMessage = DisablePlugin | RawId | DiffPatch | Reload | ExtractModule | TestPatch | TestFind | AllModules;
+export type IncomingMessage = DisablePlugin | RawId | DiffPatch | Reload | ExtractModule | TestPatch | TestFind | AllModules | I18nLookup;
 export type FullIncomingMessage = IncomingMessage & { nonce: number; };
 
 export type DisablePlugin = {
@@ -70,6 +70,13 @@ export type DisablePlugin = {
     data: {
         enabled: boolean;
         pluginName: string;
+    };
+};
+
+export type I18nLookup = {
+    type: "i18n";
+    data: {
+        hashedKey: string;
     };
 };
 

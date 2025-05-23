@@ -5,10 +5,11 @@
  */
 
 import { definePluginSettings, Settings } from "@api/Settings";
+import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Clipboard, Forms, TextInput, Toasts, useState } from "@webpack/common";
+import { Button, Forms, TextInput, Toasts, useState } from "@webpack/common";
 
 import { darkenColorHex, generateRandomColorHex, saturateColorHex } from "./generateTheme";
 import { themes } from "./themeDefinitions";
@@ -58,10 +59,7 @@ function copyPreset(name: string) {
     name: "${name}"
 }
     `;
-    if (Clipboard.SUPPORTS_COPY) {
-        Clipboard.copy(template);
-    }
-
+    copyToClipboard(template);
 }
 
 function CopyPresetComponent() {
@@ -229,9 +227,7 @@ export function ColorPick({ propertyname }: { propertyname: string; }) {
 
 
 function copyCSS() {
-    if (Clipboard.SUPPORTS_COPY) {
-        Clipboard.copy(getCSS(parseFontContent()));
-    }
+    copyToClipboard(getCSS(parseFontContent()));
 }
 
 function parseFontContent() {

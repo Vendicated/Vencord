@@ -62,12 +62,8 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: {
 };
 
 export function getCustomColorString(userId: string, withHash?: boolean): string | undefined {
-    if (!colors[userId] || !Settings.plugins.CustomUserColors.enabled)
-        return;
-
-    if (withHash)
-        return `#${colors[userId]}`;
-
+    if (!colors[userId] || !Settings.plugins.CustomUserColors.enabled) return;
+    if (withHash) return `#${colors[userId]}`;
     return colors[userId];
 }
 
@@ -98,21 +94,23 @@ export default definePlugin({
             // this also affects name headers in chats outside of servers
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /\i.gradientClassName]\),style:/,
-                replace: "$&{color:$self.colorIfServer(arguments[0])},_style:"
+                // Override colorString with our custom color and disable gradients if applying the custom color.
+                match: /&&null!=\i\.secondaryColor,(?<=colorString:(\i).+?(\i)=.+?)/,
+                replace: (m, colorString, hasGradientColors) => `${m}` +
+                    `vcCustomUserColorsDummy=[${colorString},${hasGradientColors}]=$self.getMessageColorsVariables(arguments[0],${hasGradientColors}),`
             },
             predicate: () => !Settings.plugins.IrcColors.enabled
         },
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /(highlighted:\i,)/,
+                match: /(subText:\i\(\),)/,
                 replace: "$1style:{color:`${$self.colorDMList(arguments[0])}`},"
             },
             predicate: () => settings.store.dmList,
         },
         {
-            find: "!1,wrapContent",
+            find: '"AvatarWithText"',
             replacement: [
                 {
                     match: /(\}=\i)/,
@@ -125,22 +123,40 @@ export default definePlugin({
             ],
             predicate: () => settings.store.dmList,
         },
+        {
+            find: '"Reply Chain Nudge")',
+            replacement: {
+                match: /(,color:)(\i),/,
+                replace: "$1$self.colorInReplyingTo(arguments[0]) ?? $2,",
+            },
+        },
     ],
 
-    colorDMList(a: any): string | undefined {
-        const userId = a?.user?.id;
-        if (!userId) return;
-        const colorString = getCustomColorString(userId, true);
-        if (colorString) return colorString;
-        return "inherit";
+    getMessageColorsVariables(context: any, hasGradientColors: boolean) {
+        const colorString = this.colorIfServer(context);
+        const originalColorString = context?.author?.colorString;
+
+        return [colorString, hasGradientColors && colorString === originalColorString];
     },
 
-    colorIfServer(a: any): string | undefined {
-        const roleColor = a.author?.colorString;
+    colorDMList(context: any): string | undefined {
+        const userId = context?.user?.id;
+        const colorString = getCustomColorString(userId, true);
+        return colorString ?? "inherit";
+    },
 
-        if (a?.channel?.guild_id && !settings.store.colorInServers) return roleColor;
+    colorIfServer(context: any): string | undefined {
+        const userId = context?.message?.author?.id;
+        const colorString = context?.author?.colorString;
 
-        const color = getCustomColorString(a.message.author.id, true);
-        return color ?? roleColor ?? undefined;
-    }
+        if (context?.channel?.guild_id && !settings.store.colorInServers) return colorString;
+
+        const color = getCustomColorString(userId, true);
+        return color ?? colorString ?? undefined;
+    },
+
+    colorInReplyingTo(a: any) {
+        const { id } = a.reply.message.author;
+        return getCustomColorString(id, true);
+    },
 });

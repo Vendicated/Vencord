@@ -116,7 +116,7 @@
 
 .vc-more-stickers-category-scroller,
 .vc-more-stickers-picker-content-scroller {
-    scrollbar-width: thin;
+    scrollbar-width: none;
     scrollbar-color: var(--scrollbar-thin-thumb) var(--scrollbar-thin-track);
 }
 

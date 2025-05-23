@@ -104,8 +104,8 @@ if (!IS_VANILLA) {
                 super(options);
 
                 if (settings.disableMinSize) {
-                    // Disable the Electron call entirely so that Discord can't override it
-                    this.setMinimumSize = () => { };
+                    // Disable the Electron call entirely so that Discord can't dynamically change the size
+                    this.setMinimumSize = (width: number, height: number) => { };
                 }
 
                 initIpc(this);

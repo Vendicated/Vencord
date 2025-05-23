@@ -177,6 +177,17 @@ export class EmojiStore extends FluxStore {
     };
 }
 
+export class StickersStore extends FluxStore {
+    getStickerById(id: string): Sticker | undefined;
+    getStickerPack(id: string): StickerPack | undefined;
+    getPremiumPacks(): StickerPack[];
+    isPremiumPack(id: string): boolean;
+    getRawStickersByGuild(): Map<string, Sticker[]>;
+    getAllStickersIterator(): IterableIterator<Sticker>;
+    getAllGuildStickers(): Map<string, Sticker[]>;
+    getStickersByGuildId(id: string): Sticker[] | undefined;
+}
+
 export interface DraftObject {
     channelId: string;
     timestamp: number;

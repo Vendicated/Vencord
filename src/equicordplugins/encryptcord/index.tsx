@@ -12,7 +12,7 @@ import {
 } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
 import {
@@ -140,7 +140,7 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
 export default definePlugin({
     name: "Encryptcord",
     description: "End-to-end encryption in Discord!",
-    authors: [Devs.Inbestigator],
+    authors: [Devs.Inbestigator, EquicordDevs.ItsAlex],
     patches: [
         {
             find: "INTERACTION_APPLICATION_COMMAND_INVALID_VERSION",
@@ -360,18 +360,28 @@ async function handleGroupData(groupData) {
 
 // Handle joining group
 async function handleJoin(senderId: string, senderKey: string, encryptcordGroupMembers: object) {
-    encryptcordGroupMembers[senderId] = { key: senderKey, parent: UserStore.getCurrentUser().id, child: null };
-    encryptcordGroupMembers[UserStore.getCurrentUser().id].child = senderId;
+    const currentUserId = UserStore.getCurrentUser().id;
+
+    if (!encryptcordGroupMembers[senderId]) {
+        encryptcordGroupMembers[senderId] = { key: senderKey, parent: currentUserId, child: null };
+    }
+
+    if (!encryptcordGroupMembers[currentUserId]) {
+        encryptcordGroupMembers[currentUserId] = { key: "", parent: null, child: null };
+    }
+    encryptcordGroupMembers[currentUserId].child = senderId;
+
     await DataStore.set("encryptcordGroupMembers", encryptcordGroupMembers);
+
     const groupChannel = await DataStore.get("encryptcordChannelId");
+
     const newMember = await UserUtils.getUser(senderId).catch(() => null);
     if (!newMember) return;
 
     const membersData = {};
-    Object.entries(encryptcordGroupMembers)
-        .forEach(([memberId, value]) => {
-            membersData[memberId] = value;
-        });
+    Object.entries(encryptcordGroupMembers).forEach(([memberId, value]) => {
+        membersData[memberId] = value;
+    });
 
     const membersDataString = JSON.stringify({ members: membersData, channel: groupChannel });
 
@@ -382,6 +392,7 @@ async function handleJoin(senderId: string, senderKey: string, encryptcordGroupM
     });
 
     await Promise.all(dmPromises);
+
     await MessageActions.receiveMessage(groupChannel, {
         ...await createMessage("", senderId, groupChannel, 7), components: [{
             type: 1,

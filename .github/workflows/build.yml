@@ -16,7 +16,7 @@ permissions: write-all
 jobs:
     Build:
         name: Build Equicord
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
               run: pnpm buildStandalone
 
             - name: Generate plugin list
-              run: pnpm generatePluginJson dist/vencordplugins.json
+              run: pnpm generatePluginJson dist/plugins.json
 
             - name: Generate Equicord plugin list
               run: pnpm generateEquicordPluginJson dist/equicordplugins.json
@@ -65,15 +65,6 @@ jobs:
                   find release -size 0 -delete
                   rm release/package.json
                   rm release/*.map
-
-            - name: get-npm-version
-              id: package-version
-              uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-            - name: Upload Equicord Tagged
-              if: startsWith(github.ref, 'refs/tags/')
-              run: |
-                  gh release upload v${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
 
             - name: Upload Equicord Stable
               if: ${{ github.ref_name == 'main' }}

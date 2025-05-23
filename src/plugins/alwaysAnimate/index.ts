@@ -43,7 +43,7 @@ export default definePlugin({
             // Status emojis
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(\.CUSTOM_STATUS.+?animate:)\i/,
+                match: /(\.CUSTOM_STATUS.+?animateEmoji:)\i/,
                 replace: "$1!0"
             }
         },
@@ -53,6 +53,20 @@ export default definePlugin({
             replacement: {
                 match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
                 replace: "$1!0"
+            }
+        },
+        {
+            // Role Gradients
+            find: "animateGradient:",
+            all: true,
+            noWarn: true,
+            replacement: {
+                match: /animateGradient:.+?([,}].*?\))/g,
+                replace: (m, rest) => {
+                    const destructuringMatch = rest.match(/}=.+/);
+                    if (destructuringMatch == null) return `animateGradient:!0${rest}`;
+                    return m;
+                }
             }
         }
     ]

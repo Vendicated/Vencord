@@ -24,7 +24,7 @@ import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -32,12 +32,6 @@ import type { ReactElement, ReactNode } from "react";
 
 // @ts-ignore
 const premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
-
-const StickerStore = findStoreLazy("StickersStore") as {
-    getPremiumPacks(): StickerPack[];
-    getAllGuildStickers(): Map<string, Sticker[]>;
-    getStickerById(id: string): Sticker | undefined;
-};
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
@@ -167,8 +161,13 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
-    useHyperLinks: {
-        description: "Whether to use hyperlinks when sending fake emojis and stickers",
+    useStickerHyperLinks: {
+        description: "Whether to use hyperlinks when sending fake stickers",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    useEmojiHyperLinks: {
+        description: "Whether to use hyperlinks when sending fake emojis",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -553,8 +552,8 @@ export default definePlugin({
 
                 const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
-                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                    if (StickerStore.getStickerById(gifMatch[1])) return null;
+                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
+                    if (StickersStore.getStickerById(gifMatch[1])) return null;
                 }
             }
 
@@ -642,7 +641,7 @@ export default definePlugin({
                     url = new URL(item);
                 } catch { }
 
-                const stickerName = StickerStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
+                const stickerName = StickersStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 1,
                     id: imgMatch[1],
@@ -655,9 +654,9 @@ export default definePlugin({
 
             const gifMatch = item.match(fakeNitroGifStickerRegex);
             if (gifMatch) {
-                if (!StickerStore.getStickerById(gifMatch[1])) continue;
+                if (!StickersStore.getStickerById(gifMatch[1])) continue;
 
-                const stickerName = StickerStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
+                const stickerName = StickersStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 2,
                     id: gifMatch[1],
@@ -690,8 +689,8 @@ export default definePlugin({
 
                     const gifMatch = embed.url!.match(fakeNitroGifStickerRegex);
                     if (gifMatch) {
-                        // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                        if (StickerStore.getStickerById(gifMatch[1])) return true;
+                        // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
+                        if (StickersStore.getStickerById(gifMatch[1])) return true;
                     }
                 }
 
@@ -708,8 +707,8 @@ export default definePlugin({
 
             const match = attachment.url.match(fakeNitroGifStickerRegex);
             if (match) {
-                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                if (StickerStore.getStickerById(match[1])) return false;
+                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
+                if (StickersStore.getStickerById(match[1])) return false;
             }
 
             return true;
@@ -865,7 +864,7 @@ export default definePlugin({
                 if (!s.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
+                const sticker = StickersStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -910,7 +909,7 @@ export default definePlugin({
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
-                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useStickerHyperLinks ? `[${linkText}](${url})` : url}`;
                     extra.stickers!.length = 0;
                 }
             }
@@ -933,7 +932,7 @@ export default definePlugin({
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${s.useEmojiHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
@@ -965,7 +964,7 @@ export default definePlugin({
 
                 const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                return `${getWordBoundary(origStr, offset - 1)}${s.useEmojiHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
 
             if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {

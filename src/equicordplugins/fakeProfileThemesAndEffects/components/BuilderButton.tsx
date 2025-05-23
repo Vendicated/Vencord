@@ -5,16 +5,17 @@
  */
 
 import { Text, Tooltip } from "@webpack/common";
-import type { ComponentProps } from "react";
+import type { ComponentProps, RefObject } from "react";
 
 export interface BuilderButtonProps {
     label?: string | undefined;
     tooltip?: string | undefined;
     selectedStyle?: ComponentProps<"div">["style"];
     buttonProps?: ComponentProps<"div"> | undefined;
+    buttonRef?: RefObject<null>;
 }
 
-export const BuilderButton = ({ label, tooltip, selectedStyle, buttonProps }: BuilderButtonProps) => (
+export const BuilderButton = ({ buttonRef, label, tooltip, selectedStyle, buttonProps }: BuilderButtonProps) => (
     <Tooltip text={tooltip} shouldShow={!!tooltip}>
         {tooltipProps => (
             <div style={{ width: "60px" }}>
@@ -32,6 +33,7 @@ export const BuilderButton = ({ label, tooltip, selectedStyle, buttonProps }: Bu
                         borderRadius: "4px",
                         cursor: "pointer"
                     }}
+                    ref={buttonRef}
                 >
                     {!selectedStyle && (
                         <svg

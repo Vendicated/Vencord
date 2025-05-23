@@ -6,13 +6,14 @@
 
 import { CodeBlock } from "@components/CodeBlock";
 import { Heart } from "@components/Heart";
+import { copyToClipboard } from "@utils/clipboard";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import type { PluginNative } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Clipboard, Forms, Parser, React, showToast, Toasts } from "@webpack/common";
+import { Button, Forms, Parser, React, showToast, Toasts } from "@webpack/common";
 
 import { Theme, ThemeInfoModalProps } from "../types";
 import { ClockIcon, DownloadIcon, WarningIcon } from "../utils/Icons";
@@ -145,7 +146,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                             </Button>
                                             <Button className={Margins.right8}
                                                 onClick={() => {
-                                                    Clipboard.copy(themeContent);
+                                                    copyToClipboard(themeContent);
                                                     showToast("Copied to Clipboard", Toasts.Type.SUCCESS);
                                                 }}>Copy to Clipboard</Button>
                                         </ModalFooter>

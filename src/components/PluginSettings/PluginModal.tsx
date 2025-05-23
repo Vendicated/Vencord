@@ -179,20 +179,18 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         }
     }
 
-    function renderMoreUsers(_label: string, count: number) {
-        const sliceCount = plugin.authors.length - count;
-        const sliceStart = plugin.authors.length - sliceCount;
-        const sliceEnd = sliceStart + plugin.authors.length - count;
+    function renderMoreUsers(_label: string) {
+        const remainingAuthors = plugin.authors.slice(6);
 
         return (
-            <Tooltip text={plugin.authors.slice(sliceStart, sliceEnd).map(u => u.name).join(", ")}>
+            <Tooltip text={remainingAuthors.map(u => u.name).join(", ")}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div
                         className={AvatarStyles.moreUsers}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                     >
-                        +{sliceCount}
+                        +{remainingAuthors.length}
                     </div>
                 )}
             </Tooltip>
@@ -250,7 +248,6 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             count={plugin.authors.length}
                             guildId={undefined}
                             renderIcon={false}
-                            max={6}
                             showDefaultAvatarsForNullUsers
                             showUserPopout
                             renderMoreUsers={renderMoreUsers}

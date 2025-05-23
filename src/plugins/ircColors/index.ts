@@ -67,19 +67,28 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /\i.gradientClassName]\),style:/,
-                replace: "$&{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:"
+                // Override colorString with our custom color and disable gradients if applying the custom color.
+                match: /&&null!=\i\.secondaryColor,(?<=colorString:(\i).+?(\i)=.+?)/,
+                replace: (m, colorString, hasGradientColors) => `${m}` +
+                    `vcIrcColorsDummy=[${colorString},${hasGradientColors}]=$self.getMessageColorsVariables(arguments[0],${hasGradientColors}),`
             }
         },
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(typingIndicatorRef:.+?},)(\i=.+?)color:null!=.{0,50}?(?=,)/,
-                replace: (_, rest1, rest2) => `${rest1}ircColor=$self.calculateNameColorForListContext(arguments[0]),${rest2}color:ircColor`
+                match: /(?<=roleName:\i,)color:/,
+                replace: "color:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }
     ],
+
+    getMessageColorsVariables(context: any, hasGradientColors: boolean) {
+        const colorString = this.calculateNameColorForMessageContext(context);
+        const originalColorString = context?.author?.colorString;
+
+        return [colorString, hasGradientColors && colorString === originalColorString];
+    },
 
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
@@ -87,34 +96,26 @@ export default definePlugin({
         const color = calculateNameColorForUser(userId);
         const customColor = userId && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(userId, true) : null;
 
-        // Color preview in role settings
-        if (context?.message?.channel_id === "1337" && userId === "313337")
-            return customColor ?? colorString;
+        if (
+            (context?.message?.channel_id === "1337" && userId === "313337") ||
+            (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) ||
+            (settings.store.applyColorOnlyToUsersWithoutColor && colorString)
+        ) return customColor ?? colorString;
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return customColor ?? colorString;
-        }
-
-        if (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString) {
-            return customColor ?? color;
-        } else {
-            return customColor ?? colorString;
-        }
+        return customColor ?? color;
     },
+
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
         const colorString = context?.colorString;
         const color = calculateNameColorForUser(id);
         const customColor = id && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(id, true) : null;
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return customColor ?? colorString;
-        }
+        if (
+            (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) ||
+            (settings.store.applyColorOnlyToUsersWithoutColor && colorString)
+        ) return customColor ?? colorString;
 
-        if (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString) {
-            return customColor ?? color;
-        } else {
-            return customColor ?? colorString;
-        }
+        return customColor ?? color;
     }
 });

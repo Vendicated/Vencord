@@ -22,6 +22,14 @@ const settings = definePluginSettings(
             description: "The signature that will be added to the end of your messages",
             default: "a chronic discord user"
         },
+        textHeader: {
+            description: "What header to preface text with",
+            type: OptionType.SELECT,
+            options: [
+                { label: ">", value: ">", default: true },
+                { label: "-#", value: "-#" }
+            ]
+        },
         showIcon: {
             type: OptionType.BOOLEAN,
             default: true,
@@ -141,7 +149,7 @@ export default definePlugin({
 
 // text processing injection processor
 function textProcessing(input: string) {
-    return `${input}\n> ${settings.store.name}`;
+    return `${input}\n${settings.store.textHeader} ${settings.store.name}`;
 }
 
 
