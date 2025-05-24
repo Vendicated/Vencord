@@ -468,6 +468,29 @@ export function findStore(name: StoreNameFilter) {
             }
         }
 
+        try {
+            const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
+            const libdiscoreExports = getLibdiscore();
+
+            for (const libdiscoreExportName in libdiscoreExports) {
+                if (!libdiscoreExportName.endsWith("Store")) {
+                    continue;
+                }
+
+                const storeName = libdiscoreExportName;
+                const store = libdiscoreExports[storeName];
+
+                if (storeName === name) {
+                    res = store;
+                }
+
+                if (fluxStores[storeName] == null) {
+                    fluxStores[storeName] = store;
+                }
+            }
+
+        } catch { }
+
         if (res == null) {
             res = find(filters.byStoreName(name), { isIndirect: true });
         }
