@@ -25,7 +25,11 @@ declare module "~plugins" {
         folderName: string;
         userPlugin: boolean;
     }>;
-    export const ExcludedPlugins: Record<string, "web" | "discordDesktop" | "vesktop" | "desktop" | "dev">;
+    interface ExcludedPluginInfo {
+        name: string;
+        reason: string;
+    }
+    export const ExcludedPlugins: Record<string, ExcludedPluginInfo>;
 }
 
 declare module "~pluginNatives" {
