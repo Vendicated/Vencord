@@ -42,6 +42,7 @@ export default definePlugin({
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
     authors: [Devs.Ducko],
     reporterTestable: ReporterTestable.None,
+    hidden: IS_VESKTOP || "legcord" in window,
 
     settingsAboutComponent: () => (
         <>
@@ -73,9 +74,6 @@ export default definePlugin({
     },
 
     async start() {
-        // Legcord comes with its own arRPC implementation, so this plugin just confuses users
-        if ("legcord" in window) return;
-
         if (ws) ws.close();
         ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
 
