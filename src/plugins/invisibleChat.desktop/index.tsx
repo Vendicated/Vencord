@@ -93,9 +93,10 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
 
 const settings = definePluginSettings({
     savedPasswords: {
-        type: OptionType.STRING,
-        default: "password, Password",
-        description: "Saved Passwords (Seperated with a , )"
+        type: OptionType.ARRAY,
+        default: ["password", "Password"],
+        description: "Saved Passwords",
+        oldStringSeparator: s => s.split(",").map(s => s.trim()),
     }
 });
 
@@ -208,7 +209,7 @@ export function isCorrectPassword(result: string): boolean {
 }
 
 export async function iteratePasswords(message: Message): Promise<string | false> {
-    const passwords = settings.store.savedPasswords.split(",").map(s => s.trim());
+    const passwords = settings.store.savedPasswords;
 
     if (!message?.content || !passwords?.length) return false;
 
