@@ -24,7 +24,7 @@ import { join } from "path";
 
 import { DATA_DIR } from "./constants";
 import { crxToZip } from "./crxToZip";
-import { get } from "./simpleGet";
+import { fetchBuffer } from "./http";
 
 const extensionCacheDir = join(DATA_DIR, "ExtensionCache");
 
@@ -69,13 +69,14 @@ export async function installExt(id: string) {
     } catch (err) {
         const url = `https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&x=id%3D${id}%26uc&prodversion=${process.versions.chrome}`;
 
-        const buf = await get(url, {
+        const buf = await fetchBuffer(url, {
             headers: {
                 "User-Agent": `Electron ${process.versions.electron} ~ Vencord (https://github.com/Vendicated/Vencord)`
             }
         });
 
-        await extract(crxToZip(buf), extDir).catch(console.error);
+        await extract(crxToZip(buf), extDir)
+            .catch(err => console.error(`Failed to extract extension ${id}`, err));
     }
 
     session.defaultSession.loadExtension(extDir);
