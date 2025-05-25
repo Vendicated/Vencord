@@ -124,7 +124,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - NoNitroUpsell by thororen
 - NoOnboarding by omaw & Glitch
 - NoRoleHeaders by Samwich
-- NoRPC by Cyn
 - NotificationTitle by Kyuuhachi
 - PartyMode by UwUDev
 - PingNotifications by smuki
@@ -202,6 +201,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 - ClipsEnhancements by niko
 - MediaDownloader by Colorman
+- NoRPC by Cyn
 - StatusWhilePlaying by thororen
 
 ### Equicord Devbuilds Only
