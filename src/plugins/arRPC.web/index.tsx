@@ -36,13 +36,21 @@ async function lookupApp(applicationId: string): Promise<string> {
     return socket.application;
 }
 
+let hideSetting = false;
+
+if (IS_VESKTOP || IS_EQUIBOP || "legcord" in window) {
+    hideSetting = true;
+} else if ("goofcord" in window) {
+    hideSetting = false;
+}
+
 let ws: WebSocket;
 export default definePlugin({
     name: "WebRichPresence (arRPC)",
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
     authors: [Devs.Ducko],
     reporterTestable: ReporterTestable.None,
-    hidden: IS_VESKTOP || "legcord" in window,
+    hidden: hideSetting,
 
     settingsAboutComponent: () => (
         <>
