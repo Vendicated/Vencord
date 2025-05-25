@@ -1,5 +1,5 @@
 /*
-* Vencord, a Discord client mod
+* Stalcord, Stalk your friends but somehow worse
 * Copyright (c) 2025 gmblahaj*
 * SPDX-License-Identifier: GPL-3.0-or-later
 */
@@ -59,11 +59,11 @@ export default definePlugin({
         }
     },
 
-    onMessage({ message }: { message: Message }) {
+    onMessage({ message }: { message: Message; }) {
         try {
             const userIdToWatch = settings.store.userIdToWatch;
             if (!userIdToWatch || !message?.author || message.author.id !== userIdToWatch) return;
-            
+
             if (!settings.store.notifyInDMs && !message.guild_id) return;
 
             this.showNotification(message);
@@ -75,15 +75,17 @@ export default definePlugin({
     showNotification(message: Message) {
         if (Notification.permission !== "granted") return;
 
+        const hasAttachment = message.attachments && message.attachments.length > 0;
+        const notificationContent = hasAttachment ? "Attachment" : message.content.substring(0, 200);
+
         const notifData = {
             username: message.author.username,
-            content: message.content.substring(0, 200),
+            content: notificationContent,
             channelId: message.channel_id,
             guildId: message.guild_id ?? "@me",
             messageId: message.id
         };
 
-        // I swear to god why does it do this??
         try {
             const notification = new Notification(`Message from ${notifData.username}`, {
                 body: notifData.content,
@@ -93,7 +95,7 @@ export default definePlugin({
             notification.onclick = () => {
                 try {
                     const path = `/channels/${notifData.guildId}/${notifData.channelId}/${notifData.messageId}`;
-                    
+
                     // 1. First try Vesktop's native navigation
                     if (window.DiscordNative?.window?.navigate) {
                         window.DiscordNative.window.navigate(path);
@@ -108,13 +110,12 @@ export default definePlugin({
                         return;
                     }
 
-                    // NOTE: Yea it does "crash" but it does navigate correctly anyways
+                    // It kinda wants to die when switching channels but it works :shrug:
 
-                    
                     window.location.href = path;
                 } catch (err) {
                     console.error("Navigation error:", err);
-                    
+
                     window.open(`discord://${path}`, "_blank");
                 } finally {
                     notification.close();
