@@ -4,41 +4,53 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import {
+    findGroupChildrenByChildId,
+    NavContextMenuPatchCallback
+} from "@api/ContextMenu";
 import definePlugin from "@utils/types";
 import { Menu, React } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
 import { openAllNotesViewerModal } from "./allNotesViewerModal";
-import { openServerNotesModal } from "./serverNotesModal";
+import { openServerNotesModal } from "./serverNotesModal"; //
 
 const PLUGIN_NAME = "ServerNotes";
 
-const guildContextPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild; }) => {
-    let group = findGroupChildrenByChildId("privacy", children);
-    if (!group) {
-        group = children;
-    }
+const makeServerNotesContextMenuPatch = (isGuildHeader: boolean): NavContextMenuPatchCallback => {
+    return (children, props) => {
+        const { guild } = props as { guild?: Guild | null; };
 
-    if (!group.some(item => item && item.props && typeof (item.props as { id?: string; }).id === "string" && (item.props as { id: string; }).id === "vc-server-notes")) {
-        group.push(
-            <Menu.MenuItem
-                id="vc-server-notes"
-                label="Server Note"
-                action={() => openServerNotesModal(guild)}
-            />
-        );
-    }
+        const targetGroupId = isGuildHeader ? "developer-mode" : "privacy";
+        let group = findGroupChildrenByChildId(targetGroupId, children);
+        if (!group) {
+            group = children;
+        }
+        const isActualServer = guild && typeof guild.id === "string" && /^\d+$/.test(guild.id);
 
-    if (!group.some(item => item && item.props && typeof (item.props as { id?: string; }).id === "string" && (item.props as { id: string; }).id === "vc-all-server-notes")) {
-        group.push(
-            <Menu.MenuItem
-                id="vc-all-server-notes"
-                label="View All Server Notes"
-                action={() => openAllNotesViewerModal()}
-            />
-        );
-    }
+        if (isActualServer) {
+            if (!group.some(item => item?.props?.id === "vc-server-notes")) {
+                group.push(
+                    <Menu.MenuItem
+                        id="vc-server-notes"
+                        label="Server Note"
+                        action={() => openServerNotesModal(guild)}
+                    />
+                );
+            }
+        }
+
+        if (!group.some(item => item?.props?.id === "vc-all-server-notes")) {
+            group.push(
+                <Menu.MenuItem
+                    id="vc-all-server-notes"
+                    label="View All Server Notes"
+                    action={() => openAllNotesViewerModal()}
+                />
+            );
+        }
+        return children;
+    };
 };
 
 export default definePlugin({
@@ -47,14 +59,8 @@ export default definePlugin({
     authors: [
         { name: "m3rcury_", id: 0n }
     ],
-
-    start() {
-        addContextMenuPatch("guild-context", guildContextPatch);
-        addContextMenuPatch("guild-header-popout", guildContextPatch);
+    contextMenus: {
+        "guild-context": makeServerNotesContextMenuPatch(false),
+        "guild-header-popout": makeServerNotesContextMenuPatch(true)
     },
-
-    stop() {
-        removeContextMenuPatch("guild-context", guildContextPatch);
-        removeContextMenuPatch("guild-header-popout", guildContextPatch);
-    }
 });
