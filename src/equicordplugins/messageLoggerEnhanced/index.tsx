@@ -78,7 +78,8 @@ async function messageDeleteHandler(payload: MessageDeletePayload & { isBulk: bo
                 bot: message?.bot || message?.author?.bot,
                 flags: message?.flags,
                 ghostPinged,
-                isCachedByUs: (message as LoggedMessageJSON).ourCache
+                isCachedByUs: (message as LoggedMessageJSON).ourCache,
+                webhookId: message?.webhookId
             })
         ) {
             // Flogger.log("IGNORING", message, payload);
