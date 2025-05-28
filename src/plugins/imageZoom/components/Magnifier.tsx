@@ -18,7 +18,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { FluxDispatcher, useLayoutEffect, useRef, useState } from "@webpack/common";
+import { FluxDispatcher, useLayoutEffect, useMemo, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
@@ -160,6 +160,16 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
         }
     });
 
+    const imageSrc = useMemo(() => {
+        try {
+            const imageUrl = new URL(instance.props.src);
+            imageUrl.searchParams.set("animated", "true");
+            return imageUrl.toString();
+        } catch {
+            return instance.props.src;
+        }
+    }, [instance.props.src]);
+
     if (!ready) return null;
 
     const box = element.current?.getBoundingClientRect();
@@ -203,7 +213,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                         }}
                         width={`${box.width * zoom.current}px`}
                         height={`${box.height * zoom.current}px`}
-                        src={instance.props.src}
+                        src={imageSrc}
                         alt=""
                     />
                 )}

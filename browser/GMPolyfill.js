@@ -17,9 +17,10 @@
 */
 
 function parseHeaders(headers) {
+    const result = new Headers();
     if (!headers)
-        return {};
-    const result = {};
+        return result;
+
     const headersArr = headers.trim().split("\n");
     for (var i = 0; i < headersArr.length; i++) {
         var row = headersArr[i];
@@ -27,13 +28,7 @@ function parseHeaders(headers) {
             , key = row.slice(0, index).trim().toLowerCase()
             , value = row.slice(index + 1).trim();
 
-        if (result[key] === undefined) {
-            result[key] = value;
-        } else if (Array.isArray(result[key])) {
-            result[key].push(value);
-        } else {
-            result[key] = [result[key], value];
-        }
+        result.append(key, value);
     }
     return result;
 }
