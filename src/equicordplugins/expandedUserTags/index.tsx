@@ -76,7 +76,7 @@ export default definePlugin({
     renderNicknameIcon(props) {
         const tagId = this.getTag({
             user: UserStore.getUser(props.userId),
-            channel: ChannelStore.getChannel(this.getChannelId()),
+            channel: getCurrentChannel(),
             channelId: this.getChannelId(),
             isChat: false
         });
@@ -92,7 +92,7 @@ export default definePlugin({
             message: props.message,
             user: UserStore.getUser(props.message.author.id),
             channelId: props.message.channel_id,
-            isChat: false
+            isChat: true
         });
 
         return tagId && <Tag
@@ -146,9 +146,9 @@ export default definePlugin({
         const perms = this.getPermissions(user, channel);
 
         for (const tag of tags) {
-            if (isChat && !settings.tagSettings[tag.name].showInChat)
+            if (isChat && !settings.tagSettings[tag.name]?.showInChat)
                 continue;
-            if (!isChat && !settings.tagSettings[tag.name].showInNotChat)
+            if (!isChat && !settings.tagSettings[tag.name]?.showInNotChat)
                 continue;
 
             // If the owner tag is disabled, and the user is the owner of the guild,
@@ -159,7 +159,9 @@ export default definePlugin({
                     user.id &&
                     isChat &&
                     !settings.tagSettings.OWNER.showInChat) ||
-                (!isChat &&
+                (GuildStore.getGuild(channel?.guild_id)?.ownerId ===
+                    user.id &&
+                    !isChat &&
                     !settings.tagSettings.OWNER.showInNotChat)
             )
                 continue;

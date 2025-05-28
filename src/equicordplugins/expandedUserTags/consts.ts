@@ -9,9 +9,14 @@ import { GuildStore } from "@webpack/common";
 import { RC } from "@webpack/types";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
+import { settings } from "./settings";
 import type { ITag } from "./types";
 
-export const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
+export const isWebhook = (message: Message, user: User) => {
+    const isFollowed = message?.type === 0 && !!message?.messageReference && !settings.store.showWebhookTagFully;
+    return !!message?.webhookId && user.isNonUserBot() && !isFollowed;
+};
+
 export const tags = [
     {
         name: "WEBHOOK",

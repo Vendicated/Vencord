@@ -96,9 +96,14 @@ export const settings = definePluginSettings({
         default: false,
         restartNeeded: true
     },
+    showWebhookTagFully: {
+        description: "Show Webhook tag in followed channels like announcements",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
     tagSettings: {
         type: OptionType.COMPONENT,
         component: SettingsComponent,
         description: "fill me"
-    }
+    },
 });
