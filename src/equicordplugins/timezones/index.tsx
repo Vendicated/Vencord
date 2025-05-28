@@ -52,7 +52,7 @@ export const settings = definePluginSettings({
     useDatabase: {
         type: OptionType.BOOLEAN,
         description: "Enable database for getting user timezones",
-        default: false
+        default: true
     },
 
     preferDatabaseOverLocal: {
