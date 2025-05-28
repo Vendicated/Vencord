@@ -20,16 +20,14 @@ import { Message, User } from "discord-types/general";
 import { authModal, deleteTimezone, getTimezone, setUserDatabaseTimezone } from "./database";
 import { SetTimezoneModal } from "./TimezoneModal";
 
-export const DATASTORE_KEY = "vencord-timezones";
-
 type CacheEntry = {
     value: string | null;
     expires: number;
 };
 
 export let databaseTimezones: Record<string, CacheEntry> = {};
-
 export let timezones: Record<string, string | null> = {};
+export const DATASTORE_KEY = "vencord-timezones";
 
 const classes = findByPropsLazy("timestamp", "compact", "contentOnly");
 const locale = findByPropsLazy("getLocale");
