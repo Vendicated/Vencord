@@ -8,9 +8,10 @@ import * as DataStore from "@api/DataStore";
 import { classNameFactory } from "@api/Styles";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Button, Forms, SearchableSelect, useMemo, useState } from "@webpack/common";
+import { Button, Forms, SearchableSelect, useEffect, useMemo, useState } from "@webpack/common";
 
-import { DATASTORE_KEY, timezones } from ".";
+import { DATASTORE_KEY, settings, timezones } from ".";
+import { getTimezone, setTimezone, setUserDatabaseTimezone } from "./database";
 
 export async function setUserTimezone(userId: string, timezone: string | null) {
     timezones[userId] = timezone;
@@ -19,8 +20,23 @@ export async function setUserTimezone(userId: string, timezone: string | null) {
 
 const cl = classNameFactory("vc-timezone-");
 
-export function SetTimezoneModal({ userId, modalProps }: { userId: string, modalProps: ModalProps; }) {
+export function SetTimezoneModal({ userId, modalProps, database }: { userId: string, modalProps: ModalProps; database?: boolean; }) {
     const [currentValue, setCurrentValue] = useState<string | null>(timezones[userId] ?? null);
+
+    useEffect(() => {
+        if (!database) return;
+
+        const localTimezone = timezones[userId];
+        const shouldUseDatabase =
+            settings.store.useDatabase &&
+            (settings.store.preferDatabaseOverLocal || localTimezone == null);
+
+        if (shouldUseDatabase) {
+            getTimezone(userId).then(setCurrentValue);
+        } else {
+            setCurrentValue(localTimezone);
+        }
+    }, [userId, settings.store.useDatabase, settings.store.preferDatabaseOverLocal, database]);
 
     const options = useMemo(() => {
         return Intl.supportedValuesOf("timeZone").map(timezone => {
@@ -59,20 +75,28 @@ export function SetTimezoneModal({ userId, modalProps }: { userId: string, modal
             </ModalContent>
 
             <ModalFooter className={cl("modal-footer")}>
-                <Button
-                    color={Button.Colors.RED}
-                    onClick={async () => {
-                        await setUserTimezone(userId, null);
-                        modalProps.onClose();
-                    }}
-                >
-                    Delete Timezone
-                </Button>
+                {!database && (
+                    <Button
+                        color={Button.Colors.RED}
+                        onClick={async () => {
+                            await setUserTimezone(userId, null);
+                            modalProps.onClose();
+                        }}
+                    >
+                        Delete Timezone
+                    </Button>
+                )}
                 <Button
                     color={Button.Colors.BRAND}
                     disabled={currentValue === null}
                     onClick={async () => {
-                        await setUserTimezone(userId, currentValue!);
+                        if (database) {
+                            await setUserDatabaseTimezone(userId, currentValue);
+                            await setTimezone(currentValue!);
+                        } else {
+                            await setUserTimezone(userId, currentValue);
+                        }
+
                         modalProps.onClose();
                     }}
                 >

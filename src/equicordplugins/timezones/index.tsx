@@ -10,13 +10,14 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Menu, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Menu, showToast, Toasts, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
+import { authModal, deleteTimezone, getTimezone, setUserDatabaseTimezone } from "./database";
 import { SetTimezoneModal } from "./TimezoneModal";
 
 export const DATASTORE_KEY = "vencord-timezones";
@@ -46,6 +47,51 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show time in profiles",
         default: true
+    },
+
+    useDatabase: {
+        type: OptionType.BOOLEAN,
+        description: "Enable database for getting user timezones",
+        default: false
+    },
+
+    preferDatabaseOverLocal: {
+        type: OptionType.BOOLEAN,
+        description: "Prefer database over local storage for timezones",
+        default: true
+    },
+
+    setDatabaseTimezone: {
+        description: "Set your timezone on the database",
+        type: OptionType.COMPONENT,
+        component: () => (
+            <Button onClick={() => {
+                authModal(async () => {
+                    openModal(modalProps => <SetTimezoneModal userId={UserStore.getCurrentUser().id} modalProps={modalProps} database={true} />);
+                }
+                );
+            }}>
+                Set Timezone on Database
+            </Button>
+        )
+    },
+
+    resetDatabaseTimezone: {
+        description: "Reset your timezone on the database",
+        type: OptionType.COMPONENT,
+        component: () => (
+            <Button
+                color={Button.Colors.RED}
+                onClick={() => {
+                    authModal(async () => {
+                        await setUserDatabaseTimezone(UserStore.getCurrentUser().id, null);
+                        await deleteTimezone();
+                    });
+                }}
+            >
+                Reset Database Timezones
+            </Button>
+        )
     }
 });
 
@@ -66,23 +112,33 @@ interface Props {
 }
 const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Props) => {
     const [currentTime, setCurrentTime] = useState(timestamp || Date.now());
-    const timezone = timezones[userId];
+    const [timezone, setTimezone] = useState<string | null>(null);
 
     useEffect(() => {
-        let timer: NodeJS.Timeout;
+        const localTimezone = timezones[userId];
+        const shouldUseDatabase =
+            settings.store.useDatabase &&
+            (settings.store.preferDatabaseOverLocal || localTimezone == null);
 
-        if (type === "profile") {
-            setCurrentTime(Date.now());
-
-            const now = new Date();
-            const delay = (60 - now.getSeconds()) * 1000 + 1000 - now.getMilliseconds();
-
-            timer = setTimeout(() => {
-                setCurrentTime(Date.now());
-            }, delay);
+        if (shouldUseDatabase) {
+            getTimezone(userId).then(setTimezone);
+        } else {
+            setTimezone(localTimezone);
         }
+    }, [userId, settings.store.useDatabase, settings.store.preferDatabaseOverLocal]);
 
-        return () => timer && clearTimeout(timer);
+    useEffect(() => {
+        if (type !== "profile") return;
+
+        setCurrentTime(Date.now());
+
+        const now = new Date();
+        const delay = (60 - now.getSeconds()) * 1000 + 1000 - now.getMilliseconds();
+        const timer = setTimeout(() => {
+            setCurrentTime(Date.now());
+        }, delay);
+
+        return () => clearTimeout(timer);
     }, [type, currentTime]);
 
     if (!timezone) return null;
@@ -94,8 +150,9 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
         month: "long",
         day: "numeric",
         hour: "numeric",
-        minute: "numeric",
+        minute: "numeric"
     });
+
     return (
         <Tooltip
             position="top"
@@ -107,21 +164,18 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
             tooltipClassName="timezone-tooltip"
             text={longTime}
         >
-            {toolTipProps => {
-                return (
-                    <span
-                        {...toolTipProps}
-                        className={type === "message" ? `timezone-message-item ${classes.timestamp}` : "timezone-profile-item"}
-                    >
-                        {
-                            type === "message" ? `(${shortTime})` : shortTime
-                        }
-                    </span>
-                );
-            }}
+            {toolTipProps => (
+                <span
+                    {...toolTipProps}
+                    className={type === "message" ? `timezone-message-item ${classes.timestamp}` : "timezone-profile-item"}
+                >
+                    {type === "message" ? `(${shortTime})` : shortTime}
+                </span>
+            )}
         </Tooltip>
     );
 }, { noop: true });
+
 
 const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User; }) => {
     if (user?.id == null) return;
@@ -136,11 +190,33 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: {
 
     children.push(<Menu.MenuSeparator />, setTimezoneItem);
 
+    if (settings.store.useDatabase) {
+        const refreshTimezoneItem = (
+            <Menu.MenuItem
+                label="Refresh Timezone"
+                id="refresh-timezone"
+                action={async () => {
+                    showToast("Refreshing timezone...", Toasts.Type.CLOCK);
+
+                    try {
+                        const timezone = await getTimezone(user.id);
+                        setUserDatabaseTimezone(user.id, timezone);
+                        timezones[user.id] = timezone;
+                        showToast("Timezone refreshed successfully!", Toasts.Type.SUCCESS);
+                    } catch (error) {
+                        console.error("Failed to refresh timezone:", error);
+                        showToast("Failed to refresh timezone.", Toasts.Type.FAILURE);
+                    }
+                }}
+            />
+        );
+        children.push(refreshTimezoneItem);
+    }
 };
 
 export default definePlugin({
     name: "Timezones",
-    authors: [Devs.Aria],
+    authors: [Devs.Aria, EquicordDevs.creations],
     description: "Shows the local time of users in profiles and message headers",
     contextMenus: {
         "user-context": userContextMenuPatch
