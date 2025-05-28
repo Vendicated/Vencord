@@ -78,7 +78,7 @@ const stringifyPolicy = (policy: PolicyMap): string =>
         .join("; ");
 
 
-const patchCsp = (headers: Record<string, string[]>) => {
+const patchCsp = (headers: PolicyMap) => {
     const reportOnlyHeader = findHeader(headers, "content-security-policy-report-only");
     if (reportOnlyHeader)
         delete headers[reportOnlyHeader];
