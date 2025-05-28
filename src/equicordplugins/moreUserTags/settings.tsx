@@ -14,7 +14,7 @@ import { TagSettings } from "./types";
 
 function SettingsComponent() {
     const tagSettings = settings.store.tagSettings as TagSettings;
-    const { localTags } = Vencord.Plugins.plugins.MoreUserTags as any;
+    const { localTags } = Vencord.Plugins.plugins.ExpandedUserTags as any;
 
     return (
         <Flex flexDirection="column">
