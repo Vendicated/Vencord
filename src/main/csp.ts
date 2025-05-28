@@ -8,11 +8,11 @@ import { session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
 
-const ConnectSrc = ["connect-src"];
-const MediaSrc = [...ConnectSrc, "img-src", "media-src"];
-const CssSrc = ["style-src", "font-src"];
-const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
-const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
+export const ConnectSrc = ["connect-src"];
+export const MediaSrc = [...ConnectSrc, "img-src", "media-src"];
+export const CssSrc = ["style-src", "font-src"];
+export const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
+export const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
 
 // Plugins can whitelist their own domains by importing this object in their native.ts
 // script and just adding to it. But generally, you should just edit this file instead
