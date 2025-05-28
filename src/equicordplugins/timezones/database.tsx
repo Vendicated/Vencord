@@ -26,11 +26,11 @@ export async function setUserDatabaseTimezone(userId: string, timezone: string |
     await DataStore.set(DATASTORE_KEY, databaseTimezones);
 }
 
-export async function getTimezone(userId: string): Promise<string | null> {
+export async function getTimezone(userId: string, force?: boolean): Promise<string | null> {
     const now = Date.now();
 
     const cached = databaseTimezones[userId];
-    if (cached && now < cached.expires) return cached.value;
+    if (cached && now < cached.expires && !force) return cached.value;
 
     if (!pendingRequests[userId]) {
         pendingRequests[userId] = (async () => {
