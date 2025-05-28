@@ -29,10 +29,10 @@ export function SetTimezoneModal({ userId, modalProps, database }: { userId: str
         const localTimezone = timezones[userId];
         const shouldUseDatabase =
             settings.store.useDatabase &&
-            (settings.store.preferDatabaseOverLocal || localTimezone == null);
+            (settings.store.preferDatabaseOverLocal || !localTimezone);
 
         if (shouldUseDatabase) {
-            getTimezone(userId).then(setCurrentValue);
+            getTimezone(userId).then(e => setCurrentValue(e ?? localTimezone));
         } else {
             setCurrentValue(localTimezone);
         }

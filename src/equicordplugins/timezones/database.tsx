@@ -4,24 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-type CacheEntry = {
-    value: string | null;
-    expires: number;
-};
-
 import { DataStore } from "@api/index";
 import { openModal } from "@utils/modal";
 import { OAuth2AuthorizeModal, showToast, Toasts } from "@webpack/common";
+
+import { databaseTimezones } from ".";
 
 export const DOMAIN = "https://timezone.creations.works";
 export const REDIRECT_URI = `${DOMAIN}/auth/discord/callback`;
 export const CLIENT_ID = "1377021506810417173";
 
 export const DATASTORE_KEY = "vencord-database-timezones";
-export let databaseTimezones: Record<string, CacheEntry> = {};
-(async () => {
-    databaseTimezones = await DataStore.get<Record<string, CacheEntry>>(DATASTORE_KEY) || {};
-})();
 
 const pendingRequests: Record<string, Promise<string | null>> = {};
 

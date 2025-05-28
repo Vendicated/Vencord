@@ -22,10 +22,14 @@ import { SetTimezoneModal } from "./TimezoneModal";
 
 export const DATASTORE_KEY = "vencord-timezones";
 
+type CacheEntry = {
+    value: string | null;
+    expires: number;
+};
+
+export let databaseTimezones: Record<string, CacheEntry> = {};
+
 export let timezones: Record<string, string | null> = {};
-(async () => {
-    timezones = await DataStore.get<Record<string, string>>(DATASTORE_KEY) || {};
-})();
 
 const classes = findByPropsLazy("timestamp", "compact", "contentOnly");
 const locale = findByPropsLazy("getLocale");
@@ -118,10 +122,10 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
         const localTimezone = timezones[userId];
         const shouldUseDatabase =
             settings.store.useDatabase &&
-            (settings.store.preferDatabaseOverLocal || localTimezone == null);
+            (settings.store.preferDatabaseOverLocal || !localTimezone);
 
         if (shouldUseDatabase) {
-            getTimezone(userId).then(setTimezone);
+            getTimezone(userId).then(e => setTimezone(e ?? localTimezone));
         } else {
             setTimezone(localTimezone);
         }
@@ -240,6 +244,12 @@ export default definePlugin({
             }
         }
     ],
+
+    async start() {
+        databaseTimezones = await DataStore.get<Record<string, CacheEntry>>(DATASTORE_KEY) || {};
+        timezones = await DataStore.get<Record<string, string>>(DATASTORE_KEY) || {};
+    },
+
     settings,
     getTime,
 
