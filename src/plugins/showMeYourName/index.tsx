@@ -42,6 +42,18 @@ const settings = definePluginSettings({
     },
 });
 
+function wrapEmojis(name: string|undefined) {
+    if (!name) return null;
+    const emojiRegex = /(\p{Emoji_Presentation})/u;
+    const parts = name.split(emojiRegex);
+    return parts.map((part, index) => {
+                if (part.match(emojiRegex)) {
+                    return <span key={index} className="vc-smyn-emoji">{part}</span>;
+                }
+                return part;
+            });
+}
+
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
@@ -69,17 +81,17 @@ export default definePlugin({
             const prefix = withMentionPrefix ? "@" : "";
 
             if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
-                return <>{prefix}{nick}</>;
+                return <>{prefix}{wrapEmojis(nick)}</>;
 
             if (settings.store.mode === "user-nick")
-                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
+                return <>{prefix}{wrapEmojis(username)} <span className="vc-smyn-suffix">{wrapEmojis(nick)}</span></>;
 
             if (settings.store.mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+                return <>{prefix}{wrapEmojis(nick)} <span className="vc-smyn-suffix">{wrapEmojis(username)}</span></>;
 
-            return <>{prefix}{username}</>;
+            return <>{prefix}{wrapEmojis(username)}</>;
         } catch {
-            return <>{author?.nick}</>;
+            return <>{wrapEmojis(author?.nick)}</>;
         }
-    }, { noop: true }),
+    }, { noop: true })
 });
