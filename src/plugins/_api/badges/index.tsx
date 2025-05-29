@@ -24,7 +24,7 @@ import { openContributorModal } from "@components/PluginSettings/ContributorModa
 import { isEquicordDonor } from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
+import { shouldShowContributorBadge, shouldShowEquicordContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -39,7 +39,7 @@ const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    shouldShow: ({ userId }) => isPluginDev(userId),
+    shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
@@ -47,7 +47,7 @@ const EquicordContributorBadge: ProfileBadge = {
     description: "Equicord Contributor",
     image: EQUICORD_CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    shouldShow: ({ userId }) => isEquicordPluginDev(userId),
+    shouldShow: ({ userId }) => shouldShowEquicordContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
