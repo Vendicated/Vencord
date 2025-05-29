@@ -6,13 +6,15 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy, findLazy, findStoreLazy } from "@webpack";
 import { Button, FluxDispatcher, GuildStore } from "@webpack/common";
 
 const ExperimentStore = findStoreLazy("ExperimentStore");
 // const GuildTooltip = findByCodeLazy("GuildTooltip");
 const GuildIcon = findByCodeLazy(".PureComponent){render(){return(0,");
+const mm3 = findLazy(m => m?.toString?.().includes?.("0xcc9e2d51"));
+
 // const GuildIcon = wreq(565138).Z;
 // .PureComponent){render(){return(0,
 export default definePlugin({
@@ -37,8 +39,31 @@ export default definePlugin({
             }
         },
     ],
-    settings: definePluginSettings({
+    start: () => {
+        window.mm3 = mm3;
 
+        window.getAccountsHash = (experiment: string, accountIds: string[]) => {
+            if (accountIds.length === 0) {
+                // set from settings;
+            }
+
+            return accountIds.map(id => {
+                return mm3(`${experiment}:${id}`);
+            });
+        };
+    },
+    settings: definePluginSettings({
+        accountIds: {
+            type: OptionType.CUSTOM,
+            description: "Account IDs to get hash for",
+            component: () => {
+                return <div style={{ padding: "8px" }}>
+                    <div style={{ color: "var(--text-muted)", fontSize: "14px" }}>
+
+                    </div>
+                </div>;
+            }
+        }
     }),
     refreshButton: () => {
         return <Button
