@@ -11,6 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "discord-types/general";
+import { findByCodeLazy } from "@webpack";
 
 interface UsernameProps {
     author: { nick: string; };
@@ -42,17 +43,7 @@ const settings = definePluginSettings({
     },
 });
 
-function wrapEmojis(name: string | undefined) {
-    if (!name) return null;
-    const emojiRegex = /(\p{Emoji_Presentation})/u;
-    const parts = name.split(emojiRegex);
-    return parts.map((part, index) => {
-        if (part.match(emojiRegex)) {
-            return <span key={index} className="vc-smyn-emoji">{part}</span>;
-        }
-        return part;
-    });
-}
+const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
 
 export default definePlugin({
     name: "ShowMeYourName",
@@ -79,18 +70,21 @@ export default definePlugin({
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
 
+            const parsedNick = wrapEmojis(nick);
+            const parsedUsername = wrapEmojis(username);
+
             if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
-                return <>{prefix}{wrapEmojis(nick)}</>;
+                return <>{prefix}{parsedNick}</>;
 
             if (settings.store.mode === "user-nick")
-                return <>{prefix}{wrapEmojis(username)} <span className="vc-smyn-suffix">{wrapEmojis(nick)}</span></>;
+                return <>{prefix}{parsedUsername} <span className="vc-smyn-suffix">{parsedNick}</span></>;
 
             if (settings.store.mode === "nick-user")
-                return <>{prefix}{wrapEmojis(nick)} <span className="vc-smyn-suffix">{wrapEmojis(username)}</span></>;
+                return <>{prefix}{parsedNick} <span className="vc-smyn-suffix">{parsedUsername}</span></>;
 
-            return <>{prefix}{wrapEmojis(username)}</>;
+            return <>{prefix}{parsedUsername}</>;
         } catch {
-            return <>{wrapEmojis(author?.nick)}</>;
+            return <>{author?.nick}</>;
         }
     }, { noop: true }),
 
