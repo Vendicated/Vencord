@@ -42,16 +42,16 @@ const settings = definePluginSettings({
     },
 });
 
-function wrapEmojis(name: string|undefined) {
+function wrapEmojis(name: string | undefined) {
     if (!name) return null;
     const emojiRegex = /(\p{Emoji_Presentation})/u;
     const parts = name.split(emojiRegex);
     return parts.map((part, index) => {
-                if (part.match(emojiRegex)) {
-                    return <span key={index} className="vc-smyn-emoji">{part}</span>;
-                }
-                return part;
-            });
+        if (part.match(emojiRegex)) {
+            return <span key={index} className="vc-smyn-emoji">{part}</span>;
+        }
+        return part;
+    });
 }
 
 export default definePlugin({
