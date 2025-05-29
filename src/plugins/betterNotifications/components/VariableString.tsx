@@ -32,7 +32,7 @@ interface VariableResult {
     valid: boolean,
     type?: FailReason,
     invalidVariable?: string,
-    paranthesisIndex?: number,
+    parenthesisIndex?: number,
 }
 
 function replaceStringWithVars(input: string) {
@@ -48,7 +48,7 @@ function checkVariables(value: string): VariableResult {
     };
 
     let variables: string[] = [];
-    let paranthesisOpen: boolean = false;
+    let parenthesisOpen: boolean = false;
     let tempString: string = "";
     let valid: boolean = true;
     let escapingNextCharacter: boolean = false;
@@ -60,7 +60,7 @@ function checkVariables(value: string): VariableResult {
             continue;
         }
 
-        if (paranthesisOpen) {
+        if (parenthesisOpen) {
             if (!escapingNextCharacter) {
                 if (char === OpeningVar) {
                     valid = false;
@@ -68,13 +68,13 @@ function checkVariables(value: string): VariableResult {
                     failResult = {
                         valid: false,
                         type: FailReason.ParenthesisOpen,
-                        paranthesisIndex: i
+                        parenthesisIndex: i
                     };
 
                     break;
                 }
                 if (char === ClosingVar) {
-                    paranthesisOpen = false;
+                    parenthesisOpen = false;
                     variables.push(tempString);
                     tempString = "";
                     continue;
@@ -91,30 +91,27 @@ function checkVariables(value: string): VariableResult {
                 failResult = {
                     valid: false,
                     type: FailReason.ParenthesisClosed,
-                    paranthesisIndex: i
+                    parenthesisIndex: i
                 };
                 break;
             }
             if (char === OpeningVar) {
-                paranthesisOpen = true;
+                parenthesisOpen = true;
             }
         }
-
 
         escapingNextCharacter = false;
     }
 
-    if (paranthesisOpen && valid) {
+    if (parenthesisOpen && valid) {
         valid = false;
 
         failResult = {
             valid: false,
             type: FailReason.ParenthesisLeftOpen,
-            paranthesisIndex: value.length
+            parenthesisIndex: value.length
         };
     }
-
-
 
     variables.forEach(variable => {
         // @ts-ignore
@@ -128,8 +125,6 @@ function checkVariables(value: string): VariableResult {
             };
         }
     });
-
-
 
     return failResult;
 }
@@ -155,13 +150,13 @@ export default function VariableString(props: { setValue: (value: string) => voi
                 break;
 
             case FailReason.ParenthesisClosed:
-                nearError = value.slice(status.paranthesisIndex! - 4, status.paranthesisIndex! + 4);
-                errorMessage = `Trying to close a nonexistant variable close to ..${nearError}.. (index ${status.paranthesisIndex})`;
+                nearError = value.slice(status.parenthesisIndex! - 4, status.parenthesisIndex! + 4);
+                errorMessage = `Trying to close a nonexistant variable close to ..${nearError}.. (index ${status.parenthesisIndex})`;
                 break;
 
             case FailReason.ParenthesisOpen:
-                nearError = value.slice(status.paranthesisIndex! - 4, status.paranthesisIndex! + 4);
-                errorMessage = `Trying to open an already existing variable close to ..${nearError}.. (index ${status.paranthesisIndex})`;
+                nearError = value.slice(status.parenthesisIndex! - 4, status.parenthesisIndex! + 4);
+                errorMessage = `Trying to open an already existing variable close to ..${nearError}.. (index ${status.parenthesisIndex})`;
                 break;
             case FailReason.ParenthesisLeftOpen:
                 errorMessage = `Parenthesis not closed properly before string ended`;
