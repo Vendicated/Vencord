@@ -299,7 +299,7 @@ export default definePlugin({
         {
             find: '"MessageManager"',
             replacement: {
-                match: /(?<=\(\i\)\)return;)(?=.+?getChannel\((\i)\))/,
+                match: /forceFetch:\i,isPreload:.+?}=\i;(?=.+?getChannel\((\i)\))/,
                 replace: (m, channelId) => `${m}if($self.isHiddenChannel({channelId:${channelId}}))return;`
             }
         },
