@@ -4,55 +4,45 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
-import { openModal } from "@utils/modal";
+import { openModal } from "@utils/index";
 import { OAuth2AuthorizeModal, showToast, Toasts } from "@webpack/common";
 
-import { databaseTimezones } from ".";
+const databaseTimezones: Record<string, { value: string | null; }> = {};
 
-export const DOMAIN = "https://timezone.creations.works";
-export const REDIRECT_URI = `${DOMAIN}/auth/discord/callback`;
-export const CLIENT_ID = "1377021506810417173";
-
-export const DATASTORE_KEY = "vencord-database-timezones";
-
-const pendingRequests: Record<string, Promise<string | null>> = {};
+const DOMAIN = "https://timezone.creations.works";
+const REDIRECT_URI = `${DOMAIN}/auth/discord/callback`;
+const CLIENT_ID = "1377021506810417173";
 
 export async function setUserDatabaseTimezone(userId: string, timezone: string | null) {
-    databaseTimezones[userId] = {
-        value: timezone,
-        expires: Date.now() + 60 * 60 * 1000 // 1 hour
-    };
-    await DataStore.set(DATASTORE_KEY, databaseTimezones);
+    databaseTimezones[userId] = { value: timezone };
 }
 
-export async function getTimezone(userId: string, force?: boolean): Promise<string | null> {
-    const now = Date.now();
+export function getTimezone(userId: string): string | null {
+    return databaseTimezones[userId]?.value ?? null;
+}
 
-    const cached = databaseTimezones[userId];
-    if (cached && now < cached.expires && !force) return cached.value;
+export async function loadDatabaseTimezones(): Promise<boolean> {
+    try {
+        const res = await fetch(`${DOMAIN}/list`, {
+            headers: { Accept: "application/json" }
+        });
 
-    if (!pendingRequests[userId]) {
-        pendingRequests[userId] = (async () => {
-            const res = await fetch(`${DOMAIN}/get?id=${userId}`, {
-                headers: { Accept: "application/json" }
-            });
-
-            let value: string | null = null;
-            if (res.ok) {
-                const json = await res.json();
-                if (json?.timezone && typeof json.timezone === "string") {
-                    value = json.timezone;
-                }
+        if (res.ok) {
+            const json = await res.json();
+            for (const id in json) {
+                databaseTimezones[id] = {
+                    value: json[id]?.timezone ?? null
+                };
             }
 
-            setUserDatabaseTimezone(userId, value);
-            delete pendingRequests[userId];
-            return value;
-        })();
-    }
+            return true;
+        }
 
-    return pendingRequests[userId];
+        return false;
+    } catch (e) {
+        console.error("Failed to fetch timezones list:", e);
+        return false;
+    }
 }
 
 export async function setTimezone(timezone: string): Promise<boolean> {
@@ -92,6 +82,8 @@ export function authModal(callback?: () => void) {
             permissions={0n}
             cancelCompletesFlow={false}
             callback={async (res: any) => {
+                if (!res || !res.location) return;
+
                 try {
                     const url = new URL(res.location);
 
@@ -109,10 +101,10 @@ export function authModal(callback?: () => void) {
                     showToast("Authorization successful!", Toasts.Type.SUCCESS);
                     callback?.();
                 } catch (e) {
+                    console.error("Error during authorization:", e);
                     showToast("Unexpected error during authorization", Toasts.Type.FAILURE);
                 }
             }}
         />
     ));
 }
-
