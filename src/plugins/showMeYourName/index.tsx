@@ -62,9 +62,8 @@ export default definePlugin({
         {
             find: '"BaseUsername"',
             replacement: {
-                /* TODO: remove \i+\i once change makes it to stable */
-                match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
-                replace: "$self.renderUsername(arguments[0])"
+                match: /(?<=onContextMenu:\i,children:)(?:\i,"data-text":\i\+\i)/,
+                replace: "$self.renderUsername(arguments[0]),\"data-text\":$self.getUsername(arguments[0])",
             }
         },
     ],
@@ -93,5 +92,30 @@ export default definePlugin({
         } catch {
             return <>{wrapEmojis(author?.nick)}</>;
         }
-    }, { noop: true })
+    }, { noop: true }),
+
+    getUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
+        try {
+            const user = userOverride ?? message.author;
+            let { username } = user;
+            if (settings.store.displayNames)
+                username = (user as any).globalName || username;
+
+            const { nick } = author;
+            const prefix = withMentionPrefix ? "@" : "";
+
+            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
+                return `${prefix}${nick}`;
+
+            if (settings.store.mode === "user-nick")
+                return `${prefix}${username} (${nick})`;
+
+            if (settings.store.mode === "nick-user")
+                return `${prefix}${nick} (${username})`;
+
+            return `${prefix}${username}`;
+        } catch {
+            return author?.nick || "";
+        }
+    }
 });
