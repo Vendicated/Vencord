@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>181 additional plugins</summary>
+<summary>182 additional plugins</summary>
 
 ### All Platforms
 
@@ -109,6 +109,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - MessageLoggerEnhanced by Aria
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
+- MoreCommands by Arjix, echo, Samu
 - MoreKaomoji by JacobTm & voidbbg
 - MoreStickers by Leko & Arjix
 - MoreUserTags by Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN, hen
