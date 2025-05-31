@@ -251,13 +251,38 @@ export default definePlugin({
             if (!trackData?.["@attr"]?.nowplaying)
                 return null;
 
+            let imageUrl = trackData.image?.find((x: any) => x.size === "large")?.["#text"] || "";
+
+            if (imageUrl === "" && trackData.album?.["#text"] === "" && trackData.artist["#text"] && trackData.name) {
+                // no image on current song, but it's a single, so try to get the "album" release image
+
+                const singleParams = new URLSearchParams({
+                    method: "album.getinfo",
+                    api_key: settings.store.apiKey,
+                    artist: trackData.artist["#text"],
+                    album: trackData.name, // using the track name as-is
+                    format: "json"
+                });
+
+                const singleRes = await fetch(`https://ws.audioscrobbler.com/2.0/?${singleParams}`);
+                if (!singleRes.ok) throw `${singleRes.status} ${singleRes.statusText}`;
+
+                const singleJson = await singleRes.json();
+                if (singleJson.error) {
+                    logger.error("Error from Last.fm API", `${singleJson.error}: ${singleJson.message}`);
+                    return null;
+                }
+
+                imageUrl = singleJson.album?.image?.find((x: any) => x.size === "large")?.["#text"] || "";
+            }
+
             // why does the json api have xml structure
             return {
                 name: trackData.name || "Unknown",
                 album: trackData.album["#text"],
                 artist: trackData.artist["#text"] || "Unknown",
                 url: trackData.url,
-                imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
+                imageUrl: imageUrl
             };
         } catch (e) {
             logger.error("Failed to query Last.fm API", e);
