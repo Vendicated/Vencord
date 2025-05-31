@@ -236,7 +236,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     }
 }
 
-export function migratePluginSetting(pluginName: string, oldSetting: string, newSetting: string) {
+export function migratePluginSetting(pluginName: string, newSetting: string, oldSetting: string) {
     const settings = SettingsStore.plain.plugins[pluginName];
     if (!settings) return;
 

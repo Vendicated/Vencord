@@ -201,7 +201,7 @@ function toggleMessageDecorators(enabled: boolean) {
     }
 }
 
-migratePluginSetting("PlatformIndicators", "badges", "profiles");
+migratePluginSetting("PlatformIndicators", "profiles", "badges");
 const settings = definePluginSettings({
     list: {
         type: OptionType.BOOLEAN,
