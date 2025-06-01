@@ -8,7 +8,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Menu } from "@webpack/common";
+import { ComponentDispatch, Menu } from "@webpack/common";
 
 const languages = [
     { label: "Plain Text", value: "" },
@@ -35,12 +35,7 @@ const insertCodeBlock = (language: string) => {
     const prefix = "```" + language + "\n";
     const suffix = "\n```";
     insertTextIntoChatInputBox(prefix + suffix);
-    // Move cursor between the backticks
-    const textArea = document.querySelector('[role="textbox"]') as HTMLTextAreaElement;
-    if (textArea) {
-        const cursorPosition = textArea.value.length - suffix.length;
-        textArea.setSelectionRange(cursorPosition, cursorPosition);
-    }
+    ComponentDispatch.dispatchToLastSubscribed("TEXTAREA_FOCUS");
 };
 
 const contextMenuPatch: NavContextMenuPatchCallback = (children) => {
