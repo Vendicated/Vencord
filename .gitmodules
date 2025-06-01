@@ -37,3 +37,9 @@
 [submodule "src/userplugins/vencord-whos-watching"]
 	path = src/userplugins/vencord-whos-watching
 	url = https://github.com/fres621/vencord-whos-watching
+[submodule "src/userplugins/MessageFetchTimer"]
+	path = src/userplugins/MessageFetchTimer
+	url = https://github.com/GroupXyz2/MessageFetchTimer.git
+[submodule "src/userplugins/betterForwardMeta"]
+	path = src/userplugins/betterForwardMeta
+	url = https://git.nin0.dev/userplugins/betterForwardMeta.git
