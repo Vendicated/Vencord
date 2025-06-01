@@ -111,6 +111,7 @@ function buildMenuExpression(Sticker, fetchData: () => Promisable<Omit<Sticker, 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, favoriteableType } = props ?? {};
     if (!favoriteableId) return;
+
     const menuItem = (() => {
         const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
         if (sticker?.format_type === 3) return;
