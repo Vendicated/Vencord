@@ -13,6 +13,9 @@ jobs:
             - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
+            - name: Initialize submodules
+              run: git submodule update --init --recursive
+
             - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
