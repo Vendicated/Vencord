@@ -106,6 +106,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Meow by Samwich
 - MessageBurst by port
 - MessageColors by Hen
+- MessageFetchTimer by GroupXyz
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
 - MessageTranslate by Samwich
