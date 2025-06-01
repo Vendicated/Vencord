@@ -151,7 +151,13 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                     : <button
                         {...tooltipProps}
                         className="vc-user-connection"
-                        onClick={() => copyWithToast(connection.name)}
+                        onClick={() => {
+                            if (connection.type === "xbox") {
+                                VencordNative.native.openExternal(`https://www.xbox.com/en-US/play/user/${encodeURIComponent(connection.name)}`);
+                            } else {
+                                copyWithToast(connection.name);
+                            }
+                        }}
                     >
                         {img}
                     </button>
