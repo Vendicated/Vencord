@@ -19,3 +19,6 @@
 [submodule "src/userplugins/WigglyText"]
 	path = src/userplugins/WigglyText
 	url = https://github.com/nexpid/WigglyText
+[submodule "src/userplugins/betterForwardMeta"]
+	path = src/userplugins/betterForwardMeta
+	url = https://git.nin0.dev/userplugins/betterForwardMeta.git
