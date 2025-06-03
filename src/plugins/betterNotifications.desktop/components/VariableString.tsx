@@ -1,7 +1,12 @@
-import { Text, TextInput } from "@webpack/common";
-import { React } from "@webpack/common";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { React, Text, TextInput } from "@webpack/common";
+
 import { Replacements } from "..";
-import { settings } from "..";
 
 const OpeningVar = "{";
 const ClosingVar = "}";
@@ -10,7 +15,7 @@ type ExampleReplacement = {
     [k in typeof Replacements[number]]: string
 };
 
-let examples: ExampleReplacement = {
+const examples: ExampleReplacement = {
     username: "cooluser12",
     nickname: "Cool User 12",
     body: "Want to test out this new plugin I found?",
@@ -47,14 +52,14 @@ function checkVariables(value: string): VariableResult {
         valid: true
     };
 
-    let variables: string[] = [];
+    const variables: string[] = [];
     let parenthesisOpen: boolean = false;
     let tempString: string = "";
     let valid: boolean = true;
     let escapingNextCharacter: boolean = false;
 
     for (let i = 0; i < value.length; i++) {
-        let char = value[i];
+        const char = value[i];
         if (char === "\\") {
             escapingNextCharacter = true;
             continue;
@@ -131,11 +136,11 @@ function checkVariables(value: string): VariableResult {
 
 export default function VariableString(props: { setValue: (value: string) => void, defaultValue: string; }) {
 
-    let [value, setValue] = React.useState<string>(props.defaultValue);
+    const [value, setValue] = React.useState<string>(props.defaultValue);
 
     let [status] = React.useState<VariableResult>({ valid: true });
     let [errorMessage, setErrorMessage] = React.useState<string>();
-    let [exampleString, setExample] = React.useState<string>(replaceStringWithVars(value));
+    const [exampleString, setExample] = React.useState<string>(replaceStringWithVars(value));
 
     React.useEffect(() => {
         props.setValue(value);
@@ -159,7 +164,7 @@ export default function VariableString(props: { setValue: (value: string) => voi
                 errorMessage = `Trying to open an already existing variable close to ..${nearError}.. (index ${status.parenthesisIndex})`;
                 break;
             case FailReason.ParenthesisLeftOpen:
-                errorMessage = `Parenthesis not closed properly before string ended`;
+                errorMessage = "Parenthesis not closed properly before string ended";
                 break;
             default:
                 errorMessage = "";
