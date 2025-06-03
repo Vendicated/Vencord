@@ -1,9 +1,14 @@
-import { Notification, SystemPreferences, IpcMainInvokeEvent, WebContents, shell, app, systemPreferences } from "electron";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-const fs = require("fs");
-const https = require("https");
-const os = require("os");
-const path = require("path");
+import { app, IpcMainInvokeEvent, Notification, shell, WebContents } from "electron";
+import fs from "fs";
+import https from "https";
+import os from "os";
+import path from "path";
 
 interface NotificationData {
     channelId: string;
@@ -40,14 +45,14 @@ interface AssetOptions {
 
 let webContents: WebContents | undefined;
 
-// Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`, 
+// Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`,
 // but using a local file works, so we just throw it to %temp%
 function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
     // Returns file path if avatar downloaded
     // Returns an empty string if the request fails
 
-    let baseDir = path.join(os.tmpdir(), "vencordBetterNotifications");
-    let avatarDir = path.join(baseDir, "avatars");
+    const baseDir = path.join(os.tmpdir(), "vencordBetterNotifications");
+    const avatarDir = path.join(baseDir, "avatars");
 
     if (!fs.existsSync(avatarDir)) {
         fs.mkdirSync(avatarDir, { recursive: true });
@@ -61,7 +66,7 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
         targetDir = path.join(avatarDir, `${options.avatarId}.png`);
 
         if (fs.existsSync(targetDir)) {
-            return new Promise((resolve) => {
+            return new Promise(resolve => {
                 resolve(targetDir);
             });
         }
@@ -80,8 +85,8 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
         file = fs.createWriteStream(targetDir);
     }
 
-    return new Promise((resolve) => {
-        https.get(url, { timeout: 3000 }, (response) => {
+    return new Promise(resolve => {
+        https.get(url, { timeout: 3000 }, response => {
             response.pipe(file);
 
             file.on("finish", () => {
@@ -90,7 +95,7 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
                 });
             });
 
-        }).on("error", (err) => {
+        }).on("error", err => {
             fs.unlink(targetDir, () => { });
             console.error(`Downloading avatar with link ${url} failed:  ${err.message}`);
             resolve("");
@@ -106,11 +111,11 @@ function generateXml(
     extraOptions?: ExtraOptions,
     attachmentLoc?: string,
 ): string {
-    let guildId = notificationData.guildId ?? "@me";
+    const guildId = notificationData.guildId ?? "@me";
 
-    let notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}`;
-    let headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
-    return `     
+    const notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}`;
+    const headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
+    return `
        <toast activationType="protocol" launch="${notificationClickPath}">
             ${extraOptions?.wHeaderOptions ?
             `
@@ -144,21 +149,21 @@ export function notify(event: IpcMainInvokeEvent,
     notificationData: NotificationData,
     extraOptions?: ExtraOptions
 ) {
-    let promises = [saveAssetToDisk("avatar", { userId, avatarId })];
+    const promises = [saveAssetToDisk("avatar", { userId, avatarId })];
 
     if (extraOptions?.attachmentUrl) {
         promises.push(saveAssetToDisk("attachment", { fileType: extraOptions.attachmentType, downloadUrl: extraOptions.attachmentUrl }));
     }
     console.log("Creating promise...");
 
-    Promise.all(promises).then((results) => {
-        //@ts-ignore
-        let avatar: string = results.at(0);
-        //@ts-ignore
-        let attachment: string | undefined = results.at(1);
+    Promise.all(promises).then(results => {
+        // @ts-ignore
+        const avatar: string = results.at(0);
+        // @ts-ignore
+        const attachment: string | undefined = results.at(1);
 
         console.log(`[BN] notify notificationData: ${notificationData.channelId}`);
-        let xml = generateXml(titleString, bodyString, avatar, notificationData, extraOptions, attachment);
+        const xml = generateXml(titleString, bodyString, avatar, notificationData, extraOptions, attachment);
         console.log("[BN] Generated ToastXML: " + xml);
 
         const notification = new Notification({
@@ -181,7 +186,7 @@ export function checkIsMac(_) {
 }
 
 export function openTempFolder(_) {
-    let directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
     if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
     }
@@ -189,7 +194,7 @@ export function openTempFolder(_) {
 }
 
 export function deleteTempFolder(_) {
-    let directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
     fs.rmSync(directory, { recursive: true, force: true });
 }
 
