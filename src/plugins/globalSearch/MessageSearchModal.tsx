@@ -96,46 +96,7 @@ function MessageSearchModal(props: MessageSearchModalProps) {
                     content: searchQuery,
                     cursor: currentCursor,
                     limit: 25,
-                },
-                media: {
-                    sort_by: "timestamp",
-                    sort_order: "desc",
-                    has: [
-                        "image",
-                        "video",
-                    ],
-                    content: searchQuery,
-                    cursor: null,
-                    limit: 15,
-                },
-                pins: {
-                    sort_by: "timestamp",
-                    sort_order: "desc",
-                    pinned: true,
-                    content: searchQuery,
-                    cursor: null,
-                    limit: 15,
-                },
-                links: {
-                    sort_by: "timestamp",
-                    sort_order: "desc",
-                    has: [
-                        "link",
-                    ],
-                    content: searchQuery,
-                    cursor: null,
-                    limit: 10,
-                },
-                files: {
-                    sort_by: "timestamp",
-                    sort_order: "desc",
-                    has: [
-                        "file",
-                    ],
-                    content: searchQuery,
-                    cursor: null,
-                    limit: 10,
-                },
+                }
             },
             track_exact_total_hits: false,
         };
@@ -151,23 +112,7 @@ function MessageSearchModal(props: MessageSearchModalProps) {
 
 
             let data: SearchResponse | null = null;
-            // Prefer response.body if it exists and is an object, otherwise check response itself - ChatGeppity
-            if (response && typeof response.body === 'object' && response.body !== null) {
-                data = response.body as SearchResponse;
-            } else if (response && typeof response.body === 'string') {
-                try {
-                    data = JSON.parse(response.body) as SearchResponse;
-                } catch (e) {
-                    console.error("[MessageSearch] Failed to parse response.body string as JSON:", e, "Body:", response.body);
-                    alert("Search failed: Could not understand server string response.");
-                    setIsLoading(false);
-                    return;
-                }
-            } else if (response && typeof response === 'object' && response !== null && response.hasOwnProperty('tabs')) {
-                data = response as SearchResponse;
-            } else {
-                console.error("[MessageSearch] No usable body or direct data in RestAPI response:", response);
-            }
+            data = response.body as SearchResponse;
 
             if (!data) {
                 alert("Search failed: Server returned no usable data. Check console for details.");
