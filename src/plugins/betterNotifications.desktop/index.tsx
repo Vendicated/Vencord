@@ -75,7 +75,7 @@ export const settings = definePluginSettings({
                 </>
             );
         },
-        default: "@{username} {channelName}",
+        default: "{username} {channelName}",
     },
 
     notificationBodyFormat: {
