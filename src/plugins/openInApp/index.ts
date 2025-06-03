@@ -106,13 +106,15 @@ export default definePlugin({
                 }
             ]
         },
-        {
-            find: ".CONNECTED_ACCOUNT_VIEWED,",
+
+        // User Profile Modal & User Profile Modal v2
+        ...[".__invalid_connectedAccountOpenIconContainer", ".BLUESKY||"].map(find => ({
+            find,
             replacement: {
-                match: /(?<=href:\i,onClick:(\i)=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
+                match: /(?<=onClick:(\i)=>\{)(?=.{0,100}\.CONNECTED_ACCOUNT_VIEWED)(?<==(\i)\.metadata.+?)/,
                 replace: "if($self.handleAccountView($1,$2.type,$2.id)) return;"
             }
-        }
+        }))
     ],
 
     async handleLink(data: { href: string; }, event?: MouseEvent) {
