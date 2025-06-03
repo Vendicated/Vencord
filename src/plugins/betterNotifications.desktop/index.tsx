@@ -17,7 +17,7 @@ import { AdvancedNotification } from "./types/advancedNotification";
 import { BasicNotification } from "./types/basicNotification";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
-const Kangaroo = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
+const jumpToMessage = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 const logger = new Logger("BetterNotifications");
 
 interface ChannelInfo {
@@ -363,7 +363,7 @@ export default definePlugin({
     NotificationClickEvent(channelId: string, messageId: string) {
         logger.debug(`Recieved click to channel ${channelId}`);
         ChannelRouter.transitionToChannel(channelId);
-        Kangaroo.jumpToMessage({
+        jumpToMessage.jumpToMessage({
             channelId,
             messageId,
             flash: true,
