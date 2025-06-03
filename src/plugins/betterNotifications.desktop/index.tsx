@@ -75,7 +75,7 @@ export const settings = definePluginSettings({
                 </>
             );
         },
-        default: "@{username} #{channelName}",
+        default: "@{username} {channelName}",
     },
 
     notificationBodyFormat: {
@@ -153,6 +153,16 @@ export const settings = definePluginSettings({
         description: "What guild name to use when notification is from direct messages",
         default: "@me"
     },
+    channelPrefix: {
+        type: OptionType.STRING,
+        description: "Prefix to use for server channel (not DMs) names in notifications (e.g. '#' -> #general)",
+        default: "#",
+    },
+    UserPrefix: {
+        type: OptionType.STRING,
+        description: "Prefix to use for user names in notifications",
+        default: "@",
+    },
     notificationMediaCache: {
         type: OptionType.COMPONENT,
         component: () => (
@@ -208,7 +218,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
     if (basicNotification.channel_type === 1) {
         channelInfo = {
             channel: settings.store.notificationDmChannelname,
-            groupName: advancedNotification.messageRecord.author.globalName ?? "@" + advancedNotification.messageRecord.author.username
+            groupName: advancedNotification.messageRecord.author.globalName ?? settings.store.UserPrefix + advancedNotification.messageRecord.author.username
         };
         guildInfo = {
             name: settings.store.notificationDmGuildname,
@@ -216,9 +226,13 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
         };
 
     } else {
-        channelInfo = getChannelInfoFromTitle(title);
+        const channelData = getChannelInfoFromTitle(title);
         const guildData = GuildStore.getGuild(basicNotification.guild_id);
 
+        channelInfo = {
+            channel: settings.store.channelPrefix + channelData.channel,
+            groupName: channelData.groupName
+        };
         guildInfo = {
             name: guildData.name,
             description: guildData.description ?? ""
@@ -305,13 +319,17 @@ export default definePlugin({
 
         switch (basicNotification.channel_type) {
             case 0: // servers
-                channelInfo = getChannelInfoFromTitle(args[1]);
+                const channelData = getChannelInfoFromTitle(args[1]);
+                channelInfo = {
+                    channel: settings.store.channelPrefix + channelData.channel,
+                    groupName: channelData.groupName
+                };
                 break;
 
             case 1: // Direct messages
                 channelInfo = {
-                    channel: "DM",
-                    groupName: advancedNotification.messageRecord.author.globalName ?? "@" + advancedNotification.messageRecord.author.username
+                    channel: settings.store.notificationDmGuildname,
+                    groupName: settings.store.UserPrefix + (advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username)
                 };
                 break;
         }
@@ -380,7 +398,7 @@ export default definePlugin({
         return settings.store.notificationPatchType === "custom";
     },
 
-    start: () => {
+    start() {
         Native.checkIsMac().then(isMac => {
             if (isMac && settings.store.notificationPatchType === "custom") {
                 logger.warn("User is on macOS but has notificationPatchType as custom");
