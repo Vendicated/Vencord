@@ -71,8 +71,8 @@ export default definePlugin({
         {
             find: "NOW_PLAYING_CARD_HOVERED,",
             replacement: {
-                match: /(\{party:)(\i)(.*?\}=\i)/,
-                replace: "$1unfilter$2$3,$2=$self.partyFilterIgnoredUsers(unfilter$2)"
+                match: /(\{party:)(\i)(.*?\}=\i)(.*=\i,\i=(\i)(.*),\i=\i\(\)\(\i,\i\);)/,
+                replace: "$1unfilter$2$3,$2=$self.partyFilterIgnoredUsers(unfilter$2)$4if($5 == 0){return null;}",
             },
             predicate: () => settings.store.hideActiveNow === ActiveNowHideIgnoredSettings.HideServer
         },
@@ -116,7 +116,6 @@ export default definePlugin({
                 .map(voiceChannel => this.voiceChannelFilterIgnoredUsers(voiceChannel))
                 .filter(voiceChannel => voiceChannel !== null && voiceChannel !== undefined),
         };
-        console.log("filterIgnoredUsers", filteredParty);
         return filteredParty;
     },
 
@@ -170,6 +169,8 @@ export default definePlugin({
         if (voiceChannels.length === 0) {
             return false;
         }
+        console.log("filterIgnoredGuilds", voiceChannels);
+        console.log("ignoredGuilds", voiceChannels.some(voiceChannel => this.isIgnoredGuild(voiceChannel.guild.id)));
         return voiceChannels.some(voiceChannel => this.isIgnoredGuild(voiceChannel.guild.id));
     },
 
