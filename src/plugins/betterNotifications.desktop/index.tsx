@@ -260,7 +260,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
 export default definePlugin({
     name: "BetterNotifications",
     description: "Improves discord's desktop notifications.",
-    authors: [Devs.ctih],
+    authors: [Devs.ctih, Devs.Cootshk],
     tags: ["native", "notifications", "better"],
     settings: settings,
 
