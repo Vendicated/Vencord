@@ -243,16 +243,6 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
     return texts;
 }
 
-Native.checkIsMac().then(isMac => {
-    if (isMac && settings.store.notificationPatchType === "custom") {
-        logger.warn("User is on macOS but has notificationPatchType as custom");
-        setTimeout(() => {
-            showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
-            settings.store.notificationPatchType = "variable";
-        }, 4000);
-    }
-});
-
 export default definePlugin({
     name: "BetterNotifications",
     description: "Improves discord's desktop notifications.",
@@ -388,6 +378,18 @@ export default definePlugin({
 
     ShouldUseCustomFunc() {
         return settings.store.notificationPatchType === "custom";
+    },
+
+    start: () => {
+        Native.checkIsMac().then(isMac => {
+            if (isMac && settings.store.notificationPatchType === "custom") {
+                logger.warn("User is on macOS but has notificationPatchType as custom");
+                setTimeout(() => {
+                    showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
+                    settings.store.notificationPatchType = "variable";
+                }, 4000);
+            }
+        });
     },
 
     VariableReplacement(avatarUrl: string, notificationTitle: string, notificationBody: string, notificationData: BasicNotification, advancedData: AdvancedNotification) {
