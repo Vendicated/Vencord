@@ -30,7 +30,8 @@ const settings = definePluginSettings({
     hideActiveNowGuilds: {
         type: OptionType.BOOLEAN,
         description: "Hide entire voice channels from ignored servers in Active Now",
-        restartNeeded: true
+        default: false,
+        restartNeeded: false,
     },
     hideFriendsList: {
         description: "Hide Active Now entries for ignored users in the friends list",
@@ -63,19 +64,27 @@ export default definePlugin({
         {
             find: "NOW_PLAYING_CARD_HOVERED,",
             replacement: {
-                match: /{partiedMembers:(\i)(.*),\i=\i\(\)\(\i,\i\);/,
-                replace: "$&if($self.anyIgnored($1)){return null;}",
+                match: /{partiedMembers:(\i)(.*)voiceChannels:(\i)(.*),\i=\i\(\)\(\i,\i\);/,
+                replace: "$&if($self.anyIgnoredUser($1) || $self.filterIgnoredGuilds($3)){return null;}",
             },
-            predicate: () => settings.store.hideActiveNow === ActiveNowHideIgnoredSettings.HideUser
+            predicate: () => settings.store.hideActiveNow === ActiveNowHideIgnoredSettings.HideServer
         },
         {
             find: "NOW_PLAYING_CARD_HOVERED,",
             replacement: {
                 match: /(\{party:)(\i)(.*?\}=\i)(.*=\i,\i=(\i)(.*),\i=\i\(\)\(\i,\i\);)/,
-                replace: "$1unfilter$2$3,$2=$self.partyFilterIgnoredUsers(unfilter$2)$4if($5 == 0){return null;}",
+                replace: "$1unfilter$2$3,$2=$self.partyFilterIgnoredUsers(unfilter$2)$4if($5 == 0 || $self.filterIgnoredGuilds($2)){return null;}",
             },
-            predicate: () => settings.store.hideActiveNow === ActiveNowHideIgnoredSettings.HideServer
+            predicate: () => settings.store.hideActiveNow === ActiveNowHideIgnoredSettings.HideUser
         },
+        /* fix wrong online count here
+         , Q = i.useCallback(e => {
+                    const n = function (e, t, n) {
+                        switch (e) {
+                            case T.pJs.ONLINE:
+                                return P.intl.formatToPlainString(P.t.BagU2d, {
+                                    online: t.toString()
+        */
         {
             find: "}=this.state,{children:",
             replacement: {
@@ -95,7 +104,7 @@ export default definePlugin({
         }
         return false;
     },
-    anyIgnored(users) {
+    anyIgnoredUser(users) {
         return users.some(user => this.isIgnoredUser(user));
     },
     // party functions
@@ -164,11 +173,13 @@ export default definePlugin({
         }
         return false;
     },
-    filterIgnoredGuilds(party) {
-        var { voiceChannels } = party;
-        if (voiceChannels.length === 0) {
+    // input can be a array of channels or a party
+    filterIgnoredGuilds(input) {
+        if (!settings.store.hideActiveNowGuilds || !input) {
             return false;
         }
+        var voiceChannels = input.voiceChannels || input;
+
         console.log("filterIgnoredGuilds", voiceChannels);
         console.log("ignoredGuilds", voiceChannels.some(voiceChannel => this.isIgnoredGuild(voiceChannel.guild.id)));
         return voiceChannels.some(voiceChannel => this.isIgnoredGuild(voiceChannel.guild.id));
