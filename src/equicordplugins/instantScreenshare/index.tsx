@@ -4,60 +4,31 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByCode, findByProps } from "@webpack";
+import definePlugin from "@utils/types";
+import { findByCodeLazy } from "@webpack";
 import { ChannelStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 
-const settings = definePluginSettings({
-    streamType: {
-        description: "Stream screen or window",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Screen", value: "screen" },
-            { label: "Window", value: "window" }
-        ],
-        default: "screen"
-    },
-    streamWindowKeyword: {
-        description: "Keyword to search for in window title",
-        type: OptionType.STRING,
-        default: "",
-        placeholder: "Enter keyword"
-    }
-});
+import { getCurrentMedia, settings } from "./utils";
+
+const startStream = findByCodeLazy('type:"STREAM_START"');
 
 let hasStreamed;
-let sources;
-let source;
 
-async function startStream() {
-    const startStream = findByCode('type:"STREAM_START"');
-    const mediaEngine = findByProps("getMediaEngine").getMediaEngine();
-    const getDesktopSources = findByCode("desktop sources");
+async function autoStartStream() {
     const selected = SelectedChannelStore.getVoiceChannelId();
     if (!selected) return;
     const channel = ChannelStore.getChannel(selected);
 
     if (channel.type === 13 || !PermissionStore.can(PermissionsBits.STREAM, channel)) return;
 
-    if (settings.store.streamType === "screen") {
-        sources = await getDesktopSources(mediaEngine, ["screen"], null);
-        source = sources[0];
-    } else if (settings.store.streamType === "window") {
-        const keyword = settings.store.streamWindowKeyword?.toLowerCase();
-        sources = await getDesktopSources(mediaEngine, ["window", "application"], null);
-        source = sources.find(s => s.name?.toLowerCase().includes(keyword));
-    }
-
-    if (!source) return;
+    const streamMedia = await getCurrentMedia();
 
     startStream(channel.guild_id, selected, {
         "pid": null,
-        "sourceId": source.id,
-        "sourceName": source.name,
+        "sourceId": streamMedia.id,
+        "sourceName": streamMedia.name,
         "audioSourceId": null,
         "sound": true,
         "previewDisabled": false
@@ -78,7 +49,7 @@ export default definePlugin({
 
                 if (channelId && !hasStreamed) {
                     hasStreamed = true;
-                    await startStream();
+                    await autoStartStream();
                 }
 
                 if (!channelId) {
