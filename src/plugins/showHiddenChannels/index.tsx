@@ -72,7 +72,7 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn, Devs.Cootshk],
     settings,
 
     patches: [
@@ -498,7 +498,7 @@ export default definePlugin({
 
             if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
             if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
-            if (["browse", "customize", "guide"].includes(channel.id)) return false; // Special channels
+            if (["browse", "customize", "guide"].includes(channel.id)) return false;
 
             return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, channel);
         } catch (e) {
