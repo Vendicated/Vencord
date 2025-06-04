@@ -43,10 +43,10 @@ export default definePlugin({
         },
         // Also taken from AnonymiseFileNames
         {
-            find: 'addFilesTo:"message.attachments"',
+            find: "FirstThreadMessage,options",
             replacement: {
-                match: /(\i.uploadFiles\((\i),)/,
-                replace: "$2.forEach(f=>f.filename=$self.fixExt(f)),$1",
+                match: /\i.uploadFilesSimple\((\i)\);/,
+                replace: "$&$1.forEach($self.fixExt);",
             },
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
         }

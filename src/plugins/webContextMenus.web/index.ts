@@ -133,7 +133,7 @@ export default definePlugin({
         {
             find: "Copy image not supported",
             replacement: {
-                match: /(?<=(?:canSaveImage|canCopyImage)\(\i?\)\{.{0,50})!\i\.isPlatformEmbedded/g,
+                match: /(?<=(?:canSaveImage|canCopyImage)\((\i,\i)?\)\{.{0,150})!\i\.isPlatformEmbedded/g,
                 replace: "false"
             }
         },
@@ -147,7 +147,7 @@ export default definePlugin({
                     replace: "false"
                 },
                 {
-                    match: /return\s*?\[.{0,50}?(?=\?.{0,100}?id:"copy-image")/,
+                    match: /return\s*?\[.{0,50}?(?=\?.{0,25}?id:"copy-image")/,
                     replace: "return [true"
                 },
                 {

@@ -86,10 +86,10 @@ export default definePlugin({
             },
         },
         {
-            find: 'addFilesTo:"message.attachments"',
+            find: "FirstThreadMessage,options",
             replacement: {
-                match: /\i.uploadFiles\((\i),/,
-                replace: "$1.forEach($self.anonymise),$&"
+                match: /\i.uploadFilesSimple\((\i)\);/,
+                replace: "$&$1.forEach($self.anonymise);"
             }
         },
         {
