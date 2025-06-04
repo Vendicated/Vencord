@@ -64,7 +64,8 @@ export const settings = definePluginSettings({
                         <Forms.FormText>Available variables:</Forms.FormText>
                         <ul>
                             {Replacements.map((variable, index) => {
-                                return <li><Forms.FormText>&#123;{variable}&#125;</Forms.FormText></li>;
+                                // &#123; = { and &#125; = }
+                                return <li key={index}><Forms.FormText>&#123;{variable}&#125;</Forms.FormText></li>;
                             })}
                         </ul>
                         <Forms.FormDivider />
@@ -127,19 +128,25 @@ export const settings = definePluginSettings({
     },
     notificationHeaderEnabled: {
         type: OptionType.BOOLEAN,
-        description: "Enable support for notification headers. (Windows only, build 15063 or higher)",
+        description: "Enable support for notification headers (aka grouping). (Windows only, build 15063 or higher)",
         default: false
     },
     disableImageLoading: {
         type: OptionType.BOOLEAN,
-        description: "Disables attachments. Use if you have a limited data plan. (Windows only)",
+        description: "Disables attachments in notifications. Turn on if you have a limited data plan.",
         default: false
     },
+    showSpoilerImages: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to include attachments marked as spoilers in notifications",
+        default: false
+    },
+
     notificationImagePosition: {
         type: OptionType.SELECT,
         description: "How notification attachments are placed. (Windows only) ",
         options: [
-            { label: "Hero (Anniversary update required)", value: "hero", default: true },
+            { label: "Hero", value: "hero", default: true },
             { label: "Inline (Legacy)", value: "inline" }
         ]
     },
@@ -282,8 +289,8 @@ export default definePlugin({
     ],
 
     NotificationHandlerHook(...args) {
-        logger.info("Recieved hooked notification with args the following args");
-        logger.info(args);
+        logger.debug("Recieved hooked notification with the following args");
+        logger.debug(args);
 
         const replacementMap: Map<string, string> = new Map();
 
@@ -301,16 +308,31 @@ export default definePlugin({
         let imageType;
 
 
-        if (attachments.length > 0) {
-            contentType = attachments[0].content_type;
-            // Windows has a 3mb limit on Notification attachments
-            if (!attachments[0].spoiler && attachments[0].size < 3_000_000 && (contentType === "image/jpeg" || contentType === "image/png")) {
-                attachmentUrl = attachments[0].proxy_url;
-                imageType = contentType.split("/")[1];
-            } else {
-                logger.info(`Unsupported image type (${contentType}), size, or image is a spoiler`);
+        for (const attachment of attachments) {
+            contentType = attachment.content_type;
+
+            if (contentType !== "image/jpeg" && contentType !== "image/png") {
+                logger.info(`Invalid content type ${contentType}. Skipping...`);
+                continue;
             }
+            if (attachment.spoiler && !settings.store.showSpoilerImages) {
+                logger.info("Attachment marked as a spoiler. Skipping...");
+                continue;
+            }
+            if (attachment.size > 3_000_000) {
+                logger.info("Attachment size exceeds 3mb. Skipping...");
+                continue;
+            }
+
+            attachmentUrl = attachment.proxy_url;
+            imageType = contentType.split("/")[1];
+
+            logger.info("Found suitable attachment");
+            logger.debug(attachment.url);
+
+            break;
         }
+
         let channelInfo;
 
         switch (basicNotification.channel_type) {
