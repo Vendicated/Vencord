@@ -20,7 +20,6 @@ const getDesktopSources = findByCodeLazy("desktop sources");
 
 export const settings = definePluginSettings({
     streamMedia: {
-        description: "Media source to stream resets to main screen if not found",
         type: OptionType.COMPONENT,
         component: SettingSection,
     },
@@ -52,7 +51,7 @@ function StreamSimplePicker({ streamMediaSelection, streamMedia }: PickerProps) 
 
     return (
         <SearchableSelect
-            placeholder="Select a media source"
+            placeholder="Select a media source to stream "
             maxVisibleItems={5}
             options={options}
             value={options.find(o => o.value === streamMedia)}
@@ -95,7 +94,8 @@ function ScreenSetting() {
 function SettingSection() {
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>Stream Media</Forms.FormTitle>
+            <Forms.FormTitle>Media source to stream</Forms.FormTitle>
+            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Resets to main screen if not found</Forms.FormText>
             <ScreenSetting />
         </Forms.FormSection>
     );
