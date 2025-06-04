@@ -10,7 +10,7 @@ import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelRouter, Forms, GuildStore, showToast, Toasts } from "@webpack/common";
+import { Button, ChannelRouter, Forms, GuildStore, showToast, Toasts, UserUtils } from "@webpack/common";
 
 import VariableString from "./components/VariableString";
 import { AdvancedNotification } from "./types/advancedNotification";
@@ -342,30 +342,32 @@ export default definePlugin({
 
         [title, body, attributeText] = replaceVariables(advancedNotification, basicNotification, args[1], args[2], [title, body, attributeText]);
 
-        Native.notify(
-            title,
-            body,
-            advancedNotification.messageRecord.author.avatar,
-            advancedNotification.messageRecord.author.id,
-            {
-                channelId: `${advancedNotification.messageRecord.channel_id}`,
-                messageId: `${basicNotification.message_id}`,
-                guildId: basicNotification.guild_id
-            },
-            {
-                wMessageOptions: {
-                    attachmentType: settings.store.notificationImagePosition,
+        UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
+            Native.notify(
+                title,
+                body,
+                advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
+                user.getAvatarURL(basicNotification.guild_id, 256, false),
+                {
+                    channelId: `${advancedNotification.messageRecord.channel_id}`,
+                    messageId: `${basicNotification.message_id}`,
+                    guildId: basicNotification.guild_id
                 },
-                attachmentUrl: settings.store.disableImageLoading ? undefined : attachmentUrl,
-                attachmentType: imageType,
-                wAvatarCrop: settings.store.notificationPfpCircle,
-                wHeaderOptions: settings.store.notificationHeaderEnabled ? {
-                    channelId: advancedNotification.messageRecord.channel_id,
-                    channelName: channelInfo.channel
-                } : undefined,
-                wAttributeText: settings.store.notificationAttribute ? attributeText : undefined
-            }
-        );
+                {
+                    wMessageOptions: {
+                        attachmentType: settings.store.notificationImagePosition,
+                    },
+                    attachmentUrl: settings.store.disableImageLoading ? undefined : attachmentUrl,
+                    attachmentType: imageType,
+                    wAvatarCrop: settings.store.notificationPfpCircle,
+                    wHeaderOptions: settings.store.notificationHeaderEnabled ? {
+                        channelId: advancedNotification.messageRecord.channel_id,
+                        channelName: channelInfo.channel
+                    } : undefined,
+                    wAttributeText: settings.store.notificationAttribute ? attributeText : undefined
+                }
+            );
+        });
     },
 
     NotificationClickEvent(channelId: string, messageId: string) {
