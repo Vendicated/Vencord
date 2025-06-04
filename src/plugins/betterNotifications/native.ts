@@ -1,9 +1,22 @@
-import { Notification, SystemPreferences, IpcMainInvokeEvent, WebContents, shell, app, systemPreferences } from "electron";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { app, IpcMainInvokeEvent, Notification, shell, WebContents } from "electron";
 
 const fs = require("fs");
 const https = require("https");
 const os = require("os");
+const child_process = require("child_process");
 const path = require("path");
+
+const platform = os.platform();
+
+const isWin = platform === "win32";
+const isDarwin = platform === "darwin";
+const isLinux = platform === "linux";
 
 interface NotificationData {
     channelId: string;
@@ -31,8 +44,8 @@ interface ExtraOptions {
 }
 
 interface AssetOptions {
-    userId?: string,
     avatarId?: string,
+    avatarUrl?: string,
 
     downloadUrl?: string;
     fileType?: string;
@@ -40,14 +53,14 @@ interface AssetOptions {
 
 let webContents: WebContents | undefined;
 
-// Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`, 
+// Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`,
 // but using a local file works, so we just throw it to %temp%
 function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
     // Returns file path if avatar downloaded
     // Returns an empty string if the request fails
 
-    let baseDir = path.join(os.tmpdir(), "vencordBetterNotifications");
-    let avatarDir = path.join(baseDir, "avatars");
+    const baseDir = path.join(os.tmpdir(), "vencordBetterNotifications");
+    const avatarDir = path.join(baseDir, "avatars");
 
     if (!fs.existsSync(avatarDir)) {
         fs.mkdirSync(avatarDir, { recursive: true });
@@ -57,31 +70,39 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
     let file;
     let targetDir;
 
+    // TODO: round avatars before saving on linux
+    // TODO: avatar decorations
     if (type === "avatar") {
         targetDir = path.join(avatarDir, `${options.avatarId}.png`);
 
         if (fs.existsSync(targetDir)) {
-            return new Promise((resolve) => {
+            return new Promise(resolve => {
                 resolve(targetDir);
             });
         }
 
         console.log("Could not find profile picture in cache...");
 
-        url = `https://cdn.discordapp.com/avatars/${options.userId}/${options.avatarId}.png?size=256`;
+        // probably should use node URL to be safer
+        url = options.avatarUrl
+            ? options.avatarUrl.startsWith("/assets")
+                ? `https://discord.com${options.avatarUrl}`
+                : options.avatarUrl.replace(/\.\w{1,5}(?=\?|$)/, ".png")
+            : "";
+
         file = fs.createWriteStream(targetDir);
 
     } else if (type === "attachment") {
         targetDir = path.join(baseDir, `attachment.${options.fileType}`);
 
-        console.log("Could not find profile picture in cache...");
+        console.log("Could not find attachment in cache...");
 
         url = options.downloadUrl ?? "";
         file = fs.createWriteStream(targetDir);
     }
 
-    return new Promise((resolve) => {
-        https.get(url, { timeout: 3000 }, (response) => {
+    return new Promise(resolve => {
+        https.get(url, { timeout: 3000 }, response => {
             response.pipe(file);
 
             file.on("finish", () => {
@@ -90,7 +111,7 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
                 });
             });
 
-        }).on("error", (err) => {
+        }).on("error", err => {
             fs.unlink(targetDir, () => { });
             console.error(`Downloading avatar with link ${url} failed:  ${err.message}`);
             resolve("");
@@ -106,11 +127,11 @@ function generateXml(
     extraOptions?: ExtraOptions,
     attachmentLoc?: string,
 ): string {
-    let guildId = notificationData.guildId ?? "@me";
+    const guildId = notificationData.guildId ?? "@me";
 
-    let notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}`;
-    let headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
-    return `     
+    const notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}`;
+    const headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
+    const xml = `
        <toast activationType="protocol" launch="${notificationClickPath}">
             ${extraOptions?.wHeaderOptions ?
             `
@@ -135,31 +156,73 @@ function generateXml(
                 </binding>
             </visual>
         </toast>`;
+    console.log("[BN] Generated ToastXML: " + xml);
+    return xml;
 }
 
+// TODO: ensure notify-send version greater than 0.7.10 for callbacks https://gitlab.gnome.org/GNOME/libnotify/-/blame/master/NEWS#L101
+// `notify-send -v` > "notify-send 0.8.6"
+// libnotify has a limitation where actions cannot survive past the notification expiring. Meaning notifications in the DE history cannot be clicked. This can be sorta worked around with the replace-id but then that notify-send process will live forever untill clicked, then needs to be recreated.
+function notifySend(summary: string, body: string | null, avatarLocation: string, defaultCallback: Function, attachmentLocation?: string) {
+    const name = app.getName();
+    var args = [summary];
+    if (body) args.push(body);
+
+    // default callback
+    args.push("--action=default=Open");
+    // TODO future: button actions
+    // args.push("--action=key=buttontext");
+
+    // TODO future: modify existing notification with --replace-id="id"
+    // args.push("--print-id");
+
+    args.push(`--app-name=${name[0].toUpperCase() + name.slice(1)}`);
+    args.push(`--hint=string:desktop-entry:${name}`);
+
+    // TODO future: KDE has an `x-kde-urls` hint which can be used to display the attachment and avatar at the same time.
+    // args.push(--hint=string:x-kde-urls:file://${attachmentLocation})
+    if (attachmentLocation) args.push(`--icon=file://${attachmentLocation}`);
+    else args.push(`--icon=file://${avatarLocation}`);
+
+    console.log(args);
+
+    child_process.execFile("notify-send", args, {}, (error, stdout, stderr) => {
+        if (error)
+            return console.error("Notification error:", error + stderr);
+
+        // Will need propper filtering if multiple actions or notification ids are used
+        if (stdout.trim() === "default") defaultCallback();
+    });
+}
 
 export function notify(event: IpcMainInvokeEvent,
     titleString: string, bodyString: string,
-    avatarId: string, userId: string,
+    avatarId: string, avatarUrl: string,
     notificationData: NotificationData,
     extraOptions?: ExtraOptions
 ) {
-    let promises = [saveAssetToDisk("avatar", { userId, avatarId })];
+    const promises = [saveAssetToDisk("avatar", { avatarUrl, avatarId })];
 
     if (extraOptions?.attachmentUrl) {
         promises.push(saveAssetToDisk("attachment", { fileType: extraOptions.attachmentType, downloadUrl: extraOptions.attachmentUrl }));
     }
     console.log("Creating promise...");
 
-    Promise.all(promises).then((results) => {
-        //@ts-ignore
-        let avatar: string = results.at(0);
-        //@ts-ignore
-        let attachment: string | undefined = results.at(1);
+    Promise.all(promises).then(results => {
+        // @ts-ignore
+        const avatar: string = results.at(0);
+        // @ts-ignore
+        const attachment: string | undefined = results.at(1);
 
-        console.log(`[BN] notify notificationData: ${notificationData.channelId}`);
-        let xml = generateXml(titleString, bodyString, avatar, notificationData, extraOptions, attachment);
-        console.log("[BN] Generated ToastXML: " + xml);
+        // console.log(`[BN] notify notificationData: ${notificationData.channelId}`);
+
+        const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
+
+        if (isLinux) {
+            // TODO: style the body with basic markup https://specifications.freedesktop.org/notification-spec/latest/markup.html
+            notifySend(titleString, bodyString, avatar, unixCallback, attachment);
+            return;
+        }
 
         const notification = new Notification({
             title: titleString,
@@ -167,21 +230,21 @@ export function notify(event: IpcMainInvokeEvent,
 
             // toastXml only works on Windows
             // https://learn.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/adaptive-interactive-toasts?tabs=xml
-            toastXml: xml
+            ...(isWin && { toastXml: generateXml(titleString, bodyString, avatar, notificationData, extraOptions, attachment) })
         });
 
-        // Listener for macOS and Linux
-        notification.addListener("click", () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`));
+        // Listener for macOS
+        notification.addListener("click", () => unixCallback());
         notification.show();
     });
 }
 
 export function checkIsMac(_) {
-    return os.platform() === "darwin";
+    return isDarwin;
 }
 
 export function openTempFolder(_) {
-    let directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
     if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
     }
@@ -189,7 +252,7 @@ export function openTempFolder(_) {
 }
 
 export function deleteTempFolder(_) {
-    let directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
     fs.rmSync(directory, { recursive: true, force: true });
 }
 
@@ -209,6 +272,6 @@ export function deleteTempFolder(_) {
 // });
 
 app.on("browser-window-created", (_, win) => {
-    console.log("[BN] Browser window created!");
+    // console.log("[BN] Browser window created!");
     webContents = win.webContents;
 });
