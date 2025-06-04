@@ -1,16 +1,20 @@
-import definePlugin, { PluginNative, OptionType } from "@utils/types";
-import { Button, ChannelRouter, FluxDispatcher, Forms, Select, showToast, Toasts } from "@webpack/common";
-import { findByPropsLazy } from "@webpack";
-import { definePluginSettings, SettingsStore } from "@api/Settings";
-import { sendMessage } from "@utils/discord";
-import { AdvancedNotification } from "./types/advancedNotification";
-import { BasicNotification } from "./types/basicNotification";
-import { MessageStore } from "@webpack/common";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { GuildStore } from "@webpack/common";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { Button, ChannelRouter, Forms, GuildStore, showToast, Toasts, UserUtils } from "@webpack/common";
 
 import VariableString from "./components/VariableString";
+import { AdvancedNotification } from "./types/advancedNotification";
+import { BasicNotification } from "./types/basicNotification";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const Kangaroo = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
@@ -167,15 +171,15 @@ export const settings = definePluginSettings({
 
 function getChannelInfoFromTitle(title: string) {
     try {
-        let parts = title.split(" (#");
+        const parts = title.split(" (#");
         if (parts === undefined) {
             return {
                 channel: "unknown",
                 groupName: "unknown"
             };
         }
-        let innerInfo = parts[1];
-        let data = innerInfo.slice(0, -1).split(", ");
+        const innerInfo = parts[1];
+        const data = innerInfo.slice(0, -1).split(", ");
         return {
             channel: data[0],
             groupName: data[1]
@@ -213,7 +217,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
 
     } else {
         channelInfo = getChannelInfoFromTitle(title);
-        let guildData = GuildStore.getGuild(basicNotification.guild_id);
+        const guildData = GuildStore.getGuild(basicNotification.guild_id);
 
         guildInfo = {
             name: guildData.name,
@@ -221,7 +225,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
         };
     }
 
-    let replacementMap: ReplacementMap = {
+    const replacementMap: ReplacementMap = {
         username: advancedNotification.messageRecord.author.username,
         body,
         channelName: channelInfo.channel,
@@ -234,7 +238,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
 
     new Map(Object.entries(replacementMap)).forEach((value, key) => {
         logger.debug(`Replacing ${key} - ${value}`);
-        texts = texts.map((text) => text.replaceAll(`{${key}}`, value));
+        texts = texts.map(text => text.replaceAll(`{${key}}`, value));
     });
     return texts;
 }
@@ -251,14 +255,14 @@ Native.checkIsMac().then(isMac => {
 
 export default definePlugin({
     name: "BetterNotifications",
-    description: `Improves discord's desktop notifications.`,
+    description: "Improves discord's desktop notifications.",
     authors: [Devs.ctih],
     tags: ["native", "notifications", "better"],
     settings: settings,
 
     patches: [
         {
-            find: 'Notification body contains null character, setting to empty string',
+            find: "Notification body contains null character, setting to empty string",
             replacement: {
                 match: /async function (\i)\((\i),(\i),(\i),(\i),(\i)\){/,
                 replace: `
@@ -278,13 +282,13 @@ export default definePlugin({
     ],
 
     NotificationHandlerHook(...args) {
-        logger.info(`Recieved hooked notification with args the following args`);
+        logger.info("Recieved hooked notification with args the following args");
         logger.info(args);
 
-        let replacementMap: Map<string, string> = new Map();
+        const replacementMap: Map<string, string> = new Map();
 
-        let basicNotification: BasicNotification = args[3];
-        let advancedNotification: AdvancedNotification = args[4];
+        const basicNotification: BasicNotification = args[3];
+        const advancedNotification: AdvancedNotification = args[4];
         let attachmentUrl: string | undefined;
 
         if (!notificationShouldBeShown(advancedNotification)) {
@@ -292,7 +296,7 @@ export default definePlugin({
             return;
         }
 
-        let attachments = advancedNotification.messageRecord.attachments;
+        const { attachments } = advancedNotification.messageRecord;
         let contentType;
         let imageType;
 
@@ -330,30 +334,32 @@ export default definePlugin({
 
         [title, body, attributeText] = replaceVariables(advancedNotification, basicNotification, args[1], args[2], [title, body, attributeText]);
 
-        Native.notify(
-            title,
-            body,
-            advancedNotification.messageRecord.author.avatar,
-            advancedNotification.messageRecord.author.id,
-            {
-                channelId: `${advancedNotification.messageRecord.channel_id}`,
-                messageId: `${basicNotification.message_id}`,
-                guildId: basicNotification.guild_id
-            },
-            {
-                wMessageOptions: {
-                    attachmentType: settings.store.notificationImagePosition,
+        UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
+            Native.notify(
+                title,
+                body,
+                advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
+                user.getAvatarURL(basicNotification.guild_id, 256, false),
+                {
+                    channelId: `${advancedNotification.messageRecord.channel_id}`,
+                    messageId: `${basicNotification.message_id}`,
+                    guildId: basicNotification.guild_id
                 },
-                attachmentUrl: settings.store.disableImageLoading ? undefined : attachmentUrl,
-                attachmentType: imageType,
-                wAvatarCrop: settings.store.notificationPfpCircle,
-                wHeaderOptions: settings.store.notificationHeaderEnabled ? {
-                    channelId: advancedNotification.messageRecord.channel_id,
-                    channelName: channelInfo.channel
-                } : undefined,
-                wAttributeText: settings.store.notificationAttribute ? attributeText : undefined
-            }
-        );
+                {
+                    wMessageOptions: {
+                        attachmentType: settings.store.notificationImagePosition,
+                    },
+                    attachmentUrl: settings.store.disableImageLoading ? undefined : attachmentUrl,
+                    attachmentType: imageType,
+                    wAvatarCrop: settings.store.notificationPfpCircle,
+                    wHeaderOptions: settings.store.notificationHeaderEnabled ? {
+                        channelId: advancedNotification.messageRecord.channel_id,
+                        channelName: channelInfo.channel
+                    } : undefined,
+                    wAttributeText: settings.store.notificationAttribute ? attributeText : undefined
+                }
+            );
+        });
     },
 
     NotificationClickEvent(channelId: string, messageId: string) {
