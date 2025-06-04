@@ -16,8 +16,8 @@ import { settings } from "../settings";
 import { ActivityListIcon, ActivityListProps, ApplicationIcon, IconCSSProperties } from "../types";
 import { cl, getApplicationIcons } from "../utils";
 
-// if discord one day decides to change their icon this needs to be updated
-const DefaultActivityIcon = findComponentByCodeLazy("M6,7 L2,7 L2,6 L6,6 L6,7 Z M8,5 L2,5 L2,4 L8,4 L8,5 Z M8,3 L2,3 L2,2 L8,2 L8,3 Z M8.88888889,0 L1.11111111,0 C0.494444444,0 0,0.494444444 0,1.11111111 L0,8.88888889 C0,9.50253861 0.497461389,10 1.11111111,10 L8.88888889,10 C9.50253861,10 10,9.50253861 10,8.88888889 L10,1.11111111 C10,0.494444444 9.5,0 8.88888889,0 Z");
+// Discord no longer shows an icon here by default but we use the one from the popout now here
+const DefaultActivityIcon = findComponentByCodeLazy("M5 2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5Zm6.81 7c-.54 0-1 .26-1.23.61A1 1 0 0 1 8.92 8.5 3.49 3.49 0 0 1 11.82 7c1.81 0 3.43 1.38 3.43 3.25 0 1.45-.98 2.61-2.27 3.06a1 1 0 0 1-1.96.37l-.19-1a1 1 0 0 1 .98-1.18c.87 0 1.44-.63 1.44-1.25S12.68 9 11.81 9ZM13 16a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm7-10.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM18.5 20a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM7 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM5.5 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z");
 
 export function patchActivityList({ activities, user, hideTooltip }: ActivityListProps): JSX.Element | null {
     const icons: ActivityListIcon[] = [];
@@ -86,7 +86,7 @@ export function patchActivityList({ activities, user, hideTooltip }: ActivityLis
         // We need to filter out custom statuses
         const shouldShow = activities.filter(a => a.type !== 4).length !== icons.length;
         if (shouldShow) {
-            return <DefaultActivityIcon />;
+            return <DefaultActivityIcon size="xs" />;
         }
     }
 
