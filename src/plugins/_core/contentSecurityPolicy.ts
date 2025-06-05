@@ -35,9 +35,15 @@ export default definePlugin({
             }
             if (IS_DEV) logger.debug("Recieved CSP: " + csp);
             meta.content = csp.replaceAll(
+                // script-src, style-src, connect-src
                 "https://cdn.discordapp.com ", "https://cdn.discordapp.com https://vencord.dev https://*.vencord.dev "
             ).replaceAll(
-                "https://*.discordapp.com ", "https://*.discordapp.com https://vencord.dev https://*.vencord.dev ");
+                // img-src, media-src
+                "https://*.discordapp.com ", "https://*.discordapp.com https://vencord.dev https://*.vencord.dev "
+            ).replaceAll(
+                // connect-src
+                "http://127.0.0.1:*", "http://127.0.0.1:* ws://localhost:* http://localhost:*"
+            );
             document.head.appendChild(meta);
         });
     }
