@@ -253,7 +253,11 @@ export function openTempFolder(_) {
 
 export function deleteTempFolder(_) {
     const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
-    fs.rmSync(directory, { recursive: true, force: true });
+    try {
+        fs.rmSync(directory, { recursive: true, force: true });
+    } catch (error) {
+        console.error("Failed to delete temporary folder.");
+    }
 }
 
 // TODO future: app.on("second-instance") with deeplinks on Windows notifications to allow button actions
@@ -270,8 +274,3 @@ export function deleteTempFolder(_) {
 //     }
 //     event.preventDefault();
 // });
-
-app.on("browser-window-created", (_, win) => {
-    // console.log("[BN] Browser window created!");
-    webContents = win.webContents;
-});
