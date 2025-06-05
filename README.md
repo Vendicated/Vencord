@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>183 additional plugins</summary>
+<summary>184 additional plugins</summary>
 
 ### All Platforms
 
@@ -160,6 +160,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - StatusPresets by iamme
 - SteamStatusSync by niko
 - StickerBlocker by Samwich
+- StreamingCodecDisabler by davidkra230
 - TalkInReverse by Tolgchu
 - TeX by Kyuuhachi
 - TextToSpeech by Samwich
