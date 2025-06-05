@@ -65,7 +65,7 @@ export default definePlugin({
         mediaEngine = mediaEngine.getMediaEngine();
         const options = Object.keys(originalCodecStatuses);
         // [{"codec":"","decode":false,"encode":false}]
-        const CodecCapabilities = JSON.parse(await new Promise(res => engine.getCodecCapabilities(res)));
+        const CodecCapabilities = JSON.parse(await new Promise(res => mediaEngine.getCodecCapabilities(res)));
         CodecCapabilities.forEach((codec: { codec: string; encode: boolean; }) => {
             if (options.includes(codec.codec)) {
                 originalCodecStatuses[codec.codec] = codec.encode;
