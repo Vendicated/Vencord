@@ -17,7 +17,7 @@ import { AdvancedNotification } from "./types/advancedNotification";
 import { BasicNotification } from "./types/basicNotification";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
-const Kangaroo = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
+const jumpToMessage = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 const logger = new Logger("BetterNotifications");
 
 interface ChannelInfo {
@@ -76,7 +76,7 @@ export const settings = definePluginSettings({
                 </>
             );
         },
-        default: "@{username} #{channelName}",
+        default: "{username} {channelName}",
     },
 
     notificationBodyFormat: {
@@ -160,6 +160,16 @@ export const settings = definePluginSettings({
         description: "What guild name to use when notification is from direct messages",
         default: "@me"
     },
+    channelPrefix: {
+        type: OptionType.STRING,
+        description: "Prefix to use for server channel (not DMs) names in notifications (e.g. '#' -> #general)",
+        default: "#",
+    },
+    UserPrefix: {
+        type: OptionType.STRING,
+        description: "Prefix to use for user names in notifications",
+        default: "@",
+    },
     notificationMediaCache: {
         type: OptionType.COMPONENT,
         component: () => (
@@ -215,7 +225,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
     if (basicNotification.channel_type === 1) {
         channelInfo = {
             channel: settings.store.notificationDmChannelname,
-            groupName: advancedNotification.messageRecord.author.globalName ?? "@" + advancedNotification.messageRecord.author.username
+            groupName: advancedNotification.messageRecord.author.globalName ?? settings.store.UserPrefix + advancedNotification.messageRecord.author.username
         };
         guildInfo = {
             name: settings.store.notificationDmGuildname,
@@ -223,9 +233,13 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
         };
 
     } else {
-        channelInfo = getChannelInfoFromTitle(title);
+        const channelData = getChannelInfoFromTitle(title);
         const guildData = GuildStore.getGuild(basicNotification.guild_id);
 
+        channelInfo = {
+            channel: settings.store.channelPrefix + channelData.channel,
+            groupName: channelData.groupName
+        };
         guildInfo = {
             name: guildData.name,
             description: guildData.description ?? ""
@@ -249,16 +263,6 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
     });
     return texts;
 }
-
-Native.checkIsMac().then(isMac => {
-    if (isMac && settings.store.notificationPatchType === "custom") {
-        logger.warn("User is on macOS but has notificationPatchType as custom");
-        setTimeout(() => {
-            showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
-            settings.store.notificationPatchType = "variable";
-        }, 4000);
-    }
-});
 
 export default definePlugin({
     name: "BetterNotifications",
@@ -344,13 +348,17 @@ export default definePlugin({
 
         switch (basicNotification.channel_type) {
             case 0: // servers
-                channelInfo = getChannelInfoFromTitle(args[1]);
+                const channelData = getChannelInfoFromTitle(args[1]);
+                channelInfo = {
+                    channel: settings.store.channelPrefix + channelData.channel,
+                    groupName: channelData.groupName
+                };
                 break;
 
             case 1: // Direct messages
                 channelInfo = {
-                    channel: "DM",
-                    groupName: advancedNotification.messageRecord.author.globalName ?? "@" + advancedNotification.messageRecord.author.username
+                    channel: settings.store.notificationDmGuildname,
+                    groupName: settings.store.UserPrefix + (advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username)
                 };
                 break;
         }
@@ -394,7 +402,7 @@ export default definePlugin({
     NotificationClickEvent(channelId: string, messageId: string) {
         logger.debug(`Recieved click to channel ${channelId}`);
         ChannelRouter.transitionToChannel(channelId);
-        Kangaroo.jumpToMessage({
+        jumpToMessage.jumpToMessage({
             channelId,
             messageId,
             flash: true,
@@ -419,6 +427,18 @@ export default definePlugin({
 
     ShouldUseCustomFunc() {
         return settings.store.notificationPatchType === "custom";
+    },
+
+    start() {
+        Native.checkIsMac().then(isMac => {
+            if (isMac && settings.store.notificationPatchType === "custom") {
+                logger.warn("User is on macOS but has notificationPatchType as custom");
+                setTimeout(() => {
+                    showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
+                    settings.store.notificationPatchType = "variable";
+                }, 4000);
+            }
+        });
     },
 
     VariableReplacement(avatarUrl: string, notificationTitle: string, notificationBody: string, notificationData: BasicNotification, advancedData: AdvancedNotification) {

@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import child_process from "child_process";
 import { app, IpcMainInvokeEvent, Notification, shell, WebContents } from "electron";
-
-const fs = require("fs");
-const https = require("https");
-const os = require("os");
-const child_process = require("child_process");
-const path = require("path");
+import fs from "fs";
+import https from "https";
+import os from "os";
+import path from "path";
 
 const platform = os.platform();
 
