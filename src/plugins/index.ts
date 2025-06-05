@@ -55,8 +55,7 @@ export function isPluginEnabled(p: string) {
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
-        (settings[p]?.enabled &&
-            (Plugins[p]?.predicate ? Plugins[p].predicate() : true))
+        settings[p]?.enabled
     ) ?? false;
 }
 
