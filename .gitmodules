@@ -22,3 +22,6 @@
 [submodule "src/userplugins/betterForwardMeta"]
 	path = src/userplugins/betterForwardMeta
 	url = https://git.nin0.dev/userplugins/betterForwardMeta.git
+[submodule "src/userplugins/MediaStatus"]
+	path = src/userplugins/MediaStatus
+	url = https://github.com/redbaron2k7/MediaStatus.git
