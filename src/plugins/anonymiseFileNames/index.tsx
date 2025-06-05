@@ -72,18 +72,17 @@ export default definePlugin({
 
     patches: [
         {
-            find: 'type:"UPLOAD_START"',
-            replacement: {
-                match: /await \i\.uploadFiles\((\i),/,
-                replace: "$1.forEach($self.anonymise),$&"
-            },
-        },
-        {
-            find: 'addFilesTo:"message.attachments"',
-            replacement: {
-                match: /\i.uploadFiles\((\i),/,
-                replace: "$1.forEach($self.anonymise),$&"
-            }
+            find: "async uploadFiles(",
+            replacement: [
+                {
+                    match: /async uploadFiles\((\i),\i\){/,
+                    replace: "$&$1.forEach($self.anonymise);"
+                },
+                {
+                    match: /async uploadFilesSimple\((\i)\){/,
+                    replace: "$&$1.forEach($self.anonymise);"
+                }
+            ],
         },
         {
             find: "#{intl::ATTACHMENT_UTILITIES_SPOILER}",
