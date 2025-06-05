@@ -164,6 +164,8 @@ export const globPlugins = kind => ({
 
                     if (target && !IS_REPORTER) {
                         const excluded =
+                            (target === "userscript" && !IS_EXTENSION && kind === "web") ||
+                            (target === "extension" && IS_EXTENSION && kind === "web") ||
                             (target === "dev" && !IS_DEV) ||
                             (target === "web" && kind === "discordDesktop") ||
                             (target === "desktop" && kind === "web") ||

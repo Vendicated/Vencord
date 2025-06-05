@@ -177,7 +177,9 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
 
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
+    const ExcludedReasons: Record<"userscript" | "extension" | "web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
+        userscript: "Vencord Userscript",
+        extension: "Vencord Chrome Extension",
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
         vesktop: "Vesktop app",
