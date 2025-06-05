@@ -9,7 +9,7 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 
-const mediaEngine = findStoreLazy("MediaEngineStore");
+let mediaEngine = findStoreLazy("MediaEngineStore");
 
 const originalCodecStatuses: {
     AV1: boolean,
@@ -62,7 +62,7 @@ export default definePlugin({
     },
 
     async start() {
-        const engine = mediaEngine.getMediaEngine();
+        mediaEngine = mediaEngine.getMediaEngine();
         const options = Object.keys(originalCodecStatuses);
         // [{"codec":"","decode":false,"encode":false}]
         const CodecCapabilities = JSON.parse(await new Promise(res => engine.getCodecCapabilities(res)));
