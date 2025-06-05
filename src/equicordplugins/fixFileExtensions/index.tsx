@@ -34,22 +34,19 @@ export default definePlugin({
     patches: [
         // Taken from AnonymiseFileNames
         {
-            find: 'type:"UPLOAD_START"',
-            replacement: {
-                match: /await \i\.uploadFiles\((\i),/,
-                replace: "$1.forEach($self.fixExt),$&"
-            },
+            find: "async uploadFiles(",
+            replacement: [
+                {
+                    match: /async uploadFiles\((\i),\i\){/,
+                    replace: "$&$1.forEach($self.anonymise);"
+                },
+                {
+                    match: /async uploadFilesSimple\((\i)\){/,
+                    replace: "$&$1.forEach($self.anonymise);"
+                }
+            ],
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
         },
-        // Also taken from AnonymiseFileNames
-        {
-            find: "FirstThreadMessage,options",
-            replacement: {
-                match: /\i.uploadFilesSimple\((\i)\);/,
-                replace: "$&$1.forEach($self.fixExt);",
-            },
-            predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
-        }
     ],
     fixExt(upload: ExtUpload) {
         const file = upload.filename;
