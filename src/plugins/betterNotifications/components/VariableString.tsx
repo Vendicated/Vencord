@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { React, Text, TextInput } from "@webpack/common";
+import { Forms, React, Text, TextInput } from "@webpack/common";
 
 import { Replacements } from "..";
 
@@ -38,6 +38,7 @@ interface VariableResult {
     type?: FailReason,
     invalidVariable?: string,
     parenthesisIndex?: number,
+    currentVariable?: string;
 }
 
 function replaceStringWithVars(input: string) {
@@ -45,6 +46,21 @@ function replaceStringWithVars(input: string) {
         input = input.replaceAll(`{${key}}`, value);
     });
     return input;
+}
+
+function getVariableHinting(unfinishedVar: string): string[] {
+    if (!unfinishedVar) {
+        return [];
+    }
+
+    const matches: string[] = [];
+
+    Replacements.forEach(variable => {
+        if (variable.startsWith(unfinishedVar)) {
+            matches.push(variable);
+        }
+    });
+    return matches;
 }
 
 function checkVariables(value: string): VariableResult {
@@ -60,43 +76,48 @@ function checkVariables(value: string): VariableResult {
 
     for (let i = 0; i < value.length; i++) {
         const char = value[i];
+
         if (char === "\\") {
             escapingNextCharacter = true;
             continue;
         }
 
-        if (parenthesisOpen) {
-            if (!escapingNextCharacter) {
-                if (char === OpeningVar) {
-                    valid = false;
-
-                    failResult = {
-                        valid: false,
-                        type: FailReason.ParenthesisOpen,
-                        parenthesisIndex: i
-                    };
-
-                    break;
-                }
-                if (char === ClosingVar) {
-                    parenthesisOpen = false;
-                    variables.push(tempString);
-                    tempString = "";
-                    continue;
-                }
-                tempString += char;
-            } else {
-                console.log("Escaping next character...");
-            }
+        if (escapingNextCharacter) {
+            escapingNextCharacter = false;
+            continue;
         }
-        else if (!escapingNextCharacter) {
+
+        if (parenthesisOpen) {
+            if (char === OpeningVar) {
+                valid = false;
+
+                failResult = {
+                    valid: false,
+                    type: FailReason.ParenthesisOpen,
+                    parenthesisIndex: i,
+                    currentVariable: tempString
+                };
+
+                break;
+            }
+            if (char === ClosingVar) {
+                parenthesisOpen = false;
+                variables.push(tempString);
+                tempString = "";
+                continue;
+            }
+            tempString += char;
+
+        }
+        else {
             if (char === ClosingVar) {
                 valid = false;
 
                 failResult = {
                     valid: false,
                     type: FailReason.ParenthesisClosed,
-                    parenthesisIndex: i
+                    parenthesisIndex: i,
+                    currentVariable: tempString
                 };
                 break;
             }
@@ -104,9 +125,9 @@ function checkVariables(value: string): VariableResult {
                 parenthesisOpen = true;
             }
         }
-
-        escapingNextCharacter = false;
     }
+
+
 
     if (parenthesisOpen && valid) {
         valid = false;
@@ -114,7 +135,8 @@ function checkVariables(value: string): VariableResult {
         failResult = {
             valid: false,
             type: FailReason.ParenthesisLeftOpen,
-            parenthesisIndex: value.length
+            parenthesisIndex: value.length,
+            currentVariable: tempString
         };
     }
 
@@ -126,7 +148,8 @@ function checkVariables(value: string): VariableResult {
             failResult = {
                 valid: false,
                 type: FailReason.VariableName,
-                invalidVariable: variable
+                invalidVariable: variable,
+                currentVariable: variable
             };
         }
     });
@@ -135,17 +158,20 @@ function checkVariables(value: string): VariableResult {
 }
 
 export default function VariableString(props: { setValue: (value: string) => void, defaultValue: string; }) {
-
     const [value, setValue] = React.useState<string>(props.defaultValue);
 
-    let [status] = React.useState<VariableResult>({ valid: true });
+    let status: VariableResult = { valid: true };
     let [errorMessage, setErrorMessage] = React.useState<string>();
     const [exampleString, setExample] = React.useState<string>(replaceStringWithVars(value));
+    const [hints, setHints] = React.useState<string[]>(getVariableHinting(""));
+    const [currentVar, setCurrentVar] = React.useState<string>("");
 
     React.useEffect(() => {
         props.setValue(value);
         status = checkVariables(value);
         setExample(replaceStringWithVars(value));
+        setHints(getVariableHinting(status.currentVariable ?? ""));
+        setCurrentVar(status.currentVariable ?? "");
 
         let nearError: string = "";
 
@@ -174,11 +200,26 @@ export default function VariableString(props: { setValue: (value: string) => voi
         setErrorMessage(errorMessage);
     }, [value]);
 
+
     return (
         <div>
+            <ul>
+                {hints.map((hintedVariable, index) => {
+                    return (
+                        <>
+                            <li style={{
+                                display: "inline-block",
+                                marginRight: "0.5em"
+                            }} key={hintedVariable}>
+                                <Forms.FormText><b>{currentVar}</b>{hintedVariable.slice(currentVar.length)}</Forms.FormText>
+                            </li>
+                        </>
+                    );
+                })}
+            </ul>
             <TextInput value={value} onChange={setValue}></TextInput>
             <TextInput style={{ marginTop: "6px", opacity: 0.5 }} value={exampleString} disabled={true}></TextInput>
-            <Text style={{ color: "red" }}>{errorMessage}</Text>
+            <Text style={{ marginTop: "4px", color: "red" }}>{errorMessage}</Text>
         </div>
     );
 }
