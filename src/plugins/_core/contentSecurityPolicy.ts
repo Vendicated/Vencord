@@ -11,7 +11,7 @@ import definePlugin, { StartAt } from "@utils/types";
 export default definePlugin({
     name: "ContentSecurityPolicy",
     required: true,
-    startAt: StartAt.DOMContentLoaded,
+    startAt: StartAt.Init,
     description: "Allow loading resources from Vencord.dev",
     authors: [Devs.Cootshk],
     start() {
