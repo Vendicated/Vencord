@@ -107,7 +107,6 @@ function checkVariables(value: string): VariableResult {
                 continue;
             }
             tempString += char;
-
         }
         else {
             if (char === ClosingVar) {

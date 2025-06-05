@@ -212,6 +212,7 @@ function getChannelInfoFromTitle(title: string) {
 }
 
 function notificationShouldBeShown(advancedData: AdvancedNotification): boolean {
+    // messageRecord.author may be undefined under specific notification types
     if (advancedData.messageRecord.author?.discriminator || "0" !== "0" && !settings.store.allowBotNotifications) {
         return false;
     }
