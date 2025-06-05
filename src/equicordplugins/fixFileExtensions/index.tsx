@@ -38,11 +38,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /async uploadFiles\((\i),\i\){/,
-                    replace: "$&$1.forEach($self.anonymise);"
+                    replace: "$&$1.forEach($self.fixExt);"
                 },
                 {
                     match: /async uploadFilesSimple\((\i)\){/,
-                    replace: "$&$1.forEach($self.anonymise);"
+                    replace: "$&$1.forEach($self.fixExt);"
                 }
             ],
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
