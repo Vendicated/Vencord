@@ -10,15 +10,18 @@ import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelRouter, Forms, GuildStore, showToast, Toasts, UserUtils } from "@webpack/common";
+import { Button, ChannelRouter, Forms, GuildStore, React, showToast, Switch, Toasts, UserUtils } from "@webpack/common";
 
+import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
 import { AdvancedNotification } from "./types/advancedNotification";
 import { BasicNotification } from "./types/basicNotification";
 
+
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const jumpToMessage = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 const logger = new Logger("BetterNotifications");
+
 
 interface ChannelInfo {
     channel: string; // Channel name
@@ -83,43 +86,94 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: props => {
             return (
-                <>
-                    < Forms.FormSection>
-                        <Forms.FormText>Notification body format</Forms.FormText>
-                        <VariableString setValue={props.setValue} defaultValue={settings.store.notificationBodyFormat} />
-                    </Forms.FormSection >
-                </>
+                < Forms.FormSection>
+                    <Forms.FormText>Notification body format</Forms.FormText>
+                    <VariableString setValue={props.setValue} defaultValue={settings.store.notificationBodyFormat} />
+                </Forms.FormSection >
             );
         },
         default: "{body}",
     },
 
-    notificationAttributeText: {
+    channelPrefix: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            return (
+                < Forms.FormSection>
+                    <Forms.FormText>Channel prefix</Forms.FormText>
+                    <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Prefix to use for server channel (not DMs) names in notifications (e.g. '#' -&gt; #general)</Forms.FormText>
+                    <ExampleString setValue={props.setValue} defaultValue={settings.store.channelPrefix} staticValue="general"></ExampleString>
+                </Forms.FormSection >
+            );
+        },
+        default: "#"
+    },
+    userPrefix: {
         type: OptionType.COMPONENT,
         component: props => {
             return (
                 <>
                     < Forms.FormSection>
-                        <Forms.FormText>Attribute text format (Windows only, Anniversary Update required)</Forms.FormText>
-                        <VariableString setValue={props.setValue} defaultValue={settings.store.notificationAttributeText} />
-                    </Forms.FormSection >
+                        <Forms.FormText>Username prefix</Forms.FormText>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Prefix to use for user names in notifications</Forms.FormText>
 
+                        <ExampleString setValue={props.setValue} defaultValue={settings.store.userPrefix} staticValue="username567"></ExampleString>
+                    </Forms.FormSection >
                     <Forms.FormDivider />
                 </>
             );
         },
-        default: "{groupName}",
+        default: "@"
     },
+    notificationAttribute: {
+        type: OptionType.COMPONENT,
+        component: _ => {
+            return <></>;
+        }
+    },
+    notificationAttributeText: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            const [switchValue, setSwitchValue] = React.useState<boolean>(settings.store.notificationAttribute);
+
+            React.useEffect(() => {
+                settings.store.notificationAttribute = switchValue;
+            }, [switchValue]);
+
+            return (
+                <>
+                    <Forms.FormSection>
+                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification attribute text</Forms.FormTitle>
+                            <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={switchValue} onChange={setSwitchValue}></Switch>
+                        </div>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Enables attribute text (Windows only)</Forms.FormText>
+
+
+                        {switchValue &&
+                            <div style={{ marginTop: "12px" }}>
+                                <Forms.FormSection>
+                                    <Forms.FormText>Attribute text format</Forms.FormText>
+                                    <VariableString setValue={props.setValue} defaultValue={settings.store.notificationAttributeText} />
+                                </Forms.FormSection>
+                            </div>
+                        }
+                    </Forms.FormSection >
+
+                </>
+            );
+        },
+        default: "{guildName}"
+    },
+
+
 
     allowBotNotifications: {
         type: OptionType.BOOLEAN,
         description: "Allow desktop notifications from bots",
         default: true
     },
-    notificationAttribute: {
-        type: OptionType.BOOLEAN,
-        description: "Enables attribute text (Windows only, Anniversary Update required)"
-    },
+
 
     notificationPfpCircle: {
         type: OptionType.BOOLEAN,
@@ -159,16 +213,6 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "What guild name to use when notification is from direct messages",
         default: "@me"
-    },
-    channelPrefix: {
-        type: OptionType.STRING,
-        description: "Prefix to use for server channel (not DMs) names in notifications (e.g. '#' -> #general)",
-        default: "#",
-    },
-    UserPrefix: {
-        type: OptionType.STRING,
-        description: "Prefix to use for user names in notifications",
-        default: "@",
     },
     notificationMediaCache: {
         type: OptionType.COMPONENT,
@@ -226,13 +270,12 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
     if (basicNotification.channel_type === 1) {
         channelInfo = {
             channel: settings.store.notificationDmChannelname,
-            groupName: advancedNotification.messageRecord.author.globalName ?? settings.store.UserPrefix + advancedNotification.messageRecord.author.username
+            groupName: advancedNotification.messageRecord.author.globalName ?? settings.store.userPrefix + advancedNotification.messageRecord.author.username
         };
         guildInfo = {
             name: settings.store.notificationDmGuildname,
             description: ""
         };
-
     } else {
         const channelData = getChannelInfoFromTitle(title);
         const guildData = GuildStore.getGuild(basicNotification.guild_id);
@@ -359,7 +402,7 @@ export default definePlugin({
             case 1: // Direct messages
                 channelInfo = {
                     channel: settings.store.notificationDmGuildname,
-                    groupName: settings.store.UserPrefix + (advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username)
+                    groupName: settings.store.userPrefix + (advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username)
                 };
                 break;
         }

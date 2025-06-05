@@ -33,7 +33,7 @@ interface VariableResult {
 
 function replaceStringWithVars(input: string) {
     const examples: ExampleReplacement = {
-        username: settings.store.UserPrefix + "cooluser12",
+        username: settings.store.userPrefix + "cooluser12",
         nickname: "Cool User 12",
         body: "Want to test out this new plugin I found?",
         channelId: "1282951630847295163",
