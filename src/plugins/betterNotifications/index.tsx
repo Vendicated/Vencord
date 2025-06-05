@@ -202,7 +202,7 @@ function getChannelInfoFromTitle(title: string) {
 }
 
 function notificationShouldBeShown(advancedData: AdvancedNotification): boolean {
-    if (advancedData.messageRecord.author.discriminator !== "0" && !settings.store.allowBotNotifications) {
+    if (advancedData.messageRecord.author?.discriminator || "0" !== "0" && !settings.store.allowBotNotifications) {
         return false;
     }
     return true;
@@ -297,6 +297,13 @@ export default definePlugin({
         const basicNotification: BasicNotification = args[3];
         const advancedNotification: AdvancedNotification = args[4];
         let attachmentUrl: string | undefined;
+
+        if (basicNotification.notif_type === "reactions_push_notification") {
+            console.warn("Ignoring reaction notification");
+            return;
+        } else if (basicNotification.notif_type !== "MESSAGE_CREATE") {
+            console.warn(`Notification type "${basicNotification.notif_type}" is not supported`);
+        }
 
         if (!notificationShouldBeShown(advancedNotification)) {
             logger.info("Notification blocked");
