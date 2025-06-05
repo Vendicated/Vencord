@@ -6,7 +6,7 @@
 
 import { Forms, React, Text, TextInput } from "@webpack/common";
 
-import { Replacements } from "..";
+import { Replacements, settings } from "..";
 
 const OpeningVar = "{";
 const ClosingVar = "}";
@@ -15,16 +15,6 @@ type ExampleReplacement = {
     [k in typeof Replacements[number]]: string
 };
 
-const examples: ExampleReplacement = {
-    username: "cooluser12",
-    nickname: "Cool User 12",
-    body: "Want to test out this new plugin I found?",
-    channelId: "1282951630847295163",
-    channelName: "general",
-    groupName: "General discussion",
-    guildName: "Super generic server",
-    guildDescription: "A peaceful place for all",
-};
 
 enum FailReason {
     VariableName,
@@ -42,6 +32,16 @@ interface VariableResult {
 }
 
 function replaceStringWithVars(input: string) {
+    const examples: ExampleReplacement = {
+        username: settings.store.UserPrefix + "cooluser12",
+        nickname: "Cool User 12",
+        body: "Want to test out this new plugin I found?",
+        channelId: "1282951630847295163",
+        channelName: settings.store.channelPrefix + "general",
+        groupName: "General discussion",
+        guildName: "Super generic server",
+        guildDescription: "A peaceful place for all",
+    };
     new Map(Object.entries(examples)).forEach((value, key) => {
         input = input.replaceAll(`{${key}}`, value);
     });
