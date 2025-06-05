@@ -26,6 +26,14 @@ import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
 
+function makePlugins(is_extension) {
+    return [
+        // @ts-ignore
+        globPlugins("web", is_extension),
+        ...commonRendererPlugins
+    ];
+}
+
 /**
  * @type {import("esbuild").BuildOptions}
  */
@@ -36,13 +44,8 @@ const commonOptions = {
     globalName: "Vencord",
     external: ["~plugins", "~git-hash", "/assets/*"],
     target: ["esnext"],
-    plugins: [
-        globPlugins("web"),
-        ...commonRendererPlugins
-    ],
     define: stringifyValues({
         IS_WEB: true,
-        IS_EXTENSION: false,
         IS_STANDALONE: true,
         IS_DEV,
         IS_REPORTER,
@@ -81,11 +84,17 @@ const buildConfigs = [
     },
     {
         ...commonOptions,
+        plugins: makePlugins(true),
         outfile: "dist/browser.js",
+        define: {
+            ...commonOptions.define,
+            IS_EXTENSION: "true",
+        },
         footer: { js: "//# sourceURL=file:///VencordWeb" }
     },
     {
         ...commonOptions,
+        plugins: makePlugins(true),
         outfile: "dist/extension.js",
         define: {
             ...commonOptions.define,
@@ -95,10 +104,12 @@ const buildConfigs = [
     },
     {
         ...commonOptions,
+        plugins: makePlugins(false),
         inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
         define: {
             ...commonOptions.define,
             window: "unsafeWindow",
+            IS_EXTENSION: "false",
         },
         outfile: "dist/Vencord.user.js",
         banner: {

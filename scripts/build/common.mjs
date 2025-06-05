@@ -131,7 +131,7 @@ export const makeAllPackagesExternalPlugin = {
 /**
  * @type {(kind: "web" | "discordDesktop" | "vesktop") => import("esbuild").Plugin}
  */
-export const globPlugins = kind => ({
+export const globPlugins = (kind, IS_EXTENSION = false) => ({
     name: "glob-plugins",
     setup: build => {
         const filter = /^~plugins$/;
@@ -164,8 +164,8 @@ export const globPlugins = kind => ({
 
                     if (target && !IS_REPORTER) {
                         const excluded =
-                            (target === "userscript" && !IS_EXTENSION && kind === "web") ||
-                            (target === "extension" && IS_EXTENSION && kind === "web") ||
+                            (target === "userscript" && IS_EXTENSION && kind === "web") ||
+                            (target === "extension" && !IS_EXTENSION && kind === "web") ||
                             (target === "dev" && !IS_DEV) ||
                             (target === "web" && kind === "discordDesktop") ||
                             (target === "desktop" && kind === "web") ||
