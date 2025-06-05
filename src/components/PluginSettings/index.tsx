@@ -179,7 +179,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
     const ExcludedReasons: Record<"userscript" | "extension" | "web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
         userscript: "Vencord Userscript",
-        extension: "Vencord Chrome Extension",
+        extension: "Vencord Browser Extension",
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
         vesktop: "Vesktop app",
