@@ -24,8 +24,6 @@ export const reverseExtensionMap = Object.entries(extensionMap).reduce((acc, [ta
     return acc;
 }, {} as Record<string, string>);
 
-type ExtUpload = Upload & { fixExtension?: boolean; };
-
 export default definePlugin({
     name: "FixFileExtensions",
     authors: [EquicordDevs.thororen],
@@ -48,7 +46,7 @@ export default definePlugin({
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
         },
     ],
-    fixExt(upload: ExtUpload) {
+    fixExt(upload: Upload) {
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
