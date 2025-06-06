@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { get } from "@main/utils/simpleGet";
+import { fetchBuffer, fetchJson } from "@main/utils/http";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { ipcMain } from "electron";
@@ -30,8 +30,8 @@ import { ASAR_FILE, serializeErrors } from "./common";
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdate: string | null = null;
 
-async function githubGet(endpoint: string) {
-    return get(API_BASE + endpoint, {
+async function githubGet<T = any>(endpoint: string) {
+    return fetchJson<T>(API_BASE + endpoint, {
         headers: {
             Accept: "application/vnd.github+json",
             // "All API requests MUST include a valid User-Agent header.
@@ -45,9 +45,8 @@ async function calculateGitChanges() {
     const isOutdated = await fetchUpdates();
     if (!isOutdated) return [];
 
-    const res = await githubGet(`/compare/${gitHash}...HEAD`);
+    const data = await githubGet(`/compare/${gitHash}...HEAD`);
 
-    const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map((c: any) => ({
         // github api only sends the long sha
         hash: c.sha.slice(0, 7),
@@ -57,9 +56,8 @@ async function calculateGitChanges() {
 }
 
 async function fetchUpdates() {
-    const release = await githubGet("/releases/latest");
+    const data = await githubGet("/releases/latest");
 
-    const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
     if (hash === gitHash)
         return false;
@@ -74,7 +72,7 @@ async function fetchUpdates() {
 async function applyUpdates() {
     if (!PendingUpdate) return true;
 
-    const data = await get(PendingUpdate);
+    const data = await fetchBuffer(PendingUpdate);
     originalWriteFileSync(__dirname, data);
 
     PendingUpdate = null;
