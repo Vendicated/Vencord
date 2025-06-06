@@ -29,11 +29,12 @@ declare global {
      * replace: "IS_WEB?foo:bar"
      * // GOOD
      * replace: IS_WEB ? "foo" : "bar"
-     * // also good
+     * // also okay
      * replace: `${IS_WEB}?foo:bar`
      */
     export var IS_WEB: boolean;
     export var IS_EXTENSION: boolean;
+    export var IS_USERSCRIPT: boolean;
     export var IS_STANDALONE: boolean;
     export var IS_UPDATER_DISABLED: boolean;
     export var IS_DEV: boolean;
