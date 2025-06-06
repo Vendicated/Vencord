@@ -52,6 +52,12 @@ export const settings = definePluginSettings({
         }
     },
 
+    ignoreWebhooks: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to ignore messages by webhooks",
+        default: false,
+    },
+
     ignoreSelf: {
         type: OptionType.BOOLEAN,
         description: "Whether to ignore messages by yourself",

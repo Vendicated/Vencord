@@ -30,7 +30,7 @@ export const settings = definePluginSettings({
     },
     showInMiniProfile: {
         type: OptionType.BOOLEAN,
-        description: "Only show a button in the mini profile",
+        description: "Show full ui in the mini profile instead of just a button",
         default: true
     },
 });

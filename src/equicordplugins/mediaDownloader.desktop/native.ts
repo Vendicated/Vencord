@@ -103,12 +103,21 @@ export async function stop(_: IpcMainInvokeEvent) {
 }
 
 async function metadata(options: DownloadOptions) {
-    stdout_global = "";
-    const metadata = JSON.parse(await ytdlp(["-J", options.url, "--no-warnings"]));
-    if (metadata.is_live) throw "Live streams are not supported.";
-    stdout_global = "";
-    return { videoTitle: `${metadata.title || "video"} (${metadata.id})` };
+    try {
+        stdout_global = "";
+        const output = await ytdlp(["-J", options.url, "--no-warnings"]);
+        const metadata = JSON.parse(output);
+
+        if (metadata.is_live) throw new Error("Live streams are not supported.");
+
+        stdout_global = "";
+        return { videoTitle: `${metadata.title || "video"} (${metadata.id})` };
+
+    } catch (err) {
+        throw err;
+    }
 }
+
 function genFormat({ videoTitle }: { videoTitle: string; }, { maxFileSize, format }: DownloadOptions) {
     const HAS_LIMIT = !!maxFileSize;
     const MAX_VIDEO_SIZE = HAS_LIMIT ? maxFileSize * 0.8 : 0;
@@ -161,8 +170,11 @@ async function download({ format, videoTitle }: { format: string; videoTitle: st
                 : []
         : [];
     const customArgs = ytdlpArgs?.filter(Boolean) || [];
-
-    await ytdlp([url, ...baseArgs, ...remuxArgs, ...customArgs]);
+    try {
+        await ytdlp([url, ...baseArgs, ...remuxArgs, ...customArgs]);
+    } catch (err) {
+        console.error("Error during yt-dlp execution:", err);
+    }
     const file = fs.readdirSync(getdir()).find(f => f.startsWith("download."));
     if (!file) throw "No video file was found!";
     return { file, videoTitle };

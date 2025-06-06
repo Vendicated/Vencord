@@ -24,8 +24,6 @@ export const reverseExtensionMap = Object.entries(extensionMap).reduce((acc, [ta
     return acc;
 }, {} as Record<string, string>);
 
-type ExtUpload = Upload & { fixExtension?: boolean; };
-
 export default definePlugin({
     name: "FixFileExtensions",
     authors: [EquicordDevs.thororen],
@@ -34,24 +32,21 @@ export default definePlugin({
     patches: [
         // Taken from AnonymiseFileNames
         {
-            find: 'type:"UPLOAD_START"',
-            replacement: {
-                match: /await \i\.uploadFiles\((\i),/,
-                replace: "$1.forEach($self.fixExt),$&"
-            },
+            find: "async uploadFiles(",
+            replacement: [
+                {
+                    match: /async uploadFiles\((\i),\i\){/,
+                    replace: "$&$1.forEach($self.fixExt);"
+                },
+                {
+                    match: /async uploadFilesSimple\((\i)\){/,
+                    replace: "$&$1.forEach($self.fixExt);"
+                }
+            ],
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
         },
-        // Also taken from AnonymiseFileNames
-        {
-            find: 'addFilesTo:"message.attachments"',
-            replacement: {
-                match: /(\i.uploadFiles\((\i),)/,
-                replace: "$2.forEach(f=>f.filename=$self.fixExt(f)),$1",
-            },
-            predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
-        }
     ],
-    fixExt(upload: ExtUpload) {
+    fixExt(upload: Upload) {
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");

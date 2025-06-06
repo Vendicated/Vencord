@@ -8,30 +8,30 @@ import { session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
 
-const ConnectSrc = ["connect-src"];
-const MediaSrc = [...ConnectSrc, "img-src", "media-src"];
-const CssSrc = ["style-src", "font-src"];
-const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
+export const ConnectSrc = ["connect-src"];
+export const MediaSrc = [...ConnectSrc, "img-src", "media-src"];
+export const CssSrc = ["style-src", "font-src"];
+export const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
 export const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
 
 // Plugins can whitelist their own domains by importing this object in their native.ts
 // script and just adding to it. But generally, you should just edit this file instead
 
 export const CspPolicies: PolicyMap = {
-    "*.github.io": MediaAndCssSrc, // github pages, used by most themes
-    "raw.githubusercontent.com": MediaAndCssSrc, // github raw, used by some themes
-    "*.gitlab.io": MediaAndCssSrc, // gitlab pages, used by some themes
-    "gitlab.com": MediaAndCssSrc, // gitlab raw, used by some themes
-    "*.codeberg.page": MediaAndCssSrc, // codeberg pages, used by some themes
-    "codeberg.org": MediaAndCssSrc, // codeberg raw, used by some themes
+    "*.github.io": MediaAndCssSrc, // GitHub pages, used by most themes
+    "raw.githubusercontent.com": MediaAndCssSrc, // GitHub raw, used by some themes
+    "*.gitlab.io": MediaAndCssSrc, // GitLab pages, used by some themes
+    "gitlab.com": MediaAndCssSrc, // GitLab raw, used by some themes
+    "*.codeberg.page": MediaAndCssSrc, // Codeberg pages, used by some themes
+    "codeberg.org": MediaAndCssSrc, // Codeberg raw, used by some themes
 
     "*.githack.com": MediaAndCssSrc, // githack (namely raw.githack.com), used by some themes
-    "jsdelivr.net": MediaAndCssSrc, // jsdeliver, used by very few themes
+    "jsdelivr.net": MediaAndCssSrc, // jsDelivr, used by very few themes
 
-    "fonts.googleapis.com": CssSrc, // google fonts, used by many themes
+    "fonts.googleapis.com": CssSrc, // Google Fonts, used by many themes
 
-    "i.imgur.com": MediaSrc, // imgur, used by some themes
-    "i.ibb.co": MediaSrc, // imgbb, used by some themes
+    "i.imgur.com": MediaSrc, // Imgur, used by some themes
+    "i.ibb.co": MediaSrc, // ImgBB, used by some themes
 
     "cdn.discordapp.com": MediaAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
     "media.discordapp.net": MediaSrc, // Discord media CDN, possible alternative to Discord CDN
@@ -43,7 +43,7 @@ export const CspPolicies: PolicyMap = {
 
     // Function Specific
     "api.github.com": ConnectSrc, // used for updating Vencord itself
-    "ws.audioscrobbler.com": ConnectSrc, // last.fm API
+    "ws.audioscrobbler.com": ConnectSrc, // Last.fm API
     "translate-pa.googleapis.com": ConnectSrc, // Google Translate API
     "*.vencord.dev": MediaSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
     "manti.vendicated.dev": MediaSrc, // ReviewDB API
@@ -78,7 +78,7 @@ const stringifyPolicy = (policy: PolicyMap): string =>
         .join("; ");
 
 
-const patchCsp = (headers: Record<string, string[]>) => {
+const patchCsp = (headers: PolicyMap) => {
     const reportOnlyHeader = findHeader(headers, "content-security-policy-report-only");
     if (reportOnlyHeader)
         delete headers[reportOnlyHeader];

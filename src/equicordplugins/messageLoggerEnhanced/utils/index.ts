@@ -74,6 +74,7 @@ interface ShouldIgnoreArguments {
     bot?: boolean;
     ghostPinged?: boolean;
     isCachedByUs?: boolean;
+    webhookId?: string;
 }
 
 const EPHEMERAL = 64;
@@ -87,7 +88,7 @@ const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
   * @param {ShouldIgnoreArguments} args - An object containing the message details.
   * @returns {boolean} - True if the message should be ignored, false if it should be kept.
 */
-export function shouldIgnore({ channelId, authorId, guildId, flags, bot, ghostPinged, isCachedByUs }: ShouldIgnoreArguments): boolean {
+export function shouldIgnore({ channelId, authorId, guildId, flags, bot, ghostPinged, isCachedByUs, webhookId }: ShouldIgnoreArguments): boolean {
     const isEphemeral = ((flags ?? 0) & EPHEMERAL) === EPHEMERAL;
     if (isEphemeral) return true; // ignore
 
@@ -96,7 +97,7 @@ export function shouldIgnore({ channelId, authorId, guildId, flags, bot, ghostPi
 
     const myId = UserStore.getCurrentUser().id;
     const { ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
-    const { ignoreBots, ignoreSelf } = settings.store;
+    const { ignoreBots, ignoreSelf, ignoreWebhooks } = settings.store;
 
     if (ignoreSelf && authorId === myId)
         return true; // ignore
@@ -131,6 +132,8 @@ export function shouldIgnore({ channelId, authorId, guildId, flags, bot, ghostPi
     const shouldIgnoreMutedChannels = settings.store.ignoreMutedChannels;
 
     if ((ignoreBots && bot) && !isAuthorWhitelisted) return true; // ignore
+
+    if ((ignoreWebhooks && webhookId) && !isAuthorWhitelisted) return true;
 
     if (ghostPinged) return false; // keep
 

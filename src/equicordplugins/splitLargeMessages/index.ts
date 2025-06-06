@@ -61,8 +61,7 @@ const listener: MessageSendListener = async (channelId, msg) => {
             if (hardSplit || splitIndex === -1) {
                 chunks.push(msg.content.slice(0, maxLength));
                 msg.content = msg.content.slice(maxLength);
-            }
-            else {
+            } else {
                 chunks.push(msg.content.slice(0, splitIndex));
                 msg.content = msg.content.slice(splitIndex);
             }

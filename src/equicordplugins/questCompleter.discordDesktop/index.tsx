@@ -51,26 +51,27 @@ async function openCompleteQuestUI() {
         const applicationId = quest.config.application.id;
         const applicationName = quest.config.application.name;
         const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY"].find(x => quest.config.taskConfig.tasks[x] != null);
+        const icon = `https://cdn.discordapp.com/quests/${quest.id}/${theme}/${quest.config.assets.gameTile}`;
         // @ts-ignore
         const secondsNeeded = quest.config.taskConfig.tasks[taskName].target;
         // @ts-ignore
-        const secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0;
-        const icon = `https://cdn.discordapp.com/assets/quests/${quest.id}/${theme}/${quest.config.assets.gameTile}`;
+        let secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0;
         if (taskName === "WATCH_VIDEO") {
-            const tolerance = 2, speed = 10;
-            const diff = Math.floor((Date.now() - new Date(quest.userStatus.enrolledAt).getTime()) / 1000);
-            const startingPoint = Math.min(Math.max(Math.ceil(secondsDone), diff), secondsNeeded);
+            const maxFuture = 10, speed = 7, interval = 1;
+            const enrolledAt = new Date(quest.userStatus.enrolledAt).getTime();
             const fn = async () => {
-                for (let i = startingPoint; i <= secondsNeeded; i += speed) {
-                    try {
-                        await RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: Math.min(secondsNeeded, i + Math.random()) } });
-                    } catch (ex) {
-                        console.log("Failed to send increment of", i, ex);
+                while (true) {
+                    const maxAllowed = Math.floor((Date.now() - enrolledAt) / 1000) + maxFuture;
+                    const diff = maxAllowed - secondsDone;
+                    const timestamp = secondsDone + speed;
+                    if (diff >= speed) {
+                        await RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: Math.min(secondsNeeded, timestamp + Math.random()) } });
+                        secondsDone = Math.min(secondsNeeded, timestamp);
                     }
-                    await new Promise(resolve => setTimeout(resolve, tolerance * 1000));
-                }
-                if ((secondsNeeded - secondsDone) % speed !== 0) {
-                    await RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: secondsNeeded } });
+                    if (timestamp >= secondsNeeded) {
+                        break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, interval * 1000));
                     showNotification({
                         title: `${applicationName} - Quest Completer`,
                         body: "Quest Completed.",
@@ -81,10 +82,9 @@ async function openCompleteQuestUI() {
             fn();
             showNotification({
                 title: `${applicationName} - Quest Completer`,
-                body: `Wait for ${Math.ceil((secondsNeeded - startingPoint) / speed * tolerance)} more seconds.`,
+                body: `Spoofing video for ${applicationName}.`,
                 icon: icon,
             });
-            console.log(`Spoofing video for ${applicationName}.`);
         } else if (taskName === "PLAY_ON_DESKTOP") {
             RestAPI.get({ url: `/applications/public?application_ids=${applicationId}` }).then(res => {
                 const appData = res.body[0];

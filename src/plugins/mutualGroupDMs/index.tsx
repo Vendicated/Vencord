@@ -121,14 +121,9 @@ export default definePlugin({
                 },
                 // Make the gap between each item smaller so our tab can fit.
                 {
-                    match: /className:\i\.tabBar/,
-                    replace: '$& + " vc-mutual-gdms-modal-v2-tab-bar"'
+                    match: /type:"top",/,
+                    replace: '$&className:"vc-mutual-gdms-modal-v2-tab-bar",'
                 },
-                // Make the tab bar item text smaller so our tab can fit.
-                {
-                    match: /(\.tabBarItem.+?variant:)"heading-md\/normal"/,
-                    replace: '$1"heading-sm/normal"'
-                }
             ]
         },
         {
@@ -209,5 +204,5 @@ export default definePlugin({
                 />
             </>
         );
-    })
+    }, { noop: true })
 });

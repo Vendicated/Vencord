@@ -244,7 +244,7 @@ export default function PluginSettings() {
         }));
     }, []);
 
-    const depMap = React.useMemo(() => {
+    const depMap = useMemo(() => {
         const o = {} as Record<string, string[]>;
         for (const plugin in Plugins) {
             const deps = Plugins[plugin].dependencies;
