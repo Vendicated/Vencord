@@ -34,6 +34,7 @@ import { useAwaiter } from "@utils/react";
 import type { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
+import { getStylusWebStoreUrl } from "@utils/web";
 import { findLazy } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
@@ -502,4 +503,20 @@ function ThemesTab() {
     );
 }
 
-export default wrapTab(ThemesTab, "Themes");
+function UserscriptThemesTab() {
+    return (
+        <SettingsTab title="Themes">
+            <Card className="vc-settings-card">
+                <Forms.FormTitle tag="h5">Themes are not supported on the Userscript!</Forms.FormTitle>
+
+                <Forms.FormText>
+                    You can instead install themes with the <Link href={getStylusWebStoreUrl()}>Stylus extension</Link>!
+                </Forms.FormText>
+            </Card>
+        </SettingsTab>
+    );
+}
+
+export default IS_USERSCRIPT
+    ? wrapTab(UserscriptThemesTab, "Themes")
+    : wrapTab(ThemesTab, "Themes");
