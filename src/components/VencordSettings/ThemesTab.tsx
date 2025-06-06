@@ -371,8 +371,8 @@ export function CspErrorCard() {
     return (
         <ErrorCard className="vc-settings-card">
             <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
-            <Forms.FormText>Some of your themes or css are trying to load resources from domains that aren't whitelisted.</Forms.FormText>
-            <Forms.FormText>Move them to whitelisted domains like GitHub, Imgur, etc.</Forms.FormText>
+            <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
+            <Forms.FormText>Make sure that your themes and custom css only load resources from whitelisted websites, such as GitHub, Imgur and Google Fonts.</Forms.FormText>
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
             <Flex flexDirection="column" style={{ gap: "0.25em" }}>
