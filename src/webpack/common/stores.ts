@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import type * as Stores from "discord-types/stores";
 
-// eslint-disable-next-line path-alias/no-relative
-import { findByCodeLazy, findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 
@@ -33,7 +32,7 @@ export let MessageStore: Omit<Stores.MessageStore, "getMessages"> & GenericStore
     getMessages(chanId: string): any;
 };
 
-// this is not actually a FluxStore
+// TODO: The correct name for this is ChannelActionCreators and it has already been exported again from utils. Remove this export once enough time has passed
 export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
 export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
@@ -86,4 +85,8 @@ waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
-waitForStore("ThemeStore", m => ThemeStore = m);
+waitForStore("ThemeStore", m => {
+    ThemeStore = m;
+    // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
+    Vencord.QuickCss.initQuickCssThemeStore();
+});
