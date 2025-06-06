@@ -18,13 +18,16 @@
 
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
+import { useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
@@ -353,9 +356,31 @@ function ThemesTab() {
                 </TabBar.Item>
             </TabBar>
 
+            <CspErrorCard />
             {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
             {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
         </SettingsTab>
+    );
+}
+
+export function CspErrorCard() {
+    const errors = useCspErrors();
+
+    if (!errors.length) return null;
+
+    return (
+        <ErrorCard className="vc-settings-card">
+            <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
+            <Forms.FormText>Some of your themes or css are trying to load resources from domains that aren't whitelisted.</Forms.FormText>
+            <Forms.FormText>Move them to whitelisted domains like GitHub, Imgur, etc.</Forms.FormText>
+
+            <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
+            <Flex flexDirection="column" style={{ gap: "0.25em" }}>
+                {errors.map(url => (
+                    <Link href={url} key={url}>{url}</Link>
+                ))}
+            </Flex>
+        </ErrorCard>
     );
 }
 
