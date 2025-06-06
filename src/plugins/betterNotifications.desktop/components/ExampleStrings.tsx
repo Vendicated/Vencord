@@ -12,6 +12,7 @@ export default function ExampleString(props: { setValue: (value: string) => void
 
     React.useEffect(() => {
         setExampleString(`${value}${props.staticValue}`);
+        props.setValue(value);
     }, [value]);
 
     return <>
