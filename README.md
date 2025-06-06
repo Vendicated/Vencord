@@ -23,7 +23,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - AtSomeone by Joona
 - BannersEverywhere by ImLvna & AutumnVN
 - BetterActivities by D3SOX, Arjix, AutumnVN
-- BetterAudioPlayer by creations
+- BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
 - BetterBlockedUsers by TheArmagan
 - BetterInvites by iamme
