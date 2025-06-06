@@ -118,7 +118,7 @@ export default definePlugin({
     renderSearchBar(instance: Instance, SearchBarComponent: TSearchBarComponent) {
         this.instance = instance;
         return (
-            <ErrorBoundary noop={true}>
+            <ErrorBoundary noop>
                 <SearchBar instance={instance} SearchBarComponent={SearchBarComponent} />
             </ErrorBoundary>
         );
