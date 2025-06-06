@@ -87,7 +87,7 @@ export interface Author {
     banner: any;
     email: any;
     verified: boolean;
-    bot: boolean;
+    bot: boolean; // NOTE: Seems to be very unrealiable. Replace with Author.discriminator !== "0"
     system: boolean;
     mfaEnabled: boolean;
     mobile: boolean;
