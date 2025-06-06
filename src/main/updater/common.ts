@@ -35,7 +35,10 @@ export function serializeErrors(func: (...args: any[]) => any) {
                 ok: false,
                 error: e instanceof Error ? {
                     // prototypes get lost, so turn error into plain object
-                    ...e
+                    ...e,
+                    message: e.message,
+                    name: e.name,
+                    stack: e.stack
                 } : e
             };
         }
