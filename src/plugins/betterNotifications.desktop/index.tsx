@@ -418,6 +418,7 @@ export default definePlugin({
 
         UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
             Native.notify(
+                advancedNotification.messageRecord.call ? "call" : "notification",
                 title,
                 body,
                 advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,

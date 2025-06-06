@@ -120,6 +120,7 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
 }
 
 function generateXml(
+    type: "notification" | "call",
     titleString: string, bodyString: string,
     avatarLoc: String,
     notificationData: NotificationData,
@@ -130,31 +131,60 @@ function generateXml(
 
     const notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}`;
     const headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
-    const xml = `
-       <toast activationType="protocol" launch="${notificationClickPath}">
-            ${extraOptions?.wHeaderOptions ?
-            `
-        <header
-            id="${extraOptions.wHeaderOptions.channelId}"
-            title="#${extraOptions.wHeaderOptions.channelName}"
-            activationType="protocol"
-            arguments="${headerClickPath}"
-            />
-            `
-            :
-            ""
-        }
-            <visual>
-                <binding template="ToastGeneric">
-                <text>${titleString}</text>
-                <text>${bodyString}</text>
-                <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} placement="appLogoOverride"  />
+    let xml: string;
+    if (type === "notification") {
+        xml = `
+        <toast activationType="protocol" launch="${notificationClickPath}">
+             ${extraOptions?.wHeaderOptions ?
+                `
+         <header
+             id="${extraOptions.wHeaderOptions.channelId}"
+             title="#${extraOptions.wHeaderOptions.channelName}"
+             activationType="protocol"
+             arguments="${headerClickPath}"
+             />
+             `
+                :
+                ""
+            }
+             <visual>
+                 <binding template="ToastGeneric">
+                 <text>${titleString}</text>
+                 <text>${bodyString}</text>
+                 <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} placement="appLogoOverride"  />
 
-                ${extraOptions?.wAttributeText ? `<text placement="attribution">${extraOptions.wAttributeText}</text>` : ""}
-                ${attachmentLoc ? `<image placement="${extraOptions?.wMessageOptions?.attachmentType}" src="${attachmentLoc}" />` : ""}
-                </binding>
-            </visual>
-        </toast>`;
+                 ${extraOptions?.wAttributeText ? `<text placement="attribution">${extraOptions.wAttributeText}</text>` : ""}
+                 ${attachmentLoc ? `<image placement="${extraOptions?.wMessageOptions?.attachmentType}" src="${attachmentLoc}" />` : ""}
+                 </binding>
+             </visual>
+         </toast>`;
+    } else {
+        xml = `
+        <toast activationType="protocol" launch="${notificationClickPath}">
+            ${extraOptions?.wHeaderOptions ?
+                `
+            <header
+                id="${extraOptions.wHeaderOptions.channelId}"
+                title="#${extraOptions.wHeaderOptions.channelName}"
+                activationType="protocol"
+                arguments="${headerClickPath}"
+                />
+                `
+                :
+                ""
+            }
+             <visual>
+                 <binding template="ToastGeneric">
+                    <text hint-callScenarioCenterAlign="true">${titleString}</text>
+                    <text hint-callScenarioCenterAlign="true">${bodyString}</text>
+                    <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} />
+
+                    ${extraOptions?.wAttributeText ? `<text placement="attribution">${extraOptions.wAttributeText}</text>` : ""}
+                 </binding>
+             </visual>
+         </toast>`;
+    }
+
     console.log("[BN] Generated ToastXML: " + xml);
     return xml;
 }
@@ -195,6 +225,7 @@ function notifySend(summary: string, body: string | null, avatarLocation: string
 }
 
 export function notify(event: IpcMainInvokeEvent,
+    type: "notification" | "call",
     titleString: string, bodyString: string,
     avatarId: string, avatarUrl: string,
     notificationData: NotificationData,
@@ -226,10 +257,11 @@ export function notify(event: IpcMainInvokeEvent,
         const notification = new Notification({
             title: titleString,
             body: bodyString,
+            timeoutType: "default",
 
             // toastXml only works on Windows
             // https://learn.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/adaptive-interactive-toasts?tabs=xml
-            ...(isWin && { toastXml: generateXml(titleString, bodyString, avatar, notificationData, extraOptions, attachment) })
+            ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment) })
         });
 
         // Listener for macOS

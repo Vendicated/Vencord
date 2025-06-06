@@ -56,7 +56,7 @@ export interface MessageRecord {
     nonce: any;
     blocked: boolean;
     ignored: boolean;
-    call: any;
+    call?: Call;
     webhookId: any;
     reactions: any[];
     applicationId: any;
@@ -107,5 +107,12 @@ export interface Author {
     primaryGuild: any;
     collectibles: any;
 }
+
+export interface Call {
+    participants: string[];
+    endedTimestamp: any;
+    duration: any;
+}
+
 
 export interface GuildMemberAvatars { }
