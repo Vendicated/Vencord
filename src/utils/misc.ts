@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard, Toasts } from "@webpack/common";
+import { Toasts } from "@webpack/common";
 
+import { copyToClipboard } from "./clipboard";
 import { DevsById } from "./constants";
 
 /**
@@ -35,12 +36,8 @@ export function sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
 }
 
-export function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    if (Clipboard.SUPPORTS_COPY) {
-        Clipboard.copy(text);
-    } else {
-        toastMessage = "Your browser does not support copying to clipboard";
-    }
+export async function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
+    await copyToClipboard(text);
     Toasts.show({
         message: toastMessage,
         id: Toasts.genId(),
@@ -95,6 +92,7 @@ export function identity<T>(value: T): T {
 export const isMobile = navigator.userAgent.includes("Mobi");
 
 export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+export const shouldShowContributorBadge = (id: string) => isPluginDev(id) && DevsById[id].badge !== false;
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
