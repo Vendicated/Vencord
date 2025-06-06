@@ -38,7 +38,12 @@ export async function makeKagiTranslateRequest(_: IpcMainInvokeEvent, token: str
                 "Content-Type": "application/json",
                 "Cookie": `kagi_session=${token}`
             },
-            body: `{"text": "${text}","from":"${sourceLang}","to":"${targetLang}","model":"standard"}`
+            body: JSON.stringify({
+                text,
+                from: sourceLang,
+                to: targetLang,
+                model: "standard"
+            }),
         });
 
         const data = await res.json();
