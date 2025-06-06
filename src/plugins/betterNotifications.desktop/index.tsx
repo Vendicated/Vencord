@@ -298,7 +298,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
     }
 
     const replacementMap: ReplacementMap = {
-        username: advancedNotification.messageRecord.author.username,
+        username: settings.store.userPrefix + advancedNotification.messageRecord.author.username,
         body,
         channelName: channelInfo.channel,
         channelId: advancedNotification.messageRecord.channel_id,
