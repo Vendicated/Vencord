@@ -87,7 +87,10 @@ export interface Author {
     banner: any;
     email: any;
     verified: boolean;
-    bot: boolean; // NOTE: Seems to be very unrealiable. Replace with Author.discriminator !== "0"
+
+    /** @deprecated is very unrealiable. Use Author.discriminator != "0" */
+    bot: boolean;
+
     system: boolean;
     mfaEnabled: boolean;
     mobile: boolean;
