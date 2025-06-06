@@ -75,5 +75,5 @@ export default definePlugin({
                 }}> Pause Indefinitely.</a>}
             </div>
         );
-    })
+    }, { noop: true })
 });
