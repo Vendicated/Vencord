@@ -29,7 +29,7 @@ export default definePlugin({
     authors: [Devs.AutumnVN],
     start() {
         (function connect() {
-            ws = new WebSocket("ws://localhost:24050/websocket/v2");
+            ws = new WebSocket("ws://127.0.0.1:24050/websocket/v2");
             ws.addEventListener("error", () => ws.close());
             ws.addEventListener("close", () => wsReconnect = setTimeout(connect, 5000));
             ws.addEventListener("message", ({ data }) => throttledOnMessage(data));

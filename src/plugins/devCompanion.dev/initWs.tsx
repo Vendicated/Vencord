@@ -29,7 +29,7 @@ export let socket: WebSocket | undefined;
 export function initWs(isManual = false) {
     let wasConnected = isManual;
     let hasErrored = false;
-    const ws = socket = new WebSocket(`ws://localhost:${PORT}`);
+    const ws = socket = new WebSocket(`ws://127.0.0.1:${PORT}`);
 
     function replyData(data: OutgoingMessage) {
         ws.send(JSON.stringify(data));
