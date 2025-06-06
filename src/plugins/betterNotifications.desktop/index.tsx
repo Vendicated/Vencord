@@ -173,8 +173,11 @@ export const settings = definePluginSettings({
         description: "Allow desktop notifications from bots",
         default: true
     },
-
-
+    specialCallNotification: {
+        type: OptionType.BOOLEAN,
+        description: "Use a special notification type for incoming calls",
+        default: true
+    },
     notificationPfpCircle: {
         type: OptionType.BOOLEAN,
         description: "Crop the sender's profile picture to a circle (Windows only)",
@@ -230,30 +233,33 @@ export const settings = definePluginSettings({
     },
 });
 
-function getChannelInfoFromTitle(title: string) {
+function getChannelInfoFromTitle(title: string, basicNotification: BasicNotification, advancedNotification: AdvancedNotification): ChannelInfo {
+    let channelInfo: ChannelInfo;
     try {
         const parts = title.split(" (#");
         if (parts === undefined) {
-            return {
+            channelInfo = {
                 channel: "unknown",
                 groupName: "unknown"
             };
         }
         const innerInfo = parts[1];
         const data = innerInfo.slice(0, -1).split(", ");
-        return {
+        channelInfo = {
             channel: data[0],
             groupName: data[1]
         };
     } catch (error) {
         console.error(error);
-        return {
+        channelInfo = {
             channel: "unknown",
             groupName: "unknown"
         };
     }
 
+    return channelInfo;
 }
+
 
 function notificationShouldBeShown(advancedData: AdvancedNotification): boolean {
     // messageRecord.author may be undefined under specific notification types
@@ -268,7 +274,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
     let guildInfo: GuildInfo;
     let channelInfo: ChannelInfo;
 
-    if (basicNotification.channel_type === 1) {
+    if (basicNotification.channel_type === 1) { // DM
         channelInfo = {
             channel: settings.store.notificationDmChannelname,
             groupName: advancedNotification.messageRecord.author.globalName ?? settings.store.userPrefix + advancedNotification.messageRecord.author.username
@@ -278,7 +284,7 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
             description: ""
         };
     } else {
-        const channelData = getChannelInfoFromTitle(title);
+        const channelData = getChannelInfoFromTitle(title, basicNotification, advancedNotification);
         const guildData = GuildStore.getGuild(basicNotification.guild_id);
 
         channelInfo = {
@@ -306,6 +312,8 @@ function replaceVariables(advancedNotification: AdvancedNotification, basicNotif
         logger.debug(`Replacing ${key} - ${value}`);
         texts = texts.map(text => text.replaceAll(`{${key}}`, value));
     });
+
+    texts.push(channelInfo.channel);
     return texts;
 }
 
@@ -337,15 +345,30 @@ export default definePlugin({
         }
     ],
 
+    start() {
+        Native.checkIsMac().then(isMac => {
+            if (isMac && settings.store.notificationPatchType === "custom") {
+                logger.warn("User is on macOS but has notificationPatchType as custom");
+                setTimeout(() => {
+                    showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
+                    settings.store.notificationPatchType = "variable";
+                }, 4000);
+            }
+        });
+    },
+
     NotificationHandlerHook(...args) {
         logger.debug("Recieved hooked notification with the following args");
         logger.debug(args);
 
-        const replacementMap: Map<string, string> = new Map();
-
         const basicNotification: BasicNotification = args[3];
         const advancedNotification: AdvancedNotification = args[4];
         let attachmentUrl: string | undefined;
+
+        if (!notificationShouldBeShown(advancedNotification)) {
+            logger.info("Notification blocked");
+            return;
+        }
 
         if (basicNotification.notif_type === "reactions_push_notification") {
             console.warn("Ignoring reaction notification");
@@ -354,15 +377,9 @@ export default definePlugin({
             console.warn(`Notification type "${basicNotification.notif_type}" is not supported`);
         }
 
-        if (!notificationShouldBeShown(advancedNotification)) {
-            logger.info("Notification blocked");
-            return;
-        }
-
         const { attachments } = advancedNotification.messageRecord;
-        let contentType;
-        let imageType;
-
+        let contentType: string;
+        let imageType: "png" | "jpeg";
 
         for (const attachment of attachments) {
             contentType = attachment.content_type;
@@ -381,6 +398,8 @@ export default definePlugin({
             }
 
             attachmentUrl = attachment.proxy_url;
+
+            // @ts-ignore
             imageType = contentType.split("/")[1];
 
             logger.info("Found suitable attachment");
@@ -389,36 +408,18 @@ export default definePlugin({
             break;
         }
 
-        let channelInfo;
-
-        switch (basicNotification.channel_type) {
-            case 0: // servers
-                const channelData = getChannelInfoFromTitle(args[1]);
-                channelInfo = {
-                    channel: settings.store.channelPrefix + channelData.channel,
-                    groupName: channelData.groupName
-                };
-                break;
-
-            case 1: // Direct messages
-                channelInfo = {
-                    channel: settings.store.notificationDmGuildname,
-                    groupName: settings.store.userPrefix + (advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username)
-                };
-                break;
-        }
-
-        console.log(replacementMap);
+        logger.debug(`Notification type ${basicNotification.channel_type}`);
 
         let title = settings.store.notificationTitleFormat;
         let body = settings.store.notificationBodyFormat;
         let attributeText = settings.store.notificationAttributeText;
+        let headerText: string;
 
-        [title, body, attributeText] = replaceVariables(advancedNotification, basicNotification, args[1], args[2], [title, body, attributeText]);
+        [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, args[1], args[2], [title, body, attributeText]);
 
         UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
             Native.notify(
-                advancedNotification.messageRecord.call ? "call" : "notification",
+                (advancedNotification.messageRecord.call && settings.store.specialCallNotification) ? "call" : "notification",
                 title,
                 body,
                 advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
@@ -437,12 +438,28 @@ export default definePlugin({
                     wAvatarCrop: settings.store.notificationPfpCircle,
                     wHeaderOptions: settings.store.notificationHeaderEnabled ? {
                         channelId: advancedNotification.messageRecord.channel_id,
-                        channelName: channelInfo.channel
+                        channelName: headerText
                     } : undefined,
                     wAttributeText: settings.store.notificationAttribute ? attributeText : undefined
                 }
             );
         });
+    },
+    VariableReplacement(avatarUrl: string, notificationTitle: string, notificationBody: string, notificationData: BasicNotification, advancedData: AdvancedNotification) {
+        if (!notificationShouldBeShown(advancedData)) {
+            logger.info("Notification blocked");
+            return;
+        }
+        logger.info(notificationData);
+        logger.info(advancedData);
+
+        let title = settings.store.notificationTitleFormat;
+        let body = settings.store.notificationBodyFormat;
+
+        [title, body] = replaceVariables(advancedData, notificationData, notificationTitle, notificationBody, [title, body]);
+        logger.info("Succesfully patched notification");
+
+        return [avatarUrl, title, body, notificationData, advancedData];
     },
 
     NotificationClickEvent(channelId: string, messageId: string) {
@@ -474,33 +491,4 @@ export default definePlugin({
     ShouldUseCustomFunc() {
         return settings.store.notificationPatchType === "custom";
     },
-
-    start() {
-        Native.checkIsMac().then(isMac => {
-            if (isMac && settings.store.notificationPatchType === "custom") {
-                logger.warn("User is on macOS but has notificationPatchType as custom");
-                setTimeout(() => {
-                    showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
-                    settings.store.notificationPatchType = "variable";
-                }, 4000);
-            }
-        });
-    },
-
-    VariableReplacement(avatarUrl: string, notificationTitle: string, notificationBody: string, notificationData: BasicNotification, advancedData: AdvancedNotification) {
-        if (!notificationShouldBeShown(advancedData)) {
-            logger.info("Notification blocked");
-            return;
-        }
-        logger.info(notificationData);
-        logger.info(advancedData);
-
-        let title = settings.store.notificationTitleFormat;
-        let body = settings.store.notificationBodyFormat;
-
-        [title, body] = replaceVariables(advancedData, notificationData, notificationTitle, notificationBody, [title, body]);
-        logger.info("Succesfully patched notification");
-
-        return [avatarUrl, title, body, notificationData, advancedData];
-    }
 });

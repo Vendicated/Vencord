@@ -139,7 +139,7 @@ function generateXml(
                 `
          <header
              id="${extraOptions.wHeaderOptions.channelId}"
-             title="#${extraOptions.wHeaderOptions.channelName}"
+             title="${extraOptions.wHeaderOptions.channelName}"
              activationType="protocol"
              arguments="${headerClickPath}"
              />
