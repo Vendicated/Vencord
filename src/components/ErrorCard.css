@@ -4,4 +4,8 @@
     border: 1px solid #e78284;
     border-radius: 5px;
     color: var(--text-normal, white);
+
+    & a:hover {
+        text-decoration: underline;
+    }
 }

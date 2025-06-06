@@ -18,13 +18,16 @@
 
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
+import { useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
@@ -219,6 +222,12 @@ function ThemesTab() {
                     <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
                 </Card>
 
+                <Card className="vc-settings-card">
+                    <Forms.FormTitle tag="h5">External Resources</Forms.FormTitle>
+                    <Forms.FormText>For security reasons, loading resources (styles, fonts, images, ...) from most sites is blocked.</Forms.FormText>
+                    <Forms.FormText>Make sure all your assets are hosted on GitHub, GitLab, Codeberg, Imgur, Discord or Google Fonts.</Forms.FormText>
+                </Card>
+
                 <Forms.FormSection title="Local Themes">
                     <QuickActionCard>
                         <>
@@ -347,9 +356,31 @@ function ThemesTab() {
                 </TabBar.Item>
             </TabBar>
 
+            <CspErrorCard />
             {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
             {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
         </SettingsTab>
+    );
+}
+
+export function CspErrorCard() {
+    const errors = useCspErrors();
+
+    if (!errors.length) return null;
+
+    return (
+        <ErrorCard className="vc-settings-card">
+            <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
+            <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
+            <Forms.FormText>Make sure that your themes and custom css only load resources from whitelisted websites, such as GitHub, Imgur and Google Fonts.</Forms.FormText>
+
+            <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
+            <Flex flexDirection="column" style={{ gap: "0.25em" }}>
+                {errors.map(url => (
+                    <Link href={url} key={url}>{url}</Link>
+                ))}
+            </Flex>
+        </ErrorCard>
     );
 }
 
