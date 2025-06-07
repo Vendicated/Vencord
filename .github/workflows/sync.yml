@@ -1,0 +1,23 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Every day at noon UTC
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync from upstream
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git remote add upstream https://github.com/Vendicated/Vencord.git
+          git fetch upstream
+          git checkout main
+          git merge upstream/main --allow-unrelated-histories --no-edit
+          git push origin main

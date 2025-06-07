@@ -85,6 +85,7 @@ export default definePlugin({
                                 return P.intl.formatToPlainString(P.t.BagU2d, {
                                     online: t.toString()
         */
+        // hide ignored users in friends list
         {
             find: "}=this.state,{children:",
             replacement: {
@@ -132,6 +133,10 @@ export default definePlugin({
         if (this.isIgnoredUser(activity.activityUser) && partiedMembers.length > 0) {
             return null;
         }
+        console.log("activityFilterIgnoredUsers", activity, partiedMembers);
+        const filteredActivity = {
+            ...activity,
+        };
         return activity;
     },
 
