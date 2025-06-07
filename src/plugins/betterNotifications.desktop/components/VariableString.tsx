@@ -6,7 +6,8 @@
 
 import { Forms, React, Text, TextInput } from "@webpack/common";
 
-import { Replacements, settings } from "..";
+import { settings } from "..";
+import { Replacements } from "../utils/Variables";
 
 const OpeningVar = "{";
 const ClosingVar = "}";
