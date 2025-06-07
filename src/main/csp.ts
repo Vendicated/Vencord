@@ -20,6 +20,7 @@ export const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-s
 export const CspPolicies: PolicyMap = {
     "*.github.io": MediaAndCssSrc, // GitHub pages, used by most themes
     "github.com": MediaAndCssSrc, // GitHub content (stuff uploaded to markdown forms), used by most themes
+    "gist.githubusercontent.com": MediaAndCssSrc, // GitHub gist, used by some themes
     "raw.githubusercontent.com": MediaAndCssSrc, // GitHub raw, used by some themes
     "*.gitlab.io": MediaAndCssSrc, // GitLab pages, used by some themes
     "gitlab.com": MediaAndCssSrc, // GitLab raw, used by some themes
