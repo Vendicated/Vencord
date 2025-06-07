@@ -16,30 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
+import { setStyleVariables } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-let style: HTMLStyleElement;
-
-function setCss() {
-    style.textContent = `
-        .vc-nsfw-img [class^=imageContainer],
-        .vc-nsfw-img [class^=wrapperPaused] {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
-            transition: filter 0.2s;
-
-            &:hover {
-                filter: blur(0);
-            }
-        }
-        `;
-}
+import managedStyle from "./style.css?managed";
 
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
     authors: [Devs.Ven],
+    managedStyle,
 
     patches: [
         {
@@ -51,24 +39,18 @@ export default definePlugin({
         }
     ],
 
-    options: {
+    settings: definePluginSettings({
         blurAmount: {
             type: OptionType.NUMBER,
             description: "Blur Amount (in pixels)",
             default: 10,
-            onChange: setCss
+            onChange(v) {
+                setStyleVariables(managedStyle, { blurAmount: v });
+            }
         }
-    },
+    }),
 
     start() {
-        style = document.createElement("style");
-        style.id = "VcBlurNsfw";
-        document.head.appendChild(style);
-
-        setCss();
-    },
-
-    stop() {
-        style?.remove();
+        setStyleVariables(managedStyle, { blurAmount: this.settings.store.blurAmount });
     }
 });
