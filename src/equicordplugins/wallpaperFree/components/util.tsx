@@ -6,13 +6,9 @@
 
 import { openModal } from "@utils/modal";
 import { makeCodeblock } from "@utils/text";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, FluxDispatcher, Parser } from "@webpack/common";
 
-import { SetCustomWallpaperModal, SetDiscordWallpaperModal } from "./modal";
-
-export const ChatWallpaperStore = findStoreLazy("ChatWallpaperStore");
-export const fetchWallpapers = findByCodeLazy('type:"FETCH_CHAT_WALLPAPERS_SUCCESS"');
+import { SetWallpaperModal } from "./modal";
 
 export function GlobalDefaultComponent() {
     const setGlobal = (url?: string) => {
@@ -26,13 +22,8 @@ export function GlobalDefaultComponent() {
     return (
         <>
             <Button onClick={() => {
-                openModal(props => <SetCustomWallpaperModal props={props} onSelect={setGlobal} />);
-            }}>Set a global custom wallpaper</Button>
-
-            <Button onClick={async () => {
-                ChatWallpaperStore.shouldFetchWallpapers && await fetchWallpapers();
-                openModal(props => <SetDiscordWallpaperModal props={props} onSelect={setGlobal} />);
-            }}>Set a global Discord wallpaper</Button>
+                openModal(props => <SetWallpaperModal props={props} onSelect={setGlobal} />);
+            }}>Set a global wallpaper</Button>
 
             <Button
                 color={Button.Colors.RED}
@@ -52,30 +43,10 @@ export function GlobalDefaultComponent() {
 
 export function TipsComponent() {
     const tipText = `
-    [class^=wallpaperContainer] {
+    .vc-wpfree-wp-container {
         transform: scaleX(-1); /* flip it horizontally */
         filter: blur(4px); /* apply a blur */
         opacity: 0.7; /* self-explanatory */
     }`;
     return Parser.parse(makeCodeblock(tipText, "css"));
-}
-
-export interface Wallpaper {
-    id: string;
-    label: string;
-    default: Default;
-    variants: Variants;
-    isBlurred: boolean;
-    designGroupId: string;
-}
-
-export interface Default {
-    asset: string;
-    icon: string;
-    thumbhash: string;
-    opacity?: number;
-}
-
-export interface Variants {
-    dark: Default;
 }

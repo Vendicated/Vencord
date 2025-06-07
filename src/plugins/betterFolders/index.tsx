@@ -20,7 +20,6 @@ import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
@@ -350,7 +349,7 @@ export default definePlugin({
             }
 
             try {
-                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+                return child?.props?.renderTreeNode !== null;
             } catch (e) {
                 console.error(e);
                 return true;
@@ -365,7 +364,7 @@ export default definePlugin({
             }
 
             try {
-                return filterTreeWithTargetNode(child, child => child?.props?.renderTreeNode != null);
+                return filterTreeWithTargetNode(child, child => child?.props?.role === "tree");
             } catch (e) {
                 console.error(e);
                 return true;
@@ -388,14 +387,6 @@ export default definePlugin({
             default:
                 return true;
         }
-    },
-
-    makeNewButtonFilter(isBetterFolders: boolean) {
-        return child => {
-            if (!isBetterFolders) return true;
-
-            return !child?.props?.barClassName;
-        };
     },
 
     shouldShowTransition(props: any) {
