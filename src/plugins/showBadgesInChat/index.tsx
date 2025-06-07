@@ -6,10 +6,7 @@
 
 import "./styles.css";
 
-import {
-    addMessageDecoration,
-    removeMessageDecoration,
-} from "@api/MessageDecorations";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { Devs } from "@utils/constants";
 import { isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
