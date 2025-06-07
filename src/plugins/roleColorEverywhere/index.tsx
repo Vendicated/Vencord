@@ -32,8 +32,10 @@ import { Guild } from "discord-types/general";
 
 import { RoleModal } from "./components/RolesModal";
 import { toggleRole } from "./storeHelper";
-import { ContextMenu } from "./components/ContextMenu";
+
 import { brewUserColor } from "./witchCauldron";
+
+import { ChannelStore, GuildMemberStore, GuildStore, Menu, React } from "@webpack/common";
 
 const cl = classNameFactory("rolecolor");
 const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
