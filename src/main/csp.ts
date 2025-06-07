@@ -36,6 +36,7 @@ export const CspPolicies: PolicyMap = {
     "i.pinimg.com": MediaSrc, // Pinterest, used by some themes
     "*.tenor.com": MediaSrc, // Tenor, used by some themes
     "files.catbox.moe": MediaSrc, // Catbox, used by some themes
+    "cdnb.artstation.com": MediaSrc, // ArtStation image cdn
 
     "cdn.discordapp.com": MediaAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
     "media.discordapp.net": MediaSrc, // Discord media CDN, possible alternative to Discord CDN
