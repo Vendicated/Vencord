@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "BypassPinPrompt",
-    description: "Bypass the pin prompt when pinning messages",
+    description: "Bypass the pin prompt when using the pin functions",
     authors: [EquicordDevs.thororen],
     patches: [
         {
