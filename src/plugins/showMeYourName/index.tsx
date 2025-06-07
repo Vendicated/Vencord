@@ -45,6 +45,31 @@ const settings = definePluginSettings({
 
 const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
 
+const getNames = ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps): string[] => {
+    try {
+        const user = userOverride ?? message.author;
+        let { username } = user;
+        if (settings.store.displayNames)
+            username = (user as any).globalName || username;
+
+        const { nick } = author;
+        const prefix = withMentionPrefix ? "@" : "";
+
+        if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
+            return [prefix, nick];
+
+        if (settings.store.mode === "user-nick")
+            return [prefix, username, nick];
+
+        if (settings.store.mode === "nick-user")
+            return [prefix, nick, username];
+
+        return [prefix, username];
+    } catch {
+        return ["", author?.nick || ""];
+    }
+};
+
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
@@ -62,27 +87,12 @@ export default definePlugin({
 
     renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
-            const user = userOverride ?? message.author;
-            let { username } = user;
-            if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+            const [prefix, first, second] = getNames({ author, message, isRepliedMessage, withMentionPrefix, userOverride });
 
-            const { nick } = author;
-            const prefix = withMentionPrefix ? "@" : "";
+            const parsedFirst = wrapEmojis(first);
+            const parsedSecond = wrapEmojis(second);
 
-            const parsedNick = wrapEmojis(nick);
-            const parsedUsername = wrapEmojis(username);
-
-            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
-                return <>{prefix}{parsedNick}</>;
-
-            if (settings.store.mode === "user-nick")
-                return <>{prefix}{parsedUsername} <span className="vc-smyn-suffix">{parsedNick}</span></>;
-
-            if (settings.store.mode === "nick-user")
-                return <>{prefix}{parsedNick} <span className="vc-smyn-suffix">{parsedUsername}</span></>;
-
-            return <>{prefix}{parsedUsername}</>;
+            return <>{prefix}{parsedFirst}{second && <> <span className="vc-smyn-suffix">{parsedSecond}</span></>}</>;
         } catch {
             return <>{author?.nick}</>;
         }
@@ -90,24 +100,9 @@ export default definePlugin({
 
     getUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
-            const user = userOverride ?? message.author;
-            let { username } = user;
-            if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+            const [prefix, first, second] = getNames({ author, message, isRepliedMessage, withMentionPrefix, userOverride });
 
-            const { nick } = author;
-            const prefix = withMentionPrefix ? "@" : "";
-
-            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
-                return `${prefix}${nick}`;
-
-            if (settings.store.mode === "user-nick")
-                return `${prefix}${username} (${nick})`;
-
-            if (settings.store.mode === "nick-user")
-                return `${prefix}${nick} (${username})`;
-
-            return `${prefix}${username}`;
+            return prefix + first + (second ? ` (${second})` : "");
         } catch {
             return author?.nick || "";
         }
