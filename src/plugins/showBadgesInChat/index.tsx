@@ -80,7 +80,7 @@ function ChatBadges({ author }: { author: User; }) {
                             className={roleIconClassName}
                             name="Vencord Contributor"
                             size={20}
-                            src={"https://vencord.dev/assets/favicon.png"}
+                            src={"https://cdn.discordapp.com/emojis/1092089799109775453.png"}
                         />
                     </span>
                 )}

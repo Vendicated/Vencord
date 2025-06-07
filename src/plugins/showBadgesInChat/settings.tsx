@@ -51,7 +51,7 @@ function BadgeSettings() {
             title: "Vencord donor badges",
         },
         {
-            src: "https://vencord.dev/assets/favicon.png",
+            src: "https://cdn.discordapp.com/emojis/1092089799109775453.png",
             settings: settings.store.vencordContributor,
             title: "Vencord contributor badge",
         },
