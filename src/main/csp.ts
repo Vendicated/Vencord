@@ -6,6 +6,9 @@
 
 import { session } from "electron";
 
+import { RendererSettings } from "./settings";
+
+
 type PolicyMap = Record<string, string[]>;
 
 export const ConnectSrc = ["connect-src"];
@@ -107,6 +110,11 @@ const patchCsp = (headers: PolicyMap) => {
             for (const directive of directives) {
                 pushDirective(directive, host);
             }
+        }
+
+        const cloudUrl = RendererSettings.plain.cloud?.url;
+        if (cloudUrl && URL.canParse(cloudUrl)) {
+            pushDirective("connect-src", new URL(cloudUrl).host);
         }
 
         headers[header] = [stringifyPolicy(csp)];
