@@ -138,7 +138,7 @@ export const UserUtils = {
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
-    promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
+    promptToUpload: findByCodeLazy("=!0,showLargeMessageDialog:") as (files: File[], channel: Channel, draftType: Number) => void
 };
 
 export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
