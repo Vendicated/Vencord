@@ -26,7 +26,7 @@ export default definePlugin({
                 },
                 {
                     match: /;usedtx=".concat\((\i)\?"0":"1"\)/,
-                    replace: "$&+`;stereo=${+$1};sprop-stereo=${+$1}`"
+                    replace: '$&.concat($1?";stereo=1;sprop-stereo=1":"")'
                 }
             ]
         }
