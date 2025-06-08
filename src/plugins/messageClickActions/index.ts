@@ -28,7 +28,7 @@ const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
-const changed = () => !WindowStore.isFocused() && (isDeletePressed = false);
+const focusChanged = () => !WindowStore.isFocused() && (isDeletePressed = false);
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
@@ -63,13 +63,13 @@ export default definePlugin({
     start() {
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
-        WindowStore.addChangeListener(changed);
+        WindowStore.addChangeListener(focusChanged);
     },
 
     stop() {
         document.removeEventListener("keydown", keydown);
         document.removeEventListener("keyup", keyup);
-        WindowStore.removeChangeListener(changed);
+        WindowStore.removeChangeListener(focusChanged);
     },
 
     onMessageClick(msg: any, channel, event) {
