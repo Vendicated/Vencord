@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
+import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore, WindowStore } from "@webpack/common";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
@@ -28,6 +28,7 @@ const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
+const focusChanged = () => !WindowStore.isFocused() && (isDeletePressed = false);
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
@@ -62,11 +63,13 @@ export default definePlugin({
     start() {
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
+        WindowStore.addChangeListener(focusChanged);
     },
 
     stop() {
         document.removeEventListener("keydown", keydown);
         document.removeEventListener("keyup", keyup);
+        WindowStore.removeChangeListener(focusChanged);
     },
 
     onMessageClick(msg: any, channel, event) {
