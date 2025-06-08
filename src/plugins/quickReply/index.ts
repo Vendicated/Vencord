@@ -22,6 +22,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
+import NoBlockedMessagesPlugin from "plugins/noBlockedMessages";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
@@ -131,12 +132,12 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
 
     const meId = UserStore.getCurrentUser().id;
-    const hasNoBlockedMessages = Vencord.Plugins.isPluginEnabled("NoBlockedMessages");
+    const hasNoBlockedMessages = Vencord.Plugins.isPluginEnabled(NoBlockedMessagesPlugin.name);
 
     messages = messages.filter(m => {
         if (m.deleted) return false;
         if (!isReply && m.author.id !== meId) return false; // editing only own messages
-        if (hasNoBlockedMessages && RelationshipStore.isBlocked(m.author.id)) return false;
+        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
 
         return true;
     });
