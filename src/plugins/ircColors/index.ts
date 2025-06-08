@@ -25,7 +25,8 @@ import { useMemo } from "@webpack/common";
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
     const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => id ? h64(id) : null, [id]);
+    const { pepper } = settings.use(["pepper"]);
+    const idHash = useMemo(() => id ? h64(id + pepper) : null, [id, pepper]);
 
     return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
 }
@@ -35,6 +36,11 @@ const settings = definePluginSettings({
         description: "Lightness, in %. Change if the colors are too light or too dark",
         type: OptionType.NUMBER,
         default: 70,
+    },
+    pepper: {
+        description: "Change this value to change the colour of every user",
+        type: OptionType.STRING,
+        default: "",
     },
     memberListColors: {
         description: "Replace role colors in the member list",
@@ -58,7 +64,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "IrcColors",
-    description: "Makes username colors in chat unique, like in IRC clients",
+    description: "Makes username colors in chat unique, like in IRC clients (MODIFIED)",
     authors: [Devs.Grzesiek11, Devs.jamesbt365],
     settings,
 
