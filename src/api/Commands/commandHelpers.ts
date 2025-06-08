@@ -18,7 +18,7 @@
 
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { findByCodeLazy } from "@webpack";
-import { MessageActions, SnowflakeUtils } from "@webpack/common";
+import { MessageActionCreators, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
@@ -39,7 +39,7 @@ export function generateId() {
 export function sendBotMessage(channelId: string, message: PartialDeep<Message>): Message {
     const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
 
-    MessageActions.receiveMessage(channelId, mergeDefaults(message, botMessage));
+    MessageActionCreators.receiveMessage(channelId, mergeDefaults(message, botMessage));
 
     return message as Message;
 }

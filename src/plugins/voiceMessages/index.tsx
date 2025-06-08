@@ -28,7 +28,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActionCreators, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -112,7 +112,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
                     waveform: meta.waveform,
                     duration_secs: meta.duration,
                 }],
-                message_reference: reply ? MessageActions.getSendMessageOptionsForReply(reply)?.messageReference : null,
+                message_reference: reply ? MessageActionCreators.getSendMessageOptionsForReply(reply)?.messageReference : null,
             }
         });
     });

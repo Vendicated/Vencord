@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, MessageActions } from "@webpack/common";
+import { FluxDispatcher, MessageActionCreators } from "@webpack/common";
 
 interface Album {
     id: string;
@@ -79,7 +79,7 @@ function makeCommand(name: string, formatUrl: (track: Track) => string): Command
                 channel.id,
                 { content: message ? `${message} ${data}` : data },
                 false,
-                MessageActions.getSendMessageOptionsForReply(PendingReplyStore.getPendingReply(channel.id))
+                MessageActionCreators.getSendMessageOptionsForReply(PendingReplyStore.getPendingReply(channel.id))
             ).then(() => {
                 FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });
             });
