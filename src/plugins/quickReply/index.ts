@@ -115,7 +115,7 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 
     const vh = Math.max(document.documentElement.clientHeight, window.innerHeight);
     const rect = element.getBoundingClientRect();
-    const isOffscreen = rect.bottom < 200 || rect.top - vh >= -200;
+    const isOffscreen = rect.bottom < 150 || rect.top - vh >= -150;
 
     if (isOffscreen) {
         MessageActions.jumpToMessage({
@@ -128,16 +128,18 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 }
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
-    let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array.filter(m => !m.deleted);
+    let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
 
-    if (!isReply) { // we are editing so only include own
-        const meId = UserStore.getCurrentUser().id;
-        messages = messages.filter(m => m.author.id === meId);
-    }
+    const meId = UserStore.getCurrentUser().id;
+    const hasNoBlockedMessages = Vencord.Plugins.isPluginEnabled("NoBlockedMessages");
 
-    if (Vencord.Plugins.isPluginEnabled("NoBlockedMessages")) {
-        messages = messages.filter(m => !RelationshipStore.isBlocked(m.author.id));
-    }
+    messages = messages.filter(m => {
+        if (m.deleted) return false;
+        if (!isReply && m.author.id !== meId) return false; // editing only own messages
+        if (hasNoBlockedMessages && RelationshipStore.isBlocked(m.author.id)) return false;
+
+        return true;
+    });
 
     const findNextNonDeleted = (id: string | null) => {
         if (id === null) return messages[messages.length - 1];
