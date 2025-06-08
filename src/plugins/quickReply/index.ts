@@ -143,6 +143,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         if (id === null) return messages[messages.length - 1];
 
         const idx = messages.findIndex(m => m.id === id);
+        if (idx === -1) return messages[messages.length - 1];
 
         const i = isUp ? idx - 1 : idx + 1;
         return messages[i] ?? null;
