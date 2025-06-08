@@ -125,13 +125,16 @@ export default definePlugin({
         return activity;
     },
 
-    priorityMembersFilterIgnoredUsers(priorityMember, partiedMembers) {
+    priorityMembersFilterIgnoredUsers(priorityMembers, priorityMember, partiedMembers) {
         var filteredUser = priorityMember.user;
         if (this.isIgnoredUser(filteredUser)) {
-            filteredUser = partiedMembers.find(user => !this.isIgnoredUser(user));
+            if (partiedMembers.length === 1) {
+                return null;
+            }
+            filteredUser = partiedMembers.find(user => !priorityMembers.some(pm => pm.user.id === user.id));
 
             if (!filteredUser) {
-                filteredUser = priorityMember.user;
+                return null;
             }
         }
         const filteredPriorityMember = {
