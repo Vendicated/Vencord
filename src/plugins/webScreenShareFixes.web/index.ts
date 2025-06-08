@@ -25,7 +25,7 @@ export default definePlugin({
                     replace: ";b=AS:800000;level-asymmetry-allowed=1"
                 },
                 {
-                    match: /;usedtx=".concat\((\i).{0,8}\)/,
+                    match: /;usedtx=".concat\((\i)\?"0":"1"\)/,
                     replace: "$&+`;stereo=${+$1};sprop-stereo=${+$1}`"
                 }
             ]
