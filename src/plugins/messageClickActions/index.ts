@@ -21,6 +21,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
+import NoReplyMentionPlugin from "plugins/noReplyMention";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
@@ -89,9 +90,8 @@ export default definePlugin({
                 if (msg.hasFlag(EPHEMERAL)) return;
 
                 const isShiftPress = event.shiftKey && !settings.store.requireModifier;
-                const NoReplyMention = Vencord.Plugins.plugins.NoReplyMention as any as typeof import("../noReplyMention").default;
-                const shouldMention = Vencord.Plugins.isPluginEnabled("NoReplyMention")
-                    ? NoReplyMention.shouldMention(msg, isShiftPress)
+                const shouldMention = Vencord.Plugins.isPluginEnabled(NoReplyMentionPlugin.name)
+                    ? NoReplyMentionPlugin.shouldMention(msg, isShiftPress)
                     : !isShiftPress;
 
                 FluxDispatcher.dispatch({

@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 import NoBlockedMessagesPlugin from "plugins/noBlockedMessages";
+import NoReplyMentionPlugin from "plugins/noReplyMention";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
@@ -164,13 +165,14 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
 }
 
 function shouldMention(message: Message) {
-    const { enabled, userList, shouldPingListed } = Settings.plugins.NoReplyMention;
-    const shouldPing = !enabled || (shouldPingListed === userList.includes(message.author.id));
-
     switch (settings.store.shouldMention) {
-        case MentionOptions.NO_REPLY_MENTION_PLUGIN: return shouldPing;
-        case MentionOptions.DISABLED: return false;
-        default: return true;
+        case MentionOptions.NO_REPLY_MENTION_PLUGIN:
+            if (!Vencord.Plugins.isPluginEnabled(NoReplyMentionPlugin.name)) return true;
+            return NoReplyMentionPlugin.shouldMention(message, false);
+        case MentionOptions.DISABLED:
+            return false;
+        default:
+            return true;
     }
 }
 
