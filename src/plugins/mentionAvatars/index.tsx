@@ -99,7 +99,7 @@ export default definePlugin({
                 src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${roleId}/${role.icon}.webp?size=24&quality=lossless`}
             />
         );
-    }),
+    }, { noop: true }),
 });
 
 function getUsernameString(username: string) {
