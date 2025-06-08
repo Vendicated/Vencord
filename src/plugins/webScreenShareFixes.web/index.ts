@@ -25,8 +25,8 @@ export default definePlugin({
                     replace: ";b=AS:800000;level-asymmetry-allowed=1"
                 },
                 {
-                    match: "useinbandfec=1",
-                    replace: "useinbandfec=1;stereo=1;sprop-stereo=1"
+                    match: /;usedtx=".concat\((\i)\?"0":"1"\)/,
+                    replace: '$&.concat($1?";stereo=1;sprop-stereo=1":"")'
                 }
             ]
         }
