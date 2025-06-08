@@ -20,7 +20,7 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActionCreators, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
@@ -118,7 +118,7 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
     const isOffscreen = rect.bottom < 200 || rect.top - vh >= -200;
 
     if (isOffscreen) {
-        MessageActionCreators.jumpToMessage({
+        MessageActions.jumpToMessage({
             channelId,
             messageId,
             flash: false,

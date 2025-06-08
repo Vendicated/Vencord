@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, Menu, MessageActionCreators } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, MessageActions } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 interface Sticker {
@@ -52,7 +52,7 @@ const settings = definePluginSettings({
 const WELCOME_STICKERS = findLazy(m => Array.isArray(m) && m[0]?.name === "Wave");
 
 function greet(channel: Channel, message: Message, stickers: string[]) {
-    const options = MessageActionCreators.getSendMessageOptionsForReply({
+    const options = MessageActions.getSendMessageOptionsForReply({
         channel,
         message,
         shouldMention: true,
@@ -68,9 +68,9 @@ function greet(channel: Channel, message: Message, stickers: string[]) {
             validNonShortcutEmojis: []
         };
 
-        MessageActionCreators._sendMessage(channel.id, msg, options);
+        MessageActions._sendMessage(channel.id, msg, options);
     } else {
-        MessageActionCreators.sendGreetMessage(channel.id, stickers[0], options);
+        MessageActions.sendGreetMessage(channel.id, stickers[0], options);
     }
 }
 
