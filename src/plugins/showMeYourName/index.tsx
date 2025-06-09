@@ -62,7 +62,7 @@ function validColor(color: string) {
     return isValid;
 }
 
-function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string) {
+function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string, mention = false) {
     if (!savedColor.trim()) return { color: fallbackColor };
 
     if (savedColor.toLowerCase().includes("role")) {
@@ -86,7 +86,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
             tertiaryColor = adjustHex(tertiaryColor, parseInt(percentage));
         }
 
-        if (settings.store.ignoreGradients || !secondaryColor) {
+        if ((!mention && settings.store.ignoreGradients) || !secondaryColor) {
             return {
                 "color": primaryColor,
                 "text-decoration-color": primaryColor,
@@ -99,7 +99,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
                 ? "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-1))"
                 : "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-3),var(--custom-gradient-color-1))";
 
-            return settings.store.animateGradients ? {
+            return settings.store.animateGradients && !mention ? {
                 "color": primaryColor,
                 "text-decoration-color": primaryColor,
             } : {
@@ -232,11 +232,12 @@ const settings = definePluginSettings({
 export function renderedUsername(props: any) {
     const { replies, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor } = settings.use();
 
+    const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
     const renderType = props.className === "mention" ? "mention" : "message";
     let author: any = null;
     let isRepliedMessage = false;
     let mentionSymbol = "";
-    let topRoleColor = "";
+    let topRoleStyle: any = null;
 
     if (renderType === "mention") {
         const channel = ChannelStore.getChannel(props.channelId) || {};
@@ -245,7 +246,7 @@ export function renderedUsername(props: any) {
         author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
         isRepliedMessage = false;
         mentionSymbol = hideDefaultAtSign ? "" : "@";
-        topRoleColor = ((author as any)?.colorStrings || {}).primaryColor || "";
+        topRoleStyle = resolveColor(author, "Role", textMutedValue, true);
     } else if (renderType === "message") {
         // props.message.author only has a globalName attribute.
         // props.author only has a nick attribute, but it is overwritten by the globalName if no nickname is set.
@@ -274,7 +275,6 @@ export function renderedUsername(props: any) {
             return <>{mentionSymbol}{nick || display || username}</>;
         }
 
-        const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
         const affixes = parseAffixes(includedNames);
         const resolvedUsernameColor = resolveColor(author, usernameColor.trim(), textMutedValue);
         const resolvedNicknameColor = resolveColor(author, nicknameColor.trim(), textMutedValue);
@@ -282,9 +282,9 @@ export function renderedUsername(props: any) {
         const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
 
         const values = {
-            "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "color": resolvedUsernameColor },
-            "display": { "value": display, "prefix": affixes.display.prefix, "suffix": affixes.display.suffix, "color": resolvedDisplayNameColor },
-            "nick": { "value": nick, "prefix": affixes.nick.prefix, "suffix": affixes.nick.suffix, "color": resolvedNicknameColor }
+            "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "style": resolvedUsernameColor },
+            "display": { "value": display, "prefix": affixes.display.prefix, "suffix": affixes.display.suffix, "style": resolvedDisplayNameColor },
+            "nick": { "value": nick, "prefix": affixes.nick.prefix, "suffix": affixes.nick.suffix, "style": resolvedNicknameColor }
         };
 
         let { order } = affixes;
@@ -311,7 +311,7 @@ export function renderedUsername(props: any) {
                 {(
                     <span>
                         <span
-                            {...(topRoleColor ? { style: { color: topRoleColor } } : {})}
+                            {...(topRoleStyle ? { style: topRoleStyle } : {})}
                         >
                             {values[first].value}
                         </span>
@@ -322,7 +322,7 @@ export function renderedUsername(props: any) {
                         <span>&nbsp;</span>
                         <span style={affixColor}>
                             {values[second].prefix}</span>
-                        <span style={values[second].color}>
+                        <span style={values[second].style}>
                             {values[second].value}</span>
                         <span style={affixColor}>
                             {values[second].suffix}</span>
@@ -333,7 +333,7 @@ export function renderedUsername(props: any) {
                         <span>&nbsp;</span>
                         <span style={affixColor}>
                             {values[third].prefix}</span>
-                        <span style={values[third].color}>
+                        <span style={values[third].style}>
                             {values[third].value}</span>
                         <span style={affixColor}>
                             {values[third].suffix}</span>
