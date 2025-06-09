@@ -119,6 +119,15 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
 
 }
 
+function safeStringForXML(input: string): string {
+    return input
+        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
 function generateXml(
     type: "notification" | "call",
     titleString: string, bodyString: string,
@@ -149,11 +158,11 @@ function generateXml(
             }
              <visual>
                  <binding template="ToastGeneric">
-                 <text>${titleString}</text>
-                 <text>${bodyString}</text>
+                 <text>${safeStringForXML(titleString)}</text>
+                 <text>${safeStringForXML(bodyString)}</text>
                  <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} placement="appLogoOverride"  />
 
-                 ${extraOptions?.wAttributeText ? `<text placement="attribution">${extraOptions.wAttributeText}</text>` : ""}
+                 ${extraOptions?.wAttributeText ? `<text placement="attribution">${safeStringForXML(extraOptions.wAttributeText)}</text>` : ""}
                  ${attachmentLoc ? `<image placement="${extraOptions?.wMessageOptions?.attachmentType}" src="${attachmentLoc}" />` : ""}
                  </binding>
              </visual>
@@ -175,11 +184,11 @@ function generateXml(
             }
              <visual>
                  <binding template="ToastGeneric">
-                    <text hint-callScenarioCenterAlign="true">${titleString}</text>
-                    <text hint-callScenarioCenterAlign="true">${bodyString}</text>
+                    <text hint-callScenarioCenterAlign="true">${safeStringForXML(titleString)}</text>
+                    <text hint-callScenarioCenterAlign="true">${safeStringForXML(bodyString)}</text>
                     <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} />
 
-                    ${extraOptions?.wAttributeText ? `<text placement="attribution">${extraOptions.wAttributeText}</text>` : ""}
+                    ${extraOptions?.wAttributeText ? `<text placement="attribution">${safeStringForXML(extraOptions.wAttributeText)}</text>` : ""}
                  </binding>
              </visual>
          </toast>`;
