@@ -210,8 +210,8 @@ function notifySend(summary: string, body: string | null, avatarLocation: string
 
     // TODO future: KDE has an `x-kde-urls` hint which can be used to display the attachment and avatar at the same time.
     // args.push(--hint=string:x-kde-urls:file://${attachmentLocation})
-    if (attachmentLocation) args.push(`--icon=file://${attachmentLocation}`);
-    else args.push(`--icon=file://${avatarLocation}`);
+    if (attachmentLocation) args.push(`-h string:image-path:${attachmentLocation}`);
+    else args.push(`-h string:image-path:${avatarLocation}`);
 
     console.log(args);
 
