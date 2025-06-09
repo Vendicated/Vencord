@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>184 additional plugins</summary>
+<summary>186 additional plugins</summary>
 
 ### All Platforms
 
@@ -20,6 +20,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - AlwaysExpandProfile by thororen
 - AmITyping by MrDiamond
 - Anammox by Kyuuhachi
+- AudiobookShelfRPC by vMohammad
 - AtSomeone by Joona
 - BannersEverywhere by ImLvna & AutumnVN
 - BetterActivities by D3SOX, Arjix, AutumnVN
@@ -95,6 +96,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - InRole by nin0dev
 - InstantScreenshare by HAHALOSAH & thororen
 - IRememberYou by zoodogood
+- JellyfinRichPresence by vMohammad
 - Jumpscare by Surgedevs
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
