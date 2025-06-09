@@ -229,6 +229,124 @@ const settings = definePluginSettings({
     }
 });
 
+export function renderedUsername(props: any) {
+    const { replies, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor } = settings.use();
+
+    const renderType = props.className === "mention" ? "mention" : "message";
+    let author: any = null;
+    let isRepliedMessage = false;
+    let mentionSymbol = "";
+    let topRoleColor = "";
+
+    if (renderType === "mention") {
+        const channel = ChannelStore.getChannel(props.channelId) || {};
+        const usr = UserStore.getUser(props.userId) || {};
+        const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
+        author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
+        isRepliedMessage = false;
+        mentionSymbol = hideDefaultAtSign ? "" : "@";
+        topRoleColor = ((author as any)?.colorStrings || {}).primaryColor || "";
+    } else if (renderType === "message") {
+        // props.message.author only has a globalName attribute.
+        // props.author only has a nick attribute, but it is overwritten by the globalName if no nickname is set.
+        // getUser only has a globalName attribute.
+        // getMember only has a nick attribute, and it is null if no nickname is set.
+        // Therefore just using the author props is not enough for an accurate result and we instead need to combine the results of getUser and getMember.
+        const channel = ChannelStore.getChannel(props.message.channel_id) || {};
+        const athr = props.userOverride ? props.userOverride : props.message.author;
+        const usr = UserStore.getUser(athr.id) || {};
+        const mem = GuildMemberStore.getMember(channel.guild_id, athr.id) || {};
+        author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
+        isRepliedMessage = props.isRepliedMessage;
+        mentionSymbol = hideDefaultAtSign ? "" : props.withMentionPrefix ? "@" : "";
+    }
+
+    if (!author) {
+        return <>{mentionSymbol}Unknown</>;
+    }
+
+    const username = StreamerModeStore.enabled && respectStreamerMode ? author.username[0] + "..." : author.username;
+    const display = StreamerModeStore.enabled && respectStreamerMode && author.globalName?.toLowerCase() === author.username.toLowerCase() ? author.globalName[0] + "..." : author.globalName || "";
+    const nick = StreamerModeStore.enabled && respectStreamerMode && author.nick?.toLowerCase() === author.username.toLowerCase() ? author.nick[0] + "..." : author.nick || "";
+
+    try {
+        if (isRepliedMessage && !replies) {
+            return <>{mentionSymbol}{nick || display || username}</>;
+        }
+
+        const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
+        const affixes = parseAffixes(includedNames);
+        const resolvedUsernameColor = resolveColor(author, usernameColor.trim(), textMutedValue);
+        const resolvedNicknameColor = resolveColor(author, nicknameColor.trim(), textMutedValue);
+        const resolvedDisplayNameColor = resolveColor(author, displayNameColor.trim(), textMutedValue);
+        const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
+
+        const values = {
+            "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "color": resolvedUsernameColor },
+            "display": { "value": display, "prefix": affixes.display.prefix, "suffix": affixes.display.suffix, "color": resolvedDisplayNameColor },
+            "nick": { "value": nick, "prefix": affixes.nick.prefix, "suffix": affixes.nick.suffix, "color": resolvedNicknameColor }
+        };
+
+        let { order } = affixes;
+        order.includes("nick") && !values.nick.value && !order.includes("display") && values.display.value ? order[order.indexOf("nick")] = "display" : null;
+        order.includes("display") && !values.display.value && !order.includes("user") && values.user.value ? order[order.indexOf("display")] = "user" : null;
+        order = order.filter((name: string) => values[name].value);
+
+        const first = order.shift() || "user";
+        let second = order.shift() || null;
+        let third = order.shift() || null;
+
+        if (removeDuplicates) {
+            // If third is the same as second, remove it, unless third is the username, then prioritize it.
+            second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third === "user" ? second = null : third = null : null;
+            // If second is the same as first, remove it.
+            second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
+            // If third is the same as first, remove it.
+            third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
+        }
+
+        return (
+            <span>
+                {mentionSymbol && <span>{mentionSymbol}</span>}
+                {(
+                    <span>
+                        <span
+                            {...(topRoleColor ? { style: { color: topRoleColor } } : {})}
+                        >
+                            {values[first].value}
+                        </span>
+                    </span>
+                )}
+                {second && (
+                    <span>
+                        <span>&nbsp;</span>
+                        <span style={affixColor}>
+                            {values[second].prefix}</span>
+                        <span style={values[second].color}>
+                            {values[second].value}</span>
+                        <span style={affixColor}>
+                            {values[second].suffix}</span>
+                    </span>
+                )}
+                {third && (
+                    <span>
+                        <span>&nbsp;</span>
+                        <span style={affixColor}>
+                            {values[third].prefix}</span>
+                        <span style={values[third].color}>
+                            {values[third].value}</span>
+                        <span style={affixColor}>
+                            {values[third].suffix}</span>
+                    </span>
+                )}
+            </span>
+        );
+    } catch (e) {
+        console.error(e);
+        return <>{mentionSymbol}{StreamerModeStore.enabled && respectStreamerMode ? ((nick || display || username)[0] + "...") : (nick || display || username)}</>;
+    }
+}
+
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display any permutation of nicknames, display names, and usernames in chat.",
@@ -251,115 +369,5 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ErrorBoundary.wrap((props: any) => {
-        const { replies, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor } = settings.use();
-
-        const renderType = props.className === "mention" ? "mention" : "message";
-        let author: any = null;
-        let isRepliedMessage = false;
-        let mentionSymbol = "";
-
-        if (renderType === "mention") {
-            const channel = ChannelStore.getChannel(props.channelId) || {};
-            const usr = UserStore.getUser(props.userId) || {};
-            const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
-            author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
-            isRepliedMessage = false;
-            mentionSymbol = hideDefaultAtSign ? "" : "@";
-        } else if (renderType === "message") {
-            // props.message.author only has a globalName attribute.
-            // props.author only has a nick attribute, but it is overwritten by the globalName if no nickname is set.
-            // getUser only has a globalName attribute.
-            // getMember only has a nick attribute, and it is null if no nickname is set.
-            // Therefore just using the author props is not enough for an accurate result and we instead need to combine the results of getUser and getMember.
-            const channel = ChannelStore.getChannel(props.message.channel_id) || {};
-            const athr = props.userOverride ? props.userOverride : props.message.author;
-            const usr = UserStore.getUser(athr.id) || {};
-            const mem = GuildMemberStore.getMember(channel.guild_id, athr.id) || {};
-            author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
-            isRepliedMessage = props.isRepliedMessage;
-            mentionSymbol = hideDefaultAtSign ? "" : props.withMentionPrefix ? "@" : "";
-        }
-
-        if (!author) {
-            return <>{mentionSymbol}Unknown</>;
-        }
-
-        const username = StreamerModeStore.enabled && respectStreamerMode ? author.username[0] + "..." : author.username;
-        const display = StreamerModeStore.enabled && respectStreamerMode && author.globalName?.toLowerCase() === author.username.toLowerCase() ? author.globalName[0] + "..." : author.globalName || "";
-        const nick = StreamerModeStore.enabled && respectStreamerMode && author.nick?.toLowerCase() === author.username.toLowerCase() ? author.nick[0] + "..." : author.nick || "";
-
-        try {
-            if (isRepliedMessage && !replies) {
-                return <>{mentionSymbol}{nick || display || username}</>;
-            }
-
-            const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
-            const affixes = parseAffixes(includedNames);
-            const resolvedUsernameColor = resolveColor(author, usernameColor.trim(), textMutedValue);
-            const resolvedNicknameColor = resolveColor(author, nicknameColor.trim(), textMutedValue);
-            const resolvedDisplayNameColor = resolveColor(author, displayNameColor.trim(), textMutedValue);
-            const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
-
-            const values = {
-                "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "color": resolvedUsernameColor },
-                "display": { "value": display, "prefix": affixes.display.prefix, "suffix": affixes.display.suffix, "color": resolvedDisplayNameColor },
-                "nick": { "value": nick, "prefix": affixes.nick.prefix, "suffix": affixes.nick.suffix, "color": resolvedNicknameColor }
-            };
-
-            let { order } = affixes;
-            order.includes("nick") && !values.nick.value && !order.includes("display") && values.display.value ? order[order.indexOf("nick")] = "display" : null;
-            order.includes("display") && !values.display.value && !order.includes("user") && values.user.value ? order[order.indexOf("display")] = "user" : null;
-            order = order.filter((name: string) => values[name].value);
-
-            const first = order.shift() || "user";
-            let second = order.shift() || null;
-            let third = order.shift() || null;
-
-            if (removeDuplicates) {
-                // If third is the same as second, remove it, unless third is the username, then prioritize it.
-                second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third === "user" ? second = null : third = null : null;
-                // If second is the same as first, remove it.
-                second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
-                // If third is the same as first, remove it.
-                third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
-            }
-
-            return (
-                <>
-                    {mentionSymbol && <span>{mentionSymbol}</span>}
-                    {(
-                        <span>
-                            <span>{values[first].value}</span>
-                        </span>
-                    )}
-                    {second && (
-                        <span>
-                            <span>&nbsp;</span>
-                            <span style={affixColor}>
-                                {values[second].prefix}</span>
-                            <span style={values[second].color}>
-                                {values[second].value}</span>
-                            <span style={affixColor}>
-                                {values[second].suffix}</span>
-                        </span>
-                    )}
-                    {third && (
-                        <span>
-                            <span>&nbsp;</span>
-                            <span style={affixColor}>
-                                {values[third].prefix}</span>
-                            <span style={values[third].color}>
-                                {values[third].value}</span>
-                            <span style={affixColor}>
-                                {values[third].suffix}</span>
-                        </span>
-                    )}
-                </>
-            );
-        } catch (e) {
-            console.error(e);
-            return <>{mentionSymbol}{StreamerModeStore.enabled && respectStreamerMode ? ((nick || display || username)[0] + "...") : (nick || display || username)}</>;
-        }
-    }, { noop: true }),
+    renderUsername: ErrorBoundary.wrap(renderedUsername, { noop: true }),
 });
