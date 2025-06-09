@@ -21,7 +21,7 @@ function adjustHex(color: string, percent: number): string {
     let hex = color.replace("#", "");
 
     if (hex.length === 3) {
-        hex = hex.split('').map(c => c + c).join('');
+        hex = hex.split("").map(c => c + c).join("");
     }
 
     const num = parseInt(hex, 16);
@@ -69,8 +69,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         const percentage = roleColorPattern.exec(savedColor)?.[1] || "";
         if (percentage && isNaN(parseInt(percentage))) return { color: fallbackColor };
 
-        // @ts-expect-error: colorStrings is an undocumented property on GuildMember
-        let colorStrings = (user as GuildMember)?.colorStrings || {};
+        const colorStrings = (user as any)?.colorStrings || {};
         let primaryColor = colorStrings.primaryColor || null;
         let secondaryColor = colorStrings.secondaryColor || null;
         let tertiaryColor = colorStrings.tertiaryColor || null;
@@ -293,10 +292,7 @@ export default definePlugin({
             const resolvedUsernameColor = resolveColor(author, usernameColor.trim(), textMutedValue);
             const resolvedNicknameColor = resolveColor(author, nicknameColor.trim(), textMutedValue);
             const resolvedDisplayNameColor = resolveColor(author, displayNameColor.trim(), textMutedValue);
-            const affixColor = {
-                color: `${getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d"}`,
-                ["-webkit-text-fill-color"]: `${getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d"}`,
-            };
+            const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
 
             const values = {
                 "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "color": resolvedUsernameColor },
