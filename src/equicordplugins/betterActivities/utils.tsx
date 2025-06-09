@@ -39,11 +39,11 @@ export function getActivityApplication(activity: Activity | null) {
 
 export function getApplicationIcons(activities: Activity[], preferSmall = false): ApplicationIcon[] {
     const applicationIcons: ApplicationIcon[] = [];
-    const applications = activities.filter(activity => activity.application_id || activity.platform);
+    const applications = activities.filter(activity => activity.application_id || activity.platform || activity.id.startsWith("spotify:"));
 
     for (const activity of applications) {
-        const { assets, application_id, platform } = activity;
-        if (!application_id && !platform) continue;
+        const { assets, application_id, platform, id } = activity;
+        if (!application_id && !platform && !id.startsWith("spotify:")) continue;
 
         if (assets) {
             const { small_image, small_text, large_image, large_text } = assets;
@@ -59,6 +59,12 @@ export function getApplicationIcons(activities: Activity[], preferSmall = false)
                             activity
                         });
                     }
+                } else if (image.startsWith("spotify:")) {
+                    const url = `https://i.scdn.co/image/${image.split(":")[1]}`;
+                    applicationIcons.push({
+                        image: { src: url, alt },
+                        activity
+                    });
                 } else {
                     const src = `https://cdn.discordapp.com/app-assets/${application_id}/${image}.png`;
                     applicationIcons.push({

@@ -10,7 +10,6 @@ import { React, Tooltip } from "@webpack/common";
 import { JSX } from "react";
 
 import { ActivityTooltip } from "../components/ActivityTooltip";
-import { SpotifyIcon } from "../components/SpotifyIcon";
 import { TwitchIcon } from "../components/TwitchIcon";
 import { settings } from "../settings";
 import { ActivityListIcon, ActivityListProps, ApplicationIcon, IconCSSProperties } from "../types";
@@ -57,7 +56,6 @@ export function patchActivityList({ activities, user, hideTooltip }: ActivityLis
         }
     };
     addActivityIcon("Twitch", TwitchIcon);
-    addActivityIcon("Spotify", SpotifyIcon);
 
     if (icons.length) {
         const iconStyle: IconCSSProperties = {
