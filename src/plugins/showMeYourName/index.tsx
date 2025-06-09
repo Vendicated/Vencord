@@ -69,9 +69,13 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         const percentage = roleColorPattern.exec(savedColor)?.[1] || "";
         if (percentage && isNaN(parseInt(percentage))) return { color: fallbackColor };
 
-        let primaryColor = (user as GuildMember)?.colorStrings?.primaryColor;
-        let secondaryColor = (user as GuildMember)?.colorStrings?.secondaryColor;
-        let tertiaryColor = (user as GuildMember)?.colorStrings?.tertiaryColor;
+        // @ts-expect-error: colorStrings is an undocumented property on GuildMember
+        let colorStrings = (user as GuildMember)?.colorStrings || {};
+        let primaryColor = colorStrings.primaryColor || null;
+        let secondaryColor = colorStrings.secondaryColor || null;
+        let tertiaryColor = colorStrings.tertiaryColor || null;
+
+        if (!primaryColor) return { color: fallbackColor };
 
         if (primaryColor && percentage) {
             primaryColor = adjustHex(primaryColor, parseInt(percentage));
@@ -82,8 +86,6 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         if (tertiaryColor && percentage) {
             tertiaryColor = adjustHex(tertiaryColor, parseInt(percentage));
         }
-
-        if (!primaryColor) return { color: fallbackColor };
 
         if (settings.store.ignoreGradients || !secondaryColor) {
             return {
