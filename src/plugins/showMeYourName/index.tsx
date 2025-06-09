@@ -63,7 +63,8 @@ export default definePlugin({
             }
         },
         {
-            find: "missing user\"",
+            // same module as RoleColorEverywhere
+            find: ".USER_MENTION)",
             predicate: () => settings.store.inMentions,
             replacement: {
                 match: /"@"\.concat\(null!=(\i)\?\i:(\i)\)/,
@@ -108,9 +109,9 @@ export default definePlugin({
                 return <>@{displayName}</>;
             switch (settings.store.mode) {
                 case "user-nick":
-                    return <>@{displayName} <span className="vc-smyn-suffix">{nick}</span></>;
+                    return <>@{displayName} {nick}</>;
                 case "nick-user":
-                    return <>@{nick} <span className="vc-smyn-suffix">{displayName}</span></>;
+                    return <>@{nick} {displayName}</>;
                 case "user":
                     return <>@{displayName}</>;
                 default:
