@@ -69,7 +69,6 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         const percentage = roleColorPattern.exec(savedColor)?.[1] || "";
         if (percentage && isNaN(parseInt(percentage))) return { color: fallbackColor };
 
-        console.log(`Percentage: ${percentage}`);
         let primaryColor = (user as GuildMember)?.colorStrings?.primaryColor;
         let secondaryColor = (user as GuildMember)?.colorStrings?.secondaryColor;
         let tertiaryColor = (user as GuildMember)?.colorStrings?.tertiaryColor;
