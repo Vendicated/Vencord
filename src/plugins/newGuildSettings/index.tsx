@@ -20,7 +20,7 @@ import {
     findGroupChildrenByChildId,
     NavContextMenuPatchCallback
 } from "@api/ContextMenu";
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -115,8 +115,6 @@ function applyDefaultSettings(guildId: string | null) {
     }
 }
 
-
-migratePluginSettings("NewGuildSettings", "MuteNewGuild");
 export default definePlugin({
     name: "NewGuildSettings",
     description: "Automatically mute new servers and change various other settings upon joining",
@@ -130,7 +128,7 @@ export default definePlugin({
         {
             find: ",acceptInvite(",
             replacement: {
-                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!==.+?;/,
+                match: /INVITE_ACCEPT_SUCCESS.+?,(\i)=null!=.+?;/,
                 replace: (m, guildId) => `${m}$self.applyDefaultSettings(${guildId});`
             }
         },

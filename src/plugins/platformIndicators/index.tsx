@@ -18,14 +18,14 @@
 
 import "./style.css";
 
-import { addBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeBadge } from "@api/Badges";
-import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeProfileBadge } from "@api/Badges";
+import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -70,7 +70,9 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
+const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
+    useStatusFillColor: filters.byCode(".hex")
+});
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform === "embedded"
@@ -79,7 +81,7 @@ const PlatformIcon = ({ platform, status, small }: { platform: Platform, status:
 
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={StatusUtils.useStatusFillColor(status)} tooltip={tooltip} small={small} />;
+    return <Icon color={useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
 function ensureOwnStatus(user: User) {
@@ -131,7 +133,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     }));
 }
 
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
+const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolean; }) => {
     if (!user || user.bot) return null;
 
     ensureOwnStatus(user);
@@ -153,11 +155,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
     return (
         <span
             className="vc-platform-indicator"
-            style={{
-                marginLeft: wantMargin ? 4 : 0,
-                top: wantTopMargin ? 2 : 0,
-                gap: 2
-            }}
+            style={{ gap: "2px" }}
         >
             {icons}
         </span>
@@ -172,26 +170,26 @@ const badge: ProfileBadge = {
 const indicatorLocations = {
     list: {
         description: "In the member list",
-        onEnable: () => addDecorator("platform-indicator", props =>
+        onEnable: () => addMemberListDecorator("platform-indicator", props =>
             <ErrorBoundary noop>
                 <PlatformIndicator user={props.user} small={true} />
             </ErrorBoundary>
         ),
-        onDisable: () => removeDecorator("platform-indicator")
+        onDisable: () => removeMemberListDecorator("platform-indicator")
     },
     badges: {
         description: "In user profiles, as badges",
-        onEnable: () => addBadge(badge),
-        onDisable: () => removeBadge(badge)
+        onEnable: () => addProfileBadge(badge),
+        onDisable: () => removeProfileBadge(badge)
     },
     messages: {
         description: "Inside messages",
-        onEnable: () => addDecoration("platform-indicator", props =>
+        onEnable: () => addMessageDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={props.message?.author} wantTopMargin={true} />
+                <PlatformIndicator user={props.message?.author} />
             </ErrorBoundary>
         ),
-        onDisable: () => removeDecoration("platform-indicator")
+        onDisable: () => removeMessageDecoration("platform-indicator")
     }
 };
 

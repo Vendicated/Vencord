@@ -24,17 +24,25 @@ export default definePlugin({
     patches: [
         // DM User Sidebar
         {
-            find: ".PANEL}),nicknameIcons",
+            find: ".SIDEBAR}),nicknameIcons",
             replacement: {
-                match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(\i\.id)}\)}\)/,
+                match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id)}\)}\)/,
                 replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:true})"
             }
         },
         // User Profile Modal
         {
-            find: "action:\"PRESS_APP_CONNECTION\"",
+            find: ".connections,userId:",
             replacement: {
-                match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
+                match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
+                replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:false}),"
+            }
+        },
+        // User Profile Modal v2
+        {
+            find: ".MODAL_V2,onClose:",
+            replacement: {
+                match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
                 replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:false}),"
             }
         }
