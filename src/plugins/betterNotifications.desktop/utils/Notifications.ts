@@ -11,6 +11,7 @@ import { UserUtils } from "@webpack/common";
 import { notificationShouldBeShown, settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
 import { BasicNotification } from "../types/basicNotification";
+import { cropImageToCircle } from "./Round";
 import { replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
@@ -77,13 +78,13 @@ export function SendNativeNotification(avatarUrl: string,
 
     [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText]);
 
-    UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
+    function notify(avatar) {
         Native.notify(
             (advancedNotification.messageRecord.call && settings.store.specialCallNotification) ? "call" : "notification",
             title,
             body,
             advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
-            user.getAvatarURL(basicNotification.guild_id, 256, false),
+            avatar,
             {
                 channelId: `${advancedNotification.messageRecord.channel_id}`,
                 messageId: `${basicNotification.message_id}`,
@@ -103,6 +104,13 @@ export function SendNativeNotification(avatarUrl: string,
                 wAttributeText: settings.store.notificationAttribute ? attributeText : undefined
             }
         );
+    }
+
+    UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
+        const avatar = user.getAvatarURL(basicNotification.guild_id, 256, false).replace(".webp", ".png");
+
+        if (settings.store.notificationPfpCircle) cropImageToCircle(avatar, 256).then(data => { notify(data); });
+        else notify(avatar);
     });
 }
 

@@ -156,7 +156,7 @@ export const settings = definePluginSettings({
     },
     notificationPfpCircle: {
         type: OptionType.BOOLEAN,
-        description: "Crop the sender's profile picture to a circle (Windows only)",
+        description: "Crop the sender's profile picture to a circle",
         default: true
     },
     notificationHeaderEnabled: {

@@ -54,7 +54,7 @@ let webContents: WebContents | undefined;
 
 // Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`,
 // but using a local file works, so we just throw it to %temp%
-function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
+function saveAssetToDisk(options: AssetOptions, type?: "attachment") {
     // Returns file path if avatar downloaded
     // Returns an empty string if the request fails
 
@@ -69,25 +69,34 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
     let file;
     let targetDir;
 
-    // TODO: round avatars before saving on linux
     // TODO: avatar decorations
-    if (type === "avatar") {
-        targetDir = path.join(avatarDir, `${options.avatarId}.png`);
+    if (options.avatarUrl) {
+        const isData = options.avatarUrl.startsWith("data:image");
+        // rounded is the default
+        const targetFilename = `${isData ? "" : "unrounded-"}${options.avatarId}.png`;
+        targetDir = path.join(avatarDir, targetFilename);
 
         if (fs.existsSync(targetDir)) {
             return new Promise(resolve => {
                 resolve(targetDir);
             });
         }
-
         console.log("Could not find profile picture in cache...");
 
+        if (isData) {
+            options.avatarUrl = options.avatarUrl.replace(/^data:image\/png;base64,/, "");
+            return new Promise(resolve => {
+                fs.writeFile(targetDir, options.avatarUrl!, "base64", function (error) {
+                    if (error) resolve("");
+                    else resolve(targetDir);
+                });
+            });
+        }
+
         // probably should use node URL to be safer
-        url = options.avatarUrl
-            ? options.avatarUrl.startsWith("/assets")
-                ? `https://discord.com${options.avatarUrl}`
-                : options.avatarUrl.replace(/\.\w{1,5}(?=\?|$)/, ".png")
-            : "";
+        url = options.avatarUrl.startsWith("/assets")
+            ? `https://discord.com${options.avatarUrl}`
+            : options.avatarUrl;
 
         file = fs.createWriteStream(targetDir);
 
@@ -116,7 +125,6 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
             resolve("");
         });
     });
-
 }
 
 function safeStringForXML(input: string): string {
@@ -222,7 +230,7 @@ function notifySend(summary: string, body: string | null, avatarLocation: string
     if (attachmentLocation) args.push(`--hint=string:image-path:file://${attachmentLocation}`);
     else args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
-    console.log(args);
+    // console.log(args);
 
     child_process.execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
@@ -240,12 +248,12 @@ export function notify(event: IpcMainInvokeEvent,
     notificationData: NotificationData,
     extraOptions?: ExtraOptions
 ) {
-    const promises = [saveAssetToDisk("avatar", { avatarUrl, avatarId })];
+    const promises = [saveAssetToDisk({ avatarUrl, avatarId })];
 
     if (extraOptions?.attachmentUrl) {
-        promises.push(saveAssetToDisk("attachment", { fileType: extraOptions.attachmentType, downloadUrl: extraOptions.attachmentUrl }));
+        promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, downloadUrl: extraOptions.attachmentUrl }, "attachment"));
     }
-    console.log("Creating promise...");
+    // console.log("Creating promise...");
 
     Promise.all(promises).then(results => {
         // @ts-ignore
