@@ -241,6 +241,13 @@ export default definePlugin({
                 replace: "$self.renderUsername(arguments[0])"
             }
         },
+        {
+            find: ".USER_MENTION)",
+            replacement: {
+                match: /"@"\.concat\(null!=(\i)\?\i:(\i)\)/,
+                replace: "$self.renderUsername(arguments[0])"
+            }
+        }
     ],
     settings,
 
