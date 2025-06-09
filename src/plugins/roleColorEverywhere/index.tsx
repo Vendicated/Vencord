@@ -84,8 +84,8 @@ export default definePlugin({
             find: ".USER_MENTION)",
             replacement: [
                 {
-                    match: /onContextMenu:\i,color:\i,\.\.\.\i(?=,children:)(?<=user:(\i),channel:(\i).{0,500}?)/,
-                    replace: "$&,color:$self.getColorInt($1?.id,$2?.id)"
+                    match: /(?<=onContextMenu:\i,color:)\i(?<=\.getNickname\((\i),\i,(\i).+?)/,
+                    replace: "$self.getColorInt($2?.id,$1)",
                 }
             ],
             predicate: () => settings.store.chatMentions
@@ -124,11 +124,11 @@ export default definePlugin({
         },
         // Voice Users
         {
-            find: "renderPrioritySpeaker(){",
+            find: ".usernameSpeaking]:",
             replacement: [
                 {
-                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
-                    replace: "$&style:$self.getColorStyle(this?.props?.user?.id,this?.props?.guildId),"
+                    match: /\.usernameSpeaking\]:.+?,(?=children)(?<=guildId:(\i),.+?user:(\i).+?)/,
+                    replace: "$&style:$self.getColorStyle($2.id,$1),"
                 }
             ],
             predicate: () => settings.store.voiceUsers
@@ -153,7 +153,7 @@ export default definePlugin({
         },
         // Messages
         {
-            find: "#{intl::MESSAGE_EDITED}",
+            find: ".SEND_FAILED,",
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
                 replace: "style:$self.useMessageColorsStyle($1),"

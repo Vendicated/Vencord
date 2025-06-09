@@ -32,7 +32,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -44,6 +44,11 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Open Spotify URIs instead of Spotify URLs. Will only work if you have Spotify installed and might not work on all platforms",
             default: false
+        },
+        previousButtonRestartsTrack: {
+            type: OptionType.BOOLEAN,
+            description: "Restart currently playing track when pressing the previous button if playtime is >3s",
+            default: true
         }
     },
     patches: [

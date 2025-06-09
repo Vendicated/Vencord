@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
@@ -235,7 +235,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".PREMIUM_LOCKED;",
+            find: ".GUILD_SUBSCRIPTION_UNAVAILABLE;",
             group: true,
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
@@ -256,8 +256,11 @@ export default definePlugin({
                 },
                 {
                     // Disallow the emoji for premium locked if the intention doesn't allow it
-                    match: /!\i\.\i\.canUseEmojisEverywhere\(\i\)/,
-                    replace: m => `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
+                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
+                    match: /(!)?(\i\.\i\.canUseEmojisEverywhere\(\i\))/,
+                    replace: (m, not) => not
+                        ? `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
+                        : `(${m}||${IS_BYPASSEABLE_INTENTION})`
                 },
                 {
                     // Allow animated emojis to be used if the intention allows it
@@ -391,7 +394,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
+            find: "?24:30,",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -514,7 +517,7 @@ export default definePlugin({
         return array.filter(item => item != null);
     },
 
-    ensureChildrenIsArray(child: ReactElement) {
+    ensureChildrenIsArray(child: ReactElement<any>) {
         if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
     },
 
@@ -524,7 +527,7 @@ export default definePlugin({
 
         let nextIndex = content.length;
 
-        const transformLinkChild = (child: ReactElement) => {
+        const transformLinkChild = (child: ReactElement<any>) => {
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
@@ -558,7 +561,7 @@ export default definePlugin({
             return child;
         };
 
-        const transformChild = (child: ReactElement) => {
+        const transformChild = (child: ReactElement<any>) => {
             if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
                 if (!Array.isArray(child.props.children)) {
@@ -574,7 +577,7 @@ export default definePlugin({
             return child;
         };
 
-        const modifyChild = (child: ReactElement) => {
+        const modifyChild = (child: ReactElement<any>) => {
             const newChild = transformChild(child);
 
             if (newChild?.type === "ul" || newChild?.type === "ol") {
@@ -601,7 +604,7 @@ export default definePlugin({
             return newChild;
         };
 
-        const modifyChildren = (children: Array<ReactElement>) => {
+        const modifyChildren = (children: Array<ReactElement<any>>) => {
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
@@ -853,7 +856,7 @@ export default definePlugin({
             });
         }
 
-        this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
+        this.preSend = addMessagePreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
 
             let hasBypass = false;
@@ -941,7 +944,7 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        this.preEdit = addPreEditListener(async (channelId, __, messageObj) => {
+        this.preEdit = addMessagePreEditListener(async (channelId, __, messageObj) => {
             if (!s.enableEmojiBypass) return;
 
             let hasBypass = false;
@@ -973,7 +976,7 @@ export default definePlugin({
     },
 
     stop() {
-        removePreSendListener(this.preSend);
-        removePreEditListener(this.preEdit);
+        removeMessagePreSendListener(this.preSend);
+        removeMessagePreEditListener(this.preEdit);
     }
 });
