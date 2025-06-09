@@ -9,6 +9,7 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
@@ -29,7 +30,7 @@ const settings = definePluginSettings({
             { label: "Username then nickname", value: "user-nick", default: true },
             { label: "Nickname then username", value: "nick-user" },
             { label: "Username only", value: "user" },
-        ],
+        ] as const,
     },
     displayNames: {
         type: OptionType.BOOLEAN,
@@ -48,6 +49,45 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
+
+interface FullNameProps {
+    nickname: string;
+    username: string;
+    displayName?: string;
+    useDisplayName?: boolean;
+    prefix?: string;
+    colorSuffix: boolean;
+}
+
+function FullName({ nickname, username, displayName, prefix = "@", useDisplayName, colorSuffix }: FullNameProps) {
+    function Suffix({ name }: { name: string; }) {
+        return <span className={classes("vc-smyn-suffix", colorSuffix && "vc-smyn-color")}>{name}</span>;
+    }
+    const showDisplayName = settings.use(["displayNames"]).displayNames;
+    useDisplayName ??= showDisplayName;
+    const name = useDisplayName ? displayName ?? username : username;
+    const nick = nickname;
+    let first: string,
+        second: string | undefined;
+    const { mode } = settings.use(["mode"]);
+    switch (mode) {
+        case "nick-user":
+            first = nick;
+            second = name;
+            break;
+        case "user-nick":
+            first = name;
+            second = nick;
+            break;
+        case "user":
+            first = name;
+            break;
+        default:
+            throw new Error(`Unknown mode: ${settings.store.mode}`);
+    }
+
+    return <>{prefix}{first} {second && <Suffix name={second} />}</>;
+}
 
 export default definePlugin({
     name: "ShowMeYourName",
@@ -77,46 +117,35 @@ export default definePlugin({
     renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
             const user = userOverride ?? message.author;
-            let { username } = user;
-            if (settings.store.displayNames)
-                username = (user as any).globalName || username;
-
+            const { username } = user;
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
-
+            const { inReplies } = settings.use(["inReplies"]);
             if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
                 return <>{prefix}{nick}</>;
 
-            if (settings.store.mode === "user-nick")
-                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
-
-            if (settings.store.mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-
-            return <>{prefix}{username}</>;
+            return (
+                <FullName
+                    nickname={nick}
+                    username={username}
+                    displayName={(user as any).globalName || username}
+                    prefix={prefix}
+                    colorSuffix
+                />
+            );
         } catch {
             return <>{author?.nick}</>;
         }
     }, { noop: true }),
 
-    renderMentionUsername(nick: string | null, displayName: string, { userId }: {
+    renderMentionUsername(nick: string, displayName: string, { userId }: {
         userId: string;
     }) {
         try {
-            if (!settings.store.displayNames)
-                displayName = UserStore.getUser(userId).username;
-            if (!nick)
-                return <>@{displayName}</>;
-            switch (settings.store.mode) {
-                case "user-nick":
-                    return <>@{displayName} ({nick})</>;
-                case "nick-user":
-                    return <>@{nick} ({displayName})</>;
-                case "user":
-                    return <>@{displayName}</>;
-                default:
-                    throw new Error("settings.store.mode is not one of nick-user, user-nick or user");
-            }
+            const user = UserStore.getUser(userId);
+            return <ErrorBoundary noop fallback={() => `@${displayName}`}>
+                <FullName username={user.username} nickname={nick} displayName={displayName} colorSuffix={false} />
+            </ErrorBoundary>;
         } catch (e) {
             console.error(e);
             return `@${displayName}`;
