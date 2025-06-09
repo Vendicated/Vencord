@@ -59,7 +59,7 @@ interface FullNameProps {
     colorSuffix: boolean;
 }
 
-function FullName({ nickname, username, displayName, prefix = "@", useDisplayName, colorSuffix }: FullNameProps) {
+export function FullName({ nickname, username, displayName, prefix = "@", useDisplayName, colorSuffix }: FullNameProps) {
     function Suffix({ name }: { name: string; }) {
         return <span className={classes("vc-smyn-suffix", colorSuffix && "vc-smyn-color")}>{name}</span>;
     }
