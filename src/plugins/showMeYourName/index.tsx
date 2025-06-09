@@ -17,6 +17,31 @@ const colorPattern = /^#(?:[\da-f]{3}){1,2}$|^#(?:[\da-f]{4}){1,2}$|(rgb|hsl)a?\
 const roleColorPattern = /^role((?:\+|-)\d{0,4})?$/iu;
 const symbolPattern = /^[\p{S}\p{P}]{1,3}$/iu;
 
+function adjustHex(color: string, percent: number): string {
+    let hex = color.replace("#", "");
+
+    if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+    }
+
+    const num = parseInt(hex, 16);
+    let r = (num >> 16) & 0xFF;
+    let g = (num >> 8) & 0xFF;
+    let b = num & 0xFF;
+
+    r = Math.max(0, Math.min(255, r + Math.round(r * (percent / 100))));
+    g = Math.max(0, Math.min(255, g + Math.round(g * (percent / 100))));
+    b = Math.max(0, Math.min(255, b + Math.round(b * (percent / 100))));
+
+    const newColor = ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
+
+    if (newColor === "ffffff" || newColor === "000000") {
+        return color;
+    }
+
+    return `#${newColor}`;
+}
+
 function validColor(color: string) {
     const trimmedColor = color.trim();
     if (!trimmedColor) return color.length > 0;
@@ -41,16 +66,64 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
     if (!savedColor.trim()) return { color: fallbackColor };
 
     if (savedColor.toLowerCase().includes("role")) {
-        const percentageText = roleColorPattern.exec(savedColor)?.[1] || "";
-        if (percentageText && isNaN(parseInt(percentageText))) return { color: fallbackColor };
+        const percentage = roleColorPattern.exec(savedColor)?.[1] || "";
+        if (percentage && isNaN(parseInt(percentage))) return { color: fallbackColor };
 
-        const percentage = percentageText ? 1 + (parseInt(percentageText) / 100) : 1;
-        const roleColor = (user as GuildMember)?.colorString || null;
-        if (!roleColor) return { color: fallbackColor };
+        console.log(`Percentage: ${percentage}`);
+        let primaryColor = (user as GuildMember)?.colorStrings?.primaryColor;
+        let secondaryColor = (user as GuildMember)?.colorStrings?.secondaryColor;
+        let tertiaryColor = (user as GuildMember)?.colorStrings?.tertiaryColor;
 
-        return { color: roleColor, filter: `brightness(${percentage})` };
+        if (primaryColor && percentage) {
+            primaryColor = adjustHex(primaryColor, parseInt(percentage));
+        }
+        if (secondaryColor && percentage) {
+            secondaryColor = adjustHex(secondaryColor, parseInt(percentage));
+        }
+        if (tertiaryColor && percentage) {
+            tertiaryColor = adjustHex(tertiaryColor, parseInt(percentage));
+        }
+
+        if (!primaryColor) return { color: fallbackColor };
+
+        if (settings.store.ignoreGradients || !secondaryColor) {
+            return {
+                "color": primaryColor,
+                "text-decoration-color": primaryColor,
+                "font-weight": "initial",
+                "-webkit-text-fill-color": primaryColor,
+                "isolation": "isolate",
+            };
+        } else {
+            const gradient = tertiaryColor
+                ? "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-1))"
+                : "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-3),var(--custom-gradient-color-1))";
+
+            return settings.store.animateGradients ? {
+                "color": primaryColor,
+                "text-decoration-color": primaryColor,
+            } : {
+                "color": primaryColor,
+                "text-decoration-color": primaryColor,
+                "font-weight": "initial",
+                "--custom-gradient-color-1": primaryColor,
+                "--custom-gradient-color-2": secondaryColor || primaryColor,
+                "--custom-gradient-color-3": tertiaryColor || primaryColor,
+                "background": gradient,
+                "background-clip": "text",
+                "-webkit-text-fill-color": "transparent",
+                "-webkit-background-clip": "text",
+                "isolation": "isolate",
+            };
+        }
     } else {
-        return { color: savedColor };
+        return {
+            "color": savedColor,
+            "text-decoration-color": savedColor,
+            "font-weight": "initial",
+            "-webkit-text-fill-color": savedColor,
+            "isolation": "isolate",
+        };
     }
 }
 
@@ -108,7 +181,7 @@ const settings = definePluginSettings({
     hideDefaultAtSign: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Hide the default '@' symbol before the name in mentions and replies. Only applied if either feature is enabled.",
+        description: "Hide the default \"@\" symbol before the name in mentions and replies. Only applied if either feature is enabled.",
     },
     respectStreamerMode: {
         type: OptionType.BOOLEAN,
@@ -120,6 +193,16 @@ const settings = definePluginSettings({
         default: true,
         description: "If any of the names are equivalent, remove them, leaving only the unique names.",
     },
+    ignoreGradients: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "For the second and third names, if the color is set to \"Role+-\" and the role has a gradient, flatten it to the primary color.",
+    },
+    animateGradients: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "For the second and third names, if the color is set to \"Role+-\" and the role has a gradient, animate it. This is disabled by \"Ignore Gradients\" and will cause the +- percentage to role colors to be ignored as well.",
+    },
     includedNames: {
         type: OptionType.STRING,
         description: "The order to display usernames, nicknames, and display names. Use the following placeholders: {nick}, {display}, {user}. You can have up to three prefixes and three suffixes per name.",
@@ -128,19 +211,19 @@ const settings = definePluginSettings({
     },
     nicknameColor: {
         type: OptionType.STRING,
-        description: "The color to use for the nickname. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        description: "The color to use for the nickname if it's not the first displayed. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
         default: "Role-25",
         isValid: validColor,
     },
     displayNameColor: {
         type: OptionType.STRING,
-        description: "The color to use for the display name. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        description: "The color to use for the display name if it's not the first displayed. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
         default: "Role-25",
         isValid: validColor,
     },
     usernameColor: {
         type: OptionType.STRING,
-        description: "The color to use for the username. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        description: "The color to use for the username if it's not the first displayed. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
         default: "Role-25",
         isValid: validColor,
     }
@@ -154,16 +237,7 @@ export default definePlugin({
         {
             find: '"BaseUsername"',
             replacement: {
-                /* TODO: remove \i+\i once change makes it to stable */
                 match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
-                replace: "$self.renderUsername(arguments[0])"
-            }
-        },
-        {
-            find: "missing user\"",
-            predicate: () => settings.store.mentions,
-            replacement: {
-                match: /"@"\.concat\(null!=(\i)\?\i:(\i)\)/,
                 replace: "$self.renderUsername(arguments[0])"
             }
         },
@@ -218,7 +292,10 @@ export default definePlugin({
             const resolvedUsernameColor = resolveColor(author, usernameColor.trim(), textMutedValue);
             const resolvedNicknameColor = resolveColor(author, nicknameColor.trim(), textMutedValue);
             const resolvedDisplayNameColor = resolveColor(author, displayNameColor.trim(), textMutedValue);
-            const affixColor = { color: getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d" };
+            const affixColor = {
+                color: `${getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d"}`,
+                ["-webkit-text-fill-color"]: `${getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d"}`,
+            };
 
             const values = {
                 "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "color": resolvedUsernameColor },
