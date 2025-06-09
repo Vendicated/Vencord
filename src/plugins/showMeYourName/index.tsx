@@ -109,9 +109,9 @@ export default definePlugin({
                 return <>@{displayName}</>;
             switch (settings.store.mode) {
                 case "user-nick":
-                    return <>@{displayName} {nick}</>;
+                    return <>@{displayName} ({nick})</>;
                 case "nick-user":
-                    return <>@{nick} {displayName}</>;
+                    return <>@{nick} ({displayName})</>;
                 case "user":
                     return <>@{displayName}</>;
                 default:
