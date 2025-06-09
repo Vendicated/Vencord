@@ -48,10 +48,11 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad],
     patches: [
         {
-            find: '?"@":""',
+            find: '"BaseUsername"',
             replacement: {
-                match: /(?<=onContextMenu:\i,children:).*?\)}/,
-                replace: "$self.renderUsername(arguments[0])}"
+                /* TODO: remove \i+\i once change makes it to stable */
+                match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
+                replace: "$self.renderUsername(arguments[0])"
             }
         },
     ],

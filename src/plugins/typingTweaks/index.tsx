@@ -23,6 +23,9 @@ import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
+import { PropsWithChildren } from "react";
+
+import managedStyle from "./style.css?managed";
 
 const settings = definePluginSettings({
     showAvatars: {
@@ -59,24 +62,19 @@ interface Props {
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
     return (
         <strong
+            className="vc-typing-user"
             role="button"
             onClick={() => {
                 openUserProfile(user.id);
             }}
             style={{
-                display: "grid",
-                gridAutoFlow: "column",
-                gap: "4px",
                 color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
-                cursor: "pointer"
             }}
         >
             {settings.store.showAvatars && (
-                <div style={{ marginTop: "4px" }}>
-                    <Avatar
-                        size="SIZE_16"
-                        src={user.getAvatarURL(guildId, 128)} />
-                </div>
+                <Avatar
+                    size="SIZE_16"
+                    src={user.getAvatarURL(guildId, 128)} />
             )}
             {GuildMemberStore.getNick(guildId!, user.id)
                 || (!guildId && RelationshipStore.getNickname(user.id))
@@ -93,6 +91,8 @@ export default definePlugin({
     authors: [Devs.zt],
     settings,
 
+    managedStyle,
+
     patches: [
         {
             find: "#{intl::THREE_USERS_TYPING}",
@@ -100,11 +100,11 @@ export default definePlugin({
                 {
                     // Style the indicator and add function call to modify the children before rendering
                     match: /(?<=children:\[(\i)\.length>0.{0,200}?"aria-atomic":!0,children:)\i(?<=guildId:(\i).+?)/,
-                    replace: "$self.mutateChildren($2,$1,$&),style:$self.TYPING_TEXT_STYLE"
+                    replace: "$self.renderTypingUsers({ users: $1, guildId: $2, children: $& })"
                 },
                 {
                     // Changes the indicator to keep the user object when creating the list of typing users
-                    match: /\.map\((\i)=>\i\.\i\.getName\(\i,\i\.id,\1\)\)/,
+                    match: /\.map\((\i)=>\i\.\i\.getName\(\i(?:\.guild_id)?,\i\.id,\1\)\)/,
                     replace: ""
                 },
                 {
@@ -117,15 +117,9 @@ export default definePlugin({
         }
     ],
 
-    TYPING_TEXT_STYLE: {
-        display: "grid",
-        gridAutoFlow: "column",
-        gridGap: "0.25em"
-    },
-
     buildSeveralUsers,
 
-    mutateChildren(guildId: any, users: User[], children: any) {
+    renderTypingUsers: ErrorBoundary.wrap(({ guildId, users, children }: PropsWithChildren<{ guildId: string, users: User[]; }>) => {
         try {
             if (!Array.isArray(children)) {
                 return children;
@@ -133,15 +127,17 @@ export default definePlugin({
 
             let element = 0;
 
-            return children.map(c =>
-                c.type === "strong" || (typeof c !== "string" && !React.isValidElement(c))
-                    ? <TypingUser guildId={guildId} user={users[element++]} />
-                    : c
-            );
+            return children.map(c => {
+                if (c.type !== "strong" && !(typeof c !== "string" && !React.isValidElement(c)))
+                    return c;
+
+                const user = users[element++];
+                return <TypingUser key={user.id} guildId={guildId} user={user} />;
+            });
         } catch (e) {
             console.error(e);
         }
 
         return children;
-    }
+    }, { noop: true })
 });

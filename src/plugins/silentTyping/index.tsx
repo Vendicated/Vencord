@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
@@ -76,7 +76,7 @@ const toggleLocation = (locationId: string, effectiveList: string[], defaultHidd
     }
 };
 
-const SilentTypingChatToggle: ChatBarButton = ({ channel, type }) => {
+const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
     const { enabled, chatIcon, defaultHidden, enabledLocations, disabledLocations } = settings.use(["enabled", "chatIcon", "defaultHidden", "enabledLocations", "disabledLocations"]);
     const validChat = ["normal", "sidebar"].some(x => type.analyticsName === x);
 
@@ -108,16 +108,16 @@ const SilentTypingChatToggle: ChatBarButton = ({ channel, type }) => {
                     toggleGlobal();
                 }
             }}>
-            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style={{ scale: "1.2" }}>
-                <path fill="currentColor" mask="url(#silent-typing-msg-mask)" d="M18.333 15.556H1.667a1.667 1.667 0 0 1 -1.667 -1.667v-10a1.667 1.667 0 0 1 1.667 -1.667h16.667a1.667 1.667 0 0 1 1.667 1.667v10a1.667 1.667 0 0 1 -1.667 1.667M4.444 6.25V4.861a0.417 0.417 0 0 0 -0.417 -0.417H2.639a0.417 0.417 0 0 0 -0.417 0.417V6.25a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m3.333 0V4.861a0.417 0.417 0 0 0 -0.417 -0.417H5.973a0.417 0.417 0 0 0 -0.417 0.417V6.25a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m3.333 0V4.861a0.417 0.417 0 0 0 -0.417 -0.417h-1.389a0.417 0.417 0 0 0 -0.417 0.417V6.25a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m3.333 0V4.861a0.417 0.417 0 0 0 -0.417 -0.417h-1.389a0.417 0.417 0 0 0 -0.417 0.417V6.25a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m3.333 0V4.861a0.417 0.417 0 0 0 -0.417 -0.417h-1.389a0.417 0.417 0 0 0 -0.417 0.417V6.25a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m-11.667 3.333V8.194a0.417 0.417 0 0 0 -0.417 -0.417H4.306a0.417 0.417 0 0 0 -0.417 0.417V9.583a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m3.333 0V8.194a0.417 0.417 0 0 0 -0.417 -0.417H7.639a0.417 0.417 0 0 0 -0.417 0.417V9.583a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m3.333 0V8.194a0.417 0.417 0 0 0 -0.417 -0.417h-1.389a0.417 0.417 0 0 0 -0.417 0.417V9.583a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m3.333 0V8.194a0.417 0.417 0 0 0 -0.417 -0.417h-1.389a0.417 0.417 0 0 0 -0.417 0.417V9.583a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m-11.667 3.333v-1.389a0.417 0.417 0 0 0 -0.417 -0.417H2.639a0.417 0.417 0 0 0 -0.417 0.417V12.917a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417m10 0v-1.389a0.417 0.417 0 0 0 -0.417 -0.417H5.973a0.417 0.417 0 0 0 -0.417 0.417V12.917a0.417 0.417 0 0 0 0.417 0.417h8.056a0.417 0.417 0 0 0 0.417 -0.417m3.333 0v-1.389a0.417 0.417 0 0 0 -0.417 -0.417h-1.389a0.417 0.417 0 0 0 -0.417 0.417V12.917a0.417 0.417 0 0 0 0.417 0.417h1.389a0.417 0.417 0 0 0 0.417 -0.417" transform="translate(2, 3)" />
-                {(enabledLocally) && (
-                    <>
-                        <mask id="silent-typing-msg-mask">
-                            <path fill="#fff" d="M0 0h24v24H0Z"></path>
-                            <path stroke="#000" strokeWidth="5.99068" d="M0 24 24 0" transform="translate(-2, -3)"></path>
-                        </mask>
-                        <path fill="var(--status-danger)" d="m21.178 1.70703 1.414 1.414L4.12103 21.593l-1.414-1.415L21.178 1.70703Z" />
-                    </>
+            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style={{ scale: "1.2" }}>
+                <mask id="silent-typing-msg-mask">
+                    <path fill="#fff" d="M0 0h24v24H0Z"></path>
+                    <path stroke="#000" strokeWidth="5.99068" d="M0 24 24 0" transform="translate(-2, -3)"></path>
+                </mask>
+
+                <path fill="currentColor" mask="url(#silent-typing-msg-mask)" d="M18.333..." transform="translate(2, 3)" />
+
+                {enabledLocally && (
+                    <path fill="var(--status-danger)" d="m21.178 1.70703 1.414 1.414L4.12103 21.593l-1.414-1.415L21.178 1.70703Z" />
                 )}
             </svg>
         </ChatBarButton>
@@ -156,7 +156,7 @@ const checkEnabled = (channel: string | Channel) => {
     }
 };
 
-const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
+const chatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     const { chatIcon, chatContextMenu, enabled, defaultHidden } = settings.use(["chatIcon", "chatContextMenu", "enabled", "defaultHidden"]);
     if (!chatContextMenu) return;
 
@@ -184,11 +184,9 @@ export default definePlugin({
     description: "Hide your typing indicator from chat.",
     dependencies: ["ChatInputButtonAPI"],
     settings,
-
     contextMenus: {
-        "textarea-context": ChatBarContextCheckbox
+        "textarea-context": chatBarContextCheckbox
     },
-
     patches: [
         {
             find: '.dispatch({type:"TYPING_START_LOCAL"',
@@ -239,8 +237,10 @@ export default definePlugin({
         execute: async (args, ctx) => {
             let updated = false;
             const location = findOption(args, "toggle");
+
             if (typeof location === "string") {
                 updated = true;
+
                 if (location === "global") {
                     toggleGlobal();
                 } else {
@@ -250,18 +250,21 @@ export default definePlugin({
             }
 
             const updateChatIcon = findOption(args, "chat-icon");
+
             if (typeof updateChatIcon === "boolean") {
                 updated = true;
                 settings.store.chatIcon = !!updateChatIcon;
             }
 
             const updateChatContextMenu = findOption(args, "chat-context-menu");
+
             if (typeof updateChatContextMenu === "boolean") {
                 updated = true;
                 settings.store.chatContextMenu = !!updateChatContextMenu;
             }
 
             const updateDefaultHidden = findOption(args, "default-hidden");
+
             if (typeof updateDefaultHidden === "boolean") {
                 updated = true;
                 settings.store.defaultHidden = !!updateDefaultHidden;
@@ -278,6 +281,5 @@ export default definePlugin({
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
-    start: () => addChatBarButton("SilentTyping", SilentTypingChatToggle),
-    stop: () => removeChatBarButton("SilentTyping"),
+    renderChatBarButton: silentTypingChatToggle,
 });
