@@ -125,7 +125,7 @@ function VencordPopoutButton() {
 function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
     children.splice(
         children.length - 1, 0,
-        <ErrorBoundary noop={true}>
+        <ErrorBoundary noop>
             <VencordPopoutButton />
         </ErrorBoundary>
     );
