@@ -20,7 +20,6 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
@@ -373,7 +372,7 @@ export default definePlugin({
     settings,
 
     start() {
-        addMessageAccessory("messageLinkEmbed", props => {
+        addMessageAccessory("MessageLinkEmbeds", props => {
             if (!messageLinkRegex.test(props.message.content))
                 return null;
 
@@ -381,16 +380,14 @@ export default definePlugin({
             messageLinkRegex.lastIndex = 0;
 
             return (
-                <ErrorBoundary>
-                    <MessageEmbedAccessory
-                        message={props.message}
-                    />
-                </ErrorBoundary>
+                <MessageEmbedAccessory
+                    message={props.message}
+                />
             );
         }, 4 /* just above rich embeds */);
     },
 
     stop() {
-        removeMessageAccessory("messageLinkEmbed");
+        removeMessageAccessory("MessageLinkEmbeds");
     }
 });
