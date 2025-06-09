@@ -67,7 +67,7 @@ export default definePlugin({
 
     renderUsername: ErrorBoundary.wrap(({ props, user, username }: { props: any, user: User, username: string; }) => {
         const [isHovering, setIsHovering] = useState(false);
-        const usr = user || UserStore.getUser(props.id);
+        const usr = user || UserStore.getUser(props.userId);
 
         const nameContent = Vencord.Settings.plugins.ShowMeYourName.enabled
             ? renderedUsername(props)
