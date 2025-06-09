@@ -5,7 +5,6 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { RelationshipStore } from "@webpack/common";
 
@@ -34,12 +33,6 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: false,
     },
-    hideFriendsList: {
-        description: "Hide Active Now entries for ignored users in the friends list",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true,
-    },
     ignoredUsers: {
         description: "List of user IDs to hide from Active Now (one per line)",
         type: OptionType.STRING,
@@ -51,7 +44,7 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "",
         restartNeeded: false,
-    }
+    },
 });
 
 
@@ -59,7 +52,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Active Now Hide Ignored",
     description: "Hides Active Now entries for ignored users.",
-    authors: [Devs.Kyrillk],
+    authors: [{ name: "kyrillk", id: 0n }],
 
     patches: [
         {
@@ -74,7 +67,7 @@ export default definePlugin({
             find: "NOW_PLAYING_CARD_HOVERED,",
             replacement: {
                 match: /(\{party:)(\i)(.*?\}=\i)(.*=\i,\i=(\i)(.*),\i=\i\(\)\(\i,\i\);)/,
-                replace: "$1unfilter$2$3,$2=$self.partyFilterIgnoredUsers(unfilter$2)$4if($5 == 0 || $self.filterIgnoredGuilds($2)){return null;}",
+                replace: "$1unfilter_$2$3,$2=$self.partyFilterIgnoredUsers(unfilter_$2)$4if($5 == 0 || $self.filterIgnoredGuilds($2)){return null;} console.log('Active Now Hide Ignored: Party Filtered', $2);",
             },
             predicate: () => settings.store.hideActiveNow === ActiveNowHideIgnoredSettings.HideUser
         },
@@ -100,10 +93,10 @@ export default definePlugin({
             partiedMembers: filteredPartyMembers,
 
             currentActivities: party.currentActivities
-                .map(activity => this.activityFilterIgnoredUsers(activity, filteredPartyMembers))
+                .map(activity => this.activityFilterIgnoredUsers(activity))
                 .filter(activity => activity !== null && activity !== undefined),
             priorityMembers: party.priorityMembers
-                .map(priorityMember => this.priorityMembersFilterIgnoredUsers(priorityMember, filteredPartyMembers))
+                .map(priorityMember => this.priorityMembersFilterIgnoredUsers(party.priorityMembers, priorityMember, filteredPartyMembers))
                 .filter(priorityMember => priorityMember !== null && priorityMember !== undefined),
             voiceChannels: party.voiceChannels
                 .map(voiceChannel => this.voiceChannelFilterIgnoredUsers(voiceChannel))
@@ -112,18 +105,32 @@ export default definePlugin({
         return filteredParty;
     },
 
-
-    // still needs fixing
-    activityFilterIgnoredUsers(activity, partiedMembers) {
-        if (this.isIgnoredUser(activity.activityUser) && partiedMembers.length > 0) {
-            return null;
+    // needed?
+    activityFilterIgnoredUsers(activity) {
+        var filteredActivityUser = activity.activityUser;
+        var filteredPlayingMembers = activity.playingMembers.filter(user => !this.isIgnoredUser(user));
+        if (this.isIgnoredUser(activity.activityUser)) {
+            if (filteredPlayingMembers.length === 0) {
+                return null;
+            } else if (this.isIgnoredUser(activity.activityUser)) {
+                filteredActivityUser = filteredPlayingMembers[0];
+            }
         }
-        console.log("activityFilterIgnoredUsers", activity, partiedMembers);
-        const filteredActivity = {
+
+        // change to Const when fixed
+        var filteredActivity = {
             ...activity,
+            activityUser: filteredActivityUser,
+            playingMembers: filteredPlayingMembers,
         };
-        return activity;
+
+        // console.log("activityFilterIgnoredUsers", activity, filteredActivity);
+        if (settings.store.Debug) {
+            filteredActivity = activity;
+        }
+        return filteredActivity;
     },
+
 
     priorityMembersFilterIgnoredUsers(priorityMembers, priorityMember, partiedMembers) {
         var filteredUser = priorityMember.user;
@@ -172,9 +179,6 @@ export default definePlugin({
             return false;
         }
         var voiceChannels = input.voiceChannels || input;
-
-        console.log("filterIgnoredGuilds", voiceChannels);
-        console.log("ignoredGuilds", voiceChannels.some(voiceChannel => this.isIgnoredGuild(voiceChannel.guild.id)));
         return voiceChannels.some(voiceChannel => this.isIgnoredGuild(voiceChannel.guild.id));
     },
 
