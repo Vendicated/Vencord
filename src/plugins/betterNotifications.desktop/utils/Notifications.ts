@@ -109,8 +109,10 @@ export function SendNativeNotification(avatarUrl: string,
     UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
         const avatar = user.getAvatarURL(basicNotification.guild_id, 256, false).replace(".webp", ".png");
 
-        if (settings.store.notificationPfpCircle) cropImageToCircle(avatar, 256).then(data => { notify(data); });
-        else notify(avatar);
+        Native.checkPlatform("linux").then(isLinux => {
+            if (settings.store.notificationPfpCircle && isLinux) cropImageToCircle(avatar, 256).then(data => { notify(data); });
+            else notify(avatar);
+        });
     });
 }
 

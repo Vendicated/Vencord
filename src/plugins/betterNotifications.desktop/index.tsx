@@ -249,7 +249,7 @@ export default definePlugin({
     ],
 
     start() {
-        Native.checkIsMac().then(isMac => {
+        Native.checkPlatform("darwin").then(isMac => {
             if (isMac && settings.store.notificationPatchType === "custom") {
                 logger.warn("User is on macOS but has notificationPatchType as custom");
                 setTimeout(() => {
