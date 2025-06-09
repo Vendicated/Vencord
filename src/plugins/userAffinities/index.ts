@@ -55,7 +55,7 @@ interface UserPosition {
 }
 
 export default definePlugin({
-    name: "userAffinities",
+    name: "UserAffinities",
     description: "Adds a /affinities command to visualize user affinities as a word cloud",
     authors: [Devs.fafa],
     commands: [
