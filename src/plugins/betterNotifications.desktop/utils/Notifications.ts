@@ -108,7 +108,7 @@ export function SendNativeNotification(avatarUrl: string,
     let contentType: string;
     let imageType: "png" | "jpeg";
 
-    for (const attachment of attachments) {¨
+    for (const attachment of attachments) {
         contentType = attachment.content_type;
 
         if (contentType !== "image/jpeg" && contentType !== "image/png") {
