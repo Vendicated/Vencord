@@ -44,6 +44,7 @@ function createMarkupForLinux(notificationBody: string, basicNotification: Basic
     let linuxString: string = "";
 
     for (const item of res) {
+        console.debug(item);
         switch (item.type) {
             case "text":
                 linuxString += safeStringForXML(item.content);
@@ -107,7 +108,7 @@ export function SendNativeNotification(avatarUrl: string,
     let contentType: string;
     let imageType: "png" | "jpeg";
 
-    for (const attachment of attachments) {
+    for (const attachment of attachments) {¨
         contentType = attachment.content_type;
 
         if (contentType !== "image/jpeg" && contentType !== "image/png") {

@@ -261,6 +261,10 @@ export function notify(event: IpcMainInvokeEvent,
 
         if (isLinux) {
             const linuxFormattedString: string | undefined = extraOptions?.linuxFormattedText;
+
+            console.log("Recieved the following linux formatted string:");
+            console.log(linuxFormattedString);
+
             notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, attachment);
             return;
         }
