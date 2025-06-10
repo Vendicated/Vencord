@@ -29,13 +29,13 @@ function createMarkupForLinux(notificationBody: string, basicNotification: Basic
     // @ts-ignore
     const parser: ParserType = Parser;
 
-    const res = parser.parseToAST(notificationBody, false, {
+    const res = parser.parseToAST(notificationBody, true, {
         channelId: basicNotification.channel_id,
         messageId: basicNotification.message_id,
         allowLinks: true,
         allowDevLinks: true,
-        allowHeading: true,
-        allowList: true,
+        allowHeading: false,
+        allowList: false,
         allowEmojiLinks: true,
         previewLinkTarget: true,
         viewingChannelId: basicNotification.channel_id,
@@ -65,7 +65,10 @@ function createMarkupForLinux(notificationBody: string, basicNotification: Basic
                 break;
 
             case "link":
-                linuxString += safeStringForXML(item.target);
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += `<a href="${item.target}">${safeStringForXML(text.content)} </a>`;
+                }
                 break;
 
             case "subtext":
@@ -80,6 +83,9 @@ function createMarkupForLinux(notificationBody: string, basicNotification: Basic
                 break;
         }
     }
+
+    logger.debug("Generated the following linux notification string");
+    logger.debug(linuxString);
     return linuxString;
 }
 
