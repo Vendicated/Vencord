@@ -31,6 +31,7 @@ const defines = stringifyValues({
     IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
+    IS_USERSCRIPT: false,
     VERSION,
     BUILD_TIMESTAMP
 });
