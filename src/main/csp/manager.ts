@@ -20,7 +20,7 @@ export function registerCspIpcHandlers() {
     ipcMain.handle(IpcEvents.CSP_REQUEST_ADD_OVERRIDE_DUE_TO_ERROR, async (_, url: string, directives: string[]) =>
         addCspRule(url, directives)
     );
-    ipcMain.on(IpcEvents.CSP_IS_DOMAIN_ALLOWED, (_, url: string, directives: string[]) => {
+    ipcMain.handle(IpcEvents.CSP_IS_DOMAIN_ALLOWED, (_, url: string, directives: string[]) => {
         try {
             const domain = new URL(url).hostname;
             const ruleForDomain = CspPolicies[domain] ?? NativeSettings.store.customCspRules[domain];
