@@ -11,13 +11,6 @@ import { RelationshipStore } from "@webpack/common";
 
 import { contextMenus, isGuildBlacklisted, isUserBlacklisted, ResetButton } from "./activeNowIgnoreList";
 
-enum ActiveNowHideIgnoredSettings {
-    Off,
-    HideServer,
-    HideUser,
-}
-
-
 // const logger = new Logger("ActiveNowHideIgnored");
 export const settings = definePluginSettings({
     hideActiveNow: {
