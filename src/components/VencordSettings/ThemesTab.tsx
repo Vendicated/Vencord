@@ -369,7 +369,7 @@ export function CspErrorCard() {
 
     if (!errors.length) return null;
 
-    const hasImgurHtmlDomain = errors.some(e => e.includes("https://imgur.com"));
+    const hasImgurHtmlDomain = errors.some(e => e.startsWith("https://imgur.com/"));
 
     return (
         <ErrorCard className="vc-settings-card">
