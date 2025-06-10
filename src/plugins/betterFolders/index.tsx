@@ -364,7 +364,7 @@ export default definePlugin({
             }
 
             try {
-                return filterTreeWithTargetNode(child, child => child?.props?.role === "tree");
+                return filterTreeWithTargetNode(child, child => child?.props?.renderTreeNode != null);
             } catch (e) {
                 console.error(e);
                 return true;
