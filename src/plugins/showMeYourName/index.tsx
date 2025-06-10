@@ -62,69 +62,108 @@ function validColor(color: string) {
     return isValid;
 }
 
-function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string, mention = false) {
-    if (!savedColor.trim()) return { color: fallbackColor };
+function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string) {
+    const fallbackReturn = {
+        normal: {
+            original: {
+                color: fallbackColor,
+                "text-decoration-color": fallbackColor,
+            },
+            adjusted: {
+                color: fallbackColor,
+                "text-decoration-color": fallbackColor,
+            }
+        },
+        gradient: null
+    };
+
+    if (!savedColor.trim()) { return fallbackReturn; }
+
+    let gradient: any = null;
+    let primaryColor: any = savedColor;
+    let secondaryColor: any = savedColor;
+    let tertiaryColor: any = savedColor;
+    let primaryAdjusted: any = savedColor;
+    let secondaryAdjusted: any = savedColor;
+    let tertiaryAdjusted: any = savedColor;
 
     if (savedColor.toLowerCase().includes("role")) {
         const percentage = roleColorPattern.exec(savedColor)?.[1] || "";
         if (percentage && isNaN(parseInt(percentage))) return { color: fallbackColor };
 
         const colorStrings = (user as any)?.colorStrings || {};
-        let primaryColor = colorStrings.primaryColor || null;
-        let secondaryColor = colorStrings.secondaryColor || null;
-        let tertiaryColor = colorStrings.tertiaryColor || null;
+        primaryColor = colorStrings.primaryColor || null;
+        secondaryColor = colorStrings.secondaryColor || null;
+        tertiaryColor = colorStrings.tertiaryColor || null;
+        primaryAdjusted = primaryColor;
+        secondaryAdjusted = secondaryColor;
+        tertiaryAdjusted = tertiaryColor;
 
-        if (!primaryColor) return { color: fallbackColor };
+        if (!primaryColor) { return fallbackReturn; };
 
         if (primaryColor && percentage) {
-            primaryColor = adjustHex(primaryColor, parseInt(percentage));
-        }
-        if (secondaryColor && percentage) {
-            secondaryColor = adjustHex(secondaryColor, parseInt(percentage));
-        }
-        if (tertiaryColor && percentage) {
-            tertiaryColor = adjustHex(tertiaryColor, parseInt(percentage));
+            primaryAdjusted = adjustHex(primaryColor, parseInt(percentage));
         }
 
-        if ((!mention && settings.store.ignoreGradients) || !secondaryColor) {
-            return {
-                "color": primaryColor,
-                "text-decoration-color": primaryColor,
-                "font-weight": "initial",
-                "-webkit-text-fill-color": primaryColor,
-                "isolation": "isolate",
-            };
-        } else {
-            const gradient = tertiaryColor
+        if (secondaryColor && percentage) {
+            secondaryAdjusted = adjustHex(secondaryColor, parseInt(percentage));
+        }
+
+        if (tertiaryColor && percentage) {
+            tertiaryAdjusted = adjustHex(tertiaryColor, parseInt(percentage));
+        }
+
+        gradient = !secondaryColor
+            ? null
+            : tertiaryColor
                 ? "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-1))"
                 : "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-3),var(--custom-gradient-color-1))";
-
-            return settings.store.animateGradients && !mention ? {
-                "color": primaryColor,
-                "text-decoration-color": primaryColor,
-            } : {
-                "color": primaryColor,
-                "text-decoration-color": primaryColor,
-                "font-weight": "initial",
-                "--custom-gradient-color-1": primaryColor,
-                "--custom-gradient-color-2": secondaryColor || primaryColor,
-                "--custom-gradient-color-3": tertiaryColor || primaryColor,
-                "background": gradient,
-                "background-clip": "text",
-                "-webkit-text-fill-color": "transparent",
-                "-webkit-background-clip": "text",
-                "isolation": "isolate",
-            };
-        }
-    } else {
-        return {
-            "color": savedColor,
-            "text-decoration-color": savedColor,
-            "font-weight": "initial",
-            "-webkit-text-fill-color": savedColor,
-            "isolation": "isolate",
-        };
     }
+
+    const baseNormalStyle = {
+        "font-weight": "initial",
+        "isolation": "isolate",
+    };
+
+    const baseGradientStaticStyle = {
+        "font-weight": "initial",
+        "background": gradient,
+        "background-clip": "text",
+        "-webkit-text-fill-color": "transparent",
+        "-webkit-background-clip": "text",
+        "isolation": "isolate",
+    };
+
+    return {
+        normal: {
+            original: { ...baseNormalStyle, "color": primaryColor, "text-decoration-color": primaryColor, "-webkit-text-fill-color": primaryColor },
+            adjusted: { ...baseNormalStyle, "color": primaryAdjusted, "text-decoration-color": primaryAdjusted, "-webkit-text-fill-color": primaryAdjusted },
+        },
+        gradient: gradient ? {
+            animated: {
+                original: { "color": primaryColor, "text-decoration-color": primaryColor },
+                adjusted: { "color": primaryAdjusted, "text-decoration-color": primaryAdjusted },
+            },
+            static: {
+                original: {
+                    ...baseGradientStaticStyle,
+                    "color": primaryColor,
+                    "text-decoration-color": primaryColor,
+                    "--custom-gradient-color-1": primaryColor,
+                    "--custom-gradient-color-2": secondaryColor || primaryColor,
+                    "--custom-gradient-color-3": tertiaryColor || primaryColor
+                },
+                adjusted: {
+                    ...baseGradientStaticStyle,
+                    "color": primaryAdjusted,
+                    "text-decoration-color": primaryAdjusted,
+                    "--custom-gradient-color-1": primaryAdjusted,
+                    "--custom-gradient-color-2": secondaryAdjusted || primaryAdjusted,
+                    "--custom-gradient-color-3": tertiaryAdjusted || primaryAdjusted
+                },
+            }
+        } : null,
+    };
 }
 
 function validTemplate(value: string) {
@@ -234,20 +273,22 @@ export function renderedUsername(props: any) {
 
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
     const renderType = props.className === "mention" ? "mention" : "message";
+    const isMention = renderType === "mention";
+    const isMessage = renderType === "message";
     let author: any = null;
     let isRepliedMessage = false;
     let mentionSymbol = "";
     let topRoleStyle: any = null;
 
-    if (renderType === "mention") {
+    if (isMention) {
         const channel = ChannelStore.getChannel(props.channelId) || {};
         const usr = UserStore.getUser(props.userId) || {};
         const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
         author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
         isRepliedMessage = false;
         mentionSymbol = hideDefaultAtSign ? "" : "@";
-        topRoleStyle = resolveColor(author, "Role", textMutedValue, true);
-    } else if (renderType === "message") {
+        topRoleStyle = resolveColor(author, "Role", textMutedValue);
+    } else if (isMessage) {
         // props.message.author only has a globalName attribute.
         // props.author only has a nick attribute, but it is overwritten by the globalName if no nickname is set.
         // getUser only has a globalName attribute.
@@ -308,11 +349,19 @@ export function renderedUsername(props: any) {
         return (
             <span>
                 {mentionSymbol && <span>{mentionSymbol}</span>}
+                {/* If it's a message render, let Discord handle the default coloring.
+                    If it's a mention, patch in the top role color.*/}
                 {(
                     <span>
-                        <span
-                            {...(topRoleStyle ? { style: topRoleStyle } : {})}
-                        >
+                        <span style={
+                            topRoleStyle
+                                ? !topRoleStyle.gradient
+                                    ? topRoleStyle.normal.original
+                                    : isMention
+                                        ? topRoleStyle.gradient.static.original
+                                        : topRoleStyle.gradient.animated.original
+                                : undefined
+                        }>
                             {values[first].value}
                         </span>
                     </span>
@@ -322,7 +371,15 @@ export function renderedUsername(props: any) {
                         <span>&nbsp;</span>
                         <span style={affixColor}>
                             {values[second].prefix}</span>
-                        <span style={values[second].style}>
+                        <span style={
+                            settings.store.ignoreGradients
+                                ? values[second].style.normal.adjusted
+                                : settings.store.animateGradients && values[second].style.gradient
+                                    ? values[second].style.gradient.animated.original
+                                    : values[second].style.gradient
+                                        ? values[second].style.gradient.static.original
+                                        : values[second].style.normal.adjusted
+                        }>
                             {values[second].value}</span>
                         <span style={affixColor}>
                             {values[second].suffix}</span>
@@ -333,7 +390,15 @@ export function renderedUsername(props: any) {
                         <span>&nbsp;</span>
                         <span style={affixColor}>
                             {values[third].prefix}</span>
-                        <span style={values[third].style}>
+                        <span style={
+                            settings.store.ignoreGradients
+                                ? values[third].style.normal.adjusted
+                                : settings.store.animateGradients && values[third].style.gradient
+                                    ? values[third].style.gradient.animated.original
+                                    : values[third].style.gradient
+                                        ? values[third].style.gradient.static.original
+                                        : values[third].style.normal.adjusted
+                        }>
                             {values[third].value}</span>
                         <span style={affixColor}>
                             {values[third].suffix}</span>
