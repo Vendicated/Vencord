@@ -304,119 +304,117 @@ export function renderedUsername(props: any) {
         mentionSymbol = hideDefaultAtSign ? "" : props.withMentionPrefix ? "@" : "";
     }
 
-    if (!author) {
+    const username = StreamerModeStore.enabled && respectStreamerMode ? author?.username[0] + "..." : author?.username || "";
+    const display = StreamerModeStore.enabled && respectStreamerMode && author?.globalName?.toLowerCase() === author?.username.toLowerCase() ? author?.globalName[0] + "..." : author?.globalName || "";
+    const nick = StreamerModeStore.enabled && respectStreamerMode && author?.nick?.toLowerCase() === author?.username.toLowerCase() ? author?.nick[0] + "..." : author?.nick || "";
+
+    const affixes = parseAffixes(includedNames);
+    const resolvedUsernameColor = author ? resolveColor(author, usernameColor.trim(), textMutedValue) : null;
+    const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), textMutedValue) : null;
+    const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), textMutedValue) : null;
+    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
+
+    const values = {
+        "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "style": resolvedUsernameColor },
+        "display": { "value": display, "prefix": affixes.display.prefix, "suffix": affixes.display.suffix, "style": resolvedDisplayNameColor },
+        "nick": { "value": nick, "prefix": affixes.nick.prefix, "suffix": affixes.nick.suffix, "style": resolvedNicknameColor }
+    };
+
+    let { order } = affixes;
+    order.includes("nick") && !values.nick.value && !order.includes("display") && values.display.value ? order[order.indexOf("nick")] = "display" : null;
+    order.includes("display") && !values.display.value && !order.includes("user") && values.user.value ? order[order.indexOf("display")] = "user" : null;
+    order = order.filter((name: string) => values[name].value);
+
+    const first = order.shift() || "user";
+    let second = order.shift() || null;
+    let third = order.shift() || null;
+
+    const firstValue = wrapEmojis(values[first].value);
+    const secondValue = wrapEmojis(second ? values[second].value : "");
+    const thirdValue = wrapEmojis(third ? values[third].value : "");
+
+    if (!author || !username) {
         return <>{mentionSymbol}Unknown</>;
+    } else if (isRepliedMessage && !replies) {
+        return <>{mentionSymbol}{nick || display || username}</>;
     }
 
-    const username = StreamerModeStore.enabled && respectStreamerMode ? author.username[0] + "..." : author.username;
-    const display = StreamerModeStore.enabled && respectStreamerMode && author.globalName?.toLowerCase() === author.username.toLowerCase() ? author.globalName[0] + "..." : author.globalName || "";
-    const nick = StreamerModeStore.enabled && respectStreamerMode && author.nick?.toLowerCase() === author.username.toLowerCase() ? author.nick[0] + "..." : author.nick || "";
-
-    try {
-        if (isRepliedMessage && !replies) {
-            return <>{mentionSymbol}{nick || display || username}</>;
-        }
-
-        const affixes = parseAffixes(includedNames);
-        const resolvedUsernameColor = resolveColor(author, usernameColor.trim(), textMutedValue);
-        const resolvedNicknameColor = resolveColor(author, nicknameColor.trim(), textMutedValue);
-        const resolvedDisplayNameColor = resolveColor(author, displayNameColor.trim(), textMutedValue);
-        const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
-
-        const values = {
-            "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "style": resolvedUsernameColor },
-            "display": { "value": display, "prefix": affixes.display.prefix, "suffix": affixes.display.suffix, "style": resolvedDisplayNameColor },
-            "nick": { "value": nick, "prefix": affixes.nick.prefix, "suffix": affixes.nick.suffix, "style": resolvedNicknameColor }
-        };
-
-        let { order } = affixes;
-        order.includes("nick") && !values.nick.value && !order.includes("display") && values.display.value ? order[order.indexOf("nick")] = "display" : null;
-        order.includes("display") && !values.display.value && !order.includes("user") && values.user.value ? order[order.indexOf("display")] = "user" : null;
-        order = order.filter((name: string) => values[name].value);
-
-        const first = order.shift() || "user";
-        let second = order.shift() || null;
-        let third = order.shift() || null;
-
-        if (removeDuplicates) {
-            // If third is the same as second, remove it, unless third is the username, then prioritize it.
-            second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third === "user" ? second = null : third = null : null;
-            // If second is the same as first, remove it.
-            second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
-            // If third is the same as first, remove it.
-            third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
-        }
-
-        return (
-            <span>
-                {mentionSymbol && <span>{mentionSymbol}</span>}
-                {/* If it's a message render, let Discord handle the default coloring.
-                    If it's a mention, patch in the top role color.*/}
-                {(
-                    <span>
-                        <span style={
-                            !topRoleStyle
-                                ? undefined
-                                : !topRoleStyle.gradient
-                                    ? topRoleStyle.normal.original
-                                    : isMention
-                                        ? topRoleStyle.gradient.static.original
-                                        : topRoleStyle.gradient.animated.original
-                        }>
-                            {wrapEmojis(values[first].value)}
-                        </span>
-                    </span>
-                )}
-                {second && (
-                    <span>
-                        <span>&nbsp;</span>
-                        <span style={affixColor}>
-                            {values[second].prefix}</span>
-                        <span style={
-                            settings.store.ignoreGradients
-                                ? values[second].style.normal.adjusted
-                                : settings.store.animateGradients && values[second].style.gradient
-                                    ? values[second].style.gradient.animated.original
-                                    : values[second].style.gradient
-                                        ? values[second].style.gradient.static.adjusted
-                                        : values[second].style.normal.adjusted
-                        }>
-                            {wrapEmojis(values[second].value)}</span>
-                        <span style={affixColor}>
-                            {values[second].suffix}</span>
-                    </span>
-                )}
-                {third && (
-                    <span>
-                        <span>&nbsp;</span>
-                        <span style={affixColor}>
-                            {values[third].prefix}</span>
-                        <span style={
-                            settings.store.ignoreGradients
-                                ? values[third].style.normal.adjusted
-                                : settings.store.animateGradients && values[third].style.gradient
-                                    ? values[third].style.gradient.animated.original
-                                    : values[third].style.gradient
-                                        ? values[third].style.gradient.static.adjusted
-                                        : values[third].style.normal.adjusted
-                        }>
-                            {wrapEmojis(values[third].value)}</span>
-                        <span style={affixColor}>
-                            {values[third].suffix}</span>
-                    </span>
-                )}
-            </span>
-        );
-    } catch (e) {
-        console.error(e);
-        return <>{mentionSymbol}{StreamerModeStore.enabled && respectStreamerMode ? ((nick || display || username)[0] + "...") : (nick || display || username)}</>;
+    if (removeDuplicates) {
+        // If third is the same as second, remove it, unless third is the username, then prioritize it.
+        second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third === "user" ? second = null : third = null : null;
+        // If second is the same as first, remove it.
+        second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
+        // If third is the same as first, remove it.
+        third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
     }
+
+    return (
+        <span>
+            {mentionSymbol && <span>{mentionSymbol}</span>}
+            {/* If it's a message render, let Discord handle the default coloring.
+                If it's a mention, patch in the top role color.*/}
+            {(
+                <span>
+                    <span style={
+                        !topRoleStyle
+                            ? undefined
+                            : !topRoleStyle.gradient
+                                ? topRoleStyle.normal.original
+                                : isMention
+                                    ? topRoleStyle.gradient.static.original
+                                    : topRoleStyle.gradient.animated.original
+                    }>
+                        {firstValue}
+                    </span>
+                </span>
+            )}
+            {second && (
+                <span>
+                    <span>&nbsp;</span>
+                    <span style={affixColor}>
+                        {values[second].prefix}</span>
+                    <span style={
+                        settings.store.ignoreGradients
+                            ? values[second].style.normal.adjusted
+                            : settings.store.animateGradients && values[second].style.gradient
+                                ? values[second].style.gradient.animated.original
+                                : values[second].style.gradient
+                                    ? values[second].style.gradient.static.adjusted
+                                    : values[second].style.normal.adjusted
+                    }>
+                        {secondValue}</span>
+                    <span style={affixColor}>
+                        {values[second].suffix}</span>
+                </span>
+            )}
+            {third && (
+                <span>
+                    <span>&nbsp;</span>
+                    <span style={affixColor}>
+                        {values[third].prefix}</span>
+                    <span style={
+                        settings.store.ignoreGradients
+                            ? values[third].style.normal.adjusted
+                            : settings.store.animateGradients && values[third].style.gradient
+                                ? values[third].style.gradient.animated.original
+                                : values[third].style.gradient
+                                    ? values[third].style.gradient.static.adjusted
+                                    : values[third].style.normal.adjusted
+                    }>
+                        {thirdValue}</span>
+                    <span style={affixColor}>
+                        {values[third].suffix}</span>
+                </span>
+            )}
+        </span>
+    );
 }
 
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display any permutation of nicknames, display names, and usernames in chat.",
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.Etorix, Devs.sadan],
+
     patches: [
         {
             find: '"BaseUsername"',
