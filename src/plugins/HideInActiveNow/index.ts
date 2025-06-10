@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { RelationshipStore } from "@webpack/common";
 
@@ -54,7 +55,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "Active Now Hide Ignored",
     description: "Hides Active Now entries for ignored users.",
-    authors: [{ name: "kyrillk", id: 0n }],
+    authors: [Devs.Kyrillk],
     contextMenus,
     settings,
     patches: [
