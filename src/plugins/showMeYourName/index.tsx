@@ -8,10 +8,11 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, UserStore } from "@webpack/common";
 import { GuildMember, User } from "discord-types/general";
 
+const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
 const StreamerModeStore = findStoreLazy("StreamerModeStore");
 const colorPattern = /^#(?:[\da-f]{3}){1,2}$|^#(?:[\da-f]{4}){1,2}$|(rgb|hsl)a?\((\s*-?\d+%?\s*,){2}(\s*-?\d+%?\s*)\)|(rgb|hsl)a?\((\s*-?\d+%?\s*,){3}\s*(0|(0?\.\d+)|1)\)$/iu;
 const roleColorPattern = /^role((?:\+|-)\d{0,4})?$/iu;
@@ -362,7 +363,7 @@ export function renderedUsername(props: any) {
                                         ? topRoleStyle.gradient.static.original
                                         : topRoleStyle.gradient.animated.original
                         }>
-                            {values[first].value}
+                            {wrapEmojis(values[first].value)}
                         </span>
                     </span>
                 )}
@@ -380,7 +381,7 @@ export function renderedUsername(props: any) {
                                         ? values[second].style.gradient.static.adjusted
                                         : values[second].style.normal.adjusted
                         }>
-                            {values[second].value}</span>
+                            {wrapEmojis(values[second].value)}</span>
                         <span style={affixColor}>
                             {values[second].suffix}</span>
                     </span>
@@ -399,7 +400,7 @@ export function renderedUsername(props: any) {
                                         ? values[third].style.gradient.static.adjusted
                                         : values[third].style.normal.adjusted
                         }>
-                            {values[third].value}</span>
+                            {wrapEmojis(values[third].value)}</span>
                         <span style={affixColor}>
                             {values[third].suffix}</span>
                     </span>
