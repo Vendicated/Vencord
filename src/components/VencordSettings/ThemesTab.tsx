@@ -369,6 +369,8 @@ export function CspErrorCard() {
 
     if (!errors.length) return null;
 
+    const hasImgurHtmlDomain = errors.some(e => e.includes("https://imgur.com"));
+
     return (
         <ErrorCard className="vc-settings-card">
             <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
@@ -381,6 +383,13 @@ export function CspErrorCard() {
                     <Link href={url} key={url}>{url}</Link>
                 ))}
             </Flex>
+
+            {hasImgurHtmlDomain && (
+                <Forms.FormText className={Margins.top16}>
+                    Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>.
+                    To obtain a direct link, right-click the image and select "Copy image address".
+                </Forms.FormText>
+            )}
         </ErrorCard>
     );
 }
