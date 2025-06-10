@@ -78,5 +78,5 @@ interface EmojiParseResult {
 }
 
 interface ParserType {
-    parseToAST(input: string, options: Partial<ParseOptions>): Array<FormattedtextResult | TextParseResult | LinkParseResult | EmojiParseResult>;
+    parseToAST(input: string, inline: boolean, options: Partial<ParseOptions>): Array<FormattedtextResult | TextParseResult | LinkParseResult | EmojiParseResult>;
 }
