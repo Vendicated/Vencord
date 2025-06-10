@@ -5,6 +5,7 @@
  */
 
 import type { Settings } from "@api/Settings";
+import { CspRequestResult } from "@main/csp/manager";
 import { PluginIpcMappings } from "@main/ipcPlugins";
 import type { UserThemeHeader } from "@main/themes";
 import { IpcEvents } from "@shared/IpcEvents";
@@ -71,6 +72,14 @@ export default {
     native: {
         getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
+    },
+
+    csp: {
+        removeOverride: (domain: string) => invoke<void>(IpcEvents.CSP_REMOVE_OVERRIDE, domain),
+        requestAddOverride: (domain: string, directives: string[], callerName: string) =>
+            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, domain, directives, callerName),
+        requestAddOverrideDueToError: (domain: string, directives: string[]) =>
+            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE_DUE_TO_ERROR, domain, directives)
     },
 
     pluginHelpers: PluginHelpers

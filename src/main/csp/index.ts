@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { NativeSettings } from "@main/settings";
 import { session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
@@ -108,6 +109,12 @@ const patchCsp = (headers: PolicyMap) => {
 
         for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
             pushDirective(directive, "blob:", "data:", "vencord:");
+        }
+
+        for (const [host, directives] of Object.entries(NativeSettings.store.customCspRules)) {
+            for (const directive of directives) {
+                pushDirective(directive, host);
+            }
         }
 
         for (const [host, directives] of Object.entries(CspPolicies)) {
