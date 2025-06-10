@@ -10,6 +10,7 @@ import { GuildStore } from "@webpack/common";
 import { settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
 import { BasicNotification } from "../types/basicNotification";
+import { safeStringForXML } from "./Notifications";
 
 const logger = new Logger("BetterNotifications");
 
@@ -111,4 +112,70 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
 
     texts.push(channelInfo.channel);
     return texts;
+}
+
+/** @deprecated findByProps("htmlFor").defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(input: string)); is a better alternative. (thanks @suffocate on discord)  */
+export function createMarkupForLinux(notificationBody: string, basicNotification: BasicNotification): string {
+    // @ts-ignore
+    const parser: ParserType = Parser;
+
+    const res = parser.parseToAST(notificationBody, true, {
+        channelId: basicNotification.channel_id,
+        messageId: basicNotification.message_id,
+        allowLinks: true,
+        allowDevLinks: true,
+        allowHeading: false,
+        allowList: false,
+        allowEmojiLinks: true,
+        previewLinkTarget: true,
+        viewingChannelId: basicNotification.channel_id,
+    });
+
+    let linuxString: string = "";
+
+
+    for (const item of res) {
+        console.debug(item);
+        switch (item.type) {
+            case "text":
+                linuxString += safeStringForXML(item.content);
+                break;
+
+            case "em":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += `<i>${safeStringForXML(text.content)}</i>`;
+                }
+                break;
+
+            case "strong":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += `<b>${safeStringForXML(text.content)}</b>`;
+                }
+                break;
+
+            case "link":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += `<a href="${item.target}">${safeStringForXML(text.content)} </a>`;
+                }
+                break;
+
+            case "subtext":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += safeStringForXML(text.content);
+                }
+                break;
+
+            case "emoji":
+                linuxString += item.surrogate;
+                break;
+        }
+    }
+
+    logger.debug("Generated the following linux notification string");
+    logger.debug(linuxString);
+    return linuxString;
 }

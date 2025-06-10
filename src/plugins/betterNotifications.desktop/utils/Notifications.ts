@@ -6,7 +6,8 @@
 
 import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
-import { Parser, UserUtils } from "@webpack/common";
+import { findByProps } from "@webpack";
+import { UserUtils } from "@webpack/common";
 
 import { notificationShouldBeShown, settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
@@ -26,74 +27,19 @@ export function safeStringForXML(input: string): string {
         .replace(/'/g, "&apos;");
 }
 
-function createMarkupForLinux(notificationBody: string, basicNotification: BasicNotification): string {
-    // @ts-ignore
-    const parser: ParserType = Parser;
 
-    const res = parser.parseToAST(notificationBody, true, {
-        channelId: basicNotification.channel_id,
-        messageId: basicNotification.message_id,
-        allowLinks: true,
-        allowDevLinks: true,
-        allowHeading: false,
-        allowList: false,
-        allowEmojiLinks: true,
-        previewLinkTarget: true,
-        viewingChannelId: basicNotification.channel_id,
-    });
 
-    let linuxString: string = "";
-
-    for (const item of res) {
-        console.debug(item);
-        switch (item.type) {
-            case "text":
-                linuxString += safeStringForXML(item.content);
-                break;
-
-            case "em":
-                for (const text of item.content) {
-                    if (text.type !== "text") continue;
-                    linuxString += `<i>${safeStringForXML(text.content)}</i>`;
-                }
-                break;
-
-            case "strong":
-                for (const text of item.content) {
-                    if (text.type !== "text") continue;
-                    linuxString += `<b>${safeStringForXML(text.content)}</b>`;
-                }
-                break;
-
-            case "link":
-                for (const text of item.content) {
-                    if (text.type !== "text") continue;
-                    linuxString += `<a href="${item.target}">${safeStringForXML(text.content)} </a>`;
-                }
-                break;
-
-            case "subtext":
-                for (const text of item.content) {
-                    if (text.type !== "text") continue;
-                    linuxString += safeStringForXML(text.content);
-                }
-                break;
-
-            case "emoji":
-                linuxString += item.surrogate;
-                break;
-        }
-    }
-
-    logger.debug("Generated the following linux notification string");
-    logger.debug(linuxString);
-    return linuxString;
-}
 
 export function SendNativeNotification(avatarUrl: string,
     notificationTitle: string, notificationBody: string,
     basicNotification: BasicNotification, advancedNotification: AdvancedNotification
 ) {
+    const SimpleMarkdown = findByProps("htmlFor");
+
+    if (!SimpleMarkdown) {
+        logger.error("Failed to find SimpleMarkdown");
+    }
+
     logger.debug("Recieved hooked notification with the following args");
     logger.debug([avatarUrl, notificationTitle, notificationBody, basicNotification, advancedNotification]);
 
@@ -175,7 +121,10 @@ export function SendNativeNotification(avatarUrl: string,
                     channelName: headerText
                 } : undefined,
                 wAttributeText: settings.store.notificationAttribute ? attributeText : undefined,
-                linuxFormattedText: settings.store.notificationMarkupSupported ? createMarkupForLinux(notificationBody, basicNotification) : undefined
+
+                linuxFormattedText: settings.store.notificationMarkupSupported
+                    ? SimpleMarkdown.defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(notificationBody))
+                    : undefined
             }
         );
     }

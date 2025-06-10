@@ -231,7 +231,7 @@ function notifySend(summary: string, body: string | null, avatarLocation: string
     if (attachmentLocation) args.push(`--hint=string:image-path:file://${attachmentLocation}`);
     else args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
-    // console.log(args);
+    console.log(args);
 
     child_process.execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
@@ -294,10 +294,6 @@ export function notify(event: IpcMainInvokeEvent,
 
 export function checkPlatform(_, isPlatform: string) {
     return platform === isPlatform;
-}
-
-export function checkIsLinux(_) {
-    return isLinux;
 }
 
 export function openTempFolder(_) {
