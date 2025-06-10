@@ -179,18 +179,17 @@ export const settings = definePluginSettings({
                     <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
                         <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification markup support for Linux</Forms.FormTitle>
                         <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={value} onChange={setValue}></Switch>
-
                     </div>
                 </Forms.FormSection>
-
+                <Forms.FormText style={{ marginBottom: "8px" }} type={Forms.FormText.Types.DESCRIPTION}><span style={{ color: "var(--status-danger)" }}>WARNING:</span> This feature may not support your system. If you see HTML tags (such as &lt;b&gt;) in notifications, turn this feature off.</Forms.FormText>
                 {value ?
-                    <Text><b>Here is some bold text</b> and <i>Heres some italic text</i></Text>
+                    <Text><b>Here's some bold text</b> and <i>heres's some italic text</i></Text>
                     :
-                    <Text>Here is some bold text and Heres some italic text</Text>
+                    <Text>Here's some bold text and here's some italic text</Text>
                 }
             </div>;
         },
-        default: true
+        default: false
     },
     disableImageLoading: {
         type: OptionType.BOOLEAN,
