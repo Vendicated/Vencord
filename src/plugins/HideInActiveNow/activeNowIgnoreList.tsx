@@ -160,9 +160,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
             label={isBlacklisted ? "Show in Active Now" : "Hide in Active Now"}
             id="HideActiveNowIgnored-user"
             action={() => {
-                // fix this
-                // settings.store.whitelistUsers ? !isBlacklisted : !isBlacklisted
-                if (isBlacklisted) {
+                if (settings.store.whitelistServers ? !isBlacklisted : !isBlacklisted) {
                     removeUserFromBlacklist(user.id, user.username);
                 } else {
                     addUserToBlacklist(user.id, user.username);
