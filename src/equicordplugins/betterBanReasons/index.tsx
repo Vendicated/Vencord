@@ -78,11 +78,11 @@ export default definePlugin({
         {
             find: "#{intl::BAN_REASON_OPTION_SPAM_ACCOUNT}",
             replacement: [{
-                match: /\[(\{((name|value):\i\.\i\.string\(\i\.\i\.\i\),?){2}\},?){3}\]/,
+                match: /\[(\{name:\i\.\i\.\i\(\i\.\i\.\i\),value:(\i\.\i\.\i\(\i\.\i\.\i\)|"other")\},?)+\]/,
                 replace: "$self.getReasons()"
             },
             {
-                match: /useState\(0\)(?=.{0,100}targetUserId:)/,
+                match: /useState\(null\)(?=.{0,200}targetUserId:)/,
                 replace: "useState($self.getDefaultState())"
             }]
         }
