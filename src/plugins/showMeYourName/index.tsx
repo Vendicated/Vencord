@@ -354,13 +354,13 @@ export function renderedUsername(props: any) {
                 {(
                     <span>
                         <span style={
-                            topRoleStyle
-                                ? !topRoleStyle.gradient
+                            !topRoleStyle
+                                ? undefined
+                                : !topRoleStyle.gradient
                                     ? topRoleStyle.normal.original
                                     : isMention
                                         ? topRoleStyle.gradient.static.original
                                         : topRoleStyle.gradient.animated.original
-                                : undefined
                         }>
                             {values[first].value}
                         </span>
@@ -377,7 +377,7 @@ export function renderedUsername(props: any) {
                                 : settings.store.animateGradients && values[second].style.gradient
                                     ? values[second].style.gradient.animated.original
                                     : values[second].style.gradient
-                                        ? values[second].style.gradient.static.original
+                                        ? values[second].style.gradient.static.adjusted
                                         : values[second].style.normal.adjusted
                         }>
                             {values[second].value}</span>
@@ -396,7 +396,7 @@ export function renderedUsername(props: any) {
                                 : settings.store.animateGradients && values[third].style.gradient
                                     ? values[third].style.gradient.animated.original
                                     : values[third].style.gradient
-                                        ? values[third].style.gradient.static.original
+                                        ? values[third].style.gradient.static.adjusted
                                         : values[third].style.normal.adjusted
                         }>
                             {values[third].value}</span>
