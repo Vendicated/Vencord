@@ -8,15 +8,17 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { RelationshipStore } from "@webpack/common";
 
+import { contextMenus, isGuildBlacklisted, isUserBlacklisted } from "./activeNowIgnoreList";
+
 enum ActiveNowHideIgnoredSettings {
     Off,
     HideServer,
-    HideUser
+    HideUser,
 }
 
 
 // const logger = new Logger("ActiveNowHideIgnored");
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     hideActiveNow: {
         type: OptionType.SELECT,
         description: "How to handle ignored users/ignored users in voice channel in the main Active Now section",
@@ -27,25 +29,25 @@ const settings = definePluginSettings({
         ],
         restartNeeded: true
     },
+    whitelistUsers: {
+        description: "Turn the blacklist into a whitelist for users, so only the users in the list will be shown",
+        type: OptionType.BOOLEAN,
+        restartNeeded: false,
+    },
+    whitelistServers: {
+        description: "Turn the blacklist into a whitelist for server, so only the servers in the list will be shown",
+        type: OptionType.BOOLEAN,
+        restartNeeded: false,
+    },
     hideIgnoredUsers: {
         description: "Hide ignored users in the main Active Now section",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false,
-    },
-    ignoredUsers: {
-        description: "List of user IDs to hide from Active Now (one per line)",
-        type: OptionType.STRING,
-        default: "",
-        restartNeeded: false,
-    },
-    ignoredGuilds: {
-        description: "List of guild IDs to hide from Active Now (one per line)",
-        type: OptionType.STRING,
-        default: "",
-        restartNeeded: false,
-    },
+    }
 });
+
+
 
 
 // it break them yeey
@@ -53,7 +55,7 @@ export default definePlugin({
     name: "Active Now Hide Ignored",
     description: "Hides Active Now entries for ignored users.",
     authors: [{ name: "kyrillk", id: 0n }],
-
+    contextMenus,
     patches: [
         {
             find: "NOW_PLAYING_CARD_HOVERED,",
@@ -67,16 +69,15 @@ export default definePlugin({
             find: "NOW_PLAYING_CARD_HOVERED,",
             replacement: {
                 match: /(\{party:)(\i)(.*?\}=\i)(.*=\i,\i=(\i)(.*),\i=\i\(\)\(\i,\i\);)/,
-                replace: "$1unfilter_$2$3,$2=$self.partyFilterIgnoredUsers(unfilter_$2)$4if($5 == 0 || $self.filterIgnoredGuilds($2)){return null;} console.log('Active Now Hide Ignored: Party Filtered', $2);",
+                replace: "$1unfilter_$2$3,$2=$self.partyFilterIgnoredUsers(unfilter_$2)$4if($5 == 0 || $self.filterIgnoredGuilds($2)){return null;}",
             },
             predicate: () => settings.store.hideActiveNow === ActiveNowHideIgnoredSettings.HideUser
         },
     ],
     settings,
     isIgnoredUser(user) {
-        const ignoredUsers = (settings.store.ignoredUsers || "");
         const userId = user.id || user;
-        if (ignoredUsers.includes(userId) || (RelationshipStore.isIgnored(userId) && settings.store.hideIgnoredUsers)) {
+        if (isUserBlacklisted(userId) || (RelationshipStore.isIgnored(userId)) && settings.store.hideIgnoredUsers) {
             return true;
         }
         return false;
@@ -88,6 +89,9 @@ export default definePlugin({
 
     partyFilterIgnoredUsers(party) {
         var filteredPartyMembers = party.partiedMembers.filter(user => !this.isIgnoredUser(user));
+        if (filteredPartyMembers.length === 0) {
+            return { ...party, partiedMembers: filteredPartyMembers };
+        }
         const filteredParty = {
             ...party,
             partiedMembers: filteredPartyMembers,
@@ -162,8 +166,7 @@ export default definePlugin({
 
 
     isIgnoredGuild(guild) {
-        const ignoredGuilds = (settings.store.ignoredGuilds || "");
-        if (ignoredGuilds.includes(guild)) {
+        if (isGuildBlacklisted(guild)) {
             return true;
         }
         return false;
