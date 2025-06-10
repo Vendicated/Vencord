@@ -69,7 +69,7 @@ export default definePlugin({
         },
         // Change top right chat toolbar button from the help one to the dev one
         {
-            find: ".CONTEXTLESS,isActivityPanelMode:",
+            find: ".GLOBAL_DISCOVERY)?",
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"
