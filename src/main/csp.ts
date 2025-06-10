@@ -19,6 +19,7 @@ export const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-s
 
 export const CspPolicies: PolicyMap = {
     "*.github.io": MediaAndCssSrc, // GitHub pages, used by most themes
+    "github.com": MediaAndCssSrc, // GitHub content (stuff uploaded to markdown forms), used by most themes
     "raw.githubusercontent.com": MediaAndCssSrc, // GitHub raw, used by some themes
     "*.gitlab.io": MediaAndCssSrc, // GitLab pages, used by some themes
     "gitlab.com": MediaAndCssSrc, // GitLab raw, used by some themes
@@ -32,6 +33,9 @@ export const CspPolicies: PolicyMap = {
 
     "i.imgur.com": MediaSrc, // Imgur, used by some themes
     "i.ibb.co": MediaSrc, // ImgBB, used by some themes
+    "i.pinimg.com": MediaSrc, // Pinterest, used by some themes
+    "*.tenor.com": MediaSrc, // Tenor, used by some themes
+    "files.catbox.moe": MediaSrc, // Catbox, used by some themes
 
     "cdn.discordapp.com": MediaAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
     "media.discordapp.net": MediaSrc, // Discord media CDN, possible alternative to Discord CDN
