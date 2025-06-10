@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
-import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUCORD_HELPERS, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_ID, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUCORD_HELPERS, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_ID, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -196,13 +196,12 @@ export default definePlugin({
 
     flux: {
         async CHANNEL_SELECT({ channelId }) {
-            const isSupportChannel = channelId === SUPPORT_CHANNEL_ID;
+            const isSupportChannel = SUPPORT_CHANNEL_IDS.includes(channelId);
             if (!isSupportChannel) return;
 
             const selfId = UserStore.getCurrentUser()?.id;
             if (!selfId || isPluginDev(selfId) || isEquicordPluginDev(selfId)) return;
             if (channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport") && !clicked) {
-                clicked = true;
                 return Alerts.show({
                     title: "You are entering the support channel!",
                     body: <div>
@@ -215,8 +214,14 @@ export default definePlugin({
                         <Forms.FormText>issue could be caused by Equicord!</Forms.FormText>
                     </div>,
                     confirmText: "Go to Equicord Support",
+                    onConfirm() {
+                        clicked = true;
+                        VencordNative.native.openExternal("https://discord.gg/5Xh2W87egW");
+                    },
                     cancelText: "Okay continue",
-                    onConfirm: () => VencordNative.native.openExternal("https://discord.gg/5Xh2W87egW"),
+                    onCancel() {
+                        clicked = true;
+                    },
                 });
             }
 
