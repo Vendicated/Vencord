@@ -75,12 +75,12 @@ export default {
     },
 
     csp: {
-        isDomainAllowed: (domain: string) => invoke<boolean>(IpcEvents.CSP_IS_DOMAIN_ALLOWED, domain),
-        removeOverride: (domain: string) => invoke<void>(IpcEvents.CSP_REMOVE_OVERRIDE, domain),
-        requestAddOverride: (domain: string, directives: string[], callerName: string) =>
-            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, domain, directives, callerName),
-        requestAddOverrideDueToError: (domain: string, directives: string[]) =>
-            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE_DUE_TO_ERROR, domain, directives)
+        isDomainAllowed: (url: string) => invoke<boolean>(IpcEvents.CSP_IS_DOMAIN_ALLOWED, url),
+        removeOverride: (url: string) => invoke<void>(IpcEvents.CSP_REMOVE_OVERRIDE, url),
+        requestAddOverride: (url: string, directives: string[], callerName: string) =>
+            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, url, directives, callerName),
+        requestAddOverrideDueToError: (url: string, directives: string[]) =>
+            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE_DUE_TO_ERROR, url, directives)
     },
 
     pluginHelpers: PluginHelpers
