@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>186 additional plugins</summary>
+<summary>187 additional plugins</summary>
 
 ### All Platforms
 
@@ -167,6 +167,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - TeX by Kyuuhachi
 - TextToSpeech by Samwich
 - ThemeLibrary by Fafa
+- TidalEmbeds by vmohammad
 - Timezones by Aria
 - Title by Kyuuhachi
 - ToastNotifications by Skully, Ethan, Buzzy
