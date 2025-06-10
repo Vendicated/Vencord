@@ -10,7 +10,7 @@ import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelRouter, Forms, React, showToast, Switch, Toasts } from "@webpack/common";
+import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, Toasts } from "@webpack/common";
 
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
@@ -105,7 +105,8 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: _ => {
             return <></>;
-        }
+        },
+        default: false
     },
     notificationAttributeText: {
         type: OptionType.COMPONENT,
@@ -163,6 +164,33 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Enable support for notification headers (aka grouping). (Windows only, build 15063 or higher)",
         default: false
+    },
+    notificationMarkupSupported: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            const [value, setValue] = React.useState<boolean>(settings.store.notificationMarkupSupported);
+
+            React.useEffect(() => {
+                props.setValue(value);
+            }, [value]);
+
+            return <div style={{ marginBottom: "0.5em", height: "100%" }}>
+                <Forms.FormSection>
+                    <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                        <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification markup support for Linux</Forms.FormTitle>
+                        <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={value} onChange={setValue}></Switch>
+
+                    </div>
+                </Forms.FormSection>
+
+                {value ?
+                    <Text><b>Here is some bold text</b> and <i>Heres some italic text</i></Text>
+                    :
+                    <Text>Here is some bold text and Heres some italic text</Text>
+                }
+            </div>;
+        },
+        default: true
     },
     disableImageLoading: {
         type: OptionType.BOOLEAN,

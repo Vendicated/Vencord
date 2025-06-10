@@ -11,6 +11,8 @@ import https from "https";
 import os from "os";
 import path from "path";
 
+import { safeStringForXML } from "./utils/Notifications";
+
 const platform = os.platform();
 
 const isWin = platform === "win32";
@@ -38,6 +40,7 @@ interface ExtraOptions {
     wAttributeText?: string;
     wAvatarCrop?: boolean;
     wHeaderOptions?: HeaderOptions;
+    linuxFormattedText?: string,
     attachmentUrl?: string;
     attachmentType?: string;
 }
@@ -117,15 +120,6 @@ function saveAssetToDisk(type: "attachment" | "avatar", options: AssetOptions) {
         });
     });
 
-}
-
-function safeStringForXML(input: string): string {
-    return input
-        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&apos;");
 }
 
 function generateXml(
@@ -258,8 +252,8 @@ export function notify(event: IpcMainInvokeEvent,
         const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
 
         if (isLinux) {
-            // TODO: style the body with basic markup https://specifications.freedesktop.org/notification-spec/latest/markup.html
-            notifySend(titleString, bodyString, avatar, unixCallback, attachment);
+            const linuxFormattedString: string | undefined = extraOptions?.linuxFormattedText;
+            notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, attachment);
             return;
         }
 
@@ -281,6 +275,10 @@ export function notify(event: IpcMainInvokeEvent,
 
 export function checkIsMac(_) {
     return isDarwin;
+}
+
+export function checkIsLinux(_) {
+    return isLinux;
 }
 
 export function openTempFolder(_) {
