@@ -12,8 +12,8 @@ import os from "os";
 import path from "path";
 
 const platform = os.platform();
-
 const isWin = platform === "win32";
+const isMac = platform === "darwin";
 const isLinux = platform === "linux";
 
 interface NotificationData {
@@ -284,10 +284,6 @@ export function notify(event: IpcMainInvokeEvent,
         notification.addListener("click", () => unixCallback());
         notification.show();
     });
-}
-
-export function checkPlatform(_, isPlatform: string) {
-    return platform === isPlatform;
 }
 
 export function openTempFolder(_) {

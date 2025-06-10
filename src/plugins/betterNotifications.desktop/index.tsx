@@ -16,13 +16,12 @@ import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
 import { AdvancedNotification } from "./types/advancedNotification";
 import { InterceptNotification, SendNativeNotification } from "./utils/Notifications";
-import { Replacements } from "./utils/Variables";
+import { isMac, Replacements } from "./utils/Variables";
 
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const jumpToMessage = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 const logger = new Logger("BetterNotifications");
-
 
 export const settings = definePluginSettings({
     notificationPatchType: {
@@ -249,15 +248,13 @@ export default definePlugin({
     ],
 
     start() {
-        Native.checkPlatform("darwin").then(isMac => {
-            if (isMac && settings.store.notificationPatchType === "custom") {
-                logger.warn("User is on macOS but has notificationPatchType as custom");
-                setTimeout(() => {
-                    showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
-                    settings.store.notificationPatchType = "variable";
-                }, 4000);
-            }
-        });
+        if (isMac && settings.store.notificationPatchType === "custom") {
+            logger.warn("User is on macOS but has notificationPatchType as custom");
+            setTimeout(() => {
+                showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
+                settings.store.notificationPatchType = "variable";
+            }, 4000);
+        }
     },
 
     SendNativeNotification,

@@ -12,7 +12,7 @@ import { notificationShouldBeShown, settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
 import { BasicNotification } from "../types/basicNotification";
 import { cropImageToCircle } from "./Round";
-import { replaceVariables } from "./Variables";
+import { isLinux, replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
@@ -109,10 +109,8 @@ export function SendNativeNotification(avatarUrl: string,
     UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
         const avatar = user.getAvatarURL(basicNotification.guild_id, 256, false).replace(".webp", ".png");
 
-        Native.checkPlatform("linux").then(isLinux => {
-            if (settings.store.notificationPfpCircle && isLinux) cropImageToCircle(avatar, 256).then(data => { notify(data); });
-            else notify(avatar);
-        });
+        if (settings.store.notificationPfpCircle && isLinux) cropImageToCircle(avatar, 256).then(data => { notify(data); });
+        else notify(avatar);
     });
 }
 
