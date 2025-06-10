@@ -129,7 +129,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
             label={isBlacklisted ? "Show in Active Now" : "Hide in Active Now"}
             id="HideActiveNowIgnored-guild"
             action={() => {
-                if (settings.store.whitelistServers ? !isBlacklisted : !isBlacklisted) {
+                if (settings.store.whitelistServers ? !isBlacklisted : isBlacklisted) {
                     removeGuildFromBlacklist(guild.id, guild.name);
                 } else {
                     addGuildToBlacklist(guild.id, guild.name);
@@ -160,7 +160,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
             label={isBlacklisted ? "Show in Active Now" : "Hide in Active Now"}
             id="HideActiveNowIgnored-user"
             action={() => {
-                if (settings.store.whitelistServers ? !isBlacklisted : !isBlacklisted) {
+                if (settings.store.whitelistUsers ? !isBlacklisted : isBlacklisted) {
                     removeUserFromBlacklist(user.id, user.username);
                 } else {
                     addUserToBlacklist(user.id, user.username);
