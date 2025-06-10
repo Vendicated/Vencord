@@ -8,9 +8,9 @@ import { NativeSettings } from "@main/settings";
 import { IpcEvents } from "@shared/IpcEvents";
 import { dialog, ipcMain } from "electron";
 
-import { ImageAndCssSrc } from ".";
+import { CspPolicies, ImageAndCssSrc } from ".";
 
-export type CspRequestResult = "invalid" | "cancelled" | "unchecked" | "ok";
+export type CspRequestResult = "invalid" | "cancelled" | "unchecked" | "ok" | "conflict";
 
 export function registerCspIpcHandlers() {
     ipcMain.handle(IpcEvents.CSP_REMOVE_OVERRIDE, (_, domain: string) => removeCspRule(domain));
@@ -20,6 +20,15 @@ export function registerCspIpcHandlers() {
     ipcMain.handle(IpcEvents.CSP_REQUEST_ADD_OVERRIDE_DUE_TO_ERROR, async (_, url: string, directives: string[]) =>
         addCspRule(url, directives)
     );
+    ipcMain.on(IpcEvents.CSP_IS_DOMAIN_ALLOWED, (_, url: string, directives: string[]) => {
+        try {
+            const domain = new URL(url).hostname;
+            const ruleForDomain = CspPolicies[domain] ?? NativeSettings.store.customCspRules[domain];
+            return ruleForDomain && directives.every(d => ruleForDomain.includes(d));
+        } catch (e) {
+            return false;
+        }
+    });
 }
 
 // TODO: remove this when URL.canParse is more mature
@@ -81,6 +90,10 @@ async function addCspRule(url: string, directives: string[], callerName?: string
     }
 
     const domain = new URL(url).hostname;
+
+    if (domain in NativeSettings.store.customCspRules) {
+        return "conflict";
+    }
 
     const { checkboxChecked, response } = await dialog.showMessageBox({
         ...getMessage(url, directives, callerName),
