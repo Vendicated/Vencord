@@ -157,7 +157,7 @@ export const settings = definePluginSettings({
     },
     notificationPfpCircle: {
         type: OptionType.BOOLEAN,
-        description: "Crop the sender's profile picture to a circle (Windows only)",
+        description: "Crop the sender's profile picture to a circle",
         default: true
     },
     notificationHeaderEnabled: {
@@ -277,7 +277,7 @@ export default definePlugin({
     ],
 
     start() {
-        Native.checkIsMac().then(isMac => {
+        Native.checkPlatform("darwin").then(isMac => {
             if (isMac && settings.store.notificationPatchType === "custom") {
                 logger.warn("User is on macOS but has notificationPatchType as custom");
                 setTimeout(() => {
