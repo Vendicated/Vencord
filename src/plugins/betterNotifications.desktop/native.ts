@@ -11,8 +11,6 @@ import https from "https";
 import os from "os";
 import path from "path";
 
-import { safeStringForXML } from "./utils/Notifications";
-
 const platform = os.platform();
 
 const isWin = platform === "win32";
@@ -54,6 +52,16 @@ interface AssetOptions {
 }
 
 let webContents: WebContents | undefined;
+
+function safeStringForXML(input: string): string {
+    return input
+        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
 
 // Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`,
 // but using a local file works, so we just throw it to %temp%
