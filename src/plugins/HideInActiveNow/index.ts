@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { RelationshipStore } from "@webpack/common";
 
-import { contextMenus, isGuildBlacklisted, isUserBlacklisted } from "./activeNowIgnoreList";
+import { contextMenus, isGuildBlacklisted, isUserBlacklisted, ResetButton } from "./activeNowIgnoreList";
 
 enum ActiveNowHideIgnoredSettings {
     Off,
@@ -44,7 +44,12 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false,
-    }
+    },
+        resetData: {
+        type: OptionType.COMPONENT,
+        description: "Reset all blacklisted/whitelisted users and servers",
+        component: ResetButton
+    },
 });
 
 

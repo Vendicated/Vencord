@@ -6,7 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
-import { Menu, showToast, Toasts } from "@webpack/common";
+import { Button, Menu, showToast, Toasts } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 import { settings } from "./index";
@@ -180,10 +180,106 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
     }
 };
 
+// Helper function to extract ID and type from party data
+function getPartyInfo(party: any): { type: "guild" | "user", id: string, name: string; } | null {
+    if (!party || !party.id) return null;
+
+    if (party.id.startsWith("channel-")) {
+        // Extract guild info from voice channels
+        const voiceChannel = party.voiceChannels?.[0];
+        if (voiceChannel?.guild) {
+            return {
+                type: "guild",
+                id: voiceChannel.guild.id,
+                name: voiceChannel.guild.name
+            };
+        }
+    } else if (party.id.startsWith("user-")) {
+        // Extract user ID from party.id
+        const userId = party.id.replace("user-", "");
+        const user = party.priorityMembers?.[0]?.user || party.partiedMembers?.[0];
+        if (user) {
+            return {
+                type: "user",
+                id: userId,
+                name: user.globalName || user.username
+            };
+        }
+    }
+
+    return null;
+}
+
+// Updated context menu patch for the Active Now menu
+const activeNowMenuPatch: NavContextMenuPatchCallback = (children, { party }) => {
+    // The props should contain party data or similar context
+    if (!party) return;
+
+    const partyInfo = getPartyInfo(party);
+    if (!partyInfo) return;
+
+    const isBlacklisted = partyInfo.type === "guild"
+        ? isGuildBlacklisted(partyInfo.id)
+        : isUserBlacklisted(partyInfo.id);
+
+    const menuItem = (
+        <Menu.MenuItem
+            label={isBlacklisted ? "Show in Active Now" : "Hide in Active Now"}
+            id={`HideActiveNowIgnored-${partyInfo.type}`}
+            action={() => {
+                if (partyInfo.type === "guild") {
+                    if (settings.store.whitelistServers ? !isBlacklisted : isBlacklisted) {
+                        removeGuildFromBlacklist(partyInfo.id, partyInfo.name);
+                    } else {
+                        addGuildToBlacklist(partyInfo.id, partyInfo.name);
+                    }
+                } else {
+                    if (settings.store.whitelistUsers ? !isBlacklisted : isBlacklisted) {
+                        removeUserFromBlacklist(partyInfo.id, partyInfo.name);
+                    } else {
+                        addUserToBlacklist(partyInfo.id, partyInfo.name);
+                    }
+                }
+            }}
+        />
+    );
+
+    // Add the menu item to the context menu
+    children.unshift(menuItem);
+};
+
 export const contextMenus = {
+    "now-playing-menu": activeNowMenuPatch,
     "guild-header-popout": guildPopoutPatch,
     "guild-context": guildPopoutPatch,
     "user-context": userContextPatch,
     "user-profile-actions": userContextPatch,
     "user-profile-overflow-menu": userContextPatch,
 };
+
+async function resetBlacklists() {
+    try {
+        blacklistedUsers.clear();
+        blacklistedGuilds.clear();
+
+        // Clear from DataStore
+        await DataStore.del("activeNowHideIgnored_blacklistedUsers");
+        await DataStore.del("activeNowHideIgnored_blacklistedGuilds");
+
+        showToast("Reset all blacklists", Toasts.Type.SUCCESS);
+    } catch (e) {
+        console.error("Failed to reset blacklists:", e);
+        showToast("Failed to reset blacklists", Toasts.Type.FAILURE);
+    }
+}
+
+// Reset Button Component
+export const ResetButton = () => (
+    <Button
+        onClick={resetBlacklists}
+        size={Button.Sizes.SMALL}
+        color={Button.Colors.RED}
+    >
+        Reset All Data
+    </Button>
+);
