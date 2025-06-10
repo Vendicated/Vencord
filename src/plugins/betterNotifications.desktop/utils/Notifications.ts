@@ -29,7 +29,7 @@ function createMarkupForLinux(notificationBody: string, basicNotification: Basic
     // @ts-ignore
     const parser: ParserType = Parser;
 
-    const res = parser.parseToAST(notificationBody, {
+    const res = parser.parseToAST(notificationBody, false, {
         channelId: basicNotification.channel_id,
         messageId: basicNotification.message_id,
         allowLinks: true,
