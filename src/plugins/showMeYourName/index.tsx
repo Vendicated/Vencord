@@ -99,7 +99,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         secondaryAdjusted = secondaryColor;
         tertiaryAdjusted = tertiaryColor;
 
-        if (!primaryColor) { return fallbackReturn; };
+        if (!primaryColor) { return fallbackReturn; }
 
         if (primaryColor && percentage) {
             primaryAdjusted = adjustHex(primaryColor, parseInt(percentage));
