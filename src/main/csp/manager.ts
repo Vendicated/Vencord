@@ -49,7 +49,7 @@ function validate(domain: string, directives: string[]) {
 function getMessage(url: string, directives: string[], callerName: string) {
     const domain = new URL(url).hostname;
 
-    const message = `${callerName} wants to allow connections to ${domain}.`;
+    const message = `${callerName} wants to allow connections to ${domain}`;
 
     let detail = `Unless you recognise and fully trust ${domain}, you should cancel this request!\n\nYou will have to fully close and restart the app for the changes to take effect.`;
 
@@ -74,7 +74,7 @@ function getMessage(url: string, directives: string[], callerName: string) {
         .sort()
         .join(", ");
 
-    detail = `The following types of content will be allowed to load from ${domain}: ${contentTypes}\n\n${detail}`;
+    detail = `The following types of content will be allowed to load from ${domain}:\n${contentTypes}\n\n${detail}`;
 
     return { message, detail };
 }

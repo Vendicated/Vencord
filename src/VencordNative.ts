@@ -75,7 +75,7 @@ export default {
     },
 
     csp: {
-        isDomainAllowed: (url: string) => invoke<boolean>(IpcEvents.CSP_IS_DOMAIN_ALLOWED, url),
+        isDomainAllowed: (url: string, directives: string[]) => invoke<boolean>(IpcEvents.CSP_IS_DOMAIN_ALLOWED, url, directives),
         removeOverride: (url: string) => invoke<void>(IpcEvents.CSP_REMOVE_OVERRIDE, url),
         requestAddOverride: (url: string, directives: string[], callerName: string) =>
             invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, url, directives, callerName),

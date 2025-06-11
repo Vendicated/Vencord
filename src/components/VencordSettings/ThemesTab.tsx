@@ -375,7 +375,7 @@ export function CspErrorCard() {
     const allowUrl = async (url: string) => {
         const { origin: baseUrl, hostname } = new URL(url);
 
-        const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Themes");
+        const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Vencord Themes");
         if (result === "ok") {
             CspBlockedUrls.forEach(url => {
                 if (new URL(url).hostname === hostname) {

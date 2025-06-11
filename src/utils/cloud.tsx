@@ -35,10 +35,18 @@ export async function checkCloudUrlCsp() {
     const { host } = getCloudUrl();
     if (host === "api.vencord.dev") return true;
 
-    if (await VencordNative.csp.isDomainAllowed(Settings.cloud.url)) return true;
+    if (await VencordNative.csp.isDomainAllowed(Settings.cloud.url, ["connect-src"])) {
+        return true;
+    }
 
     const res = await VencordNative.csp.requestAddOverride(Settings.cloud.url, ["connect-src"], "Cloud Sync");
-    return res === "ok";
+    if (res === "ok") {
+        showNotification({
+            title: "Cloud Integration",
+            body: `${host} has been added to the whitelist. Please restart the app for the changes to take effect.`
+        });
+    }
+    return false;
 }
 
 const getUserId = () => {
