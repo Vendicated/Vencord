@@ -244,10 +244,11 @@ const activeNowMenuPatch: NavContextMenuPatchCallback = (children, { party }) =>
         />
     );
 
-    // Add the menu item to the context menu
+    // Add the menu item to the context menu at the top
     children.unshift(menuItem);
 };
 
+// contextMenus
 export const contextMenus = {
     "now-playing-menu": activeNowMenuPatch,
     "guild-header-popout": guildPopoutPatch,
@@ -283,3 +284,5 @@ export const ResetButton = () => (
         Reset All Data
     </Button>
 );
+
+// extra Button to see the blacklists
