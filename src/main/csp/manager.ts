@@ -22,7 +22,7 @@ function validate(url: string, directives: string[]) {
     try {
         const { hostname } = new URL(url);
 
-        if (/[;'"'\\]/.test(hostname)) return false;
+        if (/[;'"\\]/.test(hostname)) return false;
     } catch {
         return false;
     }
