@@ -28,11 +28,11 @@ import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { showItemInFolder } from "@utils/native";
+import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { Alerts, Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import Plugins from "~plugins";
@@ -378,14 +378,23 @@ export function CspErrorCard() {
         const { origin: baseUrl, hostname } = new URL(url);
 
         const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Vencord Themes");
-        if (result === "ok") {
-            CspBlockedUrls.forEach(url => {
-                if (new URL(url).hostname === hostname) {
-                    CspBlockedUrls.delete(url);
-                }
-            });
-            forceUpdate();
-        }
+        if (result !== "ok") return;
+
+        CspBlockedUrls.forEach(url => {
+            if (new URL(url).hostname === hostname) {
+                CspBlockedUrls.delete(url);
+            }
+        });
+
+        forceUpdate();
+
+        Alerts.show({
+            title: "Restart Required",
+            body: "A restart is required to apply this change",
+            confirmText: "Restart now",
+            cancelText: "Later!",
+            onConfirm: relaunch
+        });
     };
 
     return (
