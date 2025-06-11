@@ -365,6 +365,8 @@ function ThemesTab() {
 }
 
 export function CspErrorCard() {
+    if (IS_WEB) return null;
+
     const errors = useCspErrors();
     const forceUpdate = useForceUpdater();
 
@@ -390,7 +392,8 @@ export function CspErrorCard() {
         <ErrorCard className="vc-settings-card">
             <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
             <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
-            <Forms.FormText>Make sure that your themes and custom css only load resources from whitelisted websites, such as GitHub, Imgur and Google Fonts.</Forms.FormText>
+            <Forms.FormText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Forms.FormText>
+            <Forms.FormText>After allowing a domain, you have to fully close (from tray / task manager) and restart {IS_DISCORD_DESKTOP ? "Discord" : "Vesktop"} to apply the change.</Forms.FormText>
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
             <div className="vc-settings-csp-list">

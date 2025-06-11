@@ -51,7 +51,9 @@ function getMessage(url: string, directives: string[], callerName: string) {
 
     const message = `${callerName} wants to allow connections to ${domain}`;
 
-    let detail = `Unless you recognise and fully trust ${domain}, you should cancel this request!\n\nYou will have to fully close and restart the app for the changes to take effect.`;
+    let detail =
+        `Unless you recognise and fully trust ${domain}, you should cancel this request!\n\n` +
+        `You will have to fully close and restart ${IS_DISCORD_DESKTOP ? "Discord" : "Vesktop"} for the changes to take effect.`;
 
     if (directives.length === 1 && directives[0] === "connect-src") {
         return { message, detail };
