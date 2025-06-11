@@ -65,6 +65,33 @@ const settings = definePluginSettings({
         description: "Jellyfin user ID obtained from your user profile URL",
         type: OptionType.STRING,
     },
+    overrideRichPresenceType: {
+        description: "Override the rich presence type",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Off",
+                value: false,
+                default: true,
+            },
+            {
+                label: "Listening",
+                value: 2,
+            },
+            {
+                label: "Playing",
+                value: 0,
+            },
+            {
+                label: "Streaming",
+                value: 1,
+            },
+            {
+                label: "Watching",
+                value: 3
+            },
+        ],
+    },
 });
 
 const applicationId = "1381368130164625469";
@@ -169,8 +196,23 @@ export default definePlugin({
     },
 
     async getActivity(): Promise<Activity | null> {
+        let richPresenceType;
+
         const mediaData = await this.fetchMediaData();
         if (!mediaData) return null;
+
+        if (settings.store.overrideRichPresenceType) {
+            richPresenceType = settings.store.overrideRichPresenceType;
+        } else {
+            switch (mediaData.type) {
+                case "Audio":
+                    richPresenceType = 2;
+                    break;
+                default:
+                    richPresenceType = 3;
+                    break;
+            }
+        }
 
         const largeImage = mediaData.imageUrl;
         const assets: ActivityAssets = {
@@ -208,7 +250,7 @@ export default definePlugin({
             assets,
             timestamps,
 
-            type: 3,
+            type: richPresenceType,
             flags: 1,
         };
     }
