@@ -121,4 +121,6 @@ function removeCspRule(domain: string) {
         delete NativeSettings.store.customCspRules[domain];
         return true;
     }
+
+    return false;
 }
