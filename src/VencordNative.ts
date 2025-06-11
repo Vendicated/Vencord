@@ -75,6 +75,11 @@ export default {
     },
 
     csp: {
+        /**
+         * Note: Only supports full explicit matches, not wildcards.
+         *
+         * If `*.example.com` is allowed, `isDomainAllowed("https://sub.example.com")` will return false.
+         */
         isDomainAllowed: (url: string, directives: string[]) => invoke<boolean>(IpcEvents.CSP_IS_DOMAIN_ALLOWED, url, directives),
         removeOverride: (url: string) => invoke<boolean>(IpcEvents.CSP_REMOVE_OVERRIDE, url),
         requestAddOverride: (url: string, directives: string[], callerName: string) =>
