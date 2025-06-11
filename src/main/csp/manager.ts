@@ -117,9 +117,8 @@ async function addCspRule(url: string, directives: string[], callerName: string)
 }
 
 function removeCspRule(domain: string) {
-    if ((domain in NativeSettings.store)) {
+    if (domain in NativeSettings.store.customCspRules) {
         delete NativeSettings.store.customCspRules[domain];
         return true;
     }
-    return false;
 }
