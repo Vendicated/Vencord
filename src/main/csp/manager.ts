@@ -118,8 +118,11 @@ function removeCspRule(_: IpcMainInvokeEvent, domain: string) {
 function isDomainAllowed(_: IpcMainInvokeEvent, url: string, directives: string[]) {
     try {
         const domain = new URL(url).hostname;
+
         const ruleForDomain = CspPolicies[domain] ?? NativeSettings.store.customCspRules[domain];
-        return ruleForDomain && directives.every(d => ruleForDomain.includes(d));
+        if (!ruleForDomain) return false;
+
+        return directives.every(d => ruleForDomain.includes(d));
     } catch (e) {
         return false;
     }
