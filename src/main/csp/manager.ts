@@ -29,6 +29,8 @@ function validate(url: string, directives: string[]) {
 
     if (directives.length === 0) return false;
     if (directives.some(d => !ImageAndCssSrc.includes(d))) return false;
+
+    return true;
 }
 
 function getMessage(url: string, directives: string[], callerName: string) {
