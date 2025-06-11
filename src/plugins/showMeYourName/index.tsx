@@ -45,8 +45,9 @@ function adjustHex(color: string, percent: number): string {
 
 function validColor(color: string) {
     const trimmedColor = color.trim();
-    if (!trimmedColor) return color.length > 0;
 
+    if (!color) return true;
+    if (trimmedColor.length !== color.length) return false;
     if (trimmedColor.toLowerCase() === "role") return true;
 
     if (color.toLowerCase().includes("role")) {
