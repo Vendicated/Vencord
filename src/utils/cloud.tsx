@@ -25,9 +25,22 @@ import { Logger } from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
-export const getCloudUrl = () => new URL(Settings.cloud.url);
 
-const cloudUrlOrigin = () => getCloudUrl().origin;
+export const getCloudUrl = () => new URL(Settings.cloud.url);
+const getCloudUrlOrigin = () => getCloudUrl().origin;
+
+export async function checkCloudUrlCsp() {
+    if (IS_WEB) return true;
+
+    const { host } = getCloudUrl();
+    if (host === "api.vencord.dev") return true;
+
+    if (await VencordNative.csp.isDomainAllowed(Settings.cloud.url)) return true;
+
+    const res = await VencordNative.csp.requestAddOverride(Settings.cloud.url, ["connect-src"], "Cloud Sync");
+    return res === "ok";
+}
+
 const getUserId = () => {
     const id = UserStore.getCurrentUser()?.id;
     if (!id) throw new Error("User not yet logged in");
@@ -37,7 +50,7 @@ const getUserId = () => {
 export async function getAuthorization() {
     const secrets = await DataStore.get<Record<string, string>>("Vencord_cloudSecret") ?? {};
 
-    const origin = cloudUrlOrigin();
+    const origin = getCloudUrlOrigin();
 
     // we need to migrate from the old format here
     if (secrets[origin]) {
@@ -59,7 +72,7 @@ export async function getAuthorization() {
 async function setAuthorization(secret: string) {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secret;
+        secrets[`${getCloudUrlOrigin()}:${getUserId()}`] = secret;
         return secrets;
     });
 }
@@ -67,7 +80,7 @@ async function setAuthorization(secret: string) {
 export async function deauthorizeCloud() {
     await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
-        delete secrets[`${cloudUrlOrigin()}:${getUserId()}`];
+        delete secrets[`${getCloudUrlOrigin()}:${getUserId()}`];
         return secrets;
     });
 }
@@ -77,6 +90,8 @@ export async function authorizeCloud() {
         Settings.cloud.authenticated = true;
         return;
     }
+
+    if (!await checkCloudUrlCsp()) return;
 
     try {
         const oauthConfiguration = await fetch(new URL("/v1/oauth/settings", getCloudUrl()));

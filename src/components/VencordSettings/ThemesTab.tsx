@@ -24,15 +24,15 @@ import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIc
 import { Link } from "@components/Link";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
-import { useCspErrors } from "@utils/cspViolations";
+import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
-import { useAwaiter } from "@utils/react";
+import { useAwaiter, useForceUpdater } from "@utils/react";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { findLazy } from "@webpack";
-import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import Plugins from "~plugins";
@@ -366,10 +366,25 @@ function ThemesTab() {
 
 export function CspErrorCard() {
     const errors = useCspErrors();
+    const forceUpdate = useForceUpdater();
 
     if (!errors.length) return null;
 
     const hasImgurHtmlDomain = errors.some(e => e.startsWith("https://imgur.com/"));
+
+    const allowUrl = async (url: string) => {
+        const { origin: baseUrl, hostname } = new URL(url);
+
+        const result = await VencordNative.csp.requestAddOverride(baseUrl, ["img-src", "style-src", "font-src"], "Themes");
+        if (result === "ok") {
+            CspBlockedUrls.forEach(url => {
+                if (new URL(url).hostname === hostname) {
+                    CspBlockedUrls.delete(url);
+                }
+            });
+            forceUpdate();
+        }
+    };
 
     return (
         <ErrorCard className="vc-settings-card">
@@ -378,11 +393,19 @@ export function CspErrorCard() {
             <Forms.FormText>Make sure that your themes and custom css only load resources from whitelisted websites, such as GitHub, Imgur and Google Fonts.</Forms.FormText>
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
-            <Flex flexDirection="column" style={{ gap: "0.25em" }}>
+            <div className="vc-settings-csp-list">
                 {errors.map(url => (
-                    <Link href={url} key={url}>{url}</Link>
+                    <div key={url}>
+                        <div className="vc-settings-csp-row" key={url}>
+                            <Link href={url} key={url}>{url}</Link>
+                            <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)}>
+                                Allow
+                            </Button>
+                        </div>
+                        <Forms.FormDivider className={Margins.top8} />
+                    </div>
                 ))}
-            </Flex>
+            </div>
 
             {hasImgurHtmlDomain && (
                 <Forms.FormText className={Margins.top16}>

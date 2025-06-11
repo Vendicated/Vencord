@@ -79,8 +79,6 @@ export default {
         removeOverride: (url: string) => invoke<void>(IpcEvents.CSP_REMOVE_OVERRIDE, url),
         requestAddOverride: (url: string, directives: string[], callerName: string) =>
             invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, url, directives, callerName),
-        requestAddOverrideDueToError: (url: string, directives: string[]) =>
-            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE_DUE_TO_ERROR, url, directives)
     },
 
     pluginHelpers: PluginHelpers
