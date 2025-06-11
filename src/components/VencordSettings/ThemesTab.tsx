@@ -400,8 +400,8 @@ export function CspErrorCard() {
                 {errors.map((url, i) => (
                     <div key={url}>
                         {i !== 0 && <Forms.FormDivider className={Margins.bottom8} />}
-                        <div className="vc-settings-csp-row" key={url}>
-                            <Link href={url} key={url}>{url}</Link>
+                        <div className="vc-settings-csp-row">
+                            <Link href={url}>{url}</Link>
                             <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={url.startsWith("https://imgur.com/")}>
                                 Allow
                             </Button>
