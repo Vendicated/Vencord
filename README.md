@@ -44,7 +44,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CopyUserMention by Cortex & castdrian
 - CustomFolderIcons by sadan
 - CustomSounds by TheKodeToad & SpikeHD
-- CustomTimestamps by Rini & nvhrr
+- CustomTimestamps by Rini, nvhrr, Suffocate, Obsidian
 - CustomUserColors by mochienya
 - CuteAnimeBoys by ShadyGoat
 - CuteNekos by echo
