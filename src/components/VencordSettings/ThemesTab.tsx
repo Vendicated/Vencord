@@ -375,7 +375,7 @@ export function CspErrorCard() {
     const allowUrl = async (url: string) => {
         const { origin: baseUrl, hostname } = new URL(url);
 
-        const result = await VencordNative.csp.requestAddOverride(baseUrl, ["img-src", "style-src", "font-src"], "Themes");
+        const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Themes");
         if (result === "ok") {
             CspBlockedUrls.forEach(url => {
                 if (new URL(url).hostname === hostname) {
@@ -394,15 +394,15 @@ export function CspErrorCard() {
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
             <div className="vc-settings-csp-list">
-                {errors.map(url => (
+                {errors.map((url, i) => (
                     <div key={url}>
+                        {i !== 0 && <Forms.FormDivider className={Margins.bottom8} />}
                         <div className="vc-settings-csp-row" key={url}>
                             <Link href={url} key={url}>{url}</Link>
-                            <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)}>
+                            <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={url.startsWith("https://imgur.com/")}>
                                 Allow
                             </Button>
                         </div>
-                        <Forms.FormDivider className={Margins.top8} />
                     </div>
                 ))}
             </div>
