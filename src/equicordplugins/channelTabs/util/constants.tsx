@@ -71,6 +71,31 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: false
+    },
+    switchToExistingTab: {
+        type: OptionType.BOOLEAN,
+        description: "Switch to tab if it already exists for the channel you're navigating to",
+        default: false,
+        restartNeeded: false
+    },
+    createNewTabIfNotExists: {
+        type: OptionType.BOOLEAN,
+        description: "Create a new tab if one doesn't exist for the channel you're navigating to",
+        default: false,
+        restartNeeded: false
+    },
+    enableRapidNavigation: {
+        type: OptionType.BOOLEAN,
+        description: "Enable rapid navigation behavior - quickly navigating between channels will replace the current tab instead of creating new ones",
+        default: false,
+        restartNeeded: false
+    },
+    rapidNavigationThreshold: {
+        type: OptionType.SLIDER,
+        description: "Time window (in milliseconds) for rapid navigation. Within this time, new channels replace the current tab instead of creating new ones.",
+        markers: [500, 1000, 1500, 2000, 3000, 5000, 10000],
+        default: 3000,
+        stickToMarkers: false,
     }
 });
 

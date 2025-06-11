@@ -145,6 +145,9 @@
     width: 12rem;
     min-width: 0;
     margin-right: 0.25rem;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-accent);
+    transition: background-color 0.15s ease;
 }
 
 .vc-channeltabs-tab.vc-channeltabs-wider:not(.vc-channeltabs-tab-compact) {
@@ -159,6 +162,7 @@
 .vc-channeltabs-tab-selected {
     background: var(--bg-overlay-selected);
     background-color: var(--background-modifier-selected);
+    border-color: var(--brand-500);
 }
 
 /* channel type container */

@@ -52,16 +52,25 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     }, []);
 
     useEffect(() => {
-        (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current?.clientHeight;
+        if (ref.current) {
+            try {
+                (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
+            } catch { }
+        }
     }, [userId, showBookmarkBar]);
 
     useEffect(() => {
         _update();
     }, [widerTabsAndBookmarks]);
 
+    useEffect(() => {
+        if (userId) {
+            handleChannelSwitch(props);
+            saveTabs(userId);
+        }
+    }, [userId, props.channelId, props.guildId]);
+
     if (!userId) return null;
-    handleChannelSwitch(props);
-    saveTabs(userId);
 
     return (
         <div

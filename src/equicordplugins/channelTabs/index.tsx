@@ -15,7 +15,7 @@ import { Channel, Message } from "discord-types/general";
 import { JSX } from "react";
 
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
-import { BasicChannelTabsProps, createTab, settings } from "./util";
+import { BasicChannelTabsProps, createTab, handleChannelSwitch, settings } from "./util";
 import * as ChannelTabsUtils from "./util";
 
 const contextMenuPatch: NavContextMenuPatchCallback = (children, props: { channel: Channel, messageId?: string; }) =>
@@ -50,6 +50,14 @@ export default definePlugin({
             replacement: {
                 match: /(\?void 0:(\i)\.channelId.{0,500}return)((.{0,15})"div",{.*?\])(\}\)\}\})/,
                 replace: "$1$4$self.render,{currentChannel:$2,children:$3})$5"
+            }
+        },
+        // intercept channel navigation to switch/create tabs
+        {
+            find: "transitionToGuild",
+            replacement: {
+                match: /transitionToGuild\(([^,]+),([^)]+)\)/,
+                replace: "$&;$self.handleNavigation($1,$2)"
             }
         },
         // ctrl click to open in new tab in inbox unread
@@ -111,6 +119,15 @@ export default definePlugin({
             compact: false
         };
         createTab(tab, false, message.id);
+    },
+
+    handleNavigation(guildId: string, channelId: string) {
+        if (!guildId || !channelId) return;
+
+        // wait for discord to update channel data
+        requestAnimationFrame(() => {
+            handleChannelSwitch({ guildId, channelId });
+        });
     },
 
     util: ChannelTabsUtils,

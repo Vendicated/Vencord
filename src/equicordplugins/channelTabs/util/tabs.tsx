@@ -128,11 +128,46 @@ export function closeTabsToTheLeft(id: number) {
     else update();
 }
 
+let lastNavigationTime = 0;
+
 export function handleChannelSwitch(ch: BasicChannelTabsProps) {
     const tab = openTabs.find(c => c.id === currentlyOpenTab);
-    if (tab === undefined) return logger.error("Couldn't find the currently open channel " + currentlyOpenTab, openTabs);
+    const existingTab = openTabs.find(tab => tab.channelId === ch.channelId && tab.guildId === ch.guildId);
 
-    if (tab.channelId !== ch.channelId) openTabs[openTabs.indexOf(tab)] = { id: tab.id, compact: tab.compact, ...ch };
+    // First check: switch to existing tab if setting enabled and tab exists
+    if (settings.store.switchToExistingTab && existingTab) {
+        moveToTab(existingTab.id);
+        return;
+    }
+
+    // Second check: create new tab if setting enabled
+    if (settings.store.createNewTabIfNotExists) {
+        // Apply rapid navigation logic when creating new tabs
+        const now = Date.now();
+        const isRapidNavigation = now - lastNavigationTime < settings.store.rapidNavigationThreshold;
+        lastNavigationTime = now;
+
+        if (isRapidNavigation && settings.store.enableRapidNavigation) {
+            // Replace current tab content instead of creating new one
+            const currentTab = openTabs.find(t => t.id === currentlyOpenTab);
+            if (currentTab) {
+                currentTab.channelId = ch.channelId;
+                currentTab.guildId = ch.guildId;
+                update();
+                return;
+            }
+        }
+
+        // Create new tab (normal behavior)
+        createTab(ch, true);
+        return;
+    }
+
+    // Default behavior: replace current tab content
+    if (tab && tab.channelId !== ch.channelId) {
+        openTabs[openTabs.indexOf(tab)] = { id: tab.id, compact: tab.compact, ...ch };
+        update();
+    }
 }
 
 export function hasClosedTabs() {
