@@ -54,10 +54,10 @@ export default definePlugin({
         },
         // intercept channel navigation to switch/create tabs
         {
-            find: "transitionToGuild",
+            find: "sourceLocationStack,null",
             replacement: {
-                match: /transitionToGuild\(([^,]+),([^)]+)\)/,
-                replace: "$&;$self.handleNavigation($1,$2)"
+                match: /(\i\((\i),(\i),\i,\i\)\{)(.{0,25}"transitionToGuild)/,
+                replace: "$1$self.handleNavigation($2,$3);$4"
             }
         },
         // ctrl click to open in new tab in inbox unread
@@ -86,7 +86,7 @@ export default definePlugin({
         },
         // prevent issues with the pins/inbox popouts being too tall
         {
-            find: ".messagesPopoutWrap",
+            find: ".messagesPopoutWrap),style",
             replacement: {
                 match: /\i&&\((\i).maxHeight.{0,5}\)/,
                 replace: "$&;$1.maxHeight-=$self.containerHeight"
