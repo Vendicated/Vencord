@@ -49,9 +49,9 @@ function validate(domain: string, directives: string[]) {
 function getMessage(url: string, directives: string[], callerName: string) {
     const domain = new URL(url).hostname;
 
-    const message = `${callerName} wants to allow connections to ${domain}. Unless you recognise and fully trust ${domain}, you should cancel this request!`;
+    const message = `${callerName} wants to allow connections to ${domain}.`;
 
-    let detail = "You will have to fully close and restart the app for the changes to take effect.";
+    let detail = `Unless you recognise and fully trust ${domain}, you should cancel this request!\n\nYou will have to fully close and restart the app for the changes to take effect.`;
 
     if (directives.length === 1 && directives[0] === "connect-src") {
         return { message, detail };
@@ -93,7 +93,7 @@ async function addCspRule(url: string, directives: string[], callerName: string)
     const { checkboxChecked, response } = await dialog.showMessageBox({
         ...getMessage(url, directives, callerName),
         type: callerName ? "info" : "warning",
-        title: `${domain} Host Permissions`,
+        title: "Vencord Host Permissions",
         buttons: ["Cancel", "Allow"],
         defaultId: 0,
         cancelId: 0,

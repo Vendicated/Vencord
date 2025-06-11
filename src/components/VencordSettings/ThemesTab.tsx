@@ -408,10 +408,13 @@ export function CspErrorCard() {
             </div>
 
             {hasImgurHtmlDomain && (
-                <Forms.FormText className={Margins.top16}>
-                    Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>.
-                    To obtain a direct link, right-click the image and select "Copy image address".
-                </Forms.FormText>
+                <>
+                    <Forms.FormDivider className={classes(Margins.top8, Margins.bottom16)} />
+                    <Forms.FormText>
+                        Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>.
+                        To obtain a direct link, right-click the image and select "Copy image address".
+                    </Forms.FormText>
+                </>
             )}
         </ErrorCard>
     );
