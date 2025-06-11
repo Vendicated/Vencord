@@ -18,22 +18,17 @@ export function registerCspIpcHandlers() {
     ipcMain.handle(IpcEvents.CSP_IS_DOMAIN_ALLOWED, isDomainAllowed);
 }
 
-// TODO: remove this when URL.canParse is more mature
-const isUrlValid = URL.canParse || ((url: string) => {
+function validate(url: string, directives: string[]) {
     try {
-        new URL(url);
-        return true;
+        const { hostname } = new URL(url);
+
+        if (/[;'"'\\]/.test(hostname)) return false;
     } catch {
         return false;
     }
-});
 
-function validate(domain: string, directives: string[]) {
-    if (!isUrlValid(domain)) return false;
     if (directives.length === 0) return false;
     if (directives.some(d => !ImageAndCssSrc.includes(d))) return false;
-
-    return true;
 }
 
 function getMessage(url: string, directives: string[], callerName: string) {
