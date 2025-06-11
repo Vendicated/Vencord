@@ -372,7 +372,7 @@ export function CspErrorCard() {
 
     if (!errors.length) return null;
 
-    const hasImgurHtmlDomain = errors.some(e => e.startsWith("https://imgur.com/"));
+    const isImgurHtmlDomain = (url: string) => url.startsWith("https://imgur.com/");
 
     const allowUrl = async (url: string) => {
         const { origin: baseUrl, hostname } = new URL(url);
@@ -397,12 +397,16 @@ export function CspErrorCard() {
         });
     };
 
+    const hasImgurHtmlDomain = errors.some(isImgurHtmlDomain);
+
     return (
         <ErrorCard className="vc-settings-card">
             <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
             <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
             <Forms.FormText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Forms.FormText>
-            <Forms.FormText>After allowing a domain, you have to fully close (from tray / task manager) and restart {IS_DISCORD_DESKTOP ? "Discord" : "Vesktop"} to apply the change.</Forms.FormText>
+            <Forms.FormText>
+                After allowing a domain, you have to fully close (from tray / task manager) and restart {IS_DISCORD_DESKTOP ? "Discord" : "Vesktop"} to apply the change.
+            </Forms.FormText>
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
             <div className="vc-settings-csp-list">
@@ -411,7 +415,7 @@ export function CspErrorCard() {
                         {i !== 0 && <Forms.FormDivider className={Margins.bottom8} />}
                         <div className="vc-settings-csp-row">
                             <Link href={url}>{url}</Link>
-                            <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={url.startsWith("https://imgur.com/")}>
+                            <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
                                 Allow
                             </Button>
                         </div>
