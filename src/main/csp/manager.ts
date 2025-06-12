@@ -99,7 +99,6 @@ async function addCspRule(_: IpcMainInvokeEvent, url: string, directives: string
     }
 
     NativeSettings.store.customCspRules[domain] = directives;
-
     return "ok";
 }
 
