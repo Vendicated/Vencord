@@ -82,7 +82,7 @@ export default definePlugin({
                 replace: "$self.getReasons()"
             },
             {
-                match: /useState\(null\)(?=.{0,200}targetUserId:)/,
+                match: /useState\((null|0)\)(?=.{0,200}targetUserId:)/,
                 replace: "useState($self.getDefaultState())"
             }]
         }
