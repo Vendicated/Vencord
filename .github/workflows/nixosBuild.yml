@@ -5,7 +5,7 @@ on:
         - cron: 0 0 * * *
 env:
     FORCE_COLOR: true
-    GITHUB_TOKEN: ${{ secrets.ETOKEN }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions: write-all
 
