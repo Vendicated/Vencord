@@ -35,6 +35,7 @@ export async function checkCloudUrlCsp() {
 
     const { host } = getCloudUrl();
     if (host === "api.vencord.dev") return true;
+    if (host === "cloud.equicord.org") return true;
 
     if (await VencordNative.csp.isDomainAllowed(Settings.cloud.url, ["connect-src"])) {
         return true;
