@@ -115,4 +115,5 @@ window.VencordNative = {
     },
 
     pluginHelpers: {} as any,
+    csp: {} as any,
 };
