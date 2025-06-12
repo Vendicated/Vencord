@@ -64,9 +64,9 @@ const settings = definePluginSettings({
         default: [] as string[],
         component: ReasonsComponent,
     },
-    isTextInputDefault: {
+    isOtherDefault: {
         type: OptionType.BOOLEAN,
-        description: 'Shows a text input instead of a select menu by default. (Equivalent to clicking the "Other" option)'
+        description: "Selects the other option by default. (Shows a text input)"
     }
 });
 
@@ -76,13 +76,13 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: "banReasonOtherClickable,",
+            find: 'username:"@"',
             replacement: [{
-                match: /\[(\{((name|value):\i\.\i\.string\(\i\.\i\.\i\),?){2}\},?){3}\]/,
-                replace: "$self.getReasons()"
+                match: /\[({name:.+?,value:.+?},){2}{name:.+?,value:"other"}\]/,
+                replace: "$self.getReasons($1)"
             },
             {
-                match: /useState\(0\)(?=.{0,100}targetUserId:)/,
+                match: /useState\(""\)(?=.{0,100}isArchivedThread)/,
                 replace: "useState($self.getDefaultState())"
             }]
         }
@@ -96,8 +96,8 @@ export default definePlugin({
                 getIntlMessage("BAN_REASON_OPTION_HACKED_ACCOUNT"),
                 getIntlMessage("BAN_REASON_OPTION_BREAKING_RULES"),
             ];
-        return reasons.map(s => ({ name: s, value: s }));
+        return reasons.map(s => ({ name: s, value: s })).concat({ name: getIntlMessage("BAN_REASON_OPTION_OTHER"), value: "other" });
     },
-    getDefaultState: () => settings.store.isTextInputDefault ? 1 : 0,
+    getDefaultState: () => settings.store.isOtherDefault ? "other" : "",
     settings,
 });
