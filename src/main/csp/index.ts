@@ -44,6 +44,8 @@ export const CspPolicies: PolicyMap = {
     "cdn.discordapp.com": ImageAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
     "media.discordapp.net": ImageSrc, // Discord media CDN, possible alternative to Discord CDN
 
+    "external-content.duckduckgo.com": ImageSrc, // DuckDuckGo image mirror, reasonably private and secure
+
     // CDNs used for some things by Vencord.
     // FIXME: we really should not be using CDNs anymore
     "cdnjs.cloudflare.com": ImageScriptsAndCssSrc,
