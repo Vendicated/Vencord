@@ -26,7 +26,7 @@ import { Flex } from "@components/Flex";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes, isObjectEmpty } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
@@ -98,7 +98,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
-    const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
+    const hasSettings = Boolean(plugin.settings?.def && !Object.values(plugin.settings?.def || {})?.every(o => "hidden" in o && o?.hidden));
 
     React.useEffect(() => {
         (async () => {

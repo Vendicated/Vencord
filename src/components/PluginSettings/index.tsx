@@ -30,7 +30,7 @@ import { ChangeList } from "@utils/ChangeList";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { classes, isObjectEmpty } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -141,6 +141,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         settings.enabled = !wasEnabled;
     }
 
+    const shouldShowCog = plugin.settings?.def && !Object.values(plugin.settings?.def || {})?.every(o => "hidden" in o && o?.hidden);
+
     return (
         <AddonCard
             name={plugin.name}
@@ -157,7 +159,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                     onClick={() => openPluginModal(plugin, onRestartNeeded)}
                     className={classes(ButtonClasses.button, cl("info-button"))}
                 >
-                    {plugin.options && !isObjectEmpty(plugin.options)
+                    {shouldShowCog
                         ? <CogWheel className={cl("info-icon")} />
                         : <InfoIcon className={cl("info-icon")} />}
                 </button>
