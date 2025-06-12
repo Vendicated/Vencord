@@ -23,6 +23,7 @@ export const DONOR_ROLE_ID = "1042507929485586532";
 export const CONTRIB_ROLE_ID = "1026534353167208489";
 export const REGULAR_ROLE_ID = "1026504932959977532";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
+export const SUPPORT_CATEGORY_ID = "1108135649699180705";
 export const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
 
 export interface Dev {
@@ -39,7 +40,7 @@ export interface Dev {
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
     Ven: {
-        name: "Vee",
+        name: "V",
         id: 343383572805058560n
     },
     Arjix: {
@@ -193,7 +194,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     axyie: {
         name: "'ax",
-        id: 273562710745284628n,
+        id: 929877747151548487n,
     },
     pointy: {
         name: "pointy",
@@ -586,7 +587,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     samsam: {
         name: "samsam",
-        id: 836452332387565589n,
+        id: 400482410279469056n,
+    },
+    Cootshk: {
+        name: "Cootshk",
+        id: 921605971577548820n
     },
 } satisfies Record<string, Dev>);
 

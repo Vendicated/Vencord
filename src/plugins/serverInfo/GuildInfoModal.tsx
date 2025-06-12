@@ -16,7 +16,7 @@ import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore,
 import { Guild, User } from "discord-types/general";
 
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
-const FriendRow = findComponentByCodeLazy(".listName,discriminatorClass");
+const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "getAvatarURL");
 
 const cl = classNameFactory("vc-gp-");
 
@@ -198,7 +198,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Vanity Link": guild.vanityURLCode ? (<a>{`discord.gg/${guild.vanityURLCode}`}</a>) : "-", // Making the anchor href valid would cause Discord to reload
         "Preferred Locale": guild.preferredLocale || "-",
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
-        "Nitro Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
+        "Server Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
         "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
         "Roles": Object.keys(GuildStore.getRoles(guild.id)).length - 1, // - @everyone
     };

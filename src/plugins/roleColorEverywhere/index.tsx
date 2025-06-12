@@ -84,14 +84,8 @@ export default definePlugin({
             find: ".USER_MENTION)",
             replacement: [
                 {
-                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
-                    match: /onContextMenu:\i,color:\i,\.\.\.\i(?=,children:)(?<=user:(\i),channel:(\i).{0,500}?)/,
-                    replace: "$&,color:$self.getColorInt($1?.id,$2?.id)",
-                    noWarn: true
-                },
-                {
-                    match: /(?<=onContextMenu:\i,color:)\i(?=\},\i\),\{children)(?<=user:(\i),channel:(\i).{0,500}?)/,
-                    replace: "$self.getColorInt($1?.id,$2?.id)",
+                    match: /(?<=onContextMenu:\i,color:)\i(?<=\.getNickname\((\i),\i,(\i).+?)/,
+                    replace: "$self.getColorInt($2?.id,$1)",
                 }
             ],
             predicate: () => settings.store.chatMentions
@@ -159,7 +153,7 @@ export default definePlugin({
         },
         // Messages
         {
-            find: "#{intl::MESSAGE_EDITED}",
+            find: ".SEND_FAILED,",
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
                 replace: "style:$self.useMessageColorsStyle($1),"
