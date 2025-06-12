@@ -42,4 +42,8 @@ export const enum IpcEvents {
 
     OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
     VOICE_MESSAGES_READ_RECORDING = "VencordVMReadRecording",
+
+    CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
+    CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",
+    CSP_REQUEST_ADD_OVERRIDE = "VencordCspRequestAddOverride",
 }

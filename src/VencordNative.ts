@@ -5,6 +5,7 @@
  */
 
 import type { Settings } from "@api/Settings";
+import { CspRequestResult } from "@main/csp/manager";
 import { PluginIpcMappings } from "@main/ipcPlugins";
 import type { UserThemeHeader } from "@main/themes";
 import { IpcEvents } from "@shared/IpcEvents";
@@ -71,6 +72,18 @@ export default {
     native: {
         getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
+    },
+
+    csp: {
+        /**
+         * Note: Only supports full explicit matches, not wildcards.
+         *
+         * If `*.example.com` is allowed, `isDomainAllowed("https://sub.example.com")` will return false.
+         */
+        isDomainAllowed: (url: string, directives: string[]) => invoke<boolean>(IpcEvents.CSP_IS_DOMAIN_ALLOWED, url, directives),
+        removeOverride: (url: string) => invoke<boolean>(IpcEvents.CSP_REMOVE_OVERRIDE, url),
+        requestAddOverride: (url: string, directives: string[], callerName: string) =>
+            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, url, directives, callerName),
     },
 
     pluginHelpers: PluginHelpers

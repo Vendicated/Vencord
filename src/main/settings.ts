@@ -49,16 +49,18 @@ export interface NativeSettings {
             [setting: string]: any;
         };
     };
+    customCspRules: Record<string, string[]>;
 }
 
 const DefaultNativeSettings: NativeSettings = {
-    plugins: {}
+    plugins: {},
+    customCspRules: {}
 };
 
 const nativeSettings = readSettings<NativeSettings>("native", NATIVE_SETTINGS_FILE);
 mergeDefaults(nativeSettings, DefaultNativeSettings);
 
-export const NativeSettings = new SettingsStore(nativeSettings);
+export const NativeSettings = new SettingsStore(nativeSettings as NativeSettings);
 
 NativeSettings.addGlobalChangeListener(() => {
     try {

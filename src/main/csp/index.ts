@@ -4,59 +4,63 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { NativeSettings } from "@main/settings";
 import { session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
 
 export const ConnectSrc = ["connect-src"];
-export const MediaSrc = [...ConnectSrc, "img-src", "media-src"];
+export const ImageSrc = [...ConnectSrc, "img-src"];
 export const CssSrc = ["style-src", "font-src"];
-export const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
-export const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
+export const ImageAndCssSrc = [...ImageSrc, ...CssSrc];
+export const ImageScriptsAndCssSrc = [...ImageAndCssSrc, "script-src", "worker-src"];
 
 // Plugins can whitelist their own domains by importing this object in their native.ts
 // script and just adding to it. But generally, you should just edit this file instead
 
 export const CspPolicies: PolicyMap = {
-    "*.github.io": MediaAndCssSrc, // GitHub pages, used by most themes
-    "github.com": MediaAndCssSrc, // GitHub content (stuff uploaded to markdown forms), used by most themes
-    "raw.githubusercontent.com": MediaAndCssSrc, // GitHub raw, used by some themes
-    "*.gitlab.io": MediaAndCssSrc, // GitLab pages, used by some themes
-    "gitlab.com": MediaAndCssSrc, // GitLab raw, used by some themes
-    "*.codeberg.page": MediaAndCssSrc, // Codeberg pages, used by some themes
-    "codeberg.org": MediaAndCssSrc, // Codeberg raw, used by some themes
+    "localhost": ImageAndCssSrc,
+    "127.0.0.1": ImageAndCssSrc,
 
-    "*.githack.com": MediaAndCssSrc, // githack (namely raw.githack.com), used by some themes
-    "jsdelivr.net": MediaAndCssSrc, // jsDelivr, used by very few themes
+    "*.github.io": ImageAndCssSrc, // GitHub pages, used by most themes
+    "github.com": ImageAndCssSrc, // GitHub content (stuff uploaded to markdown forms), used by most themes
+    "raw.githubusercontent.com": ImageAndCssSrc, // GitHub raw, used by some themes
+    "*.gitlab.io": ImageAndCssSrc, // GitLab pages, used by some themes
+    "gitlab.com": ImageAndCssSrc, // GitLab raw, used by some themes
+    "*.codeberg.page": ImageAndCssSrc, // Codeberg pages, used by some themes
+    "codeberg.org": ImageAndCssSrc, // Codeberg raw, used by some themes
+
+    "*.githack.com": ImageAndCssSrc, // githack (namely raw.githack.com), used by some themes
+    "jsdelivr.net": ImageAndCssSrc, // jsDelivr, used by very few themes
 
     "fonts.googleapis.com": CssSrc, // Google Fonts, used by many themes
 
-    "i.imgur.com": MediaSrc, // Imgur, used by some themes
-    "i.ibb.co": MediaSrc, // ImgBB, used by some themes
-    "i.pinimg.com": MediaSrc, // Pinterest, used by some themes
-    "*.tenor.com": MediaSrc, // Tenor, used by some themes
-    "files.catbox.moe": MediaSrc, // Catbox, used by some themes
+    "i.imgur.com": ImageSrc, // Imgur, used by some themes
+    "i.ibb.co": ImageSrc, // ImgBB, used by some themes
+    "i.pinimg.com": ImageSrc, // Pinterest, used by some themes
+    "*.tenor.com": ImageSrc, // Tenor, used by some themes
+    "files.catbox.moe": ImageAndCssSrc, // Catbox, used by some themes
 
-    "cdn.discordapp.com": MediaAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
-    "media.discordapp.net": MediaSrc, // Discord media CDN, possible alternative to Discord CDN
+    "cdn.discordapp.com": ImageAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
+    "media.discordapp.net": ImageSrc, // Discord media CDN, possible alternative to Discord CDN
 
     // CDNs used for some things by Vencord.
     // FIXME: we really should not be using CDNs anymore
-    "cdnjs.cloudflare.com": MediaScriptsAndCssSrc,
-    "cdn.jsdelivr.net": MediaScriptsAndCssSrc,
+    "cdnjs.cloudflare.com": ImageScriptsAndCssSrc,
+    "cdn.jsdelivr.net": ImageScriptsAndCssSrc,
 
     // Function Specific
     "api.github.com": ConnectSrc, // used for updating Vencord itself
     "ws.audioscrobbler.com": ConnectSrc, // Last.fm API
     "translate-pa.googleapis.com": ConnectSrc, // Google Translate API
-    "*.vencord.dev": MediaSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
-    "manti.vendicated.dev": MediaSrc, // ReviewDB API
+    "*.vencord.dev": ImageSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
+    "manti.vendicated.dev": ImageSrc, // ReviewDB API
     "decor.fieryflames.dev": ConnectSrc, // Decor API
-    "ugc.decor.fieryflames.dev": MediaSrc, // Decor CDN
+    "ugc.decor.fieryflames.dev": ImageSrc, // Decor CDN
     "sponsor.ajay.app": ConnectSrc, // Dearrow API
-    "dearrow-thumb.ajay.app": MediaSrc, // Dearrow Thumbnail CDN
-    "usrbg.is-hardly.online": MediaSrc, // USRBG API
-    "icons.duckduckgo.com": MediaSrc, // DuckDuckGo Favicon API (Reverse Image Search)
+    "dearrow-thumb.ajay.app": ImageSrc, // Dearrow Thumbnail CDN
+    "usrbg.is-hardly.online": ImageSrc, // USRBG API
+    "icons.duckduckgo.com": ImageSrc, // DuckDuckGo Favicon API (Reverse Image Search)
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
@@ -105,6 +109,12 @@ const patchCsp = (headers: PolicyMap) => {
 
         for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
             pushDirective(directive, "blob:", "data:", "vencord:");
+        }
+
+        for (const [host, directives] of Object.entries(NativeSettings.store.customCspRules)) {
+            for (const directive of directives) {
+                pushDirective(directive, host);
+            }
         }
 
         for (const [host, directives] of Object.entries(CspPolicies)) {
