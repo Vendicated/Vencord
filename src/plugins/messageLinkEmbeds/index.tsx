@@ -21,24 +21,12 @@ import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants.js";
+import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import {
-    Button,
-    ChannelStore,
-    Constants,
-    GuildStore,
-    IconUtils,
-    MessageStore,
-    Parser,
-    PermissionsBits,
-    PermissionStore,
-    RestAPI,
-    Text,
-    UserStore
-} from "@webpack/common";
+import { Button, ChannelStore, Clickable, Constants, GuildStore, IconUtils, MessageStore, Parser, PermissionsBits, PermissionStore, RestAPI, Text, UserStore, useState } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 import { JSX } from "react";
 
@@ -51,8 +39,14 @@ const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
 const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 
+const ImageWarningIcon = findComponentByCodeLazy("M19.91 14.63a1.06 1.06 0 0 0-1.82");
+const EyeIcon = findComponentByCodeLazy("M22.89 11.7c.07.2.07.4 0 .6C22.27");
+const EyeSlashIcon = findComponentByCodeLazy("M8.18 10.81c-.13.43.36.65");
+
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
+const SpoilerClasses = findByPropsLazy("explicitContentWarning", "explicitContentWarningText", "spoilerContent");
+const MosaicClasses = findByPropsLazy("obscured", "hiddenMosaicItem", "hiddenExplicit");
 
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
@@ -96,6 +90,11 @@ const settings = definePluginSettings({
                 default: true
             }
         ]
+    },
+    blurNsfw: {
+        description: "Blur embeds from age restricted channels",
+        type: OptionType.BOOLEAN,
+        default: true
     },
     listMode: {
         description: "Whether to use ID list as blacklist or whitelist",
@@ -283,6 +282,55 @@ function getChannelLabelAndIconUrl(channel: Channel) {
     return ["Server", IconUtils.getGuildIconURL(GuildStore.getGuild(channel.guild_id))];
 }
 
+function Spoiler(props: { children: JSX.Element }) : JSX.Element {
+    const [visible, setVisible] = useState(false);
+    const {
+        explicitContentWarning,
+        explicitContentWarningText,
+        spoilerContent,
+        spoilerContainer,
+        hidden,
+        spoilerInnerContainer,
+        obscureButtonContainer,
+        obscureHoverButton
+    } = SpoilerClasses;
+    const { obscured, hiddenMosaicItem, hiddenExplicit } = MosaicClasses;
+
+    return (
+        <div
+            aria-label={!visible && getIntlMessage("EXPLICIT_CONTENT_WARNING_TOOLTIP")}
+            aria-expanded={visible}
+            className={classes(spoilerContainer, !visible && classes(hidden, spoilerContent))}
+            role={visible ? "presentation" : "button"}
+            tabIndex={visible ? -1 : 0}
+        >
+            {!visible &&
+                <div className={explicitContentWarning}>
+                    <ImageWarningIcon size="lg" color="white"/>
+                    <Text variant="text-sm/normal" color="always-white"
+                          className={classes(explicitContentWarningText)}>
+                        {getIntlMessage("EXPLICIT_CONTENT_WARNING")}
+                    </Text>
+                </div>
+            }
+            <div
+                aria-hidden={!visible}
+                className={classes(spoilerInnerContainer, !visible && classes(obscured, hiddenMosaicItem, hiddenExplicit))}
+            >
+                {props.children}
+            </div>
+            <div className={obscureButtonContainer}>
+                <Clickable onClick={() => setVisible(!visible)}
+                                 aria-label={getIntlMessage("EXPLICIT_CONTENT_BUTTON_TOOLTIP")}
+                                 className={obscureHoverButton}>
+                    {visible ? <EyeIcon size="md" color="currentColor"/> :
+                        <EyeSlashIcon size="md" color="currentColor"/>}
+                </Clickable>
+            </div>
+        </div>
+    );
+}
+
 function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
     const compact = MessageDisplayCompact.useSetting();
 
@@ -314,6 +362,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
                     />
                 </div>
             )}
+            {...(settings.store.blurNsfw && channel.isNSFW() && { obscureReason: "explicit_content" })}
         />
     );
 }
@@ -326,7 +375,7 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
 
     const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
 
-    return <AutoModEmbed
+    const embed = <AutoModEmbed
         channel={channel}
         childrenAccessories={
             <Text color="text-muted" variant="text-xs/medium" tag="span" className={`${EmbedClasses.embedAuthor} ${EmbedClasses.embedMargin}`}>
@@ -361,6 +410,12 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
         message={message}
         _messageEmbed="automod"
     />;
+
+    if (settings.store.blurNsfw && channel.isNSFW()) {
+        return <Spoiler>{embed}</Spoiler>;
+    }
+
+    return embed;
 }
 
 export default definePlugin({
