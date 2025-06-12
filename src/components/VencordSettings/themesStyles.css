@@ -28,11 +28,25 @@
     content: "by ";
 }
 
-.vc-settings-theme-link-input {
-    width: 100%;
+.vc-settings-csp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.vc-settings-theme-add-card {
-    padding: 1em;
-    margin-bottom: 16px;
+.vc-settings-csp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+
+    & a {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        line-height: 1.2em;
+    }
+
+    --custom-button-button-md-height: 26px;
 }
