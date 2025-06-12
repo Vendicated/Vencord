@@ -80,8 +80,8 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
             <svg
                 aria-hidden
                 role="img"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox={"0 0 64 64"}
                 style={{ scale: "1.39", translate: "0 -1px" }}
             >
@@ -110,7 +110,7 @@ export default definePlugin({
     patches: [
         {
             // Indicator
-            find: "#{intl::MESSAGE_EDITED}",
+            find: ".SEND_FAILED,",
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"
