@@ -209,11 +209,11 @@ export default definePlugin({
             find: "NOW_PLAYING_CARD_HOVERED,",
             replacement: [
                 {
-                    match: /(\{party:)(\i)(.*?\}=\i)/,
+                    match: /(let\{party:)(\i)(.*?\}=\i)/,
                     replace: "$1eq_$2$3,$2=$self.partyFilterIgnoredUsers(eq_$2)",
                 },
                 {
-                    match: /\{party:(\i).*,\i=\i\(\)\(\i,\i\);/,
+                    match: /let\{party:(\i).*,\i=\i\(\)\(\i,\i\);/,
                     replace: "$&if($self.shoudBeNull($1)){return null;}"
                 }
             ]

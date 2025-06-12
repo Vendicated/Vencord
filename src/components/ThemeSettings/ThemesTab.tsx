@@ -20,6 +20,7 @@ import "./themesStyles.css";
 
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { CogWheel, DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PluginIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
@@ -27,16 +28,19 @@ import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { QuickAction, QuickActionCard } from "@components/VencordSettings/quickActions";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
+import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { showItemInFolder } from "@utils/native";
-import { useAwaiter } from "@utils/react";
+import { relaunch, showItemInFolder } from "@utils/native";
+import { useAwaiter, useForceUpdater } from "@utils/react";
 import type { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { Alerts, Button, Card, Forms, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 import type { UserstyleHeader } from "usercss-meta";
 
@@ -497,9 +501,82 @@ function ThemesTab() {
                 </TabBar.Item>
             </TabBar>
 
+            <CspErrorCard />
             {currentTab === ThemeTab.LOCAL && <LocalThemes />}
             {currentTab === ThemeTab.ONLINE && <OnlineThemes />}
         </SettingsTab>
+    );
+}
+
+export function CspErrorCard() {
+    if (IS_WEB) return null;
+
+    const errors = useCspErrors();
+    const forceUpdate = useForceUpdater();
+
+    if (!errors.length) return null;
+
+    const isImgurHtmlDomain = (url: string) => url.startsWith("https://imgur.com/");
+
+    const allowUrl = async (url: string) => {
+        const { origin: baseUrl, hostname } = new URL(url);
+
+        const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Vencord Themes");
+        if (result !== "ok") return;
+
+        CspBlockedUrls.forEach(url => {
+            if (new URL(url).hostname === hostname) {
+                CspBlockedUrls.delete(url);
+            }
+        });
+
+        forceUpdate();
+
+        Alerts.show({
+            title: "Restart Required",
+            body: "A restart is required to apply this change",
+            confirmText: "Restart now",
+            cancelText: "Later!",
+            onConfirm: relaunch
+        });
+    };
+
+    const hasImgurHtmlDomain = errors.some(isImgurHtmlDomain);
+
+    return (
+        <ErrorCard className="vc-settings-card">
+            <Forms.FormTitle tag="h5">Blocked Resources</Forms.FormTitle>
+            <Forms.FormText>Some images, styles, or fonts were blocked because they come from disallowed domains.</Forms.FormText>
+            <Forms.FormText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Forms.FormText>
+            <Forms.FormText>
+                After allowing a domain, you have to fully close (from tray / task manager) and restart {IS_DISCORD_DESKTOP ? "Discord" : IS_EQUIBOP ? "Equibop" : "Vesktop"} to apply the change.
+            </Forms.FormText>
+
+            <Forms.FormTitle tag="h5" className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Forms.FormTitle>
+            <div className="vc-settings-csp-list">
+                {errors.map((url, i) => (
+                    <div key={url}>
+                        {i !== 0 && <Forms.FormDivider className={Margins.bottom8} />}
+                        <div className="vc-settings-csp-row">
+                            <Link href={url}>{url}</Link>
+                            <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
+                                Allow
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {hasImgurHtmlDomain && (
+                <>
+                    <Forms.FormDivider className={classes(Margins.top8, Margins.bottom16)} />
+                    <Forms.FormText>
+                        Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>
+                    </Forms.FormText>
+                    <Forms.FormText>To obtain a direct link, right-click the image and select "Copy image address".</Forms.FormText>
+                </>
+            )}
+        </ErrorCard>
     );
 }
 
