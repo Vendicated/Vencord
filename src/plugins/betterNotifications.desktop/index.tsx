@@ -15,6 +15,7 @@ import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, Toasts } 
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
 import { AdvancedNotification } from "./types/advancedNotification";
+import { AttachmentManipulation } from "./utils/ImageManipulation";
 import { InterceptNotification, SendNativeNotification } from "./utils/Notifications";
 import { Replacements } from "./utils/Variables";
 
@@ -208,6 +209,17 @@ export const settings = definePluginSettings({
         options: [
             { label: "Hero", value: "hero", default: true },
             { label: "Inline (Legacy)", value: "inline" }
+        ]
+    },
+    notificationAttachmentFit: {
+        type: OptionType.SELECT,
+        description: "How to process attachments for notifications",
+        options: [
+            { label: "Let operating system decide", value: AttachmentManipulation.none, default: true },
+            { label: "Fill in blanks (blur background)", value: AttachmentManipulation.fillBlank },
+            { label: "Crop to top", value: AttachmentManipulation.cropTop },
+            { label: "Crop to center", value: AttachmentManipulation.cropCenter },
+            { label: "Crop to bottom", value: AttachmentManipulation.cropBottom },
         ]
     },
     notificationDmChannelname: {

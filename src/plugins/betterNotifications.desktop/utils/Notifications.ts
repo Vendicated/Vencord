@@ -12,22 +12,11 @@ import { UserUtils } from "@webpack/common";
 import { notificationShouldBeShown, settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
 import { BasicNotification } from "../types/basicNotification";
-import { cropImageToCircle } from "./Round";
+import { AttachmentManipulation, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio } from "./ImageManipulation";
 import { replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
-
-export function safeStringForXML(input: string): string {
-    return input
-        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&apos;");
-}
-
-
 
 
 export function SendNativeNotification(avatarUrl: string,
@@ -97,7 +86,7 @@ export function SendNativeNotification(avatarUrl: string,
 
     [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText]);
 
-    function notify(avatar) {
+    function notify(avatar, attachment = attachmentUrl) {
         Native.notify(
             (advancedNotification.messageRecord.call && settings.store.specialCallNotification) ? "call" : "notification",
             title,
@@ -113,7 +102,7 @@ export function SendNativeNotification(avatarUrl: string,
                 wMessageOptions: {
                     attachmentType: settings.store.notificationImagePosition,
                 },
-                attachmentUrl: settings.store.disableImageLoading ? undefined : attachmentUrl,
+                attachmentUrl: settings.store.disableImageLoading ? undefined : attachment,
                 attachmentType: imageType,
                 wAvatarCrop: settings.store.notificationPfpCircle,
                 wHeaderOptions: settings.store.notificationHeaderEnabled ? {
@@ -134,6 +123,7 @@ export function SendNativeNotification(avatarUrl: string,
 
         Native.checkPlatform("linux").then(isLinux => {
             if (settings.store.notificationPfpCircle && isLinux) cropImageToCircle(avatar, 256).then(data => { notify(data); });
+            if (settings.store.notificationAttachmentFit !== AttachmentManipulation.none && attachmentUrl) fitAttachmentIntoCorrectAspectRatio(attachmentUrl, settings.store.notificationAttachmentFit).then(data => notify(avatar, data));
             else notify(avatar);
         });
     });

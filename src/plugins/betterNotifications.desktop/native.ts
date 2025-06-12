@@ -70,6 +70,7 @@ function saveAssetToDisk(options: AssetOptions, type?: "attachment") {
 
     const baseDir = path.join(os.tmpdir(), "vencordBetterNotifications");
     const avatarDir = path.join(baseDir, "avatars");
+    const isData = options.avatarUrl?.startsWith("data:image") || options.downloadUrl?.startsWith("data:image");
 
     if (!fs.existsSync(avatarDir)) {
         fs.mkdirSync(avatarDir, { recursive: true });
@@ -81,7 +82,6 @@ function saveAssetToDisk(options: AssetOptions, type?: "attachment") {
 
     // TODO: avatar decorations
     if (options.avatarUrl) {
-        const isData = options.avatarUrl.startsWith("data:image");
         // rounded is the default
         const targetFilename = `${isData ? "" : "unrounded-"}${options.avatarId}.png`;
         targetDir = path.join(avatarDir, targetFilename);
@@ -113,7 +113,15 @@ function saveAssetToDisk(options: AssetOptions, type?: "attachment") {
     } else if (type === "attachment") {
         targetDir = path.join(baseDir, `attachment.${options.fileType}`);
 
-        console.log("Could not find attachment in cache...");
+        if (isData && options.downloadUrl) {
+            options.avatarUrl = options.downloadUrl.replace(/^data:image\/png;base64,/, "");
+            return new Promise(resolve => {
+                fs.writeFile(targetDir, options.avatarUrl!, "base64", function (error) {
+                    if (error) resolve("");
+                    else resolve(targetDir);
+                });
+            });
+        }
 
         url = options.downloadUrl ?? "";
         file = fs.createWriteStream(targetDir);

@@ -10,7 +10,6 @@ import { GuildStore } from "@webpack/common";
 import { settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
 import { BasicNotification } from "../types/basicNotification";
-import { safeStringForXML } from "./Notifications";
 
 const logger = new Logger("BetterNotifications");
 
@@ -179,3 +178,14 @@ export function createMarkupForLinux(notificationBody: string, basicNotification
     logger.debug(linuxString);
     return linuxString;
 }
+
+
+export function safeStringForXML(input: string): string {
+    return input
+        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
