@@ -4,6 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CspPolicies, MediaScriptsAndCssSrc } from "@main/csp";
+import { CspPolicies, ImageScriptsAndCssSrc } from "@main/csp";
 
-CspPolicies["*"] = MediaScriptsAndCssSrc;
+CspPolicies["*"] = ImageScriptsAndCssSrc;
