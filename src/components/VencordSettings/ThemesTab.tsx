@@ -375,13 +375,13 @@ export function CspErrorCard() {
     const isImgurHtmlDomain = (url: string) => url.startsWith("https://imgur.com/");
 
     const allowUrl = async (url: string) => {
-        const { origin: baseUrl, hostname } = new URL(url);
+        const { origin: baseUrl, host } = new URL(url);
 
         const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Vencord Themes");
         if (result !== "ok") return;
 
         CspBlockedUrls.forEach(url => {
-            if (new URL(url).hostname === hostname) {
+            if (new URL(url).host === host) {
                 CspBlockedUrls.delete(url);
             }
         });

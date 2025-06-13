@@ -20,9 +20,9 @@ export function registerCspIpcHandlers() {
 
 function validate(url: string, directives: string[]) {
     try {
-        const { hostname } = new URL(url);
+        const { host } = new URL(url);
 
-        if (/[;'"\\]/.test(hostname)) return false;
+        if (/[;'"\\]/.test(host)) return false;
     } catch {
         return false;
     }
@@ -34,7 +34,7 @@ function validate(url: string, directives: string[]) {
 }
 
 function getMessage(url: string, directives: string[], callerName: string) {
-    const domain = new URL(url).hostname;
+    const domain = new URL(url).host;
 
     const message = `${callerName} wants to allow connections to ${domain}`;
 
@@ -73,7 +73,7 @@ async function addCspRule(_: IpcMainInvokeEvent, url: string, directives: string
         return "invalid";
     }
 
-    const domain = new URL(url).hostname;
+    const domain = new URL(url).host;
 
     if (domain in NativeSettings.store.customCspRules) {
         return "conflict";
@@ -113,7 +113,7 @@ function removeCspRule(_: IpcMainInvokeEvent, domain: string) {
 
 function isDomainAllowed(_: IpcMainInvokeEvent, url: string, directives: string[]) {
     try {
-        const domain = new URL(url).hostname;
+        const domain = new URL(url).host;
 
         const ruleForDomain = CspPolicies[domain] ?? NativeSettings.store.customCspRules[domain];
         if (!ruleForDomain) return false;
