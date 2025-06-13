@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { createStyle, deleteStyle } from "@api/Styles";
+
 import { hexToHSL } from "./colorUtils";
 
 const VARS_STYLE_ID = "vc-clientTheme-vars";
@@ -12,7 +14,7 @@ const OVERRIDES_STYLE_ID = "vc-clientTheme-overrides";
 export function createOrUpdateThemeColorVars(color: string) {
     const { hue, saturation, lightness } = hexToHSL(color);
 
-    createOrUpdateStyle(VARS_STYLE_ID, `:root {
+    createStyle(VARS_STYLE_ID, `:root {
         --theme-h: ${hue};
         --theme-s: ${saturation}%;
         --theme-l: ${lightness}%;
@@ -25,25 +27,8 @@ export async function startClientTheme(color: string) {
 }
 
 export function disableClientTheme() {
-    document.getElementById(VARS_STYLE_ID)?.remove();
-    document.getElementById(OVERRIDES_STYLE_ID)?.remove();
-}
-
-function getOrCreateStyle(styleId: string) {
-    const existingStyle = document.getElementById(styleId);
-    if (existingStyle) {
-        return existingStyle as HTMLStyleElement;
-    }
-
-    const newStyle = document.createElement("style");
-    newStyle.id = styleId;
-
-    return document.head.appendChild(newStyle);
-}
-
-function createOrUpdateStyle(styleId: string, css: string) {
-    const style = getOrCreateStyle(styleId);
-    style.textContent = css;
+    deleteStyle(VARS_STYLE_ID);
+    deleteStyle(OVERRIDES_STYLE_ID);
 }
 
 /**
@@ -74,7 +59,7 @@ function createColorsOverrides(styles: string) {
     const lightThemeBaseLightness = visualRefreshColorsLightness["--neutral-2-hsl"];
     const darkThemeBaseLightness = visualRefreshColorsLightness["--neutral-69-hsl"];
 
-    createOrUpdateStyle(OVERRIDES_STYLE_ID, [
+    createStyle(OVERRIDES_STYLE_ID, [
         `.visual-refresh.theme-light {\n ${generateNewColorVars(visualRefreshColorsLightness, lightThemeBaseLightness)} \n}`,
         `.visual-refresh.theme-dark {\n ${generateNewColorVars(visualRefreshColorsLightness, darkThemeBaseLightness)} \n}`,
     ].join("\n\n"));
