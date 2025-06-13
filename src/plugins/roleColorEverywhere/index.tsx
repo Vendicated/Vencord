@@ -72,7 +72,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "RoleColorEverywhere",
+    name: "RoleColourEverywhere",
     authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
     description: "Adds the top role color anywhere possible",
     settings,
@@ -170,7 +170,7 @@ export default definePlugin({
 
             return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
         } catch (e) {
-            new Logger("RoleColorEverywhere").error("Failed to get color string", e);
+            new Logger("RoleColourEverywhere").error("Failed to get color string", e);
         }
 
         return null;
@@ -207,7 +207,7 @@ export default definePlugin({
                 };
             }
         } catch (e) {
-            new Logger("RoleColorEverywhere").error("Failed to get message color", e);
+            new Logger("RoleColourEverywhere").error("Failed to get message color", e);
         }
 
         return null;
