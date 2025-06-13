@@ -24,7 +24,7 @@ import { findStore } from "@webpack";
 import { DraftType, UploadHandler, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const logger = new Logger("UserAffinities");
+const logger = new Logger("FriendCloud");
 
 interface AffinitiesV2 {
     otherUserId: User["id"];
@@ -55,14 +55,14 @@ interface UserPosition {
 }
 
 export default definePlugin({
-    name: "UserAffinities",
-    description: "Adds a /affinities command to visualize user affinities as a word cloud",
+    name: "FriendCloud",
+    description: "Adds a /friendcloud command to visualize the users you most interact with",
     authors: [Devs.fafa],
     commands: [
         {
             inputType: ApplicationCommandInputType.BUILT_IN,
-            name: "affinities",
-            description: "Display user affinities as a visual word cloud",
+            name: "friendcloud",
+            description: "Display user you most interact with in a cloud",
             options: [
                 {
                     name: "count",
@@ -237,22 +237,22 @@ function generatePoissonDiskPosition(
 
     function isValid(x: number, y: number) {
         if (
-            x < edgePadding + size / 2 ||
-            x > canvasWidth - edgePadding - size / 2 ||
-            y < edgePadding + size / 2 ||
-            y > canvasHeight - textSpace - edgePadding - size / 2
+            x < edgePadding ||
+            x + size > canvasWidth - edgePadding ||
+            y < edgePadding ||
+            y + size > canvasHeight - textSpace - edgePadding
         ) return false;
 
         return !existingPositions.some(pos => {
             const dx = pos.x - x;
             const dy = pos.y - y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const dist = Math.hypot(dx, dy);
             const minAllowed = (pos.size + size) / 2 + (minDist - size);
             return dist < minAllowed;
         });
     }
 
-    if (!existingPositions.length) {
+    if (existingPositions.length === 0) {
         return {
             x: canvasWidth / 2 - size / 2,
             y: canvasHeight / 2 - size / 2
@@ -262,25 +262,36 @@ function generatePoissonDiskPosition(
     for (let tries = 0; tries < 100; tries++) {
         const base = existingPositions[Math.floor(Math.random() * existingPositions.length)];
         for (let i = 0; i < k; i++) {
-            const angle = Math.random() * 2 * Math.PI;
+            const angle = Math.random() * Math.PI * 2;
             const radius = minDist + Math.random() * minDist;
             const x = base.x + Math.cos(angle) * radius;
             const y = base.y + Math.sin(angle) * radius;
-            if (isValid(x, y)) return { x, y };
+            if (isValid(x, y)) {
+                return {
+                    x: Math.max(edgePadding, Math.min(x, canvasWidth - size - edgePadding)),
+                    y: Math.max(edgePadding, Math.min(y, canvasHeight - size - textSpace - edgePadding))
+                };
+            }
         }
     }
 
     for (let tries = 0; tries < 100; tries++) {
-        const x = Math.random() * (canvasWidth - size - edgePadding * 2) + edgePadding + size / 2;
-        const y = Math.random() * (canvasHeight - size - textSpace - edgePadding * 2) + edgePadding + size / 2;
-        if (isValid(x, y)) return { x, y };
+        const x = Math.random() * (canvasWidth - size - edgePadding * 2) + edgePadding;
+        const y = Math.random() * (canvasHeight - size - textSpace - edgePadding * 2) + edgePadding;
+        if (isValid(x, y)) {
+            return {
+                x: Math.max(edgePadding, Math.min(x, canvasWidth - size - edgePadding)),
+                y: Math.max(edgePadding, Math.min(y, canvasHeight - size - textSpace - edgePadding))
+            };
+        }
     }
 
     return {
-        x: edgePadding + size / 2,
-        y: edgePadding + size / 2
+        x: edgePadding,
+        y: edgePadding
     };
 }
+
 
 function calculateCanvasSize(userCount: number, avatarSize: number): { width: number, height: number; } {
     const padding = 50;
