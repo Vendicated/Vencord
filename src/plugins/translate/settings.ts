@@ -78,6 +78,13 @@ export const settings = definePluginSettings({
         description: "Show a tooltip on the ChatBar button whenever a message is automatically translated",
         default: true
     },
+
+    enableCtrlLeftClickShortcut: {
+        type: OptionType.BOOLEAN,
+        description: "Enables you to translate a message by left clicking it while holding the control key",
+        default: true
+    }
+
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
 }>();
