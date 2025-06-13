@@ -91,8 +91,8 @@ export function SendNativeNotification(avatarUrl: string,
                 guildId: basicNotification.guild_id
             },
             {
-                wMessageOptions: {
-                    attachmentType: settings.store.notificationImagePosition,
+                messageOptions: {
+                    attachmentFormat: isLinux ? settings.store.notificationImagePositionLinux : settings.store.notificationImagePositionWin,
                 },
                 attachmentUrl: settings.store.disableImageLoading ? undefined : attachmentUrl,
                 attachmentType: imageType,

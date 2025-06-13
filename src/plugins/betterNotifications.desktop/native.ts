@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import child_process from "child_process";
+import { execFile } from "child_process";
 import { app, IpcMainInvokeEvent, Notification, shell, WebContents } from "electron";
 import fs from "fs";
 import https from "https";
@@ -23,7 +23,7 @@ interface NotificationData {
 }
 
 interface MessageOptions {
-    attachmentType: string,
+    attachmentFormat: string,
 }
 
 interface HeaderOptions {
@@ -33,7 +33,7 @@ interface HeaderOptions {
 
 interface ExtraOptions {
     // properties prefixed with 'w' are windows specific
-    wMessageOptions?: MessageOptions;
+    messageOptions?: MessageOptions;
     wAttributeText?: string;
     wAvatarCrop?: boolean;
     wHeaderOptions?: HeaderOptions;
@@ -45,7 +45,7 @@ interface AssetOptions {
     avatarId?: string,
     avatarUrl?: string,
 
-    downloadUrl?: string;
+    attachmentUrl?: string;
     fileType?: string;
 }
 
@@ -53,7 +53,7 @@ let webContents: WebContents | undefined;
 
 // Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`,
 // but using a local file works, so we just throw it to %temp%
-function saveAssetToDisk(options: AssetOptions, type?: "attachment") {
+function saveAssetToDisk(options: AssetOptions) {
     // Returns file path if avatar downloaded
     // Returns an empty string if the request fails
 
@@ -75,11 +75,8 @@ function saveAssetToDisk(options: AssetOptions, type?: "attachment") {
         const targetFilename = `${isData ? "" : "unrounded-"}${options.avatarId}.png`;
         targetDir = path.join(avatarDir, targetFilename);
 
-        if (fs.existsSync(targetDir)) {
-            return new Promise(resolve => {
-                resolve(targetDir);
-            });
-        }
+        if (fs.existsSync(targetDir))
+            return Promise.resolve(targetDir);
         console.log("Could not find profile picture in cache...");
 
         if (isData) {
@@ -99,14 +96,16 @@ function saveAssetToDisk(options: AssetOptions, type?: "attachment") {
 
         file = fs.createWriteStream(targetDir);
 
-    } else if (type === "attachment") {
-        targetDir = path.join(baseDir, `attachment.${options.fileType}`);
+    } else if (options.attachmentUrl) {
+        // pathname -> /attachments/123456/789/image.png -> 3: 789, 4: image.png
+        const fileName = new URL(options.attachmentUrl).pathname.split("/");
+        targetDir = path.join(baseDir, `${fileName[3]}-${fileName[4]}`);
 
         console.log("Could not find attachment in cache...");
 
-        url = options.downloadUrl ?? "";
+        url = options.attachmentUrl;
         file = fs.createWriteStream(targetDir);
-    }
+    } else return Promise.resolve("");
 
     return new Promise(resolve => {
         https.get(url, { timeout: 3000 }, response => {
@@ -170,7 +169,7 @@ function generateXml(
                  <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} placement="appLogoOverride"  />
 
                  ${extraOptions?.wAttributeText ? `<text placement="attribution">${safeStringForXML(extraOptions.wAttributeText)}</text>` : ""}
-                 ${attachmentLoc ? `<image placement="${extraOptions?.wMessageOptions?.attachmentType}" src="${attachmentLoc}" />` : ""}
+                 ${attachmentLoc ? `<image placement="${extraOptions?.messageOptions?.attachmentFormat}" src="${attachmentLoc}" />` : ""}
                  </binding>
              </visual>
          </toast>`;
@@ -208,7 +207,14 @@ function generateXml(
 // TODO: ensure notify-send version greater than 0.7.10 for callbacks https://gitlab.gnome.org/GNOME/libnotify/-/blame/master/NEWS#L101
 // `notify-send -v` > "notify-send 0.8.6"
 // libnotify has a limitation where actions cannot survive past the notification expiring. Meaning notifications in the DE history cannot be clicked. This can be sorta worked around with the replace-id but then that notify-send process will live forever untill clicked, then needs to be recreated.
-function notifySend(summary: string, body: string | null, avatarLocation: string, defaultCallback: Function, attachmentLocation?: string) {
+function notifySend(summary: string,
+    body: string | null,
+    avatarLocation: string,
+    defaultCallback: Function,
+    notificationType: "notification" | "call",
+    attachmentFormat: string | undefined,
+    attachmentLocation?: string
+) {
     const name = app.getName();
     var args = [summary];
     if (body) args.push(body);
@@ -224,14 +230,18 @@ function notifySend(summary: string, body: string | null, avatarLocation: string
     args.push(`--app-name=${name[0].toUpperCase() + name.slice(1)}`);
     args.push(`--hint=string:desktop-entry:${name}`);
 
-    // TODO future: KDE has an `x-kde-urls` hint which can be used to display the attachment and avatar at the same time.
-    // args.push(--hint=string:x-kde-urls:file://${attachmentLocation})
-    if (attachmentLocation) args.push(`--hint=string:image-path:file://${attachmentLocation}`);
-    else args.push(`--hint=string:image-path:file://${avatarLocation}`);
+    // AFAIK KDE & Gnome do not care about these
+    if (notificationType === "call") args.push("--category=call.incoming");
+    else if (notificationType === "notification") args.push("--category=im.recieved");
+
+    // KDE has an `x-kde-urls` hint which can be used to display the attachment and avatar at the same time.
+    if (attachmentLocation) args.push(`--hint=string:${attachmentFormat}:file://${attachmentLocation}`);
+    if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
+
 
     // console.log(args);
 
-    child_process.execFile("notify-send", args, {}, (error, stdout, stderr) => {
+    execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
             return console.error("Notification error:", error + stderr);
 
@@ -250,7 +260,7 @@ export function notify(event: IpcMainInvokeEvent,
     const promises = [saveAssetToDisk({ avatarUrl, avatarId })];
 
     if (extraOptions?.attachmentUrl) {
-        promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, downloadUrl: extraOptions.attachmentUrl }, "attachment"));
+        promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, attachmentUrl: extraOptions.attachmentUrl }));
     }
     // console.log("Creating promise...");
 
@@ -266,7 +276,7 @@ export function notify(event: IpcMainInvokeEvent,
 
         if (isLinux) {
             // TODO: style the body with basic markup https://specifications.freedesktop.org/notification-spec/latest/markup.html
-            notifySend(titleString, bodyString, avatar, unixCallback, attachment);
+            notifySend(titleString, bodyString, avatar, unixCallback, type, extraOptions?.messageOptions?.attachmentFormat, attachment);
             return;
         }
 
@@ -286,6 +296,10 @@ export function notify(event: IpcMainInvokeEvent,
     });
 }
 
+export function checkLinuxDE(_, DE: string) {
+    return process.env.XDG_CURRENT_DESKTOP === DE;
+}
+
 export function openTempFolder(_) {
     const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
     if (!fs.existsSync(directory)) {
@@ -294,7 +308,7 @@ export function openTempFolder(_) {
     shell.openPath(directory);
 }
 
-export function deleteTempFolder(_) {
+export async function deleteTempFolder(_) {
     const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
     try {
         fs.rmSync(directory, { recursive: true, force: true });
