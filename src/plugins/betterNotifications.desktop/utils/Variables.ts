@@ -21,7 +21,8 @@ export const Replacements = [
     "channelName",
     "groupName",
     "guildName",
-    "guildDescription"
+    "guildDescription",
+    "guildTag"
 ] as const;
 
 type ReplacementMap = {
@@ -101,7 +102,8 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
         groupName: channelInfo.groupName,
         nickname: advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username,
         guildName: guildInfo.name,
-        guildDescription: guildInfo.description
+        guildDescription: guildInfo.description,
+        guildTag: advancedNotification.messageRecord.author.primaryGuild?.tag ?? ""
     };
 
     new Map(Object.entries(replacementMap)).forEach((value, key) => {
@@ -109,7 +111,6 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
         texts = texts.map(text => text.replaceAll(`{${key}}`, value));
     });
 
-    texts.push(channelInfo.channel);
     return texts;
 }
 

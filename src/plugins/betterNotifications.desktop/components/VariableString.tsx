@@ -42,6 +42,7 @@ function replaceStringWithVars(input: string) {
         groupName: "General discussion",
         guildName: "Super generic server",
         guildDescription: "A peaceful place for all",
+        guildTag: "VENC"
     };
     new Map(Object.entries(examples)).forEach((value, key) => {
         input = input.replaceAll(`{${key}}`, value);

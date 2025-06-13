@@ -82,9 +82,9 @@ export function SendNativeNotification(avatarUrl: string,
     let title = settings.store.notificationTitleFormat;
     let body = settings.store.notificationBodyFormat;
     let attributeText = settings.store.notificationAttributeText;
-    let headerText: string;
+    let headerText = settings.store.notificationHeaderText;
 
-    [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText]);
+    [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText, headerText]);
 
     function notify(avatar, attachment = attachmentUrl) {
         Native.notify(
@@ -94,7 +94,7 @@ export function SendNativeNotification(avatarUrl: string,
             advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
             avatar,
             {
-                channelId: `${advancedNotification.messageRecord.channel_id}`,
+                channelId: `${advancedNotification.messageRecord.channel_id}`, // big numbers seem to get rounded when passing them to windows' notification XML.
                 messageId: `${basicNotification.message_id}`,
                 guildId: basicNotification.guild_id
             },

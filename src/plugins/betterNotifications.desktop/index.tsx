@@ -104,9 +104,7 @@ export const settings = definePluginSettings({
     },
     notificationAttribute: {
         type: OptionType.COMPONENT,
-        component: _ => {
-            return <></>;
-        },
+        component: _ => <></>,
         default: false
     },
     notificationAttributeText: {
@@ -144,6 +142,46 @@ export const settings = definePluginSettings({
         default: "{guildName}"
     },
 
+    notificationHeaderEnabled: {
+        type: OptionType.COMPONENT,
+        default: false,
+        component: _ => <></>
+    },
+
+    notificationHeaderText: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            const [switchValue, setSwitchValue] = React.useState<boolean>(settings.store.notificationAttribute);
+
+            React.useEffect(() => {
+                settings.store.notificationHeaderEnabled = switchValue;
+            }, [switchValue]);
+
+            return (
+                <>
+                    <Forms.FormSection>
+                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification grouping</Forms.FormTitle>
+                            <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={switchValue} onChange={setSwitchValue}></Switch>
+                        </div>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Enables grouping for notifications. (Windows only)</Forms.FormText>
+
+
+                        {switchValue &&
+                            <div style={{ marginTop: "12px" }}>
+                                <Forms.FormSection>
+                                    <Forms.FormText>Grouping text format. This changes how notifications are grouped. This text is also visible in notifications below the application name.</Forms.FormText>
+                                    <VariableString setValue={props.setValue} defaultValue={settings.store.notificationHeaderText} />
+                                </Forms.FormSection>
+                            </div>
+                        }
+                    </Forms.FormSection >
+
+                </>
+            );
+        },
+        default: "{channelName}"
+    },
 
 
     allowBotNotifications: {
@@ -160,11 +198,6 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Crop the sender's profile picture to a circle",
         default: true
-    },
-    notificationHeaderEnabled: {
-        type: OptionType.BOOLEAN,
-        description: "Enable support for notification headers (aka grouping). (Windows only, build 15063 or higher)",
-        default: false
     },
     notificationMarkupSupported: {
         type: OptionType.COMPONENT,
