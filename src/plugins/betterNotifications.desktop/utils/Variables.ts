@@ -21,7 +21,8 @@ export const Replacements = [
     "channelName",
     "groupName",
     "guildName",
-    "guildDescription"
+    "guildDescription",
+    "guildTag"
 ] as const;
 
 const platform = navigator.platform.toLowerCase();
@@ -106,7 +107,8 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
         groupName: channelInfo.groupName,
         nickname: advancedNotification.messageRecord.author.globalName ?? advancedNotification.messageRecord.author.username,
         guildName: guildInfo.name,
-        guildDescription: guildInfo.description
+        guildDescription: guildInfo.description,
+        guildTag: advancedNotification.messageRecord.author.primaryGuild?.tag ?? ""
     };
 
     new Map(Object.entries(replacementMap)).forEach((value, key) => {
@@ -114,6 +116,82 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
         texts = texts.map(text => text.replaceAll(`{${key}}`, value));
     });
 
-    texts.push(channelInfo.channel);
     return texts;
 }
+
+/** @deprecated findByProps("htmlFor").defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(input: string)); is a better alternative. (thanks @suffocate on discord)  */
+export function createMarkupForLinux(notificationBody: string, basicNotification: BasicNotification): string {
+    // @ts-ignore
+    const parser: ParserType = Parser;
+
+    const res = parser.parseToAST(notificationBody, true, {
+        channelId: basicNotification.channel_id,
+        messageId: basicNotification.message_id,
+        allowLinks: true,
+        allowDevLinks: true,
+        allowHeading: false,
+        allowList: false,
+        allowEmojiLinks: true,
+        previewLinkTarget: true,
+        viewingChannelId: basicNotification.channel_id,
+    });
+
+    let linuxString: string = "";
+
+
+    for (const item of res) {
+        console.debug(item);
+        switch (item.type) {
+            case "text":
+                linuxString += safeStringForXML(item.content);
+                break;
+
+            case "em":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += `<i>${safeStringForXML(text.content)}</i>`;
+                }
+                break;
+
+            case "strong":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += `<b>${safeStringForXML(text.content)}</b>`;
+                }
+                break;
+
+            case "link":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += `<a href="${item.target}">${safeStringForXML(text.content)} </a>`;
+                }
+                break;
+
+            case "subtext":
+                for (const text of item.content) {
+                    if (text.type !== "text") continue;
+                    linuxString += safeStringForXML(text.content);
+                }
+                break;
+
+            case "emoji":
+                linuxString += item.surrogate;
+                break;
+        }
+    }
+
+    logger.debug("Generated the following linux notification string");
+    logger.debug(linuxString);
+    return linuxString;
+}
+
+
+export function safeStringForXML(input: string): string {
+    return input
+        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+

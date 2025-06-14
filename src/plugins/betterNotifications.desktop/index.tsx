@@ -10,11 +10,12 @@ import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelRouter, Forms, React, showToast, Switch, Toasts } from "@webpack/common";
+import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, Toasts } from "@webpack/common";
 
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
 import { AdvancedNotification } from "./types/advancedNotification";
+import { AttachmentManipulation } from "./utils/ImageManipulation";
 import { InterceptNotification, SendNativeNotification } from "./utils/Notifications";
 import { isLinux, isMac, isWin, Replacements } from "./utils/Variables";
 
@@ -103,9 +104,9 @@ export const settings = definePluginSettings({
     },
     notificationAttribute: {
         type: OptionType.COMPONENT,
-        component: _ => {
-            return <></>;
-        }
+        component: _ => <></>,
+        default: false,
+        hidden: !isWin
     },
     notificationAttributeText: {
         type: OptionType.COMPONENT,
@@ -143,6 +144,48 @@ export const settings = definePluginSettings({
         hidden: !isWin
     },
 
+    notificationHeaderEnabled: {
+        type: OptionType.COMPONENT,
+        default: false,
+        component: _ => <></>,
+        hidden: !isWin
+    },
+
+    notificationHeaderText: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            const [switchValue, setSwitchValue] = React.useState<boolean>(settings.store.notificationAttribute);
+
+            React.useEffect(() => {
+                settings.store.notificationHeaderEnabled = switchValue;
+            }, [switchValue]);
+
+            return (
+                <>
+                    <Forms.FormSection>
+                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification grouping</Forms.FormTitle>
+                            <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={switchValue} onChange={setSwitchValue}></Switch>
+                        </div>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Enables grouping for notifications. (Windows only)</Forms.FormText>
+
+
+                        {switchValue &&
+                            <div style={{ marginTop: "12px" }}>
+                                <Forms.FormSection>
+                                    <Forms.FormText>Grouping text format. This changes how notifications are grouped. This text is also visible in notifications below the application name.</Forms.FormText>
+                                    <VariableString setValue={props.setValue} defaultValue={settings.store.notificationHeaderText} />
+                                </Forms.FormSection>
+                            </div>
+                        }
+                    </Forms.FormSection >
+
+                </>
+            );
+        },
+        default: "{channelName}",
+        hidden: !isWin
+    },
 
 
     allowBotNotifications: {
@@ -162,11 +205,32 @@ export const settings = definePluginSettings({
         default: true,
         hidden: isMac
     },
-    notificationHeaderEnabled: {
-        type: OptionType.BOOLEAN,
-        description: "Enable support for notification headers (aka grouping). (Windows only, build 15063 or higher)",
+    notificationMarkupSupported: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            const [value, setValue] = React.useState<boolean>(settings.store.notificationMarkupSupported);
+
+            React.useEffect(() => {
+                props.setValue(value);
+            }, [value]);
+
+            return <div style={{ marginBottom: "0.5em", height: "100%" }}>
+                <Forms.FormSection>
+                    <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                        <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification markup support for Linux</Forms.FormTitle>
+                        <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={value} onChange={setValue}></Switch>
+                    </div>
+                </Forms.FormSection>
+                <Forms.FormText style={{ marginBottom: "8px" }} type={Forms.FormText.Types.DESCRIPTION}><span style={{ color: "var(--status-danger)" }}>WARNING:</span> This feature may not support your system. If you see HTML tags (such as &lt;b&gt;) in notifications, turn this feature off.</Forms.FormText>
+                {value ?
+                    <Text><b>Here's some bold text</b> and <i>heres's some italic text</i></Text>
+                    :
+                    <Text>Here's some bold text and here's some italic text</Text>
+                }
+            </div>;
+        },
         default: false,
-        hidden: !isWin
+        hidden: !isLinux
     },
     disableImageLoading: {
         type: OptionType.BOOLEAN,
@@ -175,7 +239,7 @@ export const settings = definePluginSettings({
     },
     showSpoilerImages: {
         type: OptionType.BOOLEAN,
-        description: "Whether to include attachments marked as spoilers in notifications",
+        description: "Include blurred spoiler attachments",
         default: false
     },
 
@@ -196,6 +260,18 @@ export const settings = definePluginSettings({
             { label: "Inline", value: "image-path", default: true }
         ],
         hidden: !isLinux && Native.checkLinuxDE("KDE")
+    },
+    notificationAttachmentFit: {
+        type: OptionType.SELECT,
+        description: "How to process attachments for notifications",
+        options: [
+            { label: "Let operating system decide", value: AttachmentManipulation.none, default: true },
+            { label: "Fill in blanks (blur background)", value: AttachmentManipulation.fillBlank },
+            { label: "Crop to top", value: AttachmentManipulation.cropTop },
+            { label: "Crop to center", value: AttachmentManipulation.cropCenter },
+            { label: "Crop to bottom", value: AttachmentManipulation.cropBottom },
+        ],
+        hidden: isMac
     },
     notificationDmChannelname: {
         type: OptionType.STRING,

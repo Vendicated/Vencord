@@ -78,6 +78,13 @@ export interface MessageRecord {
     chatWallpaperInfo: any;
 }
 
+export interface PrimaryGuild {
+    identityGuildId: string;
+    identityEnabled: boolean;
+    tag: string;
+    badge: string;
+}
+
 export interface Author {
     id: string;
     username: string;
@@ -104,7 +111,7 @@ export interface Author {
     hasBouncedEmail: boolean;
     personalConnectionId: any;
     globalName?: string;
-    primaryGuild: any;
+    primaryGuild?: PrimaryGuild;
     collectibles: any;
 }
 

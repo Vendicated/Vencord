@@ -6,21 +6,28 @@
 
 import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
-import { UserUtils } from "@webpack/common";
+import { findByProps } from "@webpack";
 
 import { notificationShouldBeShown, settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
 import { BasicNotification } from "../types/basicNotification";
-import { cropImageToCircle } from "./Round";
+import { AttachmentManipulation, blurImage, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio } from "./ImageManipulation";
 import { isLinux, replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
 
-export function SendNativeNotification(avatarUrl: string,
+
+export async function SendNativeNotification(avatarUrl: string,
     notificationTitle: string, notificationBody: string,
     basicNotification: BasicNotification, advancedNotification: AdvancedNotification
 ) {
+    const SimpleMarkdown = findByProps("htmlFor");
+
+    if (!SimpleMarkdown) {
+        logger.error("Failed to find SimpleMarkdown");
+    }
+
     logger.debug("Recieved hooked notification with the following args");
     logger.debug([avatarUrl, notificationTitle, notificationBody, basicNotification, advancedNotification]);
 
@@ -41,6 +48,7 @@ export function SendNativeNotification(avatarUrl: string,
     const { attachments } = advancedNotification.messageRecord;
     let contentType: string;
     let imageType: "png" | "jpeg";
+    let isAttachmentSpoiler: boolean = false;
 
     for (const attachment of attachments) {
         contentType = attachment.content_type;
@@ -64,6 +72,7 @@ export function SendNativeNotification(avatarUrl: string,
         imageType = contentType.split("/")[1];
 
         logger.info("Found suitable attachment");
+        isAttachmentSpoiler = attachment.spoiler;
         logger.debug(attachment.url);
 
         break;
@@ -74,11 +83,11 @@ export function SendNativeNotification(avatarUrl: string,
     let title = settings.store.notificationTitleFormat;
     let body = settings.store.notificationBodyFormat;
     let attributeText = settings.store.notificationAttributeText;
-    let headerText: string;
+    let headerText = settings.store.notificationHeaderText;
 
-    [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText]);
+    [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText, headerText]);
 
-    function notify(avatar) {
+    function notify(avatar, attachment = attachmentUrl) {
         Native.notify(
             (advancedNotification.messageRecord.call && settings.store.specialCallNotification) ? "call" : "notification",
             title,
@@ -86,7 +95,7 @@ export function SendNativeNotification(avatarUrl: string,
             advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
             avatar,
             {
-                channelId: `${advancedNotification.messageRecord.channel_id}`,
+                channelId: `${advancedNotification.messageRecord.channel_id}`, // big numbers seem to get rounded when passing them to windows' notification XML.
                 messageId: `${basicNotification.message_id}`,
                 guildId: basicNotification.guild_id
             },
@@ -94,24 +103,49 @@ export function SendNativeNotification(avatarUrl: string,
                 messageOptions: {
                     attachmentFormat: isLinux ? settings.store.notificationImagePositionLinux : settings.store.notificationImagePositionWin,
                 },
-                attachmentUrl: settings.store.disableImageLoading ? undefined : attachmentUrl,
+                attachmentUrl: settings.store.disableImageLoading ? undefined : attachment,
                 attachmentType: imageType,
                 wAvatarCrop: settings.store.notificationPfpCircle,
                 wHeaderOptions: settings.store.notificationHeaderEnabled ? {
                     channelId: advancedNotification.messageRecord.channel_id,
                     channelName: headerText
                 } : undefined,
-                wAttributeText: settings.store.notificationAttribute ? attributeText : undefined
+                wAttributeText: settings.store.notificationAttribute ? attributeText : undefined,
+
+                linuxFormattedText: settings.store.notificationMarkupSupported
+                    ? SimpleMarkdown.defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(notificationBody))
+                    : undefined
             }
         );
     }
 
-    UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
-        const avatar = user.getAvatarURL(basicNotification.guild_id, 256, false).replace(".webp", ".png");
+    const url = new URL(avatarUrl);
+    url.searchParams.set("size", "256");
+    url.pathname = url.pathname.replace(".webp", ".png");
 
-        if (settings.store.notificationPfpCircle && isLinux) cropImageToCircle(avatar, 256).then(data => { notify(data); });
-        else notify(avatar);
-    });
+    const bigAvatar = url.toString();
+
+    let finalAvatarData;
+    if (settings.store.notificationPfpCircle && isLinux) {
+        console.log("Cropping profile picture to circle...");
+        finalAvatarData = await cropImageToCircle(bigAvatar, 256);
+    } else {
+        finalAvatarData = avatarUrl;
+    }
+
+    let finalAttachment: string | undefined = attachmentUrl;
+    if (attachmentUrl && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
+        console.log("Fitting attachment");
+        finalAttachment = await fitAttachmentIntoCorrectAspectRatio(attachmentUrl, settings.store.notificationAttachmentFit);
+    }
+    if (attachmentUrl && isAttachmentSpoiler) {
+        finalAttachment = await blurImage(finalAttachment);
+    }
+    if (finalAttachment) {
+        notify(finalAvatarData, finalAttachment);
+    } else {
+        notify(finalAvatarData);
+    }
 }
 
 export function InterceptNotification(avatarUrl: string,

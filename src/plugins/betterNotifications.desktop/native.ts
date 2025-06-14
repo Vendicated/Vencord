@@ -37,6 +37,7 @@ interface ExtraOptions {
     wAttributeText?: string;
     wAvatarCrop?: boolean;
     wHeaderOptions?: HeaderOptions;
+    linuxFormattedText?: string,
     attachmentUrl?: string;
     attachmentType?: string;
 }
@@ -50,6 +51,16 @@ interface AssetOptions {
 }
 
 let webContents: WebContents | undefined;
+
+function safeStringForXML(input: string): string {
+    return input
+        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
 
 // Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`,
 // but using a local file works, so we just throw it to %temp%
@@ -70,8 +81,8 @@ function saveAssetToDisk(options: AssetOptions) {
 
     // TODO: avatar decorations
     if (options.avatarUrl) {
-        const isData = options.avatarUrl.startsWith("data:image");
         // rounded is the default
+        const isData = options.avatarUrl?.startsWith("data:image");
         const targetFilename = `${isData ? "" : "unrounded-"}${options.avatarId}.png`;
         targetDir = path.join(avatarDir, targetFilename);
 
@@ -98,10 +109,19 @@ function saveAssetToDisk(options: AssetOptions) {
 
     } else if (options.attachmentUrl) {
         // pathname -> /attachments/123456/789/image.png -> 3: 789, 4: image.png
+        const isData = options.attachmentUrl?.startsWith("data:image");
         const fileName = new URL(options.attachmentUrl).pathname.split("/");
         targetDir = path.join(baseDir, `${fileName[3]}-${fileName[4]}`);
 
-        console.log("Could not find attachment in cache...");
+        if (isData && options.attachmentUrl) {
+            options.avatarUrl = options.attachmentUrl.replace(/^data:image\/png;base64,/, "");
+            return new Promise(resolve => {
+                fs.writeFile(targetDir, options.avatarUrl!, "base64", function (error) {
+                    if (error) resolve("");
+                    else resolve(targetDir);
+                });
+            });
+        }
 
         url = options.attachmentUrl;
         file = fs.createWriteStream(targetDir);
@@ -123,15 +143,6 @@ function saveAssetToDisk(options: AssetOptions) {
             resolve("");
         });
     });
-}
-
-function safeStringForXML(input: string): string {
-    return input
-        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&apos;");
 }
 
 function generateXml(
@@ -239,7 +250,7 @@ function notifySend(summary: string,
     if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
 
-    // console.log(args);
+    console.log(args);
 
     execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
@@ -275,8 +286,12 @@ export function notify(event: IpcMainInvokeEvent,
         const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
 
         if (isLinux) {
-            // TODO: style the body with basic markup https://specifications.freedesktop.org/notification-spec/latest/markup.html
-            notifySend(titleString, bodyString, avatar, unixCallback, type, extraOptions?.messageOptions?.attachmentFormat, attachment);
+            const linuxFormattedString: string | undefined = extraOptions?.linuxFormattedText;
+
+            console.log("Recieved the following linux formatted string:");
+            console.log(linuxFormattedString);
+
+            notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, type, extraOptions?.messageOptions?.attachmentFormat, attachment);
             return;
         }
 
