@@ -7,7 +7,6 @@
 import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
 import { findByProps } from "@webpack";
-import { UserUtils } from "@webpack/common";
 
 import { notificationShouldBeShown, settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
@@ -120,8 +119,11 @@ export async function SendNativeNotification(avatarUrl: string,
         );
     }
 
-    const user = await UserUtils.getUser(advancedNotification.messageRecord.author.id);
-    const bigAvatar = user.getAvatarURL(basicNotification.guild_id, 256, false).replace(".webp", ".png");
+    const url = new URL(avatarUrl);
+    url.searchParams.set("size", "256");
+    url.pathname = url.pathname.replace(".webp", ".png");
+
+    const bigAvatar = url.toString();
 
     let finalAvatarData;
     if (settings.store.notificationPfpCircle && isLinux) {
