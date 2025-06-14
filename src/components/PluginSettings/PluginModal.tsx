@@ -39,6 +39,7 @@ import { PluginMeta } from "~plugins";
 import {
     ISettingCustomElementProps,
     ISettingElementProps,
+    SettingArrayComponent,
     SettingBooleanComponent,
     SettingCustomComponent,
     SettingNumericComponent,
@@ -84,6 +85,10 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.SLIDER]: SettingSliderComponent,
     [OptionType.COMPONENT]: SettingCustomComponent,
     [OptionType.CUSTOM]: () => null,
+    [OptionType.ARRAY]: SettingArrayComponent,
+    [OptionType.USERS]: SettingArrayComponent,
+    [OptionType.CHANNELS]: SettingArrayComponent,
+    [OptionType.GUILDS]: SettingArrayComponent
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
