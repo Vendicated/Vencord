@@ -1,0 +1,9 @@
+# FriendCloud
+
+Visualize the users you interact with most in a cloud!
+
+Simply run the `/friendcloud` command to generate a cloud of your friends based on your interactions with them.
+
+Use the `count` option to set the number of users to display. Use the `algorithm` option to choose the algorithm; Discord has two versions of the store (default is `v2`).
+
+![](https://private-user-images.githubusercontent.com/87046111/455022939-ee83fcaf-0c71-4234-868c-23a2efb10351.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDk4NDMzNzUsIm5iZiI6MTc0OTg0MzA3NSwicGF0aCI6Ii84NzA0NjExMS80NTUwMjI5MzktZWU4M2ZjYWYtMGM3MS00MjM0LTg2OGMtMjNhMmVmYjEwMzUxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA2MTMlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNjEzVDE5MzExNVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTJjZWYxMTdlMDM2YjNhMGFlMzYyMjA1MjgyZDM0MDU2NWM4ZTQ0NzA0ODJkYWNhNzc0ZDA4ZDQwYTcyMGQ1NDgmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.S5Qy3Z1SQHi-dLotN2hIvVJreAV8vG3Y3LWB20E98dU)
