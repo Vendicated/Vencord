@@ -163,7 +163,6 @@ function ThemesTab() {
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
     const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
     const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
-    const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
         refreshLocalThemes();
@@ -252,7 +251,6 @@ function ThemesTab() {
                                     <QuickAction
                                         text="Open Themes Folder"
                                         action={() => VencordNative.themes.openFolder()}
-                                        disabled={themeDirPending}
                                         Icon={FolderIcon}
                                     />
                                 )}
