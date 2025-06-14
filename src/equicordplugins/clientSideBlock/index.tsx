@@ -206,17 +206,11 @@ export default definePlugin({
         },
         // active now list
         {
-            find: "NOW_PLAYING_CARD_HOVERED,",
-            replacement: [
-                {
-                    match: /(let\{party:)(\i)(.*?\}=\i)/,
-                    replace: "$1eq_$2$3,$2=$self.partyFilterIgnoredUsers(eq_$2)",
-                },
-                {
-                    match: /let\{party:(\i).*,\i=\i\(\)\(\i,\i\);/,
-                    replace: "$&if($self.shoudBeNull($1)){return null;}"
-                }
-            ]
+            find: "ACTIVE_NOW_COLUMN)",
+            replacement: {
+                match: /(\i\.\i),\{\}\)\]/,
+                replace: '"div",{children:$self.activeNowView($1())})]'
+            }
         },
         // mutual friends list in user profile
         {
@@ -227,29 +221,13 @@ export default definePlugin({
             }
         }
     ],
-    partyFilterIgnoredUsers,
-    shoudBeNull
+    activeNowView(cards) {
+        if (!Array.isArray(cards)) return cards;
+
+        return cards.filter(card => {
+            if (!card?.key) return false;
+            const newKey = card.key.match(/(?:user-|party-spotify:)(.+)/)?.[1];
+            return this.shouldHideUser(newKey) ? null : card;
+        });
+    }
 });
-
-// From https://github.com/Vendicated/Vencord/blob/29060f9ec9359a036fa83e61b5378a19789481dd/src/plugins/HideInActiveNow/index.ts
-
-function partyFilterIgnoredUsers(party) {
-    const filteredPartyMembers = party.partiedMembers.filter(user => shouldHideUser(user));
-    const filteredPartyMembersLength = filteredPartyMembers.length;
-    if (filteredPartyMembersLength === 0) return { ...party, partiedMembers: [] };
-
-    const filteredParty = {
-        ...party,
-        partiedMembers: filteredPartyMembers,
-        currentActivities: party.currentActivities,
-        priorityMembers: party.priorityMembers,
-        voiceChannels: party.voiceChannels
-    };
-    return filteredParty;
-}
-
-function shoudBeNull(party) {
-    if (!party) return true;
-    if (party.partiedMembers.length === 0) return true;
-    return false;
-}
