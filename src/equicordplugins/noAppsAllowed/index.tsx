@@ -10,7 +10,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "NoAppsAllowed",
     description: "returns the bot's tag :skulk:",
-    authors: [EquicordDevs.kvba],
+    authors: [EquicordDevs.meowabyte],
 
     patches: [
         {
