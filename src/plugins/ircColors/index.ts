@@ -109,13 +109,18 @@ export default definePlugin({
         const id = context?.user?.id;
         const colorString = context?.colorString;
         const color = calculateNameColorForUser(id);
-        const customColor = id && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(id, true) : null;
 
-        if (
-            (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) ||
-            (settings.store.applyColorOnlyToUsersWithoutColor && colorString)
-        ) return customColor ?? colorString;
+        if (Settings.plugins.CustomUserColors.enabled) {
+            const customColor = getCustomColorString(id, true);
+            if (customColor) return customColor;
+        }
 
-        return customColor ?? color;
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
+        }
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
     }
 });

@@ -62,6 +62,7 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: {
 };
 
 export function getCustomColorString(userId: string, withHash?: boolean): string | undefined {
+    if (!userId) return;
     if (!colors[userId] || !Settings.plugins.CustomUserColors.enabled) return;
     if (withHash) return `#${colors[userId]}`;
     return colors[userId];

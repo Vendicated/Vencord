@@ -60,10 +60,15 @@ interface Props {
     guildId: string;
 }
 
-function typingUserColor(guildId: string, userId: string) {
+function typingUserColor(guildId: string, userId: string): string | undefined {
     if (!settings.store.showRoleColors) return;
-    const customColor = Settings.plugins.CustomUserColors.enabled ? getCustomColorString(userId, true) : null;
-    return customColor ?? GuildMemberStore.getMember(guildId, userId)?.colorString;
+
+    if (Settings.plugins.CustomUserColors.enabled) {
+        const customColor = getCustomColorString(userId, true);
+        if (customColor) return customColor;
+    }
+
+    return GuildMemberStore.getMember(guildId, userId)?.colorString;
 }
 
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
