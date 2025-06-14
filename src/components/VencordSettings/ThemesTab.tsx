@@ -311,7 +311,7 @@ function ThemesTab() {
     function renderOnlineThemes() {
         return (
             <>
-                <Card className="vc-settings-card vc-text-selectable">
+                <Card className="vc-settings-card">
                     <Forms.FormTitle tag="h5">Paste links to css files here</Forms.FormTitle>
                     <Forms.FormText>One link per line</Forms.FormText>
                     <Forms.FormText>You can prefix lines with @light or @dark to toggle them based on your Discord theme</Forms.FormText>
