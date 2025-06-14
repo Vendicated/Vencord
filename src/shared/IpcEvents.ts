@@ -46,4 +46,7 @@ export const enum IpcEvents {
     CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
     CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",
     CSP_REQUEST_ADD_OVERRIDE = "VencordCspRequestAddOverride",
+
+    OPEN_THEMES_FOLDER = "VencordOpenThemesFolder",
+    OPEN_SETTINGS_FOLDER = "VencordOpenSettingsFolder",
 }

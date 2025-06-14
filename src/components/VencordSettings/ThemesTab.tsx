@@ -28,7 +28,7 @@ import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { relaunch, showItemInFolder } from "@utils/native";
+import { relaunch } from "@utils/native";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { findLazy } from "@webpack";
@@ -251,7 +251,7 @@ function ThemesTab() {
                                 ) : (
                                     <QuickAction
                                         text="Open Themes Folder"
-                                        action={() => showItemInFolder(themeDir!)}
+                                        action={() => VencordNative.themes.openFolder()}
                                         disabled={themeDirPending}
                                         Icon={FolderIcon}
                                     />
