@@ -38,6 +38,8 @@ export default {
         getThemesList: () => invoke<Array<UserThemeHeader>>(IpcEvents.GET_THEMES_LIST),
         getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName),
         getSystemValues: () => invoke<Record<string, string>>(IpcEvents.GET_THEME_SYSTEM_VALUES),
+
+        openFolder: () => invoke<void>(IpcEvents.OPEN_THEMES_FOLDER),
     },
 
     updater: {
@@ -51,6 +53,8 @@ export default {
         get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
         set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),
         getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
+
+        openFolder: () => invoke<void>(IpcEvents.OPEN_SETTINGS_FOLDER),
     },
 
     quickCss: {

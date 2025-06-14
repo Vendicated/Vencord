@@ -26,8 +26,7 @@ import { gitRemote } from "@shared/vencordUserAgent";
 import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { identity, isPluginDev } from "@utils/misc";
-import { relaunch, showItemInFolder } from "@utils/native";
-import { useAwaiter } from "@utils/react";
+import { relaunch } from "@utils/native";
 import { Button, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 
 import BadgeAPI from "../../plugins/_api/badges";
@@ -53,9 +52,6 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function VencordSettings() {
-    const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
-        fallbackValue: "Loading..."
-    });
     const settings = useSettings();
 
     const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
@@ -171,7 +167,7 @@ function VencordSettings() {
                         <QuickAction
                             Icon={FolderIcon}
                             text="Open Settings Folder"
-                            action={() => showItemInFolder(settingsDir)}
+                            action={() => VencordNative.settings.openFolder()}
                         />
                     )}
                     <QuickAction
