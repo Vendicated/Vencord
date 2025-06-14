@@ -25,6 +25,11 @@ export const Replacements = [
     "guildTag"
 ] as const;
 
+const platform = navigator.platform.toLowerCase();
+export const isWin = platform.startsWith("win");
+export const isMac = platform.startsWith("mac");
+export const isLinux = platform.startsWith("linux");
+
 type ReplacementMap = {
     [k in typeof Replacements[number]]: string
 };

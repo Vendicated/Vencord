@@ -12,14 +12,14 @@ import { UserUtils } from "@webpack/common";
 import { notificationShouldBeShown, settings } from "..";
 import { AdvancedNotification } from "../types/advancedNotification";
 import { BasicNotification } from "../types/basicNotification";
-import { AttachmentManipulation, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio } from "./ImageManipulation";
-import { replaceVariables } from "./Variables";
+import { AttachmentManipulation, blurImage, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio } from "./ImageManipulation";
+import { isLinux, replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
 
 
-export function SendNativeNotification(avatarUrl: string,
+export async function SendNativeNotification(avatarUrl: string,
     notificationTitle: string, notificationBody: string,
     basicNotification: BasicNotification, advancedNotification: AdvancedNotification
 ) {
@@ -49,6 +49,7 @@ export function SendNativeNotification(avatarUrl: string,
     const { attachments } = advancedNotification.messageRecord;
     let contentType: string;
     let imageType: "png" | "jpeg";
+    let isAttachmentSpoiler: boolean = false;
 
     for (const attachment of attachments) {
         contentType = attachment.content_type;
@@ -72,6 +73,7 @@ export function SendNativeNotification(avatarUrl: string,
         imageType = contentType.split("/")[1];
 
         logger.info("Found suitable attachment");
+        isAttachmentSpoiler = attachment.spoiler;
         logger.debug(attachment.url);
 
         break;
@@ -99,8 +101,8 @@ export function SendNativeNotification(avatarUrl: string,
                 guildId: basicNotification.guild_id
             },
             {
-                wMessageOptions: {
-                    attachmentType: settings.store.notificationImagePosition,
+                messageOptions: {
+                    attachmentFormat: isLinux ? settings.store.notificationImagePositionLinux : settings.store.notificationImagePositionWin,
                 },
                 attachmentUrl: settings.store.disableImageLoading ? undefined : attachment,
                 attachmentType: imageType,
@@ -118,15 +120,30 @@ export function SendNativeNotification(avatarUrl: string,
         );
     }
 
-    UserUtils.getUser(advancedNotification.messageRecord.author.id).then(user => {
-        const avatar = user.getAvatarURL(basicNotification.guild_id, 256, false).replace(".webp", ".png");
+    const user = await UserUtils.getUser(advancedNotification.messageRecord.author.id);
+    const bigAvatar = user.getAvatarURL(basicNotification.guild_id, 256, false).replace(".webp", ".png");
 
-        Native.checkPlatform("linux").then(isLinux => {
-            if (settings.store.notificationPfpCircle && isLinux) cropImageToCircle(avatar, 256).then(data => { notify(data); });
-            if (settings.store.notificationAttachmentFit !== AttachmentManipulation.none && attachmentUrl) fitAttachmentIntoCorrectAspectRatio(attachmentUrl, settings.store.notificationAttachmentFit).then(data => notify(avatar, data));
-            else notify(avatar);
-        });
-    });
+    let finalAvatarData;
+    if (settings.store.notificationPfpCircle && isLinux) {
+        console.log("Cropping profile picture to circle...");
+        finalAvatarData = await cropImageToCircle(bigAvatar, 256);
+    } else {
+        finalAvatarData = avatarUrl;
+    }
+
+    let finalAttachment: string | undefined = attachmentUrl;
+    if (attachmentUrl && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
+        console.log("Fitting attachment");
+        finalAttachment = await fitAttachmentIntoCorrectAspectRatio(attachmentUrl, settings.store.notificationAttachmentFit);
+    }
+    if (attachmentUrl && isAttachmentSpoiler) {
+        finalAttachment = await blurImage(finalAttachment);
+    }
+    if (finalAttachment) {
+        notify(finalAvatarData, finalAttachment);
+    } else {
+        notify(finalAvatarData);
+    }
 }
 
 export function InterceptNotification(avatarUrl: string,

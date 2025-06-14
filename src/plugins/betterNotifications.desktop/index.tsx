@@ -17,22 +17,22 @@ import VariableString from "./components/VariableString";
 import { AdvancedNotification } from "./types/advancedNotification";
 import { AttachmentManipulation } from "./utils/ImageManipulation";
 import { InterceptNotification, SendNativeNotification } from "./utils/Notifications";
-import { Replacements } from "./utils/Variables";
+import { isLinux, isMac, isWin, Replacements } from "./utils/Variables";
 
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const jumpToMessage = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
 const logger = new Logger("BetterNotifications");
 
-
 export const settings = definePluginSettings({
     notificationPatchType: {
         type: OptionType.SELECT,
-        description: "How notifications are going to be patched. Custom enables features such as attachment previews, but does not work with macOS",
+        description: "How notifications are going to be patched. Custom enables features such as attachment previews",
         options: [
             { label: "Custom", value: "custom", default: true },
-            { label: "Variable replacement (macOS)", value: "variable" }
-        ]
+            { label: "Variable replacement", value: "variable" }
+        ],
+        hidden: isMac
     },
     notificationTitleFormat: {
         type: OptionType.COMPONENT,
@@ -105,7 +105,8 @@ export const settings = definePluginSettings({
     notificationAttribute: {
         type: OptionType.COMPONENT,
         component: _ => <></>,
-        default: false
+        default: false,
+        hidden: !isWin
     },
     notificationAttributeText: {
         type: OptionType.COMPONENT,
@@ -139,13 +140,15 @@ export const settings = definePluginSettings({
                 </>
             );
         },
-        default: "{guildName}"
+        default: "{guildName}",
+        hidden: !isWin
     },
 
     notificationHeaderEnabled: {
         type: OptionType.COMPONENT,
         default: false,
-        component: _ => <></>
+        component: _ => <></>,
+        hidden: !isWin
     },
 
     notificationHeaderText: {
@@ -180,7 +183,8 @@ export const settings = definePluginSettings({
                 </>
             );
         },
-        default: "{channelName}"
+        default: "{channelName}",
+        hidden: !isWin
     },
 
 
@@ -191,13 +195,15 @@ export const settings = definePluginSettings({
     },
     specialCallNotification: {
         type: OptionType.BOOLEAN,
-        description: "Use a special notification type for incoming calls (Windows only)",
-        default: true
+        description: "Use a special notification type for incoming calls",
+        default: true,
+        hidden: isMac
     },
     notificationPfpCircle: {
         type: OptionType.BOOLEAN,
         description: "Crop the sender's profile picture to a circle",
-        default: true
+        default: true,
+        hidden: isMac
     },
     notificationMarkupSupported: {
         type: OptionType.COMPONENT,
@@ -223,7 +229,8 @@ export const settings = definePluginSettings({
                 }
             </div>;
         },
-        default: false
+        default: false,
+        hidden: !isLinux
     },
     disableImageLoading: {
         type: OptionType.BOOLEAN,
@@ -232,17 +239,27 @@ export const settings = definePluginSettings({
     },
     showSpoilerImages: {
         type: OptionType.BOOLEAN,
-        description: "Whether to include attachments marked as spoilers in notifications",
+        description: "Include blurred spoiler attachments",
         default: false
     },
 
-    notificationImagePosition: {
+    notificationImagePositionWin: {
         type: OptionType.SELECT,
-        description: "How notification attachments are placed. (Windows only) ",
+        description: "How notification attachments are placed.",
         options: [
             { label: "Hero", value: "hero", default: true },
             { label: "Inline (Legacy)", value: "inline" }
-        ]
+        ],
+        hidden: !isWin
+    },
+    notificationImagePositionLinux: {
+        type: OptionType.SELECT,
+        description: "How notification attachments are placed.",
+        options: [
+            { label: "Body", value: "x-kde-urls" },
+            { label: "Inline", value: "image-path", default: true }
+        ],
+        hidden: !isLinux && Native.checkLinuxDE("KDE")
     },
     notificationAttachmentFit: {
         type: OptionType.SELECT,
@@ -253,7 +270,8 @@ export const settings = definePluginSettings({
             { label: "Crop to top", value: AttachmentManipulation.cropTop },
             { label: "Crop to center", value: AttachmentManipulation.cropCenter },
             { label: "Crop to bottom", value: AttachmentManipulation.cropBottom },
-        ]
+        ],
+        hidden: isMac
     },
     notificationDmChannelname: {
         type: OptionType.STRING,
@@ -321,15 +339,13 @@ export default definePlugin({
     ],
 
     start() {
-        Native.checkPlatform("darwin").then(isMac => {
-            if (isMac && settings.store.notificationPatchType === "custom") {
-                logger.warn("User is on macOS but has notificationPatchType as custom");
-                setTimeout(() => {
-                    showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
-                    settings.store.notificationPatchType = "variable";
-                }, 4000);
-            }
-        });
+        if (isMac && settings.store.notificationPatchType === "custom") {
+            logger.warn("User is on macOS but has notificationPatchType as custom");
+            setTimeout(() => {
+                showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
+                settings.store.notificationPatchType = "variable";
+            }, 4000);
+        }
     },
 
     SendNativeNotification,

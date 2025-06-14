@@ -5,10 +5,11 @@
  */
 
 import type { Settings } from "@api/Settings";
+import { CspRequestResult } from "@main/csp/manager";
 import { PluginIpcMappings } from "@main/ipcPlugins";
 import type { UserThemeHeader } from "@main/themes";
 import { IpcEvents } from "@shared/IpcEvents";
-import { IpcRes } from "@utils/types";
+import { IpcRes, PluginNative } from "@utils/types";
 import { ipcRenderer } from "electron";
 
 function invoke<T = any>(event: IpcEvents, ...args: any[]) {
@@ -19,7 +20,7 @@ export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.sendSync(event, ...args) as T;
 }
 
-const PluginHelpers = {} as Record<string, Record<string, (...args: any[]) => Promise<any>>>;
+const PluginHelpers: Record<string, PluginNative<Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>>> = {} as any;
 const pluginIpcMap = sendSync<PluginIpcMappings>(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP);
 
 for (const [plugin, methods] of Object.entries(pluginIpcMap)) {
@@ -71,6 +72,18 @@ export default {
     native: {
         getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
+    },
+
+    csp: {
+        /**
+         * Note: Only supports full explicit matches, not wildcards.
+         *
+         * If `*.example.com` is allowed, `isDomainAllowed("https://sub.example.com")` will return false.
+         */
+        isDomainAllowed: (url: string, directives: string[]) => invoke<boolean>(IpcEvents.CSP_IS_DOMAIN_ALLOWED, url, directives),
+        removeOverride: (url: string) => invoke<boolean>(IpcEvents.CSP_REMOVE_OVERRIDE, url),
+        requestAddOverride: (url: string, directives: string[], callerName: string) =>
+            invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, url, directives, callerName),
     },
 
     pluginHelpers: PluginHelpers
