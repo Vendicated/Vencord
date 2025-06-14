@@ -5,10 +5,8 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addMessagePreSendListener, MessageExtra, MessageObject, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { UploadWithRemix } from "@equicordplugins/remixMe/types";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -127,8 +125,6 @@ function makeContextCallback(
     };
 }
 
-const handleMessage: MessageSendListener = (_: string, __: MessageObject, ex: MessageExtra) => ex.uploads && (ex.uploads as UploadWithRemix[]).forEach(att => console.log(att));
-
 export default definePlugin({
     name: "ViewRawVariant",
     description: "Copy/View raw content of any message, channel, or guild, but show in the right click menu.",
@@ -147,10 +143,4 @@ export default definePlugin({
             openViewRawModal(cleanMessage(val), "Message", true),
         ),
     },
-    start() {
-        addMessagePreSendListener(handleMessage);
-    },
-    stop() {
-        removeMessagePreSendListener(handleMessage);
-    }
 });
