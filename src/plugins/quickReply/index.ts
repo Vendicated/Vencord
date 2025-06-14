@@ -16,19 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
+import NoBlockedMessagesPlugin from "plugins/noBlockedMessages";
+import NoReplyMentionPlugin from "plugins/noReplyMention";
 
-const Kangaroo = findByPropsLazy("jumpToMessage");
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 const isMac = navigator.platform.includes("Mac"); // bruh
-let replyIdx = -1;
-let editIdx = -1;
+let currentlyReplyingId: string | null = null;
+let currentlyEditingId: string | null = null;
 
 
 const enum MentionOptions {
@@ -69,36 +70,29 @@ export default definePlugin({
 
     flux: {
         DELETE_PENDING_REPLY() {
-            replyIdx = -1;
+            currentlyReplyingId = null;
         },
         MESSAGE_END_EDIT() {
-            editIdx = -1;
+            currentlyEditingId = null;
+        },
+        CHANNEL_SELECT() {
+            currentlyReplyingId = null;
+            currentlyEditingId = null;
         },
         MESSAGE_START_EDIT: onStartEdit,
         CREATE_PENDING_REPLY: onCreatePendingReply
     }
 });
 
-function calculateIdx(messages: Message[], id: string) {
-    const idx = messages.findIndex(m => m.id === id);
-    return idx === -1
-        ? idx
-        : messages.length - idx - 1;
-}
-
-function onStartEdit({ channelId, messageId, _isQuickEdit }: any) {
+function onStartEdit({ messageId, _isQuickEdit }: any) {
     if (_isQuickEdit) return;
-
-    const meId = UserStore.getCurrentUser().id;
-
-    const messages = MessageStore.getMessages(channelId)._array.filter(m => m.author.id === meId);
-    editIdx = calculateIdx(messages, messageId);
+    currentlyEditingId = messageId;
 }
 
 function onCreatePendingReply({ message, _isQuickReply }: { message: Message; _isQuickReply: boolean; }) {
     if (_isQuickReply) return;
 
-    replyIdx = calculateIdx(MessageStore.getMessages(message.channel_id)._array, message.id);
+    currentlyReplyingId = message.id;
 }
 
 const isCtrl = (e: KeyboardEvent) => isMac ? e.metaKey : e.ctrlKey;
@@ -123,10 +117,10 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 
     const vh = Math.max(document.documentElement.clientHeight, window.innerHeight);
     const rect = element.getBoundingClientRect();
-    const isOffscreen = rect.bottom < 200 || rect.top - vh >= -200;
+    const isOffscreen = rect.bottom < 150 || rect.top - vh >= -150;
 
     if (isOffscreen) {
-        Kangaroo.jumpToMessage({
+        MessageActions.jumpToMessage({
             channelId,
             messageId,
             flash: false,
@@ -137,43 +131,48 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
     let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
-    if (!isReply) { // we are editing so only include own
-        const meId = UserStore.getCurrentUser().id;
-        messages = messages.filter(m => m.author.id === meId);
-    }
 
-    if (Vencord.Plugins.isPluginEnabled("NoBlockedMessages")) {
-        messages = messages.filter(m => !RelationshipStore.isBlocked(m.author.id));
-    }
+    const meId = UserStore.getCurrentUser().id;
+    const hasNoBlockedMessages = Vencord.Plugins.isPluginEnabled(NoBlockedMessagesPlugin.name);
 
-    const mutate = (i: number) => isUp
-        ? Math.min(messages.length - 1, i + 1)
-        : Math.max(-1, i - 1);
+    messages = messages.filter(m => {
+        if (m.deleted) return false;
+        if (!isReply && m.author.id !== meId) return false; // editing only own messages
+        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
 
-    const findNextNonDeleted = (i: number) => {
-        do {
-            i = mutate(i);
-        } while (i !== -1 && messages[messages.length - i - 1]?.deleted === true);
-        return i;
+        return true;
+    });
+
+    const findNextNonDeleted = (id: string | null) => {
+        if (id === null) return messages[messages.length - 1];
+
+        const idx = messages.findIndex(m => m.id === id);
+        if (idx === -1) return messages[messages.length - 1];
+
+        const i = isUp ? idx - 1 : idx + 1;
+        return messages[i] ?? null;
     };
 
-    let i: number;
-    if (isReply)
-        replyIdx = i = findNextNonDeleted(replyIdx);
-    else
-        editIdx = i = findNextNonDeleted(editIdx);
-
-    return i === - 1 ? undefined : messages[messages.length - i - 1];
+    if (isReply) {
+        const msg = findNextNonDeleted(currentlyReplyingId);
+        currentlyReplyingId = msg?.id ?? null;
+        return msg;
+    } else {
+        const msg = findNextNonDeleted(currentlyEditingId);
+        currentlyEditingId = msg?.id ?? null;
+        return msg;
+    }
 }
 
-function shouldMention(message) {
-    const { enabled, userList, shouldPingListed } = Settings.plugins.NoReplyMention;
-    const shouldPing = !enabled || (shouldPingListed === userList.includes(message.author.id));
-
+function shouldMention(message: Message) {
     switch (settings.store.shouldMention) {
-        case MentionOptions.NO_REPLY_MENTION_PLUGIN: return shouldPing;
-        case MentionOptions.DISABLED: return false;
-        default: return true;
+        case MentionOptions.NO_REPLY_MENTION_PLUGIN:
+            if (!Vencord.Plugins.isPluginEnabled(NoReplyMentionPlugin.name)) return true;
+            return NoReplyMentionPlugin.shouldMention(message, false);
+        case MentionOptions.DISABLED:
+            return false;
+        default:
+            return true;
     }
 }
 
@@ -181,13 +180,16 @@ function shouldMention(message) {
 function nextReply(isUp: boolean) {
     const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
     if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
+
     const message = getNextMessage(isUp, true);
 
-    if (!message)
+    if (!message) {
         return void Dispatcher.dispatch({
             type: "DELETE_PENDING_REPLY",
             channelId: SelectedChannelStore.getChannelId(),
         });
+    }
+
     const channel = ChannelStore.getChannel(message.channel_id);
     const meId = UserStore.getCurrentUser().id;
 
@@ -199,6 +201,7 @@ function nextReply(isUp: boolean) {
         showMentionToggle: !channel.isPrivate() && message.author.id !== meId,
         _isQuickReply: true
     });
+
     ComponentDispatch.dispatchToLastSubscribed("TEXTAREA_FOCUS");
     jumpIfOffScreen(channel.id, message.id);
 }
@@ -209,11 +212,13 @@ function nextEdit(isUp: boolean) {
     if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return;
     const message = getNextMessage(isUp, false);
 
-    if (!message)
+    if (!message) {
         return Dispatcher.dispatch({
             type: "MESSAGE_END_EDIT",
             channelId: SelectedChannelStore.getChannelId()
         });
+    }
+
     Dispatcher.dispatch({
         type: "MESSAGE_START_EDIT",
         channelId: message.channel_id,
@@ -221,5 +226,6 @@ function nextEdit(isUp: boolean) {
         content: message.content,
         _isQuickEdit: true
     });
+
     jumpIfOffScreen(message.channel_id, message.id);
 }
