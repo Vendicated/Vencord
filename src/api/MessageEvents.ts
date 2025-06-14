@@ -38,6 +38,8 @@ export interface Upload {
     filename: string;
     id: string;
     isImage: boolean;
+    isRemix?: boolean;
+    isThumbnail: boolean;
     isVideo: boolean;
     item: {
         file: File;
