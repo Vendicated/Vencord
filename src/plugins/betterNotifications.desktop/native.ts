@@ -19,6 +19,7 @@ const isLinux = platform === "linux";
 let isMonitorRunning: boolean = false;
 
 const idMap: Map<number, NotificationData> = new Map();
+const replyMap: Map<number, string> = new Map();
 
 interface NotificationData {
     channelId: string;
@@ -272,6 +273,7 @@ function notifySend(summary: string,
         if (Number(stdout.trim())) {
             idMap.set(Number(stdout), notificationData);
             console.log(idMap);
+            console.log(replyMap);
 
         }
 
@@ -284,10 +286,35 @@ async function startListeningToDbus() {
     console.log("Starting monitoring");
     isMonitorRunning = true;
 
+    let nextIsReply: boolean = false;
+    let nextReplyId: number;
+
     const monitor = execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"]);
 
     monitor.stdout?.on("data", data => {
-        console.log(data.trim());
+        const text: string = data.trim();
+
+        if (nextIsReply) {
+            if (!text.startsWith("string")) {
+                console.error(`Expected reply, recieved ${text} instead`);
+                return;
+            }
+            const i = text.indexOf(" ");
+            replyMap.set(nextReplyId, text.slice(i + 1));
+
+            nextIsReply = false;
+            nextReplyId = 0;
+        } else if (text.startsWith("uint32")) {
+            nextIsReply = true;
+            const foundId = text.split(" ").at(1);
+
+            if (!foundId) {
+                console.error(`Failed to find id (${foundId})`);
+                return;
+            }
+
+            nextReplyId = Number(foundId);
+        }
     });
 }
 
