@@ -292,32 +292,34 @@ async function startListeningToDbus() {
     const monitor = execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"]);
 
     monitor.stdout?.on("data", data => {
-        const text: string = data.trim();
-        console.log(`:: ${text}`);
+        const textData: string = data.trim();
+        console.log(`:: ${textData}`);
 
-        if (nextIsReply) {
-            if (!text.startsWith("string")) {
-                console.error(`Expected reply, recieved ${text} instead`);
-                return;
+        textData.split("\n").forEach(text => {
+            if (nextIsReply) {
+                if (!text.startsWith("string")) {
+                    console.error(`Expected reply, recieved ${text} instead`);
+                    return;
+                }
+                console.log("Event is reply");
+                const i = text.indexOf(" ");
+                replyMap.set(nextReplyId, text.slice(i + 1));
+
+                nextIsReply = false;
+                nextReplyId = 0;
+            } else if (text.startsWith("uint32")) {
+                console.log("Found data starting with uint32");
+                nextIsReply = true;
+                const foundId = text.split(" ").at(1);
+
+                if (!foundId) {
+                    console.error(`Failed to find id (${foundId})`);
+                    return;
+                }
+
+                nextReplyId = Number(foundId);
             }
-            console.log("Event is reply");
-            const i = text.indexOf(" ");
-            replyMap.set(nextReplyId, text.slice(i + 1));
-
-            nextIsReply = false;
-            nextReplyId = 0;
-        } else if (text.startsWith("uint32")) {
-            console.log("Found data starting with uint32");
-            nextIsReply = true;
-            const foundId = text.split(" ").at(1);
-
-            if (!foundId) {
-                console.error(`Failed to find id (${foundId})`);
-                return;
-            }
-
-            nextReplyId = Number(foundId);
-        }
+        });
     });
 }
 
