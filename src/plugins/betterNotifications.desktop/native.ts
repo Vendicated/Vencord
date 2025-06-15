@@ -16,6 +16,8 @@ const isWin = platform === "win32";
 const isMac = platform === "darwin";
 const isLinux = platform === "linux";
 
+const idMap: Map<number, NotificationData> = new Map();
+
 interface NotificationData {
     channelId: string;
     messageId: string;
@@ -229,8 +231,9 @@ function notifySend(summary: string,
     avatarLocation: string,
     defaultCallback: Function,
     notificationType: "notification" | "call",
+    notificationData: NotificationData,
     attachmentFormat: string | undefined,
-    attachmentLocation?: string
+    attachmentLocation?: string,
 ) {
     const name = app.getName();
     var args = [summary];
@@ -242,7 +245,7 @@ function notifySend(summary: string,
     // args.push("--action=key=buttontext");
 
     // TODO future: modify existing notification with --replace-id="id"
-    // args.push("--print-id");
+    args.push("--print-id");
 
     args.push(`--app-name=${name[0].toUpperCase() + name.slice(1)}`);
     args.push(`--hint=string:desktop-entry:${name}`);
@@ -261,6 +264,11 @@ function notifySend(summary: string,
     execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
             return console.error("Notification error:", error + stderr);
+
+        if (Number(stdout.trim())) {
+            idMap.set(Number(stdout), notificationData);
+            console.log(idMap);
+        }
 
         // Will need propper filtering if multiple actions or notification ids are used
         if (stdout.trim() === "default") defaultCallback();
@@ -297,7 +305,7 @@ export function notify(event: IpcMainInvokeEvent,
             console.log("Recieved the following linux formatted string:");
             console.log(linuxFormattedString);
 
-            notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, type, extraOptions?.messageOptions?.attachmentFormat, attachment);
+            notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, type, notificationData, extraOptions?.messageOptions?.attachmentFormat, attachment);
             return;
         }
 

@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, TextInput, Toasts } from "@webpack/common";
 
 import ExampleString from "./components/ExampleStrings";
@@ -389,9 +389,6 @@ export default definePlugin({
     ],
 
     start() {
-        const reactionModule = findByCode("MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE", "Message Shortcut");
-
-        console.log(reactionModule);
         if (isMac && settings.store.notificationPatchType === "custom") {
             logger.warn("User is on macOS but has notificationPatchType as custom");
             setTimeout(() => {
