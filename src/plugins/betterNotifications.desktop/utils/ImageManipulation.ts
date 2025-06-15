@@ -177,7 +177,7 @@ export async function fitAttachmentIntoCorrectAspectRatio(images: string[], type
 }
 
 
-export async function blurImage(src, amount = 42) {
+export async function blurImage(src, amount = 84) {
     // 42px blur seems to be equavilent to discord's spoiler blur
     const { promise: imgLoaded, resolve } = Promise.withResolvers();
 
@@ -190,8 +190,8 @@ export async function blurImage(src, amount = 42) {
 
     const canvas = document.createElement("canvas");
 
-    canvas.width = img.width; // aspect ratio for windows 'hero' images
-    canvas.height = img.height;
+    canvas.width = 1092; // aspect ratio for windows 'hero' images
+    canvas.height = 540;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("canvas context not defined");
