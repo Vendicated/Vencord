@@ -293,7 +293,7 @@ async function startListeningToDbus() {
 
     monitor.stdout?.on("data", data => {
         const text: string = data.trim();
-        console.log(text);
+        console.log(`:: ${text}`);
 
         if (nextIsReply) {
             if (!text.startsWith("string")) {
