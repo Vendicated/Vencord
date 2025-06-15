@@ -16,6 +16,8 @@ const isWin = platform === "win32";
 const isMac = platform === "darwin";
 const isLinux = platform === "linux";
 
+let isMonitorRunning: boolean = false;
+
 const idMap: Map<number, NotificationData> = new Map();
 
 interface NotificationData {
@@ -262,7 +264,6 @@ function notifySend(summary: string,
 
 
     console.log(args);
-    startListeningToDbus();
 
     execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
@@ -281,6 +282,7 @@ function notifySend(summary: string,
 
 async function startListeningToDbus() {
     console.log("Starting monitoring");
+    isMonitorRunning = true;
 
     const monitor = execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"]);
 
@@ -314,6 +316,9 @@ export function notify(event: IpcMainInvokeEvent,
         const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
 
         if (isLinux) {
+            if (!isMonitorRunning) {
+                startListeningToDbus();
+            }
             const linuxFormattedString: string | undefined = extraOptions?.linuxFormattedText;
 
             console.log("Recieved the following linux formatted string:");
