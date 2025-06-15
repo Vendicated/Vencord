@@ -79,6 +79,10 @@ export async function SendNativeNotification(avatarUrl: string,
         logger.info("Found suitable attachment");
         logger.debug(attachment.url);
         suitableAttachments.push({ url: attachmentUrl, isSpoiler: attachment.spoiler });
+
+        if (suitableAttachments.length >= 3) {
+            break;
+        }
     }
 
     logger.debug(`Notification type ${basicNotification.channel_type}`);
