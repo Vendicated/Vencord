@@ -262,6 +262,7 @@ function notifySend(summary: string,
 
 
     console.log(args);
+    startListeningToDbus();
 
     execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
@@ -271,7 +272,6 @@ function notifySend(summary: string,
             idMap.set(Number(stdout), notificationData);
             console.log(idMap);
 
-            startListeningToDbus();
         }
 
         // Will need propper filtering if multiple actions or notification ids are used
