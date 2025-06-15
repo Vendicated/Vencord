@@ -17,6 +17,10 @@ import { isLinux, replaceVariables } from "./Variables";
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
 
+export interface SuitableAttachment {
+    isSpoiler: boolean,
+    url: string;
+}
 
 export async function SendNativeNotification(avatarUrl: string,
     notificationTitle: string, notificationBody: string,
@@ -48,7 +52,8 @@ export async function SendNativeNotification(avatarUrl: string,
     const { attachments } = advancedNotification.messageRecord;
     let contentType: string;
     let imageType: "png" | "jpeg";
-    let isAttachmentSpoiler: boolean = false;
+    const isAttachmentSpoiler: boolean = false;
+    const suitableAttachments: SuitableAttachment[] = [];
 
     for (const attachment of attachments) {
         contentType = attachment.content_type;
@@ -72,10 +77,8 @@ export async function SendNativeNotification(avatarUrl: string,
         imageType = contentType.split("/")[1];
 
         logger.info("Found suitable attachment");
-        isAttachmentSpoiler = attachment.spoiler;
         logger.debug(attachment.url);
-
-        break;
+        suitableAttachments.push({ url: attachmentUrl, isSpoiler: attachment.spoiler });
     }
 
     logger.debug(`Notification type ${basicNotification.channel_type}`);
@@ -133,13 +136,16 @@ export async function SendNativeNotification(avatarUrl: string,
         finalAvatarData = avatarUrl;
     }
 
-    let finalAttachment: string | undefined = attachmentUrl;
-    if (attachmentUrl && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
-        console.log("Fitting attachment");
-        finalAttachment = await fitAttachmentIntoCorrectAspectRatio(attachmentUrl, settings.store.notificationAttachmentFit);
+    for (const attachment of suitableAttachments) {
+        if (attachment.isSpoiler) {
+            attachment.url = await blurImage(attachment.url);
+        }
     }
-    if (attachmentUrl && isAttachmentSpoiler) {
-        finalAttachment = await blurImage(finalAttachment);
+
+    let finalAttachment: string | undefined = suitableAttachments[0].url;
+    if (suitableAttachments && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
+        console.log("Fitting attachment");
+        finalAttachment = await fitAttachmentIntoCorrectAspectRatio(suitableAttachments.map(img => img.url), settings.store.notificationAttachmentFit);
     }
     if (finalAttachment) {
         notify(finalAvatarData, finalAttachment);
