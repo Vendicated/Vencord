@@ -268,10 +268,21 @@ function notifySend(summary: string,
         if (Number(stdout.trim())) {
             idMap.set(Number(stdout), notificationData);
             console.log(idMap);
+
+            startListeningToDbus();
         }
 
         // Will need propper filtering if multiple actions or notification ids are used
         if (stdout.trim() === "default") defaultCallback();
+    });
+}
+
+async function startListeningToDbus() {
+    execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"], {}, (error, stdout, stderr) => {
+        if (error) {
+            return console.error("Listening error", error + stderr);
+        }
+        console.log(stdout.trim());
     });
 }
 
