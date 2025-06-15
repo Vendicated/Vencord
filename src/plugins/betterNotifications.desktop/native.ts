@@ -280,11 +280,12 @@ function notifySend(summary: string,
 }
 
 async function startListeningToDbus() {
-    execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"], {}, (error, stdout, stderr) => {
-        if (error) {
-            return console.error("Listening error", error + stderr);
-        }
-        console.log(stdout.trim());
+    console.log("Starting monitoring");
+
+    const monitor = execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"]);
+
+    monitor.stdout?.on("data", data => {
+        console.log(data.trim());
     });
 }
 
