@@ -147,7 +147,7 @@ export async function SendNativeNotification(avatarUrl: string,
     }
 
     let finalAttachment: string | undefined = suitableAttachments.at(0)?.url;
-    if (suitableAttachments && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
+    if (suitableAttachments.length > 0 && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
         console.log("Fitting attachment");
         finalAttachment = await fitAttachmentIntoCorrectAspectRatio(suitableAttachments.map(img => img.url), settings.store.notificationAttachmentFit);
     }
