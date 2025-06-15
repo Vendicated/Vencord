@@ -265,8 +265,8 @@ export const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "How to process attachments for notifications",
         options: [
-            { label: "Let operating system decide", value: AttachmentManipulation.none, default: true },
-            { label: "Fill in blanks (blur background)", value: AttachmentManipulation.fillBlank },
+            { label: "Let operating system decide", value: AttachmentManipulation.none },
+            { label: "Fill in blanks (blur background). Supports displaying multiple attachments at once", value: AttachmentManipulation.fillBlank, default: true },
             { label: "Crop to top", value: AttachmentManipulation.cropTop },
             { label: "Crop to center", value: AttachmentManipulation.cropCenter },
             { label: "Crop to bottom", value: AttachmentManipulation.cropBottom },
