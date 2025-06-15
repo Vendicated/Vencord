@@ -40,6 +40,7 @@ interface ExtraOptions {
     linuxFormattedText?: string,
     attachmentUrl?: string;
     attachmentType?: string;
+    quickReactions?: string[];
 }
 
 interface AssetOptions {
@@ -183,6 +184,11 @@ function generateXml(
                  ${attachmentLoc ? `<image placement="${extraOptions?.messageOptions?.attachmentFormat}" src="${attachmentLoc}" />` : ""}
                  </binding>
              </visual>
+             <actions>
+            ${extraOptions?.quickReactions?.map(emoji =>
+                `<action content="${emoji}" arguments="${notificationClickPath}?reaction=${emoji}&amp;messageId=${notificationData.messageId}&amp;channelId=${notificationData.channelId}" activationType="protocol" />`
+            )}
+             </actions>
          </toast>`;
     } else {
         xml = `
@@ -332,17 +338,23 @@ export async function deleteTempFolder(_) {
     }
 }
 
+app.on("browser-window-created", (_, win) => {
+    webContents = win.webContents;
+});
+
 // TODO future: app.on("second-instance") with deeplinks on Windows notifications to allow button actions
-// app.on("second-instance", (event, arg) => {
-//     console.log("[BN] second instance activated");
-//     console.log(arg);
-//     let params = new URL(arg[arg.length - 1]).searchParams;
-//     let channelId = params.get("c");
-//     let messageId = params.get("m");
-//     if (webContents) {
-//         webContents.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationReplyButtonEvent("${channelId}", "${messageId}")`);
-//     } else {
-//         console.error("[BN] webContents not defined!");
-//     }
-//     event.preventDefault();
-// });
+app.on("second-instance", (event, args) => {
+    console.log("[BN] second instance activated");
+    console.log(args);
+    const stringUrl = args.at(args.length - 1);
+    if (!stringUrl || !stringUrl.startsWith("discord://")) {
+        console.log(`[BN] url is ${stringUrl}. Skipping`);
+        return;
+    }
+
+    const url = new URL(stringUrl);
+    if (!url.searchParams.get("reaction")) {
+        console.log("[BN] Link does not contain a reaction");
+    }
+    webContents?.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationReactEvent("${url.searchParams.get("channelId")}", "${url.searchParams.get("messageId")}", "${url.searchParams.get("reaction")}")`);
+});

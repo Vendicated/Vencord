@@ -9,8 +9,8 @@ import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, Toasts } from "@webpack/common";
+import { findByCode, findByCodeLazy, findByPropsLazy } from "@webpack";
+import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, TextInput, Toasts } from "@webpack/common";
 
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
@@ -22,6 +22,8 @@ import { isLinux, isMac, isWin, Replacements } from "./utils/Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const jumpToMessage = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
+const addReaction = findByCodeLazy("MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE", "Message Shortcut");
+
 const logger = new Logger("BetterNotifications");
 
 export const settings = definePluginSettings({
@@ -187,6 +189,54 @@ export const settings = definePluginSettings({
         hidden: !isWin
     },
 
+    notificationQuickReactEnabled: {
+        type: OptionType.COMPONENT,
+        component: () => <></>,
+        default: false
+    },
+
+    notificationQuickReact: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            const [switchValue, setSwitchValue] = React.useState<boolean>(settings.store.notificationQuickReactEnabled);
+            const [tempEmojiVal, setTempEmojiVal] = React.useState<string>("");
+
+            React.useEffect(() => {
+                settings.store.notificationQuickReactEnabled = switchValue;
+            }, [switchValue]);
+
+            // NOTE: Very unfinished implementation. Use Discord's emoji picker in the future
+            React.useEffect(() => {
+                props.setValue(tempEmojiVal.split(","));
+            }, [tempEmojiVal]);
+
+            return (
+                <>
+                    <Forms.FormSection>
+                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable quick reactions</Forms.FormTitle>
+                            <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={switchValue} onChange={setSwitchValue}></Switch>
+                        </div>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Add reaction buttons to notifications</Forms.FormText>
+
+
+                        {switchValue &&
+                            <div style={{ marginTop: "12px" }}>
+                                <Forms.FormSection>
+                                    <Forms.FormText>Quick reaction</Forms.FormText>
+                                    <TextInput onChange={props.setValue} defaultValue={settings.store.notificationQuickReact} />
+                                </Forms.FormSection>
+                            </div>
+                        }
+                    </Forms.FormSection >
+
+                </>
+            );
+        },
+        default: ["👍", "❤️"],
+        hidden: !isWin
+    },
+
 
     allowBotNotifications: {
         type: OptionType.BOOLEAN,
@@ -339,6 +389,9 @@ export default definePlugin({
     ],
 
     start() {
+        const reactionModule = findByCode("MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE", "Message Shortcut");
+
+        console.log(reactionModule);
         if (isMac && settings.store.notificationPatchType === "custom") {
             logger.warn("User is on macOS but has notificationPatchType as custom");
             setTimeout(() => {
@@ -359,6 +412,14 @@ export default definePlugin({
             messageId,
             flash: true,
             jumpType: "INSTANT"
+        });
+    },
+
+    NotificationReactEvent(channelId: string, messageId: string, emoji: string) {
+        addReaction(channelId.toString(), messageId.toString(), {
+            animated: false,
+            id: null,
+            name: emoji
         });
     },
 
