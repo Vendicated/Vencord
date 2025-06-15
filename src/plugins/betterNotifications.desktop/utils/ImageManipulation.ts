@@ -178,7 +178,7 @@ export async function fitAttachmentIntoCorrectAspectRatio(images: string[], type
 
 
 export async function blurImage(src, amount = 84) {
-    // 42px blur seems to be equavilent to discord's spoiler blur
+    // 84px blur seems to be equavilent to discord's spoiler blur
     const { promise: imgLoaded, resolve } = Promise.withResolvers();
 
     const img = new Image();
