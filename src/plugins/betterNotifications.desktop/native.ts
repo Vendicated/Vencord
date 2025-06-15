@@ -249,6 +249,8 @@ function notifySend(summary: string,
 
     args.push(`--app-name=${name[0].toUpperCase() + name.slice(1)}`);
     args.push(`--hint=string:desktop-entry:${name}`);
+    args.push("--hint=string:x-kde-reply-placeholder-text:\"reply\"");
+    args.push("--action=inline-reply=\"send\"");
 
     // AFAIK KDE & Gnome do not care about these
     if (notificationType === "call") args.push("--category=call.incoming");
