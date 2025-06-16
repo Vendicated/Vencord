@@ -415,11 +415,20 @@ function ThemesTab() {
     }
 
     async function refreshOnlineThemes() {
-        const themes = await Promise.all(settings.themeLinks.map(async link => {
-            const css = await fetch(link).then(res => res.text());
-            return { ...getThemeInfo(css, link), link };
-        }));
-        setOnlineThemes(themes);
+        const themes = await Promise.all(
+            settings.themeLinks.map(async link => {
+                try {
+                    const res = await fetch(link);
+                    if (!res.ok) throw new Error(`Failed to fetch ${link}`);
+                    const css = await res.text();
+                    return { ...getThemeInfo(css, link), link };
+                } catch (err) {
+                    console.warn(`Theme fetch failed for ${link}:`, err);
+                    return null;
+                }
+            })
+        );
+        setOnlineThemes(themes.filter(theme => theme !== null));
     }
 
     function onThemeLinkEnabledChange(link: string, enabled: boolean) {
