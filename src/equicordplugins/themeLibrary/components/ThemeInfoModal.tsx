@@ -9,16 +9,28 @@ import { Heart } from "@components/Heart";
 import { copyToClipboard } from "@utils/clipboard";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import type { PluginNative } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, Forms, Parser, React, showToast, Toasts } from "@webpack/common";
 
-import { ThemeInfoModalProps } from "../types";
-import { ClockIcon, WarningIcon } from "../utils/Icons";
+import { Theme, ThemeInfoModalProps } from "../types";
+import { ClockIcon, DownloadIcon, WarningIcon } from "../utils/Icons";
+import { logger } from "./ThemeTab";
 
 const Native = VencordNative.pluginHelpers.ThemeLibrary as PluginNative<typeof import("../native")>;
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+
+async function downloadTheme(themesDir: string, theme: Theme) {
+    try {
+        await Native.downloadTheme(themesDir, theme);
+        showToast(`Downloaded ${theme.name}!`, Toasts.Type.SUCCESS);
+    } catch (err: unknown) {
+        logger.error(err);
+        showToast(`Failed to download ${theme.name}! (check console)`, Toasts.Type.FAILURE);
+    }
+}
 
 export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, ...props }) => {
     const { type, content, likes, guild, tags, last_updated, requiresThemeAttributes } = theme;
@@ -176,6 +188,68 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                     onClick={() => props.onClose()}
                 >
                     Close
+                </Button>
+                <Button
+                    color={Button.Colors.GREEN}
+                    look={Button.Looks.OUTLINED}
+                    className={classes("vce-button", Margins.right8)}
+                    disabled={!theme.content || theme.id === "preview"}
+                    onClick={async () => {
+                        const themesDir = await VencordNative.themes.getThemesDir();
+                        const exists = await Native.themeExists(themesDir, theme);
+                        // using another function so we get the proper file path instead of just guessing
+                        // which slash to use (im looking at you windows)
+                        const validThemesDir = await Native.getThemesDir(themesDir, theme);
+                        // check if theme exists, and ask if they want to overwrite
+                        if (exists) {
+                            openModal(modalProps => (
+                                <ModalRoot {...modalProps} size={ModalSize.SMALL}>
+                                    <ModalHeader>
+                                        <Forms.FormTitle tag="h4">Conflict!</Forms.FormTitle>
+                                    </ModalHeader>
+                                    <ModalContent>
+                                        <Forms.FormText style={{
+                                            padding: "8px",
+                                        }}>
+                                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                                <p>A theme with the same name <b>already exist</b> in your themes directory! Do you want to overwrite it?</p>
+                                                <div className="vce-overwrite-modal">
+                                                    <code style={{ wordWrap: "break-word" }}>
+                                                        {validThemesDir}
+                                                    </code>
+                                                </div>
+                                            </div>
+                                        </Forms.FormText>
+                                    </ModalContent>
+                                    <ModalFooter>
+                                        <Button
+                                            look={Button.Looks.FILLED}
+                                            color={Button.Colors.RED}
+                                            onClick={async () => {
+                                                await downloadTheme(themesDir, theme);
+                                                modalProps.onClose();
+                                            }}
+                                        >
+                                            Overwrite
+                                        </Button>
+                                        <Button
+                                            color={Button.Colors.GREEN}
+                                            look={Button.Looks.FILLED}
+                                            className={Margins.right8} onClick={() => modalProps.onClose()}
+                                        >
+                                            Keep my file
+                                        </Button>
+                                    </ModalFooter>
+                                </ModalRoot>
+                            ));
+                        } else {
+                            await downloadTheme(themesDir, theme);
+                        }
+                    }}
+                >
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        Download <DownloadIcon style={{ marginLeft: "5px" }} />
+                    </div>
                 </Button>
             </ModalFooter>
         </ModalRoot>
