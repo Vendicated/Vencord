@@ -26,7 +26,7 @@ import { EquicordDevs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByProps, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByProps, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ChannelStore, Menu } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -34,6 +34,11 @@ import { Popover as NoteButtonPopover, Popover } from "./components/icons/NoteBu
 import { NoteModal } from "./components/modals/Notebook";
 import noteHandler, { noteHandlerCache } from "./NoteHandler";
 import { DataStoreToCache, HolyNoteStore } from "./utils";
+
+export const User = findByCodeLazy("isSystemUser(){");
+export const { message, groupStart, cozyMessage } = findByPropsLazy("cozyMessage");
+export const MessageType = findByCodeLazy("isEdited(){");
+export const Channel = findByCodeLazy("computeLurkerPermissionsAllowList(){");
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 

@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Channel, cozyMessage, groupStart, message, MessageType, User } from "@equicordplugins/holyNotes";
 import { copyToClipboard } from "@utils/clipboard";
 import { classes } from "@utils/misc";
 import { ModalProps } from "@utils/modal";
-import { findByCode, findByCodeLazy, findByProps, findComponentByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 
 import noteHandler from "../../NoteHandler";
@@ -28,10 +29,6 @@ export const RenderMessage = ({
     closeModal?: () => void;
 }) => {
     const ChannelMessage = findComponentByCodeLazy("Message must not be a thread");
-    const { message, groupStart, cozyMessage } = findByProps("cozyMessage");
-    const User = findByCode("isClyde(){");
-    const Message = findByCode("isEdited(){");
-    const Channel = findByCodeLazy("computeLurkerPermissionsAllowList");
 
     const [isHoldingDelete, setHoldingDelete] = React.useState(false);
 
@@ -90,7 +87,7 @@ export const RenderMessage = ({
                 // @ts-ignore
                 channel={new Channel({ id: "holy-notes" })}
                 message={
-                    new Message(
+                    new MessageType(
                         Object.assign(
                             { ...note },
                             {

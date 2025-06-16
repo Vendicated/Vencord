@@ -128,7 +128,7 @@ export default definePlugin({
         message, user, channelId, isChat, channel
     }: {
         message?: Message,
-        user?: User & { isClyde(): boolean; },
+        user?: User,
         channel?: Channel & { isForumPost(): boolean; isMediaPost(): boolean; },
         channelId?: string;
         isChat?: boolean;
@@ -137,7 +137,6 @@ export default definePlugin({
 
         if (!user) return null;
         if (isChat && user.id === "1") return null;
-        if (user.isClyde()) return null;
         if (user.bot && settings.dontShowForBots) return null;
 
         channel ??= ChannelStore.getChannel(channelId!) as any;
