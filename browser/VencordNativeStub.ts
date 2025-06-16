@@ -41,6 +41,7 @@ window.VencordNative = {
     themes: {
         uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
+        getThemesDir: async () => "",
         getThemesList: () => DataStore.entries(themeStore).then(entries =>
             entries.map(([name, css]) => ({ fileName: name as string, content: css }))
         ),
@@ -111,6 +112,7 @@ window.VencordNative = {
             }
         },
         set: async (s: Settings) => localStorage.setItem("EquicordSettings", JSON.stringify(s)),
+        getSettingsDir: async () => "LocalStorage",
         openFolder: async () => Promise.reject("settings:openFolder is not supported on web"),
     },
 

@@ -80,6 +80,7 @@ ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
     writeFileSync(QUICKCSS_PATH, css)
 );
 
+ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
 ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({

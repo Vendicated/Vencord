@@ -33,7 +33,7 @@ import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { relaunch } from "@utils/native";
+import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import type { ThemeHeader } from "@utils/themes";
 import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
@@ -201,6 +201,7 @@ function ThemesTab() {
     const [themeLinkValid, setThemeLinkValid] = useState(false);
     const [userThemes, setUserThemes] = useState<ThemeHeader[] | null>(null);
     const [onlineThemes, setOnlineThemes] = useState<(UserThemeHeader & { link: string; })[] | null>(null);
+    const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
         updateThemes();
@@ -344,7 +345,8 @@ function ThemesTab() {
                                 ) : (
                                     <QuickAction
                                         text="Open Themes Folder"
-                                        action={() => VencordNative.themes.openFolder()}
+                                        action={() => showItemInFolder(themeDir!)}
+                                        disabled={themeDirPending}
                                         Icon={FolderIcon}
                                     />
                                 )}

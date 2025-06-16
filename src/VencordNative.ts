@@ -33,6 +33,7 @@ export default {
     themes: {
         uploadTheme: (fileName: string, fileData: string) => invoke<void>(IpcEvents.UPLOAD_THEME, fileName, fileData),
         deleteTheme: (fileName: string) => invoke<void>(IpcEvents.DELETE_THEME, fileName),
+        getThemesDir: () => invoke<string>(IpcEvents.GET_THEMES_DIR),
         getThemesList: () => invoke<Array<{ fileName: string; content: string; }>>(IpcEvents.GET_THEMES_LIST),
         getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName),
         getSystemValues: () => invoke<Record<string, string>>(IpcEvents.GET_THEME_SYSTEM_VALUES),
@@ -50,6 +51,7 @@ export default {
     settings: {
         get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
         set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),
+        getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
 
         openFolder: () => invoke<void>(IpcEvents.OPEN_SETTINGS_FOLDER),
     },

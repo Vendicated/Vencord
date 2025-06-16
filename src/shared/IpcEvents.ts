@@ -17,30 +17,25 @@
 */
 
 export const enum IpcEvents {
-    OPEN_QUICKCSS = "VencordOpenQuickCss",
+    QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
+    THEME_UPDATE = "VencordThemeUpdate",
     GET_QUICK_CSS = "VencordGetQuickCss",
     SET_QUICK_CSS = "VencordSetQuickCss",
-    QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
-
-    GET_SETTINGS = "VencordGetSettings",
-    SET_SETTINGS = "VencordSetSettings",
-
+    UPLOAD_THEME = "VencordUploadTheme",
+    DELETE_THEME = "VencordDeleteTheme",
+    GET_THEMES_DIR = "VencordGetThemesDir",
     GET_THEMES_LIST = "VencordGetThemesList",
     GET_THEME_DATA = "VencordGetThemeData",
     GET_THEME_SYSTEM_VALUES = "VencordGetThemeSystemValues",
-    UPLOAD_THEME = "VencordUploadTheme",
-    DELETE_THEME = "VencordDeleteTheme",
-    THEME_UPDATE = "VencordThemeUpdate",
-
+    GET_SETTINGS_DIR = "VencordGetSettingsDir",
+    GET_SETTINGS = "VencordGetSettings",
+    SET_SETTINGS = "VencordSetSettings",
     OPEN_EXTERNAL = "VencordOpenExternal",
-    OPEN_THEMES_FOLDER = "VencordOpenThemesFolder",
-    OPEN_SETTINGS_FOLDER = "VencordOpenSettingsFolder",
-
+    OPEN_QUICKCSS = "VencordOpenQuickCss",
     GET_UPDATES = "VencordGetUpdates",
     GET_REPO = "VencordGetRepo",
     UPDATE = "VencordUpdate",
     BUILD = "VencordBuild",
-
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
 
     GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
@@ -51,4 +46,7 @@ export const enum IpcEvents {
     CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
     CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",
     CSP_REQUEST_ADD_OVERRIDE = "VencordCspRequestAddOverride",
+
+    OPEN_THEMES_FOLDER = "VencordOpenThemesFolder",
+    OPEN_SETTINGS_FOLDER = "VencordOpenSettingsFolder",
 }
