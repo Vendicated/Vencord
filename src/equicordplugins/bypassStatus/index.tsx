@@ -11,7 +11,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
+import { ChannelActionCreators, ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, UserStore, WindowStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import { JSX } from "react";
 
@@ -163,7 +163,7 @@ export default definePlugin({
                 if ((settings.store.guilds.split(", ").includes(guildId) || settings.store.channels.split(", ").includes(channelId)) && mentioned) {
                     await showNotification(message, guildId);
                 } else if (settings.store.users.split(", ").includes(message.author.id)) {
-                    const userChannelId = await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id);
+                    const userChannelId = await ChannelActionCreators.getOrEnsurePrivateChannel(message.author.id);
                     if (channelId === userChannelId || (mentioned && settings.store.allowOutsideOfDms === true)) {
                         await showNotification(message, guildId);
                     }

@@ -16,8 +16,8 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
 import {
-    FluxDispatcher, MessageActions,
-    PrivateChannelsStore, RestAPI,
+    ChannelActionCreators,
+    FluxDispatcher, MessageActions, RestAPI,
     SnowflakeUtils,
     useEffect, UserStore,
     UserUtils, useState,
@@ -201,7 +201,7 @@ export default definePlugin({
                 }
                 return;
             }
-            const dmChannelId = await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id);
+            const dmChannelId = await ChannelActionCreators.getOrEnsurePrivateChannel(message.author.id);
             if (channelId !== dmChannelId) return;
             const sender = await UserUtils.getUser(message.author.id).catch(() => null);
             if (!sender) return;
@@ -282,7 +282,7 @@ export default definePlugin({
 // Send Temporary Message
 async function sendTempMessage(recipientId: string, attachment: string, content: string, dm: boolean = true) {
     if (recipientId === UserStore.getCurrentUser().id) return;
-    const channelId = dm ? await PrivateChannelsStore.getOrEnsurePrivateChannel(recipientId) : recipientId;
+    const channelId = dm ? await ChannelActionCreators.getOrEnsurePrivateChannel(recipientId) : recipientId;
     if (attachment && attachment !== "") {
         const upload = await new CloudUpload({
             file: new File([new Blob([attachment])], "file.text", { type: "text/plain; charset=utf-8" }),
