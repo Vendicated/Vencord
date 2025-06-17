@@ -68,7 +68,7 @@ const settings = definePluginSettings({
     },
     showGradient: {
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         description: "Whether to show gradient for suffix",
     },
 });
