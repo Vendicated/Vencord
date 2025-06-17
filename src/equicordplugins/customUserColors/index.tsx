@@ -99,7 +99,8 @@ export default definePlugin({
                 match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i}=)(\i),/,
                 replace: "$self.wrapMessageColorProps($1, arguments[0]),"
             },
-            predicate: () => !Settings.plugins.IrcColors.enabled
+            predicate: () => !Settings.plugins.IrcColors.enabled,
+            noWarn: true
         },
         {
             find: "PrivateChannel.renderAvatar",
