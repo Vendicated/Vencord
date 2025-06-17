@@ -68,9 +68,8 @@ export default definePlugin({
             find: '="SYSTEM_TAG"',
             replacement: {
                 // Override colorString with our custom color and disable gradients if applying the custom color.
-                match: /useContext\(\i\.\i\),(?<=colorString:(\i).+?(\i)=.+?)/,
-                replace: (m, colorString, hasGradientColors) => `${m}` +
-                    `vcIrcColorsDummy=[${colorString},${hasGradientColors}]=$self.getMessageColorsVariables(arguments[0],${hasGradientColors}),`
+                match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i}=)(\i),/,
+                replace: "$self.wrapMessageColorProps($1, arguments[0]),"
             }
         },
         {
@@ -83,37 +82,40 @@ export default definePlugin({
         }
     ],
 
-    getMessageColorsVariables(context: any, hasGradientColors: boolean) {
-        const colorString = this.calculateNameColorForMessageContext(context);
-        const originalColorString = context?.author?.colorString;
+    wrapMessageColorProps(colorProps: { colorString: string, colorStrings?: Record<"primaryColor" | "secondaryColor" | "tertiaryColor", string>; }, context: any) {
+        try {
+            const colorString = this.calculateNameColorForMessageContext(context);
+            if (colorString === colorProps.colorString) {
+                return colorProps;
+            }
 
-        return [colorString, hasGradientColors && colorString === originalColorString];
+            return {
+                ...colorProps,
+                colorString,
+                colorStrings: colorProps.colorStrings && {
+                    primaryColor: colorString,
+                    secondaryColor: undefined,
+                    tertiaryColor: undefined
+                }
+            };
+        } catch (e) {
+            console.error("Failed to calculate message color strings:", e);
+            return colorProps;
+        }
     },
 
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
         const color = calculateNameColorForUser(userId);
-        const customColor = userId && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(userId, true) : null;
-
-        if (
-            (context?.message?.channel_id === "1337" && userId === "313337") ||
-            (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) ||
-            (settings.store.applyColorOnlyToUsersWithoutColor && colorString)
-        ) return customColor ?? colorString;
-
-        return customColor ?? color;
-    },
-
-    calculateNameColorForListContext(context: any) {
-        const id = context?.user?.id;
-        const colorString = context?.colorString;
-        const color = calculateNameColorForUser(id);
 
         if (Settings.plugins.CustomUserColors.enabled) {
-            const customColor = getCustomColorString(id, true);
+            const customColor = getCustomColorString(userId, true);
             if (customColor) return customColor;
         }
+
+        if (context?.message?.channel_id === "1337" && userId === "313337")
+            return colorString;
 
         if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
             return colorString;
@@ -122,5 +124,28 @@ export default definePlugin({
         return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
             ? color
             : colorString;
+    },
+
+    calculateNameColorForListContext(context: any) {
+        try {
+            const id = context?.user?.id;
+            const colorString = context?.colorString;
+            const color = calculateNameColorForUser(id);
+
+            if (Settings.plugins.CustomUserColors.enabled) {
+                const customColor = getCustomColorString(id, true);
+                if (customColor) return customColor;
+            }
+
+            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+                return colorString;
+            }
+
+            return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+                ? color
+                : colorString;
+        } catch (e) {
+            console.error("Failed to calculate name color for list context:", e);
+        }
     }
 });

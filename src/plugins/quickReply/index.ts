@@ -28,7 +28,6 @@ const isMac = navigator.platform.includes("Mac"); // bruh
 let currentlyReplyingId: string | null = null;
 let currentlyEditingId: string | null = null;
 
-
 const enum MentionOptions {
     DISABLED,
     ENABLED,
