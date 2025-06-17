@@ -9,3 +9,8 @@
 .vc-smyn-suffix::after {
     content: ")";
 }
+
+.vc-smyn-hide-gradient {
+    -webkit-text-fill-color: initial;
+    isolation: isolate;
+}
