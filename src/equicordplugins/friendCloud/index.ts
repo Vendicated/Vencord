@@ -64,17 +64,10 @@ export default definePlugin({
                     description: "Number of users to display",
                     type: ApplicationCommandOptionType.NUMBER,
                     required: false
-                },
-                {
-                    name: "algorithm",
-                    description: "Use the old algorithm (v1) to calculate affinity",
-                    type: ApplicationCommandOptionType.BOOLEAN,
-                    required: false
                 }
             ],
             execute: async (opts, cmdCtx) => {
                 const count = findOption(opts, "count", 25);
-                const useV1 = findOption(opts, "algorithm", false);
 
                 if (!count) return sendBotMessage(cmdCtx.channel.id, { content: "The count must be 1 or higher!" });
 
