@@ -150,5 +150,5 @@ export default definePlugin({
         }
     },
 
-    DecorSection: ErrorBoundary.wrap(DecorSection)
+    DecorSection: ErrorBoundary.wrap(DecorSection, { noop: true })
 });
