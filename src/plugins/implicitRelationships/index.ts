@@ -140,7 +140,7 @@ export default definePlugin({
         // 2. Do not have a relationship with
         await this.refreshUserAffinities();
         const userAffinities: Set<string> = UserAffinitiesStore.getUserAffinitiesUserIds();
-        const relationships = RelationshipStore.getRelationships();
+        const relationships = RelationshipStore.getMutableRelationships();
         const nonFriendAffinities = Array.from(userAffinities).filter(
             id => !RelationshipStore.getRelationshipType(id)
         );

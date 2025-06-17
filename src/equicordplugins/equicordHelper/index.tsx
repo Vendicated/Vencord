@@ -63,14 +63,6 @@ export default definePlugin({
                     replace: "return $1;"
                 }
             ]
-        },
-        // Adds getRelationships Back To The RelationshipStore
-        {
-            find: "getRelationshipCount(){",
-            replacement: {
-                match: /(?<=getRelationshipCount\(\)\{.{0,25}\})(?=.*?getFriendIDs\(\)\{.{0,25}.keys\((\i)\))/,
-                replace: "getRelationships(){return $1}"
-            }
         }
     ],
     start() {
