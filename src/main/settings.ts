@@ -36,7 +36,6 @@ RendererSettings.addGlobalChangeListener(() => {
     }
 });
 
-ipcMain.handle(IpcEvents.GET_SETTINGS_DIR, () => SETTINGS_DIR);
 ipcMain.on(IpcEvents.GET_SETTINGS, e => e.returnValue = RendererSettings.plain);
 
 ipcMain.handle(IpcEvents.SET_SETTINGS, (_, data: Settings, pathToNotify?: string) => {
@@ -49,16 +48,18 @@ export interface NativeSettings {
             [setting: string]: any;
         };
     };
+    customCspRules: Record<string, string[]>;
 }
 
 const DefaultNativeSettings: NativeSettings = {
-    plugins: {}
+    plugins: {},
+    customCspRules: {}
 };
 
 const nativeSettings = readSettings<NativeSettings>("native", NATIVE_SETTINGS_FILE);
 mergeDefaults(nativeSettings, DefaultNativeSettings);
 
-export const NativeSettings = new SettingsStore(nativeSettings);
+export const NativeSettings = new SettingsStore(nativeSettings as NativeSettings);
 
 NativeSettings.addGlobalChangeListener(() => {
     try {
