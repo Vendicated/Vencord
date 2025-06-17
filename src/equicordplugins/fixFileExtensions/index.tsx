@@ -32,12 +32,8 @@ export default definePlugin({
     patches: [
         // Taken from AnonymiseFileNames
         {
-            find: "async uploadFiles(",
+            find: "async uploadFilesSimple(",
             replacement: [
-                {
-                    match: /async uploadFiles\((\i),\i\){/,
-                    replace: "$&$1.forEach($self.fixExt);"
-                },
                 {
                     match: /async uploadFilesSimple\((\i)\){/,
                     replace: "$&$1.forEach($self.fixExt);"

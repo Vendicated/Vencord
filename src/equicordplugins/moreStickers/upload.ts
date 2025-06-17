@@ -6,13 +6,11 @@
 
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, UploadHandler } from "@webpack/common";
 
 import { FFmpegState, Sticker } from "./types";
 
-const MessageUpload = findByPropsLazy("uploadFiles");
-const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
@@ -159,26 +157,8 @@ export async function sendSticker({
             file = new File([processedImage], filename!, { type: mimeType });
         }
 
-        if (ctrlKey) {
-            UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), 0);
-            return;
-        }
-
-        MessageUpload.uploadFiles({
-            channelId,
-            draftType: 0,
-            hasSpoiler: false,
-            options: messageOptions || {},
-            parsedMessage: {
-                content: messageContent
-            },
-            uploads: [
-                new CloudUpload({
-                    file,
-                    platform: 1
-                }, channelId, false, 0)
-            ]
-        });
+        UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), 0);
+        return;
     } else if (shiftKey) {
         if (!messageContent.endsWith(" ") || !messageContent.endsWith("\n")) messageContent += " ";
         messageContent += sticker.image;

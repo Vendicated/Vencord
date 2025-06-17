@@ -192,15 +192,17 @@ function isTimestampDisabled() {
 
 function onlineFriendCount(): number {
     let onlineFriends = 0;
-    const relationships = RelationshipStore.getRelationships();
-    for (const id in relationships) {
-        if (relationships[id] === 1 && PresenceStore.getStatus(id) !== "offline") onlineFriends++;
+    const relationships = RelationshipStore.getFriendIDs();
+    for (const id of relationships) {
+        if (PresenceStore.getStatus(id) !== "offline") {
+            onlineFriends++;
+        }
     }
     return onlineFriends;
 }
 
 function totalFriendCount(): number {
-    return Object.values(RelationshipStore.getRelationships()).filter(r => r === 1).length;
+    return RelationshipStore.getFriendCount();
 }
 
 function memberCount(): string {

@@ -25,7 +25,7 @@ import { findByPropsLazy } from "@webpack";
 import { i18n, MessageStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
+const RelationshipStore = findByPropsLazy("getFriendIDs", "isBlocked");
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT

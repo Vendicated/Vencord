@@ -49,6 +49,7 @@ export let TypingStore: GenericStore;
 export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
 export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
+    getFriendCount(): number;
     getSince(userId: string): string;
     isIgnored(userId: string): boolean;
 };
