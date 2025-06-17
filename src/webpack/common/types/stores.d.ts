@@ -188,7 +188,7 @@ export class StickersStore extends FluxStore {
     getStickersByGuildId(id: string): Sticker[] | undefined;
 }
 
-export class RelationshipStore extends RelationshipStore {
+export class RelationshipStore extends FluxStore {
     isFriend(userId: string): boolean;
     isBlockedOrIgnored(userId: string): boolean;
     isBlockedOrIgnoredForMessage(userId: string): boolean;
