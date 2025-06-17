@@ -12,4 +12,5 @@
 
 .vc-smyn-hide-gradient {
     -webkit-text-fill-color: initial;
+    isolation: isolate;
 }
