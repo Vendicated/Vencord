@@ -6,8 +6,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-
 
 const setting = definePluginSettings({
     codeBlockLanguage: {
@@ -16,8 +16,8 @@ const setting = definePluginSettings({
         default: "txt"
     }
 });
-
 let isEnabled:boolean = false;
+const log = new Logger("CodeBlockChatting", "#8caaee");
 
 // idk how to make shortcut button using svg. sorry for inconvenience
 export default definePlugin({
@@ -27,7 +27,7 @@ export default definePlugin({
     settings: setting,
     enabledByDefault: false,
     async onBeforeMessageSend(_, msg) {
-        console.log("message event started.");
+        log.log("MessageEvent received.");
         if (isEnabled) {
             const content = msg.content.trim();
             const lang = setting.store.codeBlockLanguage;
@@ -45,5 +45,4 @@ export default definePlugin({
     stop() {
         isEnabled = false;
     }
-
 });
