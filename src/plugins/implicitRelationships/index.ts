@@ -23,7 +23,7 @@ import { findStoreLazy } from "@webpack";
 import { Constants, FluxDispatcher, GuildStore, RelationshipStore, RestAPI, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
-const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
+const UserAffinitiesStore = findStoreLazy("UserAffinitiesV2Store");
 
 export default definePlugin({
     name: "ImplicitRelationships",
@@ -117,7 +117,7 @@ export default definePlugin({
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 5
-            ? -(UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0)
+            ? (UserAffinitiesStore.getUserAffinity(row.user.id)?.communicationRank ?? 0)
             : comparator(row);
     },
 
@@ -139,17 +139,15 @@ export default definePlugin({
         // 1. Have an affinity for
         // 2. Do not have a relationship with
         await this.refreshUserAffinities();
-        const userAffinities: Set<string> = UserAffinitiesStore.getUserAffinitiesUserIds();
-        const relationships = RelationshipStore.getRelationships();
-        const nonFriendAffinities = Array.from(userAffinities).filter(
-            id => !RelationshipStore.getRelationshipType(id)
-        );
-        nonFriendAffinities.forEach(id => {
-            relationships[id] = 5;
+        const userAffinities: Record<string, any>[] = UserAffinitiesStore.getUserAffinities();
+        const relationships = RelationshipStore.getMutableRelationships();
+        const nonFriendAffinities = userAffinities.filter(a => !RelationshipStore.getRelationshipType(a.otherUserId));
+        nonFriendAffinities.forEach(a => {
+            relationships[a.otherUserId] = 5;
         });
         RelationshipStore.emitChange();
 
-        const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id));
+        const toRequest = nonFriendAffinities.filter(a => !UserStore.getUser(a.otherUserId));
         const allGuildIds = Object.keys(GuildStore.getGuilds());
         const sentNonce = SnowflakeUtils.fromTimestamp(Date.now());
         let count = allGuildIds.length * Math.ceil(toRequest.length / 100);
