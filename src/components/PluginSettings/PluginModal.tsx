@@ -60,7 +60,7 @@ interface PluginModalProps extends ModalProps {
     onRestartNeeded(): void;
 }
 
-function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {
+export function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {
     const newUser = new UserRecord({
         username: user.username,
         id: user.id ?? generateId(),
