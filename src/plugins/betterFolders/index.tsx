@@ -183,7 +183,7 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the Guild List from the Sidebar children
                 {
-                    match: /unreadMentionsFixedFooter\].+?\]/,
+                    match: /unreadMentionsFixedFooter\].+?unreadMentionsBar\}\)\]/,
                     replace: "$&.filter($self.makeGuildsBarSidebarFilter(!!arguments[0]?.isBetterFolders))"
                 }
             ]
