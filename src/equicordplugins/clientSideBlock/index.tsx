@@ -200,8 +200,8 @@ export default definePlugin({
         {
             find: "getFriendIDs(){",
             replacement: {
-                match: /\i.FRIEND\)/,
-                replace: "$&.filter(id => !$self.shouldHideUser(id))"
+                match: /getFriendIDs.{0,75}\i\.FRIEND\}\)/,
+                replace: "$&.filter(([id]) => !$self.shouldHideUser(id))"
             }
         },
         // active now list
