@@ -202,9 +202,7 @@ export default definePlugin({
             header={`Unblock ${user?.username ?? "unknown user"}?`}
             cancelText="Cancel"
             confirmText="Unblock"
-            onConfirm={() => {
-                callback();
-            }}>
+            onConfirm={callback}>
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }} className="vc-bbc-confirmation-modal-text">
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <Text variant="text-md/semibold">{`Are you sure you want to unblock ${user?.username ?? "this user"}?`}</Text>
