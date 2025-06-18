@@ -20,13 +20,33 @@ import "@equicordplugins/_misc/styles.css";
 import "./style.css";
 
 import { showNotification } from "@api/Notifications";
+import { definePluginSettings } from "@api/Settings";
+import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findComponentByCodeLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
 
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
+
+
+function ToolBarHeader() {
+    return (
+        <ErrorBoundary noop={true}>
+            <HeaderBarIcon
+                tooltip="Complete Quest"
+                position="bottom"
+                className="vc-quest-completer"
+                icon={QuestIcon}
+                onClick={openCompleteQuestUI}
+            >
+            </HeaderBarIcon>
+        </ErrorBoundary>
+    );
+}
+
 
 async function openCompleteQuestUI() {
     const ApplicationStreamingStore = findByProps("getStreamerActiveStreamMetadata");
@@ -213,17 +233,35 @@ async function openCompleteQuestUI() {
     }
 }
 
+const settings = definePluginSettings({
+    useNavBar: {
+        description: "Move quest button down to the server nav bar",
+        type: OptionType.BOOLEAN,
+        default: false,
+    }
+});
+
 export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game installed.",
     authors: [Devs.amia],
+    settings,
     patches: [
         {
             find: "AppTitleBar",
             replacement: {
                 match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[)/,
                 replace: "$self.renderQuestButton(),"
-            }
+            },
+            predicate: () => !settings.store.useNavBar
+        },
+        {
+            find: "toolbar:function",
+            replacement: {
+                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,200}mobileToolbar)/,
+                replace: "$1$self.toolbarAction(arguments[0]);$2"
+            },
+            predicate: () => settings.store.useNavBar
         }
     ],
     renderQuestButton() {
@@ -242,4 +280,19 @@ export default definePlugin({
             </Tooltip>
         );
     },
+    toolbarAction(e) {
+        if (Array.isArray(e.toolbar))
+            return e.toolbar.push(
+                <ErrorBoundary noop={true}>
+                    <ToolBarHeader />
+                </ErrorBoundary>
+            );
+
+        e.toolbar = [
+            <ErrorBoundary noop={true} key={"QuestCompleter"}>
+                <ToolBarHeader />
+            </ErrorBoundary>,
+            e.toolbar,
+        ];
+    }
 });
