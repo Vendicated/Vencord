@@ -34,7 +34,7 @@ export default definePlugin({
             find: "removeRelationship:(",
             replacement: {
                 match: /(removeRelationship:\((\i),\i,\i\)=>)/,
-                replace: "$1($self.removeFriend($2),0)||"
+                replace: "$1($self.removeFriend($2))||"
             }
         },
         {
