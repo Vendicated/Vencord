@@ -298,3 +298,20 @@ export class ApplicationStreamingStore extends FluxStore {
     getViewerIds: (stream: ApplicationStream) => string[];
     isSelfStreamHidden: (channelId: string | bigint | null) => boolean;
 }
+
+export class RelationshipStore extends FluxStore {
+    getFriendIDs(): string[];
+    /** Related to friend nicknames experiment. */
+    getNickname(userId: string): string;
+    getPendingCount(): number;
+    getRelationshipCount(): number;
+    /** @returns Enum value from constants.RelationshipTypes */
+    getRelationshipType(userId: string): number;
+    /** @returns Format: [userId: Enum value from constants.RelationshipTypes] */
+    getMutableRelationships(): Record<number, number>;
+    isBlocked(userId: string): boolean;
+    isFriend(userId: string): boolean;
+
+    getSince(userId: string): string;
+    isIgnored(userId: string): boolean;
+}

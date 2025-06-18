@@ -46,11 +46,7 @@ export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
 export let ChannelStore: Stores.ChannelStore & t.FluxStore;
 export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
-export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
-    /** Get the date (as a string) that the relationship was created */
-    getSince(userId: string): string;
-    isIgnored(userId: string): boolean;
-};
+export let RelationshipStore: t.RelationshipStore;
 
 export let EmojiStore: t.EmojiStore;
 export let ThemeStore: t.ThemeStore;
