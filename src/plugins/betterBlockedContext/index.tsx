@@ -92,8 +92,8 @@ export default definePlugin({
                 },
                 // fix settings not closing when clicking the Message button
                 {
-                    match: /(?<=\i.bot.{0,65}children:.*?onClose:)(\i)/,
-                    replace: "() => {$1();$self.closeSettingsWindow()}",
+                    match: /(?<=\i.bot.{0,65}children:.*?onClose:)(.*?),/,
+                    replace: "() => {$1();$self.closeSettingsWindow();},",
                 }
             ],
         },
@@ -209,7 +209,7 @@ export default definePlugin({
                     <Text variant="text-md/normal">{`This will allow ${user?.username ?? "them"} to see your profile and message you again.`}</Text>
                 </div>
                 <Text variant="text-md/normal">{"You can always block them again later."}</Text>
-                {isSettingsOrigin ? <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {isSettingsOrigin ? !settings.store.addDmsButton && <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <Text variant="text-sm/medium" style={{ color: "var(--text-muted)" }}>{"If you just want to read the chat logs instead, you can just click on their profile."}</Text>
                     <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>{"Alternatively, you can enable a button to jump to DMs in the blocklist through the plugin settings."}</Text>
                 </div> : <Text variant="text-sm/medium" style={{ color: "var(--text-muted)" }}>{"If you just want to read the chat logs, you can do this without unblocking them."}</Text>}
