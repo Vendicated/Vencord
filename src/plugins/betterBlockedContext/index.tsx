@@ -102,8 +102,8 @@ export default definePlugin({
             find: ".useSetting(),{isBlocked:",
             replacement: [
                 {
-                    match: /(?<=,\[\i,\i\]=)\(0.*?\);/,
-                    replace: "[false, () => {}];",
+                    match: /(?<=isBlocked:\i,isIgnored:\i}=).*?(?=,\[\i)/,
+                    replace: "{isBlocked:false,isIgnored:false}",
                 },
             ],
             predicate: () => settings.store.hideBlockedWarning,
