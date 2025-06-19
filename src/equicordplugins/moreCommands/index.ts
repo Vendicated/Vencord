@@ -319,7 +319,6 @@ export default definePlugin({
                         { name: "toUpperCase", value: "toUpperCase", label: "toUpperCase" },
                         { name: "toLocaleLowerCase", value: "toLocaleLowerCase", label: "toLocaleLowerCase" },
                         { name: "toLocaleUpperCase", value: "toLocaleUpperCase", label: "toLocaleUpperCase" },
-                        { name: "reverse", value: "reverse", label: "reverse" },
                         { name: "stay the same", value: "same", label: "stay the same" }
                     ]
                 },
@@ -330,9 +329,15 @@ export default definePlugin({
                     required: false
                 },
                 {
+                    name: "reverse",
+                    description: "reverse your text",
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                    required: false
+                },
+                {
                     name: "normalize",
                     description: "which normailze option to use",
-                    type: ApplicationCommandOptionType.INTEGER,
+                    type: ApplicationCommandOptionType.STRING,
                     required: false,
                     choices: [
                         { name: "NFC", value: "NFC", label: "NFC" },
@@ -343,28 +348,24 @@ export default definePlugin({
                 },
             ],
             execute: opts => {
-                const transform = findOption(opts, "transformation") as string;
-                const repeat = findOption(opts, "repeat") as number | undefined;
-                const normalize = findOption(opts, "normalize") as string | undefined;
                 let text = findOption(opts, "text") as string;
+                const transform = findOption(opts, "transformation") as string;
+                const repeat = findOption(opts, "repeat") as number | undefined ?? 1;
+                const normalize = findOption(opts, "normalize") as string | undefined;
+                const reverse = findOption(opts, "reverse") as string | undefined;
 
-                if (transform && text) {
-                    if (transform === "same") {
-                        if (normalize) text = text.normalize(normalize);
-                        return {
-                            content: text.repeat(repeat ?? 1)
-                        };
-                    } else {
-                        const method = (text as any)[transform];
-                        const transformed = method.call(text);
-                        if (normalize) text = text.normalize(normalize);
-                        if (transform === "reverse") text = text.split("").reverse().join("");
-                        return {
-                            content: transformed.repeat(repeat ?? 1)
-                        };
-                    }
+                if (!transform || !text) return;
+
+                if (transform !== "same") {
+                    text = (text as any)[transform]?.call(text) ?? text;
                 }
-            },
+
+                if (normalize) text = text.normalize(normalize);
+                if (reverse) text = text.split("").reverse().join("");
+
+                return { content: text.repeat(repeat) };
+            }
+            ,
         },
     ]
 });
