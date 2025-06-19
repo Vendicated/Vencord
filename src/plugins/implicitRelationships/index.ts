@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Constants, FluxDispatcher, GuildStore, RelationshipStore, RestAPI, SnowflakeUtils, UserStore } from "@webpack/common";
+import { Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesV2Store");
@@ -119,19 +119,6 @@ export default definePlugin({
         return row.type === 5
             ? (UserAffinitiesStore.getUserAffinity(row.user.id)?.communicationRank ?? 0)
             : comparator(row);
-    },
-
-    async refreshUserAffinities() {
-        try {
-            await RestAPI.get({ url: "/users/@me/affinities/users", retries: 3 }).then(({ body }) => {
-                FluxDispatcher.dispatch({
-                    type: "LOAD_USER_AFFINITIES_SUCCESS",
-                    affinities: body,
-                });
-            });
-        } catch (e) {
-            // Not a critical error if this fails for some reason
-        }
     },
 
     async fetchImplicitRelationships() {
