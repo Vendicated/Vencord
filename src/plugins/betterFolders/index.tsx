@@ -21,7 +21,7 @@ import "./style.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 import { ReactNode } from "react";
 
@@ -35,7 +35,6 @@ enum FolderIconDisplay {
 
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 const SortedGuildStore = findStoreLazy("SortedGuildStore");
-const GuildsTree = findLazy(m => m.prototype?.moveNextTo);
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
 let lastGuildId = null as string | null;

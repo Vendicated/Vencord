@@ -200,45 +200,50 @@ export default definePlugin({
         inputType: ApplicationCommandInputType.BUILT_IN,
         name: "download",
         description: "Download and send videos, audio or gifs.",
-        options: [{
-            name: "url",
-            description: "The URL of any video supported by yt-dlp.",
-            required: true,
-            type: ApplicationCommandOptionType.STRING
-        }, {
-            name: "format",
-            description: "Whether to download a video or audio.",
-            type: ApplicationCommandOptionType.STRING,
-            choices: [
-                { name: "Video", value: "video", label: "Video" },
-                { name: "Audio", value: "audio", label: "Audio" },
-                { name: "GIF", value: "gif", label: "GIF" }
-            ],
-            required: false,
-        }, {
-            name: "gif_quality",
-            type: ApplicationCommandOptionType.INTEGER,
-            description: "The quality level when using GIF. Try lowering this number if the GIF is too large.",
-            required: false,
-            choices: [
-                { name: "5", value: "5", label: "5" },
-                { name: "4", value: "4", label: "4" },
-                { name: "3", value: "3", label: "3" },
-                { name: "2", value: "2", label: "2" },
-                { name: "1", value: "1", label: "1" }
-            ]
-        }, {
-            name: "yt-dlp_args",
-            description: "Additional arguments to pass to yt-dlp. These will take precedence over arguments set in the settings. This may overwrite default plugin arguments such format selection. Note: if modifying the output, ensure the filename starts with `download`.",
-            required: false,
-            type: ApplicationCommandOptionType.STRING
-        }, {
-            name: "ffmpeg_args",
-            description: "Additional arguments to pass to ffmpeg. These will take precedence over arguments set in the settings. This may overwrite default plugin arguments such as auto-scaling. Note: if modifying the output, ensure the filename starts with `remux`.",
-            required: false,
-            type: ApplicationCommandOptionType.STRING
-        }],
-
+        options: [
+            {
+                name: "url",
+                description: "The URL of any video supported by yt-dlp.",
+                required: true,
+                type: ApplicationCommandOptionType.STRING
+            },
+            {
+                name: "format",
+                description: "Whether to download a video or audio.",
+                type: ApplicationCommandOptionType.STRING,
+                choices: [
+                    { name: "Video", value: "video", label: "Video" },
+                    { name: "Audio", value: "audio", label: "Audio" },
+                    { name: "GIF", value: "gif", label: "GIF" }
+                ],
+                required: false,
+            },
+            {
+                name: "gif_quality",
+                type: ApplicationCommandOptionType.INTEGER,
+                description: "The quality level when using GIF. Try lowering this number if the GIF is too large.",
+                required: false,
+                choices: [
+                    { name: "5", value: "5", label: "5" },
+                    { name: "4", value: "4", label: "4" },
+                    { name: "3", value: "3", label: "3" },
+                    { name: "2", value: "2", label: "2" },
+                    { name: "1", value: "1", label: "1" }
+                ]
+            },
+            {
+                name: "yt-dlp_args",
+                description: "Additional arguments to pass to yt-dlp. These will take precedence over arguments set in the settings. This may overwrite default plugin arguments such format selection. Note: if modifying the output, ensure the filename starts with `download`.",
+                required: false,
+                type: ApplicationCommandOptionType.STRING
+            },
+            {
+                name: "ffmpeg_args",
+                description: "Additional arguments to pass to ffmpeg. These will take precedence over arguments set in the settings. This may overwrite default plugin arguments such as auto-scaling. Note: if modifying the output, ensure the filename starts with `remux`.",
+                required: false,
+                type: ApplicationCommandOptionType.STRING
+            }
+        ],
         execute: async (args, ctx) => {
             if (!await Native.isYtdlpAvailable()) return openDependencyModal();
             if (!await Native.isFfmpegAvailable() && settings.store.showFfmpegWarning) sendFfmpegWarning(ctx.channel.id);
