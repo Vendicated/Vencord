@@ -354,8 +354,6 @@ export default definePlugin({
                 const normalize = findOption(opts, "normalize") as string | undefined;
                 const reverse = findOption(opts, "reverse") as string | undefined;
 
-                if (!transform || !text) return;
-
                 if (transform !== "same") {
                     text = (text as any)[transform]?.call(text) ?? text;
                 }
