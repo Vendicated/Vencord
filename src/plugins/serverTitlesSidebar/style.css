@@ -3,17 +3,29 @@ nav[aria-label="Servers sidebar"] {
     width: 240px !important;
 }
 
+/*
+ * Override Discord's centering and add padding, but ONLY for list items
+ * that contain a server icon (blobContainer) or a folder.
+*/
+div[class*="listItem"]:has(div[class*="blobContainer"]),
+div[class*="listItem"]:has(div[class*="folderIconWrapper"]) {
+    justify-content: flex-start !important;
+    padding-left: 12px;
+    box-sizing: border-box;
+}
+
 /* Make the containers flexible and wide to hold the icon and text */
 div[class*="blobContainer"],
-div[class*="folderIconWrapper"] {
+div[class*="folderHeader"] {
     display: flex;
     align-items: center;
-    width: 224px; /* Adjust width to fit inside the sidebar with padding */
+    /* This width is based on the sidebar width (240px) minus the item's padding (12px) and some extra for margin */
+    width: 216px;
 }
 
 /* Prevent the icon from shrinking */
 div[class*="blobContainer"] > div[class*="wrapper"],
-div[class*="folderIconWrapper"] > div[class*="wrapper"] {
+div[class*="folderHeader"] > div[class*="folderButton"] {
     flex-shrink: 0;
 }
 
