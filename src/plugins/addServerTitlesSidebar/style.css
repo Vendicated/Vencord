@@ -1,77 +1,121 @@
 /**
  * @name addServerTitlesSidebar
- * @description Extends the server list to show server titles next to the icons.
+ * @description Adds server and folder titles next to their icons in the sidebar, and widens it to fit them.
  * @author KBO
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 /* 
- * By default, the server sidebar is only wide enough for the icons. 
- * This rule expands it to make room for the server titles.
+ * Styles for the expand/collapse toggle button. It is positioned at the
+ * bottom of the sidebar for easy access.
+*/
+.sts-toggle-button {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 24px;
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-tertiary);
+    border-radius: 12px;
+    cursor: pointer;
+    z-index: 2; /* Position it above the server list but below modals */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--interactive-normal);
+    transition: all 0.2s ease-in-out;
+}
+.sts-toggle-button:hover {
+    background-color: var(--background-secondary-alt);
+}
+.sts-toggle-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+/*
+ * When the sidebar is expanded, the button moves to the bottom right
+ * to stay out of the way of the server list.
+*/
+body.server-titles-sidebar-expanded .sts-toggle-button {
+    left: auto;
+    right: 10px;
+    transform: none;
+}
+
+/* 
+ * All styles below are scoped to the .server-titles-sidebar-expanded class on the body.
+ * This class is added/removed by the plugin to toggle the expanded view.
+*/
+
+/* 
+ * Expands the server sidebar to make room for the titles.
  */
-nav[aria-label="Servers sidebar"] {
+body.server-titles-sidebar-expanded nav[aria-label="Servers sidebar"] {
     width: 240px !important;
 }
 
 /* 
- * This targets server and folder items specifically, leaving other items 
- * like the DMs button untouched. It overrides Discord's default centering
- * and adds some padding to align the icons correctly in the wider sidebar.
- * The :has() selector is used to only apply this to items that contain a server or folder.
+ * Targets server and folder items specifically, leaving other items 
+ * like the DMs button untouched. It aligns icons correctly in the wider sidebar.
  */
-div[class*="listItem"]:has(div[class*="blobContainer"]),
-div[class*="listItem"]:has(div[class*="folderHeader"]) {
+body.server-titles-sidebar-expanded
+    div[class*="listItem"]:has(div[class*="blobContainer"]),
+body.server-titles-sidebar-expanded
+    div[class*="listItem"]:has(div[class*="folderHeader"]) {
     justify-content: flex-start !important;
     padding-left: 17px;
     box-sizing: border-box;
 }
 
 /*
- * This rule widens the entire folder container, which includes the folder icon
- * and its background. This ensures the background correctly wraps the title
- * and the servers inside, in both collapsed and expanded states.
+ * Widens the entire folder container, including its background, to wrap the 
+ * title and the servers inside, in both collapsed and expanded states.
  */
-div[class*="folderGroup"] {
+body.server-titles-sidebar-expanded div[class*="folderGroup"] {
     width: 224px;
 }
 
 /* 
- * These rules make the main containers for server icons and folder headers
- * flexible, allowing the icon and the title to sit side-by-side.
+ * Makes the containers for server icons and folder headers flexible,
+ * allowing the icon and the title to sit side-by-side.
  */
-div[class*="blobContainer"],
-div[class*="folderHeader"] {
+body.server-titles-sidebar-expanded div[class*="blobContainer"],
+body.server-titles-sidebar-expanded div[class*="folderHeader"] {
     display: flex;
     align-items: center;
     width: 216px;
 }
 
 /* 
- * This ensures the icon itself doesn't shrink when the title is added,
- * and it uses the 'order' property to guarantee the icon always appears
- * before the text, regardless of the HTML structure.
+ * Enforces the visual order of the icon and text and prevents the icon from shrinking.
  */
-div[class*="blobContainer"] > div[class*="wrapper"],
-div[class*="folderHeader"] > div[class*="folderButton"] {
+body.server-titles-sidebar-expanded
+    div[class*="blobContainer"]
+    > div[class*="wrapper"],
+body.server-titles-sidebar-expanded
+    div[class*="folderHeader"]
+    > div[class*="folderButton"] {
     flex-shrink: 0;
     order: 1;
 }
 
 /* 
- * This corrects a minor alignment issue with the folder button, ensuring
- * it lines up perfectly with the server icons.
+ * Corrects a minor alignment issue with the folder button.
  */
-div[class*="folderHeader"] > div[class*="folderButton"] {
+body.server-titles-sidebar-expanded
+    div[class*="folderHeader"]
+    > div[class*="folderButton"] {
     margin-left: -4px;
 }
 
 /* 
- * This defines the base styles for the injected server and folder titles,
- * including font, color, and positioning. It also sets the 'order' property
- * to ensure the title always appears after the icon.
+ * Defines the base styles for the injected server and folder titles.
  */
-.server-name-text,
-.folder-name-text {
+body.server-titles-sidebar-expanded .server-name-text,
+body.server-titles-sidebar-expanded .folder-name-text {
     color: var(--header-primary);
     font-family: var(--font-primary);
     font-size: 15px;
@@ -80,15 +124,14 @@ div[class*="folderHeader"] > div[class*="folderButton"] {
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: pointer;
-    margin-left: 17px;
+    margin-left: 16px;
     width: 170px;
     order: 2;
 }
 
 /* 
- * This rule applies specific styling for folder titles to differentiate
- * them from regular server titles, matching Discord's native look and feel.
+ * Applies specific styling for folder titles to differentiate them.
  */
-.folder-name-text {
+body.server-titles-sidebar-expanded .folder-name-text {
     margin-left: 13px !important;
 }

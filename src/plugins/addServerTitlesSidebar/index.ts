@@ -16,10 +16,56 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { enableStyle, disableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { definePluginSettings } from "@api/Settings";
 import pluginStyle from "./style.css?managed";
+
+// The SVG icons for the toggle button.
+const CHEVRON_LEFT_SVG = `<svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>`;
+const CHEVRON_RIGHT_SVG = `<svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>`;
+
+// A reference to the toggle button so we can remove it on plugin stop.
+let toggleButton: HTMLButtonElement | null = null;
+
+// Persist the user's choice for the sidebar state.
+const settings = definePluginSettings({
+    expanded: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show expanded server titles in the sidebar.",
+        onChange: updateSidebarState,
+    },
+});
+
+/**
+ * Updates the UI to reflect the current sidebar state (expanded or collapsed).
+ * This function is the single source of truth for the visual state.
+ * @param isExpanded Whether the sidebar should be in its expanded state.
+ */
+function updateSidebarState(isExpanded: boolean) {
+    document.body.classList.toggle(
+        "server-titles-sidebar-expanded",
+        isExpanded
+    );
+
+    if (toggleButton) {
+        toggleButton.innerHTML = isExpanded
+            ? CHEVRON_LEFT_SVG
+            : CHEVRON_RIGHT_SVG;
+    }
+
+    if (isExpanded) {
+        // When expanding, run the script once to add titles to any existing items.
+        addTitlesToItems();
+    } else {
+        // When collapsing, remove all titles to return to the default view.
+        document
+            .querySelectorAll(".server-name-text, .folder-name-text")
+            .forEach((el) => el.remove());
+    }
+}
 
 /**
  * Asynchronously waits for a specified element to appear in the DOM.
@@ -60,6 +106,9 @@ function waitForElement<T extends Element>(
  * add a title if one already exists.
  */
 function addTitlesToItems() {
+    // If the sidebar is collapsed, do nothing.
+    if (!settings.store.expanded) return;
+
     const serverListItems: NodeListOf<HTMLElement> = document.querySelectorAll(
         'ul[data-list-id="guildsnav"] [class*="listItem"]'
     );
@@ -138,6 +187,19 @@ function addTitlesToItems() {
             );
         });
 
+        // Forward hover events to the original icon to trigger tooltips and pills.
+        const clickable = item.querySelector<HTMLElement>('[role="treeitem"]');
+        textEl.addEventListener("mouseenter", () =>
+            clickable?.dispatchEvent(
+                new MouseEvent("mouseenter", { bubbles: true })
+            )
+        );
+        textEl.addEventListener("mouseleave", () =>
+            clickable?.dispatchEvent(
+                new MouseEvent("mouseleave", { bubbles: true })
+            )
+        );
+
         container.appendChild(textEl);
     });
 }
@@ -153,39 +215,44 @@ export default definePlugin({
     name: "addServerTitlesSidebar",
     description:
         "Adds server and folder titles next to their icons in the sidebar, and widens it to fit them.",
-    authors: [Devs.KBO],
+    authors: [{ name: "NewsGuyTor" }],
+    github_link: "https://github.com/NewsGuyTor/Vencord-addServerTitlesSidebar",
+    settings,
 
-    async start() {
-        // Enable our custom stylesheet.
+    start() {
         enableStyle(pluginStyle);
 
-        try {
-            // Wait for the server list to be mounted in the DOM before proceeding.
-            const guildsNav = await waitForElement(
-                'nav[aria-label="Servers sidebar"]'
-            );
+        waitForElement('nav[aria-label="Servers sidebar"]')
+            .then((guildsNav) => {
+                toggleButton = document.createElement("button");
+                toggleButton.className = "sts-toggle-button";
+                toggleButton.onclick = () => {
+                    settings.store.expanded = !settings.store.expanded;
+                };
+                guildsNav.appendChild(toggleButton);
 
-            // Run the script once on startup.
-            addTitlesToItems();
+                updateSidebarState(settings.store.expanded);
 
-            // Start observing for any future changes to the server list.
-            observer.observe(guildsNav, {
-                childList: true, // Watch for adding/removing direct children.
-                subtree: true, // Watch for changes in all descendants.
+                addTitlesToItems();
+
+                observer.observe(guildsNav, {
+                    childList: true,
+                    subtree: true,
+                });
+            })
+            .catch((err) => {
+                console.error("[addServerTitlesSidebar]", err);
             });
-        } catch (err) {
-            console.error("[addServerTitlesSidebar]", err);
-        }
     },
 
     stop() {
-        // Stop the observer to prevent memory leaks.
         observer.disconnect();
-
-        // Disable our custom stylesheet.
         disableStyle(pluginStyle);
 
-        // Clean up any title elements we added to the DOM.
+        toggleButton?.remove();
+        toggleButton = null;
+        document.body.classList.remove("server-titles-sidebar-expanded");
+
         document
             .querySelectorAll(".server-name-text, .folder-name-text")
             .forEach((el) => el.remove());
