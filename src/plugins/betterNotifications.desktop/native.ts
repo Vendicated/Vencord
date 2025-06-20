@@ -1,0 +1,348 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { execFile } from "child_process";
+import { app, IpcMainInvokeEvent, Notification, shell, WebContents } from "electron";
+import fs from "fs";
+import https from "https";
+import os from "os";
+import path from "path";
+
+const platform = os.platform();
+const isWin = platform === "win32";
+const isMac = platform === "darwin";
+const isLinux = platform === "linux";
+
+interface NotificationData {
+    channelId: string;
+    messageId: string;
+    guildId?: string; // Doesn't exist in DMs
+}
+
+interface MessageOptions {
+    attachmentFormat: string,
+}
+
+interface HeaderOptions {
+    channelId: string,
+    channelName: string,
+}
+
+interface ExtraOptions {
+    // properties prefixed with 'w' are windows specific
+    messageOptions?: MessageOptions;
+    wAttributeText?: string;
+    wAvatarCrop?: boolean;
+    wHeaderOptions?: HeaderOptions;
+    linuxFormattedText?: string,
+    attachmentUrl?: string;
+    attachmentType?: string;
+}
+
+interface AssetOptions {
+    avatarId?: string,
+    avatarUrl?: string,
+
+    attachmentUrl?: string;
+    fileType?: string;
+}
+
+let webContents: WebContents | undefined;
+
+function safeStringForXML(input: string): string {
+    return input
+        .replace(/&/g, "&amp;") // Must be first to avoid double-escaping
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
+
+// Notifications on Windows have a weird inconsistency where the <image> tag sometimes doesn't load the url inside `src`,
+// but using a local file works, so we just throw it to %temp%
+function saveAssetToDisk(options: AssetOptions) {
+    // Returns file path if avatar downloaded
+    // Returns an empty string if the request fails
+
+    const baseDir = path.join(os.tmpdir(), "vencordBetterNotifications");
+    const avatarDir = path.join(baseDir, "avatars");
+
+    if (!fs.existsSync(avatarDir)) {
+        fs.mkdirSync(avatarDir, { recursive: true });
+    }
+
+    let url: string;
+    let file;
+    let targetDir;
+
+    // TODO: avatar decorations
+    if (options.avatarUrl) {
+        // rounded is the default
+        const isData = options.avatarUrl?.startsWith("data:image");
+        const targetFilename = `${isData ? "" : "unrounded-"}${options.avatarId}.png`;
+        targetDir = path.join(avatarDir, targetFilename);
+
+        if (fs.existsSync(targetDir))
+            return Promise.resolve(targetDir);
+        console.log("Could not find profile picture in cache...");
+
+        if (isData) {
+            options.avatarUrl = options.avatarUrl.replace(/^data:image\/png;base64,/, "");
+            return new Promise(resolve => {
+                fs.writeFile(targetDir, options.avatarUrl!, "base64", function (error) {
+                    if (error) resolve("");
+                    else resolve(targetDir);
+                });
+            });
+        }
+
+        // probably should use node URL to be safer
+        url = options.avatarUrl.startsWith("/assets")
+            ? `https://discord.com${options.avatarUrl}`
+            : options.avatarUrl;
+
+        file = fs.createWriteStream(targetDir);
+
+    } else if (options.attachmentUrl) {
+        // pathname -> /attachments/123456/789/image.png -> 3: 789, 4: image.png
+        const isData = options.attachmentUrl?.startsWith("data:image");
+        const fileName = new URL(options.attachmentUrl).pathname.split("/");
+        targetDir = path.join(baseDir, `${fileName[3]}-${fileName[4]}`);
+
+        if (isData && options.attachmentUrl) {
+            options.avatarUrl = options.attachmentUrl.replace(/^data:image\/png;base64,/, "");
+            return new Promise(resolve => {
+                fs.writeFile(targetDir, options.avatarUrl!, "base64", function (error) {
+                    if (error) resolve("");
+                    else resolve(targetDir);
+                });
+            });
+        }
+
+        url = options.attachmentUrl;
+        file = fs.createWriteStream(targetDir);
+    } else return Promise.resolve("");
+
+    return new Promise(resolve => {
+        https.get(url, { timeout: 3000 }, response => {
+            response.pipe(file);
+
+            file.on("finish", () => {
+                file.close(() => {
+                    resolve(targetDir);
+                });
+            });
+
+        }).on("error", err => {
+            fs.unlink(targetDir, () => { });
+            console.error(`Downloading avatar with link ${url} failed:  ${err.message}`);
+            resolve("");
+        });
+    });
+}
+
+function generateXml(
+    type: "notification" | "call",
+    titleString: string, bodyString: string,
+    avatarLoc: String,
+    notificationData: NotificationData,
+    extraOptions?: ExtraOptions,
+    attachmentLoc?: string,
+): string {
+    const guildId = notificationData.guildId ?? "@me";
+
+    const notificationClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}/${notificationData.messageId}`;
+    const headerClickPath = `discord://-/channels/${guildId}/${notificationData.channelId}`;
+    let xml: string;
+    if (type === "notification") {
+        xml = `
+        <toast activationType="protocol" launch="${notificationClickPath}">
+             ${extraOptions?.wHeaderOptions ?
+                `
+         <header
+             id="${extraOptions.wHeaderOptions.channelId}"
+             title="${extraOptions.wHeaderOptions.channelName}"
+             activationType="protocol"
+             arguments="${headerClickPath}"
+             />
+             `
+                :
+                ""
+            }
+             <visual>
+                 <binding template="ToastGeneric">
+                 <text>${safeStringForXML(titleString)}</text>
+                 <text>${safeStringForXML(bodyString)}</text>
+                 <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} placement="appLogoOverride"  />
+
+                 ${extraOptions?.wAttributeText ? `<text placement="attribution">${safeStringForXML(extraOptions.wAttributeText)}</text>` : ""}
+                 ${attachmentLoc ? `<image placement="${extraOptions?.messageOptions?.attachmentFormat}" src="${attachmentLoc}" />` : ""}
+                 </binding>
+             </visual>
+         </toast>`;
+    } else {
+        xml = `
+        <toast activationType="protocol" launch="${notificationClickPath}">
+            ${extraOptions?.wHeaderOptions ?
+                `
+            <header
+                id="${extraOptions.wHeaderOptions.channelId}"
+                title="#${extraOptions.wHeaderOptions.channelName}"
+                activationType="protocol"
+                arguments="${headerClickPath}"
+                />
+                `
+                :
+                ""
+            }
+             <visual>
+                 <binding template="ToastGeneric">
+                    <text hint-callScenarioCenterAlign="true">${safeStringForXML(titleString)}</text>
+                    <text hint-callScenarioCenterAlign="true">${safeStringForXML(bodyString)}</text>
+                    <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} />
+
+                    ${extraOptions?.wAttributeText ? `<text placement="attribution">${safeStringForXML(extraOptions.wAttributeText)}</text>` : ""}
+                 </binding>
+             </visual>
+         </toast>`;
+    }
+
+    console.log("[BN] Generated ToastXML: " + xml);
+    return xml;
+}
+
+// TODO: ensure notify-send version greater than 0.7.10 for callbacks https://gitlab.gnome.org/GNOME/libnotify/-/blame/master/NEWS#L101
+// `notify-send -v` > "notify-send 0.8.6"
+// libnotify has a limitation where actions cannot survive past the notification expiring. Meaning notifications in the DE history cannot be clicked. This can be sorta worked around with the replace-id but then that notify-send process will live forever untill clicked, then needs to be recreated.
+function notifySend(summary: string,
+    body: string | null,
+    avatarLocation: string,
+    defaultCallback: Function,
+    notificationType: "notification" | "call",
+    attachmentFormat: string | undefined,
+    attachmentLocation?: string
+) {
+    const name = app.getName();
+    var args = [summary];
+    if (body) args.push(body);
+
+    // default callback
+    args.push("--action=default=Open");
+    // TODO future: button actions
+    // args.push("--action=key=buttontext");
+
+    // TODO future: modify existing notification with --replace-id="id"
+    // args.push("--print-id");
+
+    args.push(`--app-name=${name[0].toUpperCase() + name.slice(1)}`);
+    args.push(`--hint=string:desktop-entry:${name}`);
+
+    // AFAIK KDE & Gnome do not care about these
+    if (notificationType === "call") args.push("--category=call.incoming");
+    else if (notificationType === "notification") args.push("--category=im.recieved");
+
+    // KDE has an `x-kde-urls` hint which can be used to display the attachment and avatar at the same time.
+    if (attachmentLocation) args.push(`--hint=string:${attachmentFormat}:file://${attachmentLocation}`);
+    if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
+
+
+    console.log(args);
+
+    execFile("notify-send", args, {}, (error, stdout, stderr) => {
+        if (error)
+            return console.error("Notification error:", error + stderr);
+
+        // Will need propper filtering if multiple actions or notification ids are used
+        if (stdout.trim() === "default") defaultCallback();
+    });
+}
+
+export function notify(event: IpcMainInvokeEvent,
+    type: "notification" | "call",
+    titleString: string, bodyString: string,
+    avatarId: string, avatarUrl: string,
+    notificationData: NotificationData,
+    extraOptions?: ExtraOptions
+) {
+    const promises = [saveAssetToDisk({ avatarUrl, avatarId })];
+
+    if (extraOptions?.attachmentUrl) {
+        promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, attachmentUrl: extraOptions.attachmentUrl }));
+    }
+    // console.log("Creating promise...");
+
+    Promise.all(promises).then(results => {
+        // @ts-ignore
+        const avatar: string = results.at(0);
+        // @ts-ignore
+        const attachment: string | undefined = results.at(1);
+
+        // console.log(`[BN] notify notificationData: ${notificationData.channelId}`);
+
+        const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
+
+        if (isLinux) {
+            const linuxFormattedString: string | undefined = extraOptions?.linuxFormattedText;
+
+            console.log("Recieved the following linux formatted string:");
+            console.log(linuxFormattedString);
+
+            notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, type, extraOptions?.messageOptions?.attachmentFormat, attachment);
+            return;
+        }
+
+        const notification = new Notification({
+            title: titleString,
+            body: bodyString,
+            timeoutType: "default",
+
+            // toastXml only works on Windows
+            // https://learn.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/adaptive-interactive-toasts?tabs=xml
+            ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment) })
+        });
+
+        // Listener for macOS
+        notification.addListener("click", () => unixCallback());
+        notification.show();
+    });
+}
+
+export function checkLinuxDE(_, DE: string) {
+    return process.env.XDG_CURRENT_DESKTOP === DE;
+}
+
+export function openTempFolder(_) {
+    const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
+    shell.openPath(directory);
+}
+
+export async function deleteTempFolder(_) {
+    const directory = path.join(os.tmpdir(), "vencordBetterNotifications");
+    try {
+        fs.rmSync(directory, { recursive: true, force: true });
+    } catch (error) {
+        console.error("Failed to delete temporary folder.");
+    }
+}
+
+// TODO future: app.on("second-instance") with deeplinks on Windows notifications to allow button actions
+// app.on("second-instance", (event, arg) => {
+//     console.log("[BN] second instance activated");
+//     console.log(arg);
+//     let params = new URL(arg[arg.length - 1]).searchParams;
+//     let channelId = params.get("c");
+//     let messageId = params.get("m");
+//     if (webContents) {
+//         webContents.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationReplyButtonEvent("${channelId}", "${messageId}")`);
+//     } else {
+//         console.error("[BN] webContents not defined!");
+//     }
+//     event.preventDefault();
+// });
