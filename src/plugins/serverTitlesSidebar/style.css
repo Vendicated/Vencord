@@ -1,0 +1,41 @@
+/* Widen the server list panel */
+nav[aria-label="Servers sidebar"] {
+    width: 240px !important;
+}
+
+/* Make the containers flexible and wide to hold the icon and text */
+div[class*="blobContainer"],
+div[class*="folderIconWrapper"] {
+    display: flex;
+    align-items: center;
+    width: 224px; /* Adjust width to fit inside the sidebar with padding */
+}
+
+/* Prevent the icon from shrinking */
+div[class*="blobContainer"] > div[class*="wrapper"],
+div[class*="folderIconWrapper"] > div[class*="wrapper"] {
+    flex-shrink: 0;
+}
+
+/* Style for the injected server name text */
+.server-name-text,
+.folder-name-text {
+    color: var(--header-primary);
+    font-family: var(--font-primary);
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    margin-left: 12px;
+    width: 170px;
+}
+
+/* Style for folder headers */
+.folder-name-text {
+    color: var(--header-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
