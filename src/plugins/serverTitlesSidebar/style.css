@@ -10,8 +10,13 @@ nav[aria-label="Servers sidebar"] {
 div[class*="listItem"]:has(div[class*="blobContainer"]),
 div[class*="listItem"]:has(div[class*="folderIconWrapper"]) {
     justify-content: flex-start !important;
-    padding-left: 12px;
+    padding-left: 17px;
     box-sizing: border-box;
+}
+
+/* Widen the entire folder container */
+div[class*="folderGroup"] {
+    width: 224px;
 }
 
 /* Make the containers flexible and wide to hold the icon and text */
@@ -40,14 +45,11 @@ div[class*="folderHeader"] > div[class*="folderButton"] {
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: pointer;
-    margin-left: 12px;
+    margin-left: 17px;
     width: 170px;
 }
 
 /* Style for folder headers */
 .folder-name-text {
-    color: var(--header-secondary);
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
+    margin-left: 13px !important;
 }

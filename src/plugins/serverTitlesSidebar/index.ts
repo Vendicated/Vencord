@@ -97,14 +97,16 @@ function addNamesToItems() {
         let isFolder = false;
         let container: HTMLElement | null = null;
 
-        const folderIconWrapper = item.querySelector<HTMLElement>(
-            '[class*="folderIconWrapper"]'
+        // Folders have a different structure from servers
+        const folderHeader = item.querySelector<HTMLElement>(
+            '[class*="folderHeader"]'
         );
-        if (folderIconWrapper) {
+        if (folderHeader) {
             isFolder = true;
-            name = folderIconWrapper.getAttribute("aria-label");
-            container = folderIconWrapper;
+            name = folderHeader.dataset.dndName;
+            container = folderHeader;
         } else {
+            // Regular server icon
             const blobContainer = item.querySelector<HTMLElement>(
                 '[class*="blobContainer"]'
             );
@@ -136,7 +138,7 @@ function addNamesToItems() {
         textEl.addEventListener("click", (e) => {
             e.stopPropagation(); // Prevent duplicate events
             const clickable =
-                item.querySelector<HTMLElement>('[role="treeitem"]');
+                container.querySelector<HTMLElement>('[role="treeitem"]');
             clickable?.click();
         });
 
