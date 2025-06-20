@@ -28,10 +28,16 @@ div[class*="folderHeader"] {
     width: 216px;
 }
 
-/* Prevent the icon from shrinking */
+/* Prevent the icon from shrinking and enforce order */
 div[class*="blobContainer"] > div[class*="wrapper"],
 div[class*="folderHeader"] > div[class*="folderButton"] {
     flex-shrink: 0;
+    order: 1;
+}
+
+/* Specific alignment fix for the folder button */
+div[class*="folderHeader"] > div[class*="folderButton"] {
+    margin-left: -4px;
 }
 
 /* Style for the injected server name text */
@@ -47,6 +53,7 @@ div[class*="folderHeader"] > div[class*="folderButton"] {
     cursor: pointer;
     margin-left: 17px;
     width: 170px;
+    order: 2;
 }
 
 /* Style for folder headers */
