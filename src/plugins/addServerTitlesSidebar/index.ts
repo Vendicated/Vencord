@@ -121,6 +121,23 @@ function addTitlesToItems() {
             clickable?.click();
         });
 
+        // Forward the context menu (right-click) event to the original icon.
+        textEl.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const clickable =
+                container.querySelector<HTMLElement>('[role="treeitem"]');
+            clickable?.dispatchEvent(
+                new MouseEvent("contextmenu", {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                })
+            );
+        });
+
         container.appendChild(textEl);
     });
 }
