@@ -10,6 +10,7 @@ export default definePlugin({
     name: "DisplayFileNames",
     description: "Displays the file name of any file (preview) directly above it",
     authors: [{ name: "SirReGa", id: 542001682255708191n }],
+    tags: ["custom"]
 });
 
 document.addEventListener("click", async event => {
@@ -32,7 +33,6 @@ document.addEventListener("click", async event => {
 
             const observer = new MutationObserver(mutations => {
                 const element = document.querySelector(selector);
-                console.log(element);
                 if (element) {
                     observer.disconnect();
                     return resolve(element);
