@@ -1,5 +1,6 @@
 .vc-smyn-suffix {
     color: var(--text-muted);
+    -webkit-text-fill-color: initial;
 }
 
 .vc-smyn-suffix::before {
