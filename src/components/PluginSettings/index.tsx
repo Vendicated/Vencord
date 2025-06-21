@@ -170,7 +170,8 @@ const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED,
-    NEW
+    NEW,
+    CUSTOM
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -257,6 +258,7 @@ export default function PluginSettings() {
         if (enabled && status === SearchStatus.DISABLED) return false;
         if (!enabled && status === SearchStatus.ENABLED) return false;
         if (status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
+        if (status === SearchStatus.CUSTOM && !plugin.tags?.includes("custom")) return false;
         if (!search.length) return true;
 
         return (
@@ -341,6 +343,7 @@ export default function PluginSettings() {
                     <Select
                         options={[
                             { label: "Show All", value: SearchStatus.ALL, default: true },
+                            { label: "Show Custom", value: SearchStatus.CUSTOM },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW }
