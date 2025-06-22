@@ -31,6 +31,7 @@ import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRout
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
+let questIdCheck = 0;
 
 function ToolBarHeader() {
     return (
@@ -70,13 +71,13 @@ async function openCompleteQuestUI() {
 
         const applicationId = quest.config.application.id;
         const applicationName = quest.config.application.name;
-        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY"].find(x => quest.config.taskConfig.tasks[x] != null);
+        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"].find(x => quest.config.taskConfig.tasks[x] != null);
         const icon = `https://cdn.discordapp.com/quests/${quest.id}/${theme}/${quest.config.assets.gameTile}`;
         // @ts-ignore
         const secondsNeeded = quest.config.taskConfig.tasks[taskName].target;
         // @ts-ignore
         let secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0;
-        if (taskName === "WATCH_VIDEO") {
+        if (taskName === "WATCH_VIDEO" || taskName === "WATCH_VIDEO_ON_MOBILE") {
             const maxFuture = 10, speed = 7, interval = 1;
             const enrolledAt = new Date(quest.userStatus.enrolledAt).getTime();
             const fn = async () => {
@@ -248,6 +249,13 @@ export default definePlugin({
     settings,
     patches: [
         {
+            find: "BkZhUF)}",
+            replacement: {
+                match: /(?<=questId:(\i\.id).*?\.PRIMARY,)disabled:!0/,
+                replace: "onClick: () => $self.mobileQuestPatch($1)"
+            },
+        },
+        {
             find: "AppTitleBar",
             replacement: {
                 match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[)/,
@@ -264,6 +272,16 @@ export default definePlugin({
             predicate: () => settings.store.useNavBar
         }
     ],
+    mobileQuestPatch(questId) {
+        if (questId === questIdCheck) return;
+        questIdCheck = questId;
+        Vencord.Webpack.Common.RestAPI.post({
+            url: `/quests/${questId}/enroll`,
+            body: {
+                location: 11
+            }
+        });
+    },
     renderQuestButton() {
         return (
             <Tooltip text="Complete Quest">
