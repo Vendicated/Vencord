@@ -51,4 +51,6 @@ export const enum IpcEvents {
     CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
     CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",
     CSP_REQUEST_ADD_OVERRIDE = "VencordCspRequestAddOverride",
+
+    XDG_GLOBAL_KEYBIND_ACTIVATED = "VencordXdgGlobalKeybindActivated",
 }

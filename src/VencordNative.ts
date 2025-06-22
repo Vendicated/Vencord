@@ -71,6 +71,15 @@ export default {
         openEditor: () => invoke<void>(IpcEvents.OPEN_MONACO_EDITOR),
     },
 
+    ipcRenderer: {
+        on: (channel: string, listener: (...args: any[]) => void) => {
+            ipcRenderer.on(channel, listener);
+        },
+        removeAllListeners: (channel: string) => {
+            ipcRenderer.removeAllListeners(channel);
+        },
+    },
+
     native: {
         getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)

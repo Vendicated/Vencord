@@ -4,12 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import fs from "node:fs";
-
+import { IpcEvents } from "@shared/IpcEvents";
 import { sessionBus, Variant } from "dbus-next";
+import { BrowserWindow } from "electron";
 
-function log(message: string) {
-    fs.writeFile("xdgLog", "LOG: " + message + "\n", () => {});
+// Get the main window to send messages to renderer
+function getMainWindow(): BrowserWindow | null {
+    return (
+        BrowserWindow.getAllWindows().find(
+            w => w.title && w.title.includes("Discord"),
+        ) || null
+    );
 }
 
 (async function () {
@@ -38,7 +43,13 @@ function log(message: string) {
 
     const bindShortcuts_request_handle = await globalShortcuts.BindShortcuts(
         session_handle,
-        [["toggle_mute", { description: new Variant("s", "Toggle mute") }]],
+        [
+            ["toggle_mute", { description: new Variant("s", "Toggle mute") }],
+            [
+                "toggle_deafen",
+                { description: new Variant("s", "Toggle deafen") },
+            ],
+        ],
         parent_window,
         { handle_token: new Variant("s", "bindShortcutsToken") },
     );
@@ -46,10 +57,14 @@ function log(message: string) {
     globalShortcuts.on(
         "Activated",
         (session_handle: string, shortcut_id: string, timestamp, options) => {
-            log(`Shortcut activated: ${shortcut_id}`);
-            log(`Session handle: ${session_handle}`);
-            log(`Timestamp: ${timestamp}`);
-            log(`Options: ${JSON.stringify(options)}`);
+            // Send message to renderer process
+            const mainWindow = getMainWindow();
+            if (mainWindow) {
+                mainWindow.webContents.postMessage(
+                    IpcEvents.XDG_GLOBAL_KEYBIND_ACTIVATED,
+                    shortcut_id,
+                );
+            }
         },
     );
 })();
