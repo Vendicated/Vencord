@@ -220,12 +220,12 @@ function FriendsTab({ guild, setCount }: RelationshipProps) {
 }
 
 function BlockedUsersTab({ guild, setCount }: RelationshipProps) {
-    const blockedIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isBlocked(id));
+    const blockedIds = RelationshipStore.getBlockedIDs();
     return UserList("blocked", guild, blockedIds, setCount);
 }
 
 function IgnoredUserTab({ guild, setCount }: RelationshipProps) {
-    const ignoredIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isIgnored(id));
+    const ignoredIds = RelationshipStore.getIgnoredIDs();
     return UserList("ignored", guild, ignoredIds, setCount);
 }
 
