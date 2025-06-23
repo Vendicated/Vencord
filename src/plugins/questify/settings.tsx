@@ -139,11 +139,12 @@ export function questIsIgnored(questName: string): boolean {
 }
 
 export function validateIgnoredQuests(ignoredQuests?: string): string {
+    const quests = Array.from(QuestsStore.quests.values()) as Quest[];
     const currentlyIgnored = new Set((ignoredQuests ?? settings.store.ignoredQuests).split("\n").map(normalizeQuestName));
     const validIgnored = new Set<string>();
     let numUnclaimedUnignoredQuests = 0;
 
-    for (const quest of QuestsStore.quests.values()) {
+    for (const quest of quests) {
         const normalizedName = normalizeQuestName(quest.config.messages.questName);
         const claimedQuest = quest.userStatus?.claimedAt;
         const questExpired = new Date(quest.config.expiresAt) < new Date();

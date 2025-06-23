@@ -601,12 +601,18 @@ export default definePlugin({
         QUESTS_FETCH_CURRENT_QUESTS_SUCCESS(data) {
             const source = data.source ? ` [${data.source}]` : "";
             QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_FETCH_CURRENT_QUESTS_SUCCESS]${source}\n`, data);
-            validateIgnoredQuests();
+
+            setTimeout(() => {
+                validateIgnoredQuests();
+            }, 1000); // Give the QuestsStore a chance to update.
         },
 
         QUESTS_CLAIM_REWARD_SUCCESS(data) {
             QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_CLAIM_REWARD_SUCCESS]\n`, data);
-            validateIgnoredQuests();
+
+            setTimeout(() => {
+                validateIgnoredQuests();
+            }, 1000);
         },
     },
 
