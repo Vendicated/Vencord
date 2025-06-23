@@ -1373,7 +1373,7 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
                                 />
                             </div>
                             <div
-                                className={q("inline-group-item", "alert-icon") + (!!activePlayer ? (" " + q("playing-audio")) : "")}
+                                className={q("inline-group-item", "alert-icon", { "playing-audio": !!activePlayer })}
                                 onClick={() => {
                                     function clearActivePlayer() {
                                         activePlayer?.stop();
