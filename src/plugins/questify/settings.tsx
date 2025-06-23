@@ -44,7 +44,7 @@ export function fetchAndAlertQuests(source: string, logger: Logger): void {
     const currentQuests = Array.from(QuestsStore.quests.values()) as Quest[];
 
     fetchAndDispatchQuests(source, logger).then(newQuests => {
-        if (newQuests !== null && Array.isArray(newQuests)) {
+        if (newQuests !== null && Array.isArray(newQuests) && currentQuests.length > 0) {
             const currentIds = new Set(currentQuests.map((q: Quest) => q.id));
             const newOnly = newQuests.filter((q: Quest) => !currentIds.has(q.id));
 
