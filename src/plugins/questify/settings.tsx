@@ -41,7 +41,7 @@ let dummyMiddleClickActionState: React.Dispatch<React.SetStateAction<string>> = 
 let dummyRightClickActionState: React.Dispatch<React.SetStateAction<string>> = () => defaultRightClickAction;
 
 export function fetchAndAlertQuests(source: string, logger: Logger): void {
-    const currentQuests = structuredClone(QuestsStore.quests);
+    const currentQuests = Array.from(QuestsStore.quests.values()) as Quest[];
 
     fetchAndDispatchQuests(source, logger).then(newQuests => {
         if (newQuests !== null && Array.isArray(newQuests)) {
