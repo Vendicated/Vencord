@@ -1284,7 +1284,6 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
     const [currentAlertSelection, setCurrentAlertSelection] = useState<SelectOption | null>(createAlertSelectOptionFromValue(resolvedAlertValue));
     const [currentAlertOptions, setCurrentAlertOptions] = useState(getAllAlertOptions(currentAlertSelection));
     const [activePlayer, setActivePlayer] = useState<any>(null);
-    const [activePlayerClass, setActivePlayerClass] = useState<string>("");
 
     return (
         <ErrorBoundary>
@@ -1374,24 +1373,21 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
                                 />
                             </div>
                             <div
-                                className={q("inline-group-item", "alert-icon") + (!!activePlayerClass ? (" " + activePlayerClass) : "")}
+                                className={q("inline-group-item", "alert-icon") + (!!activePlayer ? (" " + q("playing-audio")) : "")}
                                 onClick={() => {
                                     function clearActivePlayer() {
                                         activePlayer?.stop();
                                         setActivePlayer(null);
-                                        setActivePlayerClass("");
                                     }
 
                                     if (currentAlertSelection && currentAlertSelection.value) {
                                         if (activePlayer) {
                                             activePlayer?.stop();
                                             setActivePlayer(null);
-                                            setActivePlayerClass("");
                                         } else {
                                             const player = AudioPlayer(currentAlertSelection.value as string, 1, clearActivePlayer);
                                             setActivePlayer(player);
                                             player?.play();
-                                            setActivePlayerClass(q("playing-audio"));
                                         }
                                     }
                                 }}
