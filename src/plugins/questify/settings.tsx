@@ -774,9 +774,18 @@ function RestyleQuestsSetting(props: { setValue: (value: RestyleQuestsSettingPro
     useEffect(() => {
         const handleChange = () => {
             if (QuestsStore.quests.size > 0) {
-                const quest = structuredClone(Array.from(QuestsStore.quests.values())[0] as Quest);
-                quest.dummyColor = dummyColor as any;
-                setDummyQuest(quest);
+                if (!dummyQuest) {
+                    const questArray = Array.from(QuestsStore.quests.values()) as Quest[];
+                    const questIndex = Math.floor(Math.random() * questArray.length);
+                    const questData = structuredClone(questArray[questIndex]);
+                    questData.dummyColor = dummyColor as any;
+                    setDummyQuest(questData);
+                } else if (dummyQuest) {
+                    const updatedQuest = structuredClone(dummyQuest);
+                    updatedQuest.dummyColor = dummyColor as any;
+                    setDummyQuest(updatedQuest);
+                }
+
                 setHasQuests(true);
             } else {
                 setHasQuests(false);
@@ -1153,8 +1162,8 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
 
         return [
             currentValue,
-            ...otherOptions.sort((a, b) => Number(a.value) - Number(b.value))
-        ];
+            ...otherOptions
+        ].sort((a, b) => Number(a.value) - Number(b.value));
     }
 
     function getAllAlertOptions(currentValue: SelectOption | null) {
@@ -1166,8 +1175,8 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
 
         return [
             currentValue,
-            ...otherOptions.sort((a, b) => a.label.localeCompare(b.label))
-        ];
+            ...otherOptions
+        ].sort((a, b) => a.label.localeCompare(b.label));
     }
 
     function handleScaleSearchChange(searchValue: string) {
