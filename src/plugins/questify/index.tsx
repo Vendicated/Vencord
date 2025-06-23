@@ -14,9 +14,9 @@ import definePlugin, { StartAt } from "@utils/types";
 import { ContextMenuApi, Menu, NavigationRouter, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { addIgnoredQuest, autoFetchCompatible, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateIgnoredQuests } from "./settings";
+import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateIgnoredQuests } from "./settings";
 import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./utils/components";
-import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
+import { adjustRGB, decimalToRGB, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
 
 let questButtonBadgeNumberState: React.Dispatch<React.SetStateAction<number>> = () => { };
 let questButtonUnclaimedUnignoredState: React.Dispatch<React.SetStateAction<number>> = () => { };
@@ -123,7 +123,7 @@ export function QuestButton(): JSX.Element {
                     <Menu.MenuItem
                         id={q("fetch-quests-option")}
                         label="Fetch Quests"
-                        action={() => fetchAndDispatchQuests("QuickQuests", QuestifyLogger)}
+                        action={() => fetchAndAlertQuests("Questify", QuestifyLogger)}
                     />
                 </Menu.Menu>
             ));
@@ -605,10 +605,10 @@ export default definePlugin({
         },
     },
 
-    renderQuickQuestsButton: ErrorBoundary.wrap(QuestButton, { noop: true }),
+    renderQuestifyButton: ErrorBoundary.wrap(QuestButton, { noop: true }),
 
     start() {
-        addServerListElement(ServerListRenderPosition.Above, this.renderQuickQuestsButton);
+        addServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
         const interval = settings.store.fetchingQuestsInterval;
         const intervalValid = interval >= minimumAutoFetchIntervalValue && interval <= maximumAutoFetchIntervalValue;
 
@@ -618,7 +618,7 @@ export default definePlugin({
     },
 
     stop() {
-        removeServerListElement(ServerListRenderPosition.Above, this.renderQuickQuestsButton);
+        removeServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
         stopAutoFetchingQuests();
     }
 });

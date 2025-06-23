@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
+import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { Button, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -39,6 +40,28 @@ let dummyLeftClickActionState: React.Dispatch<React.SetStateAction<string>> = ()
 let dummyMiddleClickActionState: React.Dispatch<React.SetStateAction<string>> = () => defaultMiddleClickAction;
 let dummyRightClickActionState: React.Dispatch<React.SetStateAction<string>> = () => defaultRightClickAction;
 
+export function fetchAndAlertQuests(source: string, logger: Logger): void {
+    const currentQuests = structuredClone(QuestsStore.quests);
+
+    fetchAndDispatchQuests(source, logger).then(newQuests => {
+        if (newQuests !== null && Array.isArray(newQuests)) {
+            const currentIds = new Set(currentQuests.map((q: Quest) => q.id));
+            const newOnly = newQuests.filter((q: Quest) => !currentIds.has(q.id));
+
+            if (newOnly.length > 0) {
+                const shouldAlert = settings.store.fetchingQuestsAlert;
+
+                if (shouldAlert) {
+                    logger.info(`[${getFormattedNow()}] New quests detected. Playing alert sound.`);
+                    AudioPlayer(shouldAlert, 1).play();
+                } else {
+                    logger.info(`[${getFormattedNow()}] New quests detected.`);
+                }
+            }
+        }
+    });
+}
+
 export function startAutoFetchingQuests(seconds?: number): void {
     if (autoFetchInterval) {
         clearInterval(autoFetchInterval);
@@ -47,27 +70,7 @@ export function startAutoFetchingQuests(seconds?: number): void {
 
     const interval = seconds ? seconds * 1000 : settings.store.fetchingQuestsInterval * 1000;
     QuestifyLogger.info(`[${getFormattedNow()}] Starting auto-fetch of quests every ${(interval / 60000).toFixed(2)} minutes.`);
-
-    autoFetchInterval = setInterval(() => {
-        const currentQuests = structuredClone(QuestsStore.quests);
-        fetchAndDispatchQuests("Questify", QuestifyLogger).then(newQuests => {
-            if (newQuests !== null && Array.isArray(newQuests)) {
-                const currentIds = new Set(currentQuests.map((q: Quest) => q.id));
-                const newOnly = newQuests.filter((q: Quest) => !currentIds.has(q.id));
-
-                if (newOnly.length > 0) {
-                    const shouldAlert = settings.store.fetchingQuestsAlert;
-
-                    if (shouldAlert) {
-                        QuestifyLogger.info(`[${getFormattedNow()}] New quests detected. Playing alert sound.`);
-                        AudioPlayer(shouldAlert, 1).play();
-                    } else {
-                        QuestifyLogger.info(`[${getFormattedNow()}] New quests detected.`);
-                    }
-                }
-            }
-        });
-    }, interval);
+    autoFetchInterval = setInterval(() => { fetchAndAlertQuests("Questify", QuestifyLogger); }, interval);
 }
 
 export function stopAutoFetchingQuests(): void {
