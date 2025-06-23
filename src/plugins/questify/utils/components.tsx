@@ -30,7 +30,7 @@ export interface RestyleQuestsSettingProps {
     claimedColor: number | null;
     ignoredColor: number | null;
     expiredColor: number | null;
-    gradient: "match" | "black" | "hide";
+    gradient: "intense" | "default" | "black" | "hide";
     preload: boolean;
 }
 

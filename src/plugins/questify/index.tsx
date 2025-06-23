@@ -276,14 +276,15 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
 
     const customClasses = [
         q("quest-item-restyle"),
-        q("quest-item-match-gradient"),
+        q("quest-item-intense-gradient"),
+        q("quest-item-default-gradient"),
         q("quest-item-black-gradient"),
         q("quest-item-hide-gradient"),
         q("quest-item-contrast-logo"),
         ...reorderClasses
     ];
 
-    if (originalClasses.includes("questify-dummy-quest")) {
+    if (originalClasses.includes(q("dummy-quest"))) {
         return originalClasses;
     }
 
@@ -319,7 +320,11 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
         } else if ((gradient || restyleQuestsGradient) === "hide") {
             returnClasses.push(q("quest-item-hide-gradient"));
         } else {
-            returnClasses.push(q("quest-item-match-gradient"));
+            if ((gradient || restyleQuestsGradient) === "default") {
+                returnClasses.push(q("quest-item-default-gradient"));
+            } else {
+                returnClasses.push(q("quest-item-intense-gradient"));
+            }
 
             if (!isRestyledAndDarkish) {
                 returnClasses.push(q("quest-item-contrast-logo"));

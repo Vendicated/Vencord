@@ -282,8 +282,8 @@
     filter: drop-shadow(0 0 10px rgb(0 0 0 / 80%));
 }
 
-/* Match-restyle color gradient. */
-.questify-quest-item-match-gradient> :nth-child(1) [class^="overlay"] {
+/* Increased gradient intensity with restyle color. */
+.questify-quest-item-intense-gradient> :nth-child(1) [class^="overlay"] {
     background: linear-gradient(to top,
             var(--questify-color) 0,
             hsl(from var(--questify-color) h s l / 100%) 20.5%,
@@ -292,6 +292,14 @@
             hsl(from var(--questify-color) h s l / 97%) 30%,
             hsl(from var(--questify-color) h s l / 90%) 40%,
             hsl(from var(--questify-color) h s l / 77%) 50%,
+            hsl(from var(--questify-color) h s l / 0%) 100%);
+}
+
+/* Default gradient intensity with restyle color. */
+.questify-quest-item-default-gradient> :nth-child(1) [class^="overlay"] {
+    background: linear-gradient(to top,
+            var(--questify-color) 0,
+            hsl(from var(--questify-color) h s l / 95%) 20.31%,
             hsl(from var(--questify-color) h s l / 0%) 100%);
 }
 

@@ -26,7 +26,7 @@ const defaultUnclaimedColor = 2842239;
 const defaultClaimedColor = 6105983;
 const defaultIgnoredColor = 8334124;
 const defaultExpiredColor = 2368553;
-const defaultRestyleQuestsGradient = "match";
+const defaultRestyleQuestsGradient = "intense";
 const defaultFetchQuestsAlert = "discodo";
 export const minimumAutoFetchIntervalValue = 30 * 60;
 export const maximumAutoFetchIntervalValue = 12 * 60 * 60;
@@ -711,7 +711,7 @@ function IgnoredQuestsSetting(props: { setValue: (value: string) => void; }): JS
                             Ignored Quests
                         </Forms.FormTitle>
                         <Forms.FormText className={q("form-description")}>
-                            A list of Quest names to exclude from the unclaimed indicator.
+                            A list of Quest names to exclude from the <span className="questify-inline-code-block">Unclaimed Indicator</span>.
                             <br /><br />
                             One Quest name per line. Names must match the spelling displayed on the Quests page.
                             Alternatively, click the three dots on a Quest tile and select the <span className="questify-inline-code-block">Mark as Ignored</span> option.
@@ -814,12 +814,12 @@ function RestyleQuestsSetting(props: { setValue: (value: RestyleQuestsSettingPro
             claimedColor: colorIndex === 1 ? newColorValue : claimedColor,
             ignoredColor: colorIndex === 2 ? newColorValue : ignoredColor,
             expiredColor: colorIndex === 3 ? newColorValue : expiredColor,
-            gradient: restyleQuestsGradientValue as "match" | "black" | "hide",
+            gradient: restyleQuestsGradientValue as "intense" | "default" | "black" | "hide",
             preload: restyleQuestsPreloadValue
         });
     }
 
-    function handleGradientChange(value: "match" | "black" | "hide") {
+    function handleGradientChange(value: "intense" | "default" | "black" | "hide") {
         setRestyleQuestsGradientValue(value);
         setDummyGradient(value);
 
@@ -841,7 +841,7 @@ function RestyleQuestsSetting(props: { setValue: (value: RestyleQuestsSettingPro
             claimedColor,
             ignoredColor,
             expiredColor,
-            gradient: restyleQuestsGradientValue as "match" | "black" | "hide",
+            gradient: restyleQuestsGradientValue as "intense" | "default" | "black" | "hide",
             preload: value
         });
     }
@@ -874,7 +874,8 @@ function RestyleQuestsSetting(props: { setValue: (value: RestyleQuestsSettingPro
     ];
 
     const gradientOptions = [
-        { label: "Match Restyle Color", value: "match" },
+        { label: "Intense Restyle Gradient", value: "intense" },
+        { label: "Default Restyle Gradient", value: "default" },
         { label: "Subtle Black Gradient", value: "black" },
         { label: "No Gradient", value: "hide" }
     ];
@@ -1560,7 +1561,7 @@ export const settings = definePluginSettings({
             settings.store.restyleQuestsClaimed = newValue.claimedColor as any;
             settings.store.restyleQuestsIgnored = newValue.ignoredColor as any;
             settings.store.restyleQuestsExpired = newValue.expiredColor as any;
-            settings.store.restyleQuestsGradient = newValue.gradient as "match" | "black" | "hide";
+            settings.store.restyleQuestsGradient = newValue.gradient as "intense" | "default" | "black" | "hide";
             settings.store.restyleQuestsPreload = newValue.preload;
         }
     },
@@ -1591,7 +1592,7 @@ export const settings = definePluginSettings({
     restyleQuestsGradient: {
         type: OptionType.STRING,
         description: "Style of the gradient used in the Quest tiles.",
-        default: defaultRestyleQuestsGradient, // "match", "black", "hide"
+        default: defaultRestyleQuestsGradient, // "intense", "default", "black", "hide"
         hidden: true
     },
     restyleQuestsPreload: {
