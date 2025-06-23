@@ -1284,6 +1284,7 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
     const [currentAlertSelection, setCurrentAlertSelection] = useState<SelectOption | null>(createAlertSelectOptionFromValue(resolvedAlertValue));
     const [currentAlertOptions, setCurrentAlertOptions] = useState(getAllAlertOptions(currentAlertSelection));
     const [activePlayer, setActivePlayer] = useState<any>(null);
+    const [activePlayerClass, setActivePlayerClass] = useState<string>("");
 
     return (
         <ErrorBoundary>
@@ -1373,24 +1374,24 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
                                 />
                             </div>
                             <div
-                                className={q("inline-group-item", "alert-icon")}
+                                className={q("inline-group-item", "alert-icon") + (!!activePlayerClass ? (" " + activePlayerClass) : "")}
                                 onClick={() => {
                                     function clearActivePlayer() {
                                         activePlayer?.stop();
                                         setActivePlayer(null);
-                                        document.querySelector("." + q("alert-icon"))?.classList.remove(q("playing-audio"));
+                                        setActivePlayerClass("");
                                     }
 
                                     if (currentAlertSelection && currentAlertSelection.value) {
                                         if (activePlayer) {
                                             activePlayer?.stop();
                                             setActivePlayer(null);
-                                            document.querySelector("." + q("alert-icon"))?.classList.remove(q("playing-audio"));
+                                            setActivePlayerClass("");
                                         } else {
                                             const player = AudioPlayer(currentAlertSelection.value as string, 1, clearActivePlayer);
                                             setActivePlayer(player);
                                             player?.play();
-                                            document.querySelector("." + q("alert-icon"))?.classList.add(q("playing-audio"));
+                                            setActivePlayerClass(q("playing-audio"));
                                         }
                                     }
                                 }}
