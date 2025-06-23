@@ -189,6 +189,7 @@
 .questify-quest-button-pill>[class^="item"],
 [class^="listItem"]>[class^="pill"]>[class^="item"] {
     will-change: transform !important;
+    max-height: 20px !important;
 }
 
 .questify-quest-button-server-list-button-container {
