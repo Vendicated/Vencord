@@ -19,7 +19,7 @@ interface ColorPickerProps {
     suggestedColors?: string[];
     onChange(value: number | null): void;
 }
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".BACKGROUND_ACCENT.css");
 
 const cl = classNameFactory("vc-customColors-");
 

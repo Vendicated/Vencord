@@ -19,7 +19,7 @@ interface ColorPickerProps {
     onChange(value: number | null): void;
 }
 
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".BACKGROUND_PRIMARY).hex");
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".BACKGROUND_ACCENT.css");
 
 const cl = classNameFactory("vc-remix-settings-color-");
 

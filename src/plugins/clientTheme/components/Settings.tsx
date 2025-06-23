@@ -14,7 +14,7 @@ import { settings } from "..";
 import { relativeLuminance } from "../utils/colorUtils";
 import { createOrUpdateThemeColorVars } from "../utils/styleUtils";
 
-const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
+const ColorPicker = findComponentByCodeLazy(".BACKGROUND_ACCENT.css");
 const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');
 const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
 
