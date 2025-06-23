@@ -186,10 +186,13 @@
     pointer-events: none !important;
 }
 
-.questify-quest-button-pill>[class^="item"],
-[class^="listItem"]>[class^="pill"]>[class^="item"] {
+.questify-quest-button-pill>[class^="item"] {
     will-change: transform !important;
     max-height: 20px !important;
+}
+
+.questify-quest-button-pill.selected>[class^="item"] {
+    max-height: 40px !important;
 }
 
 .questify-quest-button-server-list-button-container {

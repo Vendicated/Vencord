@@ -169,6 +169,7 @@ export function GuildlessServerListItem(
     const pillContainerClass = `${baseClasses.join(" ")}-pill-container`;
     const buttonClass = `${baseClasses.join(" ")}-button`;
     const pillClass = `${baseClasses.join(" ")}-pill`;
+    const pillClassSelected = `${pillClass} selected`;
     const lowerBadgeClass = `${baseClasses.join(" ")}-lower-badge`;
     const upperBadgeClass = `${baseClasses.join(" ")}-upper-badge`;
 
@@ -217,7 +218,7 @@ export function GuildlessServerListItem(
                             unread={unread && showPill}
                             selected={selected && showPill}
                             hovered={hovered && showPill}
-                            className={pillClass}
+                            className={selected ? pillClassSelected : pillClass}
                         />
                     </div>
                     <div
