@@ -165,7 +165,7 @@ export function GuildlessServerListItem(
     const baseClasses = className.split(" ") || ["vc-server-list-item"];
     const mainContainerClass = `${baseClasses.join(" ")}-container`;
     const iconContainerClass = `${baseClasses.join(" ")}-icon-container`;
-    const buttonContainerClass = `${baseClasses.join(" ")}-button-container`;
+    const buttonContainerClass = `${baseClasses.join(" ")}-server-list-button-container`;
     const pillContainerClass = `${baseClasses.join(" ")}-pill-container`;
     const buttonClass = `${baseClasses.join(" ")}-button`;
     const pillClass = `${baseClasses.join(" ")}-pill`;
@@ -187,10 +187,7 @@ export function GuildlessServerListItem(
 
     function wrappedIcon() {
         return icon ? (
-            <div
-                className={iconContainerClass}
-                style={{ pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}
-            >
+            <div className={iconContainerClass} >
                 {icon()}
             </div>
         ) : null;
@@ -214,22 +211,16 @@ export function GuildlessServerListItem(
                 <div
                     {...(id !== undefined ? { id } : {})}
                     className={mainContainerClass}
-                    style={{ position: "relative" }}
                 >
-                    <div
-                        style={{ position: "absolute", top: "0", left: "0", width: "8px", height: "100%", pointerEvents: "none" }}
-                        className={pillContainerClass}
-                    >
+                    <div className={pillContainerClass} >
                         <GuildedServerListItemPillComponent
                             unread={unread && showPill}
                             selected={selected && showPill}
                             hovered={hovered && showPill}
                             className={pillClass}
-                            style={{ willChange: "transform" }}
                         />
                     </div>
                     <div
-                        style={{ position: "relative" }}
                         className={buttonContainerClass}
                     >
                         <GuildlessServerListItemComponent

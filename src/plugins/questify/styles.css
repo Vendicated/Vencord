@@ -108,11 +108,6 @@
     border-radius: 3px !important;
 }
 
-.questify-quest-button-pill>[class^="item"],
-[class^="listItem"]>[class^="pill"]>[class^="item"] {
-    will-change: transform !important;
-}
-
 .questify-text-input,
 .questify-text-area {
     margin-top: 4px !important;
@@ -180,6 +175,37 @@
 .questify-dummy-quest:active {
     pointer-events: none !important;
     user-select: none !important;
+}
+
+.questify-quest-button-pill {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 8px !important;
+    height: 100% !important;
+    pointer-events: none !important;
+}
+
+.questify-quest-button-pill>[class^="item"],
+[class^="listItem"]>[class^="pill"]>[class^="item"] {
+    will-change: transform !important;
+}
+
+.questify-quest-button-server-list-button-container {
+    position: relative !important;
+}
+
+.questify-quest-button-icon-container {
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.questify-quest-button-container {
+    position: relative !important;
 }
 
 /* Position tiles based on status. */
