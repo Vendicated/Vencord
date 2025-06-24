@@ -19,7 +19,6 @@ const isLinux = platform === "linux";
 let isMonitorRunning: boolean = false;
 
 const idMap: Map<number, NotificationData> = new Map();
-const replyMap: Map<number, string> = new Map();
 
 interface NotificationData {
     channelId: string;
@@ -273,8 +272,6 @@ function notifySend(summary: string,
         if (Number(stdout.trim())) {
             idMap.set(Number(stdout), notificationData);
             console.log(idMap);
-            console.log(replyMap);
-
         }
 
         // Will need propper filtering if multiple actions or notification ids are used
@@ -287,6 +284,7 @@ async function startListeningToDbus() {
     isMonitorRunning = true;
 
     let nextIsReply: boolean = false;
+    let notificationIdParsed: boolean = false;
     let notificationId: number;
 
     const monitor = execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"]);
@@ -301,28 +299,45 @@ async function startListeningToDbus() {
             if (text.includes("member=NotificationReplied")) {
                 console.log("Next data should be uint32");
                 nextIsReply = true;
+                return;
             }
 
-            else if (nextIsReply) {
-                if (!text.startsWith("string")) {
-                    console.error(`Expected reply, recieved ${text} instead`);
-                    return;
+            if (nextIsReply) {
+                if (notificationIdParsed) {
+                    if (!text.startsWith("string")) {
+                        console.error(`Expected reply, recieved ${text}`);
+                        return;
+                    }
+
+                    const i = text.indexOf(" ");
+                    const reply = text.slice(i + 1);
+
+                    const messageData = idMap.get(notificationId);
+                    if (!messageData) {
+                        console.error(`Could not find notification with id ${notificationId} in map`);
+                        console.debug(idMap);
+                        return;
+                    }
+
+                    webContents?.executeJavaScript(`
+                        Vencord.Plugins.plugins.BetterNotifications.NotificationReplyEvent("${reply}","${messageData.channelId}", "${messageData.messageId}")
+                    `);
+
+                } else {
+                    if (!text.startsWith("uint32")) {
+                        console.error(`Expected notification id, recieved ${text}`);
+                        return;
+                    }
+
+                    const targetId = text.split(" ").at(1);
+                    if (!targetId || !Number(targetId)) {
+                        console.error(`Expected number value (from text ${text})`);
+                        return;
+                    }
+
+                    notificationIdParsed = true;
+                    notificationId = Number(targetId);
                 }
-                console.log("Event is reply");
-                const i = text.indexOf(" ");
-                replyMap.set(notificationId, text.slice(i + 1));
-
-                nextIsReply = false;
-            } else if (text.startsWith("uint32")) {
-                console.log("Found data starting with uint32");
-                const foundId = text.split(" ").at(1);
-
-                if (!foundId) {
-                    console.error(`Failed to find id (${foundId})`);
-                    return;
-                }
-
-                notificationId = Number(foundId);
             }
         });
     });

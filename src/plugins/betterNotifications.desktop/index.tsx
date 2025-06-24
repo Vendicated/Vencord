@@ -359,7 +359,6 @@ export function notificationShouldBeShown(advancedData: AdvancedNotification): b
     return true;
 }
 
-
 export default definePlugin({
     name: "BetterNotifications",
     description: "Improves discord's desktop notifications.",
@@ -412,14 +411,6 @@ export default definePlugin({
         });
     },
 
-    NotificationReactEvent(channelId: string, messageId: string, emoji: string) {
-        addReaction(channelId.toString(), messageId.toString(), {
-            animated: false,
-            id: null,
-            name: emoji
-        });
-    },
-
     NotificationReplyEvent(text: string, channelId: string, messageId: string) {
         logger.info(`Recieved reply event to channel ${channelId}`);
         sendMessage(
@@ -428,11 +419,19 @@ export default definePlugin({
             true,
             {
                 "messageReference": {
-                    "channel_id": channelId,
-                    "message_id": messageId
+                    "channel_id": channelId.toString(),
+                    "message_id": messageId.toString()
                 }
             }
         );
+    },
+
+    NotificationReactEvent(channelId: string, messageId: string, emoji: string) {
+        addReaction(channelId.toString(), messageId.toString(), {
+            animated: false,
+            id: null,
+            name: emoji
+        });
     },
 
     ShouldUseCustomFunc() {
