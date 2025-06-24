@@ -48,8 +48,8 @@ export default definePlugin({
         {
             find: ".COLLECTIBLES_SHOP_FULLSCREEN))",
             replacement: {
-                match: /(\?void 0:(\i)\.channelId.{0,500}return)((.{0,15})"div",{.*?\])(\}\)\}\})/,
-                replace: "$1$4$self.render,{currentChannel:$2,children:$3})$5"
+                match: /(?<=\?void 0:(\i)\.channelId.{0,500}return)((.{0,15})"div",{.*?\])(?=\}\)\}\)\}\)\})/,
+                replace: "$3$self.render,{currentChannel:$1,children:$2})"
             }
         },
         // intercept channel navigation to switch/create tabs

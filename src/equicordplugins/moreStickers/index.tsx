@@ -32,7 +32,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "ChannelStickerPickerButton",
+            find: ".stickerButton)},",
             replacement: [{
                 match: /(children:\(0,\i\.jsx\)\()(.{0,10})({innerClassName.{10,30}\.stickerButton)/,
                 replace: "$1arguments[0]?.stickersType?$self.stickerButton:$2$3"
