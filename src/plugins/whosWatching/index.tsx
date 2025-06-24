@@ -8,7 +8,6 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Devs } from "@utils/constants";
 import { getIntlMessage, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -16,7 +15,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Clickable, Forms, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
-import { JSX } from "react";
 
 interface WatchingProps {
     userIds: string[];
@@ -50,8 +48,8 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
                     <Forms.FormTitle>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Forms.FormTitle>
                     <Flex flexDirection="column" style={{ gap: 6 }} >
                         {users.map(user => (
-                            <Flex key={user.id} flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
-                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} alt="" />
+                            <Flex flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
+                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} />
                                 {getUsername(user)}
                             </Flex>
                         ))}
@@ -72,7 +70,7 @@ export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
     authors: [Devs.viciouscal],
-    settings,
+    settings: settings,
     patches: [
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
@@ -81,11 +79,21 @@ export default definePlugin({
                 replace: "jsx)($self.component({OriginalComponent:$1}),{mask:"
             }
         },
+        /* Old panel patch
         {
             predicate: () => settings.store.showPanel,
             find: "this.renderEmbeddedActivity()",
             replacement: {
                 match: /(?<=children.{0,50})"div"(?=.{0,500}this\.renderEmbeddedActivity\(\))/,
+                replace: "$self.WrapperComponent"
+            }
+        }
+        */
+        { // New panel patch
+            predicate: () => settings.store.showPanel,
+            find: "this.renderEmbeddedActivity()",
+            replacement: {
+                match: /(?<=let{canGoLive.{0,500}\()"div"(?=,{className:\i\.body)/,
                 replace: "$self.WrapperComponent"
             }
         }
@@ -121,7 +129,7 @@ export default definePlugin({
                 <div className={classes(cl("spectators_panel"), Margins.top8)}>
                     {users.length ?
                         <>
-                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, marginLeft: 8, textTransform: "uppercase" }}>
+                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
                                 {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                             </Forms.FormTitle>
                             <UserSummaryItem
@@ -141,13 +149,12 @@ export default definePlugin({
                                             src={user.getAvatarURL(void 0, 80, true)}
                                             alt={user.username}
                                             title={user.username}
-                                            style={{ marginLeft: 8 }}
                                         />
                                     </Clickable>
                                 )}
                             />
                         </>
-                        : <Forms.FormText style={{ marginLeft: 8 }}>No spectators</Forms.FormText>
+                        : <Forms.FormText>No spectators</Forms.FormText>
                     }
                 </div>
             </>
