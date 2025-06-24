@@ -462,18 +462,32 @@ export default definePlugin({
         {
             // Hides Quests tab in the Discovery page.
             find: "GlobalDiscoverySidebar",
-            replacement: {
-                match: /GLOBAL_DISCOVERY_TABS.map/,
-                replace: 'GLOBAL_DISCOVERY_TABS.filter(tab=>!$self.shouldHideDiscoveryTab()||tab!=="quests").map'
-            }
+            group: true,
+            replacement: [
+                {
+                    match: /(let \i=function\(\){)/,
+                    replace: "$1const shouldHideDiscoveryTab=$self.shouldHideDiscoveryTab();"
+                },
+                {
+                    match: /GLOBAL_DISCOVERY_TABS.map/,
+                    replace: 'GLOBAL_DISCOVERY_TABS.filter(tab=>!(tab==="quests"&&shouldHideDiscoveryTab)).map'
+                }
+            ]
         },
         {
             // Hides the Quest badge on user profiles.
             find: ".MODAL]:26",
-            replacement: {
-                match: /badges:(\i)/,
-                replace: 'badges:$1.filter(badge=>!$self.shouldHideBadgeOnUserProfiles()||badge.id!=="quest_completed")',
-            }
+            group: true,
+            replacement: [
+                {
+                    match: /(return 0===\i.length\?null:\(0,)/,
+                    replace: "const shouldHideBadgeOnUserProfiles=$self.shouldHideBadgeOnUserProfiles();$1"
+                },
+                {
+                    match: /badges:(\i)/,
+                    replace: 'badges:$1.filter(badge=>!(badge.id==="quest_completed"&&shouldHideBadgeOnUserProfiles))',
+                }
+            ]
         },
         {
             // Hides the new Quest popup above the account panel.
