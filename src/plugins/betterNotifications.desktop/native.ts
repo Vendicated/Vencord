@@ -310,7 +310,7 @@ async function startListeningToDbus() {
                     }
 
                     const i = text.indexOf(" ");
-                    const reply = text.slice(i + 1);
+                    const reply = text.slice(i + 1); // NOTE: This variable already contains quotes around the string itself
 
                     const messageData = idMap.get(notificationId);
                     if (!messageData) {
@@ -320,7 +320,7 @@ async function startListeningToDbus() {
                     }
 
                     webContents?.executeJavaScript(`
-                        Vencord.Plugins.plugins.BetterNotifications.NotificationReplyEvent("${reply}","${messageData.channelId}", "${messageData.messageId}")
+                        Vencord.Plugins.plugins.BetterNotifications.NotificationReplyEvent(${reply},"${messageData.channelId}", "${messageData.messageId}")
                     `);
 
                 } else {
