@@ -412,7 +412,7 @@ export default definePlugin({
     },
 
     NotificationReplyEvent(text: string, channelId: string, messageId: string) {
-        logger.info(`Recieved reply event to channel ${channelId}`);
+        logger.info(`Recieved reply event with text ${text} to channel ${channelId} replying to ${messageId}`);
         sendMessage(
             channelId,
             { content: text },
@@ -424,6 +424,14 @@ export default definePlugin({
                 }
             }
         );
+
+        ChannelRouter.transitionToChannel(channelId);
+        jumpToMessage.jumpToMessage({
+            channelId,
+            messageId,
+            flash: true,
+            jumpType: "INSTANT"
+        });
     },
 
     NotificationReactEvent(channelId: string, messageId: string, emoji: string) {
