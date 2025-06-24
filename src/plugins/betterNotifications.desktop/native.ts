@@ -19,6 +19,7 @@ const isLinux = platform === "linux";
 let isMonitorRunning: boolean = false;
 
 const idMap: Map<number, NotificationData> = new Map();
+const replyMap: Map<Number, string> = new Map();
 
 interface NotificationData {
     channelId: string;
@@ -269,10 +270,26 @@ function notifySend(summary: string,
         if (error)
             return console.error("Notification error:", error + stderr);
 
-        if (Number(stdout.trim())) {
-            idMap.set(Number(stdout.trim()), notificationData);
+        const id = Number(stdout.trim());
+
+        if (id) {
+            idMap.set(id, notificationData);
             console.log("Setting id..");
             console.log(idMap);
+
+            if (replyMap.has(id)) {
+                console.log("Found id in reply map... replyinhg");
+                const notificationData = idMap.get(id);
+
+                if (!notificationData) {
+                    console.log("NotificationData not defiend in idmap");
+                    return;
+                }
+                webContents?.executeJavaScript(`
+                    Vencord.Plugins.plugins.BetterNotifications.NotificationReplyEvent(${replyMap.get(id)},"${notificationData.channelId}", "${notificationData.messageId}")
+                `);
+            }
+
         }
 
         // Will need propper filtering if multiple actions or notification ids are used
@@ -313,16 +330,9 @@ async function startListeningToDbus() {
                     const i = text.indexOf(" ");
                     const reply = text.slice(i + 1); // NOTE: This variable already contains quotes around the string itself
 
-                    const messageData = idMap.get(notificationId);
-                    if (!messageData) {
-                        console.error(`Could not find notification with id ${notificationId} in map`);
-                        console.debug(idMap);
-                        return;
-                    }
-
-                    webContents?.executeJavaScript(`
-                        Vencord.Plugins.plugins.BetterNotifications.NotificationReplyEvent(${reply},"${messageData.channelId}", "${messageData.messageId}")
-                    `);
+                    replyMap.set(notificationId, reply);
+                    nextIsReply = false;
+                    notificationIdParsed = false;
 
                 } else {
                     if (!text.startsWith("uint32")) {
