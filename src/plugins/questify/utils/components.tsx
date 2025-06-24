@@ -12,11 +12,11 @@ import { JSX } from "react";
 import { formatLowerBadge } from "./misc";
 
 // GuildlessServerListItem's built-in pill does not support unread state.
-export const GuildlessServerListItemComponent = findComponentByCodeLazy('ButtonListItem")');
+export const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip:", "lowerBadgeSize:");
 export const GuildedServerListItemPillComponent = findComponentByCodeLazy('"pill":"empty"');
 export const ServerListItemLowerBadgeComponent = findComponentByCodeLazy("STATUS_DANGER,disableColor:");
 export const ServerListItemUpperBadgeComponent = findComponentByCodeLazy("STATUS_DANGER,shape:", "iconBadge,");
-export const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
+export const ColorPicker = findComponentByCodeLazy("showEyeDropper", "BACKGROUND_BASE_LOW");
 export const RadioGroup = findComponentByCodeLazy("radioItemIconClassName,");
 export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannelMetadata");
 
