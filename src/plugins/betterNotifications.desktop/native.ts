@@ -287,7 +287,7 @@ async function startListeningToDbus() {
     isMonitorRunning = true;
 
     let nextIsReply: boolean = false;
-    let nextReplyId: number;
+    let notificationId: number;
 
     const monitor = execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"]);
 
@@ -298,20 +298,23 @@ async function startListeningToDbus() {
             const text = line.trim();
             console.log(`::${text}`);
 
-            if (nextIsReply) {
+            if (text.includes("member=NotificationReplied")) {
+                console.log("Next data should be uint32");
+                nextIsReply = true;
+            }
+
+            else if (nextIsReply) {
                 if (!text.startsWith("string")) {
                     console.error(`Expected reply, recieved ${text} instead`);
                     return;
                 }
                 console.log("Event is reply");
                 const i = text.indexOf(" ");
-                replyMap.set(nextReplyId, text.slice(i + 1));
+                replyMap.set(notificationId, text.slice(i + 1));
 
                 nextIsReply = false;
-                nextReplyId = 0;
             } else if (text.startsWith("uint32")) {
                 console.log("Found data starting with uint32");
-                nextIsReply = true;
                 const foundId = text.split(" ").at(1);
 
                 if (!foundId) {
@@ -319,7 +322,7 @@ async function startListeningToDbus() {
                     return;
                 }
 
-                nextReplyId = Number(foundId);
+                notificationId = Number(foundId);
             }
         });
     });
