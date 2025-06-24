@@ -677,19 +677,21 @@ export default definePlugin({
 
             switch (embed.type) {
                 case "image": {
+                    const url = embed.url ?? embed.image?.url;
+                    if (!url) return false;
                     if (
                         !settings.store.transformCompoundSentence
-                        && !contentItems.some(item => item === embed.url! || item.match(hyperLinkRegex)?.[1] === embed.url!)
+                        && !contentItems.some(item => item === url || item.match(hyperLinkRegex)?.[1] === url)
                     ) return false;
 
                     if (settings.store.transformEmojis) {
-                        if (fakeNitroEmojiRegex.test(embed.url!)) return true;
+                        if (fakeNitroEmojiRegex.test(url)) return true;
                     }
 
                     if (settings.store.transformStickers) {
-                        if (fakeNitroStickerRegex.test(embed.url!)) return true;
+                        if (fakeNitroStickerRegex.test(url)) return true;
 
-                        const gifMatch = embed.url!.match(fakeNitroGifStickerRegex);
+                        const gifMatch = url.match(fakeNitroGifStickerRegex);
                         if (gifMatch) {
                             // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
                             if (StickerStore.getStickerById(gifMatch[1])) return true;
