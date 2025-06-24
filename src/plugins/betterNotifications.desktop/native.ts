@@ -270,7 +270,8 @@ function notifySend(summary: string,
             return console.error("Notification error:", error + stderr);
 
         if (Number(stdout.trim())) {
-            idMap.set(Number(stdout), notificationData);
+            idMap.set(Number(stdout.trim()), notificationData);
+            console.log("Setting id..");
             console.log(idMap);
         }
 
