@@ -293,9 +293,11 @@ async function startListeningToDbus() {
 
     monitor.stdout?.on("data", data => {
         const textData: string = data.trim();
-        console.log(`:: ${textData}`);
 
-        textData.split("\n").forEach(text => {
+        textData.split("\n").forEach(line => {
+            const text = line.trim();
+            console.log(`::${text}`);
+
             if (nextIsReply) {
                 if (!text.startsWith("string")) {
                     console.error(`Expected reply, recieved ${text} instead`);
