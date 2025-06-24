@@ -464,7 +464,7 @@ export default definePlugin({
             find: "GlobalDiscoverySidebar",
             replacement: {
                 match: /GLOBAL_DISCOVERY_TABS.map/,
-                replace: 'GLOBAL_DISCOVERY_TABS.filter(tab=>tab!=="quests"||!$self.shouldHideDiscoveryTab()).map'
+                replace: 'GLOBAL_DISCOVERY_TABS.filter(tab=>!$self.shouldHideDiscoveryTab()||tab!=="quests").map'
             }
         },
         {
@@ -472,7 +472,7 @@ export default definePlugin({
             find: ".MODAL]:26",
             replacement: {
                 match: /badges:(\i)/,
-                replace: 'badges:$1.filter(badge=>badge.id!=="quest_completed"||!$self.shouldHideBadgeOnUserProfiles())',
+                replace: 'badges:$1.filter(badge=>!$self.shouldHideBadgeOnUserProfiles()||badge.id!=="quest_completed")',
             }
         },
         {
