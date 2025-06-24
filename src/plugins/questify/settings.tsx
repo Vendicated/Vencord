@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { Button, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useState } from "@webpack/common";
+import { Button, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { getQuestTileClasses, updateHasUnclaimedUnignoredQuests } from "./index";
@@ -1283,7 +1283,22 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
     const resolvedAlertValue = fetchingQuestsAlert;
     const [currentAlertSelection, setCurrentAlertSelection] = useState<SelectOption | null>(createAlertSelectOptionFromValue(resolvedAlertValue));
     const [currentAlertOptions, setCurrentAlertOptions] = useState(getAllAlertOptions(currentAlertSelection));
-    const [activePlayer, setActivePlayer] = useState<any>(null);
+    // Needed to update the playing state of the preview button.
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    // Needed to stop audio output on settings close mid-preview.
+    const activePlayer = useRef<any>(null);
+
+    function clearActivePlayer() {
+        activePlayer.current?.stop();
+        activePlayer.current = null;
+        setIsPlaying(false);
+    }
+
+    useEffect(() => {
+        return () => {
+            clearActivePlayer();
+        };
+    }, []);
 
     return (
         <ErrorBoundary>
@@ -1373,21 +1388,15 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
                                 />
                             </div>
                             <div
-                                className={q("inline-group-item", "alert-icon", { "playing-audio": !!activePlayer })}
+                                className={q("inline-group-item", "alert-icon", { "playing-audio": !!isPlaying })}
                                 onClick={() => {
-                                    function clearActivePlayer() {
-                                        activePlayer?.stop();
-                                        setActivePlayer(null);
-                                    }
-
-                                    if (currentAlertSelection && currentAlertSelection.value) {
-                                        if (activePlayer) {
-                                            activePlayer?.stop();
-                                            setActivePlayer(null);
+                                    if (currentAlertSelection?.value) {
+                                        if (activePlayer.current) {
+                                            clearActivePlayer();
                                         } else {
-                                            const player = AudioPlayer(currentAlertSelection.value as string, 1, clearActivePlayer);
-                                            setActivePlayer(player);
-                                            player?.play();
+                                            activePlayer.current = AudioPlayer(currentAlertSelection.value as string, 1, clearActivePlayer);
+                                            activePlayer.current?.play();
+                                            setIsPlaying(true);
                                         }
                                     }
                                 }}
