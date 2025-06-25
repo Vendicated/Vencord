@@ -7,14 +7,13 @@
 import { classNameFactory } from "@api/Styles";
 import { ErrorCard } from "@components/ErrorCard";
 import { Margins } from "@utils/margins";
-import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { Button, ColorPicker, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
 import { relativeLuminance } from "../utils/colorUtils";
 import { createOrUpdateThemeColorVars } from "../utils/styleUtils";
 
-const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');
 const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
 
