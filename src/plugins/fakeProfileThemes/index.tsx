@@ -30,7 +30,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, ColorPicker, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
-import { ReactElement } from "react";
 import virtualMerge from "virtual-merge";
 
 interface UserProfile extends User {
@@ -86,14 +85,6 @@ const settings = definePluginSettings({
         ],
     }
 });
-
-interface ColorPickerProps {
-    color: number | null;
-    label: ReactElement<any>;
-    showEyeDropper?: boolean;
-    suggestedColors?: string[];
-    onChange(value: number | null): void;
-}
 
 // I can't be bothered to figure out the semantics of this component. The
 // functions surely get some event argument sent to them and they likely aren't
