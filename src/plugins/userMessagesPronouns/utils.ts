@@ -18,12 +18,17 @@
 
 import { getCurrentChannel } from "@utils/discord";
 import { UserProfileStore, useStateFromStores } from "@webpack/common";
+import { User } from "discord-types/general";
 
 import { PronounsFormat, settings } from "./settings";
 
+interface UserProfile extends User {
+    pronouns?: string;
+}
+
 function useDiscordPronouns(id: string, useGlobalProfile: boolean = false): string | undefined {
-    const globalPronouns: string | undefined = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(id)?.pronouns);
-    const guildPronouns: string | undefined = useStateFromStores([UserProfileStore], () => UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.getGuildId())?.pronouns);
+    const globalPronouns: string | undefined = useStateFromStores([UserProfileStore], () => (UserProfileStore.getUserProfile(id) as UserProfile | null)?.pronouns);
+    const guildPronouns: string | undefined = useStateFromStores([UserProfileStore], () => (UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.getGuildId()) as UserProfile | null)?.pronouns);
 
     if (useGlobalProfile) return globalPronouns;
     return guildPronouns || globalPronouns;

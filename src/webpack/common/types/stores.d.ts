@@ -268,7 +268,7 @@ export class UserProfileStore extends FluxStore {
 
     getUserProfile(userId: string): User | undefined;
 
-    getGuildMemberProfile(userId: string, guildId: string): User | undefined;
+    getGuildMemberProfile(userId: string, guildId: string | undefined): User | null;
     /**
      * Get the mutual friends of a user.
      *
