@@ -50,7 +50,7 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
                 placeholder={"Select a language"}
                 maxVisibleItems={5}
                 closeOnSelect={true}
-                onChange={v => settings.store[settingsKey] = v}
+                onChange={(v: string) => settings.store[settingsKey] = v}
             />
         </section>
     );
