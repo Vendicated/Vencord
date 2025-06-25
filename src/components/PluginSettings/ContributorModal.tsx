@@ -15,6 +15,7 @@ import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { ConnectedAccount } from "@webpack/types";
 import { User } from "discord-types/general";
 
 import Plugins from "~plugins";
@@ -36,27 +37,7 @@ export function openContributorModal(user: User) {
     );
 }
 
-interface ConnectedAccount {
-    type: "twitch" | "youtube" | "skype" | "steam" | "leagueoflegends" | "battlenet" | "bluesky" | "bungie" | "reddit" | "twitter" | "twitter_legacy" | "spotify" | "facebook" | "xbox" | "samsung" | "contacts" | "instagram" | "mastodon" | "soundcloud" | "github" | "playstation" | "playstation-stg" | "epicgames" | "riotgames" | "roblox" | "paypal" | "ebay" | "tiktok" | "crunchyroll" | "domain" | "amazon-music";
-    /**
-     * underlying id of connected account
-     * eg. account uuid
-     */
-    id: string;
-    /**
-     * display name of connected account
-     */
-    name: string;
-    verified: boolean;
-    metadata?: Record<string, unknown>;
-}
-
 interface UserProfile extends User {
-    /**
-     * never actually seen this be undefined, but just in case
-     *
-     * empty array if no connected accounts
-     */
     connectedAccounts?: ConnectedAccount[];
 }
 
