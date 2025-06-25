@@ -64,7 +64,9 @@ export const TabBar = waitForComponent("TabBar", filters.componentByCode("ref:th
 export const Paginator = waitForComponent<t.Paginator>("Paginator", filters.componentByCode('rel:"prev",children:'));
 export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.componentByCode("this.context?this.renderNonInteractive():"));
 export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
-export const ColorPicker = waitForComponent<t.ColorPicker>("ColorPicker", filters.componentByCode("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_BASE_LOW)"));
+
+export const ColorPicker = waitForComponent<t.ColorPicker>("ColorPicker", filters.componentByCode("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", "showEyeDropper"));
+
 
 export let createScroller: (scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin;
 export let scrollerClasses: Record<string, string>;
