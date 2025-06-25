@@ -178,7 +178,7 @@ export default definePlugin({
         // Theads
         {
             // This is the thread "spine" that shows in the left
-            find: "spineWithGuildIcon]:",
+            find: "M0 15H2c0 1.6569",
             replacement: {
                 match: /mentionsCount:\i.+?null(?<=channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"

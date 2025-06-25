@@ -24,7 +24,7 @@ import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, StickerStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -552,8 +552,8 @@ export default definePlugin({
 
                 const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
-                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
-                    if (StickersStore.getStickerById(gifMatch[1])) return null;
+                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
+                    if (StickerStore.getStickerById(gifMatch[1])) return null;
                 }
             }
 
@@ -641,7 +641,7 @@ export default definePlugin({
                     url = new URL(item);
                 } catch { }
 
-                const stickerName = StickersStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
+                const stickerName = StickerStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 1,
                     id: imgMatch[1],
@@ -654,9 +654,9 @@ export default definePlugin({
 
             const gifMatch = item.match(fakeNitroGifStickerRegex);
             if (gifMatch) {
-                if (!StickersStore.getStickerById(gifMatch[1])) continue;
+                if (!StickerStore.getStickerById(gifMatch[1])) continue;
 
-                const stickerName = StickersStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
+                const stickerName = StickerStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 2,
                     id: gifMatch[1],
@@ -670,32 +670,38 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
-        const contentItems = message.content.split(/\s/);
-        if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
+        try {
+            const contentItems = message.content.split(/\s/);
+            if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
 
-        switch (embed.type) {
-            case "image": {
-                if (
-                    !settings.store.transformCompoundSentence
-                    && !contentItems.some(item => item === embed.url! || item.match(hyperLinkRegex)?.[1] === embed.url!)
-                ) return false;
+            switch (embed.type) {
+                case "image": {
+                    const url = embed.url ?? embed.image?.url;
+                    if (!url) return false;
+                    if (
+                        !settings.store.transformCompoundSentence
+                        && !contentItems.some(item => item === url || item.match(hyperLinkRegex)?.[1] === url)
+                    ) return false;
 
-                if (settings.store.transformEmojis) {
-                    if (fakeNitroEmojiRegex.test(embed.url!)) return true;
-                }
-
-                if (settings.store.transformStickers) {
-                    if (fakeNitroStickerRegex.test(embed.url!)) return true;
-
-                    const gifMatch = embed.url!.match(fakeNitroGifStickerRegex);
-                    if (gifMatch) {
-                        // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
-                        if (StickersStore.getStickerById(gifMatch[1])) return true;
+                    if (settings.store.transformEmojis) {
+                        if (fakeNitroEmojiRegex.test(url)) return true;
                     }
-                }
 
-                break;
+                    if (settings.store.transformStickers) {
+                        if (fakeNitroStickerRegex.test(url)) return true;
+
+                        const gifMatch = url.match(fakeNitroGifStickerRegex);
+                        if (gifMatch) {
+                            // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
+                            if (StickerStore.getStickerById(gifMatch[1])) return true;
+                        }
+                    }
+
+                    break;
+                }
             }
+        } catch (e) {
+            new Logger("FakeNitro").error("Error in shouldIgnoreEmbed:", e);
         }
 
         return false;
@@ -707,8 +713,8 @@ export default definePlugin({
 
             const match = attachment.url.match(fakeNitroGifStickerRegex);
             if (match) {
-                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
-                if (StickersStore.getStickerById(match[1])) return false;
+                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
+                if (StickerStore.getStickerById(match[1])) return false;
             }
 
             return true;
@@ -864,7 +870,7 @@ export default definePlugin({
                 if (!s.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickersStore.getStickerById(extra.stickers?.[0]!);
+                const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
