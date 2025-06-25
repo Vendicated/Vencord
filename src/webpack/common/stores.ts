@@ -50,7 +50,7 @@ export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
 export let RelationshipStore: t.RelationshipStore;
 
 export let EmojiStore: t.EmojiStore;
-export let StickersStore: t.StickersStore;
+export let StickerStore: t.StickerStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
@@ -83,7 +83,7 @@ waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
-waitForStore("StickersStore", m => StickersStore = m);
+waitForStore("StickersStore", m => StickerStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;

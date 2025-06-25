@@ -8,7 +8,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { EmojiStore, Menu, StickersStore } from "@webpack/common";
+import { EmojiStore, Menu, StickerStore } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 import { zipSync } from "fflate";
 
@@ -30,7 +30,7 @@ async function zipGuildAssets(guild: Guild, type: "emojis" | "stickers") {
     const isEmojis = type === "emojis";
     const items = isEmojis
         ? EmojiStore.getGuilds()[guild.id]?.emojis
-        : StickersStore.getStickersByGuildId(guild.id);
+        : StickerStore.getStickersByGuildId(guild.id);
 
     if (!items) {
         return console.log("Server not found!");

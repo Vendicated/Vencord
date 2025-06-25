@@ -9,7 +9,7 @@ import "./styles.css";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { StickersStore } from "@webpack/common";
+import { StickerStore } from "@webpack/common";
 
 import { getMimeType, isLinkAnImage, settings, stripDiscordParams } from "./settings";
 
@@ -121,7 +121,7 @@ function loadImagePreview(url: string, sticker: boolean) {
 
     if (sticker) {
         const stickerId = url.split("/").pop()?.split(".")[0] ?? null;
-        const stickerData = stickerId ? StickersStore.getStickerById(stickerId) : null;
+        const stickerData = stickerId ? StickerStore.getStickerById(stickerId) : null;
 
         if (stickerData) {
             switch (stickerData.type) {

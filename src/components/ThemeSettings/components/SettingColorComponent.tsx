@@ -7,15 +7,8 @@
 import "./colorStyles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, useMemo } from "@webpack/common";
-
-interface ColorPickerProps {
-    color: number | null;
-    showEyeDropper?: boolean;
-    onChange(value: number | null): void;
-}
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".BACKGROUND_ACCENT.css");
+import { findByCodeLazy } from "@webpack";
+import { ColorPicker, Forms, useMemo } from "@webpack/common";
 
 // TinyColor is completely unmangled and it's duplicated in two modules! Fun!
 const TinyColor: tinycolor.Constructor = findByCodeLazy("this._gradientType=");
