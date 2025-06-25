@@ -1145,9 +1145,16 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
         };
     }
 
-    function createAlertSelectOptionFromValue(value: string): SelectOption {
+    function createAlertSelectOptionFromValue(value: string): SelectOption | null {
+        if (value === null) {
+            return null;
+        }
+
         const existingOption = resolvedSounds.find(option => option.value === value);
-        if (existingOption) { return existingOption; }
+
+        if (existingOption) {
+            return existingOption;
+        }
 
         const filename = value
             .split("/")
@@ -1258,7 +1265,7 @@ function FetchingQuestsSetting(props: { setValue: (value: FetchingQuestsSettingP
             isSoundAllowed(searchValue).then(allowed => {
                 if (allowed) {
                     // If the input is a custom sound URL, show it as the only option.
-                    setCurrentAlertOptions([customSoundOption]);
+                    setCurrentAlertOptions([customSoundOption as SelectOption]);
                 } else {
                     // If the input is a custom sound URL but not allowed, show feedback message.
                     setCurrentAlertOptions([]);
