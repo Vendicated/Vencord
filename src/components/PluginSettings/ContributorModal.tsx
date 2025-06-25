@@ -36,10 +36,34 @@ export function openContributorModal(user: User) {
     );
 }
 
+interface ConnectedAccount {
+    type: "twitch" | "youtube" | "skype" | "steam" | "leagueoflegends" | "battlenet" | "bluesky" | "bungie" | "reddit" | "twitter" | "twitter_legacy" | "spotify" | "facebook" | "xbox" | "samsung" | "contacts" | "instagram" | "mastodon" | "soundcloud" | "github" | "playstation" | "playstation-stg" | "epicgames" | "riotgames" | "roblox" | "paypal" | "ebay" | "tiktok" | "crunchyroll" | "domain" | "amazon-music";
+    /**
+     * underlying id of connected account
+     * eg. account uuid
+     */
+    id: string;
+    /**
+     * display name of connected account
+     */
+    name: string;
+    verified: boolean;
+    metadata?: Record<string, unknown>;
+}
+
+interface UserProfile extends User {
+    /**
+     * never actually seen this be undefined, but just in case
+     *
+     * empty array if no connected accounts
+     */
+    connectedAccounts?: ConnectedAccount[];
+}
+
 function ContributorModal({ user }: { user: User; }) {
     useSettings();
 
-    const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
+    const profile: UserProfile | undefined = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
 
     useEffect(() => {
         if (!profile && !user.bot && user.id)
