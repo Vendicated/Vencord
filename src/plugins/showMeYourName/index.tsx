@@ -10,6 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy } from "@webpack";
 import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
@@ -42,6 +43,33 @@ const settings = definePluginSettings({
     },
 });
 
+const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
+
+const getNames = ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps): string[] => {
+    try {
+        const user = userOverride ?? message.author;
+        let { username } = user;
+        if (settings.store.displayNames)
+            username = (user as any).globalName || username;
+
+        const { nick } = author;
+        const prefix = withMentionPrefix ? "@" : "";
+
+        if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
+            return [prefix, nick];
+
+        if (settings.store.mode === "user-nick")
+            return [prefix, username, nick];
+
+        if (settings.store.mode === "nick-user")
+            return [prefix, nick, username];
+
+        return [prefix, username];
+    } catch {
+        return ["", author?.nick || ""];
+    }
+};
+
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
@@ -50,9 +78,8 @@ export default definePlugin({
         {
             find: '"BaseUsername"',
             replacement: {
-                /* TODO: remove \i+\i once change makes it to stable */
-                match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
-                replace: "$self.renderUsername(arguments[0])"
+                match: /(?<=onContextMenu:\i,children:)(?:\i,"data-text":\i\+\i)/,
+                replace: "$self.renderUsername(arguments[0]),\"data-text\":$self.getUsername(arguments[0])",
             }
         },
     ],
@@ -60,26 +87,24 @@ export default definePlugin({
 
     renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
-            const user = userOverride ?? message.author;
-            let { username } = user;
-            if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+            const [prefix, first, second] = getNames({ author, message, isRepliedMessage, withMentionPrefix, userOverride });
 
-            const { nick } = author;
-            const prefix = withMentionPrefix ? "@" : "";
+            const parsedFirst = wrapEmojis(first);
+            const parsedSecond = wrapEmojis(second);
 
-            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
-                return <>{prefix}{nick}</>;
-
-            if (settings.store.mode === "user-nick")
-                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
-
-            if (settings.store.mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-
-            return <>{prefix}{username}</>;
+            return <>{prefix}{parsedFirst}{second && <> <span className="vc-smyn-suffix">{parsedSecond}</span></>}</>;
         } catch {
             return <>{author?.nick}</>;
         }
     }, { noop: true }),
+
+    getUsername: ({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
+        try {
+            const [prefix, first, second] = getNames({ author, message, isRepliedMessage, withMentionPrefix, userOverride });
+
+            return prefix + first + (second ? ` (${second})` : "");
+        } catch {
+            return author?.nick || "";
+        }
+    }
 });
