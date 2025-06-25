@@ -16,7 +16,7 @@ import { JSX } from "react";
 
 import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateIgnoredQuests } from "./settings";
 import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./utils/components";
-import { adjustRGB, decimalToRGB, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
+import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
 
 let questButtonBadgeNumberState: React.Dispatch<React.SetStateAction<number>> = () => { };
 let questButtonUnclaimedUnignoredState: React.Dispatch<React.SetStateAction<number>> = () => { };
@@ -615,18 +615,12 @@ export default definePlugin({
         QUESTS_FETCH_CURRENT_QUESTS_SUCCESS(data) {
             const source = data.source ? ` [${data.source}]` : "";
             QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_FETCH_CURRENT_QUESTS_SUCCESS]${source}\n`, data);
-
-            setTimeout(() => {
-                validateIgnoredQuests();
-            }, 1000); // Give the QuestsStore a chance to update.
+            validateIgnoredQuests(undefined, data.quests);
         },
 
         QUESTS_CLAIM_REWARD_SUCCESS(data) {
             QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_CLAIM_REWARD_SUCCESS]\n`, data);
-
-            setTimeout(() => {
-                validateIgnoredQuests();
-            }, 1000);
+            fetchAndDispatchQuests("Questify", QuestifyLogger);
         },
     },
 
