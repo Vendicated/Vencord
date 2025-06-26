@@ -6,6 +6,7 @@
         --spotify,
         #1db954
     ); /* so custom themes can easily change it */
+
     --vc-spotify-green-90: color-mix(
         in hsl,
         var(--vc-spotify-green),
