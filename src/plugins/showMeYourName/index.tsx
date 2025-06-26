@@ -89,7 +89,7 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.nyx],
     patches: [
         {
-            find: '"BaseUsername"',
+            find: ".SYSTEM_TAG=0",
             replacement: {
                 /* TODO: remove \i+\i once change makes it to stable */
                 match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)(?=.*?contextGuildId:(\i))/,
