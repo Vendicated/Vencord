@@ -71,7 +71,7 @@
 
 .vc-plugins-restart-card {
     padding: 1em;
-    background: var(--background-feedback-warningd);
+    background: var(--background-feedback-warning);
     border: inherit !important;
     color: var(--text-feedback-warning);
 }
