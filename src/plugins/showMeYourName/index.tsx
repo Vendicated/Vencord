@@ -48,7 +48,8 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad],
     patches: [
         {
-            find: '"BaseUsername"',
+            // part of an enum
+            find: '="SYSTEM_TAG"',
             replacement: {
                 /* TODO: remove \i+\i once change makes it to stable */
                 match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
