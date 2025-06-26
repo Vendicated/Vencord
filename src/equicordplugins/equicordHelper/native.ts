@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CspPolicies, Src } from "@main/csp";
+import { CspPolicies, CSPSrc } from "@main/csp";
 
-CspPolicies["*"] = Src;
+// Allow all domains to have the permissions from CSPSrc
+CspPolicies["*"] = CSPSrc;

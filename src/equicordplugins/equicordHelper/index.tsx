@@ -43,8 +43,17 @@ export default definePlugin({
     description: "Fixes some misc issues with discord",
     authors: [EquicordDevs.thororen, EquicordDevs.nyx],
     settingsAboutComponent: () => <>
-        <Forms.FormText className="plugin-warning">
-            This Plugin is used for fixing misc issues with discord such as some crashes
+        <Forms.FormText className="plugin-warning" style={{ textAlign: "left" }}>
+            This plugin was created to allow us as the Equicord Team & Contributors
+            to fix miscellaneous issues Discord may run into or cause.
+            <br />
+            This includes but is not limited to:
+            <br />
+            - Unknown Resolution/FPS Fixed?
+            <br />
+            - Whitelists all domains in CSP
+            <br />
+            - Option to hide Clan Badges
         </Forms.FormText>
     </>,
     settings,
