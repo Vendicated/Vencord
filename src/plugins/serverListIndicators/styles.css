@@ -62,7 +62,7 @@
     font-size: 12px;
     font-weight: 600;
     width: 100%;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 #vc-friendcount-icon,
