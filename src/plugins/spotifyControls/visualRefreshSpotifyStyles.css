@@ -23,7 +23,7 @@
 
     #vc-spotify-progress-bar {
         position: relative;
-        color: var(--text-normal);
+        color: var(--text-default);
         width: 100%;
     }
 

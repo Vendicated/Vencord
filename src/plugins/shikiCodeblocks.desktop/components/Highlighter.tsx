@@ -78,7 +78,7 @@ export const Highlighter = ({
     });
 
     const themeBase: ThemeBase = {
-        plainColor: currentTheme?.fg || "var(--text-normal)",
+        plainColor: currentTheme?.fg || "var(--text-default)",
         accentBgColor:
             currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",

@@ -185,7 +185,7 @@
 
 .vc-channeltabs-button {
     background-color: transparent;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .vc-channeltabs-new-button {
@@ -254,8 +254,8 @@
 }
 
 .vc-channeltabs-preview-tab> :is(.vc-channeltabs-emoji-container,
-.vc-channeltabs-typing-indicator,
-[data-has-mention]) {
+    .vc-channeltabs-typing-indicator,
+    [data-has-mention]) {
     display: none;
 }
 

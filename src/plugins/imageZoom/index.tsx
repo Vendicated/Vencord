@@ -440,7 +440,7 @@ export default definePlugin({
                 background-color: var(--background-secondary);
                 border-radius: 4px;
                 font-size: 14px;
-                color: var(--text-normal);
+                color: var(--text-default);
                 display: flex;
                 flex-direction: column;
                 gap: 4px;

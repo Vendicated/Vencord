@@ -71,9 +71,9 @@
 
 .vc-plugins-restart-card {
     padding: 1em;
-    background: var(--info-warning-background);
+    background: var(--background-feedback-warningd);
     border: inherit !important;
-    color: var(--info-warning-text);
+    color: var(--text-feedback-warning);
 }
 
 .vc-plugins-info-icon:not(:hover, :focus) {
@@ -158,7 +158,7 @@
 }
 
 .text-normal {
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 1.2rem;
 }
 

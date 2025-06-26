@@ -1,7 +1,7 @@
 :root {
     /* Body */
     --toastnotifications-background-color: var(--background-secondary-alt);
-    --toastnotifications-text-color: var(--text-normal);
+    --toastnotifications-text-color: var(--text-default);
     --toastnotifications-border-radius: 6px;
     --toastnotifications-width: 25vw;
     --toastnotifications-padding: 1.25rem;

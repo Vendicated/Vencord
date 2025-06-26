@@ -49,7 +49,7 @@
     text-indent: -9999px;
     align-items: center;
     background-color: var(--background-primary);
-    color: var(--text-normal);
+    color: var(--text-default);
     display: flex;
     height: 100%;
     justify-content: center;
@@ -258,7 +258,7 @@
     -ms-flex-align: center;
     align-items: center;
     background-color: var(--background-primary);
-    color: var(--text-normal);
+    color: var(--text-default);
     display: flex;
     height: 100%;
     -webkit-box-pack: center;
@@ -382,7 +382,7 @@
     font-size: 16px;
     line-height: 20px;
     font-weight: 600;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .vc-more-stickers-picker-content-inspector-title-secondary {
@@ -501,5 +501,5 @@
     font-family: var(--font-primary);
     font-size: 8pt;
     font-weight: 600;
-    color: var(--text-normal);
+    color: var(--text-default);
 }

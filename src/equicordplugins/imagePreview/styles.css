@@ -40,7 +40,7 @@
     transform: translateX(-50%);
     text-align: center;
     background-color: var(--background-primary);
-    color: var(--text-normal);
+    color: var(--text-default);
     padding: 2px 5px;
     border-radius: 4px;
     font-size: 12px;
@@ -51,7 +51,7 @@
 
 .image-preview .file-info span {
     background-color: var(--background-primary);
-    color: var(--text-normal);
+    color: var(--text-default);
     padding: 2px 5px;
     border-radius: 4px;
     font-size: 12px;

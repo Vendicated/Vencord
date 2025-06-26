@@ -68,7 +68,7 @@
 }
 
 .vc-gp-server-info-pair {
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .vc-gp-server-info-pair [class^="timestamp"] {
@@ -150,7 +150,7 @@
     justify-content: center;
     font-size: 8px;
     font-weight: 600;
-    color: var(--text-normal);
+    color: var(--text-default);
     text-transform: uppercase;
 }
 

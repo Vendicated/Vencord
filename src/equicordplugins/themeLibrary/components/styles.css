@@ -45,7 +45,7 @@
 
 .vce-text-input {
   display: inline-block !important;
-  color: var(--text-normal) !important;
+  color: var(--text-default) !important;
   font-size: 16px !important;
   padding: 0.5em;
   border: 2px solid var(--background-tertiary);

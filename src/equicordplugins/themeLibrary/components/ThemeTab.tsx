@@ -150,7 +150,7 @@ function ThemeTab() {
                             alignItems: "center",
                             height: "70vh",
                             fontSize: "1.5em",
-                            color: "var(--text-normal)"
+                            color: "var(--text-default)"
                         }}>
                         <p> Getting the latest themes... </p>
                         <p style={{
@@ -246,7 +246,7 @@ function ThemeTab() {
                                 }}>
                                 <p style={{
                                     fontSize: "1em",
-                                    color: "var(--text-normal)"
+                                    color: "var(--text-default)"
                                 }}> No theme found. </p>
                                 <p style={{
                                     fontSize: ".75em",
@@ -272,7 +272,7 @@ function SubmitThemes() {
                 alignItems: "center",
                 height: "70vh",
                 fontSize: "1.5em",
-                color: "var(--text-normal)"
+                color: "var(--text-default)"
             }}>
             <p> This tab was replaced in favour of the new website: </p>
             <p><a href="https://discord-themes.com" target="_blank" rel="noreferrer">discord-themes.com</a></p>

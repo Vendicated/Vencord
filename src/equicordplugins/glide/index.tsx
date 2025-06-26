@@ -421,7 +421,7 @@ function getCSS(fontName) {
             --header-primary: var(--text);
             --header-secondary: var(--text);
             --font-display: var(--text);
-            --text-normal: var(--text);
+            --text-default: var(--text);
             --text-muted: var(--mutedtext);
             --channels-default: var(--mutedtext);
             --interactive-normal: var(--text) !important;

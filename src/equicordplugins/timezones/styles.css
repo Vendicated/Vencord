@@ -7,7 +7,7 @@
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 [class*="topSection"] .timezone-profile-item {
@@ -36,6 +36,6 @@
 }
 
 .timezone-tooltip {
-    max-width: none!important;
+    max-width: none !important;
     white-space: nowrap
 }

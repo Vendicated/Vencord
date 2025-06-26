@@ -17,7 +17,7 @@
     text-align: center;
     display: inline-block;
     vertical-align: middle;
-    color: var(--text-normal, white);
+    color: var(--text-default, white);
 }
 
 .vc-voice-channel-log-avatar {

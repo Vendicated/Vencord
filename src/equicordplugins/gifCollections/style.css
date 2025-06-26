@@ -21,7 +21,7 @@
 .collections-sort-section-title {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-normal);
+    color: var(--text-default);
     margin-bottom: 8px;
 }
 
@@ -38,7 +38,7 @@
 .collections-sort-label {
     font-size: 14px;
     font-weight: 400;
-    color: var(--text-normal);
+    color: var(--text-default);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -95,7 +95,7 @@
 .collection-info-title {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .collection-info-text {
@@ -137,7 +137,7 @@
 .rename-collection-text {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-normal);
+    color: var(--text-default);
     margin: 16px 0 2px;
 }
 
@@ -172,7 +172,7 @@
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background-color: var(--background-secondary);
-    color: var(--text-normal);
+    color: var(--text-default);
     outline: none;
 }
 
@@ -180,7 +180,7 @@
     text-align: center;
     padding: 8px;
     background-color: var(--background-tertiary);
-    color: var(--text-normal);
+    color: var(--text-default);
     border: none;
     border-radius: 4px;
     cursor: pointer;

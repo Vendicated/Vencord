@@ -73,7 +73,7 @@
     overflow-y: hidden;
     margin-top: 1px;
     margin-bottom: var(--vc-rdb-spacing-size);
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 15px;
 }
 

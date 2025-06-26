@@ -19,7 +19,7 @@
 }
 
 #vc-searchbutton-icon {
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 #vc-searchbutton:hover {

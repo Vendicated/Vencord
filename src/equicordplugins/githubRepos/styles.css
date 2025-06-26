@@ -23,22 +23,19 @@
     justify-content: center;
     margin-top: 2px;
     padding-top: 12px;
-    border-top: 1px solid
-        var(--profile-body-divider-color, var(--background-modifier-accent));
+    border-top: 1px solid var(--profile-body-divider-color, var(--background-modifier-accent));
 }
 
 .vc-github-repos-button,
 .vc-github-repos-show-more {
     width: 100%;
-    border: 1px solid
-        var(--profile-body-divider-color, var(--background-modifier-accent)) !important;
+    border: 1px solid var(--profile-body-divider-color, var(--background-modifier-accent)) !important;
 }
 
 .vc-github-repo-card {
     padding: 8px;
     border-radius: var(--radius-xs);
-    border: 1px solid
-        var(--profile-body-divider-color, var(--background-modifier-accent));
+    border: 1px solid var(--profile-body-divider-color, var(--background-modifier-accent));
 }
 
 .vc-github-repo-header {
@@ -92,7 +89,7 @@
 .vc-github-repos-table {
     width: 100%;
     border-collapse: collapse;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 14px;
     table-layout: fixed;
 }
@@ -152,7 +149,7 @@
 }
 
 .vc-github-repos-table-description {
-    color: var(--text-normal);
+    color: var(--text-default);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

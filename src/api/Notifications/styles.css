@@ -3,7 +3,7 @@
     all: unset;
     display: flex;
     flex-direction: column;
-    color: var(--text-normal);
+    color: var(--text-default);
     background-color: var(--background-secondary-alt);
     border-radius: 6px;
     overflow: hidden;
