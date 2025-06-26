@@ -156,10 +156,9 @@ export default definePlugin({
 
         if (settings.store.unblockButtonDanger) originalProps.color = Button.Colors.RED;
 
-        if (settings.store.showUnblockConfirmation || settings.store.showUnblockConfirmationEverywhere) {
+        if (isBlocked && (settings.store.showUnblockConfirmation || settings.store.showUnblockConfirmationEverywhere)) {
             const originalOnClick = originalProps.onClick!;
             originalProps.onClick = e => {
-                if (!isBlocked) return originalOnClick(e);
                 this.openConfirmationModal(e, () => originalOnClick(e), user, true);
 
             };
