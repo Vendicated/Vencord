@@ -267,12 +267,12 @@ function notifySend(summary: string,
     if (attachmentLocation) args.push(`--hint=string:${attachmentFormat}:file://${attachmentLocation}`);
     if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
-    console.log("Sending linux attachment");
-    console.log(args);
-
     for (const reaction of reactions ?? []) {
         args.push(`--action=reaction:${reaction}=${reaction}`);
     }
+
+    console.log("Sending linux attachment");
+    console.log(args);
 
     execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
@@ -310,6 +310,7 @@ function notifySend(summary: string,
                 console.error("Reaction did not specify emoji");
                 return;
             }
+            console.log(`Reacting with ${reaction}`);
             webContents?.executeJavaScript(
                 `Vencord.Plugins.plugins.BetterNotifications.NotificationReactEvent("${notificationData.channelId}", "${notificationData.messageId}", "${reaction}")`
             );
