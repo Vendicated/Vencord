@@ -234,7 +234,7 @@ export const settings = definePluginSettings({
             );
         },
         default: ["👍", "❤️"],
-        hidden: !isWin
+        hidden: isMac
     },
 
 
