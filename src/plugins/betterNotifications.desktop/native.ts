@@ -268,6 +268,7 @@ function notifySend(summary: string,
     if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
     for (const reaction of reactions ?? []) {
+        if (reaction === ",") continue;
         args.push(`--action=reaction:${reaction}=${reaction}`);
     }
 
