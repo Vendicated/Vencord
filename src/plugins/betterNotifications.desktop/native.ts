@@ -241,6 +241,7 @@ function notifySend(summary: string,
     attachmentLocation?: string,
     reactions?: string[]
 ) {
+    console.log(reactions);
     const name = app.getName();
     var args = [summary];
     if (body) args.push(body);
@@ -383,6 +384,7 @@ export function notify(event: IpcMainInvokeEvent,
 ) {
     const promises = [saveAssetToDisk({ avatarUrl, avatarId })];
     const quickReactions: string[] = JSON.parse(extraOptions?.quickReactions ?? "[]");
+    console.log(quickReactions);
 
     if (extraOptions?.attachmentUrl) {
         promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, attachmentUrl: extraOptions.attachmentUrl }));
