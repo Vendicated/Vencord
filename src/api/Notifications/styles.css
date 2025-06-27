@@ -3,8 +3,8 @@
     all: unset;
     display: flex;
     flex-direction: column;
-    color: var(--vencord-text-normal);
-    background-color: var(--vencord-background-secondary-alt);
+    color: var(--vc-text-normal);
+    background-color: var(--vc-background-secondary-alt);
     border-radius: 6px;
     overflow: hidden;
     cursor: pointer;

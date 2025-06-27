@@ -78,12 +78,12 @@ export const Highlighter = ({
     });
 
     const themeBase: ThemeBase = {
-        plainColor: currentTheme?.fg || "var(--vencord-text-normal)",
+        plainColor: currentTheme?.fg || "var(--vc-text-normal)",
         accentBgColor:
             currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
         backgroundColor:
-            currentTheme?.colors?.["editor.background"] || "var(--vencord-background-secondary)",
+            currentTheme?.colors?.["editor.background"] || "var(--vc-background-secondary)",
     };
 
     let langName;

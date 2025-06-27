@@ -1,6 +1,6 @@
 .vc-st-date-picker {
     background-color: var(--input-background);
-    color: var(--vencord-text-normal);
+    color: var(--vc-text-normal);
     width: 95%;
     padding: 8px 8px 8px 12px;
     margin: 1em 0;

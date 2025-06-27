@@ -15,11 +15,11 @@
 }
 
 .theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--vencord-background-secondary-alt));
+    background: var(--bg-overlay-3, var(--vc-background-secondary-alt));
 }
 
 .theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--vencord-background-secondary-alt));
+    background: var(--bg-overlay-1, var(--vc-background-secondary-alt));
 }
 
 .vc-spotify-button {
@@ -150,7 +150,7 @@
 
 #vc-spotify-progress-bar {
     position: relative;
-    color: var(--vencord-text-normal);
+    color: var(--vc-text-normal);
     width: 100%;
     margin: 0.5em 0;
     margin-bottom: 5px;
@@ -202,5 +202,5 @@
 
 .vc-spotify-fallback {
     padding: 0.5em;
-    color: var(--vencord-text-normal);
+    color: var(--vc-text-normal);
 }

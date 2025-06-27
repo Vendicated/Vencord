@@ -1,4 +1,4 @@
 :root {
-    --vencord-vencord-text-normal: var(--text-default);
-    --vencord-vencord-background-secondary: var(--background-base-lower);
+    --vc-text-normal: var(--text-default);
+    --vc-background-secondary: var(--background-base-lower);
 }

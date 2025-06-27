@@ -138,7 +138,7 @@ export default definePlugin({
 
                             borderRadius: "50%",
                             backgroundColor: "var(--interactive-normal)",
-                            color: "var(--vencord-background-secondary)",
+                            color: "var(--vc-background-secondary)",
                         }}
                     >
                         <PlatformIcon width={14} height={14} />

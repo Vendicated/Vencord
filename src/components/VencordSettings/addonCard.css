@@ -1,5 +1,5 @@
 .vc-addon-card {
-    background-color: var(--vencord-background-secondary-alt);
+    background-color: var(--vc-background-secondary-alt);
     color: var(--interactive-active);
     border-radius: 8px;
     display: block;

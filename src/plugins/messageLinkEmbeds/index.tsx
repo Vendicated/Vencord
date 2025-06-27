@@ -294,7 +294,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
         <Embed
             embed={{
                 rawDescription: "",
-                color: "var(--vencord-background-secondary)",
+                color: "var(--vc-background-secondary)",
                 author: {
                     name: <Text variant="text-xs/medium" tag="span">
                         <span>{channelLabel} - </span>

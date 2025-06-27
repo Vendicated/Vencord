@@ -10,9 +10,9 @@
 }
 
 .vc-vmsg-preview {
-    color: var(--vencord-text-normal);
+    color: var(--vc-text-normal);
     border-radius: 24px;
-    background-color: var(--vencord-background-secondary);
+    background-color: var(--vc-background-secondary);
     position: relative;
     display: flex;
     align-items: center;
