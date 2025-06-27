@@ -172,7 +172,7 @@ export const globPlugins = kind => ({
 
                         if (excluded) {
                             const name = await resolvePluginName(fullDir, file);
-                            excludedCode += `${JSON.stringify(name)}:${JSON.stringify(target)},\n`;
+                            excludedCode += `${JSON.stringify(name.toLowerCase().replace(/\s+/g, ""))}:{name: ${JSON.stringify(name)}, reason: ${JSON.stringify(target)}},\n`;
                             continue;
                         }
                     }
