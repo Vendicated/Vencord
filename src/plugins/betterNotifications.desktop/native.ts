@@ -45,7 +45,7 @@ interface ExtraOptions {
     linuxFormattedText?: string,
     attachmentUrl?: string;
     attachmentType?: string;
-    quickReactions?: string[];
+    quickReactions?: string; // A JSON string, parse before use
     inlineReply?: boolean;
 }
 
@@ -159,6 +159,7 @@ function generateXml(
     notificationData: NotificationData,
     extraOptions?: ExtraOptions,
     attachmentLoc?: string,
+    quickReactions?: string[]
 ): string {
     const guildId = notificationData.guildId ?? "@me";
 
@@ -191,7 +192,7 @@ function generateXml(
                  </binding>
              </visual>
              <actions>
-            ${extraOptions?.quickReactions?.map(emoji =>
+            ${quickReactions?.map(emoji =>
                 `<action content="${emoji}" arguments="${notificationClickPath}?reaction=${emoji}&amp;messageId=${notificationData.messageId}&amp;channelId=${notificationData.channelId}" activationType="protocol" />`
             )}
              </actions>
@@ -381,6 +382,7 @@ export function notify(event: IpcMainInvokeEvent,
     extraOptions?: ExtraOptions
 ) {
     const promises = [saveAssetToDisk({ avatarUrl, avatarId })];
+    const quickReactions: string[] = JSON.parse(extraOptions?.quickReactions ?? "[]");
 
     if (extraOptions?.attachmentUrl) {
         promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, attachmentUrl: extraOptions.attachmentUrl }));
@@ -409,7 +411,7 @@ export function notify(event: IpcMainInvokeEvent,
             notifySend(titleString, linuxFormattedString || bodyString,
                 avatar, unixCallback, type, notificationData,
                 extraOptions?.messageOptions?.attachmentFormat,
-                attachment, extraOptions?.quickReactions
+                attachment, quickReactions
             );
 
             return;
@@ -422,7 +424,7 @@ export function notify(event: IpcMainInvokeEvent,
 
             // toastXml only works on Windows
             // https://learn.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/adaptive-interactive-toasts?tabs=xml
-            ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment) })
+            ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment, quickReactions) })
         });
 
         // Listener for macOS

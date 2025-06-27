@@ -122,7 +122,7 @@ export async function SendNativeNotification(avatarUrl: string,
                 linuxFormattedText: settings.store.notificationMarkupSupported
                     ? SimpleMarkdown.defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(notificationBody))
                     : undefined,
-                quickReactions: settings.store.notificationQuickReactEnabled ? settings.store.notificationQuickReact : [],
+                quickReactions: JSON.stringify(settings.store.notificationQuickReactEnabled ? settings.store.notificationQuickReact : []),
                 inlineReply: settings.store.inlineReplyLinux
             }
         );
