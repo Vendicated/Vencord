@@ -31,6 +31,7 @@ import "./webpack/patchWebpack";
 
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { StartAt } from "@utils/types";
+import globalStyles from "file://globalStyles.css";
 
 import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
@@ -160,6 +161,11 @@ init();
 
 document.addEventListener("DOMContentLoaded", () => {
     startAllPlugins(StartAt.DOMContentLoaded);
+
+    document.head.append(Object.assign(document.createElement("style"), {
+        id: "vencord-global-styles",
+        textContent: globalStyles
+    }));
 
     if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
         document.head.append(Object.assign(document.createElement("style"), {

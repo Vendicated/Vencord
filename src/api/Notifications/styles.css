@@ -3,7 +3,7 @@
     all: unset;
     display: flex;
     flex-direction: column;
-    color: var(--text-default);
+    color: var(--text-normal);
     background-color: var(--background-secondary-alt);
     border-radius: 6px;
     overflow: hidden;
@@ -15,9 +15,7 @@
     background-color: var(--background-base-low);
 }
 
-.vc-notification-root:not(
-        .vc-notification-log-wrapper > .vc-notification-root
-    ) {
+.vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
     position: absolute;
     z-index: 2147483647;
     right: 1rem;
@@ -85,8 +83,7 @@
 
 .vc-notification-log-empty {
     height: 218px;
-    background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") center
-        no-repeat;
+    background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") center no-repeat;
     margin-bottom: 40px;
 }
 

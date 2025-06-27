@@ -2,10 +2,8 @@
 .visual-refresh {
     #vc-spotify-player {
         padding: 12px;
-        background: var(
-            --bg-overlay-floating,
-            var(--background-base-low, var(--background-secondary-alt))
-        );
+        background: var(--bg-overlay-floating,
+                var(--background-base-low, var(--background-secondary-alt)));
         margin: 0;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
@@ -26,30 +24,30 @@
 
     #vc-spotify-progress-bar {
         position: relative;
-        color: var(--text-default);
+        color: var(--text-normal);
         width: 100%;
     }
 
-    #vc-spotify-progress-bar > [class^="slider"] {
+    #vc-spotify-progress-bar>[class^="slider"] {
         flex-grow: 1;
         width: 100%;
         padding: 0 !important;
     }
 
-    #vc-spotify-progress-bar > [class^="slider"] [class^="bar"] {
+    #vc-spotify-progress-bar>[class^="slider"] [class^="bar"] {
         height: 3px !important;
         top: calc(12px - 4px / 2 + var(--bar-offset));
     }
 
-    #vc-spotify-progress-bar > [class^="slider"] [class^="barFill"] {
+    #vc-spotify-progress-bar>[class^="slider"] [class^="barFill"] {
         background-color: var(--interactive-active);
     }
 
-    #vc-spotify-progress-bar > [class^="slider"]:hover [class^="barFill"] {
+    #vc-spotify-progress-bar>[class^="slider"]:hover [class^="barFill"] {
         background-color: var(--vc-spotify-green);
     }
 
-    #vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
+    #vc-spotify-progress-bar>[class^="slider"] [class^="grabber"] {
         background-color: var(--interactive-active);
         width: 16px !important;
         height: 16px !important;

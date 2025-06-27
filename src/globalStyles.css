@@ -1,0 +1,4 @@
+:root {
+    --text-normal: var(--text-default);
+    --background-secondary: var(--background-base-lower);
+}

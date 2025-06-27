@@ -94,7 +94,7 @@ function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof
                     <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
                     <span style={{
                         marginLeft: "0.5em",
-                        color: "var(--text-default)"
+                        color: "var(--text-normal)"
                     }}>{message} - {author}</span>
                 </div>
             ))}
