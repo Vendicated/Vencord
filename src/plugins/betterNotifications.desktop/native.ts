@@ -384,7 +384,7 @@ export function notify(event: IpcMainInvokeEvent,
 ) {
     const promises = [saveAssetToDisk({ avatarUrl, avatarId })];
     const quickReactions: string[] = JSON.parse(extraOptions?.quickReactions ?? "[]");
-    console.log(quickReactions);
+    console.log(`Reactions: ${quickReactions}`);
 
     if (extraOptions?.attachmentUrl) {
         promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, attachmentUrl: extraOptions.attachmentUrl }));
