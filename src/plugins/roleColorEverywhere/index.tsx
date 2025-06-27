@@ -197,7 +197,7 @@ export default definePlugin({
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
-                    color: value.replace("{DEFAULT}", "--text-default, var(--text-normal, white)"),
+                    color: value.replace("{DEFAULT}", "--text-default"),
                     "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
                     "--text-muted": value.replace("{DEFAULT}", "--text-muted")
                 };
