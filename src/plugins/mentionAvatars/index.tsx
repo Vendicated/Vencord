@@ -12,6 +12,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildStore, SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
+import { FullName } from "plugins/showMeYourName";
 
 const settings = definePluginSettings({
     showAtSymbol: {
@@ -68,7 +69,7 @@ export default definePlugin({
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
-        if (!user) return <>{getUsernameString(username)}</>;
+        if (!user) return <UsernameString user={user} nick={username} />;
 
         return (
             <span
@@ -80,7 +81,7 @@ export default definePlugin({
                     className="vc-mentionAvatars-icon"
                     style={{ borderRadius: "50%" }}
                 />
-                {getUsernameString(username)}
+                <UsernameString nick={username} user={user} />
             </span>
         );
     }, { noop: true }),
@@ -102,8 +103,20 @@ export default definePlugin({
     }, { noop: true }),
 });
 
-function getUsernameString(username: string) {
-    return settings.store.showAtSymbol
-        ? `@${username}`
-        : username;
+interface UsernameStringProps {
+    nick: string;
+    user: User;
+}
+
+function UsernameString({ nick, user }: UsernameStringProps): React.ReactNode {
+    const { showAtSymbol } = settings.use(["showAtSymbol"]);
+    if (Vencord.Settings.plugins.ShowMeYourName.enabled) {
+        return <FullName
+            nickname={nick}
+            username={user.username}
+            prefix={showAtSymbol ? "@" : ""}
+            colorSuffix={false}
+        />;
+    }
+    return showAtSymbol ? `@${nick}` : nick;
 }
