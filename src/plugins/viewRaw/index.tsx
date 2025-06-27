@@ -27,7 +27,7 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, GuildStore, Menu, Text } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildRoleStore, Menu, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
@@ -148,7 +148,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
     const guild = getCurrentGuild();
     if (!guild) return;
 
-    const role = GuildStore.getRole(guild.id, id);
+    const role = GuildRoleStore.getRole(guild.id, id);
     if (!role) return;
 
     children.push(
