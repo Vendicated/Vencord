@@ -102,9 +102,9 @@ export async function SendNativeNotification(avatarUrl: string,
             advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
             avatar,
             {
-                channelId: `${advancedNotification.messageRecord.channel_id}`, // big numbers seem to get rounded when passing them to windows' notification XML.
+                channelId: `${advancedNotification.messageRecord.channel_id}`, // big numbers seem to get rounded when passing them to windows' notification XML. Use strings instead
                 messageId: `${basicNotification.message_id}`,
-                guildId: basicNotification.guild_id
+                guildId: `${basicNotification.guild_id ?? "@me"}`
             },
             {
                 messageOptions: {
@@ -122,7 +122,8 @@ export async function SendNativeNotification(avatarUrl: string,
                 linuxFormattedText: settings.store.notificationMarkupSupported
                     ? SimpleMarkdown.defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(notificationBody))
                     : undefined,
-                quickReactions: settings.store.notificationQuickReactEnabled ? settings.store.notificationQuickReact : []
+                quickReactions: JSON.stringify(settings.store.notificationQuickReactEnabled ? settings.store.notificationQuickReact : []),
+                inlineReply: settings.store.inlineReplyLinux
             }
         );
     }

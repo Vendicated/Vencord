@@ -16,6 +16,11 @@ const isWin = platform === "win32";
 const isMac = platform === "darwin";
 const isLinux = platform === "linux";
 
+let isMonitorRunning: boolean = false;
+
+const idMap: Map<number, NotificationData> = new Map();
+const replyMap: Map<Number, string> = new Map();
+
 interface NotificationData {
     channelId: string;
     messageId: string;
@@ -40,7 +45,8 @@ interface ExtraOptions {
     linuxFormattedText?: string,
     attachmentUrl?: string;
     attachmentType?: string;
-    quickReactions?: string[];
+    quickReactions?: string; // A JSON string, parse before use
+    inlineReply?: boolean;
 }
 
 interface AssetOptions {
@@ -153,6 +159,7 @@ function generateXml(
     notificationData: NotificationData,
     extraOptions?: ExtraOptions,
     attachmentLoc?: string,
+    quickReactions?: string[]
 ): string {
     const guildId = notificationData.guildId ?? "@me";
 
@@ -185,7 +192,7 @@ function generateXml(
                  </binding>
              </visual>
              <actions>
-            ${extraOptions?.quickReactions?.map(emoji =>
+            ${quickReactions?.map(emoji =>
                 `<action content="${emoji}" arguments="${notificationClickPath}?reaction=${emoji}&amp;messageId=${notificationData.messageId}&amp;channelId=${notificationData.channelId}" activationType="protocol" />`
             )}
              </actions>
@@ -229,9 +236,13 @@ function notifySend(summary: string,
     avatarLocation: string,
     defaultCallback: Function,
     notificationType: "notification" | "call",
+    notificationData: NotificationData,
     attachmentFormat: string | undefined,
-    attachmentLocation?: string
+    attachmentLocation?: string,
+    reactions?: string[],
+    inlineReply?: boolean,
 ) {
+    console.log(reactions);
     const name = app.getName();
     var args = [summary];
     if (body) args.push(body);
@@ -242,10 +253,16 @@ function notifySend(summary: string,
     // args.push("--action=key=buttontext");
 
     // TODO future: modify existing notification with --replace-id="id"
-    // args.push("--print-id");
+    args.push("--print-id");
 
     args.push(`--app-name=${name[0].toUpperCase() + name.slice(1)}`);
     args.push(`--hint=string:desktop-entry:${name}`);
+
+    if (inlineReply) {
+        args.push("--hint=string:x-kde-reply-placeholder-text:\"reply\"");
+        args.push("--action=inline-reply=\"send\"");
+    }
+
 
     // AFAIK KDE & Gnome do not care about these
     if (notificationType === "call") args.push("--category=call.incoming");
@@ -255,15 +272,113 @@ function notifySend(summary: string,
     if (attachmentLocation) args.push(`--hint=string:${attachmentFormat}:file://${attachmentLocation}`);
     if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
+    for (const reaction of reactions ?? []) {
+        if (reaction === ",") continue;
+        args.push(`--action=reaction:${reaction}=${reaction}`);
+    }
 
+    console.log("Sending linux attachment");
     console.log(args);
 
     execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
             return console.error("Notification error:", error + stderr);
 
+        const text = stdout.trim();
+
+        const id = Number(text);
+
+        if (id) {
+            idMap.set(id, notificationData);
+            console.log("Setting id..");
+            console.log(idMap);
+
+            if (replyMap.has(id)) {
+                console.log("Found id in reply map... replyinhg");
+                const notificationData = idMap.get(id);
+
+                if (!notificationData) {
+                    console.log("NotificationData not defiend in idmap");
+                    return;
+                }
+                webContents?.executeJavaScript(`
+                    Vencord.Plugins.plugins.BetterNotifications.NotificationReplyEvent(${replyMap.get(id)},"${notificationData.channelId}", "${notificationData.messageId}")
+                `);
+            }
+
+        }
+
         // Will need propper filtering if multiple actions or notification ids are used
-        if (stdout.trim() === "default") defaultCallback();
+        if (text === "default") defaultCallback();
+        if (text.startsWith("react:")) {
+            const reaction = text.split(":").at(1);
+            if (!reaction) {
+                console.error("Reaction did not specify emoji");
+                return;
+            }
+            console.log(`Reacting with ${reaction}`);
+            webContents?.executeJavaScript(
+                `Vencord.Plugins.plugins.BetterNotifications.NotificationReactEvent("${notificationData.channelId}", "${notificationData.messageId}", "${reaction}")`
+            );
+            defaultCallback();
+        }
+    });
+}
+
+async function startListeningToDbus() {
+    console.log("Starting monitoring");
+    isMonitorRunning = true;
+
+    let nextIsReply: boolean = false;
+    let notificationIdParsed: boolean = false;
+    let notificationId: number;
+
+    const monitor = execFile("dbus-monitor", ["interface='org.freedesktop.Notifications',member='NotificationReplied'"]);
+
+    monitor.stdout?.on("data", data => {
+        const textData: string = data.trim();
+
+        textData.split("\n").forEach(line => {
+            const text = line.trim();
+            console.log(`::${text}`);
+
+            if (text.includes("member=NotificationReplied")) {
+                console.log("Next data should be uint32");
+                nextIsReply = true;
+                return;
+            }
+
+            if (nextIsReply) {
+                if (notificationIdParsed) {
+                    if (!text.startsWith("string")) {
+                        console.error(`Expected reply, recieved ${text}`);
+                        return;
+                    }
+
+                    const i = text.indexOf(" ");
+                    const reply = text.slice(i + 1); // NOTE: This variable already contains quotes around the string itself
+
+                    replyMap.set(notificationId, reply);
+                    nextIsReply = false;
+                    notificationIdParsed = false;
+
+                } else {
+                    if (!text.startsWith("uint32")) {
+                        console.error(`Expected notification id, recieved ${text}`);
+                        return;
+                    }
+
+                    const targetId = text.split(" ").at(1);
+                    if (!targetId || !Number(targetId)) {
+                        console.error(`Expected number value (from text ${text})`);
+                        return;
+                    }
+
+                    notificationIdParsed = true;
+                    notificationId = Number(targetId);
+                }
+            }
+        });
     });
 }
 
@@ -275,6 +390,8 @@ export function notify(event: IpcMainInvokeEvent,
     extraOptions?: ExtraOptions
 ) {
     const promises = [saveAssetToDisk({ avatarUrl, avatarId })];
+    const quickReactions: string[] = JSON.parse(extraOptions?.quickReactions ?? "[]");
+    console.log(`Reactions: ${quickReactions}`);
 
     if (extraOptions?.attachmentUrl) {
         promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, attachmentUrl: extraOptions.attachmentUrl }));
@@ -292,12 +409,20 @@ export function notify(event: IpcMainInvokeEvent,
         const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
 
         if (isLinux) {
+            if (!isMonitorRunning && extraOptions?.inlineReply && checkLinuxDE("", "KDE")) {
+                startListeningToDbus();
+            }
             const linuxFormattedString: string | undefined = extraOptions?.linuxFormattedText;
 
             console.log("Recieved the following linux formatted string:");
             console.log(linuxFormattedString);
 
-            notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, type, extraOptions?.messageOptions?.attachmentFormat, attachment);
+            notifySend(titleString, linuxFormattedString || bodyString,
+                avatar, unixCallback, type, notificationData,
+                extraOptions?.messageOptions?.attachmentFormat,
+                attachment, quickReactions, extraOptions?.inlineReply
+            );
+
             return;
         }
 
@@ -308,7 +433,7 @@ export function notify(event: IpcMainInvokeEvent,
 
             // toastXml only works on Windows
             // https://learn.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/adaptive-interactive-toasts?tabs=xml
-            ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment) })
+            ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment, quickReactions) })
         });
 
         // Listener for macOS
