@@ -155,7 +155,7 @@
 
 #vc-spotify-progress-bar {
     position: relative;
-    color: var(--text-default, var(--text-normal, white));
+    color: var(--text-default);
     width: 100%;
     margin: 0.5em 0;
     margin-bottom: 5px;
@@ -207,5 +207,5 @@
 
 .vc-spotify-fallback {
     padding: 0.5em;
-    color: var(--text-default, var(--text-normal, white));
+    color: var(--text-default);
 }
