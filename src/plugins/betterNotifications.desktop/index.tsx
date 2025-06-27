@@ -311,6 +311,12 @@ export const settings = definePluginSettings({
         ],
         hidden: !isLinux && Native.checkLinuxDE("KDE")
     },
+    inlineReplyLinux: {
+        type: OptionType.BOOLEAN,
+        description: "Enable inline replies from notifications.",
+        default: true,
+        hidden: !isLinux && Native.checkLinuxDE("KDE")
+    },
     notificationAttachmentFit: {
         type: OptionType.SELECT,
         description: "How to process attachments for notifications",

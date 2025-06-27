@@ -46,6 +46,7 @@ interface ExtraOptions {
     attachmentUrl?: string;
     attachmentType?: string;
     quickReactions?: string[];
+    inlineReply?: boolean;
 }
 
 interface AssetOptions {
@@ -237,6 +238,7 @@ function notifySend(summary: string,
     notificationData: NotificationData,
     attachmentFormat: string | undefined,
     attachmentLocation?: string,
+    reactions?: string[]
 ) {
     const name = app.getName();
     var args = [summary];
@@ -263,14 +265,20 @@ function notifySend(summary: string,
     if (attachmentLocation) args.push(`--hint=string:${attachmentFormat}:file://${attachmentLocation}`);
     if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
-
+    console.log("Sending linux attachment");
     console.log(args);
+
+    for (const reaction of reactions ?? []) {
+        args.push(`--action=reaction:${reaction}=${reaction}`);
+    }
 
     execFile("notify-send", args, {}, (error, stdout, stderr) => {
         if (error)
             return console.error("Notification error:", error + stderr);
 
-        const id = Number(stdout.trim());
+        const text = stdout.trim();
+
+        const id = Number(text);
 
         if (id) {
             idMap.set(id, notificationData);
@@ -293,7 +301,18 @@ function notifySend(summary: string,
         }
 
         // Will need propper filtering if multiple actions or notification ids are used
-        if (stdout.trim() === "default") defaultCallback();
+        if (text === "default") defaultCallback();
+        if (text.startsWith("react:")) {
+            const reaction = text.split(":").at(1);
+            if (!reaction) {
+                console.error("Reaction did not specify emoji");
+                return;
+            }
+            webContents?.executeJavaScript(
+                `Vencord.Plugins.plugins.BetterNotifications.NotificationReactEvent("${notificationData.channelId}", "${notificationData.messageId}", "${reaction}")`
+            );
+            defaultCallback();
+        }
     });
 }
 
@@ -379,7 +398,7 @@ export function notify(event: IpcMainInvokeEvent,
         const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
 
         if (isLinux) {
-            if (!isMonitorRunning) {
+            if (!isMonitorRunning && extraOptions?.inlineReply && checkLinuxDE("", "KDE")) {
                 startListeningToDbus();
             }
             const linuxFormattedString: string | undefined = extraOptions?.linuxFormattedText;
@@ -387,7 +406,12 @@ export function notify(event: IpcMainInvokeEvent,
             console.log("Recieved the following linux formatted string:");
             console.log(linuxFormattedString);
 
-            notifySend(titleString, linuxFormattedString || bodyString, avatar, unixCallback, type, notificationData, extraOptions?.messageOptions?.attachmentFormat, attachment);
+            notifySend(titleString, linuxFormattedString || bodyString,
+                avatar, unixCallback, type, notificationData,
+                extraOptions?.messageOptions?.attachmentFormat,
+                attachment, extraOptions?.quickReactions
+            );
+
             return;
         }
 
