@@ -1,0 +1,35 @@
+.vc-std-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.vc-std-wrapper [class*="communicationDisabled"] {
+    margin-right: 0;
+}
+
+.vc-std-wrapper-text {
+    color: var(--status-danger);
+}
+
+.vc-std-automod :is(svg, .vc-std-wrapper-text) {
+    color: var(--status-warning);
+}
+
+.vc-std-tooltip {
+    max-width: 220px;
+}
+
+.vc-std-popout {
+    width: unset;
+    min-width: 180px;
+    max-width: 360px;
+    color: var(--text-normal);
+}
+
+.vc-std-popout-button-wrapper {
+    margin-top: 8px;
+}
+
+.vc-std-popout-button {
+    padding: 2px 10px;
+}
