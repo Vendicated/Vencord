@@ -47,7 +47,7 @@
     user-select: none;
 }
 
-.vc-shiki-btn~.vc-shiki-btn {
+.vc-shiki-btn ~ .vc-shiki-btn {
     margin-left: 4px;
 }
 

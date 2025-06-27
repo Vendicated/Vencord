@@ -1,4 +1,4 @@
-[class|="section"]:not([class|="lastSection"])+.vc-rdb-view {
+[class|="section"]:not([class|="lastSection"]) + .vc-rdb-view {
     margin-top: 12px;
 }
 
