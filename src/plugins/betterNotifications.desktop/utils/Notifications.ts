@@ -104,7 +104,7 @@ export async function SendNativeNotification(avatarUrl: string,
             {
                 channelId: `${advancedNotification.messageRecord.channel_id}`, // big numbers seem to get rounded when passing them to windows' notification XML. Use strings instead
                 messageId: `${basicNotification.message_id}`,
-                guildId: `${basicNotification.guild_id}`
+                guildId: `${basicNotification.guild_id ?? "@me"}`
             },
             {
                 messageOptions: {
