@@ -16,10 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { ChannelStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
+
+migratePluginSettings("shouldPingListedUsers", "shouldPingListed");
 
 const settings = definePluginSettings({
     userList: {
@@ -28,7 +31,7 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "1234567890123445,1234567890123445",
     },
-    shouldPingListed: {
+    shouldPingListedUsers: {
         description: "Behaviour",
         type: OptionType.SELECT,
         options: [
@@ -43,6 +46,27 @@ const settings = definePluginSettings({
             },
         ],
     },
+    serverList: {
+        description:
+            "List of servers to allow or exempt pings for (separated by commas or spaces)",
+        type: OptionType.STRING,
+        default: "1234567890123445,1234567890123445",
+    },
+    shouldPingListedServers: {
+        description: "Behaviour",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Do not ping in the listed servers",
+                value: false,
+                default: true,
+            },
+            {
+                label: "Only ping in the listed servers",
+                value: true,
+            },
+        ],
+    },
     inverseShiftReply: {
         description: "Invert Discord's shift replying behaviour (enable to make shift reply mention user)",
         type: OptionType.BOOLEAN,
@@ -53,12 +77,17 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix, Devs.outfoxxed],
+    authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix, Devs.outfoxxed, Devs.scattagain],
     settings,
 
     shouldMention(message: Message, isHoldingShift: boolean) {
-        const isListed = settings.store.userList.includes(message.author.id);
-        const isExempt = settings.store.shouldPingListed ? isListed : !isListed;
+        const isUserListed = settings.store.userList.includes(message.author.id);
+        const isUserExempt = settings.store.shouldPingListedUsers ? isUserListed : !isUserListed;
+
+        const isServerListed = settings.store.serverList.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+        const isServerExempt = settings.store.shouldPingListedServers ? isServerListed : !isServerListed;
+
+        const isExpemt = isUserExempt || isServerExempt;
         return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
     },
 
