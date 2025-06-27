@@ -438,6 +438,7 @@ export type Popout = ComponentType<{
 
     onRequestOpen?(): void;
     onRequestClose?(): void;
+    preload?(): void;
 
     /** "center" and others */
     align?: "left" | "right" | "center";
