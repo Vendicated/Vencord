@@ -208,6 +208,7 @@ export const settings = definePluginSettings({
             // NOTE: Very unfinished implementation. Use Discord's emoji picker in the future
             React.useEffect(() => {
                 props.setValue(tempEmojiVal.split(","));
+                if (settings.store.inlineReplyLinux) settings.store.inlineReplyLinux = false;
             }, [tempEmojiVal]);
 
             return (
@@ -312,8 +313,25 @@ export const settings = definePluginSettings({
         hidden: !isLinux && Native.checkLinuxDE("KDE")
     },
     inlineReplyLinux: {
-        type: OptionType.BOOLEAN,
+        type: OptionType.COMPONENT,
         description: "Enable inline replies from notifications.",
+        component: props => {
+            const [value, setValue] = React.useState<boolean>(settings.store.inlineReplyLinux);
+
+            React.useEffect(() => {
+                props.setValue(value);
+                if (settings.store.notificationQuickReactEnabled) settings.store.notificationQuickReactEnabled = false;
+            }, [value]);
+
+            return <div style={{ marginBottom: "0.5em", height: "100%" }}>
+                <Forms.FormSection>
+                    <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                        <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable support for inline replies from notifications</Forms.FormTitle>
+                        <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={value} onChange={setValue}></Switch>
+                    </div>
+                </Forms.FormSection>
+            </div>;
+        },
         default: true,
         hidden: !isLinux && Native.checkLinuxDE("KDE")
     },

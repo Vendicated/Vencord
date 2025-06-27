@@ -239,7 +239,8 @@ function notifySend(summary: string,
     notificationData: NotificationData,
     attachmentFormat: string | undefined,
     attachmentLocation?: string,
-    reactions?: string[]
+    reactions?: string[],
+    inlineReply?: boolean,
 ) {
     console.log(reactions);
     const name = app.getName();
@@ -256,8 +257,12 @@ function notifySend(summary: string,
 
     args.push(`--app-name=${name[0].toUpperCase() + name.slice(1)}`);
     args.push(`--hint=string:desktop-entry:${name}`);
-    args.push("--hint=string:x-kde-reply-placeholder-text:\"reply\"");
-    args.push("--action=inline-reply=\"send\"");
+
+    if (inlineReply) {
+        args.push("--hint=string:x-kde-reply-placeholder-text:\"reply\"");
+        args.push("--action=inline-reply=\"send\"");
+    }
+
 
     // AFAIK KDE & Gnome do not care about these
     if (notificationType === "call") args.push("--category=call.incoming");
@@ -415,7 +420,7 @@ export function notify(event: IpcMainInvokeEvent,
             notifySend(titleString, linuxFormattedString || bodyString,
                 avatar, unixCallback, type, notificationData,
                 extraOptions?.messageOptions?.attachmentFormat,
-                attachment, quickReactions
+                attachment, quickReactions, extraOptions?.inlineReply
             );
 
             return;
