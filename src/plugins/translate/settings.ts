@@ -57,7 +57,8 @@ export const settings = definePluginSettings({
         options: [
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
-            { label: "DeepL Pro", value: "deepl-pro" }
+            { label: "DeepL Pro", value: "deepl-pro" },
+            { label: "OpenAI API", value: "openai" }
         ] as const,
         onChange: resetLanguageDefaults
     },
@@ -66,6 +67,20 @@ export const settings = definePluginSettings({
         description: "DeepL API key",
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
+        disabled: () => IS_WEB
+    },
+    openaiApiKey: {
+        type: OptionType.STRING,
+        description: "OpenAI API key",
+        default: "",
+        placeholder: "Get your API key from https://platform.openai.com/settings/profile?tab=api-keys",
+        disabled: () => IS_WEB
+    },
+    openaiModel: {
+        type: OptionType.STRING,
+        description: "OpenAI Model",
+        default: "gpt-4o-mini",
+        placeholder: "Get model pricing from https://openai.com/api/pricing/",
         disabled: () => IS_WEB
     },
     autoTranslate: {
