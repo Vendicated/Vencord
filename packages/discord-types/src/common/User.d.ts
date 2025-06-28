@@ -1,4 +1,4 @@
-export default class User {
+export class User {
     constructor(user: object);
     accentColor: number;
     avatar: string;
@@ -9,7 +9,7 @@ export default class User {
     discriminator: string;
     email: string | undefined;
     flags: number;
-    globalName: string | undefined,
+    globalName: string | undefined;
     guildMemberAvatars: Record<string, string>;
     id: string;
     mfaEnabled: boolean;

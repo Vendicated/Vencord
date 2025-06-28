@@ -1,4 +1,4 @@
-export default interface Role {
+export interface Role {
     color: number;
     colorString: string | undefined;
     hoist: boolean;

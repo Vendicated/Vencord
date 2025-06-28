@@ -1,8 +1,11 @@
-import moment from 'moment';
-import { CommandOptions } from '.';
-import User, { UserJSON } from './User';
-import Embed, { EmbedJSON } from './Embed';
+import { Moment } from 'moment';
+import { Option } from './Commands';
+import { User, UserJSON } from '../User';
+import { Embed, EmbedJSON } from './Embed';
 
+/**
+ * TODO: looks like discord has moved over to Date instead of Moment;
+ */
 export default class Message {
     constructor(message: object);
     activity: unknown;
@@ -18,7 +21,9 @@ export default class Message {
         participants: string[];
     };
     channel_id: string;
-    /* not fully typed: */
+    /**
+     * NOTE: not fully typed
+     */
     codedLinks: {
         code?: string;
         type: string;
@@ -27,7 +32,7 @@ export default class Message {
     components: unknown[];
     content: string;
     customRenderedContent: unknown;
-    editedTimestamp: moment.Moment;
+    editedTimestamp: Date;
     embeds: Embed[];
     flags: number;
     giftCodes: string[];
@@ -47,7 +52,7 @@ export default class Message {
             dm_permission: unknown;
             id: string;
             name: string;
-            options: CommandOptions[];
+            options: Option[];
             permissions: unknown[];
             type: number;
             version: string;
@@ -94,13 +99,21 @@ export default class Message {
     type: number;
     webhookId: string | undefined;
 
-    /** Doesn't actually update the original message; it just returns a new message instance with the added reaction. */
+    /**
+     *  Doesn't actually update the original message; it just returns a new message instance with the added reaction.
+     */
     addReaction(emoji: ReactionEmoji, fromCurrentUser: boolean): Message;
-    /** Searches each reaction and if the provided string has an index above -1 it'll return the reaction object. */
+    /**
+     * Searches each reaction and if the provided string has an index above -1 it'll return the reaction object.
+     */
     getReaction(name: string): MessageReaction;
-    /** Doesn't actually update the original message; it just returns the message instance without the reaction searched with the provided emoji object.  */
+    /**
+     * Doesn't actually update the original message; it just returns the message instance without the reaction searched with the provided emoji object.
+     */
     removeReactionsForEmoji(emoji: ReactionEmoji): Message;
-    /** Doesn't actually update the original message; it just returns the message instance without the reaction.*/
+    /**
+     * Doesn't actually update the original message; it just returns the message instance without the reaction.
+     */
     removeReaction(emoji: ReactionEmoji, fromCurrentUser: boolean): Message;
 
     getChannelId(): string;
@@ -109,7 +122,9 @@ export default class Message {
     isEdited(): boolean;
     isSystemDM(): boolean;
 
-    /** Returns the entire object (minus the prototype functions because it's not a class anymore) but with 3 additional props that are aliases. */
+    /**
+     * Returns the entire object (minus the prototype functions because it's not a class anymore) but with 3 additional props that are aliases.
+     */
     toJS(): JSMessage;
 }
 

@@ -20,10 +20,10 @@ import { Logger } from "@utils/Logger";
 import { makeCodeblock } from "@utils/text";
 
 import { sendBotMessage } from "./commandHelpers";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "./types";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType, Argument, Command, CommandContext, Option } from "../../../packages/discord-types/src/common/messages/Commands";
 
 export * from "./commandHelpers";
-export * from "./types";
+export * from "../../../packages/discord-types/src/common/messages/Commands";
 
 export let BUILT_IN: Command[];
 export const commands = {} as Record<string, Command>;

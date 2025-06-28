@@ -22,7 +22,7 @@ import { MessageActions, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
-import { Argument } from "./types";
+import { Argument } from "../../../packages/discord-types/src/common/messages/Commands";
 
 const createBotMessage = findByCodeLazy('username:"Clyde"');
 
