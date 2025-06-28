@@ -181,18 +181,25 @@
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
-    width: 8px !important;
     height: 100% !important;
     pointer-events: none !important;
 }
 
 .questify-quest-button-pill>[class^="item"] {
     will-change: transform !important;
+    max-height: 8px !important;
+    min-height: 8px !important;
+    transition: max-height 0.2s ease-in-out, min-height 0.2s ease-in-out !important;
+}
+
+.questify-quest-button-pill.hovered>[class^="item"] {
     max-height: 20px !important;
+    min-height: 20px !important;
 }
 
 .questify-quest-button-pill.selected>[class^="item"] {
     max-height: 40px !important;
+    min-height: 40px !important;
 }
 
 .questify-quest-button-server-list-button-container {
