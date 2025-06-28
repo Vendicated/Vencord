@@ -17,7 +17,7 @@
 */
 
 import { LazyComponent } from "@utils/lazyReact";
-import * as t from "@vencord/discord-types/components";
+import * as t from "@vencord/discord-types";
 import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";

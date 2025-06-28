@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as t from "@vencord/discord-types/stores";
+import * as t from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
 import type * as Stores from "discord-types/stores";
 
