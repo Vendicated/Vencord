@@ -23,7 +23,7 @@
 .vc-backup-restore-card {
     background-color: var(--info-warning-background);
     border-color: var(--info-warning-foreground);
-    color: var(--info-warning-text);
+    color: var(--info-warning-foreground);
 }
 
 .vc-settings-theme-links {
