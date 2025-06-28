@@ -51,7 +51,7 @@ export function PermissionDefaultIcon() {
         >
             <g>
                 <title>Not overwritten</title>
-                <polygon fill="var(--text-normal)" points="12 2.32 10.513 2 4 13.68 5.487 14" />
+                <polygon fill="var(--text-default)" points="12 2.32 10.513 2 4 13.68 5.487 14" />
             </g>
         </svg>
     );

@@ -72,7 +72,7 @@
     overflow-y: hidden;
     margin-top: 1px;
     margin-bottom: 8px;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 15px;
 }
 

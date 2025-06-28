@@ -7,7 +7,7 @@
 .vc-settings-theme-card {
     display: flex;
     flex-direction: column;
-    background-color: var(--background-secondary-alt);
+    background-color: var(--background-base-lower-alt);
     color: var(--interactive-active);
     border-radius: 8px;
     padding: 1em;

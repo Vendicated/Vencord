@@ -1,5 +1,5 @@
 .vc-addon-card {
-    background-color: var(--background-secondary-alt);
+    background-color: var(--background-base-lower-alt);
     color: var(--interactive-active);
     border-radius: 8px;
     display: block;

@@ -10,9 +10,9 @@
 }
 
 .vc-vmsg-preview {
-    color: var(--text-normal);
+    color: var(--text-default);
     border-radius: 24px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-base-lower);
     position: relative;
     display: flex;
     align-items: center;

@@ -1,6 +1,6 @@
 .vc-st-date-picker {
     background-color: var(--input-background);
-    color: var(--text-normal);
+    color: var(--text-default);
     width: 95%;
     padding: 8px 8px 8px 12px;
     margin: 1em 0;

@@ -3,8 +3,8 @@
     all: unset;
     display: flex;
     flex-direction: column;
-    color: var(--text-normal);
-    background-color: var(--background-secondary-alt);
+    color: var(--text-default);
+    background-color: var(--background-base-lower-alt);
     border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
