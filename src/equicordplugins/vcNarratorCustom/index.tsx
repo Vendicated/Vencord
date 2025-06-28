@@ -11,7 +11,6 @@ import { wordsToTitle } from "@utils/text";
 import definePlugin, {
     OptionType,
 } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -22,6 +21,7 @@ import {
     SelectedGuildStore,
     useMemo,
     UserStore,
+    VoiceStateStore,
 } from "@webpack/common";
 
 // Create an in-memory cache (temporary, lost on restart)
@@ -76,11 +76,6 @@ interface VoiceState {
     selfDeaf: boolean;
     selfMute: boolean;
 }
-
-const VoiceStateStore = findByPropsLazy(
-    "getVoiceStatesForChannel",
-    "getCurrentClientVoiceChannelId"
-);
 
 // Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would

@@ -22,8 +22,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { getCurrentVoice, settings } from "./settings";
@@ -37,8 +36,6 @@ interface VoiceState {
     selfDeaf: boolean;
     selfMute: boolean;
 }
-
-const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
 
 // Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would

@@ -38,6 +38,7 @@ export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
+export let VoiceStateStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
@@ -90,3 +91,4 @@ waitForStore("ThemeStore", m => {
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
     Vencord.QuickCss.initQuickCssThemeStore();
 });
+waitForStore("VoiceStateStore", m => VoiceStateStore = m);

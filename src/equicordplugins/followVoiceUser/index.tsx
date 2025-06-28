@@ -11,7 +11,7 @@ import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Forms, Menu, React } from "@webpack/common";
+import { Forms, Menu, React, VoiceStateStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 import { Channel, User } from "discord-types/general";
 
@@ -29,7 +29,6 @@ interface UserContextProps {
 let followedUserInfo: TFollowedUserInfo = null;
 
 const voiceChannelAction = findByPropsLazy("selectVoiceChannel");
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const UserStore = findStoreLazy("UserStore");
 const RelationshipStore = findStoreLazy("RelationshipStore");
 

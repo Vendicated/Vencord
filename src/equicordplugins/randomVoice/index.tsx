@@ -12,13 +12,12 @@ import { debounce } from "@shared/debounce";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByProps, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
+import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
 
 import style from "./styles.css?managed";
 
 const ChatVoiceIcon = findComponentByCodeLazy("0l1.8-1.8c.17");
 const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const MediaEngineStore = findStoreLazy("MediaEngineStore");
 const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
 const { toggleSelfMute } = findByPropsLazy("toggleSelfMute");
