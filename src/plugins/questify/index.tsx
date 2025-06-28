@@ -11,25 +11,19 @@ import { ErrorBoundary } from "@components/index";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { ContextMenuApi, Menu, NavigationRouter, useEffect, useState } from "@webpack/common";
+import { ContextMenuApi, Menu, NavigationRouter } from "@webpack/common";
 import { JSX } from "react";
 
 import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateIgnoredQuests } from "./settings";
 import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./utils/components";
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
 
-let questButtonBadgeNumberState: React.Dispatch<React.SetStateAction<number>> = () => { };
-let questButtonUnclaimedUnignoredState: React.Dispatch<React.SetStateAction<number>> = () => { };
-let questButtonOnQuestsPageState: React.Dispatch<React.SetStateAction<boolean>> = () => { };
-
 export function updateOnQuestsPage(value: boolean): void {
-    questButtonOnQuestsPageState(value);
+    settings.store.onQuestsPage = value;
 }
 
 export function updateHasUnclaimedUnignoredQuests(value: number): void {
     settings.store.unclaimedUnignoredQuests = value;
-    questButtonUnclaimedUnignoredState(value);
-    questButtonBadgeNumberState(value);
 }
 
 function questMenuUnignoreClicked(): void {
@@ -54,27 +48,13 @@ function questMenuIgnoreClicked(): void {
 }
 
 export function QuestButton(): JSX.Element {
-    const { questButtonDisplay, questButtonUnclaimed, questButtonBadgeColor } = settings.use(["questButtonDisplay", "questButtonUnclaimed", "questButtonBadgeColor"]);
-    const [hasUnclaimedUnignoredQuests, setHasUnclaimedUnignoredQuests] = useState(settings.store.unclaimedUnignoredQuests);
-    const [onQuestsPage, setOnQuestsPage] = useState(window.location.pathname === questPath);
-    const [badgeNumber, setBadgeNumber] = useState(hasUnclaimedUnignoredQuests);
+    const { questButtonDisplay, questButtonUnclaimed, questButtonBadgeColor, unclaimedUnignoredQuests, onQuestsPage } = settings.use(["questButtonDisplay", "questButtonUnclaimed", "questButtonBadgeColor", "unclaimedUnignoredQuests", "onQuestsPage"]);
     const questButtonBadgeColorRGB = questButtonBadgeColor === null ? null : decimalToRGB(questButtonBadgeColor);
-
-    useEffect(() => {
-        questButtonBadgeNumberState = setBadgeNumber;
-        questButtonUnclaimedUnignoredState = setHasUnclaimedUnignoredQuests;
-        questButtonOnQuestsPageState = setOnQuestsPage;
-
-        return () => {
-            questButtonUnclaimedUnignoredState = () => { };
-            questButtonOnQuestsPageState = () => { };
-        };
-    }, []);
 
     function showQuestsButton(): boolean {
         const canShow = questButtonDisplay !== "never";
         const alwaysShow = questButtonDisplay === "always";
-        return canShow && (alwaysShow || !!hasUnclaimedUnignoredQuests || onQuestsPage);
+        return canShow && (alwaysShow || !!unclaimedUnignoredQuests || onQuestsPage);
     }
 
     function handleClick(event: React.MouseEvent<Element>) {
@@ -112,7 +92,7 @@ export function QuestButton(): JSX.Element {
                         id={q("ignore-quests-option")}
                         label="Mark All Ignored"
                         action={questMenuIgnoreClicked}
-                        disabled={!hasUnclaimedUnignoredQuests}
+                        disabled={!unclaimedUnignoredQuests}
                     />
                     <Menu.MenuItem
                         id={q("unignore-quests-option")}
@@ -130,25 +110,27 @@ export function QuestButton(): JSX.Element {
         }
     }
 
+    const lowerBadgeProps = {
+        count: !["badge", "both"].includes(questButtonUnclaimed) ? 0 : unclaimedUnignoredQuests,
+        maxDigits: 2,
+        ...(questButtonBadgeColorRGB ? { color: `rgb(${questButtonBadgeColorRGB.r}, ${questButtonBadgeColorRGB.g}, ${questButtonBadgeColorRGB.b})` } : {}),
+        ...(questButtonBadgeColorRGB ? { style: { color: isDarkish(questButtonBadgeColorRGB) ? "white" : "black" } } : {})
+    };
+
     return (
         <GuildlessServerListItem
             id={q("quest-button")}
             className={q("quest-button")}
-            icon={() => QuestIcon(26, 26)}
+            icon={QuestIcon(26, 26)}
             tooltip="Quests"
             showPill={true}
-            isVisible={() => showQuestsButton()}
-            isSelected={() => onQuestsPage}
-            hasUnread={() => !!hasUnclaimedUnignoredQuests && ["pill", "both"].includes(questButtonUnclaimed)}
-            lowerBadgeProps={() => ({
-                count: !["badge", "both"].includes(questButtonUnclaimed) ? 0 : badgeNumber,
-                maxDigits: 2,
-                ...(questButtonBadgeColorRGB ? { color: `rgb(${questButtonBadgeColorRGB.r}, ${questButtonBadgeColorRGB.g}, ${questButtonBadgeColorRGB.b})` } : {}),
-                ...(questButtonBadgeColorRGB ? { style: { color: isDarkish(questButtonBadgeColorRGB) ? "white" : "black" } } : {})
-            })}
-            onClick={(e: React.MouseEvent) => handleClick(e)}
-            onContextMenu={(e: React.MouseEvent) => handleClick(e)}
-            onMouseDown={(e: React.MouseEvent) => handleClick(e)}
+            isVisible={showQuestsButton()}
+            isSelected={onQuestsPage}
+            hasUnread={!!unclaimedUnignoredQuests && ["pill", "both"].includes(questButtonUnclaimed)}
+            lowerBadgeProps={lowerBadgeProps}
+            onClick={handleClick}
+            onContextMenu={handleClick}
+            onMouseDown={handleClick}
         />
     );
 }

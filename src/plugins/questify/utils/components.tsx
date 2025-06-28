@@ -152,14 +152,14 @@ export function ServerListItemLowerBadge(props: ServerListItemLowerBadgeProps): 
 export interface GuildlessServerListItemProps {
     id?: string;
     className?: string;
-    icon?: (() => JSX.Element);
+    icon?: JSX.Element;
     tooltip?: string;
     showPill?: boolean;
-    isVisible?: (() => boolean) | boolean;
-    isSelected?: (() => boolean) | boolean;
-    hasUnread?: (() => boolean) | boolean;
-    lowerBadgeProps?: (() => ServerListItemLowerBadgeProps) | ServerListItemLowerBadgeProps;
-    upperBadgeProps?: (() => ServerListItemUpperBadgeProps) | ServerListItemUpperBadgeProps;
+    isVisible?: boolean;
+    isSelected?: boolean;
+    hasUnread?: boolean;
+    lowerBadgeProps?: ServerListItemLowerBadgeProps;
+    upperBadgeProps?: ServerListItemUpperBadgeProps;
     onClick?: ((e: React.MouseEvent) => void);
     onContextMenu?: ((e: React.MouseEvent) => void);
     onMouseDown?: ((e: React.MouseEvent) => void);
@@ -192,28 +192,24 @@ export function GuildlessServerListItem({
     const upperBadgeClass = `${baseClasses.join(" ")}-upper-badge`;
 
     const [hovered, setHovered] = useState(false);
-    const visible = typeof isVisible === "function" ? isVisible() : isVisible ?? true;
-    const selected = typeof isSelected === "function" ? isSelected() : isSelected ?? false;
-    const unread = typeof hasUnread === "function" ? hasUnread() : hasUnread ?? false;
-    const lowerBadgeDataTemp = typeof lowerBadgeProps === "function" ? lowerBadgeProps() : lowerBadgeProps;
-    const lowerBadgeData = lowerBadgeDataTemp ? { ...lowerBadgeDataTemp, className: lowerBadgeDataTemp.className ?? lowerBadgeClass } : null;
+    const visible = isVisible ?? true;
+    const selected = isSelected ?? false;
+    const unread = hasUnread ?? false;
+    const lowerBadgeData = lowerBadgeProps ? { ...lowerBadgeProps, className: lowerBadgeProps.className ?? lowerBadgeClass } : null;
     const lowerBadgeSize = lowerBadgeData ? { width: formatLowerBadge(lowerBadgeData.count, lowerBadgeData.maxDigits)[1] } : null;
 
     const lowerBadge = !lowerBadgeData || lowerBadgeData.count === 0 ? null : ServerListItemLowerBadge({ ...lowerBadgeData, style: { ...(lowerBadgeData.style || {}), ...(lowerBadgeSize || {}) } });
-    const upperBadgeDataTemp = typeof upperBadgeProps === "function" ? upperBadgeProps() : upperBadgeProps;
-    const upperBadgeData = upperBadgeDataTemp ? { ...upperBadgeDataTemp, className: upperBadgeDataTemp.className ?? upperBadgeClass } : null;
+    const upperBadgeData = upperBadgeProps ? { ...upperBadgeProps, className: upperBadgeProps.className ?? upperBadgeClass } : null;
     const upperBadge = upperBadgeData ? ServerListItemUpperBadge(upperBadgeData) : null;
 
-    function wrappedIcon() {
-        return icon ? (
-            <div className={iconContainerClass} >
-                {icon()}
-            </div>
-        ) : null;
-    }
+    const wrappedIcon = icon ? (
+        <div className={iconContainerClass}>
+            {icon}
+        </div>
+    ) : undefined;
 
     const componentProps: Record<string, any> = {
-        ...(icon !== undefined && { icon: wrappedIcon }),
+        ...(wrappedIcon && { icon: () => wrappedIcon }),
         ...(tooltip !== undefined && { tooltip }),
         ...(onClick !== undefined && { onClick }),
         ...(onMouseDown !== undefined && { onMouseDown }),

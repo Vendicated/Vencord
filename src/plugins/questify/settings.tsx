@@ -31,15 +31,6 @@ const defaultFetchQuestsAlert = "discodo";
 export const minimumAutoFetchIntervalValue = 30 * 60;
 export const maximumAutoFetchIntervalValue = 12 * 60 * 60;
 
-let dummyVisibleState: React.Dispatch<React.SetStateAction<boolean>> = () => true;
-let dummySelectedState: React.Dispatch<React.SetStateAction<boolean>> = () => false;
-let dummyShowPillState: React.Dispatch<React.SetStateAction<boolean>> = () => true;
-let dummyShowBadgeState: React.Dispatch<React.SetStateAction<boolean>> = () => true;
-let dummyBadgeColorState: React.Dispatch<React.SetStateAction<number | null>> = () => defaultUnclaimedColor;
-let dummyLeftClickActionState: React.Dispatch<React.SetStateAction<string>> = () => defaultLeftClickAction;
-let dummyMiddleClickActionState: React.Dispatch<React.SetStateAction<string>> = () => defaultMiddleClickAction;
-let dummyRightClickActionState: React.Dispatch<React.SetStateAction<string>> = () => defaultRightClickAction;
-
 export function fetchAndAlertQuests(source: string, logger: Logger): void {
     const currentQuests = Array.from(QuestsStore.quests.values()) as Quest[];
 
@@ -168,38 +159,29 @@ export function validateIgnoredQuests(ignoredQuests?: string, questsData?: Quest
     return ignoredStr;
 }
 
-function DummyQuestButton(): JSX.Element {
-    const [dummyVisible, setDummyVisible] = useState(settings.store.questButtonDisplay !== "never");
-    const [dummySelected, setDummySelected] = useState(false);
-    const [dummyShowPill, setDummyShowPill] = useState(settings.store.questButtonUnclaimed === "pill" || settings.store.questButtonUnclaimed === "both");
-    const [dummyShowBadge, setDummyShowBadge] = useState(settings.store.questButtonUnclaimed === "badge" || settings.store.questButtonUnclaimed === "both");
-    const [dummyBadgeColor, setDummyBadgeColor] = useState(settings.store.questButtonBadgeColor as number | null);
-    const [dummyLeftClickAction, setDummyLeftClickAction] = useState(settings.store.questButtonLeftClickAction);
-    const [dummyMiddleClickAction, setDummyMiddleClickAction] = useState(settings.store.questButtonMiddleClickAction);
-    const [dummyRightClickAction, setDummyRightClickAction] = useState(settings.store.questButtonRightClickAction);
+interface DummyQuestButtonProps {
+    visible: boolean;
+    selected: boolean;
+    showPill: boolean;
+    showBadge: boolean;
+    badgeColor: number | null;
+    leftClickAction: string;
+    middleClickAction: string;
+    rightClickAction: string;
+    onSelectedChange: (selected: boolean) => void;
+}
 
-    useEffect(() => {
-        dummyVisibleState = setDummyVisible;
-        dummySelectedState = setDummySelected;
-        dummyShowPillState = setDummyShowPill;
-        dummyShowBadgeState = setDummyShowBadge;
-        dummyBadgeColorState = setDummyBadgeColor;
-        dummyLeftClickActionState = setDummyLeftClickAction;
-        dummyMiddleClickActionState = setDummyMiddleClickAction;
-        dummyRightClickActionState = setDummyRightClickAction;
-
-        return () => {
-            dummyVisibleState = () => true;
-            dummySelectedState = () => false;
-            dummyShowPillState = () => true;
-            dummyShowBadgeState = () => true;
-            dummyBadgeColorState = () => defaultUnclaimedColor;
-            dummyLeftClickActionState = () => settings.store.questButtonLeftClickAction;
-            dummyMiddleClickActionState = () => settings.store.questButtonMiddleClickAction;
-            dummyRightClickActionState = () => settings.store.questButtonRightClickAction;
-        };
-    }, []);
-
+function DummyQuestButton({
+    visible,
+    selected,
+    showPill,
+    showBadge,
+    badgeColor,
+    leftClickAction,
+    middleClickAction,
+    rightClickAction,
+    onSelectedChange
+}: DummyQuestButtonProps): JSX.Element {
     function handleClick(event: React.MouseEvent<Element>) {
         // ListItem does not support onAuxClick, so we have to listen for mousedown events.
         // Ignore left and right clicks sent via mousedown events to prevent double events.
@@ -213,15 +195,15 @@ function DummyQuestButton(): JSX.Element {
         let todo: string | null = null;
 
         if (event.button === middleClick) {
-            todo = dummyMiddleClickAction;
+            todo = middleClickAction;
         } else if (event.button === rightClick) {
-            todo = dummyRightClickAction;
+            todo = rightClickAction;
         } else if (event.button === leftClick) {
-            todo = dummyLeftClickAction;
+            todo = leftClickAction;
         }
 
         if (todo === "open-quests") {
-            setDummySelected(!dummySelected);
+            onSelectedChange(!selected);
         } else if (todo === "plugin-settings") {
         } else if (todo === "context-menu") {
             ContextMenuApi.openContextMenu(event, () => (
@@ -250,28 +232,28 @@ function DummyQuestButton(): JSX.Element {
         }
     }
 
+    const dummyBadgeColorRGB = badgeColor ? decimalToRGB(badgeColor) : null;
+    const lowerBadgeProps = {
+        count: showBadge ? 3 : 0,
+        maxDigits: 2,
+        ...(dummyBadgeColorRGB ? { color: `rgb(${dummyBadgeColorRGB.r},${dummyBadgeColorRGB.g},${dummyBadgeColorRGB.b})` } : {}),
+        ...(dummyBadgeColorRGB ? { style: { color: isDarkish(dummyBadgeColorRGB) ? "white" : "black" } } : {})
+    };
+
     return (
         <GuildlessServerListItem
             id={q("dummy-quest-button")}
             className={q("dummy-quest-button", "quest-button")}
-            icon={() => QuestIcon(26, 26)}
+            icon={QuestIcon(26, 26)}
             tooltip="Quests"
             showPill={true}
-            isVisible={dummyVisible}
-            isSelected={dummySelected}
-            hasUnread={dummyShowPill}
-            lowerBadgeProps={() => {
-                const dummyBadgeColorRGB = dummyBadgeColor ? decimalToRGB(dummyBadgeColor) : null;
-                return {
-                    count: dummyShowBadge ? 3 : 0,
-                    maxDigits: 2,
-                    ...(dummyBadgeColorRGB ? { color: `rgb(${dummyBadgeColorRGB.r},${dummyBadgeColorRGB.g},${dummyBadgeColorRGB.b})` } : {}),
-                    ...(dummyBadgeColorRGB ? { style: { color: isDarkish(dummyBadgeColorRGB) ? "white" : "black" } } : {})
-                };
-            }}
-            onClick={(e: React.MouseEvent) => { handleClick(e); }}
-            onContextMenu={(e: React.MouseEvent) => { handleClick(e); }}
-            onMouseDown={(e: React.MouseEvent) => { handleClick(e); }}
+            isVisible={visible}
+            isSelected={selected}
+            hasUnread={showPill}
+            lowerBadgeProps={lowerBadgeProps}
+            onClick={handleClick}
+            onContextMenu={handleClick}
+            onMouseDown={handleClick}
         />
     );
 }
@@ -387,10 +369,10 @@ function QuestButtonSettings(props: { setValue: (value: QuestButtonSettingProps)
     const [currentQuestButtonMiddleClickAction, setCurrentQuestButtonMiddleClickAction] = useState<"open-quests" | "plugin-settings" | "context-menu" | "nothing">(questButtonMiddleClickAction as "open-quests" | "plugin-settings" | "context-menu" | "nothing");
     const [currentQuestButtonRightClickAction, setCurrentQuestButtonRightClickAction] = useState<"open-quests" | "plugin-settings" | "context-menu" | "nothing">(questButtonRightClickAction as "open-quests" | "plugin-settings" | "context-menu" | "nothing");
     const [currentBadgeColor, setCurrentBadgeColor] = useState((questButtonBadgeColor as number | null));
+    const [dummySelected, setDummySelected] = useState(false);
 
     function handleQuestButtonDisplayChange(value: RadioOption) {
         setCurrentQuestButtonDisplay(value);
-        dummyVisibleState(value.value !== "never");
 
         props.setValue(
             {
@@ -406,8 +388,6 @@ function QuestButtonSettings(props: { setValue: (value: QuestButtonSettingProps)
 
     function handleQuestButtonUnclaimedChange(value: RadioOption) {
         setCurrentQuestButtonUnclaimed(value);
-        dummyShowBadgeState(value.value === "badge" || value.value === "both");
-        dummyShowPillState(value.value === "pill" || value.value === "both");
 
         props.setValue(
             {
@@ -423,7 +403,6 @@ function QuestButtonSettings(props: { setValue: (value: QuestButtonSettingProps)
 
     function handleBadgeColorChange(value: number | null) {
         setCurrentBadgeColor(value);
-        dummyBadgeColorState(value);
 
         props.setValue(
             {
@@ -439,7 +418,6 @@ function QuestButtonSettings(props: { setValue: (value: QuestButtonSettingProps)
 
     function handleLeftClickActionChange(value: "open-quests" | "context-menu" | "plugin-settings" | "nothing") {
         setCurrentQuestButtonLeftClickAction(value);
-        dummyLeftClickActionState(value);
 
         props.setValue(
             {
@@ -454,7 +432,6 @@ function QuestButtonSettings(props: { setValue: (value: QuestButtonSettingProps)
     }
     function handleMiddleClickActionChange(value: "open-quests" | "context-menu" | "plugin-settings" | "nothing") {
         setCurrentQuestButtonMiddleClickAction(value);
-        dummyMiddleClickActionState(value);
 
         props.setValue(
             {
@@ -469,7 +446,6 @@ function QuestButtonSettings(props: { setValue: (value: QuestButtonSettingProps)
     }
     function handleRightClickActionChange(value: "open-quests" | "context-menu" | "plugin-settings" | "nothing") {
         setCurrentQuestButtonRightClickAction(value);
-        dummyRightClickActionState(value);
 
         props.setValue(
             {
@@ -498,7 +474,17 @@ function QuestButtonSettings(props: { setValue: (value: QuestButtonSettingProps)
                             </Forms.FormText>
                         </div>
                         <div className={q("dummy-quest-button")}>
-                            <DummyQuestButton />
+                            <DummyQuestButton
+                                visible={currentQuestButtonDisplay.value !== "never"}
+                                selected={dummySelected}
+                                showPill={currentQuestButtonUnclaimed.value === "pill" || currentQuestButtonUnclaimed.value === "both"}
+                                showBadge={currentQuestButtonUnclaimed.value === "badge" || currentQuestButtonUnclaimed.value === "both"}
+                                badgeColor={currentBadgeColor}
+                                leftClickAction={currentQuestButtonLeftClickAction}
+                                middleClickAction={currentQuestButtonMiddleClickAction}
+                                rightClickAction={currentQuestButtonRightClickAction}
+                                onSelectedChange={setDummySelected}
+                            />
                         </div>
                     </div>
                     <div className={q("main-inline-group")}>
@@ -739,6 +725,17 @@ function IgnoredQuestsSetting(props: { setValue: (value: string) => void; }): JS
     );
 }
 
+const DummyQuestPreview = ({ quest, dummyColor, dummyGradient }: { quest: Quest; dummyColor: number | null; dummyGradient: string; }) => {
+    const classes = getQuestTileClasses("", quest, dummyColor, dummyGradient);
+
+    return (
+        <QuestTile
+            className={[q("dummy-quest"), classes].join(" ")}
+            quest={quest}
+        />
+    );
+};
+
 function RestyleQuestsSetting(props: { setValue: (value: RestyleQuestsSettingProps) => void; }) {
     const {
         restyleQuestsUnclaimed,
@@ -764,17 +761,6 @@ function RestyleQuestsSetting(props: { setValue: (value: RestyleQuestsSettingPro
     const [restyleQuestsPreloadValue, setRestyleQuestsPreloadValue] = useState(restyleQuestsPreload);
     const [dummyColor, setDummyColor] = useState<number | null>(restyleQuestsUnclaimed);
     const [dummyGradient, setDummyGradient] = useState(restyleQuestsGradient);
-
-    const DummyQuestPreview = ({ quest }: { quest: Quest; }) => {
-        const classes = getQuestTileClasses("", quest, dummyColor, dummyGradient);
-
-        return (
-            <QuestTile
-                className={q("dummy-quest") + " " + classes}
-                quest={quest}
-            />
-        );
-    };
 
     const [hasQuests, setHasQuests] = useState(false);
     const [dummyQuest, setDummyQuest] = useState<Quest | null>(null);
@@ -966,7 +952,7 @@ function RestyleQuestsSetting(props: { setValue: (value: RestyleQuestsSettingPro
                     </div>
                     <div className={q("dummy-quest-preview")}>
                         {hasQuests && dummyQuest && (
-                            <DummyQuestPreview quest={dummyQuest} />
+                            <DummyQuestPreview quest={dummyQuest} dummyColor={dummyColor} dummyGradient={dummyGradient} />
                         )}
                     </div>
                 </Forms.FormSection>
@@ -1522,7 +1508,7 @@ export const settings = definePluginSettings({
     questButtonBadgeColor: {
         type: OptionType.NUMBER | OptionType.CUSTOM,
         description: "The color of the Quest button badge in the server list.",
-        default: defaultUnclaimedColor, // decimal, null (Discord Default)
+        default: defaultUnclaimedColor, // Decimal, null (Discord Default)
         hidden: true
     },
     questButtonLeftClickAction: {
@@ -1586,25 +1572,25 @@ export const settings = definePluginSettings({
     restyleQuestsUnclaimed: {
         type: OptionType.NUMBER | OptionType.CUSTOM,
         description: "The color of unclaimed Quest tiles in the Quests page.",
-        default: defaultUnclaimedColor, // decimal, null (Discord Default)
+        default: defaultUnclaimedColor, // Decimal, null (Discord Default)
         hidden: true
     },
     restyleQuestsClaimed: {
         type: OptionType.NUMBER | OptionType.CUSTOM,
         description: "The color of claimed Quest tiles in the Quests page.",
-        default: defaultClaimedColor, // decimal, null (Discord Default)
+        default: defaultClaimedColor, // Decimal, null (Discord Default)
         hidden: true
     },
     restyleQuestsIgnored: {
         type: OptionType.NUMBER | OptionType.CUSTOM,
         description: "The color of ignored Quest tiles in the Quests page.",
-        default: defaultIgnoredColor, // decimal, null (Discord Default)
+        default: defaultIgnoredColor, // Decimal, null (Discord Default)
         hidden: true
     },
     restyleQuestsExpired: {
         type: OptionType.NUMBER | OptionType.CUSTOM,
         description: "The color of expired Quest tiles in the Quests page.",
-        default: defaultExpiredColor, // decimal, null (Discord Default)
+        default: defaultExpiredColor, // Decimal, null (Discord Default)
         hidden: true
     },
     restyleQuestsGradient: {
@@ -1635,6 +1621,12 @@ export const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Tracks the number of unclaimed and unignored Quests.",
         default: 0, // Digit >= 0
+        hidden: true
+    },
+    onQuestsPage: {
+        type: OptionType.BOOLEAN,
+        description: "Whether the user is currently on the quests page.",
+        default: false,
         hidden: true
     }
 });
