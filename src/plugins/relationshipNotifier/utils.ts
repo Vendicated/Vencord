@@ -21,7 +21,7 @@ import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
+import { FluxStore } from "@vencord/discord-types";
 
 import settings from "./settings";
 import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";

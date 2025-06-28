@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as t from "@vencord/discord-types/classes";
+import * as t from "@vencord/discord-types";
 import { findByPropsLazy, findLazy } from "@webpack";
 
 export const ModalImageClasses: t.ImageModalClasses = findLazy(m => m.image && m.modal && !m.applicationIcon);

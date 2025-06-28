@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ChannelStore } from "@webpack/common";
-import { MessageSnapshot } from "@webpack/types";
+import { MessageSnapshot } from "@vencord/discord-types";
 
 const KEY = "HideAttachments_HiddenIds";
 

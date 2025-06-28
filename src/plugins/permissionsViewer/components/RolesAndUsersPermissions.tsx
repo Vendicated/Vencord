@@ -24,7 +24,7 @@ import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
-import { UnicodeEmoji } from "@webpack/types";
+import { UnicodeEmoji } from "@vencord/discord-types";
 import type { Guild, Role, User } from "discord-types/general";
 
 import { settings } from "..";
