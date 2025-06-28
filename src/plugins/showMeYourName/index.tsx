@@ -420,7 +420,7 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
+                match: /(?<=onContextMenu:\i,children:)\i/,
                 replace: "$self.renderUsername(arguments[0])"
             }
         },
