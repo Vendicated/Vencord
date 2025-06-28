@@ -11,7 +11,7 @@ import { OptionType } from "@utils/types";
 import { Button, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { getQuestTileClasses, updateHasUnclaimedUnignoredQuests } from "./index";
+import { getQuestTileClasses } from "./index";
 import { ColorPicker, DisableQuestsSettingOption, DisableQuestsSettingProps, DynamicDropdown, FetchingQuestsSettingProps, GuildlessServerListItem, Quest, QuestButtonSettingProps, QuestIcon, QuestTile, RadioGroup, RadioOption, RestyleQuestsSettingProps, SelectOption, SoundIcon } from "./utils/components";
 import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, isDarkish, isSoundAllowed, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, QuestsStore, rightClick, validCommaSeparatedList } from "./utils/misc";
 
@@ -152,7 +152,7 @@ export function validateIgnoredQuests(ignoredQuests?: string, questsData?: Quest
         }
     }
 
-    updateHasUnclaimedUnignoredQuests(numUnclaimedUnignoredQuests);
+    settings.store.unclaimedUnignoredQuests = numUnclaimedUnignoredQuests;
     const ignoredStr = Array.from(validIgnored).join("\n");
     settings.store.ignoredQuests = ignoredStr;
 

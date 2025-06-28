@@ -18,14 +18,6 @@ import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoF
 import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./utils/components";
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
 
-export function updateOnQuestsPage(value: boolean): void {
-    settings.store.onQuestsPage = value;
-}
-
-export function updateHasUnclaimedUnignoredQuests(value: number): void {
-    settings.store.unclaimedUnignoredQuests = value;
-}
-
 function questMenuUnignoreClicked(): void {
     settings.store.ignoredQuests = "";
 }
@@ -592,7 +584,7 @@ export default definePlugin({
 
     flux: {
         CHANNEL_SELECT(data) {
-            updateOnQuestsPage(window.location.pathname === questPath);
+            settings.store.onQuestsPage = (window.location.pathname === questPath);
         },
 
         QUESTS_FETCH_CURRENT_QUESTS_SUCCESS(data) {
