@@ -68,7 +68,7 @@
 }
 
 .vc-gp-server-info-pair {
-    color: var(--text-normal);
+    color: var(--text-default);
 }
 
 .vc-gp-server-info-pair [class^="timestamp"] {
