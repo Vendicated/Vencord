@@ -3,7 +3,7 @@
     #vc-spotify-player {
         padding: 12px;
         background: var(--bg-overlay-floating,
-                var(--background-base-low, var(--vc-background-secondary-alt)));
+                var(--background-base-low, var(--background-base-lower-alt)));
         margin: 0;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
@@ -24,7 +24,7 @@
 
     #vc-spotify-progress-bar {
         position: relative;
-        color: var(--vc-text-normal);
+        color: var(--text-default);
         width: 100%;
     }
 

@@ -28,7 +28,6 @@ export { PlainSettings, Settings };
 
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
-import "./globalStyles.css";
 
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { StartAt } from "@utils/types";

@@ -1,6 +1,6 @@
 .vc-shiki-container {
     border: 4px;
-    background-color: var(--vc-background-secondary);
+    background-color: var(--background-base-lower);
 }
 
 .vc-shiki-root {
@@ -47,7 +47,7 @@
     user-select: none;
 }
 
-.vc-shiki-btn ~ .vc-shiki-btn {
+.vc-shiki-btn~.vc-shiki-btn {
     margin-left: 4px;
 }
 
