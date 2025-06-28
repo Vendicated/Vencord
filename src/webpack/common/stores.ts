@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as t from "@vencord/discord-types/stores";
 import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
 import type * as Stores from "discord-types/stores";
 
 import { waitForStore } from "./internal";
-import * as t from "./types/stores";
 
 export const Flux: t.Flux = findByPropsLazy("connectStores");
 

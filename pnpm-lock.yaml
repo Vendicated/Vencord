@@ -65,6 +65,9 @@ importers:
       '@types/yazl':
         specifier: ^2.4.5
         version: 2.4.6
+      '@vencord/discord-types':
+        specifier: link:packages/discord-types
+        version: link:packages/discord-types
       diff:
         specifier: ^7.0.0
         version: 7.0.0
@@ -140,6 +143,15 @@ importers:
       zip-local:
         specifier: ^0.3.5
         version: 0.3.5
+
+  packages/discord-types:
+    dependencies:
+      '@types/react':
+        specifier: ^19.0.10
+        version: 19.0.12
+      type-fest:
+        specifier: ^4.41.0
+        version: 4.41.0
 
   packages/vencord-types:
     dependencies:
@@ -2326,6 +2338,10 @@ packages:
 
   type-fest@4.38.0:
     resolution: {integrity: sha512-2dBz5D5ycHIoliLYLi0Q2V7KRaDlH0uWIvmk7TYlAg5slqwiPv1ezJdZm1QEM0xgk29oYWMCbIG7E6gHpvChlg==}
+    engines: {node: '>=16'}
+
+  type-fest@4.41.0:
+    resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
     engines: {node: '>=16'}
 
   typed-array-buffer@1.0.3:
@@ -4922,6 +4938,8 @@ snapshots:
       prelude-ls: 1.2.1
 
   type-fest@4.38.0: {}
+
+  type-fest@4.41.0: {}
 
   typed-array-buffer@1.0.3:
     dependencies:
