@@ -69,7 +69,7 @@ function Validator({ link }: { link: string; }) {
             : "Valid!";
 
     return <Forms.FormText style={{
-        color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--text-positive)"
+        color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--status-positive)"
     }}>{text}</Forms.FormText>;
 }
 
