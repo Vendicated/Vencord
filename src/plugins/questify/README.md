@@ -2,7 +2,7 @@
 
 Enhance your Quest experience with a suite of features, or disable them entirely if they're not your thing.
 
-![An example of the Restyle and Reorder features.]()
+![An example of the Restyle and Reorder features.](https://github.com/user-attachments/assets/452ba894-d0e0-46d5-894a-af901c42d8e5)
 
 ## Features
 1. Quest Features
