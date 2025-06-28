@@ -418,7 +418,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"BaseUsername"',
+            find: '="SYSTEM_TAG"',
             replacement: {
                 match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
                 replace: "$self.renderUsername(arguments[0])"
