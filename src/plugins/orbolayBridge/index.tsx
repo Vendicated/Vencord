@@ -57,7 +57,7 @@ const settings = definePluginSettings({
     },
     messageAlignment: {
         type: OptionType.SELECT,
-        description: "Alignment of messages",
+        description: "Alignment of messages in the overlay",
         options: [
             { label: "Top left", value: "topleft", default: true },
             { label: "Top right", value: "topright" },
@@ -69,7 +69,7 @@ const settings = definePluginSettings({
     },
     userAlignment: {
         type: OptionType.SELECT,
-        description: "Alignment of users",
+        description: "Alignment of users in the overlay",
         options: [
             { label: "Top left", value: "topleft", default: true },
             { label: "Top right", value: "topright" },
@@ -81,13 +81,13 @@ const settings = definePluginSettings({
     },
     voiceSemitransparent: {
         type: OptionType.BOOLEAN,
-        description: "Make voice transparent",
+        description: "Make voice channel members transparent",
         default: true,
         restartNeeded: true
     },
     messagesSemitransparent: {
         type: OptionType.BOOLEAN,
-        description: "Make messages transparent",
+        description: "Make message notifications transparent",
         default: false,
         restartNeeded: true
     },
