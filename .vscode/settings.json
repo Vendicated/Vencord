@@ -9,13 +9,11 @@
     "[typescriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
-    "[css]": {
-        "editor.defaultFormatter": "vscode.css-language-features"
-    },
     "javascript.format.semicolons": "insert",
     "typescript.format.semicolons": "insert",
     "typescript.preferences.quoteStyle": "double",
     "javascript.preferences.quoteStyle": "double",
+
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",
