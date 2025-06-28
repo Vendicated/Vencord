@@ -149,21 +149,37 @@ export function ServerListItemLowerBadge(props: ServerListItemLowerBadgeProps): 
     );
 }
 
-export function GuildlessServerListItem(
-    id?: string,
-    className: string = "vc-server-list-item",
-    icon?: (() => JSX.Element),
-    tooltip?: string,
-    showPill: boolean = true,
-    isVisible?: (() => boolean) | boolean,
-    isSelected?: (() => boolean) | boolean,
-    hasUnread?: (() => boolean) | boolean,
-    lowerBadgeProps?: (() => ServerListItemLowerBadgeProps) | ServerListItemLowerBadgeProps,
-    upperBadgeProps?: (() => ServerListItemUpperBadgeProps) | ServerListItemUpperBadgeProps,
-    onClick?: ((e: React.MouseEvent) => void),
-    onContextMenu?: ((e: React.MouseEvent) => void),
-    onMouseDown?: ((e: React.MouseEvent) => void)
-): JSX.Element {
+export interface GuildlessServerListItemProps {
+    id?: string;
+    className?: string;
+    icon?: (() => JSX.Element);
+    tooltip?: string;
+    showPill?: boolean;
+    isVisible?: (() => boolean) | boolean;
+    isSelected?: (() => boolean) | boolean;
+    hasUnread?: (() => boolean) | boolean;
+    lowerBadgeProps?: (() => ServerListItemLowerBadgeProps) | ServerListItemLowerBadgeProps;
+    upperBadgeProps?: (() => ServerListItemUpperBadgeProps) | ServerListItemUpperBadgeProps;
+    onClick?: ((e: React.MouseEvent) => void);
+    onContextMenu?: ((e: React.MouseEvent) => void);
+    onMouseDown?: ((e: React.MouseEvent) => void);
+}
+
+export function GuildlessServerListItem({
+    id,
+    className = "vc-server-list-item",
+    icon,
+    tooltip,
+    showPill = true,
+    isVisible,
+    isSelected,
+    hasUnread,
+    lowerBadgeProps,
+    upperBadgeProps,
+    onClick,
+    onContextMenu,
+    onMouseDown
+}: GuildlessServerListItemProps): JSX.Element {
     const baseClasses = className.split(" ") || ["vc-server-list-item"];
     const mainContainerClass = `${baseClasses.join(" ")}-container`;
     const iconContainerClass = `${baseClasses.join(" ")}-icon-container`;

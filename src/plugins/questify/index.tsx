@@ -130,25 +130,26 @@ export function QuestButton(): JSX.Element {
         }
     }
 
-    return GuildlessServerListItem(
-        q("quest-button"),
-        q("quest-button"),
-        () => QuestIcon(26, 26),
-        "Quests",
-        true,
-        () => showQuestsButton(),
-        () => onQuestsPage,
-        () => !!hasUnclaimedUnignoredQuests && ["pill", "both"].includes(questButtonUnclaimed),
-        () => ({
-            count: !["badge", "both"].includes(questButtonUnclaimed) ? 0 : badgeNumber,
-            maxDigits: 2,
-            ...(questButtonBadgeColorRGB ? { color: `rgb(${questButtonBadgeColorRGB.r}, ${questButtonBadgeColorRGB.g}, ${questButtonBadgeColorRGB.b})` } : {}),
-            ...(questButtonBadgeColorRGB ? { style: { color: isDarkish(questButtonBadgeColorRGB) ? "white" : "black" } } : {})
-        }),
-        undefined,
-        (e: React.MouseEvent) => handleClick(e),
-        (e: React.MouseEvent) => handleClick(e),
-        (e: React.MouseEvent) => handleClick(e)
+    return (
+        <GuildlessServerListItem
+            id={q("quest-button")}
+            className={q("quest-button")}
+            icon={() => QuestIcon(26, 26)}
+            tooltip="Quests"
+            showPill={true}
+            isVisible={() => showQuestsButton()}
+            isSelected={() => onQuestsPage}
+            hasUnread={() => !!hasUnclaimedUnignoredQuests && ["pill", "both"].includes(questButtonUnclaimed)}
+            lowerBadgeProps={() => ({
+                count: !["badge", "both"].includes(questButtonUnclaimed) ? 0 : badgeNumber,
+                maxDigits: 2,
+                ...(questButtonBadgeColorRGB ? { color: `rgb(${questButtonBadgeColorRGB.r}, ${questButtonBadgeColorRGB.g}, ${questButtonBadgeColorRGB.b})` } : {}),
+                ...(questButtonBadgeColorRGB ? { style: { color: isDarkish(questButtonBadgeColorRGB) ? "white" : "black" } } : {})
+            })}
+            onClick={(e: React.MouseEvent) => handleClick(e)}
+            onContextMenu={(e: React.MouseEvent) => handleClick(e)}
+            onMouseDown={(e: React.MouseEvent) => handleClick(e)}
+        />
     );
 }
 

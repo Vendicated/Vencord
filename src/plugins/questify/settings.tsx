@@ -250,28 +250,29 @@ function DummyQuestButton(): JSX.Element {
         }
     }
 
-    return GuildlessServerListItem(
-        q("dummy-quest-button"),
-        q("dummy-quest-button", "quest-button"),
-        () => QuestIcon(26, 26),
-        "Quests",
-        true,
-        dummyVisible,
-        dummySelected,
-        dummyShowPill,
-        () => {
-            const dummyBadgeColorRGB = dummyBadgeColor ? decimalToRGB(dummyBadgeColor) : null;
-            return {
-                count: dummyShowBadge ? 3 : 0,
-                maxDigits: 2,
-                ...(dummyBadgeColorRGB ? { color: `rgb(${dummyBadgeColorRGB.r},${dummyBadgeColorRGB.g},${dummyBadgeColorRGB.b})` } : {}),
-                ...(dummyBadgeColorRGB ? { style: { color: isDarkish(dummyBadgeColorRGB) ? "white" : "black" } } : {})
-            };
-        },
-        undefined,
-        (e: React.MouseEvent) => { handleClick(e); },
-        (e: React.MouseEvent) => { handleClick(e); },
-        (e: React.MouseEvent) => { handleClick(e); }
+    return (
+        <GuildlessServerListItem
+            id={q("dummy-quest-button")}
+            className={q("dummy-quest-button", "quest-button")}
+            icon={() => QuestIcon(26, 26)}
+            tooltip="Quests"
+            showPill={true}
+            isVisible={dummyVisible}
+            isSelected={dummySelected}
+            hasUnread={dummyShowPill}
+            lowerBadgeProps={() => {
+                const dummyBadgeColorRGB = dummyBadgeColor ? decimalToRGB(dummyBadgeColor) : null;
+                return {
+                    count: dummyShowBadge ? 3 : 0,
+                    maxDigits: 2,
+                    ...(dummyBadgeColorRGB ? { color: `rgb(${dummyBadgeColorRGB.r},${dummyBadgeColorRGB.g},${dummyBadgeColorRGB.b})` } : {}),
+                    ...(dummyBadgeColorRGB ? { style: { color: isDarkish(dummyBadgeColorRGB) ? "white" : "black" } } : {})
+                };
+            }}
+            onClick={(e: React.MouseEvent) => { handleClick(e); }}
+            onContextMenu={(e: React.MouseEvent) => { handleClick(e); }}
+            onMouseDown={(e: React.MouseEvent) => { handleClick(e); }}
+        />
     );
 }
 
