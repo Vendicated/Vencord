@@ -312,26 +312,25 @@ const createWebsocket = () => {
 };
 
 export default definePlugin({
-    name: "Orbolay Bridge",
+    name: "OrbolayBridge",
     description: "Bridge plugin to connect Orbolay to Discord",
     authors: [Devs.SpikeHD],
     hidden: false,
 
     settings,
 
+    flux: {
+        SPEAKING: handleSpeaking,
+        VOICE_STATE_UPDATES: handleVoiceStateUpdates,
+        RPC_NOTIFICATION_CREATE: handleMessageNotification,
+    },
+
     start() {
         createWebsocket();
-
-        FluxDispatcher.subscribe("SPEAKING", handleSpeaking);
-        FluxDispatcher.subscribe("VOICE_STATE_UPDATES", handleVoiceStateUpdates);
-        FluxDispatcher.subscribe("RPC_NOTIFICATION_CREATE", handleMessageNotification);
     },
-    stop() {
-        ws?.close();
-        ws = null;
 
-        FluxDispatcher.unsubscribe("SPEAKING", handleSpeaking);
-        FluxDispatcher.unsubscribe("VOICE_STATE_UPDATES", handleVoiceStateUpdates);
-        FluxDispatcher.unsubscribe("RPC_NOTIFICATION_CREATE", handleMessageNotification);
+    stop() {
+        ws?.close?.();
+        ws = null;
     }
 });
