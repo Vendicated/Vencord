@@ -72,13 +72,13 @@ export function startAutoFetchingQuests(seconds?: number): void {
     }
 
     const interval = seconds ? seconds * 1000 : settings.store.fetchingQuestsInterval * 1000;
-    QuestifyLogger.info(`[${getFormattedNow()}] Starting auto-fetch of quests every ${(interval / 60000).toFixed(2)} minutes.`);
-    autoFetchInterval = setInterval(() => { fetchAndAlertQuests("Questify", QuestifyLogger); }, interval);
+    QuestifyLogger.info(`[${getFormattedNow()}] Starting AutoFetch of quests every ${(interval / 60000).toFixed(2)} minutes.`);
+    autoFetchInterval = setInterval(() => { fetchAndAlertQuests("Questify-AutoFetch", QuestifyLogger); }, interval);
 }
 
 export function stopAutoFetchingQuests(): void {
     if (autoFetchInterval) {
-        QuestifyLogger.info(`[${getFormattedNow()}] Stopping auto-fetch of quests.`);
+        QuestifyLogger.info(`[${getFormattedNow()}] Stopping AutoFetch of quests.`);
         clearInterval(autoFetchInterval);
         autoFetchInterval = null;
     }
