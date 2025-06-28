@@ -15,7 +15,7 @@ pnpm add -D @vencord/discord-types
 ## Usage
 
 ```ts
-import type { UserStore } from '@vencord/discord-types';
+import type { UserStore } from "@vencord/discord-types";
 
 const userStore: UserStore = findStore("UserStore");
 ```
