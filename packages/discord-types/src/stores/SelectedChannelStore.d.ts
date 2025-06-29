@@ -1,7 +1,7 @@
 import { FluxStore } from "..";
 
 export class SelectedChannelStore extends FluxStore {
-    getChannelId(e?: never): string;
+    getChannelId(guildId?: string): string;
     getLastChannelFollowingDestination(): unknown;
     getLastSelectedChannelId(): string;
     getMostRecentSelectedTextChannelId(guildId: string): unknown;
