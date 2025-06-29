@@ -19,36 +19,20 @@
         "noImplicitAny": false,
         "target": "ESNEXT",
         "jsx": "preserve",
+
         "baseUrl": "./src/",
         "paths": {
-            "@main/*": [
-                "./main/*"
-            ],
-            "@api/*": [
-                "./api/*"
-            ],
-            "@components/*": [
-                "./components/*"
-            ],
-            "@utils/*": [
-                "./utils/*"
-            ],
-            "@shared/*": [
-                "./shared/*"
-            ],
-            "@webpack/common": [
-                "./webpack/common"
-            ],
-            "@webpack": [
-                "./webpack/webpack"
-            ],
-            "@webpack/patcher": [
-                "./webpack/patchWebpack"
-            ],
-            "@webpack/wreq.d": [
-                "./webpack/wreq.d"
-            ],
+            "@main/*": ["./main/*"],
+            "@api/*": ["./api/*"],
+            "@components/*": ["./components/*"],
+            "@utils/*": ["./utils/*"],
+            "@shared/*": ["./shared/*"],
+            "@webpack/common": ["./webpack/common"],
+            "@webpack": ["./webpack/webpack"],
+            "@webpack/patcher": ["./webpack/patchWebpack"],
+            "@webpack/wreq.d": ["./webpack/wreq.d"],
         },
+
         "plugins": [
             // Transform paths in output .d.ts files (Include this line if you output declarations files)
             {
@@ -58,10 +42,5 @@
         ],
         "outDir": "who-fucking-cares-dude"
     },
-    "include": [
-        "src/**/*",
-        "browser/**/*",
-        "scripts/**/*",
-        "eslint.config.mjs",
-    ],
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"],
 }
