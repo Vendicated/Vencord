@@ -41,39 +41,101 @@ const settings = definePluginSettings({
         restartNeeded: true,
         type: OptionType.BOOLEAN,
         default: true
+    },
+    applyColorOnlyToUsersWithoutColor: {
+        description: "Apply colors only to users who don't have a predefined color",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    applyColorOnlyInDms: {
+        description: "Apply colors only in direct messages; do not apply colors in servers.",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [Devs.Grzesiek11],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365],
     settings,
 
     patches: [
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},"
+                // Override colorString with our custom color and disable gradients if applying the custom color.
+                match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i}=)(\i),/,
+                replace: "$self.wrapMessageColorProps($1, arguments[0]),"
             }
         },
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=\.MEMBER_LIST}\),\[\]\),)(.+?color:)null!=.{0,50}?(?=,)/,
-                replace: (_, rest) => `ircColor=$self.calculateNameColorForListContext(arguments[0]),${rest}ircColor`
+                match: /(?<=roleName:\i,)color:/,
+                replace: "color:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }
     ],
 
-    calculateNameColorForMessageContext(context: any) {
-        const id = context?.message?.author?.id;
-        return calculateNameColorForUser(id);
+    wrapMessageColorProps(colorProps: { colorString: string, colorStrings?: Record<"primaryColor" | "secondaryColor" | "tertiaryColor", string>; }, context: any) {
+        try {
+            const colorString = this.calculateNameColorForMessageContext(context);
+            if (colorString === colorProps.colorString) {
+                return colorProps;
+            }
+
+            return {
+                ...colorProps,
+                colorString,
+                colorStrings: colorProps.colorStrings && {
+                    primaryColor: colorString,
+                    secondaryColor: undefined,
+                    tertiaryColor: undefined
+                }
+            };
+        } catch (e) {
+            console.error("Failed to calculate message color strings:", e);
+            return colorProps;
+        }
     },
+
+    calculateNameColorForMessageContext(context: any) {
+        const userId: string | undefined = context?.message?.author?.id;
+        const colorString = context?.author?.colorString;
+        const color = calculateNameColorForUser(userId);
+
+        // Color preview in role settings
+        if (context?.message?.channel_id === "1337" && userId === "313337")
+            return colorString;
+
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
+        }
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
+    },
+
     calculateNameColorForListContext(context: any) {
-        const id = context?.user?.id;
-        return calculateNameColorForUser(id);
+        try {
+            const id = context?.user?.id;
+            const colorString = context?.colorString;
+            const color = calculateNameColorForUser(id);
+
+            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+                return colorString;
+            }
+
+            return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+                ? color
+                : colorString;
+        } catch (e) {
+            console.error("Failed to calculate name color for list context:", e);
+        }
     }
 });

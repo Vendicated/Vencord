@@ -19,17 +19,31 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+import managedStyle from "./style.css?managed";
+
 export default definePlugin({
-    name: "NoRPC",
-    description: "Disables Discord's RPC server.",
-    authors: [Devs.Cyn],
+    name: "MemberListDecoratorsAPI",
+    description: "API to add decorators to member list (both in servers and DMs)",
+    authors: [Devs.TheSun, Devs.Ven],
+
+    managedStyle,
+
     patches: [
         {
-            find: '.ensureModule("discord_rpc")',
-            replacement: {
-                match: /\.ensureModule\("discord_rpc"\)\.then\(\(.+?\)}\)}/,
-                replace: '.ensureModule("discord_rpc")}',
-            },
+            find: ".lostPermission)",
+            replacement: [
+                {
+                    match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
+                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
+                }
+            ]
         },
-    ],
+        {
+            find: "PrivateChannel.renderAvatar",
+            replacement: {
+                match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
+                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
+            }
+        }
+    ]
 });

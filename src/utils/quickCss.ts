@@ -19,7 +19,6 @@
 import { Settings, SettingsStore } from "@api/Settings";
 import { ThemeStore } from "@webpack/common";
 
-
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
 
@@ -40,7 +39,7 @@ async function initSystemValues() {
     createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
 }
 
-export async function toggle(isEnabled: boolean) {
+async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
             style = createStyle("vencord-custom-css");
@@ -61,7 +60,10 @@ async function initThemes() {
     const { themeLinks, enabledThemes } = Settings;
 
     // "darker" and "midnight" both count as dark
-    const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
+    // This function is first called on DOMContentLoaded, so ThemeStore may not have been loaded yet
+    const activeTheme = ThemeStore == null
+        ? undefined
+        : ThemeStore.theme === "light" ? "light" : "dark";
 
     const links = themeLinks
         .map(rawLink => {
@@ -89,6 +91,8 @@ async function initThemes() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    if (IS_USERSCRIPT) return;
+
     initSystemValues();
     initThemes();
 
@@ -97,8 +101,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
-    ThemeStore.addChangeListener(initThemes);
 
-    if (!IS_WEB)
+    if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);
-});
+    }
+}, { once: true });
+
+export function initQuickCssThemeStore() {
+    if (IS_USERSCRIPT) return;
+
+    initThemes();
+
+    let currentTheme = ThemeStore.theme;
+    ThemeStore.addChangeListener(() => {
+        if (currentTheme === ThemeStore.theme) return;
+
+        currentTheme = ThemeStore.theme;
+        initThemes();
+    });
+}

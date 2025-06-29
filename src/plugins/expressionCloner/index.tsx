@@ -17,6 +17,7 @@
 */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { migratePluginSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -25,10 +26,13 @@ import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/moda
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Guild } from "discord-types/general";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
+
+const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
 
 interface Sticker {
     t: "Sticker";
@@ -125,7 +129,7 @@ function getGuildCandidates(data: Data) {
 
         const { isAnimated } = data as Emoji;
 
-        const emojiSlots = g.getMaxEmojiSlots();
+        const emojiSlots = getGuildMaxEmojiSlots(g);
         const { emojis } = EmojiStore.getGuilds()[g.id];
 
         let count = 0;
@@ -162,7 +166,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             message = JSON.parse(e.text).message;
         } catch { }
 
-        new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
+        new Logger("ExpressionCloner").error("Failed to clone", data.name, "to", guildId, e);
         Toasts.show({
             message: "Failed to clone: " + message,
             type: Toasts.Type.FAILURE,
@@ -221,7 +225,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                 aria-disabled={isCloning}
                                 style={{
                                     borderRadius: "50%",
-                                    backgroundColor: "var(--background-secondary)",
+                                    backgroundColor: "var(--background-base-lower)",
                                     display: "inline-flex",
                                     justifyContent: "center",
                                     alignItems: "center",
@@ -361,10 +365,11 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
+migratePluginSettings("ExpressionCloner", "EmoteCloner");
 export default definePlugin({
-    name: "EmoteCloner",
+    name: "ExpressionCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
-    tags: ["StickerCloner"],
+    tags: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
     authors: [Devs.Ven, Devs.Nuckyz],
     contextMenus: {
         "message": messageContextMenuPatch,

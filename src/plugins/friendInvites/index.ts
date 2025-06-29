@@ -31,7 +31,7 @@ export default definePlugin({
         {
             name: "create friend invite",
             description: "Generates a friend invite link.",
-            inputType: ApplicationCommandInputType.BOT,
+            inputType: ApplicationCommandInputType.BUILT_IN,
 
             execute: async (args, ctx) => {
                 const invite = await FriendInvites.createFriendInvite();
@@ -48,7 +48,7 @@ export default definePlugin({
         {
             name: "view friend invites",
             description: "View a list of all generated friend invites.",
-            inputType: ApplicationCommandInputType.BOT,
+            inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
                 const invites = await FriendInvites.getAllFriendInvites();
                 const friendInviteList = invites.map(i =>
@@ -67,7 +67,7 @@ export default definePlugin({
         {
             name: "revoke friend invites",
             description: "Revokes all generated friend invites.",
-            inputType: ApplicationCommandInputType.BOT,
+            inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
                 await FriendInvites.revokeFriendInvites();
 
