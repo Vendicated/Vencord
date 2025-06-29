@@ -4,7 +4,7 @@ export class SelectedChannelStore extends FluxStore {
     getChannelId(e?: never): string;
     getLastChannelFollowingDestination(): unknown;
     getLastSelectedChannelId(): string;
-    getMostRecentSelectedTextChannelId(e: never): unknown;
+    getMostRecentSelectedTextChannelId(guildId: string): unknown;
     getVoiceChannelId(): string | undefined;
     initialize(): void;
 }
