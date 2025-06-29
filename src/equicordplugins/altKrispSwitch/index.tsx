@@ -20,12 +20,11 @@ export default definePlugin({
             }
         }
     ],
-    shouldCancelSuppression([enableKrisp, { section: origin }]) {
-        if (origin === "Noise Cancellation Popout") {
+    shouldCancelSuppression([enableKrisp, options]) {
+        if (options?.section === "Noise Cancellation Popout") {
             if (enableKrisp) {
                 return false;
             } else {
-                // don't enable standard noise suppression if disabling
                 return true;
             }
         }
