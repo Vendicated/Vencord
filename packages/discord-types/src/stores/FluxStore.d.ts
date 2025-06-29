@@ -15,10 +15,6 @@ export class FluxStore {
     registerActionHandlers: GenericFunction;
     syncWith: GenericFunction;
     waitFor: GenericFunction;
-    /**
-     * discord doesn't use this anymore, most of the time it returns an empty object
-     */
-    __getLocalVars(): Record<string, any>;
 
     static getAll(): FluxStore[];
 }
