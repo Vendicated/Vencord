@@ -54,6 +54,14 @@ export default definePlugin({
                 match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
                 replace: "$1!0"
             }
+        },
+        {
+            // Gradient roles in chat
+            find: "value:{animate:",
+            replacement: {
+                match: /animate:\i/,
+                replace: "animate:!0"
+            }
         }
     ]
 });
