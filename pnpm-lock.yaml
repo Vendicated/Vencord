@@ -146,13 +146,12 @@ importers:
       '@types/react':
         specifier: ^19.0.10
         version: 19.0.12
-      type-fest:
-        specifier: ^4.41.0
-        version: 4.41.0
-    devDependencies:
       moment:
         specifier: ^2.22.2
         version: 2.30.1
+      type-fest:
+        specifier: ^4.41.0
+        version: 4.41.0
 
   packages/vencord-types:
     dependencies:

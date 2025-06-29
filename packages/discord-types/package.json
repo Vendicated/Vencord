@@ -12,9 +12,7 @@
     },
     "dependencies": {
         "@types/react": "^19.0.10",
+        "moment": "^2.22.2",
         "type-fest": "^4.41.0"
-    },
-    "devDependencies": {
-        "moment": "^2.22.2"
     }
 }
