@@ -10,7 +10,10 @@ export interface Role {
     originalPosition: number;
     permissions: bigint;
     position: number;
-    tags: { // I'm sure there are more.
+    /**
+     * probably incomplete
+     */
+    tags: {
         bot_id: string;
         integration_id: string;
         premium_subscriber: unknown;

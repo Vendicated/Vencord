@@ -1,3 +1,5 @@
+// TODO: a lot of optional params can also be null, not just undef
+
 export class User {
     constructor(user: object);
     accentColor: number;
@@ -22,7 +24,9 @@ export class User {
     purchasedFlags: number;
     system: boolean;
     username: string;
+    globalName: string | undefined;
     verified: boolean;
+    themeColors?: [number, number];
 
     get createdAt(): Date;
     get hasPremiumPerks(): boolean;
@@ -31,7 +35,7 @@ export class User {
 
     addGuildAvatarHash(guildId: string, avatarHash: string): User;
     getAvatarSource(guildId: string, canAnimate?: boolean): { uri: string; };
-    getAvatarURL(guildId?: string, t?: unknown, canAnimate?: boolean): string;
+    getAvatarURL(guildId?: string | null, t?: unknown, canAnimate?: boolean): string;
     hasAvatarForGuild(guildId: string): boolean;
     hasDisabledPremium(): boolean;
     hasFlag(flag: number): boolean;

@@ -17,12 +17,12 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
+import { Message } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { MessageActions, SnowflakeUtils } from "@webpack/common";
-import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
-import { Argument } from "../../../packages/discord-types/src/common/messages/Commands";
+import { CommandArgument } from "../../../packages/discord-types/src/common/messages/Commands";
 
 const createBotMessage = findByCodeLazy('username:"Clyde"');
 
@@ -51,8 +51,8 @@ export function sendBotMessage(channelId: string, message: PartialDeep<Message>)
  * @param fallbackValue Fallback value in case this option wasn't passed
  * @returns Value
  */
-export function findOption<T>(args: Argument[], name: string): T & {} | undefined;
-export function findOption<T>(args: Argument[], name: string, fallbackValue: T): T & {};
-export function findOption(args: Argument[], name: string, fallbackValue?: any) {
+export function findOption<T>(args: CommandArgument[], name: string): T & {} | undefined;
+export function findOption<T>(args: CommandArgument[], name: string, fallbackValue: T): T & {};
+export function findOption(args: CommandArgument[], name: string, fallbackValue?: any) {
     return (args.find(a => a.name === name)?.value ?? fallbackValue) as any;
 }

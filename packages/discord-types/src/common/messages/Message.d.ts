@@ -1,12 +1,12 @@
 import { Moment } from 'moment';
-import { Option } from './Commands';
+import { CommandOption } from './Commands';
 import { User, UserJSON } from '../User';
 import { Embed, EmbedJSON } from './Embed';
 
 /**
  * TODO: looks like discord has moved over to Date instead of Moment;
  */
-export default class Message {
+export class Message {
     constructor(message: object);
     activity: unknown;
     application: unknown;
@@ -52,7 +52,7 @@ export default class Message {
             dm_permission: unknown;
             id: string;
             name: string;
-            options: Option[];
+            options: CommandOption[];
             permissions: unknown[];
             type: number;
             version: string;

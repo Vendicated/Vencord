@@ -21,8 +21,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
-import { User } from "discord-types/general";
 import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";

@@ -18,7 +18,6 @@
 
 import type * as t from "@vencord/discord-types";
 import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
-import type { Channel } from "discord-types/general";
 
 export let FluxDispatcher: t.FluxDispatcher;
 waitFor(["dispatch", "subscribe"], m => {
@@ -137,7 +136,7 @@ export const UserUtils = {
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
-    promptToUpload: findByCodeLazy("=!0,showLargeMessageDialog:") as (files: File[], channel: Channel, draftType: Number) => void
+    promptToUpload: findByCodeLazy("=!0,showLargeMessageDialog:") as (files: File[], channel: t.Channel, draftType: Number) => void
 };
 
 export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {

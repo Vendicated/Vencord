@@ -1,4 +1,4 @@
-export default interface GuildMember {
+export interface GuildMember {
     avatar: string | undefined;
     banner: string | undefined;
     bio: string;

@@ -1,0 +1,24 @@
+type GenericFunction = (...args: any[]) => any;
+
+export class FluxStore {
+    constructor(dispatcher: FluxDispatcher, eventHandlers?: Partial<Record<FluxEvents, (data: any) => void>>);
+
+    addChangeListener(callback: () => void): void;
+    addReactChangeListener(callback: () => void): void;
+    removeChangeListener(callback: () => void): void;
+    removeReactChangeListener(callback: () => void): void;
+    emitChange(): void;
+    getDispatchToken(): string;
+    getName(): string;
+    initialize(): void;
+    initializeIfNeeded(): void;
+    registerActionHandlers: GenericFunction;
+    syncWith: GenericFunction;
+    waitFor: GenericFunction;
+    /**
+     * discord doesn't use this anymore, most of the time it returns an empty object
+     */
+    __getLocalVars(): Record<string, any>;
+
+    static getAll(): FluxStore[];
+}
