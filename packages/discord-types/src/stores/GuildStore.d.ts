@@ -1,4 +1,4 @@
-import { Guild } from "discord-types/general";
+import { Guild, FluxStore } from "discord-types/general";
 
 
 export class GuildStore extends FluxStore {
