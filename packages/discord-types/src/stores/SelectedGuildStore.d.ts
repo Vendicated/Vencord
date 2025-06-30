@@ -1,6 +1,6 @@
 import { FluxStore } from "..";
 
-export interface SelectedGuildTimings {
+export interface SelectedGuildState {
     selectedGuildTimestampMillis: Record<string | number, number>;
     selectedGuildId: string | null;
     lastSelectedGuildId: string | null;
@@ -10,6 +10,6 @@ export class SelectedGuildStore extends FluxStore {
     getGuildId(): string | null;
     getLastSelectedGuildId(): string | null;
     getLastSelectedTimestamp(): string | null;
-    getState(): SelectedGuildTimings | undefined;
+    getState(): SelectedGuildState | undefined;
     initialize(): void;
 }
