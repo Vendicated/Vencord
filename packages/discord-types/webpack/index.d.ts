@@ -1,11 +1,3 @@
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated, Nuckyz and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
-import { SYM_ORIGINAL_FACTORY, SYM_PATCHED_BY, SYM_PATCHED_SOURCE } from "../../../src/webpack/patchWebpack";
-
 export type ModuleExports = any;
 
 export type Module = {
