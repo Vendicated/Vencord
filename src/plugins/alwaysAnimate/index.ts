@@ -57,7 +57,7 @@ export default definePlugin({
         },
         {
             // Gradient roles in chat
-            find: "value:{animate:",
+            find: "=!1,contentOnly:",
             replacement: {
                 match: /animate:\i/,
                 replace: "animate:!0"
