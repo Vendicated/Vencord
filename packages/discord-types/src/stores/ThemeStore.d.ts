@@ -1,9 +1,10 @@
 import { FluxStore } from "..";
 
+export type SystemTheme = "dark" | "light" | "unknown";
+
 export class ThemeStore extends FluxStore {
-    theme: "light" | "dark" | "darker" | "midnight";
-    darkSidebar: boolean;
-    isSystemThemeAvailable: boolean;
-    systemPrefersColorScheme: "light" | "dark";
-    systemTheme: null;
+    get theme(): "light" | "dark" | "darker" | "midnight";
+    get darkSidebar(): boolean;
+    get systemTheme(): SystemTheme;
+    themePreferenceForSystemTheme(systemTheme: SystemTheme): "darker" | "light";
 }
