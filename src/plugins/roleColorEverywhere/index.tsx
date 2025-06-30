@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore } from "@webpack/common";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -216,7 +216,7 @@ export default definePlugin({
     },
 
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const role = GuildStore.getRole(guildId, id);
+        const role = GuildRoleStore.getRole(guildId, id);
 
         return (
             <span style={{

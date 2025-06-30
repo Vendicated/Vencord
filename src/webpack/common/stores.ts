@@ -41,6 +41,7 @@ export let PresenceStore: GenericStore;
 export let VoiceStateStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
+export let GuildRoleStore: t.GuildRoleStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
 export let UserProfileStore: GenericStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
@@ -75,6 +76,7 @@ waitForStore("ChannelStore", m => ChannelStore = m);
 waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
 waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
 waitForStore("GuildStore", m => GuildStore = m);
+waitForStore("GuildRoleStore", m => GuildRoleStore = m);
 waitForStore("GuildMemberStore", m => GuildMemberStore = m);
 waitForStore("RelationshipStore", m => RelationshipStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);

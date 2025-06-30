@@ -23,7 +23,7 @@ import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, GuildStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { UnicodeEmoji } from "@webpack/types";
 import type { Guild, Role, User } from "discord-types/general";
 
@@ -238,7 +238,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                     id={cl("view-as-role")}
                     label={getIntlMessage("VIEW_AS_ROLE")}
                     action={() => {
-                        const role = GuildStore.getRole(guild.id, roleId);
+                        const role = GuildRoleStore.getRole(guild.id, roleId);
                         if (!role) return;
 
                         onClose();

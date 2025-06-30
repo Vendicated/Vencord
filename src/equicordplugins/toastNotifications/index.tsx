@@ -21,7 +21,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStore } from "@webpack";
-import { Button, ChannelStore, GuildStore, NavigationRouter, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { Button, ChannelStore, GuildRoleStore, NavigationRouter, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 import { ReactNode } from "react";
 
@@ -196,7 +196,7 @@ const addMention = (id: string, type: string, guildId?: string): ReactNode => {
     else if (type === "channel")
         name = `#${ChannelStore.getChannel(id)?.name || "unknown-channel"}`;
     else if (type === "role" && guildId)
-        name = `@${GuildStore.getGuild(guildId).getRole(id)?.name || "unknown-role"}`;
+        name = `@${GuildRoleStore.getRole(guildId, id)?.name || "unknown-role"}`;
 
     // Return the mention as a styled span.
     return (

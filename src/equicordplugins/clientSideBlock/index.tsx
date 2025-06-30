@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, Text, UserStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildRoleStore, RelationshipStore, Text, UserStore } from "@webpack/common";
 import { GuildMember } from "discord-types/general";
 
 const settings = definePluginSettings(
@@ -99,7 +99,7 @@ function shouldHideUser(userId: string, channelId?: string) {
 
 // This is really horror
 function isRoleAllBlockedMembers(roleId, guildId) {
-    const role = GuildStore.getRole(guildId, roleId);
+    const role = GuildRoleStore.getRole(guildId, roleId);
     if (!role) return false;
 
     const membersWithRole: GuildMember[] = GuildMemberStore.getMembers(guildId).filter(member => member.roles.includes(roleId));
