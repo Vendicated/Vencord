@@ -9,7 +9,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import { ModuleFactory } from "@vencord/discord-types/webpack";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
-import { AnyVencordModuleFactory } from "webpack";
+import { AnyModuleFactory } from "webpack";
 
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
@@ -130,7 +130,7 @@ export async function loadLazyChunks() {
             }, 0);
         }
 
-        function factoryListener(factory: AnyVencordModuleFactory | ModuleFactory) {
+        function factoryListener(factory: AnyModuleFactory | ModuleFactory) {
             let isResolved = false;
             searchAndLoadLazyChunks(String(factory))
                 .then(() => isResolved = true)

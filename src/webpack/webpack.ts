@@ -21,11 +21,11 @@ import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import { FluxStore } from "@vencord/discord-types";
-import { AnyWebpackRequire, ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
+import { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
-import { AnyVencordModuleFactory } from "./types";
+import { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
 
@@ -95,7 +95,7 @@ export const filters = {
 };
 
 export type CallbackFn = (module: ModuleExports, id: PropertyKey) => void;
-export type FactoryListernFn = (factory: AnyVencordModuleFactory, moduleId: PropertyKey) => void;
+export type FactoryListernFn = (factory: AnyModuleFactory, moduleId: PropertyKey) => void;
 
 export const waitForSubscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();

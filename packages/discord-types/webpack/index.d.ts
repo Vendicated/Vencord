@@ -213,14 +213,3 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     /** rspack unique id */
     ruid: string;
 };
-
-// Utility section
-
-export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Partial<Omit<WebpackRequire, "m">> & {
-    /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */
-    m: Record<PropertyKey, AnyModuleFactory>;
-};
-
-/** exports can be anything, however initially it is always an empty object */
-export type AnyModuleFactory = ((this: ModuleExports, module: Module, exports: ModuleExports, require: AnyWebpackRequire) => void);
-
