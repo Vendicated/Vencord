@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>188 additional plugins</summary>
+<summary>192 additional plugins</summary>
 
 ### All Platforms
 
@@ -22,6 +22,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Anammox by Kyuuhachi
 - AudiobookShelfRPC by vMohammad
 - AtSomeone by Joona
+- AutoJump by omaw
 - BannersEverywhere by ImLvna & AutumnVN
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterAudioPlayer by Creations
@@ -57,6 +58,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Encryptcord by Inbestigator
 - EquicordHelper by thororen & nyx
 - Equissant by SomeAspy & thororen
+- ExpandedUserTags by Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN, hen
 - ExportContacts by dat_insanity
 - FakeProfileThemesAndEffects by ryan
 - CopyProfileColors by Crxa
@@ -81,6 +83,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GoogleThat by Samwich
 - GuildPickerDumper by Cortex, Samwich, Synth, thororen
+- GuildTagSettings by thororen
 - HideChatButtons by iamme
 - HideServers by bepvte
 - HolyNotes by Wolfie
@@ -117,7 +120,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - MoreCommands by Arjix, echo, Samu
 - MoreKaomoji by JacobTm & voidbbg
 - MoreStickers by Leko & Arjix
-- MoreUserTags by Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN, hen
 - Morse by zyqunix
 - Moyai by Megu & Nuckyz
 - NeverPausePreviews by vappstar
@@ -131,13 +133,13 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - NoOnboarding by omaw & Glitch
 - NoRoleHeaders by Samwich
 - NotificationTitle by Kyuuhachi
+- OrbolayBridge by SpikeHD
 - PartyMode by UwUDev
 - PingNotifications by smuki
 - PinIcon by iamme
 - PlatformSpoofer by Drag
 - PolishWording by Samwich
 - PurgeMessages by bhop & nyx
-- QuestCompleter by Amia
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
 - RandomVoice by xijexo, omaw, thororen
@@ -210,6 +212,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ClipsEnhancements by niko
 - MediaDownloader by Colorman
 - NoRPC by Cyn
+- QuestCompleter by Amia
 - StatusWhilePlaying by thororen
 
 ### Equicord Devbuilds Only
