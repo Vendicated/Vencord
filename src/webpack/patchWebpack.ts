@@ -10,9 +10,10 @@ import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
 import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
-import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory, WebpackRequire } from "@vencord/discord-types/webpack";
+import { AnyWebpackRequire, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
+import { AnyVencordModuleFactory, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
 import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 
 export const patches = [] as Patch[];
@@ -238,7 +239,7 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
 
 // The proxy for patching lazily and/or running factories with our wrapper.
 const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
-    apply(target, thisArg: unknown, argArray: Parameters<AnyModuleFactory>) {
+    apply(target, thisArg: unknown, argArray: Parameters<AnyVencordModuleFactory>) {
         // SYM_ORIGINAL_FACTORY means the factory has already been patched
         if (target[SYM_ORIGINAL_FACTORY] != null) {
             return runFactoryWithWrap(target as PatchedModuleFactory, thisArg, argArray);
@@ -256,7 +257,7 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
             return true;
         }
 
-        const originalFactory: AnyModuleFactory = target[SYM_ORIGINAL_FACTORY] ?? target;
+        const originalFactory: AnyVencordModuleFactory = target[SYM_ORIGINAL_FACTORY] ?? target;
 
         // Redirect these properties to the original factory, including making `toString` return the original factory `toString`
         if (p === "toString" || p === SYM_PATCHED_SOURCE || p === SYM_PATCHED_BY) {
@@ -268,7 +269,7 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     }
 };
 
-function updateExistingOrProxyFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget = false) {
+function updateExistingOrProxyFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyVencordModuleFactory, receiver: any, ignoreExistingInTarget = false) {
     if (updateExistingFactory(moduleFactories, moduleId, newFactory, receiver, ignoreExistingInTarget)) {
         return true;
     }
@@ -289,8 +290,8 @@ function updateExistingOrProxyFactory(moduleFactories: AnyWebpackRequire["m"], m
  * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactories where it is being set
  * @returns Whether the original factory was updated, or false if it doesn't exist in any of the tracked Webpack instances
  */
-function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget) {
-    let existingFactory: AnyModuleFactory | undefined;
+function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyVencordModuleFactory, receiver: any, ignoreExistingInTarget) {
+    let existingFactory: AnyVencordModuleFactory | undefined;
     let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of allWebpackInstances) {
         if (ignoreExistingInTarget && wreq.m === moduleFactories) {
@@ -338,7 +339,7 @@ function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId
  * @param moduleId The id of the module
  * @param factory The factory
  */
-function defineInWebpackInstances(moduleId: PropertyKey, factory: AnyModuleFactory) {
+function defineInWebpackInstances(moduleId: PropertyKey, factory: AnyVencordModuleFactory) {
     for (const wreq of allWebpackInstances) {
         define(wreq.m, moduleId, { value: factory });
     }
@@ -350,7 +351,7 @@ function defineInWebpackInstances(moduleId: PropertyKey, factory: AnyModuleFacto
  * @param moduleId The id of the module
  * @param factory The original factory to notify for
  */
-function notifyFactoryListeners(moduleId: PropertyKey, factory: AnyModuleFactory) {
+function notifyFactoryListeners(moduleId: PropertyKey, factory: AnyVencordModuleFactory) {
     for (const factoryListener of factoryListeners) {
         try {
             factoryListener(factory, moduleId);
@@ -494,7 +495,7 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
  * @param originalFactory The original module factory
  * @returns The patched module factory
  */
-function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory): PatchedModuleFactory {
+function patchFactory(moduleId: PropertyKey, originalFactory: AnyVencordModuleFactory): PatchedModuleFactory {
     // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
     let code: string = "0," + String(originalFactory);
     let patchedSource = code;
