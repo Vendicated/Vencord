@@ -17,12 +17,10 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
-import { Message } from "@vencord/discord-types";
+import { CommandArgument, Message } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { MessageActions, SnowflakeUtils } from "@webpack/common";
 import type { PartialDeep } from "type-fest";
-
-import { CommandArgument } from "../../../packages/discord-types/src/common/messages/Commands";
 
 const createBotMessage = findByCodeLazy('username:"Clyde"');
 
