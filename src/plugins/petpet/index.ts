@@ -178,8 +178,8 @@ export default definePlugin({
                 }
 
                 gif.finish();
-                // FIXME: vvvvvvv
-                // @ts-ignore errors on some ts versions, works fine
+                // @ts-ignore This causes a type error on *only some* typescript versions.
+                // usage adheres to mdn https://developer.mozilla.org/en-US/docs/Web/API/File/File#parameters
                 const file = new File([gif.bytesView()], "petpet.gif", { type: "image/gif" });
                 // Immediately after the command finishes, Discord clears all input, including pending attachments.
                 // Thus, setTimeout is needed to make this execute after Discord cleared the input
