@@ -51,7 +51,7 @@
     flex-direction: column;
     align-items: center;
     padding: 8px;
-    background-color: var(--background-secondary-alt);
+    background-color: var(--background-base-lower-alt);
     border-radius: 4px;
 }
 

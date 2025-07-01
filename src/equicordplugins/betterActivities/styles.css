@@ -41,7 +41,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 5px;
-    background: var(--background-secondary-alt);
+    background: var(--background-base-lower-alt);
     border-radius: 3px;
     flex: 1 0;
     margin-top: 10px;

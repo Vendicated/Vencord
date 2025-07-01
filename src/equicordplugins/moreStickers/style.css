@@ -355,7 +355,7 @@
     height: 48px;
     width: 100%;
     padding: 0 16px;
-    background-color: var(--background-secondary-alt);
+    background-color: var(--background-base-lower-alt);
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
