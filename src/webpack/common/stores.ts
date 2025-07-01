@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
 import type * as Stores from "discord-types/stores";
 
 import { waitForStore } from "./internal";
@@ -42,14 +42,14 @@ export let VoiceStateStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
+export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
 export let UserProfileStore: GenericStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
 export let ChannelStore: Stores.ChannelStore & t.FluxStore;
-export let TypingStore: GenericStore;
-export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
 export let RelationshipStore: t.RelationshipStore;
+export let TypingStore: GenericStore;
 
 export let EmojiStore: t.EmojiStore;
 export let StickerStore: t.StickerStore;
@@ -94,3 +94,7 @@ waitForStore("ThemeStore", m => {
     Vencord.QuickCss.initQuickCssThemeStore();
 });
 waitForStore("VoiceStateStore", m => VoiceStateStore = m);
+
+// GuildRoleStore is new, this code is for stable + canary compatibility
+// TODO: Change to waitForStore once GuildRoleStore is on stable
+waitFor(["getRole", "getRoles"], m => GuildRoleStore = m);

@@ -83,7 +83,7 @@ export const Highlighter = ({
             currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
         backgroundColor:
-            currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
+            currentTheme?.colors?.["editor.background"] || "var(--background-base-lower)",
     };
 
     let langName;

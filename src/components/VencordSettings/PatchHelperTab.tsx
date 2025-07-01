@@ -145,7 +145,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
             )}
 
             {compileResult &&
-                <Forms.FormText style={{ color: compileResult[0] ? "var(--text-positive)" : "var(--text-danger)" }}>
+                <Forms.FormText style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-danger)" }}>
                     {compileResult[1]}
                 </Forms.FormText>
             }

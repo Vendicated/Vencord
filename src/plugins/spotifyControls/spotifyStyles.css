@@ -10,11 +10,11 @@
 }
 
 .theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--background-secondary-alt));
+    background: var(--bg-overlay-3, var(--background-base-lower-alt));
 }
 
 .theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--background-secondary-alt));
+    background: var(--bg-overlay-1, var(--background-base-lower-alt));
 }
 
 .vc-spotify-button {

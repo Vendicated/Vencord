@@ -89,11 +89,10 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.nyx],
     patches: [
         {
-            find: ".SYSTEM_TAG=0",
+            find: '="SYSTEM_TAG"',
             replacement: {
-                /* TODO: remove \i+\i once change makes it to stable */
-                match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)(?=.*?contextGuildId:(\i))/,
-                replace: "$self.renderUsername({ ...arguments[0], guildId: $1 })",
+                match: /(?<=onContextMenu:\i,children:)\i/,
+                replace: "$self.renderUsername(arguments[0])"
             }
         },
         {
