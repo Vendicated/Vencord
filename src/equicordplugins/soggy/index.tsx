@@ -109,7 +109,7 @@ const settings = definePluginSettings({
     imageLink: {
         description: "URL for the image (button and modal)",
         type: OptionType.STRING,
-        default: "https://soggy.cat/img/soggycat.webp",
+        default: "https://soggy.cat/assets/images/soggycat.webp",
     },
     songLink: {
         description: "URL for the song to play",
