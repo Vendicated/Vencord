@@ -364,7 +364,7 @@ function getCSS(fontName) {
             --primary-630: var(--accent);
 
             /*plugin grid square and nitro shop*/
-            --background-secondary-alt: var(--accent);
+            --background-base-lower-alt: var(--accent);
 
             /*modal background, self explanatory*/
             --modal-background: var(--accent);
