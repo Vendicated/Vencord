@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
+import { User } from "discord-types/general";
 import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";
@@ -45,12 +45,12 @@ const settings = definePluginSettings({
     }
 });
 
-export const buildSeveralUsers = ErrorBoundary.wrap(({ a, b, count, channel }: { a: User, b: User, count: number; channel: Channel; }) => {
+export const buildSeveralUsers = ErrorBoundary.wrap(({ a, b, count, guildId }: { a: User, b: User, count: number; guildId: string; }) => {
     return (
         <>
-            <TypingUser user={a} guildId={channel.guild_id} />
+            <TypingUser user={a} guildId={guildId} />
             {", "}
-            <TypingUser user={b} guildId={channel.guild_id} />
+            <TypingUser user={b} guildId={guildId} />
             {", "}
             and {count} others are typing...
         </>
@@ -115,7 +115,7 @@ export default definePlugin({
                     // Adds the alternative formatting for several users typing
                     match: /(,{a:(\i),b:(\i),c:\i}\):\i\.length>3&&\(\i=)\i\.\i\.string\(\i\.\i#{intl::SEVERAL_USERS_TYPING}\)(?<=(\i)\.length.+?)/,
                     replace: (_, rest, a, b, users) =>
-                        `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2, channel: arguments[0]?.channel })`,
+                        `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2, channel: arguments[0]?.channel?.guild_id })`,
                     predicate: () => settings.store.alternativeFormatting
                 }
             ]
