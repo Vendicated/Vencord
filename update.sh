@@ -1,4 +1,4 @@
-#!/bun/bash
+#!/bin/bash
 
 git fetch https://github.com/Vendicated/Vencord dev:upstream-dev
 git stash
