@@ -44,7 +44,6 @@ const getToken = async () => {
     return token;
 };
 
-getToken().then(console.log);
 async function fetchRemoteData({ id, name, artist, album }: { id: string, name: string, artist: string, album: string; }) {
     if (id === cachedRemoteData?.id) {
         if ("data" in cachedRemoteData) return cachedRemoteData.data;
