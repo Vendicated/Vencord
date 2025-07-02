@@ -72,6 +72,7 @@ const ReadAllButton = () => (
     <Button
         onClick={onClick}
         size={Button.Sizes.MIN}
+        look={Button.Looks.BLANK}
         color={Button.Colors.CUSTOM}
         className="vc-ranb-button"
     >

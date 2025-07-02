@@ -28,14 +28,17 @@ import { FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile } from "fs/promises";
 import { join, normalize } from "path";
 
+import { registerCspIpcHandlers } from "./csp/manager";
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
-import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, THEMES_DIR } from "./utils/constants";
+import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, SETTINGS_DIR, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
 mkdirSync(THEMES_DIR, { recursive: true });
 
+registerCspIpcHandlers();
+
 export function ensureSafePath(basePath: string, path: string) {
-    const normalizedBasePath = normalize(basePath);
+    const normalizedBasePath = normalize(basePath + "/");
     const newPath = join(basePath, path);
     const normalizedPath = normalize(newPath);
     return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
@@ -89,7 +92,6 @@ ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
     writeFileSync(QUICKCSS_PATH, css)
 );
 
-ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
 ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
@@ -97,6 +99,8 @@ ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
     "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
 }));
 
+ipcMain.handle(IpcEvents.OPEN_THEMES_FOLDER, () => shell.openPath(THEMES_DIR));
+ipcMain.handle(IpcEvents.OPEN_SETTINGS_FOLDER, () => shell.openPath(SETTINGS_DIR));
 
 export function initIpc(mainWindow: BrowserWindow) {
     let quickCssWatcher: FSWatcher | undefined;

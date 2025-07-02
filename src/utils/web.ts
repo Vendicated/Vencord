@@ -53,3 +53,11 @@ export function chooseFile(mimeTypes: string) {
         setImmediate(() => document.body.removeChild(input));
     });
 }
+
+export function getStylusWebStoreUrl() {
+    const isChromium = (navigator as any).userAgentData?.brands?.some(b => b.brand === "Chromium");
+
+    return isChromium
+        ? "https://chromewebstore.google.com/detail/stylus/clngdbkpkpeebahjckkjfobafhncgmne"
+        : "https://addons.mozilla.org/firefox/addon/styl-us/";
+}
