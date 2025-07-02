@@ -10,8 +10,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findStoreLazy } from "@webpack";
 import { Message, User } from "discord-types/general";
-
 interface UsernameProps {
     author: { nick: string; };
     message: Message;
@@ -19,7 +19,6 @@ interface UsernameProps {
     isRepliedMessage: boolean;
     userOverride?: User;
 }
-
 const settings = definePluginSettings({
     mode: {
         type: OptionType.SELECT,
@@ -41,7 +40,7 @@ const settings = definePluginSettings({
         description: "Also apply functionality to reply previews",
     },
 });
-
+const StreamerMode = findStoreLazy("StreamerModeStore");
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
@@ -71,12 +70,22 @@ export default definePlugin({
                 return <>{prefix}{nick}</>;
 
             if (settings.store.mode === "user-nick")
-                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
-
+                if (StreamerMode.enabled) {
+                    return <>{prefix}{username[0]}... <span className="vc-smyn-suffix">{nick}</span></>;
+                } else {
+                    return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
+                }
             if (settings.store.mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
-
-            return <>{prefix}{username}</>;
+                if (StreamerMode.enabled) {
+                    return <>{prefix}{nick} <span className="vc-smyn-suffix">{username[0]}...</span></>;
+                } else {
+                    return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+                }
+            if (StreamerMode.enabled) {
+                return prefix + username[0] + "...";
+            } else {
+                return prefix + username;
+            }
         } catch {
             return <>{author?.nick}</>;
         }
