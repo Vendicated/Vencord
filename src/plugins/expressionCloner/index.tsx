@@ -20,6 +20,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { migratePluginSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
+import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
@@ -269,7 +270,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             cursor: isCloning ? "not-allowed" : "pointer",
                                         }}
                                     >
-                                        {g.acronym}
+                                        {getGuildAcronym(g.name)}
                                     </Forms.FormText>
                                 )}
                             </div>

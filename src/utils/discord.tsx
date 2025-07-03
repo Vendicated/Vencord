@@ -19,6 +19,7 @@
 import { MessageObject } from "@api/MessageEvents";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
+import GuildFeatures from "discord-types/other/Constants";
 import { Except } from "type-fest";
 
 import { runtimeHashMessageKey } from "./intlHash";
@@ -217,4 +218,18 @@ export function getUniqueUsername(user: User) {
 export function getEmojiURL(id: string, animated: boolean, size: number) {
     const url = IconUtils.getEmojiURL({ id, animated, size });
     return animated ? url.replace(".webp", ".gif") : url;
+}
+
+// copied from discord's code
+export function getGuildAcronym(guildName?: string): string {
+    return guildName ?
+        guildName.replace(/'s /g, " ")
+            .replace(/\w+/g, m => m[0])
+            .replace(/\s/g, "")
+        : "";
+}
+
+export function guildHasFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
+    return guild.features?.has(feature) ?? false;
+
 }
