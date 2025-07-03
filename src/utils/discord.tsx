@@ -220,7 +220,6 @@ export function getEmojiURL(id: string, animated: boolean, size: number) {
     return animated ? url.replace(".webp", ".gif") : url;
 }
 
-// copied from discord's code
 export function getGuildAcronym(guildName?: string): string {
     return guildName ?
         guildName.replace(/'s /g, " ")
@@ -231,5 +230,4 @@ export function getGuildAcronym(guildName?: string): string {
 
 export function guildHasFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
     return guild.features?.has(feature) ?? false;
-
 }

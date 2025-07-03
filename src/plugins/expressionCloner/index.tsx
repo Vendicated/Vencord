@@ -262,7 +262,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                 ) : (
                                     <Forms.FormText
                                         style={{
-                                            fontSize: getFontSize(g.acronym),
+                                            fontSize: getFontSize(getGuildAcronym(g.name)),
                                             width: "100%",
                                             overflow: "hidden",
                                             whiteSpace: "nowrap",
