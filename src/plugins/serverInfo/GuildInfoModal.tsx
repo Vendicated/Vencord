@@ -103,7 +103,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                             width: 512,
                         })}
                     />
-                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{getGuildAcronym(guild.name)}</div>
+                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{getGuildAcronym(guild)}</div>
                 }
 
                 <div className={cl("name-and-description")}>

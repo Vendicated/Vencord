@@ -262,7 +262,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                 ) : (
                                     <Forms.FormText
                                         style={{
-                                            fontSize: getFontSize(getGuildAcronym(g.name)),
+                                            fontSize: getFontSize(getGuildAcronym(g)),
                                             width: "100%",
                                             overflow: "hidden",
                                             whiteSpace: "nowrap",
@@ -270,7 +270,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             cursor: isCloning ? "not-allowed" : "pointer",
                                         }}
                                     >
-                                        {getGuildAcronym(g.name)}
+                                        {getGuildAcronym(g)}
                                     </Forms.FormText>
                                 )}
                             </div>
