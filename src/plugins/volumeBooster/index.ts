@@ -94,7 +94,7 @@ export default definePlugin({
             find: "AudioContextSettingsMigrated",
             replacement: [
                 {
-                    match: /(?<=isLocalMute\(\i,\i\),volume:.+?volume:)\i(?=})/,
+                    match: /(?<=isLocalMute\(\i,\i\),volume:(\i).+?\i\(\i,\i,)\1(?=\))/,
                     replace: "$&>200?200:$&"
                 },
                 {
@@ -109,7 +109,7 @@ export default definePlugin({
         },
         // Prevent the MediaEngineStore from overwriting our LocalVolumes above 200 with the ones the Discord Audio Context Settings sync sends
         {
-            find: '"MediaEngineStore"',
+            find: '="MediaEngineStore",',
             replacement: [
                 {
                     match: /(\.settings\.audioContextSettings.+?)(\i\[\i\])=(\i\.volume)(.+?setLocalVolume\(\i,).+?\)/,
@@ -136,7 +136,7 @@ export default definePlugin({
         // @ts-expect-error
         if (data.sinkId != null && data.sinkId !== data.audioContext.sinkId && "setSinkId" in AudioContext.prototype) {
             // @ts-expect-error https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/setSinkId
-            data.audioContext.setSinkId(data.sinkId);
+            data.audioContext.setSinkId(data.sinkId === "default" ? "" : data.sinkId);
         }
 
         data.gainNode.gain.value = data._mute

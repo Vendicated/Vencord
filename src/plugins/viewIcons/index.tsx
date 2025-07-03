@@ -71,9 +71,14 @@ const openAvatar = (url: string) => openImage(url, 512, 512);
 const openBanner = (url: string) => openImage(url, 1024);
 
 function openImage(url: string, width: number, height?: number) {
-    const format = url.startsWith("/") ? "png" : settings.store.format;
-
     const u = new URL(url, window.location.href);
+
+    const format = url.startsWith("/")
+        ? "png"
+        : u.searchParams.get("animated") === "true"
+            ? "gif"
+            : settings.store.format;
+
     u.searchParams.set("size", settings.store.imgSize);
     u.pathname = u.pathname.replace(/\.(png|jpe?g|webp)$/, `.${format}`);
     url = u.toString();
@@ -190,13 +195,21 @@ export default definePlugin({
     },
 
     patches: [
-        // Avatar component used in User DMs "User Profile" popup in the right and Profiles Modal pfp
+        // Avatar component used in User DMs "User Profile" popup in the right and User Profile Modal pfp
         {
             find: ".overlay:void 0,status:",
-            replacement: {
-                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
-                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},"
-            },
+            replacement: [
+                {
+                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
+                    match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
+                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
+                    noWarn: true
+                },
+                {
+                    match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
+                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
+                }
+            ],
             all: true
         },
         // Banners
@@ -220,16 +233,16 @@ export default definePlugin({
         {
             find: ".cursorPointer:null,children",
             replacement: {
-                match: /.Avatar,.+?src:(.+?\))(?=[,}])/,
-                replace: (m, avatarUrl) => `${m},onClick:()=>$self.openAvatar(${avatarUrl})`
+                match: /(?=,src:(\i.getAvatarURL\(.+?[)]))/,
+                replace: (_, avatarUrl) => `,onClick:()=>$self.openAvatar(${avatarUrl})`
             }
         },
         // User Dms top large icon
         {
             find: 'experimentLocation:"empty_messages"',
             replacement: {
-                match: /.Avatar,.+?src:(.+?\))(?=[,}])/,
-                replace: (m, avatarUrl) => `${m},onClick:()=>$self.openAvatar(${avatarUrl})`
+                match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
+                replace: (_, avatarUrl) => `onClick:()=>$self.openAvatar(${avatarUrl}),`
             }
         }
     ]

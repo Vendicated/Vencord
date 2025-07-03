@@ -2,15 +2,17 @@
     padding: 0.375rem 0.5rem;
     border-bottom: 1px solid var(--background-modifier-accent);
 
-    --vc-spotify-green: #1db954; /* so custom themes can easily change it */
+    --vc-spotify-green: var(--spotify, #1db954); /* so custom themes can easily change it */
+    --vc-spotify-green-90: color-mix(in hsl, var(--vc-spotify-green), transparent 90%);
+    --vc-spotify-green-80: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
 }
 
 .theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--background-secondary-alt));
+    background: var(--bg-overlay-3, var(--background-base-lower-alt));
 }
 
 .theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--background-secondary-alt));
+    background: var(--bg-overlay-1, var(--background-base-lower-alt));
 }
 
 .vc-spotify-button {
@@ -30,20 +32,15 @@
     background-color: var(--background-modifier-selected);
 }
 
-.vc-spotify-button svg {
+.vc-spotify-button-icon {
     height: 24px;
     width: 24px;
 }
 
-[class*="vc-spotify-shuffle"] > svg,
-[class*="vc-spotify-repeat"] > svg {
+.vc-spotify-shuffle .vc-spotify-button-icon,
+.vc-spotify-repeat .vc-spotify-button-icon {
     width: 22px;
     height: 22px;
-}
-
-.vc-spotify-button svg path {
-    width: 100%;
-    height: 100%;
 }
 
 /* .vc-spotify-button:hover {
@@ -87,12 +84,19 @@
     gap: 0.5em;
 }
 
-#vc-spotify-info-wrapper img {
+#vc-spotify-album-image {
     height: 90%;
     object-fit: contain;
+    border-radius: 3px;
+    transition: filter 0.2s;
 }
 
-#vc-spotify-album-expanded-wrapper img {
+#vc-spotify-album-image:hover {
+    filter: brightness(1.2);
+    cursor: pointer;
+}
+
+#vc-spotify-album-expanded-wrapper #vc-spotify-album-image {
     width: 100%;
     object-fit: contain;
 }
@@ -137,19 +141,9 @@
     cursor: pointer;
 }
 
-#vc-spotify-album-image {
-    border-radius: 3px;
-    transition: filter 0.2s;
-}
-
-#vc-spotify-album-image:hover {
-    filter: brightness(1.2);
-    cursor: pointer;
-}
-
 #vc-spotify-progress-bar {
     position: relative;
-    color: var(--text-normal);
+    color: var(--text-default);
     width: 100%;
     margin: 0.5em 0;
     margin-bottom: 5px;
@@ -201,5 +195,5 @@
 
 .vc-spotify-fallback {
     padding: 0.5em;
-    color: var(--text-normal);
+    color: var(--text-default);
 }
