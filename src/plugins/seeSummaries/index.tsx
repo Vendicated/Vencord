@@ -7,7 +7,7 @@
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { guildHasFeature } from "@utils/discord";
+import { hasGuildFeature } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
@@ -110,6 +110,6 @@ export default definePlugin({
         const channel = ChannelStore.getChannel(channelId);
         // SUMMARIES_ENABLED feature is not in discord-types
         const guild = GuildStore.getGuild(channel.guild_id);
-        return guildHasFeature(guild, "SUMMARIES_ENABLED_GA" as any);
+        return hasGuildFeature(guild, "SUMMARIES_ENABLED_GA" as any);
     }
 });

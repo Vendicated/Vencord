@@ -220,6 +220,7 @@ export function getEmojiURL(id: string, animated: boolean, size: number) {
     return animated ? url.replace(".webp", ".gif") : url;
 }
 
+// Discord has the exact function in their code, search for the regex
 export function getGuildAcronym(guildName?: string): string {
     return guildName
         ? guildName
@@ -229,6 +230,6 @@ export function getGuildAcronym(guildName?: string): string {
         : "";
 }
 
-export function guildHasFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
+export function hasGuildFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
     return guild.features?.has(feature) ?? false;
 }
