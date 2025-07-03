@@ -25,9 +25,10 @@ import { Constants, GuildStore, PermissionStore, RestAPI } from "@webpack/common
 function showDisableInvites(guildId: string) {
     const guild = GuildStore.getGuild(guildId);
     if (!guild) return false;
-    // FIXME: remove `as any` when #3520 is merged
+
     return (
-        !hasGuildFeature(guild, "INVITES_DISABLED" as any) &&
+        // @ts-expect-error
+        !hasGuildFeature(guild, "INVITES_DISABLED") &&
         PermissionStore.getGuildPermissionProps(guild).canManageRoles
     );
 }
