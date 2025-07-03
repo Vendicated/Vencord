@@ -221,13 +221,11 @@ export function getEmojiURL(id: string, animated: boolean, size: number) {
 }
 
 // Discord has a similar function in their code
-export function getGuildAcronym(guild?: Guild): string {
-    return guild?.name
-        ? guild.name
-            .replaceAll("'s ", " ")
-            .replace(/\w+/g, m => m[0])
-            .replace(/\s/g, "")
-        : "";
+export function getGuildAcronym(guild: Guild): string {
+    return guild.name
+        .replaceAll("'s ", " ")
+        .replace(/\w+/g, m => m[0])
+        .replace(/\s/g, "");
 }
 
 export function hasGuildFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
