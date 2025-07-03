@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -56,8 +56,9 @@ function handleKeydown({ code, ctrlKey, shiftKey, altKey }: KeyboardEvent) {
     });
 }
 
+migratePluginSettings("ToggleVideoBind", "toggleVideoBind");
 export default definePlugin({
-    name: "toggleVideoBind",
+    name: "ToggleVideoBind",
     description: "Adds a customizable bind to toggle webcam.",
     authors: [EquicordDevs.mochienya],
     settings,
