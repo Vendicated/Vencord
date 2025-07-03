@@ -220,7 +220,7 @@ export function getEmojiURL(id: string, animated: boolean, size: number) {
     return animated ? url.replace(".webp", ".gif") : url;
 }
 
-// Discord has the exact same function in their code
+// Discord has a similar function in their code
 export function getGuildAcronym(guildName?: string): string {
     return guildName
         ? guildName
