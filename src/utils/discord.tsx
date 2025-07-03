@@ -221,8 +221,9 @@ export function getEmojiURL(id: string, animated: boolean, size: number) {
 }
 
 export function getGuildAcronym(guildName?: string): string {
-    return guildName ?
-        guildName.replace(/'s /g, " ")
+    return guildName
+        ? guildName
+            .replaceAll("'s ", " ")
             .replace(/\w+/g, m => m[0])
             .replace(/\s/g, "")
         : "";
