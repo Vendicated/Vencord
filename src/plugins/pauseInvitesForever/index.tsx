@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
+import { getIntlMessage, hasGuildFeature } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Constants, GuildStore, PermissionStore, RestAPI } from "@webpack/common";
 
@@ -27,8 +27,8 @@ function showDisableInvites(guildId: string) {
     if (!guild) return false;
 
     return (
-        // @ts-ignore
-        !guild.hasFeature("INVITES_DISABLED") &&
+        // @ts-expect-error
+        !hasGuildFeature(guild, "INVITES_DISABLED") &&
         PermissionStore.getGuildPermissionProps(guild).canManageRoles
     );
 }
