@@ -173,7 +173,7 @@ export const { zustandPersist } = mapMangledModuleLazy(".onRehydrateStorage)?", 
 });
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
-export const GuildActions = findByPropsLazy("banUser");
+export const GuildActionCreators = findByPropsLazy("banUser");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
 export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 export const InviteActions = findByPropsLazy("resolveInvite");
