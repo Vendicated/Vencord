@@ -374,7 +374,7 @@ function MutualServerIcons({ member }: { member: MemberWithMutuals; }) {
                     {iconUrl ? (
                         <img src={iconUrl} alt="" />
                     ) : (
-                        <div className={cl("guild-acronym")}>{guild.acronym}</div>
+                        <div className={cl("guild-acronym")}>{getGuildAcronym(guild)}</div>
                     )}
                 </div>
             ))}

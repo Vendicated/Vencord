@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { getGuildAcronym } from "@utils/discord";
 import { classes } from "@utils/misc";
 import {
     closeModal,
@@ -25,14 +26,8 @@ import { HiddenServersStore } from "../HiddenServersStore";
 const cl = classNameFactory("vc-hideservers-");
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 
-function HiddenServersModal({
-    modalProps,
-    close,
-}: {
-    modalProps: ModalProps;
-    close(): void;
-}) {
-    const servers = useStateFromStores([HiddenServersStore], () => HiddenServersStore.hiddenGuildsDetail());
+function HiddenServersModal({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
+    const guilds = useStateFromStores([HiddenServersStore], () => HiddenServersStore.hiddenGuildsDetail());
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
@@ -43,23 +38,26 @@ function HiddenServersModal({
             </ModalHeader>
 
             <ModalContent>
-                <HiddenServersMenu servers={servers} />
+                <HiddenServersMenu guilds={guilds} />
             </ModalContent>
         </ModalRoot>
     );
 }
 
-export function HiddenServersMenu({ servers }: { servers: Guild[]; }) {
+export function HiddenServersMenu({ guilds }: { guilds: Guild[]; }) {
     return <div className={cl("list")}>
-        {servers.length > 0 ? (
-            servers.map(server => (
-                <div key={server.id} className={cl("row")}>
+        {guilds.length > 0 ? (
+            guilds.map(guild => (
+                <div key={guild.id} className={cl("row")}>
                     <div className={cl("guildicon")}>
-                        {server.icon
-                            ? <img height="48" width="48"
+                        {guild.icon
+                            ? <img
+                                alt=""
+                                height="48"
+                                width="48"
                                 src={IconUtils.getGuildIconURL({
-                                    id: server.id,
-                                    icon: server.icon,
+                                    id: guild.id,
+                                    icon: guild.icon,
                                     canAnimate: true,
                                     size: 240,
                                 })} />
@@ -69,17 +67,17 @@ export function HiddenServersMenu({ servers }: { servers: Guild[]; }) {
                                     IconClasses.childWrapper,
                                     IconClasses.acronym
                                 )}>
-                                {server.acronym}
+                                {getGuildAcronym(guild)}
                             </div>
                         }
                     </div>
                     <Forms.FormTitle className={cl("name")}>
-                        {server.name}
+                        {guild.name}
                     </Forms.FormTitle>
                     <Button
                         className={"row-button"}
                         color={Button.Colors.PRIMARY}
-                        onClick={() => HiddenServersStore.removeHidden(server.id)}
+                        onClick={() => HiddenServersStore.removeHidden(guild.id)}
                     >
                         Remove
                     </Button>
