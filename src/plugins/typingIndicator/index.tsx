@@ -69,26 +69,29 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
 
     const myId = UserStore.getCurrentUser()?.id;
 
-    const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
+    const typingUsersArray = Object.keys(typingUsers).filter(id =>
+        id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers)
+    );
+    const [a, b, c] = typingUsersArray;
     let tooltipText: string;
 
     switch (typingUsersArray.length) {
         case 0: break;
         case 1: {
-            tooltipText = getIntlMessage("ONE_USER_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]) });
+            tooltipText = getIntlMessage("ONE_USER_TYPING", { a: getDisplayName(guildId, a) });
             break;
         }
         case 2: {
-            tooltipText = getIntlMessage("TWO_USERS_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
+            tooltipText = getIntlMessage("TWO_USERS_TYPING", { a: getDisplayName(guildId, a), b: getDisplayName(guildId, b) });
             break;
         }
         case 3: {
-            tooltipText = getIntlMessage("THREE_USERS_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
+            tooltipText = getIntlMessage("THREE_USERS_TYPING", { a: getDisplayName(guildId, a), b: getDisplayName(guildId, b), c: getDisplayName(guildId, c) });
             break;
         }
         default: {
             tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
+                ? buildSeveralUsers({ a: UserStore.getUser(a), b: UserStore.getUser(b), count: typingUsersArray.length - 2, guildId })
                 : getIntlMessage("SEVERAL_USERS_TYPING");
             break;
         }
@@ -178,7 +181,7 @@ export default definePlugin({
         // Theads
         {
             // This is the thread "spine" that shows in the left
-            find: "M11 9H4C2.89543 9 2 8.10457 2 7V1C2 0.447715 1.55228 0 1 0C0.447715 0 0 0.447715 0 1V7C0 9.20914 1.79086 11 4 11H11C11.5523 11 12 10.5523 12 10C12 9.44771 11.5523 9 11 9Z",
+            find: "M0 15H2c0 1.6569",
             replacement: {
                 match: /mentionsCount:\i.+?null(?<=channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"

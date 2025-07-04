@@ -19,18 +19,14 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 import NoBlockedMessagesPlugin from "plugins/noBlockedMessages";
 import NoReplyMentionPlugin from "plugins/noReplyMention";
 
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
-
 const isMac = navigator.platform.includes("Mac"); // bruh
 let currentlyReplyingId: string | null = null;
 let currentlyEditingId: string | null = null;
-
 
 const enum MentionOptions {
     DISABLED,

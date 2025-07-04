@@ -214,6 +214,9 @@ export class GuildStore extends FluxStore {
     getGuildCount(): number;
     getGuilds(): Record<string, Guild>;
     getGuildIds(): string[];
+}
+
+export class GuildRoleStore extends FluxStore {
     getRole(guildId: string, roleId: string): Role;
     getRoles(guildId: string): Record<string, Role>;
     getAllGuildRoles(): Record<string, Record<string, Role>>;
@@ -233,3 +236,24 @@ export type useStateFromStores = <T>(
     dependencies?: any,
     isEqual?: (old: T, newer: T) => boolean
 ) => T;
+
+export class RelationshipStore extends FluxStore {
+    getFriendIDs(): string[];
+    getIgnoredIDs(): string[];
+    getBlockedIDs(): string[];
+
+    getPendingCount(): number;
+    getRelationshipCount(): number;
+
+    /** Related to friend nicknames. */
+    getNickname(userId: string): string;
+    /** @returns Enum value from constants.RelationshipTypes */
+    getRelationshipType(userId: string): number;
+    isFriend(userId: string): boolean;
+    isBlocked(userId: string): boolean;
+    isIgnored(userId: string): boolean;
+    getSince(userId: string): string;
+
+    /** @returns Format: [userId: Enum value from constants.RelationshipTypes] */
+    getMutableRelationships(): Record<number, number>;
+}
