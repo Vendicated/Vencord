@@ -24,7 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { FluxStore } from "@webpack/types";
+import { FluxStore } from "@vencord/discord-types";
 
 import { MemberCount } from "./MemberCount";
 

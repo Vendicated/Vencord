@@ -21,7 +21,7 @@ import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
-import { MessageSnapshot } from "@webpack/types";
+import { MessageSnapshot } from "@vencord/discord-types";
 
 
 const EMBED_SUPPRESSED = 1 << 2;

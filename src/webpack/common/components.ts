@@ -17,10 +17,10 @@
 */
 
 import { LazyComponent } from "@utils/lazyReact";
+import * as t from "@vencord/discord-types";
 import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
-import * as t from "./types/components";
 
 
 const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat', '="h5"'));

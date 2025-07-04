@@ -17,8 +17,8 @@
 */
 
 import { Logger } from "@utils/Logger";
+import { CustomEmoji } from "@vencord/discord-types";
 import { MessageStore } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
 import type { Channel, Message } from "discord-types/general";
 import type { Promisable } from "type-fest";
 

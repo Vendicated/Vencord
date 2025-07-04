@@ -20,7 +20,7 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { FluxStore } from "@webpack/types";
+import { FluxStore } from "@vencord/discord-types";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
