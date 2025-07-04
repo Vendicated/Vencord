@@ -23,6 +23,7 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
 import { Constants, FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
+import { User } from "discord-types/general";
 import { type ComponentType, type ReactNode } from "react";
 
 // LYING to the type checker here
@@ -70,6 +71,10 @@ interface MentionProps {
     UserMention: ComponentType<any>;
 }
 
+interface UserProfile extends User {
+    badges?: ProfileBadge[];
+}
+
 async function getUser(id: string) {
     let userObj = UserStore.getUser(id);
     if (userObj)
@@ -101,11 +106,13 @@ async function getUser(id: string) {
         fakeBadges.push(badges.premium);
 
     // Fill in what we can deduce
-    const profile = UserProfileStore.getUserProfile(id);
-    profile.accentColor = user.accent_color;
-    profile.badges = fakeBadges;
-    profile.banner = user.banner;
-    profile.premiumType = user.premium_type;
+    const profile = UserProfileStore.getUserProfile(id) as UserProfile | undefined;
+    if (profile) {
+        profile.accentColor = user.accent_color;
+        profile.badges = fakeBadges;
+        profile.banner = user.banner;
+        profile.premiumType = user.premium_type;
+    }
 
     return userObj;
 }

@@ -27,6 +27,7 @@ import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Tooltip, UserProfileStore } from "@webpack/common";
+import { ConnectedAccount } from "@webpack/types";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
@@ -60,16 +61,13 @@ const settings = definePluginSettings({
     }
 });
 
-interface Connection {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
+interface ConnectionPlatform {
+    getPlatformUserUrl(connection: ConnectedAccount): string;
+    icon: { lightSVG: string, darkSVG: string; };
 }
 
-interface ConnectionPlatform {
-    getPlatformUserUrl(connection: Connection): string;
-    icon: { lightSVG: string, darkSVG: string; };
+interface UserProfile extends User {
+    connectedAccounts?: ConnectedAccount[];
 }
 
 const profilePopoutComponent = ErrorBoundary.wrap(
@@ -84,11 +82,11 @@ const profilePopoutComponent = ErrorBoundary.wrap(
 );
 
 function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
-    const profile = UserProfileStore.getUserProfile(id);
+    const profile = UserProfileStore.getUserProfile(id) as UserProfile | undefined;
     if (!profile)
         return null;
 
-    const connections: Connection[] = profile.connectedAccounts;
+    const connections = profile.connectedAccounts;
     if (!connections?.length)
         return null;
 
@@ -102,7 +100,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     );
 }
 
-function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
+function CompactConnectionComponent({ connection, theme }: { connection: ConnectedAccount, theme: string; }) {
     const platform = platforms.get(useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
