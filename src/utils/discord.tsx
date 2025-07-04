@@ -17,7 +17,7 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { Channel, Guild, Message, User } from "@vencord/discord-types";
+import { Channel, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
@@ -217,4 +217,16 @@ export function getUniqueUsername(user: User) {
 export function getEmojiURL(id: string, animated: boolean, size: number) {
     const url = IconUtils.getEmojiURL({ id, animated, size });
     return animated ? url.replace(".webp", ".gif") : url;
+}
+
+// Discord has a similar function in their code
+export function getGuildAcronym(guild: Guild): string {
+    return guild.name
+        .replaceAll("'s ", " ")
+        .replace(/\w+/g, m => m[0])
+        .replace(/\s/g, "");
+}
+
+export function hasGuildFeature(guild: Guild, feature: GuildFeatures): boolean {
+    return guild.features?.has(feature) ?? false;
 }
