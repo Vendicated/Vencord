@@ -18,8 +18,8 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, User } from "@vencord/discord-types";
 import { GuildStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
 
 export default definePlugin({
     name: "ForceOwnerCrown",

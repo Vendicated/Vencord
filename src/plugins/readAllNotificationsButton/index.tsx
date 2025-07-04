@@ -22,9 +22,9 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 interface ThreadJoined {
     channel: Channel;

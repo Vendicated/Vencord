@@ -27,8 +27,8 @@ import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { Button, ChannelStore, Forms, GuildRoleStore, Menu, Text } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 
 const CopyIcon = () => {
