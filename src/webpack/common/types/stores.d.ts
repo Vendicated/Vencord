@@ -255,5 +255,5 @@ export class RelationshipStore extends FluxStore {
     getSince(userId: string): string;
 
     /** @returns Format: [userId: Enum value from constants.RelationshipTypes] */
-    getMutableRelationships(): Record<number, number>;
+    getMutableRelationships(): Map<string, number>;
 }
