@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ApplicationAssetUtils, ChannelStore, FluxDispatcher, GuildStore, PresenceStore, RelationshipStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, ChannelStore, FluxDispatcher, GuildStore, IconUtils, PresenceStore, RelationshipStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 import { FluxStore } from "@webpack/types";
 import { Channel } from "discord-types/general";
 
@@ -290,7 +290,7 @@ async function createActivity(): Promise<Activity | undefined> {
             if (guild) {
                 details = guild.name;
                 state = memberCount();
-                imageBig = guild.getIconURL(128, true) || chino;
+                imageBig = IconUtils.getGuildIconURL({id: guild.id, icon: guild.icon, canAnimate: true, size: 512}) || chino;
                 if (guild.vanityURLCode) {
                     buttonOneText = `Join ${guild.name.slice(0, 26)}`;
                     buttonOneURL = `https://discord.gg/${guild.vanityURLCode}`;
@@ -319,7 +319,7 @@ async function createActivity(): Promise<Activity | undefined> {
                 appName = `#${channel.name}`;
                 details = guild.name;
                 state = memberCount();
-                imageBig = guild.getIconURL(128, true) || chino;
+                imageBig = IconUtils.getGuildIconURL({id: guild.id, icon: guild.icon, canAnimate: true, size: 512}) || chino;
                 if (guild.vanityURLCode) {
                     buttonOneText = `Join ${guild.name.slice(0, 31 - 5)}`;
                     buttonOneURL = `https://discord.gg/${guild.vanityURLCode}`;
