@@ -5,7 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { getIntlMessage } from "@utils/discord";
+import { getGuildAcronym, getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
 import { findComponentByCodeLazy } from "@webpack";
@@ -47,7 +47,7 @@ function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
             className={cl("bookmark-icon")}
         />
         : <div className={cl("bookmark-icon")}>
-            <Text variant="text-xxs/semibold" tag="span">{guild.acronym}</Text>
+            <Text variant="text-xxs/semibold" tag="span">{getGuildAcronym(guild)}</Text>
         </div>;
 
     if (channel?.recipients?.length) {

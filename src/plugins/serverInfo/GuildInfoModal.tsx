@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { openImageModal, openUserProfile } from "@utils/discord";
+import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
@@ -107,7 +107,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                             width: 512,
                         })}
                     />
-                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
+                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{getGuildAcronym(guild)}</div>
                 }
 
                 <div className={cl("name-and-description")}>
@@ -374,7 +374,7 @@ function MutualServerIcons({ member }: { member: MemberWithMutuals; }) {
                     {iconUrl ? (
                         <img src={iconUrl} alt="" />
                     ) : (
-                        <div className={cl("guild-acronym")}>{guild.acronym}</div>
+                        <div className={cl("guild-acronym")}>{getGuildAcronym(guild)}</div>
                     )}
                 </div>
             ))}

@@ -4,17 +4,34 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Constants, PermissionsBits, PermissionStore, React, RestAPI, useCallback, useEffect, useState } from "@webpack/common";
 
-const showIcon = () => {
-    const [show, setShow] = useState(false);
+const validKeycodes = [
+    "Backspace", "Tab", "Enter", "ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "Pause", "CapsLock",
+    "Escape", "Space", "PageUp", "PageDown", "End", "Home", "ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown", "PrintScreen", "Insert",
+    "Delete", "Digit0", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "KeyA", "KeyB", "KeyC",
+    "KeyD", "KeyE", "KeyF", "KeyG", "KeyH", "KeyI", "KeyJ", "KeyK", "KeyL", "KeyM", "KeyN", "KeyO", "KeyP", "KeyQ", "KeyR", "KeyS", "KeyT",
+    "KeyU", "KeyV", "KeyW", "KeyX", "KeyY", "KeyZ", "MetaLeft", "MetaRight", "ContextMenu", "Numpad0", "Numpad1", "Numpad2", "Numpad3",
+    "Numpad4", "Numpad5", "Numpad6", "Numpad7", "Numpad8", "Numpad9", "NumpadMultiply", "NumpadAdd", "NumpadSubtract", "NumpadDecimal",
+    "NumpadDivide", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "NumLock", "ScrollLock",
+];
 
-    const handleKeys = useCallback(e => {
-        const keysHeld = e.ctrlKey && e.altKey;
-        setShow(keysHeld);
-    }, []);
+function showIcon() {
+    const [show, setShow] = useState(false);
+    const { keyBind, reqCtrl, reqShift, reqAlt } = settings.store;
+
+    const handleKeys = useCallback((e: KeyboardEvent) => {
+        const isMatchingKey =
+            e.code === keyBind &&
+            (!reqCtrl || e.ctrlKey) &&
+            (!reqShift || e.shiftKey) &&
+            (!reqAlt || e.altKey);
+
+        setShow(isMatchingKey);
+    }, [keyBind, reqCtrl, reqShift, reqAlt]);
 
     useEffect(() => {
         window.addEventListener("keydown", handleKeys);
@@ -27,12 +44,38 @@ const showIcon = () => {
     }, [handleKeys]);
 
     return show;
-};
+}
+
+// TY ToggleVideoBind
+const settings = definePluginSettings({
+    keyBind: {
+        description: "The key to toggle trash when pressed.",
+        type: OptionType.STRING,
+        default: "KeyZ",
+        isValid: (value: string) => validKeycodes.includes(value),
+    },
+    reqCtrl: {
+        description: "Require control to be held.",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
+    reqShift: {
+        description: "Require shift to be held.",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
+    reqAlt: {
+        description: "Require alt to be held.",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+});
 
 export default definePlugin({
     name: "FastDeleteChannels",
-    description: "Adds a trash icon to delete channels when holding ctrl + alt",
+    description: "Adds a trash icon to delete channels",
     authors: [EquicordDevs.thororen],
+    settings,
     patches: [
         // TY TypingIndicator
         {

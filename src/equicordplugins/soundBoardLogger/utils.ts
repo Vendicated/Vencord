@@ -47,13 +47,13 @@ export const playSound = id => {
 
 export async function downloadAudio(id: string): Promise<void> {
     const filename = id + settings.store.FileType;
-    const data = await fetch(`https://cdn.discordapp.com/soundboard-sounds/${id}`).then(e => e.arrayBuffer());
-
+    const original = await fetch(`https://cdn.discordapp.com/soundboard-sounds/${id}`).then(res => res.arrayBuffer());
 
     if (IS_DISCORD_DESKTOP) {
+        const data = new Uint8Array(original);
         DiscordNative.fileManager.saveWithDialog(data, filename);
     } else {
-        saveFile(new File([data], filename, { type: "audio/ogg" }));
+        saveFile(new File([original], filename, { type: "audio/ogg" }));
     }
 }
 
