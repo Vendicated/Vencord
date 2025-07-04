@@ -230,6 +230,11 @@ export class ThemeStore extends FluxStore {
     systemTheme: null;
 }
 
+export class PopoutWindowStore extends FluxStore {
+    getWindow(windowKey: string): Window;
+    getWindowKeys(): string[];
+}
+
 export type useStateFromStores = <T>(
     stores: any[],
     mapper: () => T,
