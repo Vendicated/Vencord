@@ -20,12 +20,13 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { migratePluginSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
+import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickerStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickerStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Guild } from "discord-types/general";
 import { Promisable } from "type-fest";
 
@@ -249,13 +250,18 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             width: "100%",
                                             height: "100%",
                                         }}
-                                        src={g.getIconURL(512, true)}
+                                        src={IconUtils.getGuildIconURL({
+                                            id: g.id,
+                                            icon: g.icon,
+                                            canAnimate: true,
+                                            size: 512
+                                        })}
                                         alt={g.name}
                                     />
                                 ) : (
                                     <Forms.FormText
                                         style={{
-                                            fontSize: getFontSize(g.acronym),
+                                            fontSize: getFontSize(getGuildAcronym(g)),
                                             width: "100%",
                                             overflow: "hidden",
                                             whiteSpace: "nowrap",
@@ -263,7 +269,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             cursor: isCloning ? "not-allowed" : "pointer",
                                         }}
                                     >
-                                        {g.acronym}
+                                        {getGuildAcronym(g)}
                                     </Forms.FormText>
                                 )}
                             </div>
