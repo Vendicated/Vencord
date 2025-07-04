@@ -290,7 +290,7 @@ async function createActivity(): Promise<Activity | undefined> {
             if (guild) {
                 details = guild.name;
                 state = memberCount();
-                imageBig = IconUtils.getGuildIconURL({id: guild.id, icon: guild.icon, canAnimate: true, size: 512}) || chino;
+                imageBig = IconUtils.getGuildIconURL({ id: guild.id, icon: guild.icon, canAnimate: true, size: 512 }) || chino;
                 if (guild.vanityURLCode) {
                     buttonOneText = `Join ${guild.name.slice(0, 26)}`;
                     buttonOneURL = `https://discord.gg/${guild.vanityURLCode}`;
@@ -319,7 +319,7 @@ async function createActivity(): Promise<Activity | undefined> {
                 appName = `#${channel.name}`;
                 details = guild.name;
                 state = memberCount();
-                imageBig = IconUtils.getGuildIconURL({id: guild.id, icon: guild.icon, canAnimate: true, size: 512}) || chino;
+                imageBig = IconUtils.getGuildIconURL({ id: guild.id, icon: guild.icon, canAnimate: true, size: 512 }) || chino;
                 if (guild.vanityURLCode) {
                     buttonOneText = `Join ${guild.name.slice(0, 31 - 5)}`;
                     buttonOneURL = `https://discord.gg/${guild.vanityURLCode}`;
