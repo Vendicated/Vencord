@@ -203,7 +203,7 @@ export class RelationshipStore extends FluxStore {
     getOutgoingCount(): number;
     getFriendCount(): number;
     getRelationshipCount(): number;
-    getMutableRelationships(): Record<number, number>;
+    getMutableRelationships(): Map<string, number>;
     getVersion(): number;
     isSpam(userId): boolean;
     getRelationshipType(userId: string): number;
