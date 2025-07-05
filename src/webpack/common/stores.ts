@@ -53,6 +53,8 @@ export let EmojiStore: t.EmojiStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+export let StreamerModeStore: t.StreamerModeStore;
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 
 /**
  * React hook that returns stateful data for one or more stores
@@ -87,6 +89,8 @@ waitForStore("ThemeStore", m => {
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
     Vencord.QuickCss.initQuickCssThemeStore();
 });
+waitForStore("StreamerModeStore", m => StreamerModeStore = m);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
 
 // GuildRoleStore is new, this code is for stable + canary compatibility
 // TODO: Change to waitForStore once GuildRoleStore is on stable
