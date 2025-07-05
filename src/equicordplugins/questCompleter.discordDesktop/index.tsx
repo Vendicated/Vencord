@@ -71,10 +71,10 @@ async function openCompleteQuestUI() {
 
         const applicationId = quest.config.application.id;
         const applicationName = quest.config.application.name;
-        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"].find(x => quest.config.taskConfig.tasks[x] != null);
+        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"].find(x => quest.config.taskConfigV2.tasks[x] != null);
         const icon = `https://cdn.discordapp.com/quests/${quest.id}/${theme}/${quest.config.assets.gameTile}`;
         // @ts-ignore
-        const secondsNeeded = quest.config.taskConfig.tasks[taskName].target;
+        const secondsNeeded = quest.config.taskConfigV2.tasks[taskName].target;
         // @ts-ignore
         let secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0;
         if (taskName === "WATCH_VIDEO" || taskName === "WATCH_VIDEO_ON_MOBILE") {
@@ -155,7 +155,11 @@ async function openCompleteQuestUI() {
                     }
                 };
                 FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-                console.log(`Spoofed your game to ${applicationName}.`);
+                showNotification({
+                    title: `${applicationName} - Quest Completer`,
+                    body: `Spoofed your application to ${applicationName}.`,
+                    icon: icon,
+                });
             });
         } else if (taskName === "STREAM_ON_DESKTOP") {
             const stream = ApplicationStreamingStore.getAnyStreamForUser(UserStore.getCurrentUser()?.id);
@@ -198,7 +202,16 @@ async function openCompleteQuestUI() {
                 }
             };
             FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-            console.log(`Spoofed your stream to ${applicationName}.`);
+            showNotification({
+                title: `${applicationName} - Quest Completer`,
+                body: `Stream any window in vc for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`,
+                icon: icon,
+            });
+            showNotification({
+                title: `${applicationName} - Quest Completer`,
+                body: "Remember that you need at least 1 other person to be in the vc!",
+                icon: icon,
+            });
         } else if (taskName === "PLAY_ACTIVITY") {
             const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id ?? Object.values(GuildChannelStore.getAllGuilds() as any[]).find(x => x != null && x.VOCAL.length > 0).VOCAL[0].channel.id;
             const streamKey = `call:${channelId}:1`;
