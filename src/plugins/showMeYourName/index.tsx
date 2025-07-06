@@ -40,11 +40,6 @@ const settings = definePluginSettings({
         default: false,
         description: "Also apply functionality to reply previews",
     },
-    showGradient: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Whether to show gradient for suffix",
-    },
 });
 
 export default definePlugin({
@@ -72,16 +67,14 @@ export default definePlugin({
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
 
-            const classes = settings.store.showGradient ? "vc-smyn-suffix" : "vc-smyn-suffix vc-smyn-hide-gradient";
-
             if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
                 return <>{prefix}{nick}</>;
 
             if (settings.store.mode === "user-nick")
-                return <>{prefix}{username} <span className={classes}>{nick}</span></>;
+                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
 
             if (settings.store.mode === "nick-user")
-                return <>{prefix}{nick} <span className={classes}>{username}</span></>;
+                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
 
             return <>{prefix}{username}</>;
         } catch {

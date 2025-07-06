@@ -1,5 +1,7 @@
 .vc-smyn-suffix {
     color: var(--text-muted);
+    -webkit-text-fill-color: initial;
+    isolation: isolate;
 }
 
 .vc-smyn-suffix::before {
@@ -8,9 +10,4 @@
 
 .vc-smyn-suffix::after {
     content: ")";
-}
-
-.vc-smyn-hide-gradient {
-    -webkit-text-fill-color: initial;
-    isolation: isolate;
 }
