@@ -9,11 +9,9 @@ import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { showItemInFolder } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { saveFile } from "@utils/web";
 import { Menu } from "@webpack/common";
 import { Message } from "discord-types/general";
-
-const { saveFile } = findByPropsLazy("saveFile", "openFile");
 
 const settings = definePluginSettings({
     openFileAfterExport: {
@@ -66,7 +64,7 @@ async function exportMessage(message: Message) {
             if (result && settings.store.openFileAfterExport) {
                 showItemInFolder(result);
             }
-        } else { // for web
+        } else {
             const file = new File([content], filename, { type: "text/plain" });
             saveFile(file);
         }
