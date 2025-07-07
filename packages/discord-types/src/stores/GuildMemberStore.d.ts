@@ -1,4 +1,5 @@
 import { FluxStore, GuildMember } from "..";
+
 export class GuildMemberStore extends FluxStore {
     getAllGuildsAndMembers(): Record<string, Record<string, GuildMember>>;
     /** @returns Format: [guildId-userId: Timestamp (string)] */

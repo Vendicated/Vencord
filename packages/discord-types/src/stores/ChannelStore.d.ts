@@ -1,4 +1,5 @@
 import { Channel, FluxStore } from "..";
+
 // TODO: Update this
 export class ChannelStore extends FluxStore {
     getAllThreadsForParent(channelId: string): Channel[];

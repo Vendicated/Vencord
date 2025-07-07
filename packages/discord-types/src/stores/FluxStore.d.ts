@@ -1,3 +1,5 @@
+import { FluxDispatcher, FluxEvents } from "..";
+
 type GenericFunction = (...args: any[]) => any;
 
 export class FluxStore {

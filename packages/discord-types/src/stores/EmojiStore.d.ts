@@ -1,4 +1,4 @@
-import { CustomEmoji, FluxStore } from "..";
+import { Channel, CustomEmoji, Emoji, FluxStore } from "..";
 
 export class EmojiStore extends FluxStore {
     getCustomEmojiById(id?: string | null): CustomEmoji;
@@ -29,7 +29,7 @@ export class EmojiStore extends FluxStore {
         pendingUsages: { key: string, timestamp: number; }[];
     };
     searchWithoutFetchingLatest(data: {
-        channel: Channel,
+        channel: Channel;
         query: string;
         count?: number;
         intention: number;

@@ -1,4 +1,5 @@
 import { FluxStore } from "..";
+
 export interface DraftObject {
     channelId: string;
     timestamp: number;

@@ -24,7 +24,6 @@ export class User {
     purchasedFlags: number;
     system: boolean;
     username: string;
-    globalName: string | undefined;
     verified: boolean;
     themeColors?: [number, number];
 

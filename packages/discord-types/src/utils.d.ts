@@ -1,4 +1,4 @@
-import { Channel, Guild, GuildMember, Message, User } from "discord-types/general";
+import { Channel, Guild, GuildMember, Message, User } from ".";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 

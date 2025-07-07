@@ -1,4 +1,4 @@
-import { MessageJSON, FluxStore, Message } from "@vencord/discord-types";
+import { MessageJSON, FluxStore, Message } from "..";
 
 export class MessageStore extends FluxStore {
     getMessage(channelId: string, messageId: string): Message;
