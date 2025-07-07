@@ -170,7 +170,7 @@ export default definePlugin({
             if (guildId == null) return null;
 
             const member = GuildMemberStore.getMember(guildId, userId);
-            return member?.colorStrings ?? { primaryColor: member?.colorString, secondaryColor: null, tertiaryColor: null } ?? null;
+            member?.colorStrings ?? { primaryColor: member?.colorString, secondaryColor: null, tertiaryColor: null } ?? null;
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get color string", e);
         }
@@ -225,7 +225,7 @@ export default definePlugin({
         return null;
     },
 
-    RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }) => {
+    RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
         const role = GuildRoleStore.getRole(guildId, id);
         const cs = role?.colorStrings;
         const style: React.CSSProperties = {
