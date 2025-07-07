@@ -139,7 +139,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
-                    replace: '$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)'
+                    replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
                 }
             ],
             predicate: () => settings.store.reactorsList,
@@ -170,7 +170,7 @@ export default definePlugin({
             if (guildId == null) return null;
 
             const member = GuildMemberStore.getMember(guildId, userId);
-            member?.colorStrings ?? { primaryColor: member?.colorString, secondaryColor: null, tertiaryColor: null } ?? null;
+            return member?.colorStrings ?? { primaryColor: member?.colorString, secondaryColor: null, tertiaryColor: null } ?? null;
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get color string", e);
         }
