@@ -17,6 +17,5 @@ export class RelationshipStore extends FluxStore {
     isIgnored(userId: string): boolean;
     getSince(userId: string): string;
 
-    /** @returns Format: [userId: Enum value from constants.RelationshipTypes] */
-    getMutableRelationships(): Record<number, number>;
+    getMutableRelationships(): Map<string, number>;
 }
