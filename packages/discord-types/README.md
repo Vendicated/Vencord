@@ -12,12 +12,12 @@ yarn add -D @vencord/discord-types
 pnpm add -D @vencord/discord-types
 ```
 
-## Usage
+## Example Usage
 
 ```ts
 import type { UserStore } from "@vencord/discord-types";
 
-const userStore: UserStore = findStore("UserStore");
+const userStore: UserStore = findStore("UserStore"); // findStore is up to you to implement, this library only provides types and no runtime code
 ```
 
 ### License

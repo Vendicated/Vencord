@@ -317,3 +317,19 @@ export interface DateUtils {
     dateFormat(date: Date, format: string): string;
     diffAsUnits(start: Date, end: Date, stopAtOneSecond?: boolean): Record<"days" | "hours" | "minutes" | "seconds", number>;
 }
+
+export interface CommandOptions {
+    type: number;
+    name: string;
+    description: string;
+    required?: boolean;
+    choices?: {
+        name: string;
+        values: string | number;
+    }[];
+    options?: CommandOptions[];
+    channel_types?: number[];
+    min_value?: number;
+    max_value?: number;
+    autocomplete?: boolean;
+}
