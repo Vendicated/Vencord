@@ -69,7 +69,7 @@ export async function toggleEnabled(name: string) {
         if (failures.length) {
             console.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
             showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
-            return;
+            return false;
         } else if (restartNeeded) {
             settings.enabled = true;
             onRestartNeeded();
@@ -84,7 +84,7 @@ export async function toggleEnabled(name: string) {
 
     if (wasEnabled && !plugin.started) {
         settings.enabled = !wasEnabled;
-        return false;
+        return await beforeReturn(settings, wasEnabled);
     }
 
     const result = wasEnabled ? Vencord.Plugins.stopPlugin(plugin) : Vencord.Plugins.startPlugin(plugin);
@@ -94,7 +94,7 @@ export async function toggleEnabled(name: string) {
         const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
         console.error(msg);
         showErrorToast(msg);
-        return await beforeReturn(settings, wasEnabled);
+        return false;
     }
 
     settings.enabled = !wasEnabled;

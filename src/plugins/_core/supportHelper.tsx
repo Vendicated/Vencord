@@ -336,12 +336,7 @@ export default definePlugin({
                     onClick={async () => {
                         try {
                             const success = await toggleEnabled(matchedPlugin);
-                            if (success) {
-                                showToast(
-                                    `${isEnabled ? "Disabled" : "Enabled"} ${matchedPlugin}`,
-                                    Toasts.Type.SUCCESS
-                                );
-                            }
+                            if (success) showToast(`${isEnabled ? "Disabled" : "Enabled"} ${matchedPlugin}`, Toasts.Type.SUCCESS);
                         } catch (e) {
                             new Logger(this.name).error("Error while toggling:", e);
                             showToast(`Failed to toggle ${matchedPlugin}`, Toasts.Type.FAILURE);
