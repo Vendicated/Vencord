@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>192 additional plugins</summary>
+<summary>193 additional plugins</summary>
 
 ### All Platforms
 
@@ -60,6 +60,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Equissant by SomeAspy & thororen
 - ExpandedUserTags by Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN, hen
 - ExportContacts by dat_insanity
+- ExportMessages by veygax
 - FakeProfileThemesAndEffects by ryan
 - CopyProfileColors by Crxa
 - FastDeleteChannels by thororen
