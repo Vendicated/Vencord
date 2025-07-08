@@ -30,14 +30,12 @@ if (location.protocol !== "data:") {
     // #region cssInsert
     const rendererCss = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
-    const style = document.createElement("style");
-    style.id = "vencord-css-core";
-    style.textContent = readFileSync(rendererCss, "utf-8");
+    const injectStyle = () => webFrame.executeJavaScript(`try { Vencord.Api.Styles.createStyle("vencord-css-core", atob("${btoa(readFileSync(rendererCss, "utf-8"))}")); } catch (_) {}`);
 
     if (document.readyState === "complete") {
-        document.documentElement.appendChild(style);
+        injectStyle();
     } else {
-        document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
+        document.addEventListener("DOMContentLoaded", injectStyle, {
             once: true
         });
     }
@@ -45,9 +43,7 @@ if (location.protocol !== "data:") {
     if (IS_DEV) {
         // persistent means keep process running if watcher is the only thing still running
         // which we obviously don't want
-        watch(rendererCss, { persistent: false }, () => {
-            document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
-        });
+        watch(rendererCss, { persistent: false }, injectStyle);
     }
     // #endregion
 

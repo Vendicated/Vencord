@@ -18,6 +18,7 @@
 
 /// <reference types="standalone-electron-types"/>
 
+
 declare module "~plugins" {
     const plugins: Record<string, import("./utils/types").Plugin>;
     export default plugins;
@@ -50,6 +51,6 @@ declare module "file://*" {
 declare module "*.css";
 
 declare module "*.css?managed" {
-    const name: string;
-    export default name;
+    const style: import("@api/Styles").Style;
+    export default style;
 }
