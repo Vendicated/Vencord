@@ -1,38 +1,17 @@
 import { Channel } from "../Channel";
 import { Guild } from "../Guild";
 import { Promisable } from "type-fest";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, ApplicationCommandType } from "../../../enums";
 
 export interface CommandContext {
     channel: Channel;
     guild?: Guild;
 }
 
-export interface ApplicationCommandOptionType {
-    SUB_COMMAND: 1,
-    SUB_COMMAND_GROUP: 2,
-    STRING: 3,
-    INTEGER: 4,
-    BOOLEAN: 5,
-    USER: 6,
-    CHANNEL: 7,
-    ROLE: 8,
-    MENTIONABLE: 9,
-    NUMBER: 10,
-    ATTACHMENT: 11,
-}
-
-export interface ApplicationCommandInputType {
-    BUILT_IN: 0,
-    BUILT_IN_TEXT: 1,
-    BUILT_IN_INTEGRATION: 2,
-    BOT: 3,
-    PLACEHOLDER: 4,
-}
-
 export interface CommandOption {
     name: string;
     displayName?: string;
-    type: ApplicationCommandOptionType[keyof ApplicationCommandOptionType];
+    type: ApplicationCommandOptionType;
     description: string;
     displayDescription?: string;
     required?: boolean;
@@ -47,20 +26,14 @@ export interface ChoicesOption {
     displayName?: string;
 }
 
-export interface ApplicationCommandType {
-    CHAT_INPUT: 1,
-    USER: 2,
-    MESSAGE: 3,
-}
-
 export interface CommandReturnValue {
     content: string;
-    /** TODO: implement */
-    cancel?: boolean;
+    // TODO: implement
+    // cancel?: boolean;
 }
 
 export interface CommandArgument {
-    type: ApplicationCommandOptionType[keyof ApplicationCommandOptionType];
+    type: ApplicationCommandOptionType;
     name: string;
     value: string;
     focused: undefined;
@@ -70,8 +43,8 @@ export interface CommandArgument {
 export interface Command {
     id?: string;
     applicationId?: string;
-    type?: ApplicationCommandType[keyof ApplicationCommandType];
-    inputType?: ApplicationCommandInputType[keyof ApplicationCommandInputType];
+    type?: ApplicationCommandType;
+    inputType?: ApplicationCommandInputType;
     plugin?: string;
 
     name: string;

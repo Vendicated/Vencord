@@ -20,6 +20,15 @@ import type { UserStore } from "@vencord/discord-types";
 const userStore: UserStore = findStore("UserStore"); // findStore is up to you to implement, this library only provides types and no runtime code
 ```
 
+## Enums
+
+This library also exports some const enums that you can use from Typescript code:
+```ts
+import { ApplicationCommandType } from "@vencord/discord-types/enums";
+
+console.log(ApplicationCommandType.CHAT_INPUT); // 1
+```
+
 ### License
 
 This package is licensed under the [LGPL-3.0](./LICENSE) (or later) license.

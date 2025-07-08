@@ -13,6 +13,7 @@ export interface CustomEmoji {
     require_colons: boolean;
     roles: string[];
 }
+
 export interface UnicodeEmoji {
     type: 0;
     diversityChildren: Record<any, any>;

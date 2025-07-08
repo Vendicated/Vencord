@@ -1,18 +1,18 @@
 export interface Embed {
     author?: {
-        iconProxyURL: string | undefined;
-        iconURL: string | undefined;
         name: string;
         url: string;
+        iconURL: string | undefined;
+        iconProxyURL: string | undefined;
     };
     color: string;
     fields: [];
     id: string;
     image?: {
         height: number;
-        proxyURL: string;
-        url: string;
         width: number;
+        url: string;
+        proxyURL: string;
     };
     provider?: {
         name: string;
@@ -32,18 +32,18 @@ export interface Embed {
     url: string | undefined;
     video?: {
         height: number;
-        proxyURL: string | undefined;
-        url: string;
         width: number;
+        url: string;
+        proxyURL: string | undefined;
     };
 }
 
 export interface EmbedJSON {
     author?: {
-        icon_url: string;
         name: string;
-        proxy_icon_url: string;
         url: string;
+        icon_url: string;
+        proxy_icon_url: string;
     };
     title: string;
     color: string;
@@ -57,14 +57,14 @@ export interface EmbedJSON {
     timestamp: string;
     thumbnail?: {
         height: number;
-        proxy_url: string | undefined;
-        url: string;
         width: number;
+        url: string;
+        proxy_url: string | undefined;
     };
     video?: {
         height: number;
-        proxy_url: string | undefined;
-        url: string;
         width: number;
+        url: string;
+        proxy_url: string | undefined;
     };
 }
