@@ -1,6 +1,5 @@
 import { Channel, FluxStore } from "..";
 
-// TODO: Update this
 export class ChannelStore extends FluxStore {
     getChannel(channelId: string): Channel;
     getBasicChannel(channelId: string): Channel | undefined;
