@@ -214,6 +214,9 @@ export class GuildStore extends FluxStore {
     getGuildCount(): number;
     getGuilds(): Record<string, Guild>;
     getGuildIds(): string[];
+}
+
+export class GuildRoleStore extends FluxStore {
     getRole(guildId: string, roleId: string): Role;
     getRoles(guildId: string): Record<string, Role>;
     getAllGuildRoles(): Record<string, Record<string, Role>>;
@@ -252,5 +255,5 @@ export class RelationshipStore extends FluxStore {
     getSince(userId: string): string;
 
     /** @returns Format: [userId: Enum value from constants.RelationshipTypes] */
-    getMutableRelationships(): Record<number, number>;
+    getMutableRelationships(): Map<string, number>;
 }
