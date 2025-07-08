@@ -1,6 +1,5 @@
 /* eslint-disable */
 
-const self = module.exports;
 /**
  * apng-canvas v2.1.2
  *
