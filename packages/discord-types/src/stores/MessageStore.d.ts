@@ -10,5 +10,4 @@ export class MessageStore extends FluxStore {
     isLoadingMessages(channelId: string): boolean;
     jumpedMessageId(channelId: string): string | undefined;
     whenReady(channelId: string, callback: () => void): void;
-    initialize(): void;
 }

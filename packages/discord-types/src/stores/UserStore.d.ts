@@ -7,5 +7,4 @@ export class UserStore extends FluxStore {
     getCurrentUser(): User;
     getUser(userId: string): User;
     getUsers(): Record<string, User>;
-    initialize(): void;
 }
