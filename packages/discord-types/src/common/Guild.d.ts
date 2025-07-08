@@ -75,19 +75,4 @@ export class Guild {
     systemChannelId: string | undefined;
     vanityURLCode: string | undefined;
     verificationLevel: number;
-
-    get acronym(): string;
-
-    getApplicationId(): unknown;
-    getIconSource(size: string | number, canAnimate: boolean): { uri: string; };
-    getIconURL(size: string | number, canAnimate: boolean): string;
-    getMaxEmojiSlots(): number;
-    getRole(roleId: string): Role;
-    hasFeature(feature: GuildFeatures): boolean;
-    hasVerificationGate(): boolean;
-    isLurker(): boolean;
-    isNew(newerThanDays?: number): boolean;
-    isOwner(user: User): boolean;
-    isOwnerWithRequiredMfaLevel(user: User): boolean;
-    toString(): string; // override that is identical to Guild.name
 }
