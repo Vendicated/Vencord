@@ -1,12 +1,13 @@
 import { FluxStore } from "..";
 
 export enum DraftType {
-    ChannelMessage,
-    ThreadSettings,
-    FirstThreadMessage,
-    ApplicationLauncherCommand,
-    Poll,
-    SlashCommand,
+    ChannelMessage = 0,
+    ThreadSettings = 1,
+    FirstThreadMessage = 2,
+    ApplicationLauncherCommand = 3,
+    Poll = 4,
+    SlashCommand = 5,
+    ForwardContextMessage = 6
 }
 
 export interface Draft {

@@ -1,18 +1,16 @@
 import { Channel, CustomEmoji, Emoji, FluxStore } from "..";
 
 export class EmojiStore extends FluxStore {
-    getCustomEmojiById(id?: string | null): CustomEmoji;
-    getUsableCustomEmojiById(id?: string | null): CustomEmoji;
+    getCustomEmojiById(id?: string | null): CustomEmoji | undefined;
+    getUsableCustomEmojiById(id?: string | null): CustomEmoji | undefined;
     getGuilds(): Record<string, {
         id: string;
-        _emojiMap: Record<string, CustomEmoji>;
-        _emojis: CustomEmoji[];
         get emojis(): CustomEmoji[];
         get rawEmojis(): CustomEmoji[];
-        _usableEmojis: CustomEmoji[];
         get usableEmojis(): CustomEmoji[];
-        _emoticons: any[];
         get emoticons(): any[];
+        getEmoji(id: string): CustomEmoji | undefined;
+        isUsable(emoji: CustomEmoji): boolean;
     }>;
     getGuildEmoji(guildId?: string | null): CustomEmoji[];
     getNewlyAddedEmoji(guildId?: string | null): CustomEmoji[];
