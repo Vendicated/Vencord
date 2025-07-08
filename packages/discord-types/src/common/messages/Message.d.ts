@@ -121,17 +121,6 @@ export class Message extends DiscordRecord {
     isCommandType(): boolean;
     isEdited(): boolean;
     isSystemDM(): boolean;
-
-    /**
-     * Returns the entire object (minus the prototype functions because it's not a class anymore) but with 3 additional props that are aliases.
-     */
-    toJS(): JSMessage;
-}
-
-interface JSMessage extends Message {
-    webkhook_id: string | undefined;
-    edited_timestamp: moment.Moment;
-    mention_everyone: boolean;
 }
 
 /** A smaller Message object found in FluxDispatcher and elsewhere. */

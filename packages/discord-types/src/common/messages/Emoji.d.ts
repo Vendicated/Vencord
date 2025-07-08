@@ -1,6 +1,7 @@
 export type Emoji = CustomEmoji | UnicodeEmoji;
 
 export interface CustomEmoji {
+    type: 1;
     allNamesString: string;
     animated: boolean;
     available: boolean;
@@ -11,9 +12,9 @@ export interface CustomEmoji {
     originalName?: string;
     require_colons: boolean;
     roles: string[];
-    type: 1;
 }
 export interface UnicodeEmoji {
+    type: 0;
     diversityChildren: Record<any, any>;
     emojiObject: {
         names: string[];
@@ -22,7 +23,6 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
-    type: 0;
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;
