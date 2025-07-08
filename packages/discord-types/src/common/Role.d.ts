@@ -1,6 +1,17 @@
 export interface Role {
     color: number;
     colorString: string | undefined;
+    colorStrings: {
+        primaryColor: string | undefined;
+        secondaryColor: string | undefined;
+        tertiaryColor: string | undefined;
+    };
+    colors: {
+        primary_color: number | undefined;
+        secondary_color: number | undefined;
+        tertiary_color: number | undefined;
+    };
+    flags: number;
     hoist: boolean;
     icon: string | undefined;
     id: string;
