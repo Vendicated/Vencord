@@ -1,11 +1,12 @@
 import { CommandOption } from './Commands';
 import { User, UserJSON } from '../User';
 import { Embed, EmbedJSON } from './Embed';
+import { DiscordRecord } from "../Record";
 
 /**
  * TODO: looks like discord has moved over to Date instead of Moment;
  */
-export class Message {
+export class Message extends DiscordRecord {
     constructor(message: object);
     activity: unknown;
     application: unknown;

@@ -1,4 +1,6 @@
-export class Channel {
+import { DiscordRecord } from "./Record";
+
+export class Channel extends DiscordRecord {
     constructor(channel: object);
     application_id: number | undefined;
     bitrate: number;

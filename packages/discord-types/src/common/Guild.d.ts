@@ -1,5 +1,6 @@
-import { User } from './User';
 import { Role } from './Role';
+import { DiscordRecord } from './Record';
+
 export type GuildFeatures =
     | "INVITE_SPLASH"
     | "VIP_REGIONS"
@@ -37,7 +38,7 @@ export type GuildFeatures =
     | "GUILD_HOME_TEST";
 
 
-export class Guild {
+export class Guild extends DiscordRecord {
     constructor(guild: object);
     afkChannelId: string | undefined;
     afkTimeout: number;

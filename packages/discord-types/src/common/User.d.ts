@@ -1,6 +1,8 @@
 // TODO: a lot of optional params can also be null, not just undef
 
-export class User {
+import { DiscordRecord } from "./Record";
+
+export class User extends DiscordRecord {
     constructor(user: object);
     accentColor: number;
     avatar: string;
