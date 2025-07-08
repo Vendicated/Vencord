@@ -548,11 +548,7 @@
                 }).call(
                     this,
                     Y("VCmEsw"),
-                    "undefined" != typeof self
-                        ? self
-                        : "undefined" != typeof window
-                            ? window
-                            : {}
+                    module.exports
                 );
             },
             { VCmEsw: 2 },
@@ -879,11 +875,7 @@
                         });
                 }).call(
                     this,
-                    "undefined" != typeof self
-                        ? self
-                        : "undefined" != typeof window
-                            ? window
-                            : {}
+                    module.exports
                 );
             },
             { "./loader": 6, "./parser": 7, "./support-test": 8 },
@@ -1152,11 +1144,7 @@
                     };
                 }).call(
                     this,
-                    "undefined" != typeof self
-                        ? self
-                        : "undefined" != typeof window
-                            ? window
-                            : {}
+                    module.exports
                 );
             },
             { "es6-promise": 1 },
