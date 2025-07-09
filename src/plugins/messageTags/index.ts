@@ -92,7 +92,7 @@ export default definePlugin({
         // TODO(OptionType.CUSTOM Related): Remove DataStore tags migration once enough time has passed
         const oldTags = await DataStore.get<Tag[]>(DATA_KEY);
         if (oldTags != null) {
-            // @ts-ignore
+            // @ts-expect-error
             settings.store.tagsList = Object.fromEntries(oldTags.map(oldTag => (delete oldTag.enabled, [oldTag.name, oldTag])));
             await DataStore.del(DATA_KEY);
         }
@@ -211,7 +211,7 @@ export default definePlugin({
                                     description: Object.values(getTags())
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
-                                    // @ts-ignore
+                                    // @ts-expect-error
                                     color: 0xd77f7f,
                                     type: "rich",
                                 }

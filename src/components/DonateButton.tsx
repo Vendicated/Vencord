@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ButtonProps } from "@vencord/discord-types";
 import { Button } from "@webpack/common";
-import { ButtonProps } from "@webpack/types";
 
 import { Heart } from "./Heart";
 

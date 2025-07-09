@@ -18,14 +18,13 @@
 
 import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonFactory } from "@api/ChatButtons";
-import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
-import { FluxEvents } from "@webpack/types";
+import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
 import { Promisable } from "type-fest";
 

@@ -32,8 +32,8 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
+import { Channel } from "@vencord/discord-types";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
-import { Channel } from "discord-types/general";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -196,7 +196,6 @@ export default definePlugin({
                 }
             }
 
-            // @ts-ignore outdated type
             const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 

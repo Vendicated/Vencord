@@ -1,0 +1,19 @@
+{
+    "name": "@vencord/discord-types",
+    "author": "Vencord Contributors",
+    "description": "Typescript definitions for the webpack modules of the Discord Web app",
+    "version": "1.0.0",
+    "license": "LGPL-3.0-or-later",
+    "types": "src/index.d.ts",
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Vendicated/Vencord.git",
+        "directory": "packages/discord-types"
+    },
+    "dependencies": {
+        "@types/react": "^19.0.10",
+        "moment": "^2.22.2",
+        "type-fest": "^4.41.0"
+    }
+}

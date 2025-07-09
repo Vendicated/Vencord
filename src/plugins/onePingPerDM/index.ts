@@ -7,8 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { MessageJSON } from "@vencord/discord-types";
 import { ChannelStore, ReadStateStore, UserStore } from "@webpack/common";
-import { MessageJSON } from "discord-types/general";
 
 const enum ChannelType {
     DM = 1,

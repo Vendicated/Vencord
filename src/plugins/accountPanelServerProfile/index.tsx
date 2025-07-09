@@ -9,9 +9,9 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, useEffect, useRef } from "@webpack/common";
-import { User } from "discord-types/general";
 
 interface UserProfileProps {
     popoutProps: Record<string, any>;

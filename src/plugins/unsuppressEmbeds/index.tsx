@@ -20,8 +20,8 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { MessageSnapshot } from "@vencord/discord-types";
 import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
-import { MessageSnapshot } from "@webpack/types";
 
 
 const EMBED_SUPPRESSED = 1 << 2;
