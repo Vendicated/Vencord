@@ -38,7 +38,7 @@ const asarPath = join(dirname(injectorPath), "..", asarName);
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
 
-// @ts-ignore Untyped method? Dies from cringe
+// @ts-expect-error Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
 if (!IS_VANILLA) {

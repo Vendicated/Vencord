@@ -22,9 +22,9 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { NoopComponent } from "@utils/react";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { filters, findByCodeLazy, waitFor } from "@webpack";
 import { ChannelStore, ContextMenuApi, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 const useMessageMenu = findByCodeLazy(".MESSAGE,commandTargetId:");
 
