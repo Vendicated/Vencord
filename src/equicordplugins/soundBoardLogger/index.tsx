@@ -36,7 +36,7 @@ export default definePlugin({
     settings,
     addSBIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
         if (Array.isArray(e.toolbar))
-            return e.toolbar.push(
+            return e.toolbar.unshift(
                 <ErrorBoundary noop={true}>
                     <OpenSBLogsButton />
                 </ErrorBoundary>

@@ -9,10 +9,7 @@ import "./styles.css";
 import { EquicordDevs } from "@utils/constants";
 import { getIntlMessage, openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { Button, React, RelationshipStore, TextInput, UserStore } from "@webpack/common";
-
-const ChannelActions = findByPropsLazy("openPrivateChannel");
 
 let lastSearch = "";
 let updateFunc = (v: any) => { };
@@ -30,8 +27,8 @@ export default definePlugin({
                     replace: ",$1.listType==='blocked'?$self.renderSearchInput():null"
                 },
                 {
-                    match: /(?<=userId:(\i).*?\}\)\]\}\),)(\(.*?\)\}\))/,
-                    replace: "$self.renderUser($1,$2),",
+                    match: /(?<=userId:(\i).*?\}\)\]\}\),)(\(.*?loading:\i\}\))/,
+                    replace: "$self.renderUser($1,$2)",
                 },
                 {
                     match: /(?<=\}=(\i).{0,10}(\i).useState\(.{0,1}\);)/,

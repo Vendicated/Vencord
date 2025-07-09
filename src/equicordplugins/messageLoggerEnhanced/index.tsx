@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const VERSION = "4.0.0";
-
 export const Native = getNative();
 
 import "./styles.css";
@@ -318,7 +316,7 @@ export default definePlugin({
 
     addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
         if (Array.isArray(e.toolbar))
-            return e.toolbar.push(
+            return e.toolbar.unshift(
                 <ErrorBoundary noop={true}>
                     <OpenLogsButton />
                 </ErrorBoundary>

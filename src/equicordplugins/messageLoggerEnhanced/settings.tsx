@@ -21,7 +21,7 @@ export const settings = definePluginSettings({
     saveMessages: {
         default: true,
         type: OptionType.BOOLEAN,
-        description: "Wether to save the deleted and edited messages.",
+        description: "Whether to save the deleted and edited messages.",
     },
 
     saveImages: {
@@ -103,12 +103,6 @@ export const settings = definePluginSettings({
         description: "Vencord's base MessageLogger remove log button wiil delete logs permanently",
     },
 
-    hideMessageFromMessageLoggers: {
-        default: false,
-        type: OptionType.BOOLEAN,
-        description: "When enabled, a context menu button will be added to messages to allow you to delete messages without them being logged by other loggers. Might not be safe, use at your own risk."
-    },
-
     ShowLogsButton: {
         default: true,
         type: OptionType.BOOLEAN,
@@ -120,12 +114,6 @@ export const settings = definePluginSettings({
         default: 100,
         type: OptionType.NUMBER,
         description: "Number of messages to display at once in logs & number of messages to load when loading more messages in logs.",
-    },
-
-    hideMessageFromMessageLoggersDeletedMessage: {
-        default: "redacted eh",
-        type: OptionType.STRING,
-        description: "The message content to replace the message with when using the hide message from message loggers feature.",
     },
 
     messageLimit: {

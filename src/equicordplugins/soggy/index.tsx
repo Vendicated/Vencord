@@ -152,7 +152,7 @@ export default definePlugin({
     // taken from message logger lol
     addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
         if (Array.isArray(e.toolbar))
-            return e.toolbar.push(
+            return e.toolbar.unshift(
                 <ErrorBoundary noop={true}>
                     <SoggyButton />
                 </ErrorBoundary>

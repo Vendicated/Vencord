@@ -5,7 +5,7 @@
  */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { FluxDispatcher, Menu, MessageActions, React, Toasts, UserStore } from "@webpack/common";
+import { FluxDispatcher, Menu, React, Toasts } from "@webpack/common";
 
 import { openLogModal } from "../components/LogsModal";
 import { deleteMessageIDB } from "../db";
@@ -62,8 +62,37 @@ export const contextMenuPath: NavContextMenuPatchCallback = (children, props) =>
     if (!props) return;
 
     if (!children.some(child => child?.props?.id === "message-logger")) {
+        if (props.navId === "message" && (props.message?.deleted || props.message?.editHistory?.length > 0)) {
+            children.push(
+                <Menu.MenuItem
+                    id="remove-message"
+                    label={props.message?.deleted ? "Remove Message (Permanent)" : "Remove Message History (Permanent)"}
+                    color="danger"
+                    action={() =>
+                        deleteMessageIDB(props.message.id)
+                            .then(() => {
+                                if (props.message.deleted) {
+                                    FluxDispatcher.dispatch({
+                                        type: "MESSAGE_DELETE",
+                                        channelId: props.message.channel_id,
+                                        id: props.message.id,
+                                        mlDeleted: true
+                                    });
+                                } else {
+                                    props.message.editHistory = [];
+                                }
+                            }).catch(() => Toasts.show({
+                                type: Toasts.Type.FAILURE,
+                                message: "Failed to remove message",
+                                id: Toasts.genId()
+                            }))
+
+                    }
+                />
+            );
+        }
+
         children.push(
-            <Menu.MenuSeparator />,
             <Menu.MenuItem
                 id="message-logger"
                 label="Message Logger"
@@ -85,70 +114,6 @@ export const contextMenuPath: NavContextMenuPatchCallback = (children, props) =>
                         {renderListOption("whitelistedIds", IdType as idKeys, props)}
                     </React.Fragment>
                 ))}
-
-                {
-                    props.navId === "message"
-                    && (props.message?.deleted || props.message?.editHistory?.length > 0)
-                    && (
-                        <>
-                            <Menu.MenuSeparator />
-                            <Menu.MenuItem
-                                id="remove-message"
-                                label={props.message?.deleted ? "Remove Message (Permanent)" : "Remove Message History (Permanent)"}
-                                color="danger"
-                                action={() =>
-                                    deleteMessageIDB(props.message.id)
-                                        .then(() => {
-                                            if (props.message.deleted) {
-                                                FluxDispatcher.dispatch({
-                                                    type: "MESSAGE_DELETE",
-                                                    channelId: props.message.channel_id,
-                                                    id: props.message.id,
-                                                    mlDeleted: true
-                                                });
-                                            } else {
-                                                props.message.editHistory = [];
-                                            }
-                                        }).catch(() => Toasts.show({
-                                            type: Toasts.Type.FAILURE,
-                                            message: "Failed to remove message",
-                                            id: Toasts.genId()
-                                        }))
-
-                                }
-                            />
-                        </>
-                    )
-                }
-
-                {
-                    settings.store.hideMessageFromMessageLoggers
-                    && props.navId === "message"
-                    && props.message?.author?.id === UserStore.getCurrentUser().id
-                    && props.message?.deleted === false
-                    && (
-                        <>
-                            <Menu.MenuSeparator />
-                            <Menu.MenuItem
-                                id="hide-from-message-loggers"
-                                label="Delete Message (Hide From Message Loggers)"
-                                color="danger"
-
-                                action={async () => {
-                                    await MessageActions.deleteMessage(props.message.channel_id, props.message.id);
-                                    MessageActions._sendMessage(props.message.channel_id, {
-                                        "content": settings.store.hideMessageFromMessageLoggersDeletedMessage,
-                                        "tts": false,
-                                        "invalidEmojis": [],
-                                        "validNonShortcutEmojis": []
-                                    }, { nonce: props.message.id });
-                                }}
-
-                            />
-                        </>
-                    )
-                }
-
             </Menu.MenuItem>
         );
     }

@@ -74,26 +74,28 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (
         );
     }
 
-    children.push(
-        <Menu.MenuItem
-            id={REMOVE_HISTORY_ID}
-            key={REMOVE_HISTORY_ID}
-            label="Remove Message History"
-            color="danger"
-            action={() => {
-                if (deleted) {
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_DELETE",
-                        channelId: channel_id,
-                        id,
-                        mlDeleted: true,
-                    });
-                } else {
-                    message.editHistory = [];
-                }
-            }}
-        />,
-    );
+    if (!Vencord.Plugins.isPluginEnabled("MessageLoggerEnhanced")) {
+        children.push(
+            <Menu.MenuItem
+                id={REMOVE_HISTORY_ID}
+                key={REMOVE_HISTORY_ID}
+                label="Remove Message History"
+                color="danger"
+                action={() => {
+                    if (deleted) {
+                        FluxDispatcher.dispatch({
+                            type: "MESSAGE_DELETE",
+                            channelId: channel_id,
+                            id,
+                            mlDeleted: true,
+                        });
+                    } else {
+                        message.editHistory = [];
+                    }
+                }}
+            />,
+        );
+    }
 };
 
 const patchChannelContextMenu: NavContextMenuPatchCallback = (
