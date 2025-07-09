@@ -39,6 +39,7 @@ export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
 export let VoiceStateStore: GenericStore;
+export let StreamerModeStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
@@ -89,6 +90,7 @@ waitForStore("ThemeStore", m => {
     Vencord.QuickCss.initQuickCssThemeStore();
 });
 waitForStore("VoiceStateStore", m => VoiceStateStore = m);
+waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 
 // GuildRoleStore is new, this code is for stable + canary compatibility
 // TODO: Change to waitForStore once GuildRoleStore is on stable

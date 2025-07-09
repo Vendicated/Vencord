@@ -1,25 +1,13 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 OpenAsar
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, FluxDispatcher, GuildMemberStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildMemberStore, StreamerModeStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
 
 type Alignment = "topleft" | "topright" | "bottomleft" | "bottomright";
 
@@ -237,6 +225,15 @@ const handleVoiceStateUpdates = async dispatch => {
     }
 };
 
+const handleStreamerMode = dispatch => {
+    ws?.send(
+        JSON.stringify({
+            cmd: "STREAMER_MODE",
+            enabled: dispatch.value,
+        })
+    );
+};
+
 const createWebsocket = () => {
     console.log("Attempting to connect to Orbolay server");
 
@@ -307,6 +304,14 @@ const createWebsocket = () => {
             })
         );
 
+        // Also let the client know whether we are in streamer mode
+        ws?.send(
+            JSON.stringify({
+                cmd: "STREAMER_MODE",
+                enabled: StreamerModeStore.enabled,
+            })
+        );
+
         currentChannel = userVoiceState.channelId;
     };
 };
@@ -323,6 +328,7 @@ export default definePlugin({
         SPEAKING: handleSpeaking,
         VOICE_STATE_UPDATES: handleVoiceStateUpdates,
         RPC_NOTIFICATION_CREATE: handleMessageNotification,
+        STREAMER_MODE: handleStreamerMode,
     },
 
     start() {
