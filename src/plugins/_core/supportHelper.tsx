@@ -299,7 +299,8 @@ export default definePlugin({
             && ((props.channel.id === SUPPORT_CHANNEL_ID && equicordSupport))
             && props.message.content?.includes("update");
 
-        const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => (props.message.content?.toLowerCase() ?? "").includes(name.toLowerCase()));
+        const contentWords = (props.message.content?.toLowerCase().match(/\b\w+\b/g) ?? []);
+        const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => contentWords.includes(name.toLowerCase()));
         const matchedPlugin = matchedPlugins.sort((a, b) => b.length - a.length)[0];
         const pluginData = matchedPlugin && Vencord.Plugins.plugins[matchedPlugin];
         const equicordGuild = ChannelStore.getChannel(props.channel.id)?.guild_id === GUILD_ID;
