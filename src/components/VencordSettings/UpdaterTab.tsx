@@ -225,7 +225,7 @@ function Updater() {
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
-            <Forms.FormText className="vc-text-selectable">
+            <Forms.FormText>
                 {repoPending
                     ? repo
                     : err
