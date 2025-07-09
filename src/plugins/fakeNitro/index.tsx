@@ -127,7 +127,7 @@ const settings = definePluginSettings({
         description: "Size of the emojis when sending",
         type: OptionType.SLIDER,
         default: 48,
-        markers: [32, 48, 64, 128, 160, 256, 512]
+        markers: [32, 48, 64, 96, 128, 160, 256, 512]
     },
     transformEmojis: {
         description: "Whether to transform fake emojis into real ones",
@@ -394,7 +394,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: "?24:30,",
+            find: "getCurrentDesktopIcon(),",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -671,32 +671,38 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
-        const contentItems = message.content.split(/\s/);
-        if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
+        try {
+            const contentItems = message.content.split(/\s/);
+            if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
 
-        switch (embed.type) {
-            case "image": {
-                if (
-                    !settings.store.transformCompoundSentence
-                    && !contentItems.some(item => item === embed.url! || item.match(hyperLinkRegex)?.[1] === embed.url!)
-                ) return false;
+            switch (embed.type) {
+                case "image": {
+                    const url = embed.url ?? embed.image?.url;
+                    if (!url) return false;
+                    if (
+                        !settings.store.transformCompoundSentence
+                        && !contentItems.some(item => item === url || item.match(hyperLinkRegex)?.[1] === url)
+                    ) return false;
 
-                if (settings.store.transformEmojis) {
-                    if (fakeNitroEmojiRegex.test(embed.url!)) return true;
-                }
-
-                if (settings.store.transformStickers) {
-                    if (fakeNitroStickerRegex.test(embed.url!)) return true;
-
-                    const gifMatch = embed.url!.match(fakeNitroGifStickerRegex);
-                    if (gifMatch) {
-                        // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                        if (StickerStore.getStickerById(gifMatch[1])) return true;
+                    if (settings.store.transformEmojis) {
+                        if (fakeNitroEmojiRegex.test(url)) return true;
                     }
-                }
 
-                break;
+                    if (settings.store.transformStickers) {
+                        if (fakeNitroStickerRegex.test(url)) return true;
+
+                        const gifMatch = url.match(fakeNitroGifStickerRegex);
+                        if (gifMatch) {
+                            // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
+                            if (StickerStore.getStickerById(gifMatch[1])) return true;
+                        }
+                    }
+
+                    break;
+                }
             }
+        } catch (e) {
+            new Logger("FakeNitro").error("Error in shouldIgnoreEmbed:", e);
         }
 
         return false;

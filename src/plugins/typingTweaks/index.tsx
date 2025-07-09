@@ -45,14 +45,17 @@ const settings = definePluginSettings({
     }
 });
 
-export function buildSeveralUsers({ a, b, count }: { a: string, b: string, count: number; }) {
-    return [
-        <strong key="0">{a}</strong>,
-        ", ",
-        <strong key="1">{b}</strong>,
-        `, and ${count} others are typing...`
-    ];
-}
+export const buildSeveralUsers = ErrorBoundary.wrap(({ a, b, count, guildId }: { a: User, b: User, count: number; guildId: string; }) => {
+    return (
+        <>
+            <TypingUser user={a} guildId={guildId} />
+            {", "}
+            <TypingUser user={b} guildId={guildId} />
+            {", "}
+            and {count} others are typing...
+        </>
+    );
+}, { noop: true });
 
 interface Props {
     user: User;
@@ -96,21 +99,23 @@ export default definePlugin({
     patches: [
         {
             find: "#{intl::THREE_USERS_TYPING}",
+            group: true,
             replacement: [
                 {
                     // Style the indicator and add function call to modify the children before rendering
-                    match: /(?<=children:\[(\i)\.length>0.{0,200}?"aria-atomic":!0,children:)\i(?<=guildId:(\i).+?)/,
-                    replace: "$self.renderTypingUsers({ users: $1, guildId: $2, children: $& })"
+                    match: /(?<=children:\[(\i)\.length>0.{0,300}?"aria-atomic":!0,children:)\i/,
+                    replace: "$self.renderTypingUsers({ users: $1, guildId: arguments[0]?.channel?.guild_id, children: $& })"
                 },
                 {
                     // Changes the indicator to keep the user object when creating the list of typing users
-                    match: /\.map\((\i)=>\i\.\i\.getName\(\i,\i\.id,\1\)\)/,
+                    match: /\.map\((\i)=>\i\.\i\.getName\(\i(?:\.guild_id)?,\i\.id,\1\)\)/,
                     replace: ""
                 },
                 {
                     // Adds the alternative formatting for several users typing
                     match: /(,{a:(\i),b:(\i),c:\i}\):\i\.length>3&&\(\i=)\i\.\i\.string\(\i\.\i#{intl::SEVERAL_USERS_TYPING}\)(?<=(\i)\.length.+?)/,
-                    replace: (_, rest, a, b, users) => `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`,
+                    replace: (_, rest, a, b, users) =>
+                        `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2, guildId: arguments[0]?.channel?.guild_id })`,
                     predicate: () => settings.store.alternativeFormatting
                 }
             ]

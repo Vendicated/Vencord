@@ -48,9 +48,9 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad],
     patches: [
         {
-            find: '?"@":""',
+            find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=onContextMenu:\i,children:)\i\+\i/,
+                match: /(?<=onContextMenu:\i,children:)\i/,
                 replace: "$self.renderUsername(arguments[0])"
             }
         },

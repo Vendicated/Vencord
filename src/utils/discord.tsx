@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./discord.css";
-
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
+import GuildFeatures from "discord-types/other/Constants";
 import { Except } from "type-fest";
 
 import { runtimeHashMessageKey } from "./intlHash";
@@ -93,7 +92,7 @@ export function getCurrentGuild(): Guild | undefined {
 }
 
 export function openPrivateChannel(userId: string) {
-    PrivateChannelsStore.openPrivateChannel(userId);
+    ChannelActionCreators.openPrivateChannel(userId);
 }
 
 export const enum Theme {
@@ -143,9 +142,6 @@ export function sendMessage(
  */
 export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalProps?: Omit<MediaModalProps, "items">) {
     return openMediaModal({
-        className: "vc-image-modal",
-        fit: "vc-position-inherit",
-        shouldAnimateCarousel: true,
         items: [{
             type: "IMAGE",
             original: item.original ?? item.url,
@@ -222,4 +218,16 @@ export function getUniqueUsername(user: User) {
 export function getEmojiURL(id: string, animated: boolean, size: number) {
     const url = IconUtils.getEmojiURL({ id, animated, size });
     return animated ? url.replace(".webp", ".gif") : url;
+}
+
+// Discord has a similar function in their code
+export function getGuildAcronym(guild: Guild): string {
+    return guild.name
+        .replaceAll("'s ", " ")
+        .replace(/\w+/g, m => m[0])
+        .replace(/\s/g, "");
+}
+
+export function hasGuildFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
+    return guild.features?.has(feature) ?? false;
 }
