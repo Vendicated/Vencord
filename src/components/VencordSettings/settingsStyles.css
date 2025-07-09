@@ -60,15 +60,6 @@
     background-color: var(--button-danger-background);
 }
 
-.vc-text-selectable,
-.vc-text-selectable :where([class*="text" i], [class*="title" i]) {
-    /* make text selectable, silly discord makes the entirety of settings not selectable */
-    user-select: text;
-
-    /* discord also sets cursor: default which prevents the cursor from showing as text */
-    cursor: initial;
-}
-
 .vc-updater-modal {
     padding: 1.5em !important;
 }
