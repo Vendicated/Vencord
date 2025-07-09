@@ -16,7 +16,7 @@
 }
 
 .vc-clientTheme-container [class^="swatch"] {
-    border: thin solid var(--background-modifier-accent) !important;
+    border: thin solid var(--input-border) !important;
 }
 
 .vc-clientTheme-buttons-container {
