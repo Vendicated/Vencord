@@ -8,7 +8,7 @@ import { useLayoutEffect } from "@webpack/common";
 
 import { useForceUpdater } from "./react";
 
-const cssRelevantDirectives = ["style-src", "img-src", "font-src"] as const;
+const cssRelevantDirectives = ["style-src", "style-src-elem", "img-src", "font-src"] as const;
 
 export const CspBlockedUrls = new Set<string>();
 const CspErrorListeners = new Set<() => void>();

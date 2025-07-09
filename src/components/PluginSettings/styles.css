@@ -66,13 +66,6 @@
     gap: 0.25em;
 }
 
-.vc-plugins-restart-card {
-    padding: 1em;
-    background: var(--info-warning-background);
-    border: 1px solid var(--info-warning-foreground);
-    color: var(--info-warning-foreground);
-}
-
 .vc-plugins-restart-button {
     margin-top: 0.5em;
     background: var(--info-warning-foreground) !important;
