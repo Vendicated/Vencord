@@ -301,6 +301,7 @@ export default definePlugin({
 
         const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => (props.message.content?.toLowerCase() ?? "").includes(name.toLowerCase()));
         const matchedPlugin = matchedPlugins.sort((a, b) => b.length - a.length)[0];
+        const pluginData = matchedPlugin && Vencord.Plugins.plugins[matchedPlugin];
         const equicordGuild = ChannelStore.getChannel(props.channel.id)?.guild_id === GUILD_ID;
         const shouldAddPluginButtons = equicordGuild && equicordSupport && matchedPlugin;
 
@@ -326,9 +327,9 @@ export default definePlugin({
             );
         }
 
-        if (shouldAddPluginButtons && matchedPlugin) {
+        if (shouldAddPluginButtons && matchedPlugin && pluginData) {
+            if (pluginData.required || pluginData.name.endsWith("API")) return;
             const isEnabled = Vencord.Plugins.isPluginEnabled(matchedPlugin);
-
             buttons.push(
                 <Button
                     key="vc-plugin-toggle"
