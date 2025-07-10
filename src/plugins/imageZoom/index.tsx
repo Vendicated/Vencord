@@ -169,16 +169,23 @@ export default definePlugin({
                 {
                     match: /className:\i\.media,/,
                     replace: `id:"${ELEMENT_ID}",$&`
-                },
+                }
+            ]
+        },
+        // Remove discord's default enlarge on click and zoom-in cursor
+        {
+            find: ".ZOOM_OUT_IMAGE_PRESSED)",
+            replacement: [
+                // Remove zoom-in/out cursor
                 {
-                    // This patch needs to be above the next one as it uses the zoomed class as an anchor
-                    match: /\.zoomed]:.+?,(?=children:)/,
-                    replace: "$&onClick:()=>{},"
+                    match: /"zoom-out":"zoom-in"/,
+                    replace: "void 0:void 0"
                 },
+                // Noop handler for zooming in on click
                 {
-                    match: /className:\i\(\)\(\i\.wrapper,.+?}\),/,
-                    replace: ""
-                },
+                    match: /(?<=onMouseUp:)\i(?=,)/,
+                    replace: "() => {}"
+                }
             ]
         },
         // Make media viewer options not hide when zoomed in with the default Discord feature
