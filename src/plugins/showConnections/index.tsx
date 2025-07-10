@@ -28,6 +28,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Tooltip, UserProfileStore } from "@webpack/common";
+import OpenInAppPlugin from "plugins/openInApp";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
@@ -140,9 +141,8 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         rel="noreferrer"
                         onClick={e => {
                             if (Vencord.Plugins.isPluginEnabled("OpenInApp")) {
-                                const OpenInApp = Vencord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;
                                 // handleLink will .preventDefault() if applicable
-                                OpenInApp.handleLink(e.currentTarget, e);
+                                OpenInAppPlugin.handleLink(e.currentTarget, e);
                             }
                         }}
                     >

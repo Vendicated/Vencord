@@ -12,6 +12,6 @@ export { default as PatchHelperTab } from "./PatchHelperTab";
 export { default as PluginsTab } from "./plugins";
 export { openContributorModal } from "./plugins/ContributorModal";
 export { openPluginModal } from "./plugins/PluginModal";
-export { default as ThemesTab } from "./ThemesTab";
+export { default as ThemesTab } from "./themes";
 export { openUpdaterModal, default as UpdaterTab } from "./UpdaterTab";
 export { default as VencordTab } from "./VencordTab";

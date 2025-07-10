@@ -41,7 +41,7 @@ import Plugins, { ExcludedPlugins } from "~plugins";
 import { openPluginModal } from "./PluginModal";
 
 // Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("plugins"));
+const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("plugins") as typeof import("plugins"));
 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
