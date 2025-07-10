@@ -20,8 +20,8 @@ import {
     openModal,
 } from "@utils/modal";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { Forms, Menu, Text } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 type CustomMessage = Message & {
     editHistory?: any;

@@ -10,8 +10,8 @@ import { EquicordDevs } from "@utils/constants";
 import { showItemInFolder } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
+import { Message } from "@vencord/discord-types";
 import { Menu } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 const settings = definePluginSettings({
     openFileAfterExport: {

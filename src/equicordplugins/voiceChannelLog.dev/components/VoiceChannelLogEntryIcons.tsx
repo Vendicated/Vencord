@@ -5,8 +5,8 @@
  */
 
 import { classes } from "@utils/misc";
+import { Channel } from "@vencord/discord-types";
 import { React } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 import { cl } from "..";
 import { VoiceChannelLogEntry } from "../logs";

@@ -9,9 +9,9 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { ModalAPI } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import { SelectOption } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { PresenceStore, UserStore } from "@webpack/common";
-import { SelectOption } from "@webpack/types";
 
 interface Activity {
     name: string;

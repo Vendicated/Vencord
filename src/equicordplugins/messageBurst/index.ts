@@ -7,8 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel, Message } from "@vencord/discord-types";
 import { ChannelStore, MessageActions, MessageStore, UserStore } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
 
 function shouldEdit(channel: Channel, message: Message, timePeriod: number, shouldMergeWithAttachment: boolean) {
     let should = true;

@@ -18,8 +18,8 @@ import {
     ModalSize,
     openModal
 } from "@utils/modal";
+import * as t from "@vencord/discord-types";
 import { Button, Toasts } from "@webpack/common";
-import * as t from "@webpack/types";
 
 import { ModalHeaderTitle } from "./subComponents";
 

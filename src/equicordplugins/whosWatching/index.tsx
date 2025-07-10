@@ -13,9 +13,9 @@ import { getIntlMessage, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Clickable, Forms, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
-import { User } from "discord-types/general";
 import { JSX } from "react";
 
 interface WatchingProps {

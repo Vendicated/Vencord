@@ -23,8 +23,8 @@ import { EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { ChannelStore, Menu } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 function RepeatMessageIcon({ className }: { className?: string; }) {
     return (

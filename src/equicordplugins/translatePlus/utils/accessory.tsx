@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Message } from "@vencord/discord-types";
 import { Parser, useEffect, useState } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import { languages } from "../misc/languages";
 import { cl, Translation } from "../misc/types";

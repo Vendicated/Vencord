@@ -5,7 +5,7 @@
  */
 
 import { MessageObject } from "@api/MessageEvents";
-import { Message } from "discord-types/general";
+import { Message } from "@vencord/discord-types";
 
 import Ollama from "./providers/Ollama";
 import OpenAI from "./providers/OpenAI";

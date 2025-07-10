@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Embed, MessageAttachment, MessageReaction } from "discord-types/general";
+import { Embed, MessageAttachment, MessageReaction } from "@vencord/discord-types";
 
 export declare namespace Discord {
     export interface Sticker {

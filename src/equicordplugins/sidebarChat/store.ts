@@ -5,9 +5,9 @@
  */
 
 import { proxyLazy } from "@utils/lazy";
+import { Channel, Guild } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, Flux, FluxDispatcher, GuildStore } from "@webpack/common";
-import { Channel, Guild } from "discord-types/general";
 
 // cant destructure, otherwise context is lost
 const DMChannelHandler = findByPropsLazy("getOrEnsurePrivateChannel");

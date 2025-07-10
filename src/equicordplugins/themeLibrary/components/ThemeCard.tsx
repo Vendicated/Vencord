@@ -10,8 +10,8 @@ import { OpenExternalIcon } from "@components/Icons";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { User } from "@vencord/discord-types";
 import { Button, Card, FluxDispatcher, Forms, Parser, React, UserStore, UserUtils } from "@webpack/common";
-import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
 import type { Theme, ThemeLikeProps } from "../types";

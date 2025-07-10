@@ -20,9 +20,9 @@ import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/Messag
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, createRoot, MessageStore, Toasts } from "@webpack/common";
-import Message from "discord-types/general/Message";
 import { Root } from "react-dom/client";
 
 import ReplyNavigator from "./ReplyNavigator";

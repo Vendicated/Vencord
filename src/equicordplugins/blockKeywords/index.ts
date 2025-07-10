@@ -7,7 +7,7 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { MessageJSON } from "discord-types/general";
+import { MessageJSON } from "@vencord/discord-types";
 
 let blockedKeywords: Array<RegExp>;
 

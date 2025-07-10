@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as t from "@webpack/types";
+import * as t from "@vencord/discord-types";
 
 // name: pattern
 export const IconsFinds = {

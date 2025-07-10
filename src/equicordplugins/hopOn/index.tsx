@@ -7,8 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { RelationshipStore, SelectedChannelStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";

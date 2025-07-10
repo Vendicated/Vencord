@@ -6,9 +6,9 @@
 
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { VoiceState } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
-import { VoiceState } from "@webpack/types";
 
 import { getCurrentMedia, settings } from "./utils";
 

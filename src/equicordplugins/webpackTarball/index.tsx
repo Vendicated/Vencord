@@ -11,7 +11,6 @@ import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, M
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, wreq } from "@webpack";
 import { Button, Flex, Forms, Switch, Text, Timestamp, useState } from "@webpack/common";
-import __webpack_require__ from "discord-types/other/WebpackInstance";
 
 import TarFile from "./tar";
 import * as Webpack from "./webpack";
@@ -80,7 +79,7 @@ async function saveTar(patched: boolean) {
 }
 
 function TarModal({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
-    const webpackRequire = wreq as unknown as __webpack_require__;
+    const webpackRequire = wreq as any;
     const { buildNumber, builtAt } = getBuildNumber();
     const [, rerender] = useState({});
     const [isLoading, setLoading] = useState(false);

@@ -17,9 +17,9 @@ import {
     ModalSize,
     openModal,
 } from "@utils/modal";
+import { Guild } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Button, Forms, IconUtils, Text, useStateFromStores } from "@webpack/common";
-import { Guild } from "discord-types/general";
 
 import { HiddenServersStore } from "../HiddenServersStore";
 

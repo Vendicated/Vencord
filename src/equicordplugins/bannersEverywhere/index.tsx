@@ -9,8 +9,8 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, Plugin } from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
-import { User } from "discord-types/general";
 
 import style from "./style.css?managed";
 

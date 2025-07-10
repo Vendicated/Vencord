@@ -8,6 +8,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     ChannelRouter,
@@ -22,7 +23,6 @@ import {
     UserStore,
     useStateFromStores
 } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
 
 import { SidebarStore } from "./store";
 
@@ -149,7 +149,7 @@ export default definePlugin({
                                 }}
                             />
                             <HeaderBarIcon
-                                icon={() => (<XSmallIcon style={{ width: "24px",height: "24px" }} />)}
+                                icon={() => (<XSmallIcon style={{ width: "24px", height: "24px" }} />)}
                                 tooltip="Close Sidebar Chat"
                                 onClick={() => {
                                     FluxDispatcher.dispatch({

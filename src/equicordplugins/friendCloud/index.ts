@@ -20,9 +20,9 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { findStore } from "@webpack";
 import { DraftType, UploadHandler, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 const logger = new Logger("FriendCloud");
 

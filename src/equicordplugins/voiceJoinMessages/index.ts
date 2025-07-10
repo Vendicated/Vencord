@@ -8,9 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { humanFriendlyJoin } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message, User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, MessageActions, MessageStore, RelationshipStore, SelectedChannelStore, UserStore, VoiceStateStore } from "@webpack/common";
-import { Message, User } from "discord-types/general";
 
 const createBotMessage = findByCodeLazy('username:"Clyde"');
 

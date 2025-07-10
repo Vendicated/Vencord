@@ -17,8 +17,8 @@ import {
     ModalSize,
     openModal
 } from "@utils/modal";
+import * as t from "@vencord/discord-types";
 import { Button, FluxDispatcher, TooltipContainer, useCallback, useEffect, useState } from "@webpack/common";
-import * as t from "@webpack/types";
 
 import { IconsFinds } from "./names";
 import { openRawModal } from "./rawModal";

@@ -5,9 +5,9 @@
  */
 
 import { saveFile } from "@utils/web";
+import * as t from "@vencord/discord-types";
 import { filters, findAll, findByPropsLazy, waitFor } from "@webpack";
-import { createRoot, React, ReactDOM } from "@webpack/common";
-import * as t from "@webpack/types";
+import { createRoot, ReactDOM } from "@webpack/common";
 export let _cssColors: string[] = [];
 export type IconsDef = { [k: string]: t.Icon; };
 

@@ -7,8 +7,8 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { GuildMember } from "@vencord/discord-types";
 import { Forms, Parser } from "@webpack/common";
-import { GuildMember } from "discord-types/general";
 
 const cl = classNameFactory("vc-inrole-");
 

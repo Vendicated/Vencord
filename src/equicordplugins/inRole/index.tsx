@@ -12,8 +12,8 @@ import { InfoIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { GuildMember } from "@vencord/discord-types";
 import { Forms, GuildMemberStore, GuildRoleStore, Menu, Parser } from "@webpack/common";
-import { GuildMember } from "discord-types/general";
 
 import { showInRoleModal } from "./RoleMembersModal";
 

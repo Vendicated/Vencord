@@ -5,8 +5,8 @@
  */
 
 import { copyWithToast } from "@utils/misc";
+import type { Guild } from "@vencord/discord-types";
 import { Button, showToast, Switch, UserStore, useState, useToken } from "@webpack/common";
-import type { Guild } from "discord-types/general";
 
 import { buildFPTE } from "../lib/fpte";
 import { useAccentColor, usePrimaryColor, useProfileEffect, useShowPreview } from "../lib/profilePreview";
@@ -25,7 +25,7 @@ export function Builder({ guild }: BuilderProps) {
 
     const avatarColors = useAvatarColors(
         UserStore.getCurrentUser()?.getAvatarURL(guild?.id, 80),
-        useToken(tokens.unsafe_rawColors.PRIMARY_530).hex(),
+        useToken(tokens.unsafe_rawColors.PRIMARY_530 as any).hex(),
         false
     );
 

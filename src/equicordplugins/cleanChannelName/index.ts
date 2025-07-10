@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Channel } from "discord-types/general";
+import { Channel } from "@vencord/discord-types";
 
 export default definePlugin({
     name: "CleanChannelName",

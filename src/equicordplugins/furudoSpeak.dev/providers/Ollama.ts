@@ -5,7 +5,7 @@
  */
 
 import { MessageObject } from "@api/MessageEvents";
-import { Message } from "discord-types/general";
+import { Message } from "@vencord/discord-types";
 
 import { instructions } from "../instructions";
 import { FurudoSettings } from "../types";

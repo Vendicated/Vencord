@@ -8,8 +8,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { PassiveUpdateState, VoiceState } from "@vencord/discord-types";
 import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
-import { PassiveUpdateState, VoiceState } from "@webpack/types";
 
 import { Timer } from "./Timer";
 

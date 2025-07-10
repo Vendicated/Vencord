@@ -9,8 +9,8 @@ import "./style.css";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { Channel, Guild } from "@vencord/discord-types";
 import { ChannelStore, SelectedGuildStore } from "@webpack/common";
-import { Channel, Guild } from "discord-types/general";
 
 import { isEnabled, returnChannelBadge, settings } from "./settings";
 

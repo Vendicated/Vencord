@@ -10,9 +10,9 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ReadStateStore, useStateFromStores } from "@webpack/common";
-import { Channel } from "discord-types/general";
 import { JSX } from "react";
 
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");

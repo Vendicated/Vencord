@@ -11,8 +11,8 @@ import { classNameFactory } from "@api/Styles";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { Channel, Message, User } from "@vencord/discord-types";
 import { ChannelStore, GuildStore, PermissionsBits, SelectedChannelStore, UserStore } from "@webpack/common";
-import { Channel, Message, User } from "discord-types/general";
 
 import { computePermissions, Tag, tags } from "./consts";
 import { settings } from "./settings";

@@ -8,8 +8,8 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { ApplicationAssetUtils, FluxDispatcher, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 export async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");

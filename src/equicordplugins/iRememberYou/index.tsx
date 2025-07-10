@@ -13,8 +13,8 @@ import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import * as Modal from "@utils/modal";
 import definePlugin from "@utils/types";
+import { Guild, User } from "@vencord/discord-types";
 import { Avatar, Button, ChannelStore, Clickable, Flex, GuildMemberStore, GuildStore, MessageStore, React, Text, TextArea, TextInput, Tooltip, UserStore, } from "@webpack/common";
-import { Guild, User } from "discord-types/general";
 
 interface IUserExtra {
     isOwner?: boolean;

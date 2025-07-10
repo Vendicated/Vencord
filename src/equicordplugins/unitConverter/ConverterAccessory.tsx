@@ -17,8 +17,8 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { Message } from "@vencord/discord-types";
 import { useState } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 export const conversions = new Map<string, (conv: string) => void>();
 const cl = classNameFactory("vc-converter-");

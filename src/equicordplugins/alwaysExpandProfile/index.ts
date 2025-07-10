@@ -7,7 +7,7 @@
 import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
 
 export default definePlugin({
     name: "AlwaysExpandProfile",

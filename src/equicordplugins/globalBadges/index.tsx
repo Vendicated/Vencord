@@ -22,8 +22,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { Forms, React, Tooltip, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 import { JSX } from "react";
 
 type CustomBadge = string | {

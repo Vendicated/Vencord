@@ -11,8 +11,8 @@ import { DataStore } from "@api/index";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { CustomEmoji, UnicodeEmoji } from "@vencord/discord-types";
 import { Alerts, Button, EmojiStore, GuildStore, Menu, Toasts, useEffect, useState } from "@webpack/common";
-import { CustomEmoji, UnicodeEmoji } from "@webpack/types";
 import { JSX } from "react";
 
 interface ContextMenuEmoji {
@@ -57,7 +57,7 @@ function itemAlreadyInList(item: ContextMenuEmoji) {
 async function addBulkToAllowedList(items: ContextMenuEmoji[]) {
     const itemsToAdd = await Promise.all(items.map(async item => {
         if (!itemAlreadyInList(item)) {
-            let emojiData: CustomEmoji | null = null;
+            let emojiData: CustomEmoji | undefined = undefined;
 
             if (!item.surrogates) {
                 emojiData = EmojiStore.getCustomEmojiById(item.id);
@@ -122,7 +122,7 @@ async function removeBulkFromAllowedList(items: ContextMenuEmoji[]) {
 
 async function addToAllowedList(item: ContextMenuEmoji) {
     if (!itemAlreadyInList(item)) {
-        let emojiData: CustomEmoji | null = null;
+        let emojiData: CustomEmoji | undefined = undefined;
 
         if (!item.surrogates) {
             emojiData = EmojiStore.getCustomEmojiById(item.id);

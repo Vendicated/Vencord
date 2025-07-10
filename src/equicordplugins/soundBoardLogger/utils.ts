@@ -8,8 +8,8 @@ import { classNameFactory } from "@api/Styles";
 import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/react";
 import { saveFile } from "@utils/web";
+import type { User } from "@vencord/discord-types";
 import { findByCode, findByProps, findByPropsLazy } from "@webpack";
-import type { User } from "discord-types/general";
 
 import settings from "./settings";
 

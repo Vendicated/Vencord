@@ -15,8 +15,8 @@ import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import { Channel } from "@vencord/discord-types";
 import { Button, DraftType, FluxDispatcher, Forms, UploadHandler, UploadManager, UserStore } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 import { DependencyModal } from "./DependencyModal";
 

@@ -9,9 +9,9 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Forms, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
-import { User } from "discord-types/general";
 
 import settings from "../settings";
 import { clearLoggedSounds, getLoggedSounds } from "../store";

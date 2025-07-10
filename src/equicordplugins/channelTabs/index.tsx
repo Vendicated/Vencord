@@ -10,8 +10,8 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, Message } from "@vencord/discord-types";
 import { ChannelStore, Menu } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
 import { JSX } from "react";
 
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";

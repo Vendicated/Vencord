@@ -5,10 +5,9 @@
  */
 
 import { proxyLazy } from "@utils/lazy";
+import { Channel, FluxEmitter, FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
-import { FluxEmitter, FluxStore } from "@webpack/types";
-import { Channel } from "discord-types/general";
 
 interface IFlux {
     PersistedStore: typeof FluxStore;

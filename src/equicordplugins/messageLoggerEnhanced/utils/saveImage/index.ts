@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MessageAttachment } from "discord-types/general";
+import { MessageAttachment } from "@vencord/discord-types";
 
 import { Flogger, settings } from "../..";
 import { LoggedAttachment, LoggedMessage, LoggedMessageJSON } from "../../types";

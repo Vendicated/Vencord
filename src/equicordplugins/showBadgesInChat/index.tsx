@@ -14,7 +14,7 @@ const roleIconClassName = findByPropsLazy("roleIcon", "separator").roleIcon;
 const RoleIconComponent = findComponentByCodeLazy("#{intl::ROLE_ICON_ALT_TEXT}");
 import "./styles.css";
 
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
 import { JSX } from "react";
 
 import settings from "./settings";

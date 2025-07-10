@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { WebpackInstance } from "discord-types/other";
-
 export async function protectWebpack<T>(webpack: any[], body: () => Promise<T>): Promise<T> {
     const prev_m = Object.getOwnPropertyDescriptor(Function.prototype, "m")!;
     Object.defineProperty(Function.prototype, "m", {
@@ -22,7 +20,7 @@ export async function protectWebpack<T>(webpack: any[], body: () => Promise<T>):
     }
 }
 
-export function getLoadedChunks(wreq: WebpackInstance): { [chunkId: string | symbol]: 0 | undefined; } {
+export function getLoadedChunks(wreq): { [chunkId: string | symbol]: 0 | undefined; } {
     const { o } = wreq;
     try {
         wreq.o = (a: any) => { throw a; };
@@ -35,7 +33,7 @@ export function getLoadedChunks(wreq: WebpackInstance): { [chunkId: string | sym
     throw new Error("getLoadedChunks failed");
 }
 
-export function getChunkPaths(wreq: WebpackInstance): { [chunkId: string]: string; } {
+export function getChunkPaths(wreq): { [chunkId: string]: string; } {
     const sym = Symbol("getChunkPaths");
     try {
         Object.defineProperty(Object.prototype, sym, {
@@ -53,7 +51,7 @@ export function getChunkPaths(wreq: WebpackInstance): { [chunkId: string]: strin
     throw new Error("getChunkPaths failed");
 }
 
-export async function forceLoadAll(wreq: WebpackInstance, on_chunk: (id: string) => void = () => { }) {
+export async function forceLoadAll(wreq, on_chunk: (id: string) => void = () => { }) {
     const chunks = getChunkPaths(wreq);
     const loaded = getLoadedChunks(wreq);
     const ids = Object.keys(chunks).filter(id => loaded[id] !== 0);

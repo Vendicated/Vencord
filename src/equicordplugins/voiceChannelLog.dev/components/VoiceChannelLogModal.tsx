@@ -6,9 +6,9 @@
 
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Channel } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { React, ScrollerThin, Text } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 import { cl } from "..";
 import { getVcLogs, vcLogSubscribe } from "../logs";

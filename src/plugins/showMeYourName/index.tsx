@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "@vencord/discord-types";
-import { GuildMemberStore } from "@webpack/common";
+import { GuildMemberStore, RelationshipStore } from "@webpack/common";
 
 interface UsernameProps {
     author: { nick: string; };

@@ -16,9 +16,9 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, Forms, Select, SelectedChannelStore, Switch, TabBar, TextInput, Tooltip, UserStore, useState } from "@webpack/common";
-import { Message, User } from "discord-types/general/index.js";
 import type { JSX, PropsWithChildren } from "react";
 
 type IconProps = JSX.IntrinsicElements["svg"];

@@ -5,7 +5,7 @@
  */
 
 import { MessageObject } from "@api/MessageEvents";
-import { Message } from "discord-types/general";
+import { Message } from "@vencord/discord-types";
 
 export async function transferMessage(message: MessageObject, model: string, repliedMessage?: Message) {
     // you can use this on anything really

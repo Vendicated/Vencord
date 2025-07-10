@@ -217,7 +217,7 @@ function getTypeAndChannelId(
 function playSample(tempSettings: any, type: string) {
     const s = Object.assign({}, settings.plain, tempSettings);
     const currentUser = UserStore.getCurrentUser();
-    const myGuildId = SelectedGuildStore.getGuildId();
+    const myGuildId = SelectedGuildStore.getGuildId()!;
 
     speak(
         formatText(
@@ -312,7 +312,7 @@ export default definePlugin({
     settings,
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            const myGuildId = SelectedGuildStore.getGuildId();
+            const myGuildId = SelectedGuildStore.getGuildId()!;
             const myChanId = SelectedChannelStore.getVoiceChannelId();
             const myId = UserStore.getCurrentUser().id;
 

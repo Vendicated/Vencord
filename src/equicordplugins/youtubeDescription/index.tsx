@@ -7,8 +7,8 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Embed } from "@vencord/discord-types";
 import { useState } from "@webpack/common";
-import { Embed } from "discord-types/general";
 
 interface ToggleableDescriptionProps { embed: Embed, original: () => any; }
 

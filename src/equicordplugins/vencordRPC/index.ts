@@ -8,10 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel, FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ApplicationAssetUtils, ChannelStore, FluxDispatcher, GuildStore, IconUtils, PresenceStore, RelationshipStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
-import { Channel } from "discord-types/general";
 
 const presenceStore = findByPropsLazy("getLocalPresence");
 const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
@@ -213,7 +212,7 @@ function totalFriendCount(): number {
 
 function memberCount(): string {
     const channelId = SelectedChannelStore.getChannelId();
-    const guildId = SelectedGuildStore.getGuildId();
+    const guildId = SelectedGuildStore.getGuildId()!;
     const { groups } = ChannelMemberStore.getProps(guildId, channelId);
     const total = GuildMemberCountStore.getMemberCount(guildId);
 
@@ -265,7 +264,7 @@ async function createActivity(): Promise<Activity | undefined> {
 
 
     const channelId = SelectedChannelStore.getChannelId();
-    const guildId = SelectedGuildStore.getGuildId();
+    const guildId = SelectedGuildStore.getGuildId()!;
     const voiceId = SelectedChannelStore.getVoiceChannelId();
     const currentUser = UserStore.getCurrentUser();
     if (userAvatarAsSmallImage) imageSmall = currentUser.getAvatarURL(undefined, undefined, true) || chino;

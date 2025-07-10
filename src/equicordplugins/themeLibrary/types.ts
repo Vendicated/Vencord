@@ -5,7 +5,7 @@
  */
 
 import { ModalProps } from "@utils/modal";
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
 
 type Author = {
     github_name?: string;

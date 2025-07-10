@@ -14,8 +14,8 @@ import {
     ModalSize,
     openModal
 } from "@utils/modal";
+import * as t from "@vencord/discord-types";
 import { Button, Forms, Select, TextInput, useCallback, useEffect, useState } from "@webpack/common";
-import * as t from "@webpack/types";
 
 import { ModalHeaderTitle } from "./subComponents";
 import { convertComponentToHtml, cssColors, iconSizesInPx, saveIcon } from "./utils";

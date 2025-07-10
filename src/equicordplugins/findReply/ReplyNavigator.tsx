@@ -6,9 +6,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton } from "@utils/modal";
+import { Message } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Paginator, React, useRef, useState } from "@webpack/common";
-import { Message } from "discord-types/general";
 import { MutableRefObject } from "react";
 
 import { jumper } from "./index";

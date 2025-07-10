@@ -5,7 +5,8 @@
  */
 
 import { identity } from "@utils/misc";
-import { ComponentTypes, Forms, Select, useMemo } from "@webpack/common";
+import { SelectOption } from "@vencord/discord-types";
+import { Forms, Select, useMemo } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -31,7 +32,7 @@ export function SettingSelectComponent({ label, name, options, default: def, the
         value: option.value,
         default: def === option.name,
         label: option.label
-    } satisfies ComponentTypes.SelectOption)), [options, def]);
+    } satisfies SelectOption)), [options, def]);
 
     return (
         <Forms.FormSection>

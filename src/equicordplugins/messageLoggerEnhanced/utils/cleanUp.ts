@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { User } from "@vencord/discord-types";
 import { MessageStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 import { LoggedMessageJSON, RefrencedMessage } from "../types";
 import { getGuildIdByChannel, isGhostPinged } from "./index";
@@ -111,6 +111,6 @@ export function cleanupUserObject(user: User) {
         avatar: user.avatar,
         id: user.id,
         bot: user.bot,
-        public_flags: typeof user.publicFlags !== "undefined" ? user.publicFlags : (user as any).public_flags
+        public_flags: typeof user.publicFlags !== "undefined" ? user.publicFlags : user.publicFlags
     };
 }

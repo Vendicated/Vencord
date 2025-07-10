@@ -9,8 +9,8 @@ import "./style.css";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel } from "@vencord/discord-types";
 import { React } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 import { PickerContent, PickerHeader, PickerSidebar, Settings, Wrapper } from "./components";
 import { getStickerPack, getStickerPackMetas } from "./stickers";

@@ -15,6 +15,7 @@ import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendLis
 import { Devs, EquicordDevs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import {
     ChannelActionCreators,
     FluxDispatcher, MessageActions, RestAPI,
@@ -22,7 +23,6 @@ import {
     useEffect, UserStore,
     UserUtils, useState,
 } from "@webpack/common";
-import { Message } from "discord-types/general";
 const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 
 import { getCurrentChannel } from "@utils/discord";

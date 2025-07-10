@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "discord-types/general";
+import { Message } from "@vencord/discord-types";
 
 // Taken From Signature :)
 const settings = definePluginSettings({
@@ -31,8 +31,8 @@ export default definePlugin({
         {
             find: "#{intl::MESSAGE_FORWARDING_NSFW_NOT_ALLOWED}",
             replacement: {
-                match: /if\((\i)\.isNSFW\(\)&&.{0,25}\)\)\)/,
-                replace: "if(false)",
+                match: /if\(.*?\)(return.{0,25}#{intl::MESSAGE_FORWARDING_NSFW_NOT_ALLOWED})/,
+                replace: "if(false)$1",
             }
         },
         {

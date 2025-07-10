@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
 import { CSSProperties, ImgHTMLAttributes, JSX } from "react";
 
 export interface Timestamp {
