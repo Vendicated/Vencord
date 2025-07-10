@@ -16,47 +16,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { PluginOptionBoolean } from "@utils/types";
-import { Forms, React, Switch } from "@webpack/common";
+import { PluginOptionSlider } from "@utils/types";
+import { Forms, React, Slider, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import { SettingProps } from ".";
 
-export function SettingBooleanComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionBoolean>) {
+export function SliderSetting({ option, pluginSettings, definedSettings, id, onChange, onError }: SettingProps<PluginOptionSlider>) {
     const def = pluginSettings[id] ?? option.default;
 
-    const [state, setState] = React.useState(def ?? false);
-    const [error, setError] = React.useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 
-    function handleChange(newValue: boolean): void {
+    function handleChange(newValue: number): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {
             setError(null);
-            setState(newValue);
             onChange(newValue);
         }
     }
 
     return (
         <Forms.FormSection>
-            <Switch
-                value={state}
-                onChange={handleChange}
-                note={option.description}
+            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom20} type="description">{option.description}</Forms.FormText>
+            <Slider
                 disabled={option.disabled?.call(definedSettings) ?? false}
+                markers={option.markers}
+                minValue={option.markers[0]}
+                maxValue={option.markers[option.markers.length - 1]}
+                initialValue={def}
+                onValueChange={handleChange}
+                onValueRender={(v: number) => String(v.toFixed(2))}
+                stickToMarkers={option.stickToMarkers ?? true}
                 {...option.componentProps}
-                hideBorder
-                style={{ marginBottom: "0.5em" }}
-            >
-                {wordsToTitle(wordsFromCamel(id))}
-            </Switch>
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
+            />
         </Forms.FormSection>
     );
 }

@@ -16,9 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DefinedSettings, PluginOptionBase } from "@utils/types";
+import { DefinedSettings, OptionType, PluginOptionBase } from "@utils/types";
+import { ComponentType } from "react";
 
-interface ISettingElementPropsBase<T> {
+import { BooleanSetting } from "./BooleanSetting";
+import { ComponentSetting } from "./ComponentSetting";
+import { NumberSetting } from "./NumberSetting";
+import { SelectSetting } from "./SelectSetting";
+import { SliderSetting } from "./SliderSetting";
+import { TextSetting } from "./TextSetting";
+
+interface SettingBaseProps<T> {
     option: T;
     onChange(newValue: any): void;
     pluginSettings: {
@@ -30,14 +38,16 @@ interface ISettingElementPropsBase<T> {
     definedSettings?: DefinedSettings;
 }
 
-export type ISettingElementProps<T extends PluginOptionBase> = ISettingElementPropsBase<T>;
-export type ISettingCustomElementProps<T extends Omit<PluginOptionBase, "description" | "placeholder">> = ISettingElementPropsBase<T>;
+export type SettingProps<T extends PluginOptionBase> = SettingBaseProps<T>;
+export type ComponentSettingProps<T extends Omit<PluginOptionBase, "description" | "placeholder">> = SettingBaseProps<T>;
 
-export * from "./SettingBooleanComponent";
-export * from "./SettingCustomComponent";
-export * from "./SettingNumericComponent";
-export * from "./SettingSelectComponent";
-export * from "./SettingSliderComponent";
-export * from "./SettingTextComponent";
-export * from "@components/settings/PluginBadge";
-
+export const OptionComponentMap: Record<OptionType, ComponentType<SettingProps<any> | ComponentSettingProps<any>>> = {
+    [OptionType.STRING]: TextSetting,
+    [OptionType.NUMBER]: NumberSetting,
+    [OptionType.BIGINT]: NumberSetting,
+    [OptionType.BOOLEAN]: BooleanSetting,
+    [OptionType.SELECT]: SelectSetting,
+    [OptionType.SLIDER]: SliderSetting,
+    [OptionType.COMPONENT]: ComponentSetting,
+    [OptionType.CUSTOM]: () => null,
+};

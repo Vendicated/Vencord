@@ -18,8 +18,8 @@
 
 import { PluginOptionComponent } from "@utils/types";
 
-import { ISettingCustomElementProps } from ".";
+import { ComponentSettingProps } from ".";
 
-export function SettingCustomComponent({ option, onChange, onError }: ISettingCustomElementProps<PluginOptionComponent>) {
+export function ComponentSetting({ option, onChange, onError }: ComponentSettingProps<PluginOptionComponent>) {
     return option.component({ setValue: onChange, setError: onError, option });
 }

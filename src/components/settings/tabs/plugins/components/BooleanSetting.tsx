@@ -16,24 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { PluginOptionSelect } from "@utils/types";
-import { Forms, React, Select } from "@webpack/common";
+import { PluginOptionBoolean } from "@utils/types";
+import { Forms, React, Switch, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import { SettingProps } from ".";
 
-export function SettingSelectComponent({ option, pluginSettings, definedSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
-    const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
+export function BooleanSetting({ option, pluginSettings, definedSettings, id, onChange, onError }: SettingProps<PluginOptionBoolean>) {
+    const def = pluginSettings[id] ?? option.default;
 
-    const [state, setState] = React.useState<any>(def ?? null);
-    const [error, setError] = React.useState<string | null>(null);
+    const [state, setState] = useState(def ?? false);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 
-    function handleChange(newValue) {
+    function handleChange(newValue: boolean): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
@@ -46,20 +45,19 @@ export function SettingSelectComponent({ option, pluginSettings, definedSettings
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16} type="description">{option.description}</Forms.FormText>
-            <Select
-                isDisabled={option.disabled?.call(definedSettings) ?? false}
-                options={option.options}
-                placeholder={option.placeholder ?? "Select an option"}
-                maxVisibleItems={5}
-                closeOnSelect={true}
-                select={handleChange}
-                isSelected={v => v === state}
-                serialize={v => String(v)}
+            <Switch
+                value={state}
+                onChange={handleChange}
+                note={option.description}
+                disabled={option.disabled?.call(definedSettings) ?? false}
                 {...option.componentProps}
-            />
+                hideBorder
+                style={{ marginBottom: "0.5em" }}
+            >
+                {wordsToTitle(wordsFromCamel(id))}
+            </Switch>
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
     );
 }
+

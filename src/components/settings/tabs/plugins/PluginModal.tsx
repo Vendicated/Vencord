@@ -36,16 +36,7 @@ import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
 
-import {
-    ISettingCustomElementProps,
-    ISettingElementProps,
-    SettingBooleanComponent,
-    SettingCustomComponent,
-    SettingNumericComponent,
-    SettingSelectComponent,
-    SettingSliderComponent,
-    SettingTextComponent
-} from "./components";
+import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
@@ -74,17 +65,6 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
     });
     return newUser;
 }
-
-const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any> | ISettingCustomElementProps<any>>> = {
-    [OptionType.STRING]: SettingTextComponent,
-    [OptionType.NUMBER]: SettingNumericComponent,
-    [OptionType.BIGINT]: SettingNumericComponent,
-    [OptionType.BOOLEAN]: SettingBooleanComponent,
-    [OptionType.SELECT]: SettingSelectComponent,
-    [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent,
-    [OptionType.CUSTOM]: () => null,
-};
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
     const [authors, setAuthors] = React.useState<Partial<User>[]>([]);
@@ -154,7 +134,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     setErrors(e => ({ ...e, [key]: hasError }));
                 }
 
-                const Component = Components[setting.type];
+                const Component = OptionComponentMap[setting.type];
                 return (
                     <Component
                         id={key}

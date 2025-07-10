@@ -18,27 +18,40 @@
 
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { PluginOptionString } from "@utils/types";
-import { Forms, React, TextInput } from "@webpack/common";
+import { OptionType, PluginOptionNumber } from "@utils/types";
+import { Forms, React, TextInput, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import { SettingProps } from ".";
 
-export function SettingTextComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionString>) {
-    const [state, setState] = React.useState(pluginSettings[id] ?? option.default ?? null);
-    const [error, setError] = React.useState<string | null>(null);
+const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
-    React.useEffect(() => {
+export function NumberSetting({ option, pluginSettings, definedSettings, id, onChange, onError }: SettingProps<PluginOptionNumber>) {
+    function serialize(value: any) {
+        if (option.type === OptionType.BIGINT) return BigInt(value);
+        return Number(value);
+    }
+
+    const [state, setState] = useState<any>(`${pluginSettings[id] ?? option.default ?? 0}`);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 
-    function handleChange(newValue) {
+    function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
+
+        setError(null);
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
-        else setError(null);
 
-        setState(newValue);
-        onChange(newValue);
+        if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
+            setState(`${Number.MAX_SAFE_INTEGER}`);
+            onChange(serialize(newValue));
+        } else {
+            setState(newValue);
+            onChange(serialize(newValue));
+        }
     }
 
     return (
@@ -46,12 +59,12 @@ export function SettingTextComponent({ option, pluginSettings, definedSettings, 
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom20} type="description">{option.description}</Forms.FormText>
             <TextInput
-                type="text"
+                type="number"
+                pattern="-?[0-9]+"
                 value={state}
                 onChange={handleChange}
-                placeholder={option.placeholder ?? "Enter a value"}
+                placeholder={option.placeholder ?? "Enter a number"}
                 disabled={option.disabled?.call(definedSettings) ?? false}
-                maxLength={null}
                 {...option.componentProps}
             />
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
