@@ -22,7 +22,8 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
-import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { AddonCard } from "@components/settings/AddonCard";
+import { openPluginModal } from "@components/settings/plugins/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
@@ -37,7 +38,6 @@ import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import Plugins from "~plugins";
 
-import { AddonCard } from "./AddonCard";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 

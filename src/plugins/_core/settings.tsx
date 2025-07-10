@@ -17,13 +17,13 @@
 */
 
 import { Settings } from "@api/Settings";
-import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
-import CloudTab from "@components/VencordSettings/CloudTab";
-import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
-import PluginsTab from "@components/VencordSettings/PluginsTab";
-import ThemesTab from "@components/VencordSettings/ThemesTab";
-import UpdaterTab from "@components/VencordSettings/UpdaterTab";
-import VencordTab from "@components/VencordSettings/VencordTab";
+import BackupAndRestoreTab from "@components/settings/tabs/BackupAndRestoreTab";
+import CloudTab from "@components/settings/tabs/CloudTab";
+import PatchHelperTab from "@components/settings/tabs/PatchHelperTab";
+import PluginsTab from "@components/settings/tabs/PluginsTab";
+import ThemesTab from "@components/settings/tabs/ThemesTab";
+import UpdaterTab from "@components/settings/tabs/UpdaterTab";
+import VencordTab from "@components/settings/tabs/VencordTab";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -90,7 +90,7 @@ export default definePlugin({
                 className: "vc-settings-header"
             },
             {
-                section: "VencordSettings",
+                section: "settings/tabs",
                 label: "Vencord",
                 element: VencordTab,
                 className: "vc-settings"
@@ -120,7 +120,7 @@ export default definePlugin({
                 className: "vc-cloud"
             },
             {
-                section: "VencordSettingsSync",
+                section: "settings/tabsSync",
                 label: "Backup & Restore",
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"

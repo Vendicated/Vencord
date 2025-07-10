@@ -20,8 +20,10 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
-import { openContributorModal } from "@components/PluginSettings/ContributorModal";
-import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
+import { openContributorModal } from "@components/settings/plugins/ContributorModal";
+import { openPluginModal } from "@components/settings/plugins/PluginModal";
+import { SpecialCard } from "@components/settings/SpecialCard";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -29,12 +31,10 @@ import { identity, isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { Button, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 
-import BadgeAPI from "../../plugins/_api/badges";
-import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
+import BadgeAPI from "../../../plugins/_api/badges";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
-import { SpecialCard } from "./SpecialCard";
 
 const cl = classNameFactory("vc-settings-");
 

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./addonCard.css";
+import "./AddonCard.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Badge } from "@components/Badge";

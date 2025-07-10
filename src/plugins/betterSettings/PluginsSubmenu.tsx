@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { openPluginModal } from "@components/settings/plugins/PluginModal";
 import { getIntlMessage } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
 import { Alerts, Menu, useMemo, useState } from "@webpack/common";

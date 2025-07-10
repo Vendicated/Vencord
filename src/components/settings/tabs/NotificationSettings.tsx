@@ -5,12 +5,11 @@
  */
 
 import { useSettings } from "@api/Settings";
+import { ErrorCard } from "@components/ErrorCard";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Forms, Select, Slider, Text } from "@webpack/common";
-
-import { ErrorCard } from "..";
 
 export function NotificationSettings() {
     const settings = useSettings().notifications;
