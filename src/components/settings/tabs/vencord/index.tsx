@@ -109,8 +109,7 @@ function VencordSettings() {
         []
     );
 
-    const isMac = navigator.platform.toLowerCase().startsWith("mac");
-    const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
+    const needsVibrancySettings = IS_DISCORD_DESKTOP && navigator.platform.toLowerCase().startsWith("mac");
 
     const user = UserStore.getCurrentUser();
 
@@ -168,18 +167,18 @@ function VencordSettings() {
                         action={() => VencordNative.quickCss.openEditor()}
                     />
                     {!IS_WEB && (
-                        <QuickAction
-                            Icon={RestartIcon}
-                            text="Relaunch Discord"
-                            action={relaunch}
-                        />
-                    )}
-                    {!IS_WEB && (
-                        <QuickAction
-                            Icon={FolderIcon}
-                            text="Open Settings Folder"
-                            action={() => VencordNative.settings.openFolder()}
-                        />
+                        <>
+                            <QuickAction
+                                Icon={RestartIcon}
+                                text="Relaunch Discord"
+                                action={relaunch}
+                            />
+                            <QuickAction
+                                Icon={FolderIcon}
+                                text="Open Settings Folder"
+                                action={() => VencordNative.settings.openFolder()}
+                            />
+                        </>
                     )}
                     <QuickAction
                         Icon={GithubIcon}

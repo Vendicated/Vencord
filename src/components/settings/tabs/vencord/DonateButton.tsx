@@ -19,6 +19,7 @@ export function DonateButtonComponent() {
         <DonateButton
             look={Button.Looks.FILLED}
             color={Button.Colors.WHITE}
-            style={{ marginTop: "1em" }} />
+            style={{ marginTop: "1em" }}
+        />
     );
 }
