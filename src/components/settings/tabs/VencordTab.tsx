@@ -18,11 +18,8 @@
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
-import DonateButton from "@components/DonateButton";
 import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
-import { openContributorModal } from "@components/settings/plugins/ContributorModal";
-import { openPluginModal } from "@components/settings/plugins/PluginModal";
+import DonateButton from "@components/settings/DonateButton";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
@@ -32,11 +29,11 @@ import { relaunch } from "@utils/native";
 import { Button, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 
 import BadgeAPI from "../../../plugins/_api/badges";
+import { SettingsTab, wrapTab } from "./BaseTab";
 import { openNotificationSettingsModal } from "./NotificationSettings";
+import { openContributorModal } from "./plugins/ContributorModal";
+import { openPluginModal } from "./plugins/PluginModal";
 import { QuickAction, QuickActionCard } from "./quickActions";
-import { SettingsTab, wrapTab } from "./shared";
-
-const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";

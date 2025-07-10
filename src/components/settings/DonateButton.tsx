@@ -16,14 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function Badge({ text, color }) {
+import { Heart } from "@components/Heart";
+import { ButtonProps } from "@vencord/discord-types";
+import { Button } from "@webpack/common";
+
+export default function DonateButton({
+    look = Button.Looks.LINK,
+    color = Button.Colors.TRANSPARENT,
+    ...props
+}: Partial<ButtonProps>) {
     return (
-        <div className="vc-plugins-badge" style={{
-            backgroundColor: color,
-            justifySelf: "flex-end",
-            marginLeft: "auto"
-        }}>
-            {text}
-        </div>
+        <Button
+            {...props}
+            look={look}
+            color={color}
+            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
+            innerClassName="vc-donate-button"
+        >
+            <Heart />
+            Donate
+        </Button>
     );
 }

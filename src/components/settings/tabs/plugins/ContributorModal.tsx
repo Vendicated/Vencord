@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./contributorModal.css";
+import "./ContributorModal.css";
 
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";

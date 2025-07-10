@@ -33,11 +33,11 @@ interface ISettingElementPropsBase<T> {
 export type ISettingElementProps<T extends PluginOptionBase> = ISettingElementPropsBase<T>;
 export type ISettingCustomElementProps<T extends Omit<PluginOptionBase, "description" | "placeholder">> = ISettingElementPropsBase<T>;
 
-export * from "../../../Badge";
 export * from "./SettingBooleanComponent";
 export * from "./SettingCustomComponent";
 export * from "./SettingNumericComponent";
 export * from "./SettingSelectComponent";
 export * from "./SettingSliderComponent";
 export * from "./SettingTextComponent";
+export * from "@components/settings/PluginBadge";
 

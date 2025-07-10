@@ -26,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
 
-import { SettingsTab, wrapTab } from "./shared";
+import { SettingsTab, wrapTab } from "./BaseTab";
 
 function validateUrl(url: string) {
     try {

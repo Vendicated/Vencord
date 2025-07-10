@@ -19,8 +19,8 @@
 import "./AddonCard.css";
 
 import { classNameFactory } from "@api/Styles";
-import { Badge } from "@components/Badge";
-import { Switch } from "@components/Switch";
+import { PluginBadge } from "@components/settings/PluginBadge";
+import { Switch } from "@components/settings/Switch";
 import { Text, useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
@@ -67,7 +67,7 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                             >
                                 {name}
                             </div>
-                        </div>{isNew && <Badge text="NEW" color="#ED4245" />}
+                        </div>{isNew && <PluginBadge text="NEW" color="#ED4245" />}
                     </Text>
                     {!!author && (
                         <Text variant="text-md/normal" className={cl("author")}>

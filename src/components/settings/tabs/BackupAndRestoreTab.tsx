@@ -22,7 +22,7 @@ import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
 import { Button, Card, Text } from "@webpack/common";
 
-import { SettingsTab, wrapTab } from "./shared";
+import { SettingsTab, wrapTab } from "./BaseTab";
 
 function BackupRestoreTab() {
     return (

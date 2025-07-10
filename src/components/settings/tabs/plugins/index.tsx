@@ -24,8 +24,7 @@ import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
-import { openPluginModal } from "@components/settings/plugins/PluginModal";
-import { SettingsTab } from "@components/settings/tabs/shared";
+import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
@@ -38,6 +37,8 @@ import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextI
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
+
+import { openPluginModal } from "./PluginModal";
 
 // Avoid circular dependency
 const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
@@ -204,7 +205,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     );
 }
 
-export default function PluginSettings() {
+function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
@@ -392,3 +393,5 @@ function makeDependencyList(deps: string[]) {
         </React.Fragment>
     );
 }
+
+export default wrapTab(PluginSettings, "Plugins");

@@ -6,10 +6,9 @@
 
 import "./LinkIconButton.css";
 
+import { GithubIcon, WebsiteIcon } from "@components/Icons";
 import { getTheme, Theme } from "@utils/discord";
 import { MaskedLink, Tooltip } from "@webpack/common";
-
-import { GithubIcon, WebsiteIcon } from "../..";
 
 export function GithubLinkIcon() {
     const theme = getTheme() === Theme.Light ? "#000000" : "#FFFFFF";

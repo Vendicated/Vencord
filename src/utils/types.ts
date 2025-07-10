@@ -33,6 +33,14 @@ export default function definePlugin<P extends PluginDef>(p: P & Record<string, 
     return p;
 }
 
+export function makeRange(start: number, end: number, step = 1) {
+    const ranges: number[] = [];
+    for (let value = start; value <= end; value += step) {
+        ranges.push(Math.round(value * 100) / 100);
+    }
+    return ranges;
+}
+
 export type ReplaceFn = (match: string, ...groups: string[]) => string;
 
 export interface PatchReplacement {

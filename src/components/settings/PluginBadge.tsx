@@ -16,8 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import PluginSettings from "@components/settings/plugins";
-
-import { wrapTab } from "./shared";
-
-export default wrapTab(PluginSettings, "Plugins");
+export function PluginBadge({ text, color }) {
+    return (
+        <div className="vc-plugins-badge" style={{
+            backgroundColor: color,
+            justifySelf: "flex-end",
+            marginLeft: "auto"
+        }}>
+            {text}
+        </div>
+    );
+}

@@ -23,14 +23,6 @@ import { Forms, React, Slider } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
 
-export function makeRange(start: number, end: number, step = 1) {
-    const ranges: number[] = [];
-    for (let value = start; value <= end; value += step) {
-        ranges.push(Math.round(value * 100) / 100);
-    }
-    return ranges;
-}
-
 export function SettingSliderComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionSlider>) {
     const def = pluginSettings[id] ?? option.default;
 

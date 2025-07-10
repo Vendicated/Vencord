@@ -26,7 +26,7 @@ import { Patch, ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
 import { Button, Forms, Parser, React, Switch, TextArea, TextInput } from "@webpack/common";
 
-import { SettingsTab, wrapTab } from "./shared";
+import { SettingsTab, wrapTab } from "./BaseTab";
 
 // Do not include diff in non dev builds (side effects import)
 if (IS_DEV) {

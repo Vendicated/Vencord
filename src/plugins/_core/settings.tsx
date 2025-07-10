@@ -20,7 +20,7 @@ import { Settings } from "@api/Settings";
 import BackupAndRestoreTab from "@components/settings/tabs/BackupAndRestoreTab";
 import CloudTab from "@components/settings/tabs/CloudTab";
 import PatchHelperTab from "@components/settings/tabs/PatchHelperTab";
-import PluginsTab from "@components/settings/tabs/PluginsTab";
+import PluginsTab from "@components/settings/tabs/plugins";
 import ThemesTab from "@components/settings/tabs/ThemesTab";
 import UpdaterTab from "@components/settings/tabs/UpdaterTab";
 import VencordTab from "@components/settings/tabs/VencordTab";

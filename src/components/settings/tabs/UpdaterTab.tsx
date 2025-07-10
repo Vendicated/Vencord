@@ -30,7 +30,7 @@ import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@web
 
 import gitHash from "~git-hash";
 
-import { handleSettingsTabError, SettingsTab, wrapTab } from "./shared";
+import { handleSettingsTabError, SettingsTab, wrapTab } from "./BaseTab";
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
