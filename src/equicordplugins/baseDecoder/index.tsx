@@ -112,8 +112,6 @@ export default definePlugin({
     authors: [EquicordDevs.ThePirateStoner],
     dependencies: ["MessagePopoverAPI"],
     settings,
-    contextMenus: {
-    },
 
     start() {
         addMessagePopoverButton("DecodeBase64", msg => {

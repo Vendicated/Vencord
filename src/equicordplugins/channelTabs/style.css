@@ -40,6 +40,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+    -webkit-app-region: drag;
 }
 
 .platform-osx .vc-channeltabs-tab-container {
@@ -59,6 +60,7 @@
     padding: 0.35rem;
     display: flex;
     flex-direction: column;
+    -webkit-app-region: no-drag;
 }
 
 .vc-channeltabs-separator {
@@ -263,4 +265,11 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.vc-channeltabs-tab-container .vc-channeltabs-new-button,
+.vc-channeltabs-tab-container .vc-channeltabs-hoverable,
+.vc-channeltabs-tab-container .vc-channeltabs-button,
+.vc-channeltabs-tab-container svg {
+    -webkit-app-region: no-drag;
 }
