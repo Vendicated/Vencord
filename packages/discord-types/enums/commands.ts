@@ -25,3 +25,8 @@ export const enum ApplicationCommandType {
     USER = 2,
     MESSAGE = 3,
 }
+
+export const enum ApplicationIntegrationType {
+    GUILD_INSTALL = 0,
+    USER_INSTALL = 1
+}
