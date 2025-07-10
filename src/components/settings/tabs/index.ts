@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-export { default as PatchHelperTab } from "./patchHelper/PatchHelperTab";
+export { default as PatchHelperTab } from "./patchHelper";
 export { default as PluginsTab } from "./plugins";
 export { openContributorModal } from "./plugins/ContributorModal";
 export { openPluginModal } from "./plugins/PluginModal";

@@ -31,7 +31,7 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, M
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
+import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -59,28 +59,30 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
         /** To stop discord making unwanted requests... */
         bot: true,
     });
+
     FluxDispatcher.dispatch({
         type: "USER_UPDATE",
         user: newUser,
     });
+
     return newUser;
 }
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
-    const [authors, setAuthors] = React.useState<Partial<User>[]>([]);
+    const [authors, setAuthors] = useState<Partial<User>[]>([]);
 
     const pluginSettings = useSettings().plugins[plugin.name];
 
-    const [tempSettings, setTempSettings] = React.useState<Record<string, any>>({});
+    const [tempSettings, setTempSettings] = useState<Record<string, any>>({});
 
-    const [errors, setErrors] = React.useState<Record<string, boolean>>({});
-    const [saveError, setSaveError] = React.useState<string | null>(null);
+    const [errors, setErrors] = useState<Record<string, boolean>>({});
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
-    React.useEffect(() => {
+    useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
                 const author = user.id

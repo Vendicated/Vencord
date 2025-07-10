@@ -19,8 +19,8 @@ import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromSto
 
 import Plugins from "~plugins";
 
-import { PluginCard } from ".";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
+import { PluginCard } from "./PluginCard";
 
 const cl = classNameFactory("vc-author-modal-");
 

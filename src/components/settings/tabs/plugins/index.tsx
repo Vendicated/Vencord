@@ -19,151 +19,50 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { showNotice } from "@api/Notices";
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { CogWheel, InfoIcon } from "@components/Icons";
-import { AddonCard } from "@components/settings/AddonCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
-import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { classes, isObjectEmpty } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
-import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useEffect, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
-import { openPluginModal } from "./PluginModal";
+import { PluginCard } from "./PluginCard";
 
-// Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("plugins") as typeof import("plugins"));
-
-const cl = classNameFactory("vc-plugins-");
-const logger = new Logger("PluginSettings", "#a6d189");
+export const cl = classNameFactory("vc-plugins-");
+export const logger = new Logger("PluginSettings", "#a6d189");
 
 const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
-const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
-
-
-function showErrorToast(message: string) {
-    Toasts.show({
-        message,
-        type: Toasts.Type.FAILURE,
-        id: Toasts.genId(),
-        options: {
-            position: Toasts.Position.BOTTOM
-        }
-    });
-}
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
         <Card className={classes(cl("info-card"), required && "vc-warning-card")}>
-            {required ? (
-                <>
-                    <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
-                    <Forms.FormText className={cl("dep-text")}>
-                        Restart now to apply new plugins and their settings
-                    </Forms.FormText>
-                    <Button onClick={() => location.reload()} className={cl("restart-button")}>
-                        Restart
-                    </Button>
-                </>
-            ) : (
-                <>
-                    <Forms.FormTitle tag="h5">Plugin Management</Forms.FormTitle>
-                    <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
-                    <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
-                </>
-            )}
+            {required
+                ? (
+                    <>
+                        <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
+                        <Forms.FormText className={cl("dep-text")}>
+                            Restart now to apply new plugins and their settings
+                        </Forms.FormText>
+                        <Button onClick={() => location.reload()} className={cl("restart-button")}>
+                            Restart
+                        </Button>
+                    </>
+                )
+                : (
+                    <>
+                        <Forms.FormTitle tag="h5">Plugin Management</Forms.FormTitle>
+                        <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
+                        <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
+                    </>
+                )}
         </Card>
-    );
-}
-
-interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
-    plugin: Plugin;
-    disabled: boolean;
-    onRestartNeeded(name: string): void;
-    isNew?: boolean;
-}
-
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = Settings.plugins[plugin.name];
-
-    const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
-
-    function toggleEnabled() {
-        const wasEnabled = isEnabled();
-
-        // If we're enabling a plugin, make sure all deps are enabled recursively.
-        if (!wasEnabled) {
-            const { restartNeeded, failures } = startDependenciesRecursive(plugin);
-            if (failures.length) {
-                logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
-                showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
-                return;
-            } else if (restartNeeded) {
-                // If any dependencies have patches, don't start the plugin yet.
-                settings.enabled = true;
-                onRestartNeeded(plugin.name);
-                return;
-            }
-        }
-
-        // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches?.length) {
-            settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name);
-            return;
-        }
-
-        // If the plugin is enabled, but hasn't been started, then we can just toggle it off.
-        if (wasEnabled && !plugin.started) {
-            settings.enabled = !wasEnabled;
-            return;
-        }
-
-        const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
-
-        if (!result) {
-            settings.enabled = false;
-
-            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
-            logger.error(msg);
-            showErrorToast(msg);
-            return;
-        }
-
-        settings.enabled = !wasEnabled;
-    }
-
-    return (
-        <AddonCard
-            name={plugin.name}
-            description={plugin.description}
-            isNew={isNew}
-            enabled={isEnabled()}
-            setEnabled={toggleEnabled}
-            disabled={disabled}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-            infoButton={
-                <button
-                    role="switch"
-                    onClick={() => openPluginModal(plugin, onRestartNeeded)}
-                    className={classes(ButtonClasses.button, cl("info-button"))}
-                >
-                    {plugin.options && !isObjectEmpty(plugin.options)
-                        ? <CogWheel className={cl("info-icon")} />
-                        : <InfoIcon className={cl("info-icon")} />}
-                </button>
-            }
-        />
     );
 }
 
@@ -207,9 +106,9 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
 function PluginSettings() {
     const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>(), []);
+    const changes = useMemo(() => new ChangeList<string>(), []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
             title: "Restart required",
             body: (
@@ -229,7 +128,7 @@ function PluginSettings() {
         }));
     }, []);
 
-    const depMap = React.useMemo(() => {
+    const depMap = useMemo(() => {
         const o = {} as Record<string, string[]>;
         for (const plugin in Plugins) {
             const deps = Plugins[plugin].dependencies;
@@ -244,9 +143,10 @@ function PluginSettings() {
     }, []);
 
     const sortedPlugins = useMemo(() => Object.values(Plugins)
-        .sort((a, b) => a.name.localeCompare(b.name)), []);
+        .sort((a, b) => a.name.localeCompare(b.name)), []
+    );
 
-    const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
+    const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.ALL });
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
@@ -255,9 +155,19 @@ function PluginSettings() {
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { status } = searchValue;
         const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
-        if (enabled && status === SearchStatus.DISABLED) return false;
-        if (!enabled && status === SearchStatus.ENABLED) return false;
-        if (status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
+
+        switch (status) {
+            case SearchStatus.DISABLED:
+                if (enabled) return false;
+                break;
+            case SearchStatus.ENABLED:
+                if (!enabled) return false;
+                break;
+            case SearchStatus.NEW:
+                if (!newPlugins?.includes(plugin.name)) return false;
+                break;
+        }
+
         if (!search.length) return true;
 
         return (
@@ -387,10 +297,10 @@ function PluginSettings() {
 
 function makeDependencyList(deps: string[]) {
     return (
-        <React.Fragment>
+        <>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
             {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
-        </React.Fragment>
+        </>
     );
 }
 
