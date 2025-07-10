@@ -78,7 +78,7 @@ const settings = definePluginSettings({
         options: [
             { label: "Nitro colors", value: true, default: true },
             { label: "Fake colors", value: false },
-        ],
+        ]
     }
 });
 

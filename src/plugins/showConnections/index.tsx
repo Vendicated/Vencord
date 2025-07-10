@@ -65,7 +65,6 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-
 const profilePopoutComponent = ErrorBoundary.wrap(
     (props: { user: User; displayProfile?: any; }) => (
         <ConnectionsComponent

@@ -2,7 +2,6 @@
 
 import { DiscordRecord } from "./Record";
 
-
 export class User extends DiscordRecord {
     constructor(user: object);
     accentColor: number;
