@@ -33,7 +33,7 @@ interface Sticker {
     type: number;
 }
 
-const StickerExt = ["png", "png", "json", "gif"] as const;
+const StickerExt = ["png", "json", "gif"] as const;
 
 function getUrl(data: Sticker) {
     if (data.format_type === 4)
