@@ -171,14 +171,9 @@ export default definePlugin({
                     replace: `id:"${ELEMENT_ID}",$&`
                 },
                 {
-                    // This patch needs to be above the next one as it uses the zoomed class as an anchor
-                    match: /\.zoomed]:.+?,(?=children:)/,
-                    replace: "$&onClick:()=>{},"
-                },
-                {
-                    match: /className:\i\(\)\(\i\.wrapper,.+?}\),/,
-                    replace: ""
-                },
+                    match: /(?<=null!=(\i)\?.{0,20})\i\.\i,{children:\1/,
+                    replace: "'div',{onClick:e=>e.stopPropagation(),children:$1"
+                }
             ]
         },
         // Make media viewer options not hide when zoomed in with the default Discord feature
