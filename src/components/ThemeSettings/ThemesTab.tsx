@@ -448,7 +448,7 @@ function ThemesTab() {
 
     function OnlineThemes() {
         return (
-            <>
+            <>;
                 <Forms.FormSection title="Online Themes" tag="h5">
                     <Card className="vc-settings-theme-add-card">
                         <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>

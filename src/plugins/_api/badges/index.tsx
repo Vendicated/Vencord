@@ -26,8 +26,8 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { shouldShowContributorBadge, shouldShowEquicordContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { Toasts, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 import { EquicordDonorModal, VencordDonorModal } from "./modals";
 

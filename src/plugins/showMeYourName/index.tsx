@@ -10,8 +10,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildMemberStore, RelationshipStore } from "@webpack/common";
-import { Message, User } from "discord-types/general";
+import { Message, User } from "@vencord/discord-types";
+import { GuildMemberStore } from "@webpack/common";
 
 interface UsernameProps {
     author: { nick: string; };

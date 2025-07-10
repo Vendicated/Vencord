@@ -17,8 +17,8 @@
 */
 
 import { openInviteModal } from "@utils/discord";
+import { ButtonProps } from "@vencord/discord-types";
 import { Button, showToast } from "@webpack/common";
-import { ButtonProps } from "@webpack/types";
 
 import { Heart } from "./Heart";
 
