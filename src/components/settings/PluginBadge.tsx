@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function PluginBadge({ text, color }) {
+export function AddonBadge({ text, color }) {
     return (
-        <div className="vc-plugins-badge" style={{
+        <div className="vc-addon-badge" style={{
             backgroundColor: color,
             justifySelf: "flex-end",
             marginLeft: "auto"

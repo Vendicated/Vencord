@@ -19,7 +19,7 @@
 import "./AddonCard.css";
 
 import { classNameFactory } from "@api/Styles";
-import { PluginBadge } from "@components/settings/PluginBadge";
+import { AddonBadge } from "@components/settings/PluginBadge";
 import { Switch } from "@components/settings/Switch";
 import { Text, useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
@@ -44,6 +44,7 @@ interface Props {
 export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContainerRef = useRef<HTMLDivElement>(null);
+
     return (
         <div
             className={cl("card", { "card-disabled": disabled })}
@@ -67,8 +68,10 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                             >
                                 {name}
                             </div>
-                        </div>{isNew && <PluginBadge text="NEW" color="#ED4245" />}
+                        </div>
+                        {isNew && <AddonBadge text="NEW" color="#ED4245" />}
                     </Text>
+
                     {!!author && (
                         <Text variant="text-md/normal" className={cl("author")}>
                             {author}

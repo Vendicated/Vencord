@@ -42,7 +42,7 @@
     grid-template-columns: 1fr 150px;
 }
 
-.vc-plugins-badge {
+.vc-addon-badge {
     padding: 0 6px;
     font-family: var(--font-display);
     font-weight: 500;
