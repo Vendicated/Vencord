@@ -27,6 +27,57 @@ export interface MutualGuild {
 
 }
 
+export interface ProfileBadge {
+    id: string;
+    description: string;
+    icon: string;
+    link?: string;
+}
+
+export interface ConnectedAccount {
+    type: "twitch" | "youtube" | "skype" | "steam" | "leagueoflegends" | "battlenet" | "bluesky" | "bungie" | "reddit" | "twitter" | "twitter_legacy" | "spotify" | "facebook" | "xbox" | "samsung" | "contacts" | "instagram" | "mastodon" | "soundcloud" | "github" | "playstation" | "playstation-stg" | "epicgames" | "riotgames" | "roblox" | "paypal" | "ebay" | "tiktok" | "crunchyroll" | "domain" | "amazon-music";
+    /**
+     * underlying id of connected account
+     * eg. account uuid
+     */
+    id: string;
+    /**
+     * display name of connected account
+     */
+    name: string;
+    verified: boolean;
+    metadata?: Record<string, unknown>;
+}
+
+export interface UserProfileBase extends Pick<User, "banner"> {
+    accentColor: number | null;
+    /**
+     * often empty for guild profiles, get the user profile for badges
+     */
+    badges: ProfileBadge[];
+    bio: string | undefined;
+    popoutAnimationParticleType: unknown | undefined | null;
+    profileEffectExpiresAt: unknown | undefined;
+    profileEffectId: undefined | string;
+    /**
+     * often an empty string when not set
+     */
+    pronouns: string | "" | undefined;
+    themeColors: [number, number] | undefined;
+    userId: string;
+}
+
+export interface UserProfile extends UserProfileBase, Pick<User, "premiumType"> {
+    application: null | unknown;
+    applicationRoleConnections: unknown[];
+    connectedAccounts: ConnectedAccount[] | undefined;
+    fetchStartedAt: number;
+    fetchEndedAt: number;
+    legacyUsername: string | undefined;
+    premiumGuildSince: Date | null;
+    premiumSince: Date | null;
+}
+
 export class UserProfileStore extends FluxStore {
     /**
      * @param userId the user ID of the profile being fetched.
@@ -47,9 +98,9 @@ export class UserProfileStore extends FluxStore {
 
     get isSubmitting(): boolean;
 
-    getUserProfile(userId: string): User | undefined;
+    getUserProfile(userId: string): UserProfile | undefined;
 
-    getGuildMemberProfile(userId: string, guildId: string | undefined): User | null;
+    getGuildMemberProfile(userId: string, guildId: string | undefined): UserProfileBase | null;
     /**
      * Get the mutual friends of a user.
      *

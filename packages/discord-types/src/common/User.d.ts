@@ -2,29 +2,14 @@
 
 import { DiscordRecord } from "./Record";
 
-export interface ConnectedAccount {
-    type: "twitch" | "youtube" | "skype" | "steam" | "leagueoflegends" | "battlenet" | "bluesky" | "bungie" | "reddit" | "twitter" | "twitter_legacy" | "spotify" | "facebook" | "xbox" | "samsung" | "contacts" | "instagram" | "mastodon" | "soundcloud" | "github" | "playstation" | "playstation-stg" | "epicgames" | "riotgames" | "roblox" | "paypal" | "ebay" | "tiktok" | "crunchyroll" | "domain" | "amazon-music";
-    /**
-     * underlying id of connected account
-     * eg. account uuid
-     */
-    id: string;
-    /**
-     * display name of connected account
-     */
-    name: string;
-    verified: boolean;
-    metadata?: Record<string, unknown>;
-}
 
 export class User extends DiscordRecord {
     constructor(user: object);
     accentColor: number;
     avatar: string;
-    banner: string;
+    banner: string | null | undefined;
     bio: string;
     bot: boolean;
-    connectedAccounts: ConnectedAccount[] | undefined;
     desktop: boolean;
     discriminator: string;
     email: string | undefined;
@@ -43,7 +28,6 @@ export class User extends DiscordRecord {
     system: boolean;
     username: string;
     verified: boolean;
-    themeColors?: [number, number];
 
     get createdAt(): Date;
     get hasPremiumPerks(): boolean;

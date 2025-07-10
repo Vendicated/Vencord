@@ -22,8 +22,8 @@ import { isNonNullish } from "@utils/guards";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
+import { ProfileBadge } from "@vencord/discord-types";
 import { Constants, FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
-import { User } from "discord-types/general";
 import { type ComponentType, type ReactNode } from "react";
 
 // LYING to the type checker here
@@ -48,13 +48,6 @@ const badges: Record<string, ProfileBadge> = {
 const fetching = new Set<string>();
 const queue = new Queue(5);
 
-interface ProfileBadge {
-    id: string;
-    description: string;
-    icon: string;
-    link?: string;
-}
-
 interface MentionProps {
     data: {
         userId?: string;
@@ -69,10 +62,6 @@ interface MentionProps {
     };
     RoleMention: ComponentType<any>;
     UserMention: ComponentType<any>;
-}
-
-interface UserProfile extends User {
-    badges?: ProfileBadge[];
 }
 
 async function getUser(id: string) {
@@ -106,7 +95,7 @@ async function getUser(id: string) {
         fakeBadges.push(badges.premium);
 
     // Fill in what we can deduce
-    const profile = UserProfileStore.getUserProfile(id) as UserProfile | undefined;
+    const profile = UserProfileStore.getUserProfile(id);
     if (profile) {
         profile.accentColor = user.accent_color;
         profile.badges = fakeBadges;

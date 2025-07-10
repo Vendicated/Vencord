@@ -27,7 +27,7 @@ import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { User } from "@vencord/discord-types";
+import { User, UserProfile } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, ColorPicker, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import virtualMerge from "virtual-merge";
@@ -221,8 +221,8 @@ export default definePlugin({
     settingsAboutComponent: SettingsAboutComponentWrapper,
 
     settings,
-    colorDecodeHook(user: User) {
-        if (user) {
+    colorDecodeHook(user: UserProfile) {
+        if (user?.bio) {
             // don't replace colors if already set with nitro
             if (settings.store.nitroFirst && user.themeColors) return user;
             const colors = decode(user.bio);
