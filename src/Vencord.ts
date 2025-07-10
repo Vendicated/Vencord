@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
+import "~plugins";
+
 export * as Api from "./api";
 export * as Components from "./components";
 export * as Plugins from "./plugins";

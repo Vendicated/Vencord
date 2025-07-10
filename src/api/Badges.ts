@@ -16,9 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
-import "~plugins";
-
 import ErrorBoundary from "@components/ErrorBoundary";
 import BadgeAPIPlugin from "plugins/_api/badges";
 import { ComponentType, HTMLProps } from "react";
