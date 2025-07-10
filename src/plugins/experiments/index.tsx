@@ -68,8 +68,8 @@ export default definePlugin({
         {
             find: 'type:"user",revision',
             replacement: {
-                match: /!(\i)&&"CONNECTION_OPEN".+?;/g,
-                replace: "$1=!0;"
+                match: /!(\i)(?=&&"CONNECTION_OPEN")/,
+                replace: "!($1=true)"
             }
         },
         {
@@ -81,7 +81,7 @@ export default definePlugin({
         },
         // Change top right chat toolbar button from the help one to the dev one
         {
-            find: ".CONTEXTLESS,isActivityPanelMode:",
+            find: '"M9 3v18"',
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"
