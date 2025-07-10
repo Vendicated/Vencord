@@ -6,12 +6,12 @@
 
 import "./styles.css";
 
-export { default as BackupAndRestoreTab } from "./BackupAndRestoreTab";
-export { default as CloudTab } from "./CloudTab";
-export { default as PatchHelperTab } from "./PatchHelperTab";
+export { default as PatchHelperTab } from "./patchHelper/PatchHelperTab";
 export { default as PluginsTab } from "./plugins";
 export { openContributorModal } from "./plugins/ContributorModal";
 export { openPluginModal } from "./plugins/PluginModal";
+export { default as BackupAndRestoreTab } from "./sync/BackupAndRestoreTab";
+export { default as CloudTab } from "./sync/CloudTab";
 export { default as ThemesTab } from "./themes";
-export { openUpdaterModal, default as UpdaterTab } from "./UpdaterTab";
+export { openUpdaterModal, default as UpdaterTab } from "./updater";
 export { default as VencordTab } from "./VencordTab";

@@ -32,7 +32,7 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
-import { openUpdaterModal } from "@components/settings/tabs/UpdaterTab";
+import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";

@@ -17,14 +17,13 @@
 */
 
 import { Flex } from "@components/Flex";
+import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { downloadSettingsBackup, uploadSettingsBackup } from "@utils/settingsSync";
 import { Button, Card, Text } from "@webpack/common";
 
-import { SettingsTab, wrapTab } from "./BaseTab";
-
-function BackupRestoreTab() {
+function BackupAndRestoreTab() {
     return (
         <SettingsTab title="Backup & Restore">
             <Card className={classes("vc-settings-card", "vc-backup-restore-card")}>
@@ -64,4 +63,4 @@ function BackupRestoreTab() {
     );
 }
 
-export default wrapTab(BackupRestoreTab, "Backup & Restore");
+export default wrapTab(BackupAndRestoreTab, "Backup & Restore");

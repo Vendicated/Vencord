@@ -17,6 +17,7 @@
 */
 
 import { CodeBlock } from "@components/CodeBlock";
+import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
 import { copyToClipboard } from "@utils/clipboard";
 import { Margins } from "@utils/margins";
@@ -25,8 +26,6 @@ import { makeCodeblock } from "@utils/text";
 import { Patch, ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
 import { Button, Forms, Parser, React, Switch, TextArea, TextInput } from "@webpack/common";
-
-import { SettingsTab, wrapTab } from "./BaseTab";
 
 // Do not include diff in non dev builds (side effects import)
 if (IS_DEV) {
