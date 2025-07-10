@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./ThemesTab.css";
+
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { ErrorCard } from "@components/ErrorCard";
@@ -23,6 +25,7 @@ import { Flex } from "@components/Flex";
 import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { AddonCard } from "@components/settings/AddonCard";
+import { QuickAction, QuickActionCard } from "@components/settings/quickActions";
 import type { UserThemeHeader } from "@main/themes";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
@@ -39,7 +42,6 @@ import Plugins from "~plugins";
 
 import { SettingsTab, wrapTab } from "./BaseTab";
 import { openPluginModal } from "./plugins/PluginModal";
-import { QuickAction, QuickActionCard } from "./quickActions";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;

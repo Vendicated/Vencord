@@ -20,6 +20,7 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
 import DonateButton from "@components/settings/DonateButton";
+import { QuickAction, QuickActionCard } from "@components/settings/quickActions";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
@@ -33,7 +34,6 @@ import { SettingsTab, wrapTab } from "./BaseTab";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { openContributorModal } from "./plugins/ContributorModal";
 import { openPluginModal } from "./plugins/PluginModal";
-import { QuickAction, QuickActionCard } from "./quickActions";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
