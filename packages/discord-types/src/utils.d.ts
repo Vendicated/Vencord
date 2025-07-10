@@ -1,22 +1,4 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
-import { Channel, Guild, GuildMember, Message, User } from "discord-types/general";
+import { Channel, Guild, GuildMember, Message, User } from ".";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
@@ -336,17 +318,18 @@ export interface DateUtils {
     diffAsUnits(start: Date, end: Date, stopAtOneSecond?: boolean): Record<"days" | "hours" | "minutes" | "seconds", number>;
 }
 
-export interface ConnectedAccount {
-    type: "twitch" | "youtube" | "skype" | "steam" | "leagueoflegends" | "battlenet" | "bluesky" | "bungie" | "reddit" | "twitter" | "twitter_legacy" | "spotify" | "facebook" | "xbox" | "samsung" | "contacts" | "instagram" | "mastodon" | "soundcloud" | "github" | "playstation" | "playstation-stg" | "epicgames" | "riotgames" | "roblox" | "paypal" | "ebay" | "tiktok" | "crunchyroll" | "domain" | "amazon-music";
-    /**
-     * underlying id of connected account
-     * eg. account uuid
-     */
-    id: string;
-    /**
-     * display name of connected account
-     */
+export interface CommandOptions {
+    type: number;
     name: string;
-    verified: boolean;
-    metadata?: Record<string, unknown>;
+    description: string;
+    required?: boolean;
+    choices?: {
+        name: string;
+        values: string | number;
+    }[];
+    options?: CommandOptions[];
+    channel_types?: number[];
+    min_value?: number;
+    max_value?: number;
+    autocomplete?: boolean;
 }

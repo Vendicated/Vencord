@@ -94,7 +94,7 @@ function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof
                     <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
                     <span style={{
                         marginLeft: "0.5em",
-                        color: "var(--text-normal)"
+                        color: "var(--text-default)"
                     }}>{message} - {author}</span>
                 </div>
             ))}
@@ -225,7 +225,7 @@ function Updater() {
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
-            <Forms.FormText className="vc-text-selectable">
+            <Forms.FormText>
                 {repoPending
                     ? repo
                     : err

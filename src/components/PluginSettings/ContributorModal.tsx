@@ -14,9 +14,8 @@ import { DevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { User } from "@vencord/discord-types";
 import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
-import { ConnectedAccount } from "@webpack/types";
-import { User } from "discord-types/general";
 
 import Plugins from "~plugins";
 
@@ -37,14 +36,10 @@ export function openContributorModal(user: User) {
     );
 }
 
-interface UserProfile extends User {
-    connectedAccounts?: ConnectedAccount[];
-}
-
 function ContributorModal({ user }: { user: User; }) {
     useSettings();
 
-    const profile: UserProfile | undefined = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
+    const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
 
     useEffect(() => {
         if (!profile && !user.bot && user.id)

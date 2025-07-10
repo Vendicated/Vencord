@@ -25,10 +25,9 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import { ConnectedAccount, User } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Tooltip, UserProfileStore } from "@webpack/common";
-import { ConnectedAccount } from "@webpack/types";
-import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
@@ -66,9 +65,6 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-interface UserProfile extends User {
-    connectedAccounts?: ConnectedAccount[];
-}
 
 const profilePopoutComponent = ErrorBoundary.wrap(
     (props: { user: User; displayProfile?: any; }) => (
@@ -82,7 +78,7 @@ const profilePopoutComponent = ErrorBoundary.wrap(
 );
 
 function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
-    const profile = UserProfileStore.getUserProfile(id) as UserProfile | undefined;
+    const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
 
