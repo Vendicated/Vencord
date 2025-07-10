@@ -4,14 +4,46 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
+import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Forms, Select, Slider, Text } from "@webpack/common";
+import { Button, Forms, Select, Slider, Text } from "@webpack/common";
 
-export function NotificationSettings() {
+export function NotificationSection() {
+    return (
+        <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
+            <Flex>
+                <Button onClick={openNotificationSettingsModal}>
+                    Notification Settings
+                </Button>
+                <Button onClick={openNotificationLogModal}>
+                    View Notification Log
+                </Button>
+            </Flex>
+        </Forms.FormSection>
+    );
+}
+
+export function openNotificationSettingsModal() {
+    openModal(props => (
+        <ModalRoot {...props} size={ModalSize.MEDIUM}>
+            <ModalHeader>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Settings</Text>
+                <ModalCloseButton onClick={props.onClose} />
+            </ModalHeader>
+
+            <ModalContent>
+                <NotificationSettings />
+            </ModalContent>
+        </ModalRoot>
+    ));
+}
+
+function NotificationSettings() {
     const settings = useSettings().notifications;
 
     return (
@@ -87,19 +119,4 @@ export function NotificationSettings() {
             />
         </div>
     );
-}
-
-export function openNotificationSettingsModal() {
-    openModal(props => (
-        <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Settings</Text>
-                <ModalCloseButton onClick={props.onClose} />
-            </ModalHeader>
-
-            <ModalContent>
-                <NotificationSettings />
-            </ModalContent>
-        </ModalRoot>
-    ));
 }
