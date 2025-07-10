@@ -1,4 +1,4 @@
-import { FluxStore, Guild, User } from "..";
+import { FluxStore, Guild, User, Application, ApplicationInstallParams } from "..";
 
 export interface MutualFriend {
     /**
@@ -46,7 +46,18 @@ export interface ConnectedAccount {
      */
     name: string;
     verified: boolean;
-    metadata?: Record<string, unknown>;
+    metadata?: Record<string, string>;
+}
+
+export interface ProfileApplication {
+    id: string;
+    customInstallUrl: string | undefined;
+    installParams: ApplicationInstallParams | undefined;
+    flags: number;
+    popularApplicationCommandIds?: string[];
+    integrationTypesConfig: Record<number, any>;
+    primarySkuId: string | undefined;
+    storefront_available: boolean;
 }
 
 export interface UserProfileBase extends Pick<User, "banner"> {
@@ -56,8 +67,8 @@ export interface UserProfileBase extends Pick<User, "banner"> {
      */
     badges: ProfileBadge[];
     bio: string | undefined;
-    popoutAnimationParticleType: unknown | undefined | null;
-    profileEffectExpiresAt: unknown | undefined;
+    popoutAnimationParticleType: string | null;
+    profileEffectExpiresAt: number | Date | undefined;
     profileEffectId: undefined | string;
     /**
      * often an empty string when not set
@@ -67,9 +78,18 @@ export interface UserProfileBase extends Pick<User, "banner"> {
     userId: string;
 }
 
+export interface ApplicationRoleConnection {
+    application: Application;
+    application_metadata: Record<string, any>;
+    metadata: Record<string, any>;
+    platform_name: string;
+    platform_username: string;
+}
+
 export interface UserProfile extends UserProfileBase, Pick<User, "premiumType"> {
-    application: null | unknown;
-    applicationRoleConnections: unknown[];
+    /** If this is a bot user profile, this will be its application */
+    application: ProfileApplication | null;
+    applicationRoleConnections: ApplicationRoleConnection[] | undefined;
     connectedAccounts: ConnectedAccount[] | undefined;
     fetchStartedAt: number;
     fetchEndedAt: number;
@@ -86,7 +106,7 @@ export class UserProfileStore extends FluxStore {
      *
      * @returns true if the profile is being fetched, false otherwise.
      */
-    isFetchingProfile(userId: string, guildId?: unknown): boolean;
+    isFetchingProfile(userId: string, guildId?: string): boolean;
     /**
      * Check if mutual friends for {@link userId} are currently being fetched.
      *
