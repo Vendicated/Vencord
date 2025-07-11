@@ -37,7 +37,15 @@ export default definePlugin({
         }
 
         this.css = document.createElement("style");
-        this.css.innerText = "* { transition: none !important; animation: none !important; }";
+        this.css.innerText = `
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+            [class*="carouselModal_"] {
+                opacity: 1 !important;
+            }
+        `;
 
         document.head.appendChild(this.css);
     },
