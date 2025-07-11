@@ -314,13 +314,9 @@ export default definePlugin({
                     replace: `id:"${ELEMENT_ID}",$&`
                 },
                 {
-                    match: /\.zoomed]:.+?,(?=children:)/,
-                    replace: "$&onClick:()=>{},"
-                },
-                {
-                    match: /className:\i\(\)\(\i\.wrapper,.+?}\),/,
-                    replace: ""
-                },
+                    match: /(?<=null!=(\i)\?.{0,20})\i\.\i,{children:\1/,
+                    replace: "'div',{onClick:e=>e.stopPropagation(),children:$1"
+                }
             ]
         },
         {

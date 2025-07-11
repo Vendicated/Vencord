@@ -43,7 +43,7 @@ export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
 export let GuildMemberStore: t.GuildMemberStore;
 export let UserStore: t.UserStore;
-export let UserProfileStore: GenericStore;
+export let UserProfileStore: t.UserProfileStore;
 export let SelectedChannelStore: t.SelectedChannelStore;
 export let SelectedGuildStore: t.SelectedGuildStore;
 export let ChannelStore: t.ChannelStore;
