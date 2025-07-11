@@ -5,6 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { ActivityListIcon, ActivityListProps, ApplicationIcon, IconCSSProperties } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
 import { React, Tooltip } from "@webpack/common";
 import { JSX } from "react";
@@ -12,7 +13,6 @@ import { JSX } from "react";
 import { ActivityTooltip } from "../components/ActivityTooltip";
 import { TwitchIcon } from "../components/TwitchIcon";
 import { settings } from "../settings";
-import { ActivityListIcon, ActivityListProps, ApplicationIcon, IconCSSProperties } from "../types";
 import { cl, getApplicationIcons } from "../utils";
 
 // Discord no longer shows an icon here by default but we use the one from the popout now here

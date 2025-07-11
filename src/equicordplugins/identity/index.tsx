@@ -31,7 +31,7 @@ async function SetNewData() {
 }
 
 async function SaveData() {
-    const userData = UserProfileStore.getUserProfile(UserStore.getCurrentUser().id);
+    const userData = UserProfileStore.getUserProfile(UserStore.getCurrentUser().id)!;
 
     // the getUserProfile function doesn't return all the information we need, so we append the standard user object data to the end
     const extraUserObject: any = { extraUserObject: UserStore.getCurrentUser() };

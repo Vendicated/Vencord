@@ -1,15 +1,15 @@
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2025 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
-import { User } from "@vencord/discord-types";
 import { CSSProperties, ImgHTMLAttributes, JSX } from "react";
+import { Application } from "./Application";
+import { User } from "./User";
 
-export interface Timestamp {
+export interface ActivityTimestamp {
     start?: number;
     end?: number;
+}
+
+export interface Developer {
+    id: string;
+    name: string;
 }
 
 export interface Activity {
@@ -33,35 +33,19 @@ export interface Activity {
         small_text?: string;
         small_image?: string;
     };
-    timestamps?: Timestamp;
+    buttons?: Array<string>;
+    metadata?: {
+        button_urls?: Array<string>;
+    };
+    timestamps?: ActivityTimestamp;
     platform?: string;
 }
 
-export interface Application {
-    id: string;
-    name: string;
-    icon: string;
-    description: string;
-    summary: string;
-    type: number;
-    hook: boolean;
-    guild_id: string;
-    executables: Executable[];
-    verify_key: string;
-    publishers: Developer[];
-    developers: Developer[];
-    flags: number;
-}
-
-export interface Developer {
-    id: string;
-    name: string;
-}
-
-export interface Executable {
-    os: string;
-    name: string;
-    is_launcher: boolean;
+export interface ActivityViewProps {
+    activity: Activity | null;
+    user: User;
+    application?: Application;
+    currentUser: User;
 }
 
 export interface ApplicationIcon {
@@ -71,6 +55,12 @@ export interface ApplicationIcon {
     };
     activity: Activity;
     application?: Application;
+}
+
+export interface Executable {
+    os: string;
+    name: string;
+    is_launcher: boolean;
 }
 
 export interface ActivityListIcon {
@@ -113,4 +103,12 @@ export interface ActivityViewProps {
     user: User;
     application?: Application;
     currentUser: User;
+}
+
+export const enum ActivityType {
+    PLAYING = 0,
+    STREAMING = 1,
+    LISTENING = 2,
+    WATCHING = 3,
+    COMPETING = 5
 }
