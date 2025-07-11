@@ -17,6 +17,7 @@ Pull requests can be made either to the `main` or the `dev` branch. However, unl
 Writing a plugin is the primary way to contribute.
 
 Before starting your plugin:
+
 - Be in our discord
 - Check existing pull requests to see if someone is already working on a similar plugin
 - Check our [plugin requests tracker](https://discord.com/channels/1173279886065029291/1173334591302553631) to see if there is an existing request, or if the same idea has been rejected
@@ -46,5 +47,5 @@ Or if you notice any bugs or typos, feel free to fix them!
 
 ## Help out users in our Discord community
 
-We have an open support channel in our [Discord community](https://discord.gg/5Xh2W87egW).
+We have an open support channel in our [Discord community](https://discord.gg/equicord-1173279886065029291).
 Helping out users there is always appreciated! The more, the merrier.

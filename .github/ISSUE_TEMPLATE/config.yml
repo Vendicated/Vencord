@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Equicord Support Server
-    url: https://discord.gg/5Xh2W87egW
-    about: If you need help regarding Equicord, please join our support server!
-  - name: Equicord Installer
-    url: https://github.com/Equicord/Installer
-    about: You can find the Equicord Installer here
+    - name: Equicord Support Server
+      url: https://discord.gg/equicord-1173279886065029291
+      about: If you need help regarding Equicord, please join our support server!
+    - name: Equicord Installer
+      url: https://github.com/Equicord/Installer
+      about: You can find the Equicord Installer here
