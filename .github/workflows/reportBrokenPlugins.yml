@@ -87,6 +87,14 @@ jobs:
                     pids+=" $!"
                   fi
 
+                  exit_code=0
+                  for pid in $pids; do
+                      if ! wait "$pid"; then
+                        exit_code=1
+                      fi
+                  done
+
+                  cat "$stable_output_file" "$canary_output_file" >> $GITHUB_STEP_SUMMARY
                   git config --global user.name "GitHub-Actions"
                   git config --global user.email actions@github.com
                   git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git report
@@ -97,15 +105,6 @@ jobs:
 
                   git commit -m "Reporter Results"
                   git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git
-
-                  exit_code=0
-                  for pid in $pids; do
-                      if ! wait "$pid"; then
-                        exit_code=1
-                      fi
-                  done
-
-                  cat "$stable_output_file" "$canary_output_file" >> $GITHUB_STEP_SUMMARY
                   exit $exit_code
               env:
                   WEBHOOK_URL: ${{ inputs.webhook_url || secrets.WEBHOOK_URL }}
