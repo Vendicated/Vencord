@@ -33,6 +33,7 @@ import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
 import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { IS_WINDOWS } from "@utils/constants";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";
@@ -164,7 +165,7 @@ init();
 document.addEventListener("DOMContentLoaded", () => {
     startAllPlugins(StartAt.DOMContentLoaded);
 
-    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
+    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
         document.head.append(Object.assign(document.createElement("style"), {
             id: "vencord-native-titlebar-style",
             textContent: "[class*=titleBar]{display: none!important}"

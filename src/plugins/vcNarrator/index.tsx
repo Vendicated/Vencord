@@ -17,7 +17,7 @@
 */
 
 import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
+import { Devs, IS_LINUX } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
@@ -236,7 +236,7 @@ export default definePlugin({
         let errorComponent: ReactElement<any> | null = null;
         if (!hasVoices) {
             let error = "No narrator voices found. ";
-            error += navigator.platform?.toLowerCase().includes("linux")
+            error += IS_LINUX
                 ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-dispatcher flag"
                 : "Try installing some in the Narrator settings of your Operating System";
             errorComponent = <ErrorCard>{error}</ErrorCard>;

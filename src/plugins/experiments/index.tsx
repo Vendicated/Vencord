@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
@@ -31,9 +31,8 @@ import hideBugReport from "./hideBugReport.css?managed";
 const KbdStyles = findByPropsLazy("key", "combo");
 const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
 
-const isMacOS = navigator.platform.includes("Mac");
-const modKey = isMacOS ? "cmd" : "ctrl";
-const altKey = isMacOS ? "opt" : "alt";
+const modKey = IS_MAC ? "cmd" : "ctrl";
+const altKey = IS_MAC ? "opt" : "alt";
 
 const settings = definePluginSettings({
     toolbarDevMenu: {

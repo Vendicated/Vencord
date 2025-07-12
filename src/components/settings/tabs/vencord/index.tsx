@@ -25,6 +25,7 @@ import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
+import { IS_MAC, IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
@@ -48,8 +49,6 @@ type KeysOfType<Object, Type> = {
 function Switches() {
     const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
 
-    const isWindows = navigator.platform.toLowerCase().startsWith("win");
-
     const Switches = [
         {
             key: "useQuickCss",
@@ -61,7 +60,7 @@ function Switches() {
             title: "Enable React Developer Tools",
             note: "Requires a full restart"
         },
-        !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
+        !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
             key: "frameless",
             title: "Disable the window frame",
             note: "Requires a full restart"
@@ -75,7 +74,7 @@ function Switches() {
             title: "Enable window transparency.",
             note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
         },
-        !IS_WEB && isWindows && {
+        !IS_WEB && IS_WINDOWS && {
             key: "winCtrlQ",
             title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
             note: "Requires a full restart"
@@ -109,7 +108,7 @@ function VencordSettings() {
         []
     );
 
-    const needsVibrancySettings = IS_DISCORD_DESKTOP && navigator.platform.toLowerCase().startsWith("mac");
+    const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
 
     const user = UserStore.getCurrentUser();
 
