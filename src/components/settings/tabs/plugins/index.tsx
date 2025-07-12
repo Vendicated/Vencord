@@ -118,7 +118,7 @@ function PluginSettings() {
                         <div>{changes.map((s, i) => (
                             <>
                                 {i > 0 && ", "}
-                                {Parser.parse("`" + s + "`")}
+                                {Parser.parse("`" + s.split(".")[0] + "`")}
                             </>
                         ))}</div>
                     </>
@@ -143,8 +143,9 @@ function PluginSettings() {
         return o;
     }, []);
 
-    const sortedPlugins = useMemo(() => Object.values(Plugins)
-        .sort((a, b) => a.name.localeCompare(b.name)), []
+    const sortedPlugins = useMemo(() =>
+        Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)),
+        []
     );
 
     const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.ALL });
