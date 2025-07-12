@@ -44,8 +44,10 @@ const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentC
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
 // not say the second mute, which would lead you to believe they're unmuted
 
-function speak(text: string, { volume, rate } = settings.store) {
+function speak(text: string) {
     if (!text) return;
+
+    const { volume, rate } = settings.store;
 
     const speech = new SpeechSynthesisUtterance(text);
     const voice = getCurrentVoice();
@@ -139,19 +141,17 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 }
 */
 
-function playSample(tempSettings: any, type: string) {
-    const s = Object.assign({}, settings.plain, tempSettings);
+function playSample(type: string) {
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId();
 
     speak(formatText(
-        s[type + "Message"],
+        settings.store[type + "Message"],
         currentUser.username,
         "general",
         currentUser.globalName ?? currentUser.username,
-        GuildMemberStore.getNick(myGuildId!, currentUser.id) ?? currentUser.username),
-        s
-    );
+        GuildMemberStore.getNick(myGuildId!, currentUser.id) ?? currentUser.username
+    ));
 }
 
 export default definePlugin({
@@ -265,7 +265,7 @@ export default definePlugin({
                             className={"vc-narrator-buttons"}
                         >
                             {types.map(t => (
-                                <Button key={t} onClick={() => playSample(settings.store, t)}>
+                                <Button key={t} onClick={() => playSample(t)}>
                                     {wordsToTitle([t])}
                                 </Button>
                             ))}
