@@ -20,7 +20,8 @@
 /// <reference types="../src/modules" />
 
 import { createHmac } from "crypto";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
+import { join } from "path";
 import pup, { JSHandle } from "puppeteer-core";
 
 const logStderr = (...data: any[]) => console.error(`${CANARY ? "CANARY" : "STABLE"} ---`, ...data);
@@ -91,6 +92,9 @@ function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
 }
 
 async function printReport() {
+    const filePath = join("dist", "report.json");
+    writeFileSync(filePath, JSON.stringify(report, null, 2));
+
     console.log();
 
     console.log("# Equicord Report" + (CANARY ? " (Canary)" : ""));
