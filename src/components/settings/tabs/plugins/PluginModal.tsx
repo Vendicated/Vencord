@@ -23,6 +23,7 @@ import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
@@ -111,7 +112,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     id={key}
                     key={key}
                     option={setting}
-                    onChange={onChange}
+                    onChange={debounce(onChange)}
                     pluginSettings={pluginSettings}
                     definedSettings={plugin.settings}
                 />
