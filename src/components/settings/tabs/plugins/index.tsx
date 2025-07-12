@@ -26,9 +26,9 @@ import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { useAwaiter } from "@utils/react";
+import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useEffect, useMemo, useState } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
@@ -108,24 +108,25 @@ function PluginSettings() {
     const settings = useSettings();
     const changes = useMemo(() => new ChangeList<string>(), []);
 
-    useEffect(() => {
-        return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
-            body: (
-                <>
-                    <p>The following plugins require a restart:</p>
-                    <div>{changes.map((s, i) => (
-                        <>
-                            {i > 0 && ", "}
-                            {Parser.parse("`" + s + "`")}
-                        </>
-                    ))}</div>
-                </>
-            ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: () => location.reload()
-        }));
+    useCleanupEffect(() => {
+        if (changes.hasChanges)
+            Alerts.show({
+                title: "Restart required",
+                body: (
+                    <>
+                        <p>The following plugins require a restart:</p>
+                        <div>{changes.map((s, i) => (
+                            <>
+                                {i > 0 && ", "}
+                                {Parser.parse("`" + s + "`")}
+                            </>
+                        ))}</div>
+                    </>
+                ),
+                confirmText: "Restart now",
+                cancelText: "Later!",
+                onConfirm: () => location.reload()
+            });
     }, []);
 
     const depMap = useMemo(() => {
@@ -217,7 +218,7 @@ function PluginSettings() {
                         <PluginCard
                             onMouseLeave={onMouseLeave}
                             onMouseEnter={onMouseEnter}
-                            onRestartNeeded={name => changes.handleChange(name)}
+                            onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
                             disabled={true}
                             plugin={p}
                             key={p.name}
@@ -228,7 +229,7 @@ function PluginSettings() {
         } else {
             plugins.push(
                 <PluginCard
-                    onRestartNeeded={name => changes.handleChange(name)}
+                    onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
                     disabled={false}
                     plugin={p}
                     isNew={newPlugins?.includes(p.name)}

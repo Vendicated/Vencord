@@ -25,7 +25,7 @@ export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
     disabled: boolean;
-    onRestartNeeded(name: string): void;
+    onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
 }
 
@@ -50,7 +50,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
                 settings.enabled = true;
-                onRestartNeeded(plugin.name);
+                onRestartNeeded(plugin.name, "enabled");
                 return;
             }
         }
@@ -58,7 +58,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (plugin.patches?.length) {
             settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name);
+            onRestartNeeded(plugin.name, "enabled");
             return;
         }
 

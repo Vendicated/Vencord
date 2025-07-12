@@ -48,7 +48,7 @@ const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurr
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
-    onRestartNeeded(): void;
+    onRestartNeeded(key: string): void;
 }
 
 function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {
@@ -69,13 +69,10 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
 }
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
-    const [authors, setAuthors] = useState<Partial<User>[]>([]);
-
     const pluginSettings = useSettings().plugins[plugin.name];
-
-    const [restartNeeded, setRestartNeeded] = useState(false);
-
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
+
+    const [authors, setAuthors] = useState<Partial<User>[]>([]);
 
     useEffect(() => {
         (async () => {
@@ -103,7 +100,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
                 pluginSettings[key] = newValue;
 
-                if (option?.restartNeeded) setRestartNeeded(true);
+                if (option.restartNeeded) onRestartNeeded(key);
             }
 
             const Component = OptionComponentMap[setting.type];
@@ -212,12 +209,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     );
 }
 
-export function openPluginModal(plugin: Plugin, onRestartNeeded?: (pluginName: string) => void) {
+export function openPluginModal(plugin: Plugin, onRestartNeeded?: (pluginName: string, key: string) => void) {
     openModal(modalProps => (
         <PluginModal
             {...modalProps}
             plugin={plugin}
-            onRestartNeeded={() => onRestartNeeded?.(plugin.name)}
+            onRestartNeeded={(key: string) => onRestartNeeded?.(plugin.name, key)}
         />
     ));
 }
