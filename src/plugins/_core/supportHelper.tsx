@@ -322,7 +322,7 @@ export default definePlugin({
             && ((props.channel.id === SUPPORT_CHANNEL_ID && equicordSupport))
             && props.message.content?.includes("update");
 
-        const contentWords = (props.message.content?.toLowerCase().match(/\b\w+\b/g) ?? []);
+        const contentWords = (props.message.content?.toLowerCase().match(/`\w+`/g) ?? []).map(e => e.slice(1, -1));
         const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => contentWords.includes(name.toLowerCase()));
         const matchedPlugin = matchedPlugins.sort((a, b) => b.length - a.length)[0];
         const pluginData = matchedPlugin && Vencord.Plugins.plugins[matchedPlugin];
