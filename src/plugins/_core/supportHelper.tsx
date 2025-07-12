@@ -68,6 +68,15 @@ async function forceUpdate() {
     return outdated;
 }
 
+function getWindowsName(release: string) {
+    const build = parseInt(release.split(".")[2]);
+    if (build >= 22000) return "Windows 11";
+    if (build >= 10240) return "Windows 10";
+    if (build >= 9200) return "Windows 8.1";
+    if (build >= 7600) return "Windows 7";
+    return "Windows";
+}
+
 async function generateDebugInfoMessage() {
     const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
@@ -82,16 +91,20 @@ async function generateDebugInfoMessage() {
         return `${name} (${navigator.userAgent})`;
     })();
 
+    const platform = typeof DiscordNative !== "undefined"
+        ? DiscordNative.process.platform === "win32"
+            ? `${getWindowsName(DiscordNative.os.release)}`
+            : DiscordNative.process.platform === "darwin"
+                ? (DiscordNative.process.arch === "arm64" ? "MacSilicon" : "MacIntel")
+                : DiscordNative.process.platform
+        : window.navigator.platform;
+
     const info = {
         Equicord:
             `v${VERSION} • [${gitHash}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
-        Platform: typeof DiscordNative !== "undefined" ?
-            `${DiscordNative.process.platform === "darwin" ?
-                (DiscordNative.process.arch === "arm64" ? "MacSilicon" : "MacIntel") :
-                (DiscordNative.process.platform === "win32" && DiscordNative.process.arch === "x64" ? "Windows" : DiscordNative.process.platform)}` :
-            window.navigator.platform
+        Platform: platform
     };
 
     if (IS_DISCORD_DESKTOP) {

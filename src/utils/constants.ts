@@ -623,6 +623,10 @@ export const EquicordDevs = Object.freeze({
         name: "thororen",
         id: 848339671629299742n
     },
+    dotdas: {
+        name: "dotdas",
+        id: 353229259482857475n
+    },
     nyx: {
         name: "verticalsync",
         id: 1207087393929171095n
