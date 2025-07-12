@@ -17,10 +17,11 @@
 */
 
 import { CodeBlock } from "@components/CodeBlock";
+import { Flex } from "@components/Flex";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
-import { copyToClipboard } from "@utils/clipboard";
 import { Margins } from "@utils/margins";
+import { copyWithToast } from "@utils/misc";
 import { stripIndent } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
@@ -45,15 +46,16 @@ const findCandidates = debounce(function ({ find, setModule, setError }) {
 
 function PatchHelper() {
     const [find, setFind] = useState("");
-    const [parsedFind, setParsedFind] = useState<string | RegExp>("");
     const [match, setMatch] = useState("");
     const [replacement, setReplacement] = useState<string | ReplaceFn>("");
 
+    const [parsedFind, setParsedFind] = useState<string | RegExp>("");
+
+    const [findError, setFindError] = useState<string>();
+    const [matchError, setMatchError] = useState<string>();
     const [replacementError, setReplacementError] = useState<string>();
 
     const [module, setModule] = useState<[number, Function]>();
-    const [findError, setFindError] = useState<string>();
-    const [matchError, setMatchError] = useState<string>();
 
     const code = useMemo(() => {
         const find = parsedFind instanceof RegExp ? parsedFind.toString() : JSON.stringify(parsedFind);
@@ -146,8 +148,14 @@ function PatchHelper() {
                 <>
                     <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
                     <CodeBlock lang="js" content={code} />
-                    <Button onClick={() => copyToClipboard(code)}>Copy to Clipboard</Button>
-                    <Button className={Margins.top8} onClick={() => copyToClipboard("```ts\n" + code + "\n```")}>Copy as Codeblock</Button>
+                    <Flex className={Margins.top16}>
+                        <Button onClick={() => copyWithToast(code)}>
+                            Copy to Clipboard
+                        </Button>
+                        <Button onClick={() => copyWithToast("```ts\n" + code + "\n```")}>
+                            Copy as Codeblock
+                        </Button>
+                    </Flex>
                 </>
             )}
         </SettingsTab>

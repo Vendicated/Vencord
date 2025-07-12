@@ -7,6 +7,16 @@
 import { Margins } from "@utils/margins";
 import { Forms, Parser, Switch, TextInput, useEffect, useState } from "@webpack/common";
 
+const RegexGuide = {
+    "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
+    "$$": "Insert a $",
+    "$&": "Insert the entire match",
+    "$`\u200b": "Insert the substring before the match",
+    "$'": "Insert the substring after the match",
+    "$n": "Insert the nth capturing group ($1, $2...)",
+    "$self": "Insert the plugin instance",
+} as const;
+
 export function ReplacementInput({ replacement, setReplacement, replacementError }) {
     const [isFunc, setIsFunc] = useState(false);
     const [error, setError] = useState<string>();
@@ -31,31 +41,27 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
         }
     }
 
-    useEffect(
-        () => void (isFunc ? onChange(replacement) : setError(void 0)),
-        [isFunc]
-    );
+    useEffect(() => {
+        if (isFunc)
+            onChange(replacement);
+        else
+            setError(void 0);
+    }, [isFunc]);
 
     return (
         <>
             {/* FormTitle adds a class if className is not set, so we set it to an empty string to prevent that */}
-            <Forms.FormTitle className="">replacement</Forms.FormTitle>
+            <Forms.FormTitle className="">Replacement</Forms.FormTitle>
             <TextInput
                 value={replacement?.toString()}
                 onChange={onChange}
-                error={error ?? replacementError} />
+                error={error ?? replacementError}
+            />
             {!isFunc && (
                 <div>
                     <Forms.FormTitle className={Margins.top8}>Cheat Sheet</Forms.FormTitle>
-                    {Object.entries({
-                        "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
-                        "$$": "Insert a $",
-                        "$&": "Insert the entire match",
-                        "$`\u200b": "Insert the substring before the match",
-                        "$'": "Insert the substring after the match",
-                        "$n": "Insert the nth capturing group ($1, $2...)",
-                        "$self": "Insert the plugin instance",
-                    }).map(([placeholder, desc]) => (
+
+                    {Object.entries(RegexGuide).map(([placeholder, desc]) => (
                         <Forms.FormText key={placeholder}>
                             {Parser.parse("`" + placeholder + "`")}: {desc}
                         </Forms.FormText>
@@ -64,11 +70,11 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
             )}
 
             <Switch
-                className={Margins.top8}
+                className={Margins.top16}
                 value={isFunc}
                 onChange={setIsFunc}
                 note="'replacement' will be evaled if this is toggled"
-                hideBorder={true}
+                hideBorder
             >
                 Treat as Function
             </Switch>
