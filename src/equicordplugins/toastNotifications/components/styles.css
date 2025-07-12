@@ -145,3 +145,7 @@
     unicode-bidi: plaintext;
     font-weight: 500;
 }
+
+.visual-refresh .toastnotifications-notification-root {
+    background-color: var(--background-base-low);
+}

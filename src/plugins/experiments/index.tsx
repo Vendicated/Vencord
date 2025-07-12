@@ -103,7 +103,7 @@ export default definePlugin({
                 },
                 // Fix some tricky experiments name causing a client crash
                 {
-                    match: /.getRegisteredExperiments\(\)(?<=(\i)=.+?).+?if\(null==(\i)(?=\)return null;)/,
+                    match: /\i\.\i\)\(\)(?<=(\i)=.+?).+?if\(null==(\i)(?=\);)/,
                     replace: "$&||!Object.hasOwn($1,$2)"
                 }
             ]

@@ -52,7 +52,7 @@ export default definePlugin({
         {
             find: "GuildTagCoachmark",
             replacement: {
-                match: /return.{0,100}spacing/g,
+                match: /return.{0,100}shouldShow/g,
                 replace: "return null;$&"
             },
             predicate: () => settings.store.disableAdoptTagPrompt
