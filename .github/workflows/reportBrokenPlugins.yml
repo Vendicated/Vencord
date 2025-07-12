@@ -107,7 +107,7 @@ jobs:
                   git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git report
                   cd report
 
-                  cp ../dist/report.json .
+                  cp ../dist/reporter*.json .
                   git add -A
 
                   git commit -m "Reporter Results"

@@ -92,7 +92,7 @@ function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
 }
 
 async function printReport() {
-    const filePath = join("dist", "report.json");
+    const filePath = join("dist", (CANARY ? "reporter-canary.json" : "reporter-stable.json"));
     writeFileSync(filePath, JSON.stringify(report, null, 2));
 
     console.log();
