@@ -18,27 +18,23 @@
 
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionBoolean } from "@utils/types";
-import { Forms, React, Switch, useEffect, useState } from "@webpack/common";
+import { Forms, React, Switch, useState } from "@webpack/common";
 
-import { SettingProps } from ".";
+import { resolveError, SettingProps } from "./common";
 
-export function BooleanSetting({ option, pluginSettings, definedSettings, id, onChange, onError }: SettingProps<PluginOptionBoolean>) {
+export function BooleanSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;
 
     const [state, setState] = useState(def ?? false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        onError(error !== null);
-    }, [error]);
-
     function handleChange(newValue: boolean): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
-        else {
-            setError(null);
-            setState(newValue);
+
+        setState(newValue);
+        setError(resolveError(isValid));
+
+        if (isValid === true) {
             onChange(newValue);
         }
     }

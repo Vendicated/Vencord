@@ -16,38 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Margins } from "@utils/margins";
-import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionSelect } from "@utils/types";
-import { Forms, React, Select, useEffect, useState } from "@webpack/common";
+import { React, Select, useState } from "@webpack/common";
 
-import { SettingProps } from ".";
+import { resolveError, SettingProps, SettingsSection } from "./common";
 
-export function SelectSetting({ option, pluginSettings, definedSettings, onChange, onError, id }: SettingProps<PluginOptionSelect>) {
+export function SelectSetting({ option, pluginSettings, definedSettings, onChange, id }: SettingProps<PluginOptionSelect>) {
     const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
 
     const [state, setState] = useState<any>(def ?? null);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        onError(error !== null);
-    }, [error]);
-
     function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
-        else {
-            setError(null);
-            setState(newValue);
+
+        setState(newValue);
+        setError(resolveError(isValid));
+
+        if (isValid === true) {
             onChange(newValue);
         }
     }
 
     return (
-        <Forms.FormSection>
-            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16} type="description">{option.description}</Forms.FormText>
+        <SettingsSection name={id} description={option.description} error={error}>
             <Select
                 isDisabled={option.disabled?.call(definedSettings) ?? false}
                 options={option.options}
@@ -59,7 +51,6 @@ export function SelectSetting({ option, pluginSettings, definedSettings, onChang
                 serialize={v => String(v)}
                 {...option.componentProps}
             />
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
-        </Forms.FormSection>
+        </SettingsSection>
     );
 }

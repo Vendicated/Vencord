@@ -16,35 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Margins } from "@utils/margins";
-import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionString } from "@utils/types";
-import { Forms, React, TextInput, useEffect, useState } from "@webpack/common";
+import { React, TextInput, useState } from "@webpack/common";
 
-import { SettingProps } from ".";
+import { resolveError, SettingProps, SettingsSection } from "./common";
 
-export function TextSetting({ option, pluginSettings, definedSettings, id, onChange, onError }: SettingProps<PluginOptionString>) {
+export function TextSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionString>) {
     const [state, setState] = useState(pluginSettings[id] ?? option.default ?? null);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        onError(error !== null);
-    }, [error]);
-
     function handleChange(newValue: string) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
-        else setError(null);
 
         setState(newValue);
-        onChange(newValue);
+        setError(resolveError(isValid));
+
+        if (isValid === true) {
+            onChange(newValue);
+        }
     }
 
     return (
-        <Forms.FormSection>
-            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom20} type="description">{option.description}</Forms.FormText>
+        <SettingsSection name={id} description={option.description} error={error}>
             <TextInput
                 type="text"
                 value={state}
@@ -54,7 +47,6 @@ export function TextSetting({ option, pluginSettings, definedSettings, id, onCha
                 maxLength={null}
                 {...option.componentProps}
             />
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
-        </Forms.FormSection>
+        </SettingsSection>
     );
 }

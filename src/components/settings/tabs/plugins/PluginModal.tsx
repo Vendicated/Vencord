@@ -27,11 +27,11 @@ import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { isObjectEmpty } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -42,7 +42,6 @@ import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
@@ -73,12 +72,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     const pluginSettings = useSettings().plugins[plugin.name];
 
-    const [tempSettings, setTempSettings] = useState<Record<string, any>>({});
-
-    const [errors, setErrors] = useState<Record<string, boolean>>({});
-    const [saveError, setSaveError] = useState<string | null>(null);
-
-    const canSubmit = () => Object.values(errors).every(e => !e);
+    const [restartNeeded, setRestartNeeded] = useState(false);
 
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
@@ -95,63 +89,36 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         })();
     }, [plugin.authors]);
 
-    async function saveAndClose() {
-        if (!plugin.options) {
-            onClose();
-            return;
-        }
-
-        if (plugin.beforeSave) {
-            const result = await Promise.resolve(plugin.beforeSave(tempSettings));
-            if (result !== true) {
-                setSaveError(result);
-                return;
-            }
-        }
-
-        let restartNeeded = false;
-        for (const [key, value] of Object.entries(tempSettings)) {
-            const option = plugin.options[key];
-            pluginSettings[key] = value;
-
-            if (option.type === OptionType.CUSTOM) continue;
-            if (option?.restartNeeded) restartNeeded = true;
-        }
-        if (restartNeeded) onRestartNeeded();
-        onClose();
-    }
-
     function renderSettings() {
-        if (!hasSettings || !plugin.options) {
+        if (!hasSettings || !plugin.options)
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
-        } else {
-            const options = Object.entries(plugin.options).map(([key, setting]) => {
-                if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
 
-                function onChange(newValue: any) {
-                    setTempSettings(s => ({ ...s, [key]: newValue }));
-                }
+        const options = Object.entries(plugin.options).map(([key, setting]) => {
+            if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
 
-                function onError(hasError: boolean) {
-                    setErrors(e => ({ ...e, [key]: hasError }));
-                }
+            function onChange(newValue: any) {
+                const option = plugin.options?.[key];
+                if (!option || option.type === OptionType.CUSTOM) return;
 
-                const Component = OptionComponentMap[setting.type];
-                return (
-                    <Component
-                        id={key}
-                        key={key}
-                        option={setting}
-                        onChange={onChange}
-                        onError={onError}
-                        pluginSettings={pluginSettings}
-                        definedSettings={plugin.settings}
-                    />
-                );
-            });
+                pluginSettings[key] = newValue;
 
-            return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
-        }
+                if (option?.restartNeeded) setRestartNeeded(true);
+            }
+
+            const Component = OptionComponentMap[setting.type];
+            return (
+                <Component
+                    id={key}
+                    key={key}
+                    option={setting}
+                    onChange={onChange}
+                    pluginSettings={pluginSettings}
+                    definedSettings={plugin.settings}
+                />
+            );
+        });
+
+        return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
     }
 
     function renderMoreUsers(_label: string, count: number) {
@@ -174,35 +141,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         );
     }
 
-    /*
-    function switchToPopout() {
-        onClose();
-
-        const PopoutKey = `DISCORD_VENCORD_PLUGIN_SETTINGS_MODAL_${plugin.name}`;
-        PopoutActions.open(
-            PopoutKey,
-            () => <PluginModal
-                transitionState={transitionState}
-                plugin={plugin}
-                onRestartNeeded={onRestartNeeded}
-                onClose={() => PopoutActions.close(PopoutKey)}
-            />
-        );
-    }
-    */
-
     const pluginMeta = PluginMeta[plugin.name];
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
-
-                {/*
-                <Button look={Button.Looks.BLANK} onClick={switchToPopout}>
-                    <OpenExternalIcon aria-label="Open in Popout" />
-                </Button>
-                */}
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent>
@@ -226,12 +170,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <div style={{ width: "fit-content", marginBottom: 8 }}>
                         <UserSummaryItem
                             users={authors}
-                            count={plugin.authors.length}
                             guildId={undefined}
                             renderIcon={false}
                             max={6}
                             showDefaultAvatarsForNullUsers
-                            showUserPopout
                             renderMoreUsers={renderMoreUsers}
                             renderUser={(user: User) => (
                                 <Clickable
@@ -249,49 +191,22 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         />
                     </div>
                 </Forms.FormSection>
+
                 {!!plugin.settingsAboutComponent && (
                     <div className={Margins.bottom8}>
                         <Forms.FormSection>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
-                                <plugin.settingsAboutComponent tempSettings={tempSettings} />
+                                <plugin.settingsAboutComponent />
                             </ErrorBoundary>
                         </Forms.FormSection>
                     </div>
                 )}
+
                 <Forms.FormSection className={Margins.bottom16}>
                     <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>
-            {hasSettings && <ModalFooter>
-                <Flex flexDirection="column" style={{ width: "100%" }}>
-                    <Flex style={{ marginLeft: "auto" }}>
-                        <Button
-                            onClick={onClose}
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            look={Button.Looks.LINK}
-                        >
-                            Cancel
-                        </Button>
-                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
-                            {({ onMouseEnter, onMouseLeave }) => (
-                                <Button
-                                    size={Button.Sizes.SMALL}
-                                    color={Button.Colors.BRAND}
-                                    onClick={saveAndClose}
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    disabled={!canSubmit()}
-                                >
-                                    Save & Close
-                                </Button>
-                            )}
-                        </Tooltip>
-                    </Flex>
-                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
-                </Flex>
-            </ModalFooter>}
         </ModalRoot>
     );
 }

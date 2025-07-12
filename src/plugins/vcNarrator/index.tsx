@@ -222,7 +222,7 @@ export default definePlugin({
 
     },
 
-    settingsAboutComponent({ tempSettings: s }) {
+    settingsAboutComponent() {
         const [hasVoices, hasEnglishVoices] = useMemo(() => {
             const voices = speechSynthesis.getVoices();
             return [voices.length !== 0, voices.some(v => v.lang.startsWith("en"))];
@@ -265,7 +265,7 @@ export default definePlugin({
                             className={"vc-narrator-buttons"}
                         >
                             {types.map(t => (
-                                <Button key={t} onClick={() => playSample(s, t)}>
+                                <Button key={t} onClick={() => playSample(settings.store, t)}>
                                     {wordsToTitle([t])}
                                 </Button>
                             ))}

@@ -26,7 +26,6 @@ import { MessageClickListener, MessageEditListener, MessageSendListener } from "
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
-import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<PropertyKey, any>) {
@@ -144,17 +143,10 @@ export interface PluginDef {
      */
     settings?: DefinedSettings;
     /**
-     * Check that this returns true before allowing a save to complete.
-     * If a string is returned, show the error to the user.
-     */
-    beforeSave?(options: Record<string, any>): Promisable<true | string>;
-    /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
-    settingsAboutComponent?: React.ComponentType<{
-        tempSettings?: Record<string, any>;
-    }>;
+    settingsAboutComponent?: React.ComponentType<{}>;
     /**
      * Allows you to subscribe to Flux events
      */
@@ -330,13 +322,6 @@ export interface IPluginOptionComponentProps {
      * NOTE: The user will still need to click save to apply these changes.
      */
     setValue(newValue: any): void;
-    /**
-     * Set to true to prevent the user from saving.
-     *
-     * NOTE: This will not show the error to the user. It will only stop them saving.
-     * Make sure to show the error in your component.
-     */
-    setError(error: boolean): void;
     /**
      * The options object
      */

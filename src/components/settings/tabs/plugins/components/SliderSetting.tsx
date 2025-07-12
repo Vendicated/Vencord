@@ -16,36 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Margins } from "@utils/margins";
-import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionSlider } from "@utils/types";
-import { Forms, React, Slider, useEffect, useState } from "@webpack/common";
+import { React, Slider, useState } from "@webpack/common";
 
-import { SettingProps } from ".";
+import { resolveError, SettingProps, SettingsSection } from "./common";
 
-export function SliderSetting({ option, pluginSettings, definedSettings, id, onChange, onError }: SettingProps<PluginOptionSlider>) {
+export function SliderSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionSlider>) {
     const def = pluginSettings[id] ?? option.default;
 
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        onError(error !== null);
-    }, [error]);
-
     function handleChange(newValue: number): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
-        else {
-            setError(null);
+
+        setError(resolveError(isValid));
+
+        if (isValid === true) {
             onChange(newValue);
         }
     }
 
     return (
-        <Forms.FormSection>
-            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom20} type="description">{option.description}</Forms.FormText>
+        <SettingsSection name={id} description={option.description} error={error}>
             <Slider
                 disabled={option.disabled?.call(definedSettings) ?? false}
                 markers={option.markers}
@@ -57,7 +49,7 @@ export function SliderSetting({ option, pluginSettings, definedSettings, id, onC
                 stickToMarkers={option.stickToMarkers ?? true}
                 {...option.componentProps}
             />
-        </Forms.FormSection>
+        </SettingsSection>
     );
 }
 

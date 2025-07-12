@@ -16,30 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DefinedSettings, OptionType, PluginOptionBase } from "@utils/types";
+import { OptionType } from "@utils/types";
 import { ComponentType } from "react";
 
 import { BooleanSetting } from "./BooleanSetting";
+import { ComponentSettingProps, SettingProps } from "./common";
 import { ComponentSetting } from "./ComponentSetting";
 import { NumberSetting } from "./NumberSetting";
 import { SelectSetting } from "./SelectSetting";
 import { SliderSetting } from "./SliderSetting";
 import { TextSetting } from "./TextSetting";
-
-interface SettingBaseProps<T> {
-    option: T;
-    onChange(newValue: any): void;
-    pluginSettings: {
-        [setting: string]: any;
-        enabled: boolean;
-    };
-    id: string;
-    onError(hasError: boolean): void;
-    definedSettings?: DefinedSettings;
-}
-
-export type SettingProps<T extends PluginOptionBase> = SettingBaseProps<T>;
-export type ComponentSettingProps<T extends Omit<PluginOptionBase, "description" | "placeholder">> = SettingBaseProps<T>;
 
 export const OptionComponentMap: Record<OptionType, ComponentType<SettingProps<any> | ComponentSettingProps<any>>> = {
     [OptionType.STRING]: TextSetting,
