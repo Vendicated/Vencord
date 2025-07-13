@@ -25,9 +25,9 @@ import { SafetyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Guild, GuildMember } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, useRef, UserStore } from "@webpack/common";
-import type { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
@@ -71,7 +71,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                 const { permissions, header } = match(type)
                     .returnType<{ permissions: RoleOrUserPermission[], header: string; }>()
                     .with(MenuItemParentType.User, () => {
-                        const member = GuildMemberStore.getMember(guildId, id!);
+                        const member = GuildMemberStore.getMember(guildId, id!)!;
 
                         const permissions: RoleOrUserPermission[] = getSortedRoles(guild, member)
                             .map(role => ({

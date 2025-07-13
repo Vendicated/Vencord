@@ -17,9 +17,8 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
+import { Channel, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Channel, Guild, Message, User } from "discord-types/general";
-import GuildFeatures from "discord-types/other/Constants";
 import { Except } from "type-fest";
 
 import { runtimeHashMessageKey } from "./intlHash";
@@ -195,7 +194,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     });
 
     FluxDispatcher.dispatch({ type: "USER_UPDATE", user: body.user });
-    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", ...body });
+    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", userProfile: body });
     if (options?.guild_id && body.guild_member)
         FluxDispatcher.dispatch({ type: "GUILD_MEMBER_PROFILE_UPDATE", guildId: options.guild_id, guildMember: body.guild_member });
 
@@ -228,6 +227,6 @@ export function getGuildAcronym(guild: Guild): string {
         .replace(/\s/g, "");
 }
 
-export function hasGuildFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
+export function hasGuildFeature(guild: Guild, feature: GuildFeatures): boolean {
     return guild.features?.has(feature) ?? false;
 }
