@@ -21,13 +21,19 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Leet Text Support",
         default: true
+    },
+
+    Embeds: {
+        type: OptionType.BOOLEAN,
+        description: "Message Embeds support",
+        default: true
     }
 });
 
 export default definePlugin({
     name: "LaliluleNO",
     description: "Replace all blacklisted Messages with lalilulelo",
-    authors: [Devs.Duckouji],
+    authors: [Devs.Duckouji], // and davr1 the GOAT
     settings,
     start() {
         const blacklist = settings.store.Blacklist
@@ -59,28 +65,46 @@ export default definePlugin({
             return text;
         }
 
+        function laliluleloify(message: string) {
+            // Leet mode support
+            if (settings.store.Leet) { message = leet_convert(message); }
+
+            // Replaces all the instances of the blacklisted word in the message
+            // With lalilulelo
+            return blacklist.reduce(
+                (message, blacklisted_word) => message.replace(
+                    new RegExp(blacklisted_word, "gi"),
+                    "lalilulelo"
+                ),
+
+                message
+            );
+        }
+
         FluxDispatcher.addInterceptor(e => {
-            // if (e.type === 'MESSAGE_CREATE' || e.type === 'MESSAGE_UPDATE') {
-            //     console.log(e.message.content)
-            // } 
+            // For individual messages sent/updated
+            if (e.type === 'MESSAGE_CREATE' || e.type === 'MESSAGE_UPDATE') {
+                e.message.content = laliluleloify(e.message.content);
 
-            if (e.type === 'LOAD_MESSAGES_SUCCESS') {
-                e.messages.forEach((message, index) => {
-                    let input_message = message.content;
+                // Message embeds support
+                if (settings.store.Embeds) {
+                    e.message.embeds.forEach(embed => {
+                        embed.title = laliluleloify(embed.title);
+                    });
+                }
+            }
 
-                    // Leet mode support
-                    if (settings.store.Leet) { input_message = leet_convert(input_message); }
+            // For all messages loaded at once (normally during startup)
+            else if (e.type === 'LOAD_MESSAGES_SUCCESS') {
+                e.messages.forEach((message) => {
+                    message.content = laliluleloify(message.content);
 
-                    // Replaces all the instances of the blacklisted word in the message
-                    // With lalilulelo
-                    message.content = blacklist.reduce(
-                        (message, blacklisted_word) => message.replace(
-                            new RegExp(blacklisted_word, "gi"),
-                            "lalilulelo"
-                        ),
-
-                        input_message
-                    );
+                    // Message embeds support
+                    if (settings.store.Embeds) {
+                        message.embeds.forEach(embed => {
+                            embed.title = laliluleloify(embed.title);
+                        });
+                    }
                 });
             }
         });
