@@ -8,9 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { GuildMember, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, UserStore } from "@webpack/common";
-import { GuildMember, User } from "@vencord/discord-types";
 
 const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
 const StreamerModeStore = findStoreLazy("StreamerModeStore");
