@@ -19,7 +19,7 @@ const settings = definePluginSettings({
 
     Leet: {
         type: OptionType.BOOLEAN,
-        description: "Leet Text Support",
+        description: "Leet Text Support (Experimental)",
         default: false
     },
 
