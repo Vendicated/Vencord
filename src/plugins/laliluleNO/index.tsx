@@ -20,7 +20,7 @@ const settings = definePluginSettings({
     Leet: {
         type: OptionType.BOOLEAN,
         description: "Leet Text Support",
-        default: true
+        default: false
     },
 
     Embeds: {
