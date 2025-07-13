@@ -65,19 +65,22 @@ export default definePlugin({
             });
         }
 
-        function laliluleloify(message: string) {
+        function laliluleloify(input_text: string) {
+            // Makes sure the input text is not null
+            if (!input_text) return;
+
             // Leet mode support
-            if (settings.store.Leet) { message = leet_convert(message); }
+            if (settings.store.Leet) { input_text = leet_convert(input_text); }
 
             // Replaces all the instances of the blacklisted word in the message
             // With lalilulelo
             return blacklist.reduce(
-                (message, blacklisted_word) => message.replace(
+                (text, blacklisted_word) => text.replace(
                     new RegExp(blacklisted_word, "gi"),
                     "lalilulelo"
                 ),
 
-                message
+                input_text
             );
         }
 
