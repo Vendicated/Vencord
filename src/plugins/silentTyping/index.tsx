@@ -22,8 +22,8 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel } from "@vencord/discord-types";
 import { ChannelStore, FluxDispatcher, Menu, React } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 const settings = definePluginSettings({
     enabled: {
