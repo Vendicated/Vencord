@@ -41,28 +41,21 @@ export default definePlugin({
             .map((w) => w.trim())
             .filter(Boolean);
 
-        const leet_alphabet = {
-            a: "4",
-            b: "8",
-            e: "3",
-            g: "6",
-            i: "1",
-            o: "0",
-            p: "9",
-            s: "5",
-            t: "7",
-            z: "2"
-        };
-
         function leet_convert(text: string) {
-            for (let [letter, number] of Object.entries(leet_alphabet)) {
-                // Required as .replace() only replaces the first instance
-                let global_regex = new RegExp(number, 'g');
+            const leet_to_letter = {
+                "4": "a",
+                "8": "b",
+                "3": "e",
+                "6": "g",
+                "1": "i",
+                "0": "o",
+                "9": "p",
+                "5": "s",
+                "7": "t",
+                "2": "z"
+            };
 
-                text = text.toLowerCase().replace(global_regex, letter);
-            }
-
-            return text;
+            return [...text].map(char => leet_to_letter[char] || char).join('');
         }
 
         function laliluleloify(message: string) {
