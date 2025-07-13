@@ -61,7 +61,7 @@ export default definePlugin({
                 // (not just digits or punctuation)
                 if (!/[a-zA-Z]/.test(word)) return word;
 
-                return [...text].map(char => leet_to_letter[char] || char).join('');
+                return [...word].map(char => leet_to_letter[char] || char).join('');
             });
         }
 
