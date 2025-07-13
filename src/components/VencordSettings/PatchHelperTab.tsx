@@ -148,7 +148,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
             )}
 
             {compileResult &&
-                <Forms.FormText style={{ color: compileResult[0] ? "var(--text-positive)" : "var(--text-danger)" }}>
+                <Forms.FormText style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-danger)" }}>
                     {compileResult[1]}
                 </Forms.FormText>
             }
@@ -194,7 +194,7 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
                 error={error ?? replacementError}
             />
             {!isFunc && (
-                <div className="vc-text-selectable">
+                <div>
                     <Forms.FormTitle className={Margins.top8}>Cheat Sheet</Forms.FormTitle>
                     {Object.entries({
                         "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
