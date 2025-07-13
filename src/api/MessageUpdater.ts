@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { FluxStore, Message } from "@vencord/discord-types";
 import { MessageCache, MessageStore } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
-import { Message } from "discord-types/general";
 
 /**
  * Update and re-render a message
