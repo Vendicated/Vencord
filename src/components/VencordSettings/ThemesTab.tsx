@@ -28,8 +28,8 @@ import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { relaunch, showItemInFolder } from "@utils/native";
-import { useAwaiter, useForceUpdater } from "@utils/react";
+import { relaunch } from "@utils/native";
+import { useForceUpdater } from "@utils/react";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { findLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
@@ -51,62 +51,6 @@ type FileInput = ComponentType<{
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 
 const cl = classNameFactory("vc-settings-theme-");
-
-function Validator({ link }: { link: string; }) {
-    const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
-        if (res.status > 300) throw `${res.status} ${res.statusText}`;
-        const contentType = res.headers.get("Content-Type");
-        if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain"))
-            throw "Not a CSS file. Remember to use the raw link!";
-
-        return "Okay!";
-    }));
-
-    const text = pending
-        ? "Checking..."
-        : err
-            ? `Error: ${err instanceof Error ? err.message : String(err)}`
-            : "Valid!";
-
-    return <Forms.FormText style={{
-        color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--text-positive)"
-    }}>{text}</Forms.FormText>;
-}
-
-function Validators({ themeLinks }: { themeLinks: string[]; }) {
-    if (!themeLinks.length) return null;
-
-    return (
-        <>
-            <Forms.FormTitle className={Margins.top20} tag="h5">Validator</Forms.FormTitle>
-            <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
-            <div>
-                {themeLinks.map(rawLink => {
-                    const { label, link } = (() => {
-                        const match = /^@(light|dark) (.*)/.exec(rawLink);
-                        if (!match) return { label: rawLink, link: rawLink };
-
-                        const [, mode, link] = match;
-                        return { label: `[${mode} mode only] ${link}`, link };
-                    })();
-
-                    return <Card style={{
-                        padding: ".5em",
-                        marginBottom: ".5em",
-                        marginTop: ".5em"
-                    }} key={link}>
-                        <Forms.FormTitle tag="h5" style={{
-                            overflowWrap: "break-word"
-                        }}>
-                            {label}
-                        </Forms.FormTitle>
-                        <Validator link={link} />
-                    </Card>;
-                })}
-            </div>
-        </>
-    );
-}
 
 interface ThemeCardProps {
     theme: UserThemeHeader;
@@ -163,7 +107,6 @@ function ThemesTab() {
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
     const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
     const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
-    const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
         refreshLocalThemes();
@@ -251,8 +194,7 @@ function ThemesTab() {
                                 ) : (
                                     <QuickAction
                                         text="Open Themes Folder"
-                                        action={() => showItemInFolder(themeDir!)}
-                                        disabled={themeDirPending}
+                                        action={() => VencordNative.themes.openFolder()}
                                         Icon={FolderIcon}
                                     />
                                 )}
@@ -311,7 +253,13 @@ function ThemesTab() {
     function renderOnlineThemes() {
         return (
             <>
-                <Card className="vc-settings-card vc-text-selectable">
+                <Card className={classes("vc-warning-card", Margins.bottom16)}>
+                    <Forms.FormText>
+                        This section is for advanced users. If you are having difficulties using it, use the
+                        Local Themes tab instead.
+                    </Forms.FormText>
+                </Card>
+                <Card className="vc-settings-card">
                     <Forms.FormTitle tag="h5">Paste links to css files here</Forms.FormTitle>
                     <Forms.FormText>One link per line</Forms.FormText>
                     <Forms.FormText>You can prefix lines with @light or @dark to toggle them based on your Discord theme</Forms.FormText>
@@ -323,12 +271,11 @@ function ThemesTab() {
                         value={themeText}
                         onChange={setThemeText}
                         className={"vc-settings-theme-links"}
-                        placeholder="Theme Links"
+                        placeholder="Enter Theme Links..."
                         spellCheck={false}
                         onBlur={onBlur}
                         rows={10}
                     />
-                    <Validators themeLinks={settings.themeLinks} />
                 </Forms.FormSection>
             </>
         );
@@ -375,13 +322,13 @@ export function CspErrorCard() {
     const isImgurHtmlDomain = (url: string) => url.startsWith("https://imgur.com/");
 
     const allowUrl = async (url: string) => {
-        const { origin: baseUrl, hostname } = new URL(url);
+        const { origin: baseUrl, host } = new URL(url);
 
         const result = await VencordNative.csp.requestAddOverride(baseUrl, ["connect-src", "img-src", "style-src", "font-src"], "Vencord Themes");
         if (result !== "ok") return;
 
         CspBlockedUrls.forEach(url => {
-            if (new URL(url).hostname === hostname) {
+            if (new URL(url).host === host) {
                 CspBlockedUrls.delete(url);
             }
         });
