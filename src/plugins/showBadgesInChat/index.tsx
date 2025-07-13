@@ -10,8 +10,8 @@ import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecor
 import { Devs } from "@utils/constants";
 import { isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { User } from "discord-types/general";
 import badges from "plugins/_api/badges";
 
 import settings, { cl } from "./settings";
