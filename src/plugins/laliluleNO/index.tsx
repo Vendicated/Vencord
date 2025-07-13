@@ -55,7 +55,14 @@ export default definePlugin({
                 "2": "z"
             };
 
-            return [...text].map(char => leet_to_letter[char] || char).join('');
+            // This makes sure leet_convert only replace "word" tokens
+            return text.replace(/\b[\w]+\b/g, word => {
+                // Only process if the word contains at least one letter 
+                // (not just digits or punctuation)
+                if (!/[a-zA-Z]/.test(word)) return word;
+
+                return [...text].map(char => leet_to_letter[char] || char).join('');
+            });
         }
 
         function laliluleloify(message: string) {
