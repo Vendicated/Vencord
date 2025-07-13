@@ -58,6 +58,7 @@
 .questify-button,
 .questify-sub-inline-group [class^="swatch"] {
     height: 38px !important;
+    min-height: 38px !important;
     width: 80px !important;
     min-width: 80px !important;
     padding: 2px !important;
