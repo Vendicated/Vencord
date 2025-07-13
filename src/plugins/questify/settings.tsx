@@ -44,10 +44,7 @@ export function fetchAndAlertQuests(source: string, logger: Logger): void {
 
                 if (shouldAlert) {
                     logger.info(`[${getFormattedNow()}] New quests detected. Playing alert sound.`);
-
-                    setTimeout(() => {
-                        AudioPlayer(shouldAlert, 1).play();
-                    }, 1000); // Give the Quest Button a chance to update first.
+                    AudioPlayer(shouldAlert, 1).play();
                 } else {
                     logger.info(`[${getFormattedNow()}] New quests detected.`);
                 }
