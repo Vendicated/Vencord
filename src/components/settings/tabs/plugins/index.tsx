@@ -38,7 +38,7 @@ import { PluginCard } from "./PluginCard";
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
+const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
