@@ -22,6 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
 import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { openUserscriptModal } from "@components/PluginSettings/UserscriptModal";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -155,6 +156,11 @@ function VencordSettings() {
                         Icon={PaintbrushIcon}
                         text="Edit QuickCSS"
                         action={() => VencordNative.quickCss.openEditor()}
+                    />
+                    <QuickAction
+                        Icon={PaintbrushIcon}
+                        text="Edit QuickUserscript"
+                        action={() => openUserscriptModal()}
                     />
                     {!IS_WEB && (
                         <QuickAction

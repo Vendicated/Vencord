@@ -155,6 +155,12 @@ async function init() {
     }
 }
 
+/* The quickUserscript runs here, so it may add custom plugins and patches. */
+try {
+    new Function(Settings.quickUserscript)();
+} catch (exception) {
+    PMLogger.error("Error in QuickUserscript", exception);
+}
 startAllPlugins(StartAt.Init);
 init();
 
