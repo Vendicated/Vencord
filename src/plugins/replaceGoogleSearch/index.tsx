@@ -12,7 +12,7 @@ import { Flex, Menu } from "@webpack/common";
 
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
-    DuckDuckGo: "https://duckduckgo.com/",
+    DuckDuckGo: "https://duckduckgo.com/?q=",
     Brave: "https://search.brave.com/search?q=",
     Bing: "https://www.bing.com/search?q=",
     Yahoo: "https://search.yahoo.com/search?p=",
@@ -69,7 +69,7 @@ function makeSearchItem(src: string) {
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={`https://www.google.com/s2/favicons?domain=${Engines[engine]}&sz=64`}
+                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
                                 />
                                 {engine}
                             </Flex>

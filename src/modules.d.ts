@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line spaced-comment
 /// <reference types="standalone-electron-types"/>
 
 declare module "~plugins" {
@@ -26,7 +25,7 @@ declare module "~plugins" {
         folderName: string;
         userPlugin: boolean;
     }>;
-    export const ExcludedPlugins: Record<string, "web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev">;
+    export const ExcludedPlugins: Record<string, "web" | "discordDesktop" | "vesktop" | "desktop" | "dev">;
 }
 
 declare module "~pluginNatives" {

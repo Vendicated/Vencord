@@ -16,9 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
+export const VENBOT_USER_ID = "1017176847865352332";
+export const VENCORD_GUILD_ID = "1015060230222131221";
+export const DONOR_ROLE_ID = "1042507929485586532";
+export const CONTRIB_ROLE_ID = "1026534353167208489";
+export const REGULAR_ROLE_ID = "1026504932959977532";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
+export const SUPPORT_CATEGORY_ID = "1108135649699180705";
+export const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
 
 export interface Dev {
     name: string;
@@ -33,17 +39,14 @@ export interface Dev {
  * If you are fine with attribution but don't want the badge, add badge: false
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
-    Nobody: {
-        name: "Nobody",
-        id: 0n,
-    },
     Ven: {
-        name: "Vee",
+        name: "V",
         id: 343383572805058560n
     },
     Arjix: {
         name: "ArjixWasTaken",
-        id: 674710789138939916n
+        id: 674710789138939916n,
+        badge: false
     },
     Cyn: {
         name: "Cynosphere",
@@ -191,7 +194,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     axyie: {
         name: "'ax",
-        id: 273562710745284628n,
+        id: 929877747151548487n,
     },
     pointy: {
         name: "pointy",
@@ -269,10 +272,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     arHSM: {
         name: "arHSM",
         id: 841509053422632990n
-    },
-    F53: {
-        name: "F53",
-        id: 280411966126948353n
     },
     AutumnVN: {
         name: "AutumnVN",
@@ -523,8 +522,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 721717126523781240n,
     },
     nyx: {
-        name: "verticalsync",
-        id: 328165170536775680n
+        name: "verticalsync.",
+        id: 1207087393929171095n
     },
     nekohaxx: {
         name: "nekohaxx",
@@ -537,6 +536,62 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Joona: {
         name: "Joona",
         id: 297410829589020673n
+    },
+    sadan: {
+        name: "sadan",
+        id: 521819891141967883n,
+    },
+    Kylie: {
+        name: "Cookie",
+        id: 721853658941227088n
+    },
+    AshtonMemer: {
+        name: "AshtonMemer",
+        id: 373657230530052099n
+    },
+    surgedevs: {
+        name: "Chloe",
+        id: 1084592643784331324n
+    },
+    Lumap: {
+        name: "Lumap",
+        id: 585278686291427338n,
+    },
+    Obsidian: {
+        name: "Obsidian",
+        id: 683171006717755446n,
+    },
+    SerStars: {
+        name: "SerStars",
+        id: 861631850681729045n,
+    },
+    niko: {
+        name: "niko",
+        id: 341377368075796483n,
+    },
+    relitrix: {
+        name: "Relitrix",
+        id: 423165393901715456n,
+    },
+    RamziAH: {
+        name: "RamziAH",
+        id: 1279957227612147747n,
+    },
+    SomeAspy: {
+        name: "SomeAspy",
+        id: 516750892372852754n,
+    },
+    jamesbt365: {
+        name: "jamesbt365",
+        id: 158567567487795200n,
+    },
+    samsam: {
+        name: "samsam",
+        id: 400482410279469056n,
+    },
+    Cootshk: {
+        name: "Cootshk",
+        id: 921605971577548820n
     },
 } satisfies Record<string, Dev>);
 

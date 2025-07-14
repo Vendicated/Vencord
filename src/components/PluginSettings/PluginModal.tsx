@@ -26,17 +26,18 @@ import { Flex } from "@components/Flex";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes, isObjectEmpty } from "@utils/misc";
+import { isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
-import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
 
 import {
+    ISettingCustomElementProps,
     ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
@@ -74,14 +75,15 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
     return newUser;
 }
 
-const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
+const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any> | ISettingCustomElementProps<any>>> = {
     [OptionType.STRING]: SettingTextComponent,
     [OptionType.NUMBER]: SettingNumericComponent,
     [OptionType.BIGINT]: SettingNumericComponent,
     [OptionType.BOOLEAN]: SettingBooleanComponent,
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent
+    [OptionType.COMPONENT]: SettingCustomComponent,
+    [OptionType.CUSTOM]: () => null,
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
@@ -109,7 +111,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 setAuthors(a => [...a, author]);
             }
         })();
-    }, []);
+    }, [plugin.authors]);
 
     async function saveAndClose() {
         if (!plugin.options) {
@@ -129,7 +131,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         for (const [key, value] of Object.entries(tempSettings)) {
             const option = plugin.options[key];
             pluginSettings[key] = value;
-            option?.onChange?.(value);
+
+            if (option.type === OptionType.CUSTOM) continue;
             if (option?.restartNeeded) restartNeeded = true;
         }
         if (restartNeeded) onRestartNeeded();
@@ -141,7 +144,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
-                if (setting.hidden) return null;
+                if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
 
                 function onChange(newValue: any) {
                     setTempSettings(s => ({ ...s, [key]: newValue }));
@@ -209,7 +212,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const pluginMeta = PluginMeta[plugin.name];
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
+        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
             <ModalHeader separator={false}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
 
@@ -265,9 +268,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </div>
                 </Forms.FormSection>
                 {!!plugin.settingsAboutComponent && (
-                    <div className={classes(Margins.bottom8, "vc-text-selectable")}>
+                    <div className={Margins.bottom8}>
                         <Forms.FormSection>
-                            <ErrorBoundary message="An error occurred while rendering this plugin's custom InfoComponent">
+                            <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
                                 <plugin.settingsAboutComponent tempSettings={tempSettings} />
                             </ErrorBoundary>
                         </Forms.FormSection>

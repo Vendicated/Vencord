@@ -7,7 +7,7 @@
 import { proxyLazy } from "@utils/lazy";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
-import { Flux, FluxDispatcher, GuildChannelStore, PrivateChannelsStore } from "@webpack/common";
+import { ChannelActionCreators, Flux, FluxDispatcher, GuildChannelStore } from "@webpack/common";
 
 export const OnlineMemberCountStore = proxyLazy(() => {
     const preloadQueue = new Queue();
@@ -15,18 +15,18 @@ export const OnlineMemberCountStore = proxyLazy(() => {
     const onlineMemberMap = new Map<string, number>();
 
     class OnlineMemberCountStore extends Flux.Store {
-        getCount(guildId: string) {
-            return onlineMemberMap.get(guildId);
+        getCount(guildId?: string) {
+            return onlineMemberMap.get(guildId!);
         }
 
         async _ensureCount(guildId: string) {
             if (onlineMemberMap.has(guildId)) return;
 
-            await PrivateChannelsStore.preload(guildId, GuildChannelStore.getDefaultChannel(guildId).id);
+            await ChannelActionCreators.preload(guildId, GuildChannelStore.getDefaultChannel(guildId).id);
         }
 
-        ensureCount(guildId: string) {
-            if (onlineMemberMap.has(guildId)) return;
+        ensureCount(guildId?: string) {
+            if (!guildId || onlineMemberMap.has(guildId)) return;
 
             preloadQueue.push(() =>
                 this._ensureCount(guildId)

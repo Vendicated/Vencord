@@ -21,8 +21,8 @@ import { ScreenshareIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { Channel, User } from "@vencord/discord-types";
 import { Menu } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
 
 import { ApplicationStreamingStore, ApplicationStreamPreviewStore } from "./webpack/stores";
 import { ApplicationStream, Stream } from "./webpack/types/stores";
@@ -57,7 +57,11 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
     const previewUrl = await ApplicationStreamPreviewStore.getPreviewURL(guildId, channelId, ownerId);
     if (!previewUrl) return;
 
-    openImageModal(previewUrl);
+    openImageModal({
+        url: previewUrl,
+        height: 720,
+        width: 1280
+    });
 };
 
 export const addViewStreamContext: NavContextMenuPatchCallback = (children, { userId }: { userId: string | bigint; }) => {
