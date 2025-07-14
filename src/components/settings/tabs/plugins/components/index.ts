@@ -20,7 +20,7 @@ import { OptionType } from "@utils/types";
 import { ComponentType } from "react";
 
 import { BooleanSetting } from "./BooleanSetting";
-import { ComponentSettingProps, SettingProps } from "./common";
+import { ComponentSettingProps, SettingProps } from "./Common";
 import { ComponentSetting } from "./ComponentSetting";
 import { NumberSetting } from "./NumberSetting";
 import { SelectSetting } from "./SelectSetting";

@@ -13,7 +13,6 @@ import { relaunch } from "@utils/native";
 import { useForceUpdater } from "@utils/react";
 import { Alerts, Button, Forms } from "@webpack/common";
 
-
 export function CspErrorCard() {
     if (IS_WEB) return null;
 

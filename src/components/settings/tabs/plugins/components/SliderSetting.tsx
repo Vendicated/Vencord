@@ -19,7 +19,7 @@
 import { PluginOptionSlider } from "@utils/types";
 import { React, Slider, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./common";
+import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function SliderSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionSlider>) {
     const def = pluginSettings[id] ?? option.default;

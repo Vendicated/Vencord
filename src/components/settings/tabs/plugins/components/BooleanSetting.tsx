@@ -20,7 +20,7 @@ import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionBoolean } from "@utils/types";
 import { Forms, React, Switch, useState } from "@webpack/common";
 
-import { resolveError, SettingProps } from "./common";
+import { resolveError, SettingProps } from "./Common";
 
 export function BooleanSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;

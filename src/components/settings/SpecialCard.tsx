@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./specialCard.css";
+import "./SpecialCard.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Card, Clickable, Forms, React } from "@webpack/common";

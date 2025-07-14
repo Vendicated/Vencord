@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./quickActions.css";
+import "./QuickAction.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Card } from "@webpack/common";

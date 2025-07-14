@@ -19,7 +19,7 @@
 import { OptionType, PluginOptionNumber } from "@utils/types";
 import { React, TextInput, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./common";
+import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 

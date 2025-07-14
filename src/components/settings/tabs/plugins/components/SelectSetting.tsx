@@ -19,7 +19,7 @@
 import { PluginOptionSelect } from "@utils/types";
 import { React, Select, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./common";
+import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function SelectSetting({ option, pluginSettings, definedSettings, onChange, id }: SettingProps<PluginOptionSelect>) {
     const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;

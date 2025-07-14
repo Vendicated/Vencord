@@ -19,7 +19,7 @@
 import { PluginOptionString } from "@utils/types";
 import { React, TextInput, useState } from "@webpack/common";
 
-import { resolveError, SettingProps, SettingsSection } from "./common";
+import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function TextSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionString>) {
     const [state, setState] = useState(pluginSettings[id] ?? option.default ?? null);

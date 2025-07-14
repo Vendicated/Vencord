@@ -27,7 +27,7 @@ import { Forms, React, Switch } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
-import { CommonProps, HashLink, Newer, Updatable } from "./components";
+import { CommonProps, HashLink, Newer, Updatable } from "./Components";
 
 function Updater() {
     const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
