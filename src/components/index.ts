@@ -9,9 +9,9 @@ export * from "./CodeBlock";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export * from "./ErrorCard";
 export * from "./Flex";
+export * from "./Grid";
 export * from "./Heart";
 export * from "./Icons";
 export * from "./Link";
-export * from "./settings/DonateButton";
-export * from "./settings/PluginBadge";
-export * from "./settings/Switch";
+export * from "./settings";
+
