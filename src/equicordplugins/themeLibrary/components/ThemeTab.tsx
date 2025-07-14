@@ -20,7 +20,7 @@ import { Button, Forms, React, SearchableSelect, TabBar, TextInput, useEffect, u
 import { SearchStatus, TabItem, Theme, ThemeLikeProps } from "../types";
 import { ThemeCard } from "./ThemeCard";
 
-const InputStyles = findByPropsLazy("inputDefault", "inputWrapper", "error");
+const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");
 
 export const apiUrl = "https://discord-themes.com/api";
 export const logger = new Logger("ThemeLibrary", "#e5c890");
