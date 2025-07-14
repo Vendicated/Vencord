@@ -18,7 +18,7 @@ import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
 
 // Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("plugins") as typeof import("plugins"));
+const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } = proxyLazy(() => require("plugins") as typeof import("plugins"));
 
 export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
@@ -32,7 +32,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
 
-    const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
+    const isEnabled = () => isPluginEnabled(plugin.name);
 
     function toggleEnabled() {
         const wasEnabled = isEnabled();
