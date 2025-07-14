@@ -8,9 +8,9 @@ import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
+import { Channel, Message } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { React, useEffect, useMemo, useState } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
 
 import { settings as PluginSettings } from "../index";
 
