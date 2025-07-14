@@ -6,7 +6,7 @@ export class User extends DiscordRecord {
     constructor(user: object);
     accentColor: number;
     avatar: string;
-    banner: string;
+    banner: string | null | undefined;
     bio: string;
     bot: boolean;
     desktop: boolean;
@@ -27,7 +27,6 @@ export class User extends DiscordRecord {
     system: boolean;
     username: string;
     verified: boolean;
-    themeColors?: [number, number];
 
     get createdAt(): Date;
     get hasPremiumPerks(): boolean;
