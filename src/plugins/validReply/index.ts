@@ -6,10 +6,9 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
-import { Message, User } from "discord-types/general";
-import { Channel } from "discord-types/general/index.js";
 
 const enum ReferencedMessageState {
     Loaded,
