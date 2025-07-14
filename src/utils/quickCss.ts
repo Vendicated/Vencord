@@ -64,7 +64,10 @@ async function initThemes() {
     const { themeLinks, enabledThemes } = Settings;
 
     // "darker" and "midnight" both count as dark
-    const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
+    // This function is first called on DOMContentLoaded, so ThemeStore may not have been loaded yet
+    const activeTheme = ThemeStore == null
+        ? undefined
+        : ThemeStore.theme === "light" ? "light" : "dark";
 
     const links = themeLinks
         .map(rawLink => {
@@ -126,6 +129,8 @@ function updatePopoutWindows() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    if (IS_USERSCRIPT) return;
+
     initSystemValues();
     initThemes();
 
@@ -134,20 +139,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
-    ThemeStore.addChangeListener(initThemes);
 
-    if (!IS_WEB)
+    if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);
 
-    window.addEventListener("message", event => {
-        const { discordPopoutEvent } = event.data || {};
-        if (discordPopoutEvent?.type === "loaded") {
-            const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
-            applyToPopout(popoutWindow);
-            const style = popoutWindow.document.createElement("style");
-            style.id = "vencord-css-core";
-            style.textContent = document.getElementById("vencord-css-core")!.textContent;
-            popoutWindow.document.documentElement.appendChild(style);
-        }
+        window.addEventListener("message", event => {
+            const { discordPopoutEvent } = event.data || {};
+            if (discordPopoutEvent?.type === "loaded") {
+                const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
+                applyToPopout(popoutWindow);
+                const style = popoutWindow.document.createElement("style");
+                style.id = "vencord-css-core";
+                style.textContent = document.getElementById("vencord-css-core")!.textContent;
+                popoutWindow.document.documentElement.appendChild(style);
+            }
+        });
+    }
+}, { once: true });
+
+export function initQuickCssThemeStore() {
+    if (IS_USERSCRIPT) return;
+
+    initThemes();
+
+    let currentTheme = ThemeStore.theme;
+    ThemeStore.addChangeListener(() => {
+        if (currentTheme === ThemeStore.theme) return;
+
+        currentTheme = ThemeStore.theme;
+        initThemes();
     });
-});
+}

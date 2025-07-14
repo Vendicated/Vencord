@@ -65,7 +65,8 @@ export default definePlugin({
                     replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
                 },
                 {
-                    match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?function\(\){return )\2(?=})/,
+                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
+                    match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?(?:function\(\){return |\(\)=>))\2/,
                     replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
                 }
             ]
@@ -157,6 +158,9 @@ export default definePlugin({
                 aboveActivity: getIntlMessage("ACTIVITY_SETTINGS")
             };
 
+            if (!names[settingsLocation] || names[settingsLocation].endsWith("_SETTINGS"))
+                return firstChild === "PREMIUM";
+
             return header === names[settingsLocation];
         } catch {
             return firstChild === "PREMIUM";
@@ -209,7 +213,7 @@ export default definePlugin({
     get chromiumVersion() {
         try {
             return VencordNative.native.getVersions().chrome
-                // @ts-ignore Typescript will add userAgentData IMMEDIATELY
+                // @ts-expect-error Typescript will add userAgentData IMMEDIATELY
                 || navigator.userAgentData?.brands?.find(b => b.brand === "Chromium" || b.brand === "Google Chrome")?.version
                 || null;
         } catch { // inb4 some stupid browser throws unsupported error for navigator.userAgentData, it's only in chromium

@@ -10,7 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, User } from "discord-types/general";
+import { Message, User } from "@vencord/discord-types";
 
 interface UsernameProps {
     author: { nick: string; };
@@ -48,10 +48,10 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad],
     patches: [
         {
-            find: '?"@":""',
+            find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=onContextMenu:\i,children:).*?\)}/,
-                replace: "$self.renderUsername(arguments[0])}"
+                match: /(?<=onContextMenu:\i,children:)\i/,
+                replace: "$self.renderUsername(arguments[0])"
             }
         },
     ],
@@ -62,7 +62,7 @@ export default definePlugin({
             const user = userOverride ?? message.author;
             let { username } = user;
             if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+                username = user.globalName || username;
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";

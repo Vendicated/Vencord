@@ -20,13 +20,19 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { MessageSnapshot } from "@vencord/discord-types";
 import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
+
 
 const EMBED_SUPPRESSED = 1 << 2;
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, messageSnapshots, embeds, flags, id: messageId } }) => {
     const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
-    if (!isEmbedSuppressed && !embeds.length) return;
+    const hasEmbedsInSnapshots = messageSnapshots.some(
+        (snapshot: MessageSnapshot) => snapshot?.message.embeds.length
+    );
+
+    if (!isEmbedSuppressed && !embeds.length && !hasEmbedsInSnapshots) return;
 
     const hasEmbedPerms = channel.isPrivate() || !!(PermissionStore.getChannelPermissions({ id: channel.id }) & PermissionsBits.EMBED_LINKS);
     if (author.id === UserStore.getCurrentUser().id && !hasEmbedPerms) return;

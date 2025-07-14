@@ -53,14 +53,12 @@ function makeSearchItem(src: string) {
                             <Flex style={{ alignItems: "center", gap: "0.5em" }}>
                                 <img
                                     style={{
-                                        borderRadius: i >= 3 // Do not round Google, Yandex & SauceNAO
-                                            ? "50%"
-                                            : void 0
+                                        borderRadius: "50%",
                                     }}
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={new URL("/favicon.ico", Engines[engine]).toString().replace("lens.", "")}
+                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).host}.ico`}
                                 />
                                 {engine}
                             </Flex>
@@ -108,7 +106,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::MESSAGE_ACTIONS_MENU_LABEL}",
+            find: "#{intl::MESSAGE_ACTIONS_MENU_LABEL}),shouldHideMediaOptions:",
             replacement: {
                 match: /favoriteableType:\i,(?<=(\i)\.getAttribute\("data-type"\).+?)/,
                 replace: (m, target) => `${m}reverseImageSearchType:${target}.getAttribute("data-role"),`
