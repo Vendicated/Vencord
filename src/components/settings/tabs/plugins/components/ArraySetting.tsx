@@ -29,7 +29,7 @@ import {
     useState,
 } from "@webpack/common";
 
-import { SettingProps } from "./Common";
+import { SettingProps, SettingsSection } from "./Common";
 
 
 const cl = classNameFactory("vc-plugin-modal-");
@@ -350,93 +350,88 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
     // not using the SettingsSection component here because it uses bottom20 margins and that looks shit with the input
     // boxes/searchable selects, the gaps are just too long for whatever reason?
     return (
-        <Forms.FormSection>
-             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-             <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
-                {
-                    option.type === OptionType.GUILDS ? renderGuildView() :
-                    option.type === OptionType.USERS ? renderUserView() :
-                    option.type === OptionType.CHANNELS ? renderChannelView() :
-                        items.map((item, index) => (
-                            <Flex
-                                flexDirection="row"
-                                key={index}
-                                style={{
-                                    gap: "1px",
-                                    marginBottom: "8px"
+        <SettingsSection name={id} description={option.description} error={error}>
+            {
+                option.type === OptionType.GUILDS ? renderGuildView() :
+                option.type === OptionType.USERS ? renderUserView() :
+                option.type === OptionType.CHANNELS ? renderChannelView() :
+                    items.map((item, index) => (
+                        <Flex
+                            flexDirection="row"
+                            key={index}
+                            style={{
+                                gap: "1px",
+                                marginBottom: "8px"
+                            }}
+                        >
+                            <TextInput
+                                value={item}
+                                onChange={v => {
+                                    const idx = items.indexOf(item);
+                                    setItems(items.map((i, index) => index === idx ? v : i));
                                 }}
-                            >
-                                <TextInput
-                                    value={item}
-                                    onChange={v => {
-                                        const idx = items.indexOf(item);
-                                        setItems(items.map((i, index) => index === idx ? v : i));
-                                    }}
-                                    placeholder="Enter Text"
-                                />
-                                {removeButton(item)}
-                            </Flex>
-                        ))
-                }
-                {option.type === OptionType.ARRAY ?
-                    <Flex
-                        flexDirection="row"
-                        style={{
-                            gap: "3px"
+                                placeholder="Enter Text"
+                            />
+                            {removeButton(item)}
+                        </Flex>
+                    ))
+            } {option.type === OptionType.ARRAY ?
+                <Flex
+                    flexDirection="row"
+                    style={{
+                        gap: "3px"
+                    }}
+                >
+                    <TextInput
+                        type="text"
+                        placeholder={"Enter Text"}
+                        id={cl("text-input")}
+                        onChange={v => setText(v)}
+                        value={text}
+                    />
+                    <Button
+                        size={Button.Sizes.MIN}
+                        id={cl("add-button")}
+                        // idk why discord is so fucked with button styles here but passing it as a prop doesn't work
+                        style={{ background: "none", color: "var(--text-normal)" }}
+                        onClick={() => {
+                            setItems([...items, text]);
+                            setText("");
                         }}
+                        disabled={text === "" || error != null}
+                        look={Button.Looks.BLANK}
                     >
-                        <TextInput
-                            type="text"
-                            placeholder={"Enter Text"}
-                            id={cl("text-input")}
-                            onChange={v => setText(v)}
-                            value={text}
-                        />
-                        <Button
-                            size={Button.Sizes.MIN}
-                            id={cl("add-button")}
-                            // idk why discord is so fucked with button styles here but passing it as a prop doesn't work
-                            style={{ background: "none", color: "var(--text-normal)" }}
-                            onClick={() => {
-                                setItems([...items, text]);
-                                setText("");
-                            }}
-                            disabled={text === "" || error != null}
-                            look={Button.Looks.BLANK}
-                        >
-                            <PlusIcon />
-                        </Button>
-                    </Flex>
-                : !isDevModeEnabled() ? null :
-                    <Flex
-                        flexDirection="row"
-                        style={{
-                            gap: "3px"
-                        }}
-                    >
-                        <TextInput
-                            type="text"
-                            placeholder={`...or enter ${type}Id`}
-                            id={cl("id-input")}
-                            onChange={v => setText(v)}
-                            value={text}
-                        />
-                        <Button
-                            size={Button.Sizes.MIN}
-                            id={cl("add-button")}
-                            style={{ background: "none", color: "var(--text-normal)" }}
-                            onClick={() => {
-                                setItems([...items, text]);
-                                setText("");
-                            }}
-                            disabled={text === "" || error != null}
-                            look={Button.Looks.BLANK}
-                        >
-                            <PlusIcon />
-                        </Button>
+                        <PlusIcon />
+                    </Button>
                 </Flex>
-                }
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
-        </Forms.FormSection>
+            : !isDevModeEnabled() ? null :
+                <Flex
+                    flexDirection="row"
+                    style={{
+                        gap: "3px"
+                    }}
+                >
+                    <TextInput
+                        type="text"
+                        placeholder={`...or enter ${type}Id`}
+                        id={cl("id-input")}
+                        onChange={v => setText(v)}
+                        value={text}
+                    />
+                    <Button
+                        size={Button.Sizes.MIN}
+                        id={cl("add-button")}
+                        style={{ background: "none", color: "var(--text-normal)" }}
+                        onClick={() => {
+                            setItems([...items, text]);
+                            setText("");
+                        }}
+                        disabled={text === "" || error != null}
+                        look={Button.Looks.BLANK}
+                    >
+                        <PlusIcon />
+                    </Button>
+            </Flex>}
+        </SettingsSection>
     );
 });
