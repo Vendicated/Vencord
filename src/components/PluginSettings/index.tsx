@@ -510,7 +510,7 @@ export default function PluginSettings() {
                         select={onStatusChange}
                         isSelected={v => v === searchValue.status}
                         closeOnSelect={true}
-                        className={InputStyles.inputDefault}
+                        className={InputStyles.input}
                     />
                 </div>
             </div>
