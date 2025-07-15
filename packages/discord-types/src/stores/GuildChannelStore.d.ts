@@ -1,7 +1,8 @@
+import { LiteralStringUnion } from "type-fest/source/literal-union";
 import { FluxStore, Channel } from "..";
 
 // for completion
-type GuildId = "@favorites" | (string & Record<never, never>);
+type GuildId = LiteralStringUnion<"@favorites">;
 
 export interface ComparableChannel {
     /**
