@@ -139,7 +139,6 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
             const user = UserStore.getUser(item);
             if (!user) return null;
             return {
-                // @ts-ignore outdated lib
                 label: user.globalName || user.username,
                 value: user.id,
             };
@@ -300,7 +299,6 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
                 ) as SelectOption[];
             }
             if (!guild) return [];
-            // @ts-ignore outdated lib
             return ChannelStore.getChannelIds(guild).map((channelId: string) => {
                 const channel = ChannelStore.getChannel(channelId);
                 if (!channel) return;

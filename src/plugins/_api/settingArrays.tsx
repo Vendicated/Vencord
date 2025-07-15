@@ -6,7 +6,7 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginSettingArrayDef } from "@utils/types";
 import { Channel, Guild, User } from "@vencord/discord-types";
 import { Menu, React } from "@webpack/common";
 
@@ -63,8 +63,7 @@ function renderRegisteredPlugins(name: string, value: ContextMenuType) {
                 <Menu.MenuCheckboxItem
                     id={`vc-plugin-settings-${plugin}-${setting}`}
                     key={`vc-plugin-settings-${plugin}-${setting}`}
-                    // @ts-ignore popoutText exists due to this being a list option type
-                    label={Vencord.Plugins.plugins[plugin].settings.def[setting].popoutText ?? setting}
+                    label={(Vencord.Plugins.plugins[plugin].settings!.def[setting] as PluginSettingArrayDef).popoutText ?? setting}
                     action={() => handleCheckboxClick(plugin, setting)}
                     checked={checkedItems[`${plugin}-${setting}-${value.id}`]}
                 />
