@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
@@ -96,12 +96,11 @@ export default definePlugin({
     description: "Suffixes 'ington' to a random word in your message",
     authors: [EquicordDevs.zyqunix],
     settings,
+    renderChatBarButton: IngtoninatorButton,
     start() {
-        addChatBarButton("Ingtoninator", IngtoninatorButton);
         addMessagePreSendListener(handleMessage);
     },
     stop() {
-        removeChatBarButton("Ingtoninator");
         removeMessagePreSendListener(handleMessage);
     }
 });

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import {
     ApplicationCommandInputType,
     ApplicationCommandOptionType,
@@ -150,6 +150,7 @@ export default definePlugin({
             }
         }
     ],
+    renderChatBarButton: ChatBarIcon,
     async interactionHandler(interaction) {
         const sender = await UserUtils.getUser(interaction.application_id).catch(() => null);
         if (!sender || (sender.bot === true && sender.id !== "1")) return;
@@ -260,7 +261,6 @@ export default definePlugin({
         },
     ],
     async start() {
-        addChatBarButton("Encryptcord", ChatBarIcon);
         const pair = await generateKeys();
         await DataStore.set("encryptcordPublicKey", pair.publicKey);
         await DataStore.set("encryptcordPrivateKey", pair.privateKey);
@@ -272,7 +272,6 @@ export default definePlugin({
         await DataStore.set("encryptcordGroupMembers", {});
     },
     async stop() {
-        removeChatBarButton("Encryptcord");
         if (await DataStore.get("encryptcordGroup") === true) {
             await leave("", { channel: { id: await DataStore.get("encryptcordChannelId") } });
         }

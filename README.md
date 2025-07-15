@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/equicord-117327988606502929
 ### Extra included plugins
 
 <details>
-<summary>194 additional plugins</summary>
+<summary>195 additional plugins</summary>
 
 ### All Platforms
 
@@ -151,6 +151,7 @@ You can join our [discord server](https://discord.gg/equicord-117327988606502929
 - ReplyPingControl by ant0n & MrDiamond
 - RPCEditor by Nyako & nin0dev
 - RPCStats by Samwich
+- SaveFavoriteGIFs by thororen
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314

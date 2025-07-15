@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
@@ -287,14 +287,13 @@ export default definePlugin({
     contextMenus: {
         "textarea-context": ChatBarContextCheckbox
     },
+    renderChatBarButton: FurudoSpeakChatToggle,
 
     start: () => {
-        addChatBarButton("FurudoSpeak", FurudoSpeakChatToggle);
         messageSendListenerFuncs();
     },
 
     stop: () => {
-        removeChatBarButton("FurudoSpeak");
         removeMessagePreSendListener(presendObject);
     }
 });

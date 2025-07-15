@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
@@ -36,7 +36,8 @@ export default definePlugin({
     authors: [Devs.MaiKokain],
     dependencies: ["ChatInputButtonAPI"],
     settings,
-    start: async () => {
+    renderChatBarButton: SekaiStickerChatButton,
+    async start() {
         const fonts = [{ name: "YurukaStd", url: "https://raw.githubusercontent.com/TheOriginalAyaka/sekai-stickers/47a2ca33b8cb35f59800e8faad48980e4ce5ea71/src/fonts/YurukaStd.woff2" }, { name: "SSFangTangTi", url: "https://raw.githubusercontent.com/TheOriginalAyaka/sekai-stickers/main/src/fonts/ShangShouFangTangTi.woff2" }];
         if (!IS_FONTS_LOADED) {
             fonts.map(n => {
@@ -47,7 +48,5 @@ export default definePlugin({
             });
             IS_FONTS_LOADED = true;
         }
-        addChatBarButton("SekaiStickers", SekaiStickerChatButton);
     },
-    stop: () => removeChatBarButton("SekaiStickers")
 });

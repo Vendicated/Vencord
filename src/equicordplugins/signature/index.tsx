@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
@@ -106,15 +106,14 @@ export default definePlugin({
     description: "Automated fingerprint/end text",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana, EquicordDevs.KrystalSkull],
     dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
+    renderChatBarButton: SignatureToggle,
 
     start: () => {
         if (settings.store.isEnabled) true;
-        addChatBarButton("Signature", SignatureToggle);
         addMessagePreSendListener(handleMessage);
     },
     stop: () => {
         if (settings.store.isEnabled) false;
-        removeChatBarButton("Signature");
         removeMessagePreSendListener(handleMessage);
 
     },

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -59,7 +59,5 @@ export default definePlugin({
     authors: [EquicordDevs.Tolgchu],
     description: "Reverses the message content before sending it.",
     dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
-
-    start: () => addChatBarButton("ReverseMessageToggle", ReverseMessageToggle),
-    stop: () => removeChatBarButton("ReverseMessageToggle")
+    renderChatBarButton: ReverseMessageToggle,
 });
