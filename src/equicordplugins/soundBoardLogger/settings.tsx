@@ -14,7 +14,7 @@ const settings = definePluginSettings({
     SavedIds: {
         description: "The amount of soundboard ids you want to save at a time (0 lets you save infinite)",
         type: OptionType.COMPONENT,
-        component: ({ setValue, setError }) => {
+        component: ({ setValue }) => {
             const value = settings.store.SavedIds ?? 50;
             const [state, setState] = useState(`${value}`);
             const [shouldShowWarning, setShouldShowWarning] = useState(false);
@@ -24,7 +24,6 @@ const settings = definePluginSettings({
                 const changed = Number(newValue);
 
                 if (Number.isNaN(changed) || changed % 1 !== 0 || changed < 0) {
-                    setError(true);
                     let errorMsg = "";
                     errorMsg += Number.isNaN(changed) ? "The value is not a number.\n" : "";
                     errorMsg += (changed % 1 !== 0) ? "The value can't be a decimal number.\n" : "";
@@ -32,7 +31,6 @@ const settings = definePluginSettings({
                     setErrorMessage(errorMsg);
                     return;
                 } else {
-                    setError(false);
                     setErrorMessage(null);
                 }
 
