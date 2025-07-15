@@ -40,7 +40,7 @@ export function SettingsSection({ name, description, error, children }: Settings
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(name))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom20} type="description">{description}</Forms.FormText>
+            <Forms.FormText className={Margins.bottom8} type="description">{description}</Forms.FormText>
             {children}
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
