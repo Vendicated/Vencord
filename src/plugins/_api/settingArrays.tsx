@@ -140,14 +140,12 @@ export default definePlugin({
     start() {
         for (const plugin of Object.values(Vencord.Plugins.plugins)) {
             if (!Vencord.Plugins.isPluginEnabled(plugin.name) || !plugin.settings) continue;
-            const settings = plugin.settings.def;
-            for (const settingKey of Object.keys(settings)) {
-                const setting = settings[settingKey];
+            for (const [key, setting] of Object.entries(plugin.settings.def)) {
                 if ((setting.type === OptionType.USERS || setting.type === OptionType.GUILDS || setting.type === OptionType.CHANNELS) && !setting.hidePopout) {
                     if (!registeredPlugins[setting.type][plugin.name]) {
                         registeredPlugins[setting.type][plugin.name] = [];
                     }
-                    registeredPlugins[setting.type][plugin.name].push(settingKey);
+                    registeredPlugins[setting.type][plugin.name].push(key);
                 }
             }
         }
