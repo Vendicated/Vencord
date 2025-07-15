@@ -6,23 +6,23 @@
 
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
+import { Role } from "@vencord/discord-types";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { Text } from "@webpack/common";
-import { Role } from "discord-types/general";
 
 const Classes = proxyLazyWebpack(() =>
     Object.assign({}, ...findBulk(
-        filters.byProps("roles", "rolePill", "rolePillBorder"),
+        filters.byProps("role", "pill"),
         filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
         filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton", "roleRemoveButtonCanRemove", "roleRemoveIcon", "roleIcon")
     ))
-) as Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon" | "roleRemoveButtonCanRemove" | "roleRemoveIcon" | "roleIcon", string>;
+) as Record<"role" | "pill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon" | "roleRemoveButtonCanRemove" | "roleRemoveIcon" | "roleIcon", string>;
 
 export function RoleCard({ onRoleRemove, data, border }: { onRoleRemove: (id: string) => void, data: Role, border: boolean }) {
-    const { role, roleRemoveButton, roleRemoveButtonCanRemove, roleRemoveIcon, roleIcon, roleNameOverflow, rolePill, rolePillBorder, roleCircle, roleName } = Classes;
+    const { role, roleRemoveButton, roleRemoveButtonCanRemove, roleRemoveIcon, roleIcon, roleNameOverflow, pill, rolePillBorder, roleCircle, roleName } = Classes;
 
     return (
-        <div className={classes(role, rolePill, border ? rolePillBorder : null)}>
+        <div className={classes(role, pill, border ? rolePillBorder : null)}>
             <div
                 className={classes(roleRemoveButton, roleRemoveButtonCanRemove)}
                 onClick={() => onRoleRemove(data.id)}
@@ -57,7 +57,7 @@ export function RoleCard({ onRoleRemove, data, border }: { onRoleRemove: (id: st
 }
 
 export function RoleList({ roleData, onRoleRemove }: { onRoleRemove: (id: string) => void, roleData: Role[] }) {
-    const { root, roles } = Classes;
+    const { root } = Classes;
 
     return (
         <div>
@@ -66,7 +66,7 @@ export function RoleList({ roleData, onRoleRemove }: { onRoleRemove: (id: string
             )}
 
             {roleData?.length !== 0 && (
-                <div className={classes(root, roles)}>
+                <div className={classes(root)}>
                     {roleData.map(data => (
                         <RoleCard
                             key={data.id}
