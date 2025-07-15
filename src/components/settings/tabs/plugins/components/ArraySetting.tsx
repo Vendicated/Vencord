@@ -8,8 +8,6 @@ import { classNameFactory } from "@api/Styles";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
-import { Margins } from "@utils/margins";
-import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionArray } from "@utils/types";
 import { Channel, Guild,SelectOption } from "@vencord/discord-types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
@@ -18,7 +16,6 @@ import {
     Button,
     ChannelStore,
     Flex,
-    Forms,
     GuildStore,
     IconUtils,
     React,
