@@ -53,13 +53,13 @@ function renderRegisteredPlugins(name: string, value: ContextMenuType) {
         def[setting].onChange?.(store[setting]);
 
     };
-    return Object.keys(plugins).map(plugin => (
+    return Object.entries(plugins).map(([plugin, settings]) => (
         <Menu.MenuItem
             id={`vc-plugin-settings-${plugin}`}
             label={plugin}
             key={`vc-plugin-settings-${plugin}`}
         >
-            {plugins[plugin].map(setting => (
+            {settings.map(setting => (
                 <Menu.MenuCheckboxItem
                     id={`vc-plugin-settings-${plugin}-${setting}`}
                     key={`vc-plugin-settings-${plugin}-${setting}`}
