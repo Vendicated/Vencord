@@ -17,13 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
-import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
-import CloudTab from "@components/VencordSettings/CloudTab";
-import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
-import PluginsTab from "@components/VencordSettings/PluginsTab";
-import ThemesTab from "@components/VencordSettings/ThemesTab";
-import UpdaterTab from "@components/VencordSettings/UpdaterTab";
-import VencordTab from "@components/VencordSettings/VencordTab";
+import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -90,7 +84,7 @@ export default definePlugin({
                 className: "vc-settings-header"
             },
             {
-                section: "VencordSettings",
+                section: "settings/tabs",
                 label: "Vencord",
                 element: VencordTab,
                 className: "vc-settings"
@@ -120,7 +114,7 @@ export default definePlugin({
                 className: "vc-cloud"
             },
             {
-                section: "VencordSettingsSync",
+                section: "settings/tabsSync",
                 label: "Backup & Restore",
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
@@ -213,7 +207,7 @@ export default definePlugin({
     get chromiumVersion() {
         try {
             return VencordNative.native.getVersions().chrome
-                // @ts-ignore Typescript will add userAgentData IMMEDIATELY
+                // @ts-expect-error Typescript will add userAgentData IMMEDIATELY
                 || navigator.userAgentData?.brands?.find(b => b.brand === "Chromium" || b.brand === "Google Chrome")?.version
                 || null;
         } catch { // inb4 some stupid browser throws unsupported error for navigator.userAgentData, it's only in chromium
