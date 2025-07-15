@@ -9,7 +9,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores, VoiceStateStore } from "@webpack/common";
+import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
 const cl = classNameFactory("vc-uvs-");
 
@@ -19,7 +19,6 @@ const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
 });
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const Avatar = findComponentByCodeLazy(".status)/2):0");
 const GroupDMAvatars = findComponentByCodeLazy("frontSrc:", "getAvatarURL");
 

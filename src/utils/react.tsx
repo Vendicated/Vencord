@@ -145,7 +145,6 @@ export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
 
     return time;
 }
-
 interface FixedTimerOpts {
     interval?: number;
     initialTime?: number;
@@ -163,4 +162,11 @@ export function useFixedTimer({ interval = 1000, initialTime = Date.now() }: Fix
     }, [initialTime]);
 
     return time;
+}
+
+export function useCleanupEffect(
+    effect: () => void,
+    deps?: React.DependencyList
+): void {
+    useEffect(() => effect, deps);
 }

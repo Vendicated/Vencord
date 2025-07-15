@@ -24,9 +24,7 @@ lerna-debug.log*
 src/userplugins
 
 ExtensionCache/
-settings/
-
-src/equicordplugins/usrpe
+/settings
 
 # vencord companion module cache
 .modules

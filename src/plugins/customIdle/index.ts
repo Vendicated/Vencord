@@ -6,9 +6,8 @@
 
 import { Notices } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({

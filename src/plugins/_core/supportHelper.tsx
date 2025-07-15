@@ -21,7 +21,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
+import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { toggleEnabled } from "@equicordplugins/equicordHelper/utils";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUCORD_HELPERS, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_IDS, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -89,7 +89,7 @@ function getMacOSName(release: string) {
 }
 
 function platformName() {
-    if (typeof DiscordNative === "undefined") return window.navigator.platform;
+    if (typeof DiscordNative === "undefined") return navigator.platform;
     if (DiscordNative.process.platform === "win32") return `${getWindowsName(DiscordNative.os.release)}`;
     if (DiscordNative.process.platform === "darwin") return `${getMacOSName(DiscordNative.os.release)} (${DiscordNative.process.arch === "arm64" ? "Apple Silicon" : "Intel Silicon"})`;
     if (DiscordNative.process.platform === "linux") return `Linux (${DiscordNative.os.release})`;

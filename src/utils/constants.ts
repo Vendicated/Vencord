@@ -45,6 +45,11 @@ export const SUPPORT_CHANNEL_IDS = [SUPPORT_CHANNEL_ID, VC_SUPPORT_CHANNEL_ID];
 export const DONOR_ROLE_IDS = [DONOR_ROLE_ID, VC_DONOR_ROLE_ID];
 export const CONTRIB_ROLE_IDS = [CONTRIB_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, VENCORD_CONTRIB_ROLE_ID, VC_CONTRIB_ROLE_ID];
 
+const platform = navigator.platform.toLowerCase();
+export const IS_WINDOWS = platform.startsWith("win");
+export const IS_MAC = platform.startsWith("mac");
+export const IS_LINUX = platform.startsWith("linux");
+
 export interface Dev {
     name: string;
     id: bigint;
