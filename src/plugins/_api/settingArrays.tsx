@@ -7,8 +7,8 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel, Guild, User } from "@vencord/discord-types";
 import { Menu, React } from "@webpack/common";
-import { Channel, Guild, User } from "discord-types/general";
 
 type ContextMenuType = Channel | User | Guild;
 
