@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export * from "./Badge";
 export * from "./CheckedTextInput";
 export * from "./CodeBlock";
-export * from "./DonateButton";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export * from "./ErrorCard";
 export * from "./Flex";
+export * from "./Grid";
 export * from "./Heart";
 export * from "./Icons";
 export * from "./Link";
-export * from "./Switch";
+export * from "./settings";
+

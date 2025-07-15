@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
@@ -64,7 +64,7 @@ export default definePlugin({
                 result = event.shiftKey;
                 break;
             case "ctrl+enter":
-                result = navigator.platform.includes("Mac") ? event.metaKey : event.ctrlKey;
+                result = IS_MAC ? event.metaKey : event.ctrlKey;
                 break;
             case "enter":
                 result = !event.shiftKey && !event.ctrlKey;
