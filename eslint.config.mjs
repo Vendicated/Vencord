@@ -134,7 +134,7 @@ export default tseslint.config(
             "no-unsafe-optional-chaining": "error",
             "no-useless-backreference": "error",
             "use-isnan": "error",
-            "prefer-const": "error",
+            "prefer-const": ["error", { destructuring: "all" }],
             "prefer-spread": "error",
 
             // Plugin Rules

@@ -45,7 +45,7 @@ const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
+const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
 
@@ -62,7 +62,7 @@ function showErrorToast(message: string) {
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
-        <Card className={cl("info-card", { "restart-card": required })}>
+        <Card className={classes(cl("info-card"), required && "vc-warning-card")}>
             {required ? (
                 <>
                     <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
@@ -177,10 +177,10 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
 
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+    const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
-        vencordDesktop: "Vesktop app",
+        vesktop: "Vesktop app",
         web: "Vesktop app and the Web version of Discord",
         dev: "Developer version of Vencord"
     };
@@ -349,7 +349,7 @@ export default function PluginSettings() {
                         select={onStatusChange}
                         isSelected={v => v === searchValue.status}
                         closeOnSelect={true}
-                        className={InputStyles.inputDefault}
+                        className={InputStyles.input}
                     />
                 </div>
             </div>

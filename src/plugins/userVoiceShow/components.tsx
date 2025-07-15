@@ -7,9 +7,9 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
+import { Channel } from "@vencord/discord-types";
 import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
-import { Channel } from "discord-types/general";
 
 const cl = classNameFactory("vc-uvs-");
 
@@ -128,7 +128,7 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     );
 }
 
-interface VoiceChannelIndicatorProps {
+export interface VoiceChannelIndicatorProps {
     userId: string;
     isActionButton?: boolean;
     shouldHighlight?: boolean;

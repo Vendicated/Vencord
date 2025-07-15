@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
             replacement: {
-                match: /(?<=:null),(.{0,40}togglePopout:.+?}\)),(.+?)\]}\):null,(?<=\((\i\.\i),{label:.+?:null,(\i&&!\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,
+                match: /(?<=:null),(.{0,40}togglePopout:.+?}\)),(.+?)\]}\):null,(?<=\((\i\.\i),{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,
                 replace: (_, ReactButton, PotionButton, ButtonComponent, showReactButton, message) => "" +
                     `]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${ButtonComponent},${message}),${showReactButton}?${ReactButton}:null,${showReactButton}&&${PotionButton},`
             }
