@@ -43,7 +43,7 @@ export default definePlugin({
         // Changes text md rule regex, so it stops right before hsl( | rgb(
         // Without it discord will try to pass a string without those to color rule
         {
-            find: ".defaultRules.text,match:",
+            find: ".defaultRules.text)",
             group: true,
             replacement: {
                 // $)/)
@@ -83,7 +83,6 @@ export default definePlugin({
     getColor(order: number) {
         const source = regex.map(r => r.reg.source).join("|");
         const matchAllRegExp = new RegExp(`^(${source})`, "i");
-
         return {
             order,
             // Don't even try to match if the message chunk doesn't start with...
