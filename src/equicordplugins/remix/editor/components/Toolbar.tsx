@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Switch } from "@components/Switch";
+import { Switch } from "@components/settings";
 import { Button, Forms, Select, Slider, useEffect, useState } from "@webpack/common";
 
 import { BrushTool } from "../tools/brush";

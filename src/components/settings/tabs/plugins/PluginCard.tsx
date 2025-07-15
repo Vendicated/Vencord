@@ -5,17 +5,21 @@
  */
 
 import { showNotice } from "@api/Notices";
+import { classNameFactory } from "@api/Styles";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { proxyLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { React, showToast, Toasts } from "@webpack/common";
 import { Settings } from "Vencord";
 
-import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
+
+const logger = new Logger("PluginCard");
+const cl = classNameFactory("vc-plugins-");
 
 // Avoid circular dependency
 const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } = proxyLazy(() => require("plugins") as typeof import("plugins"));

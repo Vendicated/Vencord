@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DonateButton, VCDonateButton } from "@components/DonateButton";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
-import { ErrorBoundary } from "@components/index";
+import { DonateButton, ErrorBoundary, VCDonateButton } from "@components/index";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { Forms } from "@webpack/common";

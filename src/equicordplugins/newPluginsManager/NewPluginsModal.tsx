@@ -6,7 +6,7 @@
 
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { PluginCard } from "@components/PluginSettings";
+import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { ChangeList } from "@utils/ChangeList";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Button, Flex, Forms, Parser, React, Text, Tooltip, useMemo } from "@webpack/common";

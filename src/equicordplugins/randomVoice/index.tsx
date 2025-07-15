@@ -7,10 +7,9 @@
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { findByCode, findByProps, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
 

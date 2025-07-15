@@ -18,7 +18,7 @@
 
 import "./IconsTab.css";
 
-import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
+import { SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import * as t from "@vencord/discord-types";

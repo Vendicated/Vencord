@@ -21,7 +21,7 @@ import "./fixDiscordBadgePadding.css";
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { openContributorModal } from "@components/settings/tabs";
-import { isEquicordDonor } from "@components/VencordSettings/VencordTab";
+import { isEquicordDonor } from "@components/settings/tabs/vencord";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { shouldShowContributorBadge, shouldShowEquicordContributorBadge } from "@utils/misc";

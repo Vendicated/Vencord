@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { makeDummyUser } from "@components/PluginSettings/PluginModal";
+import { makeDummyUser } from "@components/settings/tabs/plugins/PluginModal";
 import { MessageType } from "@equicordplugins/holyNotes";
 import { copyToClipboard } from "@utils/clipboard";
 import { classes } from "@utils/misc";

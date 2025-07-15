@@ -1,44 +1,37 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import "./VencordTab.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
-import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
+import { classNameFactory } from "@api/Styles";
+import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
+import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
+import { DonateButton, InviteButton } from "@components/settings/DonateButton";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
-import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
-import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { IS_MAC, IS_WINDOWS } from "@utils/constants";
+import { DONOR_ROLE_ID, GUILD_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { isPluginDev } from "@utils/misc";
+import { identity, isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Forms, React, Switch, useMemo, UserStore } from "@webpack/common";
+import { Button, Flex, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
+import BadgeAPI from "plugins/_api/badges";
 
-import { DonateButtonComponent, isDonor } from "./DonateButton";
-import { VibrancySettings } from "./MacVibrancySettings";
-import { NotificationSection } from "./NotificationSettings";
+import { openNotificationSettingsModal } from "./NotificationSettings";
+
+const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
-const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
+const SHIGGY_DONATE_IMAGE = "https://i.imgur.com/57ATLZu.png";
+
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
 const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
+
 const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
 const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
 
@@ -46,105 +39,114 @@ type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
 }[keyof Object];
 
-function Switches() {
-    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+function EquicordSettings() {
+    const settings = useSettings();
 
-    const Switches = [
-        {
-            key: "useQuickCss",
-            title: "Enable Custom CSS",
-            note: "Loads your Custom CSS"
-        },
-        !IS_WEB && {
-            key: "enableReactDevtools",
-            title: "Enable React Developer Tools",
-            note: "Requires a full restart"
-        },
-        !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
-            key: "frameless",
-            title: "Disable the window frame",
-            note: "Requires a full restart"
-        } : {
-            key: "winNativeTitleBar",
-            title: "Use Windows' native title bar instead of Discord's custom one",
-            note: "Requires a full restart"
-        }),
-        !IS_WEB && {
-            key: "transparent",
-            title: "Enable window transparency.",
-            note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
-        },
-        !IS_WEB && IS_WINDOWS && {
-            key: "winCtrlQ",
-            title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
-            note: "Requires a full restart"
-        },
-        IS_DISCORD_DESKTOP && {
-            key: "disableMinSize",
-            title: "Disable minimum window size",
-            note: "Requires a full restart"
-        },
-    ] satisfies Array<false | {
-        key: KeysOfType<typeof settings, boolean>;
-        title: string;
-        note: string;
-    }>;
-
-    return Switches.map(s => s && (
-        <Switch
-            key={s.key}
-            value={settings[s.key]}
-            onChange={v => settings[s.key] = v}
-            note={s.note}
-        >
-            {s.title}
-        </Switch>
-    ));
-}
-
-function VencordSettings() {
-    const donateImage = useMemo(() =>
-        Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE,
-        []
+    const donateImage = React.useMemo(
+        () => (Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE),
+        [],
     );
 
-    const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
+    const isWindows = navigator.platform.toLowerCase().startsWith("win");
+    const isMac = navigator.platform.toLowerCase().startsWith("mac");
+    const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
 
     const user = UserStore.getCurrentUser();
 
-    return (
-        <SettingsTab title="Vencord Settings">
-            {isDonor(user?.id)
-                ? (
-                    <SpecialCard
-                        title="Donations"
-                        subtitle="Thank you for donating!"
-                        description="You can manage your perks at any time by messaging @vending.machine."
-                        cardImage={VENNIE_DONATOR_IMAGE}
-                        backgroundImage={DONOR_BACKGROUND_IMAGE}
-                        backgroundColor="#ED87A9"
-                    >
-                        <DonateButtonComponent />
-                    </SpecialCard>
-                )
-                : (
-                    <SpecialCard
-                        title="Support the Project"
-                        description="Please consider supporting the development of Vencord by donating!"
-                        cardImage={donateImage}
-                        backgroundImage={DONOR_BACKGROUND_IMAGE}
-                        backgroundColor="#c3a3ce"
-                    >
-                        <DonateButtonComponent />
-                    </SpecialCard>
-                )
-            }
+    const Switches: Array<false | {
+        key: KeysOfType<typeof settings, boolean>;
+        title: string;
+        note: string;
+        warning: { enabled: boolean; message?: string; };
+    }
+    > = [
+            {
+                key: "useQuickCss",
+                title: "Enable Custom CSS",
+                note: "Loads your Custom CSS",
+                warning: { enabled: false },
+            },
+            !IS_WEB && {
+                key: "enableReactDevtools",
+                title: "Enable React Developer Tools",
+                note: "Requires a full restart",
+                warning: { enabled: false },
+            },
+            !IS_WEB &&
+            (!IS_DISCORD_DESKTOP || !isWindows
+                ? {
+                    key: "frameless",
+                    title: "Disable the Window Frame",
+                    note: "Requires a full restart",
+                    warning: { enabled: false },
+                }
+                : {
+                    key: "winNativeTitleBar",
+                    title:
+                        "Use Windows' native title bar instead of Discord's custom one",
+                    note: "Requires a full restart",
+                    warning: { enabled: false },
+                }),
+            !IS_WEB && {
+                key: "transparent",
+                title: "Enable Window Transparency",
+                note: "You need a theme that supports transparency or this will do nothing. Requires a full restart!",
+                warning: {
+                    enabled: isWindows,
+                    message: "Enabling this will prevent you from snapping this window.",
+                },
+            },
+            !IS_WEB &&
+            isWindows && {
+                key: "winCtrlQ",
+                title:
+                    "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+                note: "Requires a full restart",
+                warning: { enabled: false },
+            },
+            IS_DISCORD_DESKTOP && {
+                key: "disableMinSize",
+                title: "Disable Minimum Window Size",
+                note: "Requires a full restart",
+                warning: { enabled: false },
+            },
+        ];
 
-            {isPluginDev(user?.id) && (
+    return (
+        <SettingsTab title="Equicord Settings">
+            {(isEquicordDonor(user?.id) || isVencordDonor(user?.id)) ? (
+                <SpecialCard
+                    title="Donations"
+                    subtitle="Thank you for donating!"
+                    description={
+                        isEquicordDonor(user?.id) && isVencordDonor(user?.id)
+                            ? "All Vencord users can see your Vencord donor badge, and Equicord users can see your Equicord donor badge. To change your Vencord donor badge, contact @vending.machine. For your Equicord donor badge, make a ticket in Equicord's server."
+                            : isVencordDonor(user?.id)
+                                ? "All Vencord users can see your badge! You can manage your perks by messaging @vending.machine."
+                                : "All Equicord users can see your badge! You can manage your perks by making a ticket in Equicord's server."
+                    }
+                    cardImage={VENNIE_DONATOR_IMAGE}
+                    backgroundImage={DONOR_BACKGROUND_IMAGE}
+                    backgroundColor="#ED87A9"
+                >
+                    <DonateButtonComponent />
+                </SpecialCard>
+            ) : (
+                <SpecialCard
+                    title="Support the Project"
+                    description="Please consider supporting the development of Equicord by donating!"
+                    cardImage={donateImage}
+                    backgroundImage={DONOR_BACKGROUND_IMAGE}
+                    backgroundColor="#c3a3ce"
+                >
+                    <DonateButtonComponent />
+                </SpecialCard>
+            )}
+            {isPluginDev(user?.id) || isEquicordPluginDev(user?.id) && (
                 <SpecialCard
                     title="Contributions"
                     subtitle="Thank you for contributing!"
-                    description="Since you've contributed to Vencord you now have a cool new badge!"
+                    description="Since you've contributed to Equicord you now have a cool new badge!"
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
@@ -152,7 +154,6 @@ function VencordSettings() {
                     buttonOnClick={() => openContributorModal(user)}
                 />
             )}
-
             <Forms.FormSection title="Quick Actions">
                 <QuickActionCard>
                     <QuickAction
@@ -166,23 +167,27 @@ function VencordSettings() {
                         action={() => VencordNative.quickCss.openEditor()}
                     />
                     {!IS_WEB && (
-                        <>
-                            <QuickAction
-                                Icon={RestartIcon}
-                                text="Relaunch Discord"
-                                action={relaunch}
-                            />
-                            <QuickAction
-                                Icon={FolderIcon}
-                                text="Open Settings Folder"
-                                action={() => VencordNative.settings.openFolder()}
-                            />
-                        </>
+                        <QuickAction
+                            Icon={RestartIcon}
+                            text="Relaunch Discord"
+                            action={relaunch}
+                        />
+                    )}
+                    {!IS_WEB && (
+                        <QuickAction
+                            Icon={FolderIcon}
+                            text="Open Settings Folder"
+                            action={() => VencordNative.settings.openFolder()}
+                        />
                     )}
                     <QuickAction
                         Icon={GithubIcon}
                         text="View Source Code"
-                        action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
+                        action={() =>
+                            VencordNative.native.openExternal(
+                                "https://github.com/" + gitRemote,
+                            )
+                        }
                     />
                 </QuickActionCard>
             </Forms.FormSection>
@@ -190,22 +195,158 @@ function VencordSettings() {
             <Forms.FormDivider />
 
             <Forms.FormSection className={Margins.top16} title="Settings" tag="h5">
-                <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
+                <Forms.FormText
+                    className={Margins.bottom20}
+                    style={{ color: "var(--text-muted)" }}
+                >
                     Hint: You can change the position of this settings section in the{" "}
-                    <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
+                    <Button
+                        look={Button.Looks.BLANK}
+                        style={{ color: "var(--text-link)", display: "inline-block" }}
+                        onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}
+                    >
                         settings of the Settings plugin
-                    </a>!
+                    </Button>
+                    !
                 </Forms.FormText>
 
-                <Switches />
+                {Switches.map(
+                    s =>
+                        s && (
+                            <Switch
+                                key={s.key}
+                                value={settings[s.key]}
+                                onChange={v => (settings[s.key] = v)}
+                                note={
+                                    s.warning.enabled ? (
+                                        <>
+                                            {s.note}
+                                            <div className="form-switch-warning">
+                                                {s.warning.message}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        s.note
+                                    )
+                                }
+                            >
+                                {s.title}
+                            </Switch>
+                        ),
+                )}
             </Forms.FormSection>
 
+            {needsVibrancySettings && (
+                <>
+                    <Forms.FormTitle tag="h5">
+                        Window vibrancy style (requires restart)
+                    </Forms.FormTitle>
+                    <Select
+                        className={Margins.bottom20}
+                        placeholder="Window vibrancy style"
+                        options={[
+                            // Sorted from most opaque to most transparent
+                            {
+                                label: "No vibrancy",
+                                value: undefined,
+                            },
+                            {
+                                label: "Under Page (window tinting)",
+                                value: "under-page",
+                            },
+                            {
+                                label: "Content",
+                                value: "content",
+                            },
+                            {
+                                label: "Window",
+                                value: "window",
+                            },
+                            {
+                                label: "Selection",
+                                value: "selection",
+                            },
+                            {
+                                label: "Titlebar",
+                                value: "titlebar",
+                            },
+                            {
+                                label: "Header",
+                                value: "header",
+                            },
+                            {
+                                label: "Sidebar",
+                                value: "sidebar",
+                            },
+                            {
+                                label: "Tooltip",
+                                value: "tooltip",
+                            },
+                            {
+                                label: "Menu",
+                                value: "menu",
+                            },
+                            {
+                                label: "Popover",
+                                value: "popover",
+                            },
+                            {
+                                label: "Fullscreen UI (transparent but slightly muted)",
+                                value: "fullscreen-ui",
+                            },
+                            {
+                                label: "HUD (Most transparent)",
+                                value: "hud",
+                            },
+                        ]}
+                        select={v => (settings.macosVibrancyStyle = v)}
+                        isSelected={v => settings.macosVibrancyStyle === v}
+                        serialize={identity}
+                    />
+                </>
+            )}
 
-            {needsVibrancySettings && <VibrancySettings />}
-
-            <NotificationSection />
+            <Forms.FormSection
+                className={Margins.top16}
+                title="Equicord Notifications"
+                tag="h5"
+            >
+                <Flex>
+                    <Button onClick={openNotificationSettingsModal}>
+                        Notification Settings
+                    </Button>
+                    <Button onClick={openNotificationLogModal} style={{ marginLeft: 16 }}>
+                        View Notification Log
+                    </Button>
+                </Flex>
+            </Forms.FormSection>
         </SettingsTab>
     );
 }
 
-export default wrapTab(VencordSettings, "Vencord Settings");
+function DonateButtonComponent() {
+    return (
+        <Flex>
+            <DonateButton
+                look={Button.Looks.FILLED}
+                color={Button.Colors.TRANSPARENT}
+                style={{ marginTop: "1em" }} />
+            <InviteButton
+                look={Button.Looks.FILLED}
+                color={Button.Colors.TRANSPARENT}
+                style={{ marginTop: "1em" }} />
+        </Flex>
+    );
+}
+
+function isVencordDonor(userId: string): boolean {
+    const donorBadges = BadgeAPI.getDonorBadges(userId);
+    return GuildMemberStore.getMember(VC_GUILD_ID, userId)?.roles.includes(VC_DONOR_ROLE_ID) || !!donorBadges;
+}
+
+export function isEquicordDonor(userId: string): boolean {
+    const donorBadges = BadgeAPI.getEquicordDonorBadges(userId);
+    return GuildMemberStore.getMember(GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
+}
+
+export default wrapTab(EquicordSettings, "Equicord Settings");

@@ -17,10 +17,9 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components/SettingSliderComponent";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { Message, ReactionEmoji } from "@vencord/discord-types";
 import { RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 

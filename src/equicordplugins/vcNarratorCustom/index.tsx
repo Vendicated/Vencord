@@ -214,21 +214,19 @@ function getTypeAndChannelId(
     return ["", ""];
 }
 
-function playSample(tempSettings: any, type: string) {
-    const s = Object.assign({}, settings.plain, tempSettings);
+function playSample(type: string) {
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId()!;
 
     speak(
         formatText(
-            s[type + "Message"],
+            settings.store[type + "Message"],
             currentUser.username,
             "general",
             (currentUser as any).globalName ?? currentUser.username,
             GuildMemberStore.getNick(myGuildId, currentUser.id) ??
             currentUser.username
         ),
-        s
     );
 }
 
@@ -371,7 +369,7 @@ export default definePlugin({
         },
     },
 
-    settingsAboutComponent({ tempSettings: s }) {
+    settingsAboutComponent() {
         const types = useMemo(
             () =>
                 Object.keys(settings.def)
@@ -419,7 +417,7 @@ export default definePlugin({
                     className={"vc-narrator-buttons"}
                 >
                     {types.map(t => (
-                        <Button key={t} onClick={() => playSample(s, t)}>
+                        <Button key={t} onClick={() => playSample(t)}>
                             {wordsToTitle([t])}
                         </Button>
                     ))}

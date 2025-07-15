@@ -13,9 +13,8 @@ import {
     definePluginSettings,
     Settings,
 } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs, EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 
 const presendObject: MessageSendListener = (channelId, msg) => {
     msg.content = textProcessing(msg.content);

@@ -17,11 +17,8 @@
 */
 
 import { Settings } from "@api/Settings";
-import { BackupAndRestoreTab, CloudTab, PluginsTab } from "@components/settings";
+import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, UpdaterTab, VencordTab } from "@components/settings";
 import ThemesTab from "@components/ThemeSettings/ThemesTab";
-import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
-import UpdaterTab from "@components/VencordSettings/UpdaterTab";
-import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";

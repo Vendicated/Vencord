@@ -10,7 +10,7 @@ import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { OpenExternalIcon } from "@components/Icons";
-import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
+import { SettingsTab, wrapTab } from "@components/settings";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";

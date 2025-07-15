@@ -201,7 +201,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
                     {renderSettings()}
                 </Forms.FormSection>
-            </ModalContent>;
+            </ModalContent>
             {
                 hasSettings && <ModalFooter>
                     <Flex flexDirection="column" style={{ width: "100%" }}>
