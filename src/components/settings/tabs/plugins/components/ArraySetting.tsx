@@ -336,7 +336,6 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
         };
 
         return createSelect(renderUserIcon, Object.values(UserStore.getUsers()).map(user => ({
-            // @ts-ignore outdated lib
             label: user.globalName || user.username,
             value: user.id,
         })));
