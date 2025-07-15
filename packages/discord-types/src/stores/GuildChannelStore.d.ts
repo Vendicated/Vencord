@@ -27,6 +27,21 @@ export interface GuildChannels {
     count: number;
 }
 
+interface ChannelNameDisambiguation {
+    /**
+     * channel id
+     */
+    [key: string]: {
+        name: string;
+        /**
+         * channel id
+         */
+        id: string;
+    };
+}
+
+type ComparableChannelPredicate = (channel: ComparableChannel) => boolean;
+
 export class GuildChannelStore extends FluxStore {
     getAllGuilds(): Record<GuildId, GuildChannels>;
     /**
@@ -50,5 +65,44 @@ export class GuildChannelStore extends FluxStore {
      *
      * @see {@link #getChannels}
      */
-    getFirstChannelOfType(guildId: GuildId, predicate: (channel: ComparableChannel) => boolean, channelType: keyof Omit<GuildChannels, "id" | "count">): Channel | null;
+    getFirstChannelOfType(guildId: GuildId, predicate: ComparableChannelPredicate, channelType: keyof Omit<GuildChannels, "id" | "count">): Channel | null;
+    /**
+     * First searches {@link GuildChannels.SELECTABLE|Selectable} channels, then {@link GuildChannels.VOCAL|Voice} channels if (no selectable channels were found and {@link searchVoiceChannels} is true)
+     *
+     * @param searchVoiceChannels defaults to false
+     */
+    getFirstChannel(guildId: GuildId, predicate: ComparableChannelPredicate, searchVoiceChannels?: boolean): Channel | null;
+    /**
+     * Gets the first channel that has the given permission
+     *
+     * @param searchVoiceChannels defaults to false
+     * @param permission defaults to VIEW_CHANNEL
+     *
+     * @see {@link getFirstChannel}
+     */
+    getDefaultChannel(guildId: GuildId, searchVoiceChannels?: boolean, permission?: bigint): Channel | null;
+    /**
+     * the same as {@link getDefaultChannel} but only returns SFW channels
+     *
+     * @see {@link getDefaultChannel}
+     */
+    getSFWDefaultChannel(guildId: GuildId, searchVoiceChannels?: boolean, permission?: bigint): Channel | null;
+    getSelectableChannelIds(guildId: GuildId): string[];
+    getSelectableChannels(guildId: GuildId): ComparableChannel[];
+    getVocalChannelIds(guildId: GuildId): string[];
+    getDirectoryChannelIds(guildId: GuildId): string[];
+    /**
+     * the same as the below code
+     * ```ts
+     * getSelectableChannels(guildId).includes(channelId)
+     * ```
+     */
+    hasSelectableChannel(guildId: GuildId, channelId: string): boolean;
+    hasElevatedPermissions(guildId: GuildId): boolean;
+    hasChannels(guildId: GuildId): boolean;
+    hasCategories(guildId: GuildId): boolean;
+    /**
+     * returns `{}` if no guild is found
+     */
+    getTextChannelNameDisambiguation(guildId: GuildId): ChannelNameDisambiguation;
 }
