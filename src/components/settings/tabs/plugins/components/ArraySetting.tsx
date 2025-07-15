@@ -29,7 +29,7 @@ import {
     useState,
 } from "@webpack/common";
 
-import { SettingProps, SettingsSection } from "./Common";
+import { SettingProps } from "./Common";
 
 
 const cl = classNameFactory("vc-plugin-modal-");
