@@ -11,6 +11,7 @@ import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionArray } from "@utils/types";
+import { Channel, Guild,SelectOption } from "@vencord/discord-types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Avatar,
@@ -27,8 +28,6 @@ import {
     UserStore,
     useState,
 } from "@webpack/common";
-import { SelectOption } from "@webpack/types";
-import { Channel, Guild } from "discord-types/general";
 
 import { ISettingElementProps } from ".";
 
