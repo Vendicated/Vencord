@@ -244,8 +244,10 @@ export type TextInput = ComponentType<PropsWithChildren<{
     Sizes: Record<"DEFAULT" | "MINI", string>;
 };
 
+// FIXME: this is wrong, it's not actually just HTMLTextAreaElement
 export type TextArea = ComponentType<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
     onChange(v: string): void;
+    inputRef?: Ref<HTMLTextAreaElement>;
 }>;
 
 interface SelectOption {
