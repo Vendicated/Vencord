@@ -29,7 +29,8 @@ import {
     useState,
 } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import { SettingProps, SettingsSection } from "./Common";
+
 
 const cl = classNameFactory("vc-plugin-modal-");
 
@@ -38,14 +39,13 @@ const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarUR
 
 const isDevModeEnabled = () => getUserSettingLazy("appearance", "developerMode")?.getSetting() === true;
 
-export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayComponent({
+export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
     option,
     pluginSettings,
     definedSettings,
     onChange,
-    onError,
     id
-}: ISettingElementProps<PluginOptionArray>) {
+}: SettingProps<PluginOptionArray>) {
     const [error, setError] = useState<string | null>(null);
     const [items, setItems] = useState<string[]>(ensureSettingsMigrated() || []);
     const [text, setText] = useState<string>("");
@@ -119,10 +119,6 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         pluginSettings[id] = items;
         onChange(items);
     }, [items]);
-
-    useEffect(() => {
-        onError(error !== null);
-    }, [error]);
 
     const guildIcon = (guild: Guild) => {
         const icon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
@@ -351,6 +347,8 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         })));
     }
 
+    // not using the SettingsSection component here because it uses bottom20 margins and that looks shit with the input
+    // boxes/searchable selects, the gaps are just too long for whatever reason?
     return (
         <Forms.FormSection>
              <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>

@@ -19,6 +19,7 @@
 import { OptionType } from "@utils/types";
 import { ComponentType } from "react";
 
+import { ArraySetting } from "./ArraySetting";
 import { BooleanSetting } from "./BooleanSetting";
 import { ComponentSettingProps, SettingProps } from "./Common";
 import { ComponentSetting } from "./ComponentSetting";
@@ -36,4 +37,8 @@ export const OptionComponentMap: Record<OptionType, ComponentType<SettingProps<a
     [OptionType.SLIDER]: SliderSetting,
     [OptionType.COMPONENT]: ComponentSetting,
     [OptionType.CUSTOM]: () => null,
+    [OptionType.ARRAY]: ArraySetting,
+    [OptionType.USERS]: ArraySetting,
+    [OptionType.CHANNELS]: ArraySetting,
+    [OptionType.GUILDS]: ArraySetting,
 };
