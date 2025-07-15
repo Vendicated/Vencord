@@ -5,11 +5,11 @@
  */
 
 import { ModalProps } from "@utils/modal";
-import { GuildStore, React } from "@webpack/common";
-import { Guild } from "discord-types/general";
+import { GuildRoleStore, React } from "@webpack/common";
 
 import { toggleRole } from "../storeHelper";
 import { RoleModalList } from "./RolesView";
+import { Guild } from "@vencord/discord-types";
 
 export function RoleModal({ modalProps, guild, colorsStore }: { modalProps: ModalProps, guild: Guild, colorsStore: Record<string, string[]> }) {
     const [ids, setIds] = React.useState(colorsStore[guild.id]);
