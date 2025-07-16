@@ -60,7 +60,7 @@ export default definePlugin({
             find: "#{intl::USER_PROFILE_LOAD_ERROR}",
             replacement: {
                 match: /(\.fetchError.+?\?)null/,
-                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId})`
+                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId,isProfile:true})`
             },
             predicate: () => settings.store.showInUserProfileModal
         },
