@@ -53,9 +53,9 @@ export function NumberSetting({ option, pluginSettings, definedSettings, id, onC
             <TextInput
                 type="number"
                 pattern="-?[0-9]+"
+                placeholder={option.placeholder ?? "Enter a number"}
                 value={state}
                 onChange={handleChange}
-                placeholder={option.placeholder ?? "Enter a number"}
                 disabled={option.disabled?.call(definedSettings) ?? false}
                 {...option.componentProps}
             />

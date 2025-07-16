@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { wordsFromCamel, wordsToTitle } from "@utils/text";
+import { Switch } from "@components/settings/Switch";
 import { PluginOptionBoolean } from "@utils/types";
-import { Forms, React, Switch, useState } from "@webpack/common";
+import { React, useState } from "@webpack/common";
 
-import { resolveError, SettingProps } from "./Common";
+import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function BooleanSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionBoolean>) {
     const def = pluginSettings[id] ?? option.default;
@@ -40,20 +40,9 @@ export function BooleanSetting({ option, pluginSettings, definedSettings, id, on
     }
 
     return (
-        <Forms.FormSection>
-            <Switch
-                value={state}
-                onChange={handleChange}
-                note={option.description}
-                disabled={option.disabled?.call(definedSettings) ?? false}
-                {...option.componentProps}
-                hideBorder
-                style={{ marginBottom: "0.5em" }}
-            >
-                {wordsToTitle(wordsFromCamel(id))}
-            </Switch>
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
-        </Forms.FormSection>
+        <SettingsSection name={id} description={option.description} error={error} inlineSetting>
+            <Switch checked={state} onChange={handleChange} />
+        </SettingsSection>
     );
 }
 
