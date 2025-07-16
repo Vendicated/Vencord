@@ -176,7 +176,7 @@ function PluginSettings() {
         return (
             plugin.name.toLowerCase().includes(search) ||
             plugin.description.toLowerCase().includes(search) ||
-            plugin.aliases?.some(t => t.toLowerCase().includes(search))
+            plugin.keywords?.some(t => t.toLowerCase().includes(search))
         );
     };
 

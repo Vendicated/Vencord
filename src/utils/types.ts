@@ -119,7 +119,7 @@ export interface Plugin extends PluginDef {
 export interface PluginDef {
     name: string;
     description: string;
-    aliases?: string[];
+    keywords?: string[];
     tags?: PluginTag[];
     authors: PluginAuthor[];
     start?(): void;
