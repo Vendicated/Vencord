@@ -27,12 +27,20 @@ const settings = definePluginSettings({
                 value: "web",
             },
             {
-                label: "Mobile",
-                value: "mobile",
+                label: "Android",
+                value: "android"
             },
             {
-                label: "Embedded (Console)",
-                value: "embedded",
+                label: "iOS",
+                value: "ios"
+            },
+            {
+                label: "Xbox",
+                value: "xbox",
+            },
+            {
+                label: "Playstation",
+                value: "playstation",
             },
         ]
     }
@@ -55,19 +63,31 @@ export default definePlugin({
                 match: /(\[IDENTIFY\].*let.{0,5}=\{.*properties:)(.*),presence/,
                 replace: "$1{...$2,...$self.getPlatform()},presence"
             }
+        },
+        {
+            find: "voiceChannelEffect]:",
+            replacement: {
+                match: /(?<=participantType:\i,platform:)(\i)(?=,className:\i\(\))/,
+                replace: "$self.getPlatform().vcIcon||$1"
+            }
         }
     ],
-    getPlatform: () => {
-        switch (settings.store.platform ?? "desktop") {
-            case "desktop":
-                return { browser: "Discord Client" };
-            case "web":
-                return { browser: "Chrome" };
-            case "mobile":
-                return { browser: "Discord iOS" };
-            case "embedded":
-                return { browser: "Discord Embedded" };
-        }
+    getPlatform() {
+        const platform = settings.store.platform ?? "desktop";
 
+        switch (platform) {
+            case "desktop":
+                return { browser: "Discord Client", vcIcon: 0 };
+            case "web":
+                return { browser: "Discord Web", vcIcon: 0 };
+            case "ios":
+                return { browser: "Discord iOS", vcIcon: 1 };
+            case "android":
+                return { browser: "Discord Android", vcIcon: 1 };
+            case "xbox":
+                return { browser: "Discord Embedded", vcIcon: 2 };
+            case "playstation":
+                return { browser: "Discord Embedded", vcIcon: 3 };
+        }
     }
 });
