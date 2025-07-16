@@ -52,7 +52,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "contextMenuCallbackNative,!1",
+            find: "contextMenuCallbackNative,!1):window",
             replacement: {
                 match: /(?<=\()"div"(?=,\{className:\i\(\)\(\i\?\i\.mobileApp:\i.app\))/,
                 replace: "$self.MainWrapper",
