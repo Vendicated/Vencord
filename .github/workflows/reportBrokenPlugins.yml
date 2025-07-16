@@ -105,6 +105,7 @@ jobs:
                   git add -A
 
                   if git diff --cached --quiet; then
+                    echo "Nothing to commit"
                     exit 0
                   else
                     git commit -m "Reporter Results"
