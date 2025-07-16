@@ -142,6 +142,7 @@ You can join our [discord server](https://discord.gg/equicord-117327988606502929
 - PlatformSpoofer by Drag
 - PolishWording by Samwich
 - PurgeMessages by bhop & nyx
+- QuestFocused by secp192k1
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
 - RandomVoice by xijexo, omaw, thororen
