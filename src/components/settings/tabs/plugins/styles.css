@@ -74,3 +74,9 @@
 .vc-plugins-info-icon:not(:hover, :focus) {
     color: var(--text-muted);
 }
+
+.vc-plugins-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+}
