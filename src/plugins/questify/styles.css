@@ -7,6 +7,7 @@
     border-left: 3px solid #b7b7ba !important;
     padding: 3px 0 3px 8px !important;
     border-radius: 3px !important;
+    user-select: text !important;
 }
 
 .questify-main-inline-group {
@@ -215,23 +216,6 @@
 
 .questify-quest-button-container {
     position: relative !important;
-}
-
-/* Position tiles based on status. */
-.questify-quest-item-reorder-first {
-    order: -4;
-}
-
-.questify-quest-item-reorder-second {
-    order: -3;
-}
-
-.questify-quest-item-reorder-third {
-    order: -2;
-}
-
-.questify-quest-item-reorder-fourth {
-    order: -1;
 }
 
 /* Background of bottom half of Quest tile. */

@@ -25,24 +25,6 @@ export interface FetchingQuestsSettingProps {
     alert: string | null;
 }
 
-export interface RestyleQuestsSettingProps {
-    unclaimedColor: number | null;
-    claimedColor: number | null;
-    ignoredColor: number | null;
-    expiredColor: number | null;
-    gradient: "intense" | "default" | "black" | "hide";
-    preload: boolean;
-}
-
-export interface QuestButtonSettingProps {
-    display: string;
-    unclaimed: string;
-    leftClickAction: "open-quests" | "context-menu" | "plugin-settings" | "nothing";
-    middleClickAction: "open-quests" | "context-menu" | "plugin-settings" | "nothing";
-    rightClickAction: "open-quests" | "context-menu" | "plugin-settings" | "nothing";
-    badgeColor: number | null;
-}
-
 export interface RadioOption {
     name: string;
     value: string;
@@ -51,16 +33,6 @@ export interface RadioOption {
 export interface SelectOption {
     label: string;
     value: string | number;
-}
-
-export interface DisableQuestsSettingProps {
-    everything: boolean;
-    discoveryTab: boolean;
-    fetchingQuests: boolean;
-    giftInventoryRelocationNotice: boolean;
-    badgeOnUserProfiles: boolean;
-    popupAboveAccountPanel: boolean;
-    friendsListActiveNowPromotion: boolean;
 }
 
 export interface DisableQuestsSettingOption {
@@ -81,6 +53,7 @@ export type QuestMap = Map<string, Quest>;
 export interface Quest {
     id: string;
     config: {
+        startsAt: string;
         expiresAt: string;
         messages: {
             questName: string;

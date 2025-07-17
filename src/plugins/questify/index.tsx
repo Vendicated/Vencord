@@ -14,7 +14,7 @@ import definePlugin, { StartAt } from "@utils/types";
 import { ContextMenuApi, Menu, NavigationRouter } from "@webpack/common";
 import { JSX } from "react";
 
-import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateIgnoredQuests } from "./settings";
+import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
 import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./utils/components";
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
 
@@ -225,7 +225,6 @@ function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; 
 
 export function getQuestTileClasses(originalClasses: string, quest: Quest, color: number | null | undefined, gradient: string | undefined): string {
     const {
-        reorderQuests,
         restyleQuestsUnclaimed,
         restyleQuestsClaimed,
         restyleQuestsIgnored,
@@ -233,7 +232,6 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
         restyleQuestsGradient,
         ignoredQuests
     } = settings.use([
-        "reorderQuests",
         "restyleQuestsUnclaimed",
         "restyleQuestsClaimed",
         "restyleQuestsIgnored",
@@ -242,21 +240,13 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
         "ignoredQuests"
     ]);
 
-    const reorderClasses = [
-        q("quest-item-reorder-first"),
-        q("quest-item-reorder-second"),
-        q("quest-item-reorder-third"),
-        q("quest-item-reorder-fourth")
-    ];
-
     const customClasses = [
         q("quest-item-restyle"),
         q("quest-item-intense-gradient"),
         q("quest-item-default-gradient"),
         q("quest-item-black-gradient"),
         q("quest-item-hide-gradient"),
-        q("quest-item-contrast-logo"),
-        ...reorderClasses
+        q("quest-item-contrast-logo")
     ];
 
     if (originalClasses.includes(q("dummy-quest"))) {
@@ -307,17 +297,95 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
         }
     }
 
-    if (!!reorderQuests) {
-        const orderList = reorderQuests.split(",").map(q => q.trim().toLowerCase());
-        const questStatus = claimedQuest ? "claimed" : questExpired ? "expired" : questIgnored ? "ignored" : "unclaimed";
-        const idx = orderList.indexOf(questStatus);
+    return returnClasses.join(" ");
+}
 
-        if (idx >= 0 && idx < reorderClasses.length) {
-            returnClasses.push(reorderClasses[idx]);
-        }
+function getQuestTileOrder(quests: Quest[]): Quest[] {
+    const {
+        ignoredQuests,
+        reorderQuests,
+        unclaimedSubsort,
+        claimedSubsort,
+        ignoredSubsort,
+        expiredSubsort
+    } = settings.use([
+        "ignoredQuests",
+        "reorderQuests",
+        "unclaimedSubsort",
+        "claimedSubsort",
+        "ignoredSubsort",
+        "expiredSubsort"
+    ]);
+
+    if (!reorderQuests || !reorderQuests.trim()) {
+        return quests;
     }
 
-    return returnClasses.join(" ");
+    const orderList = reorderQuests.split(",").map(q => q.trim().toLowerCase());
+
+    const questGroups: { [key: string]: Quest[]; } = {
+        claimed: [],
+        expired: [],
+        ignored: [],
+        unclaimed: []
+    };
+
+    quests.forEach(quest => {
+        const questName = normalizeQuestName(quest.config.messages.questName);
+        const claimedQuest = !!quest.userStatus?.claimedAt;
+        const questExpired = new Date(quest.config.expiresAt) < new Date();
+        const questIgnored = questIsIgnored(questName);
+
+        if (claimedQuest) {
+            questGroups.claimed.push(quest);
+        } else if (questExpired) {
+            questGroups.expired.push(quest);
+        } else if (questIgnored) {
+            questGroups.ignored.push(quest);
+        } else {
+            questGroups.unclaimed.push(quest);
+        }
+    });
+
+    const createSortFunction = (subsort: string) => {
+        switch (subsort) {
+            case "Recent ASC":
+                return (a: Quest, b: Quest) => new Date(a.config.startsAt).getTime() - new Date(b.config.startsAt).getTime();
+            case "Recent DESC":
+                return (a: Quest, b: Quest) => new Date(b.config.startsAt).getTime() - new Date(a.config.startsAt).getTime();
+            case "Expiring ASC":
+                return (a: Quest, b: Quest) => new Date(a.config.expiresAt).getTime() - new Date(b.config.expiresAt).getTime();
+            case "Expiring DESC":
+                return (a: Quest, b: Quest) => new Date(b.config.expiresAt).getTime() - new Date(a.config.expiresAt).getTime();
+            case "Claimed ASC":
+                return (a: Quest, b: Quest) => new Date(a.userStatus?.claimedAt || 0).getTime() - new Date(b.userStatus?.claimedAt || 0).getTime();
+            case "Claimed DESC":
+                return (a: Quest, b: Quest) => new Date(b.userStatus?.claimedAt || 0).getTime() - new Date(a.userStatus?.claimedAt || 0).getTime();
+            default:
+                return (a: Quest, b: Quest) => new Date(b.config.startsAt).getTime() - new Date(a.config.startsAt).getTime();
+        }
+    };
+
+    questGroups.unclaimed.sort(createSortFunction(unclaimedSubsort || "Recent DESC"));
+    questGroups.claimed.sort(createSortFunction(claimedSubsort || "Claimed DESC"));
+    questGroups.ignored.sort(createSortFunction(ignoredSubsort || "Recent DESC"));
+    questGroups.expired.sort(createSortFunction(expiredSubsort || "Expiring DESC"));
+
+    const sortedQuests: Quest[] = [];
+
+    orderList.forEach(status => {
+        if (questGroups[status]) {
+            sortedQuests.push(...questGroups[status]);
+        }
+    });
+
+    Object.keys(questGroups).forEach(status => {
+        if (!orderList.includes(status)) {
+            sortedQuests.push(...questGroups[status]);
+        }
+    });
+
+    return sortedQuests;
 }
 
 function getQuestTileStyle(quest: Quest): Record<string, string> {
@@ -393,6 +461,7 @@ export default definePlugin({
 
     formatLowerBadge,
     getQuestTileStyle,
+    getQuestTileOrder,
     getQuestTileClasses,
     shouldPreloadQuestAssets,
     shouldHideQuestPopup,
@@ -550,7 +619,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    // Restyles quest tiles with colors and ordering.
+                    // Restyles quest tiles with colors.
                     match: /(concat\((\i)[^}]+},)className:(\i\(\)\([^)]+\)),/,
                     replace: "$1className:$self.getQuestTileClasses($3, $2),style:$self.getQuestTileStyle($2),"
                 },
@@ -567,15 +636,39 @@ export default definePlugin({
             ]
         },
         {
+            // Prevents default pinning of specific quests to the top of the list.
+            find: "QUEST_HOME_DESKTOP},",
+            replacement: {
+                match: /\i.unshift\(\i\):(\i.push\(\i\))/,
+                replace: "$1:$1"
+            }
+        },
+        {
+            // Sorts the "All Quests" tab quest tiles.
+            find: ".ALL);return(",
+            replacement: {
+                match: /(quests:(\i)[^;]+;)/,
+                replace: "$1$2=$self.getQuestTileOrder($2);"
+            }
+        },
+        {
+            // Sorts the "Claimed Quests" tab quest tiles.
+            find: ".ALL)}):(",
+            replacement: {
+                match: /(claimedQuests:(\i)[^;]+;)/,
+                replace: "$1$2=$self.getQuestTileOrder($2);"
+            }
+        },
+        {
             // Whether preloading assets is enabled or not, the placeholders loading
-            // before the assets cause a lot of element shifting, whereas if
+            // before the assets causes a lot of element shifting, whereas if
             // the elements load immediately instead, it doesn't.
             find: "rewardDescriptionContainer,children",
             replacement: {
                 match: /showPlaceholder:!\i/,
                 replace: "showPlaceholder:false"
             }
-        },
+        }
     ],
 
     contextMenus: {
@@ -590,7 +683,7 @@ export default definePlugin({
         QUESTS_FETCH_CURRENT_QUESTS_SUCCESS(data) {
             const source = data.source ? ` [${data.source}]` : "";
             QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_FETCH_CURRENT_QUESTS_SUCCESS]${source}\n`, data);
-            validateIgnoredQuests(undefined, data.quests);
+            validateAndOverwriteIgnoredQuests(undefined, data.quests);
         },
 
         QUESTS_CLAIM_REWARD_SUCCESS(data) {
