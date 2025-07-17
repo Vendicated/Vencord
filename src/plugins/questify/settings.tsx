@@ -912,26 +912,26 @@ function ReorderQuestsSetting(): JSX.Element {
 
     const getSubsortOptions = (source: string): SelectOption[] => {
         const baseOptions = [
-            { label: "Recent (Oldest First)", value: "Recent ASC" },
-            { label: "Recent (Newest First)", value: "Recent DESC" }
+            { label: "Added (Newest)", value: "Recent DESC" },
+            { label: "Added (Oldest)", value: "Recent ASC" }
         ];
 
-        if (["expired", "claimed"].includes(source)) {
+        if (source === "expired") {
             baseOptions.push(
-                { label: "Expiry (Oldest First)", value: "Expiring ASC" },
-                { label: "Expiry (Recent First)", value: "Expiring DESC" }
+                { label: "Expired (Most Recent)", value: "Expiring DESC" },
+                { label: "Expired (Least Recent)", value: "Expiring ASC" }
             );
-        } else {
+        } else if (source !== "claimed") {
             baseOptions.push(
-                { label: "Expiry (Soonest First)", value: "Expiring ASC" },
-                { label: "Expiry (Latest First)", value: "Expiring DESC" }
+                { label: "Expiring (Soonest)", value: "Expiring ASC" },
+                { label: "Expiring (Latest)", value: "Expiring DESC" }
             );
         }
 
         if (source === "claimed") {
             baseOptions.push(
-                { label: "Claimed (Oldest First)", value: "Claimed ASC" },
-                { label: "Claimed (Newest First)", value: "Claimed DESC" }
+                { label: "Claimed (Most Recent)", value: "Claimed DESC" },
+                { label: "Claimed (Least Recent)", value: "Claimed ASC" }
             );
         }
 
@@ -1596,13 +1596,13 @@ export const settings = definePluginSettings({
     unclaimedSubsort: {
         type: OptionType.STRING,
         description: "Subsort method for unclaimed quests.",
-        default: "Recent DESC", // "Recent ASC", "Recent DESC", "Expiring ASC", "Expiring DESC"
+        default: "Expiring ASC", // "Recent ASC", "Recent DESC", "Expiring ASC", "Expiring DESC"
         hidden: true
     },
     claimedSubsort: {
         type: OptionType.STRING,
         description: "Subsort method for claimed quests.",
-        default: "Claimed DESC", // "Recent ASC", "Recent DESC", "Expiring ASC", "Expiring DESC", "Claimed ASC", "Claimed DESC"
+        default: "Claimed DESC", // "Recent ASC", "Recent DESC", "Claimed ASC", "Claimed DESC"
         hidden: true
     },
     ignoredSubsort: {
