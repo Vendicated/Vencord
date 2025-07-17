@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { SettingSliderComponent } from "@components/ThemeSettings/components/SettingSliderComponent";
+import { SliderSetting } from "@components/settings/tabs/plugins/components/SliderSetting";
 import { useAwaiter } from "@utils/react";
 import { makeRange, OptionType } from "@utils/types";
 import { Button, showToast, Text, Toasts, useMemo } from "@webpack/common";
@@ -102,14 +102,13 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => (
             <>
-                <SettingSliderComponent
+                <SliderSetting
                     option={{ ...sliderOptions } as any}
                     onChange={v => {
                         settings.store.LyricDelay = v;
                     }}
                     pluginSettings={Vencord.Settings.plugins.SpotifyLyrics}
                     id={"LyricDelay"}
-                    onError={() => { }}
                 />
                 <Lyrics />
             </>
