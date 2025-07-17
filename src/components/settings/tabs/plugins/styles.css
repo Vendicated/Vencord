@@ -273,3 +273,9 @@
         background-color: var(--card-primary-bg) !important;
     }
 }
+
+.vc-plugins-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+}

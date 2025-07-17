@@ -120,7 +120,11 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             );
         });
 
-        return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
+        return (
+            <div className="vc-plugins-settings">
+                {options}
+            </div>
+        );
     }
 
     function renderMoreUsers(_label: string) {
