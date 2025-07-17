@@ -71,7 +71,7 @@ export default definePlugin({
         },
         // Adds the FPTE Builder to the User Profile settings page
         {
-            find: '"DefaultCustomizationSections"',
+            find: "DefaultCustomizationSections",
             replacement: {
                 match: /\.sectionsContainer,.*?children:\[/,
                 replace: "$&$self.addFPTEBuilder(),"
