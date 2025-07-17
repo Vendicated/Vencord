@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, findOption, Option, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import { CommandArgument, CommandContext, CommandOption } from "@vencord/discord-types";
 
 import { ParamsConfigModal, ParamsPreviewModal } from "./components/ParamsConfigModal";
 
@@ -57,7 +58,7 @@ function removeTag(name: string) {
 }
 
 function generateOptionsFromParamsTag(params: Param[] | null) {
-    const options: Option[] = [];
+    const options: CommandOption[] = [];
     params?.forEach(param => {
         const notDefault = param.default === undefined;
         options.push({
@@ -115,7 +116,7 @@ const settings = definePluginSettings({
     }
 });
 
-const execute = async (args: Argument[], ctx: CommandContext) => {
+const execute = async (args: CommandArgument[], ctx: CommandContext) => {
     switch (args[0].name) {
         case "create": {
             const name: string = findOption(args[0].options, "tag-name", "");
