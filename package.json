@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.12.5",
+    "version": "1.12.6",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -53,8 +53,8 @@
         "@types/react": "^19.0.10",
         "@types/react-dom": "^19.0.4",
         "@types/yazl": "^2.4.5",
+        "@vencord/discord-types": "link:packages/discord-types",
         "diff": "^7.0.0",
-        "discord-types": "^1.3.26",
         "esbuild": "^0.25.1",
         "eslint": "9.20.1",
         "eslint-import-resolver-alias": "^1.1.2",
