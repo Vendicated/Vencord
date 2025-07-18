@@ -148,7 +148,7 @@ function CloudTab() {
                 </Forms.FormText>
                 <CheckedTextInput
                     key="backendUrl"
-                    value={settings.cloud.url}
+                    initialValue={settings.cloud.url}
                     onChange={async v => {
                         settings.cloud.url = v;
                         settings.cloud.authenticated = false;

@@ -196,7 +196,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
         <>
             <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
             <CheckedTextInput
-                value={name}
+                initialValue={name}
                 onChange={v => {
                     data.name = v;
                     setName(v);
