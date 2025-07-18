@@ -315,19 +315,16 @@
 }
 
 /* Quest tile button color. */
-.questify-quest-item-restyle> :nth-child(2) button:only-child,
-.questify-quest-item-restyle> :nth-child(2) button:nth-of-type(1):nth-last-of-type(2),
-.questify-quest-item-restyle> :nth-child(2) button:nth-of-type(2):nth-last-of-type(1) {
-    background-color: var(--questify-button-normal);
+.questify-quest-item-restyle> :nth-child(2)> div> button {
+    background-color: var(--questify-button-normal) !important;
 }
 
-/* Quest tile button hover color. */
-.questify-quest-item-restyle> :nth-child(2) button:not([disabled]):only-child:hover,
-.questify-quest-item-restyle> :nth-child(2) button:not([disabled]):nth-of-type(1):nth-last-of-type(2):hover,
-.questify-quest-item-restyle> :nth-child(2) button:not([disabled]):nth-of-type(2):nth-last-of-type(1):hover {
-    background-color: var(--questify-button-hover);
-    transition: background-color 0.2s ease-in-out;
+.questify-quest-item-restyle> :nth-child(2)> div> button:not([disabled]):hover {
+    background-color: var(--questify-button-hover) !important;
+    transition: background-color 0.2s ease-in-out !important;
 }
+
+/* Quest tile border radius. */
 
 .questify-quest-item-restyle> :nth-child(1)[class^="container"] {
     border-top-left-radius: 8px !important;

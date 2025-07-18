@@ -260,9 +260,9 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
     const questIgnored = questIsIgnored(questName);
     const baseClasses = originalClasses.split(" ").filter(cls => cls && !customClasses.includes(cls));
     const returnClasses: string[] = [...baseClasses];
-    let isRestyledAndDarkish: any = null;
     const hasColorOverride = color !== undefined;
     const skipColorCheck = hasColorOverride && color === null;
+    let isRestyledAndDarkish: any = null;
 
     if (!skipColorCheck) {
         if (claimedQuest && (color || restyleQuestsClaimed !== null)) {
