@@ -58,6 +58,7 @@ Enhance your Quest experience with a suite of features, or disable them entirely
 5. Reorder Quests
     - Sort Quests by their status.
     - Comma-separated list must contain all of: `UNCLAIMED, CLAIMED, IGNORED, EXPIRED`.
+    - Subsort status groups by Quest added date, expiring date, or claimed date.
 6. Ignored Quests
     - A list of Quest names to exclude from the `Unclaimed Indicator`.
     - One Quest name per line. Names must match the spelling displayed on the Quests page.
