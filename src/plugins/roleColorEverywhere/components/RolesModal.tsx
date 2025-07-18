@@ -13,7 +13,7 @@ import { Guild } from "@vencord/discord-types";
 
 export function RoleModal({ modalProps, guild, colorsStore }: { modalProps: ModalProps, guild: Guild, colorsStore: Record<string, string[]> }) {
     const [ids, setIds] = React.useState(colorsStore[guild.id]);
-    const roles = React.useMemo(() => ids.map(id => GuildStore.getRole(guild.id, id)), [ids]);
+    const roles = React.useMemo(() => ids.map(id => GuildRoleStore.getRole(guild.id, id)), [ids]);
 
     return <RoleModalList
         modalProps={modalProps}
