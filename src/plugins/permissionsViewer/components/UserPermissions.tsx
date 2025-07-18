@@ -19,9 +19,9 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
+import type { Guild, GuildMember } from "@vencord/discord-types";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
-import type { Guild, GuildMember } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
 import { cl, getGuildPermissionSpecMap, getSortedRoles, sortUserRoles } from "../utils";
