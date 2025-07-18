@@ -667,8 +667,12 @@ function IgnoredQuestsSetting(): JSX.Element {
                             value={ignoredQuests}
                             onChange={newValue => {
                                 setIgnoredQuests(newValue);
-                                const validated = validateIgnoredQuests(newValue)[0];
-                                validated.trim() === newValue.trim() ? settings.store.ignoredQuests = validated : null;
+                                const [validated, badgeNum] = validateIgnoredQuests(newValue);
+
+                                if (validated.trim() === newValue.trim()) {
+                                    settings.store.ignoredQuests = validated;
+                                    settings.store.unclaimedUnignoredQuests = badgeNum;
+                                }
                             }}
                         />
                     </div>
