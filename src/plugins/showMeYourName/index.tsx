@@ -311,7 +311,7 @@ export function renderedUsername(props: any) {
         mentionSymbol = hideDefaultAtSign && (!isRepliedMessage || replies) ? "" : props.withMentionPrefix ? "@" : "";
     }
 
-    author?.bot && discriminators && !isNaN(author.discriminator) ? discriminator = author.discriminator : null;
+    author?.bot && discriminators && !isNaN(author.discriminator) && Number(author.discriminator) !== 0 ? discriminator = author.discriminator : null;
 
     if (discriminator) {
         author.globalName = author.username;
