@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { GuildStore } from "@webpack/common";
+import { GuildRoleStore } from "@webpack/common";
 
 // Using plain replaces cause i dont want sanitize regexp
 export function toggleRole(colorsStore: ColorsStore, guildId: string, id: string) {
@@ -22,7 +22,7 @@ export function toggleRole(colorsStore: ColorsStore, guildId: string, id: string
 
 export function atLeastOneOverrideAppliesToGuild(overrides: string[], guildId: string) {
     for (const role of overrides) {
-        if (GuildStore.getRole(guildId, role)) {
+        if (GuildRoleStore.getRole(guildId, role)) {
             return true;
         }
     }
