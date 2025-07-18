@@ -19,7 +19,7 @@ import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./util
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
 
 function questMenuUnignoreClicked(): void {
-    settings.store.ignoredQuests = "";
+    validateAndOverwriteIgnoredQuests("");
 }
 
 function questMenuIgnoreClicked(): void {
@@ -37,6 +37,7 @@ function questMenuIgnoreClicked(): void {
     }
 
     settings.store.ignoredQuests = Array.from(ignoredQuestsSet).join("\n");
+    settings.store.unclaimedUnignoredQuests = 0;
 }
 
 export function QuestButton(): JSX.Element {
