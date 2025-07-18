@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { GuildStore } from "@webpack/common";
+import { GuildRoleStore } from "@webpack/common";
 
 import { blendColors } from "./blendColors";
 import { atLeastOneOverrideAppliesToGuild } from "./storeHelper";
@@ -14,7 +14,7 @@ export function brewUserColor(colorsStore: ColorsStore, roles: string[], guildId
     if (!overrides?.length) return null;
 
     if (atLeastOneOverrideAppliesToGuild(overrides, guildId!)) {
-        const memberRoles = roles.map(role => GuildStore.getRole(guildId!, role)).filter(e => e);
+        const memberRoles = roles.map(role => GuildRoleStore.getRole(guildId!, role)).filter(e => e);
         const blendColorsFromRoles = memberRoles
             .filter(role => overrides.includes(role.id))
             .sort((a, b) => b.color - a.color);
