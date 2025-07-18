@@ -23,12 +23,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-
-import { RoleModal } from "./components/RolesModal";
-import { toggleRole } from "./storeHelper";
 
 import { brewUserColor } from "./witchCauldron";
 
