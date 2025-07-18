@@ -73,7 +73,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365, Devs.ezzud],
     description: "Adds the top role color anywhere possible",
     settings,
 
@@ -127,7 +127,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\.usernameSpeaking\]:.+?,(?=children)(?<=guildId:(\i),.+?user:(\i).+?)/,
-                    replace: "$&style:$self.getColorStyle($2.id,$1),"
+                    replace: "$&style:$self.getColorStyle($2.id,$1),className:$self.getColorClass($2.id,$1),"
                 }
             ],
             predicate: () => settings.store.voiceUsers
@@ -135,10 +135,12 @@ export default definePlugin({
         // Reaction List
         {
             find: ".reactorDefault",
-            replacement: {
-                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
-                replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
-            },
+            replacement: [
+                {
+                    match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
+                    replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
+                }
+            ],
             predicate: () => settings.store.reactorsList,
         },
         // Poll Results
@@ -146,7 +148,7 @@ export default definePlugin({
             find: ",reactionVoteCounts",
             replacement: {
                 match: /\.nickname,(?=children:)/,
-                replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
+                replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),className:$self.getPollResultColorClass(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults
         },
@@ -166,7 +168,8 @@ export default definePlugin({
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
 
-            return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
+            const member = GuildMemberStore.getMember(guildId, userId);
+            return member?.colorStrings ?? { primaryColor: member?.colorString, secondaryColor: null, tertiaryColor: null } ?? null;
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get color string", e);
         }
@@ -176,15 +179,28 @@ export default definePlugin({
 
     getColorInt(userId: string, channelOrGuildId: string) {
         const colorString = this.getColorString(userId, channelOrGuildId);
-        return colorString && parseInt(colorString.slice(1), 16);
+        return colorString && colorString.primaryColor && parseInt(colorString.primaryColor.slice(1), 16);
     },
 
     getColorStyle(userId: string, channelOrGuildId: string) {
-        const colorString = this.getColorString(userId, channelOrGuildId);
+        const c = this.getColorString(userId, channelOrGuildId);
+        if (!c) return {};
+        if (c.secondaryColor) {
+            return { "--custom-gradient-color-1": c.primaryColor, "--custom-gradient-color-2": c.secondaryColor, "--custom-gradient-color-3": c.tertiaryColor || c.primaryColor, color: c.primaryColor };
+        }
+        return { color: c.primaryColor };
+    },
 
-        return colorString && {
-            color: colorString
-        };
+    getColorClass(userId: string, channelOrGuildId: string) {
+        return this.getColorString(userId, channelOrGuildId)?.secondaryColor
+            ? "usernameFont__07f91 username__07f91 twoColorGradient_e5de78 usernameGradient_e5de78"
+            : "usernameFont__07f91 username__07f91 ";
+    },
+
+    getPollResultColorClass(userId: string, channelOrGuildId: string) {
+        return this.getColorString(userId, channelOrGuildId)?.secondaryColor
+            ? "twoColorGradient_e5de78 usernameGradient_e5de78"
+            : "";
     },
 
     useMessageColorsStyle(message: any) {
@@ -210,13 +226,23 @@ export default definePlugin({
 
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
         const role = GuildRoleStore.getRole(guildId, id);
+        const cs = role?.colorStrings;
+        const style: React.CSSProperties = {
+            color: role?.colorString,
+            fontWeight: "unset",
+            letterSpacing: ".05em"
+        };
+        let className = "";
+
+        if (cs) {
+            if (cs.secondaryColor) className = "twoColorGradient_e5de78 usernameGradient_e5de78";
+            style["--custom-gradient-color-1" as any] = cs.primaryColor;
+            style["--custom-gradient-color-2" as any] = cs.secondaryColor;
+            style["--custom-gradient-color-3" as any] = cs.tertiaryColor ?? cs.primaryColor;
+        }
 
         return (
-            <span style={{
-                color: role?.colorString,
-                fontWeight: "unset",
-                letterSpacing: ".05em"
-            }}>
+            <span {...(className && { className })} style={style}>
                 {title ?? label} &mdash; {count}
             </span>
         );
