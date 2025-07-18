@@ -313,8 +313,12 @@ export function renderedUsername(props: any) {
 
     author?.bot && discriminators && !isNaN(author.discriminator) ? discriminator = author.discriminator : null;
 
-    const maybeBotMaybeNot = author ? discriminator ? `${author.username}#${discriminator}` : author.username : null;
-    const username = StreamerModeStore.enabled && respectStreamerMode ? maybeBotMaybeNot[0] + "..." : maybeBotMaybeNot || "";
+    if (discriminator) {
+        author.globalName = author.username;
+        author.username = `${author.username}#${discriminator}`;
+    }
+
+    const username = StreamerModeStore.enabled && respectStreamerMode ? author?.username[0] + "..." : author?.username || "";
     const display = StreamerModeStore.enabled && respectStreamerMode && author?.globalName?.toLowerCase() === author?.username.toLowerCase() ? author?.globalName[0] + "..." : author?.globalName || "";
     const nick = StreamerModeStore.enabled && respectStreamerMode && author?.nick?.toLowerCase() === author?.username.toLowerCase() ? author?.nick[0] + "..." : author?.nick || "";
 
