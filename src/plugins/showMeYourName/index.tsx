@@ -217,7 +217,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         description: "Also display extra names in mentions.",
-        restartNeeded: true
+    },
+    discriminators: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Append discriminators to usernames for bots. Discriminators were deprecated for users, but are still used for bots. By default, a bot's username is equivalent to a user's global name, therefore multiple bots can have the same username. Appending discriminators makes them unique again.",
     },
     hideDefaultAtSign: {
         type: OptionType.BOOLEAN,
@@ -271,7 +275,7 @@ const settings = definePluginSettings({
 });
 
 export function renderedUsername(props: any) {
-    const { replies, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor } = settings.use();
+    const { replies, mentions, discriminators, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor } = settings.use();
 
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
     const renderType = props.className === "mention" ? "mention" : "message";
@@ -280,6 +284,7 @@ export function renderedUsername(props: any) {
     let author: any = null;
     let isRepliedMessage = false;
     let mentionSymbol = "";
+    let discriminator = null;
     let topRoleStyle: any = null;
 
     if (isMention) {
@@ -288,8 +293,8 @@ export function renderedUsername(props: any) {
         const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
         author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
         isRepliedMessage = false;
-        mentionSymbol = hideDefaultAtSign ? "" : "@";
-        topRoleStyle = resolveColor(author, "Role", textMutedValue);
+        mentionSymbol = hideDefaultAtSign && mentions ? "" : "@";
+        topRoleStyle = resolveColor(author, "Role", "");
     } else if (isMessage) {
         // props.message.author only has a globalName attribute.
         // props.author only has a nick attribute, but it is overwritten by the globalName if no nickname is set.
@@ -301,18 +306,22 @@ export function renderedUsername(props: any) {
         const usr = UserStore.getUser(athr.id) || {};
         const mem = GuildMemberStore.getMember(channel.guild_id, athr.id) || {};
         author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
-        isRepliedMessage = props.isRepliedMessage;
-        mentionSymbol = hideDefaultAtSign ? "" : props.withMentionPrefix ? "@" : "";
+        // Treat interactions as replies. Compare user override against message author to not mislabel the bot's name as a name-in-reply.
+        isRepliedMessage = props.isRepliedMessage || !!(!!props.userOverride && !!props.message.interaction && props.message.author.id !== props.userOverride.id);
+        mentionSymbol = hideDefaultAtSign && (!isRepliedMessage || replies) ? "" : props.withMentionPrefix ? "@" : "";
     }
 
-    const username = StreamerModeStore.enabled && respectStreamerMode ? author?.username[0] + "..." : author?.username || "";
+    author?.bot && discriminators && !isNaN(author.discriminator) ? discriminator = author.discriminator : null;
+
+    const maybeBotMaybeNot = author ? discriminator ? `${author.username}#${discriminator}` : author.username : null;
+    const username = StreamerModeStore.enabled && respectStreamerMode ? maybeBotMaybeNot[0] + "..." : maybeBotMaybeNot || "";
     const display = StreamerModeStore.enabled && respectStreamerMode && author?.globalName?.toLowerCase() === author?.username.toLowerCase() ? author?.globalName[0] + "..." : author?.globalName || "";
     const nick = StreamerModeStore.enabled && respectStreamerMode && author?.nick?.toLowerCase() === author?.username.toLowerCase() ? author?.nick[0] + "..." : author?.nick || "";
 
     const affixes = parseAffixes(includedNames);
-    const resolvedUsernameColor = author ? resolveColor(author, usernameColor.trim(), textMutedValue) : null;
-    const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), textMutedValue) : null;
-    const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), textMutedValue) : null;
+    const resolvedUsernameColor = author ? resolveColor(author, usernameColor.trim(), "") : null;
+    const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "") : null;
+    const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "") : null;
     const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
 
     const values = {
@@ -337,6 +346,8 @@ export function renderedUsername(props: any) {
     if (!author || !username) {
         return <>{mentionSymbol}Unknown</>;
     } else if (isRepliedMessage && !replies) {
+        return <>{mentionSymbol}{nick || display || username}</>;
+    } else if (isMention && !mentions) {
         return <>{mentionSymbol}{nick || display || username}</>;
     }
 
@@ -427,7 +438,7 @@ export default definePlugin({
         {
             find: ".USER_MENTION)",
             replacement: {
-                match: /"@"\.concat\(null!=(\i)\?\i:(\i)\)/,
+                match: /"@"\.concat\(null!=\i\?\i:\i\)/,
                 replace: "$self.renderUsername(arguments[0])"
             }
         }
