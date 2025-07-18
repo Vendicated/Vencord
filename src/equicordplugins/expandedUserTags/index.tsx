@@ -6,7 +6,6 @@
 
 import "./styles.css";
 
-import { migratePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, getIntlMessage } from "@utils/discord";
@@ -32,7 +31,6 @@ const genTagTypes = () => {
     return obj;
 };
 
-migratePluginSettings("ExpandedUserTags", "MoreUserTags");
 export default definePlugin({
     name: "ExpandedUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
