@@ -317,7 +317,7 @@
 
 /* Quest tile button color. */
 .questify-quest-item-restyle> :nth-child(2)> div> button {
-    background-color: var(--questify-button-normal);
+    background-color: var(--questify-button-normal) !important; /* Necessary !important */
 }
 
 .questify-quest-item-restyle> :nth-child(2)> div> button:not([disabled]):hover {
