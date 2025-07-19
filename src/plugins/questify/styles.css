@@ -1,226 +1,227 @@
 /* Plugin Settings */
 .questify-setting-divider {
-    margin: 0 !important;
+    margin: 0;
 }
 
 .questify-setting {
-    border-left: 3px solid #b7b7ba !important;
-    padding: 3px 0 3px 8px !important;
-    border-radius: 3px !important;
-    user-select: text !important;
+    border-left: 3px solid var(--header-primary);
+    padding: 3px 0 3px 8px;
+    border-radius: 3px;
+    user-select: text;
 }
 
 .questify-main-inline-group {
-    margin-top: 4px !important;
-    display: flex !important;
-    gap: 12px !important;
+    margin-top: 4px;
+    display: flex;
+    gap: 12px;
 }
 
 .questify-sub-inline-group {
-    display: flex !important;
-    gap: 8px !important;
+    display: flex;
+    gap: 8px;
 }
 
 .questify-inline-group-item {
-    flex: 1 !important;
+    flex: 1;
 }
 
 .questify-form-title {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    margin-bottom: 8px !important;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
 .questify-form-subtitle {
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    margin-top: 4px !important;
-    margin-bottom: 4px !important;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .questify-form-subtitle-spacier {
-    margin-top: 8px !important;
+    margin-top: 8px;
 }
 
 .questify-form-description {
-    font-size: 14px !important;
+    font-size: 14px;
 }
 
 .questify-select {
-    border-radius: 3px !important;
-    margin-top: 4px !important;
-    min-height: 45px !important;
+    border-radius: 3px !important; /* Necessary !important */
+    margin-top: 4px;
+    min-height: 45px;
 }
 
 .questify-inline-group-item .questify-select {
-    margin-top: 0 !important;
+    margin-top: 0;
 }
 
 .questify-button,
 .questify-sub-inline-group [class^="swatch"] {
-    height: 38px !important;
-    min-height: 38px !important;
-    width: 80px !important;
-    min-width: 80px !important;
-    padding: 2px !important;
-    border-radius: 3px !important;
+    height: 38px;
+    min-height: 38px;
+    width: 80px;
+    min-width: 80px;
+    padding: 2px;
+    border-radius: 3px;
 }
 
 .questify-alert-icon {
-    flex: 0 !important;
-    place-content: center center !important;
-    background-color: #212126 !important;
-    border-radius: 3px !important;
-    padding: 0 10px !important;
-    color: #d9d9db !important;
-    border: 1px solid #39393e !important;
-    min-height: 43px !important;
-    display: flex !important;
-    align-items: center !important;
+    flex: 0;
+    place-content: center center;
+    background-color: var(--input-background);
+    border-radius: 3px;
+    padding: 0 10px;
+    color: var(--text-default);
+    border: 1px solid var(--border-normal);
+    min-height: 43px;
+    display: flex;
+    align-items: center;
 }
 
 .questify-alert-icon.questify-playing-audio {
-    color: #cc3a40 !important;
+    color: var(--red-500);
 }
 
 .questify-button [class^="contents"] {
-    margin: 0 8px !important;
+    margin: 0 8px;
 }
 
 .questify-button-red {
-    background-color: #913636 !important;
-    color: #fff !important;
+    background-color: var(--control-background-critical-primary-default) !important; /* Necessary !important */
 }
 
 .questify-button-red:hover {
-    background-color: #6e2a27 !important;
+    filter: brightness(0.75);
+    transition: filter 0.2s ease-in-out;
 }
 
 .questify-button-blue {
-    background-color: #377591 !important;
-    color: #fff !important;
+    background-color: var(--control-background-primary-default) !important; /* Necessary !important */
 }
 
 .questify-button-blue:hover {
-    background-color: #2d5568 !important;
+    filter: brightness(0.75);
+    transition: filter 0.2s ease-in-out;
 }
 
 #questify-dummy-quest-button {
-    border-left: 5px solid #161619 !important;
-    border-radius: 3px !important;
+    border-left: 5px solid var(--header-primary);
+    border-radius: 4px;
 }
 
 .questify-text-input,
 .questify-text-area {
-    margin-top: 4px !important;
-    width: 100% !important;
-    border-radius: 3px !important;
+    margin-top: 4px;
+    width: 100%;
+    border-radius: 3px;
 }
 
 .questify-text-area {
-    height: 150px !important;
+    height: 150px;
 }
 
 .questify-color-picker-container {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
-    margin-top: 8px !important;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .questify-color-picker-group {
-    display: flex !important;
-    flex-direction: column !important;
+    display: flex;
+    flex-direction: column;
 }
 
 .questify-color-picker-with-buttons {
-    background-color: #212126 !important;
-    border: 1px solid #39393e !important;
-    border-radius: 3px !important;
-    padding: 8px !important;
+    background-color: var(--input-background);
+    border: 1px solid var(--border-normal);
+    border-radius: 3px;
+    padding: 8px;
 }
 
 .questify-color-picker-with-buttons [class^="swatch"],
 .questify-color-picker-with-buttons [class^="colorSwatch"] {
-    border-radius: 3px !important;
-    width: 100% !important;
-    margin-bottom: 4px !important;
+    border-radius: 3px;
+    width: 100%;
+    margin-bottom: 4px;
 }
 
 .questify-wide-button {
-    width: 100% !important;
-    flex: 1 !important;
+    width: 100%;
+    flex: 1;
 }
 
 .questify-flex-65 {
-    flex: 6 !important;
+    flex: 6;
 }
 
 .questify-flex-35 {
-    flex: 4 !important;
+    flex: 4;
 }
 
 .questify-inline-code-block {
-    display: inline-block !important;
-    padding: 0 4px !important;
-    border-radius: 3px !important;
-    background-color: #171717 !important;
-    color: #b9bbbe !important;
-    font-family: "Uni Sans", sans-serif !important;
-    font-size: 90% !important;
+    display: inline-block;
+    padding: 0 4px;
+    border-radius: 4px;
+    background-color: var(--background-code);
+    border: 1px solid var(--border-normal);
+    font-family: var(--font-code);
+    font-size: 90%;
 }
 
 .questify-dummy-quest {
-    margin-top: 8px !important;
+    margin-top: 8px;
 }
 
 .questify-dummy-quest:active {
-    pointer-events: none !important;
-    user-select: none !important;
+    pointer-events: none;
+    user-select: none;
 }
 
 .questify-quest-button-pill {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    height: 100% !important;
-    pointer-events: none !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    pointer-events: none;
 }
 
 .questify-quest-button-pill>[class^="item"] {
-    will-change: transform !important;
-    max-height: 8px !important;
-    transition: max-height 0.2s ease-in-out !important;
+    will-change: transform;
+    max-height: 8px;
+    min-height: 8px;
+    transition: max-height 0.2s ease-in-out;
 }
 
 .questify-quest-button-pill.hovered>[class^="item"] {
-    max-height: 20px !important;
+    max-height: 20px;
 }
 
 .questify-quest-button-pill.selected>[class^="item"] {
-    max-height: 40px !important;
+    max-height: 40px;
 }
 
 .questify-quest-button-server-list-button-container {
-    position: relative !important;
+    position: relative;
 }
 
 .questify-quest-button-icon-container {
-    pointer-events: none !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    height: 100% !important;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .questify-quest-button-container {
-    position: relative !important;
+    position: relative;
 }
 
 /* Background of bottom half of Quest tile. */
 .questify-quest-item-restyle>div {
-    background-color: var(--questify-color) !important;
+    background-color: var(--questify-color);
 }
 
 /* Normal button text + SVG button text color. */
@@ -242,28 +243,28 @@
 
 /* Quest name color. */
 .questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>h2[class^="eyebrow"] {
-    color: var(--questify-quest-name) !important;
+    color: var(--questify-quest-name) !important; /* Necessary !important */
 }
 
 /* Reward title + Orbs reward title text color. */
 .questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"],
 .questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"]>span {
-    color: var(--questify-reward-title) !important;
+    color: var(--questify-reward-title) !important; /* Necessary !important */
 }
 
 /* Quest description text color. */
 .questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-sm"] {
-    color: var(--questify-reward-description) !important;
+    color: var(--questify-reward-description) !important; /* Necessary !important */
 }
 
 /* Hides the gray placeholder elements which distract from the restyles. */
 .questify-quest-item-restyle [class^="placeholderElement"] {
-    background-color: transparent !important;
+    background-color: transparent;
 }
 
 /* Promoted by XYZ text color. */
 .questify-quest-item-restyle>div[class^="container"]>div[class^="positionContentOverBackground"]>div[class^="contents"]>div[class^="bottomRow"]>div[class^="text-sm"] {
-    color: var(--questify-reward-description) !important;
+    color: var(--questify-reward-description) !important; /* Necessary !important */
 }
 
 /* Drop shadow for >87.5% luminance (near-white) restyle gradients so logos are legible. */
@@ -304,7 +305,7 @@
 
 /* Hides the gradient altogether. */
 .questify-quest-item-hide-gradient> :nth-child(1) [class^="overlay"] {
-    display: none !important;
+    display: none;
 }
 
 /* Matches the text overlay which darkens the text of long
@@ -316,22 +317,22 @@
 
 /* Quest tile button color. */
 .questify-quest-item-restyle> :nth-child(2)> div> button {
-    background-color: var(--questify-button-normal) !important;
+    background-color: var(--questify-button-normal);
 }
 
 .questify-quest-item-restyle> :nth-child(2)> div> button:not([disabled]):hover {
-    background-color: var(--questify-button-hover) !important;
-    transition: background-color 0.2s ease-in-out !important;
+    background-color: var(--questify-button-hover);
+    transition: background-color 0.2s ease-in-out;
 }
 
 /* Quest tile border radius. */
 
 .questify-quest-item-restyle> :nth-child(1)[class^="container"] {
-    border-top-left-radius: 8px !important;
-    border-top-right-radius: 8px !important;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .questify-quest-item-restyle> :nth-child(2)[class^="container"] {
-    border-bottom-left-radius: 8px !important;
-    border-bottom-right-radius: 8px !important;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }

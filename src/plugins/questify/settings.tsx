@@ -8,11 +8,11 @@ import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { Button, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { getQuestTileClasses } from "./index";
-import { ColorPicker, DynamicDropdown, DynamicDropdownSettingOption, GuildlessServerListItem, Quest, QuestIcon, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
+import { DynamicDropdown, DynamicDropdownSettingOption, GuildlessServerListItem, Quest, QuestIcon, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
 import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, isDarkish, isSoundAllowed, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, QuestsStore, rightClick, validCommaSeparatedList } from "./utils/misc";
 
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;
