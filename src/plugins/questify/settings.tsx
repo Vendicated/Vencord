@@ -623,8 +623,80 @@ function DisableQuestsSetting(): JSX.Element {
                         Disable specific Quest features, such as the popup for new Quests.
                     </Forms.FormText>
                     <DynamicDropdown
-                        placeholder="Select which quest features to disable."
+                        placeholder="Select which Quest features to disable."
                         feedback="There's no supported Quest feature by that name."
+                        className={q("select")}
+                        maxVisibleItems={options.length}
+                        clearable={true}
+                        multi={true}
+                        value={currentValue as any}
+                        options={options}
+                        onChange={handleChange}
+                        closeOnSelect={false}
+                    >
+                    </DynamicDropdown>
+                </Forms.FormSection>
+            </div>
+        </ErrorBoundary>
+    );
+}
+
+function ModifyQuestsCompletionSetting(): JSX.Element {
+    const {
+        makeMobileQuestsDesktopCompatible
+    } = settings.use([
+        "makeMobileQuestsDesktopCompatible"
+    ]);
+
+    const options: DisableQuestsSettingOption[] = [
+        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, setting: "makeMobileQuestsDesktopCompatible" }
+    ];
+
+    const [currentValue, setCurrentValue] = useState(options.filter(option => option.selected));
+
+    function updateSettingsTruthy(enabled: DisableQuestsSettingOption[]) {
+        const enabledValues = enabled.map(option => option.value);
+
+        options.forEach(option => {
+            option.selected = enabledValues.includes(option.value);
+        });
+
+        settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
+
+        setCurrentValue(enabled);
+    }
+
+    function handleChange(values: Array<DisableQuestsSettingOption | string>) {
+        if (values.length === 0) {
+            updateSettingsTruthy([]);
+            return;
+        }
+
+        const stringlessValues = values.filter(v => typeof v !== "string") as DisableQuestsSettingOption[];
+        const selectedOption = values.find(v => typeof v === "string") as string;
+
+        if (stringlessValues.some(option => option.value === selectedOption)) {
+            updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption));
+        } else {
+            const newSelectedOptions = [...stringlessValues, options.find(option => option.value === selectedOption) as DisableQuestsSettingOption];
+            updateSettingsTruthy(newSelectedOptions);
+        }
+    }
+
+    return (
+        <ErrorBoundary>
+            <Forms.FormDivider className={q("setting-divider")} />
+            <div className={q("setting", "modify-quests-completion-setting")}>
+                <Forms.FormSection>
+                    <Forms.FormTitle className={q("form-title")}>
+                        Quest Completion
+                    </Forms.FormTitle>
+                    <Forms.FormText className={q("form-description")}>
+                        Modify various aspects of completing Quests, such as platform compatibility.
+                    </Forms.FormText>
+                    <DynamicDropdown
+                        placeholder="Select which Quest completion modifications to enable."
+                        feedback="There's no supported Quest completion modification by that name."
                         className={q("select")}
                         maxVisibleItems={options.length}
                         clearable={true}
@@ -1489,6 +1561,17 @@ export const settings = definePluginSettings({
     disableFriendsListActiveNowPromotion: {
         type: OptionType.BOOLEAN,
         description: "Disable the promotion of Quests for games played by friends.",
+        default: true,
+        hidden: true
+    },
+    questCompletion: {
+        type: OptionType.COMPONENT,
+        component: ModifyQuestsCompletionSetting,
+        description: "Select which Quest completion aspects to modify."
+    },
+    makeMobileQuestsDesktopCompatible: {
+        type: OptionType.BOOLEAN,
+        description: "Make mobile-only quests compatible with desktop.",
         default: true,
         hidden: true
     },

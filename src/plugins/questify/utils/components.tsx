@@ -58,6 +58,16 @@ export interface Quest {
         messages: {
             questName: string;
         };
+        taskConfigV2: {
+            tasks: {
+                WATCH_VIDEO?: {
+                    type: "WATCH_VIDEO";
+                },
+                WATCH_VIDEO_ON_MOBILE?: {
+                    type: "WATCH_VIDEO_ON_MOBILE";
+                },
+            };
+        };
     },
     userStatus: null | {
         claimedAt: string | null;

@@ -18,6 +18,8 @@ import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoF
 import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./utils/components";
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
 
+const patchedMobileQuests = new Set<string>();
+
 function questMenuUnignoreClicked(): void {
     validateAndOverwriteIgnoredQuests("");
 }
@@ -301,22 +303,49 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
     return returnClasses.join(" ");
 }
 
-function getQuestTileOrder(quests: Quest[]): Quest[] {
+function preprocessQuests(quests: Quest[]): Quest[] {
     const {
         ignoredQuests,
         reorderQuests,
         unclaimedSubsort,
         claimedSubsort,
         ignoredSubsort,
-        expiredSubsort
+        expiredSubsort,
+        makeMobileQuestsDesktopCompatible
     } = settings.use([
         "ignoredQuests",
         "reorderQuests",
         "unclaimedSubsort",
         "claimedSubsort",
         "ignoredSubsort",
-        "expiredSubsort"
+        "expiredSubsort",
+        "makeMobileQuestsDesktopCompatible"
     ]);
+
+    if (makeMobileQuestsDesktopCompatible) {
+        quests.forEach(quest => {
+            const config = quest.config.taskConfigV2;
+
+            if (config.tasks.WATCH_VIDEO_ON_MOBILE && !config.tasks.WATCH_VIDEO) {
+                patchedMobileQuests.add(quest.id);
+                config.tasks.WATCH_VIDEO = {
+                    ...config.tasks.WATCH_VIDEO_ON_MOBILE,
+                    type: "WATCH_VIDEO"
+                };
+            }
+        });
+    } else if (patchedMobileQuests.size > 0) {
+        patchedMobileQuests.forEach(questId => {
+            const quest = quests.find(q => q.id === questId);
+
+            if (quest) {
+                const config = quest.config.taskConfigV2;
+                delete config.tasks.WATCH_VIDEO;
+            }
+        });
+
+        patchedMobileQuests.clear();
+    }
 
     if (!reorderQuests || !reorderQuests.trim()) {
         return quests;
@@ -462,7 +491,7 @@ export default definePlugin({
 
     formatLowerBadge,
     getQuestTileStyle,
-    getQuestTileOrder,
+    preprocessQuests,
     getQuestTileClasses,
     shouldPreloadQuestAssets,
     shouldHideQuestPopup,
@@ -646,10 +675,11 @@ export default definePlugin({
         },
         {
             // Sorts the "All Quests" tab quest tiles.
+            // Also sets mobile-only quests as desktop compatible if the setting is enabled.
             find: ".ALL);return(",
             replacement: {
                 match: /(quests:(\i)[^;]+;)/,
-                replace: "$1$2=$self.getQuestTileOrder($2);"
+                replace: "$1$2=$self.preprocessQuests($2);"
             }
         },
         {
@@ -657,7 +687,7 @@ export default definePlugin({
             find: ".ALL)}):(",
             replacement: {
                 match: /(claimedQuests:(\i)[^;]+;)/,
-                replace: "$1$2=$self.getQuestTileOrder($2);"
+                replace: "$1$2=$self.preprocessQuests($2);"
             }
         },
         {
