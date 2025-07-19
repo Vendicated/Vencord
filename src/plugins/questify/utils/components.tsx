@@ -61,9 +61,11 @@ export interface Quest {
             tasks: {
                 WATCH_VIDEO?: {
                     type: "WATCH_VIDEO";
+                    target: number;
                 },
                 WATCH_VIDEO_ON_MOBILE?: {
                     type: "WATCH_VIDEO_ON_MOBILE";
+                    target: number;
                 },
             };
         };
@@ -71,7 +73,17 @@ export interface Quest {
     userStatus: null | {
         claimedAt: string | null;
         completedAt: string | null;
-        progress: null | Record<string, any>;
+        enrolledAt: string | null;
+        progress: null | {
+            WATCH_VIDEO?: {
+                eventName: "WATCH_VIDEO";
+                value: number;
+            },
+            WATCH_VIDEO_ON_MOBILE?: {
+                eventName: "WATCH_VIDEO_ON_MOBILE";
+                value: number;
+            },
+        };
     },
     dummyColor?: number | null;
 }

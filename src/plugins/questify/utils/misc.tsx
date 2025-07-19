@@ -140,6 +140,32 @@ export async function fetchAndDispatchQuests(source?: string, logger?: Logger): 
     }
 }
 
+export async function enrollInQuest(quest: Quest, logger?: Logger): Promise<boolean> {
+    try {
+        if (!!quest.userStatus?.enrolledAt) {
+            return true;
+        }
+
+        await RestAPI.post({ url: `/quests/${quest.id}/enroll`, body: { location: 11 } });
+        logger?.info(`Enrolled in quest: ${quest.config.messages.questName}`);
+        return true;
+    } catch (error) {
+        logger?.error(`Failed to enroll in quest ${quest.config.messages.questName}:`, error);
+        return false;
+    }
+}
+
+export async function reportVideoQuestProgress(quest: Quest, currentProgress: number, logger?: Logger): Promise<boolean> {
+    try {
+        await RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: currentProgress } });
+        logger?.info(`Quest ${quest.config.messages.questName} progress reported: ${currentProgress} seconds.`);
+        return true;
+    } catch (error) {
+        logger?.error(`Failed to report progress for quest ${quest.config.messages.questName}:`, error);
+        return false;
+    }
+}
+
 export function getBadgeSize(value: string, negative: boolean): number {
     const numChars = value.length;
     const subtract = negative ? 3 : 0;

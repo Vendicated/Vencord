@@ -542,7 +542,9 @@ function DisableQuestsSetting(): JSX.Element {
         disableQuestsBadgeOnUserProfiles,
         disableQuestsGiftInventoryRelocationNotice,
         disableFriendsListActiveNowPromotion,
-        makeMobileQuestsDesktopCompatible
+        makeMobileQuestsDesktopCompatible,
+        completeVideoQuestsInBackgroundOption,
+        preventVideoQuestsModal
     } = settings.use([
         "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
@@ -551,7 +553,9 @@ function DisableQuestsSetting(): JSX.Element {
         "disableQuestsBadgeOnUserProfiles",
         "disableQuestsGiftInventoryRelocationNotice",
         "disableFriendsListActiveNowPromotion",
-        "makeMobileQuestsDesktopCompatible"
+        "makeMobileQuestsDesktopCompatible",
+        "completeVideoQuestsInBackgroundOption",
+        "preventVideoQuestsModal"
     ]);
 
     const options: DynamicDropdownSettingOption[] = [
@@ -562,6 +566,8 @@ function DisableQuestsSetting(): JSX.Element {
         { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel, setting: "disablePopupAboveAccountPanel" },
         { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, setting: "disableGiftInventoryRelocationNotice" },
         { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, setting: "disableFriendsListActiveNowPromotion" },
+        { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackgroundOption, setting: "videoQuestsBackground" },
+        { label: "Prevent Video Quests Modal from Opening", value: "video-quests-modal", selected: preventVideoQuestsModal, setting: "preventVideoQuestsModal" },
         { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, setting: "makeMobileQuestsDesktopCompatible" }
     ];
 
@@ -575,6 +581,11 @@ function DisableQuestsSetting(): JSX.Element {
             option.selected = enabledValues.includes(option.value);
         });
 
+        const redoAutoFetch = (
+            settings.store.disableQuestsEverything !== enabledValues.includes("everything") ||
+            settings.store.disableQuestsFetchingQuests !== enabledValues.includes("fetching")
+        );
+
         settings.store.disableQuestsEverything = enabledValues.includes("everything");
         settings.store.disableQuestsDiscoveryTab = enabledValues.includes("discovery");
         settings.store.disableQuestsFetchingQuests = enabledValues.includes("fetching");
@@ -582,8 +593,11 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableQuestsBadgeOnUserProfiles = enabledValues.includes("badge");
         settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
         settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
+        settings.store.completeVideoQuestsInBackgroundOption = enabledValues.includes("video-quests-background");
+        settings.store.preventVideoQuestsModal = enabledValues.includes("video-quests-modal");
         settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
-        checkAutoFetchInterval(settings.store.fetchingQuestsInterval);
+
+        redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
 
         setCurrentValue(enabled);
     }
@@ -624,7 +638,17 @@ function DisableQuestsSetting(): JSX.Element {
                         Quest Features
                     </Forms.FormTitle>
                     <Forms.FormText className={q("form-description")}>
-                        Modify specific Quest features, such as disabling the popup for new Quests.
+                        Modify specific Quest features.
+                        <br /><br />
+                        The <span className="questify-inline-code-block">Disable Quest Popup Above Account Panel</span> option
+                        will be ignored for completed Quests and Quest progress tracking.
+                        <br /><br />
+                        The <span className="questify-inline-code-block">Complete Video Quests in Background</span> option
+                        will wait for the duration of the video Quest and mark it as completed automatically. You still must
+                        start the Quest manually, but can close the video modal immediately after.
+                        <br /><br />
+                        Alternatively, enable the <span className="questify-inline-code-block">Prevent Video Quests Modal from Opening</span> option
+                        to bypass the video modal entirely. The modal will only be blocked if the background option is enabled.
                     </Forms.FormText>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."
@@ -1498,8 +1522,20 @@ export const settings = definePluginSettings({
     },
     makeMobileQuestsDesktopCompatible: {
         type: OptionType.BOOLEAN,
-        description: "Make mobile-only quests compatible with desktop.",
+        description: "Make mobile-only Quests compatible with desktop.",
         default: true,
+        hidden: true
+    },
+    completeVideoQuestsInBackgroundOption: {
+        type: OptionType.BOOLEAN,
+        description: "Complete video Quests in the background after the video duration has passed.",
+        default: true,
+        hidden: true
+    },
+    preventVideoQuestsModal: {
+        type: OptionType.BOOLEAN,
+        description: "Prevent the video Quests modal from opening when clicking on a video Quest. Relies on the background completion option.",
+        default: false,
         hidden: true
     },
     questButton: {

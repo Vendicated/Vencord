@@ -16,9 +16,10 @@ import { JSX } from "react";
 
 import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
 import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, RGB } from "./utils/components";
-import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, rightClick } from "./utils/misc";
+import { adjustRGB, decimalToRGB, enrollInQuest, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, reportVideoQuestProgress, rightClick } from "./utils/misc";
 
 const patchedMobileQuests = new Set<string>();
+const activeQuestIntervals = new Map<string, NodeJS.Timeout>();
 
 function questMenuUnignoreClicked(): void {
     validateAndOverwriteIgnoredQuests("");
@@ -481,6 +482,93 @@ function shouldPreloadQuestAssets(): boolean {
     return restyleQuestsPreload;
 }
 
+function startProgressTracking(quest: Quest, questDuration: number, initialProgress: number): void {
+    const start = new Date();
+    const threshold = 5;
+
+    if (!initialProgress) {
+        enrollInQuest(quest, QuestifyLogger).then(success => {
+            const enrollmentDuration = Math.floor((new Date().getTime() - start.getTime()) / 1000);
+
+            if (success && enrollmentDuration < threshold) {
+                reportVideoQuestProgress(quest, threshold, QuestifyLogger);
+            }
+        });
+
+        initialProgress = threshold;
+    }
+
+    let currentProgress = initialProgress;
+
+    const intervalId = setInterval(() => {
+        currentProgress += threshold;
+
+        if (currentProgress >= questDuration - 10) {
+            clearInterval(intervalId);
+            activeQuestIntervals.delete(quest.id);
+            reportVideoQuestProgress(quest, questDuration, QuestifyLogger).then(success => {
+                if (success) {
+                    QuestifyLogger.info(`Quest ${quest.config.messages.questName} completed.`);
+                }
+            });
+        } else {
+            reportVideoQuestProgress(quest, currentProgress, QuestifyLogger);
+        }
+    }, threshold * 1000);
+
+    activeQuestIntervals.set(quest.id, intervalId);
+
+    const timeRemaining = Math.max(0, questDuration - initialProgress);
+    QuestifyLogger.info(`Quest ${quest.config.messages.questName} will be completed in the background in ${timeRemaining} seconds.`);
+}
+
+function processVideoQuest(quest: Quest): boolean {
+    const { preventVideoQuestsModal, completeVideoQuestsInBackgroundOption } = settings.store;
+
+    if (quest.userStatus?.completedAt) {
+        return true;
+    }
+
+    if (!completeVideoQuestsInBackgroundOption) {
+        return true;
+    }
+
+    const watchType = quest.config.taskConfigV2.tasks.WATCH_VIDEO || quest.config.taskConfigV2.tasks.WATCH_VIDEO_ON_MOBILE;
+
+    if (!watchType) {
+        return true;
+    }
+
+    const questDuration = watchType.target || 0;
+
+    if (!questDuration) {
+        return true;
+    }
+
+    const existingInterval = activeQuestIntervals.get(quest.id);
+
+    if (existingInterval) {
+        return true;
+    }
+
+    const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : new Date();
+    const now = new Date();
+    const timeElapsed = Math.floor((now.getTime() - questEnrolledAt.getTime()) / 1000);
+    const timeRemaining = Math.max(0, questDuration - timeElapsed);
+
+    if (timeRemaining <= 10) {
+        reportVideoQuestProgress(quest, questDuration, QuestifyLogger).then(success => {
+            if (success) {
+                QuestifyLogger.info(`Quest ${quest.config.messages.questName} completed.`);
+            }
+        });
+    } else {
+        startProgressTracking(quest, questDuration, timeElapsed);
+    }
+
+    return !preventVideoQuestsModal;
+}
+
 export default definePlugin({
     name: "Questify",
     description: "Enhance your Quest experience with a suite of features, or disable them entirely if they're not your thing.",
@@ -500,6 +588,7 @@ export default definePlugin({
     shouldHideBadgeOnUserProfiles,
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
+    processVideoQuest,
 
     patches: [
         {
@@ -699,6 +788,21 @@ export default definePlugin({
                 match: /showPlaceholder:!\i/,
                 replace: "showPlaceholder:false"
             }
+        },
+        {
+            // Sets intervals to progress video quests in the background.
+            find: "IN_PROGRESS:if(",
+            group: true,
+            replacement: [
+                {
+                    match: /(onClick:\(\)=>)(\(0,\i.openVideoQuestModal\)\({quest:(\i))/,
+                    replace: "$1$self.processVideoQuest($3)&&$2"
+                },
+                {
+                    match: /(\i\?)(\(0,\i.openVideoQuestModal\)\({quest:(\i))/,
+                    replace: "$1$self.processVideoQuest($3)&&$2"
+                }
+            ]
         }
     ],
 
