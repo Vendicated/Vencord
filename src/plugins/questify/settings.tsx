@@ -12,7 +12,7 @@ import { Button, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEf
 import { JSX } from "react";
 
 import { getQuestTileClasses } from "./index";
-import { ColorPicker, DisableQuestsSettingOption, DynamicDropdown, GuildlessServerListItem, Quest, QuestIcon, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
+import { ColorPicker, DynamicDropdown, DynamicDropdownSettingOption, GuildlessServerListItem, Quest, QuestIcon, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
 import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, isDarkish, isSoundAllowed, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, QuestsStore, rightClick, validCommaSeparatedList } from "./utils/misc";
 
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;
@@ -541,7 +541,8 @@ function DisableQuestsSetting(): JSX.Element {
         disableQuestsPopupAboveAccountPanel,
         disableQuestsBadgeOnUserProfiles,
         disableQuestsGiftInventoryRelocationNotice,
-        disableFriendsListActiveNowPromotion
+        disableFriendsListActiveNowPromotion,
+        makeMobileQuestsDesktopCompatible
     } = settings.use([
         "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
@@ -549,23 +550,25 @@ function DisableQuestsSetting(): JSX.Element {
         "disableQuestsPopupAboveAccountPanel",
         "disableQuestsBadgeOnUserProfiles",
         "disableQuestsGiftInventoryRelocationNotice",
-        "disableFriendsListActiveNowPromotion"
+        "disableFriendsListActiveNowPromotion",
+        "makeMobileQuestsDesktopCompatible"
     ]);
 
-    const options: DisableQuestsSettingOption[] = [
-        { label: "Everything", value: "everything", selected: disableQuestsEverything, setting: "disableQuests" },
-        { label: "Discovery Tab", value: "discovery", selected: disableQuestsDiscoveryTab, setting: "disableDiscoveryTab" },
-        { label: "Fetching Quests", value: "fetching", selected: disableQuestsFetchingQuests, setting: "disableFetchingQuests" },
-        { label: "Badge on User Profiles", value: "badge", selected: disableQuestsBadgeOnUserProfiles, setting: "disableBadgeOnUserProfiles" },
-        { label: "Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel, setting: "disablePopupAboveAccountPanel" },
-        { label: "Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, setting: "disableGiftInventoryRelocationNotice" },
-        { label: "Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, setting: "disableFriendsListActiveNowPromotion" }
+    const options: DynamicDropdownSettingOption[] = [
+        { label: "Disable Everything", value: "everything", selected: disableQuestsEverything, setting: "disableQuests" },
+        { label: "Disable Fetching Quests", value: "fetching", selected: disableQuestsFetchingQuests, setting: "disableFetchingQuests" },
+        { label: "Disable Discovery Quests Tab", value: "discovery", selected: disableQuestsDiscoveryTab, setting: "disableDiscoveryTab" },
+        { label: "Disable Badge on User Profiles", value: "badge", selected: disableQuestsBadgeOnUserProfiles, setting: "disableBadgeOnUserProfiles" },
+        { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel, setting: "disablePopupAboveAccountPanel" },
+        { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, setting: "disableGiftInventoryRelocationNotice" },
+        { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, setting: "disableFriendsListActiveNowPromotion" },
+        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, setting: "makeMobileQuestsDesktopCompatible" }
     ];
 
-    const everythingOnly = options.find(option => option.value === "everything") as DisableQuestsSettingOption;
+    const everythingOnly = options.find(option => option.value === "everything") as DynamicDropdownSettingOption;
     const [currentValue, setCurrentValue] = useState(options.filter(option => option.selected));
 
-    function updateSettingsTruthy(enabled: DisableQuestsSettingOption[]) {
+    function updateSettingsTruthy(enabled: DynamicDropdownSettingOption[]) {
         const enabledValues = enabled.map(option => option.value);
 
         options.forEach(option => {
@@ -579,12 +582,13 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableQuestsBadgeOnUserProfiles = enabledValues.includes("badge");
         settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
         settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
+        settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
         checkAutoFetchInterval(settings.store.fetchingQuestsInterval);
 
         setCurrentValue(enabled);
     }
 
-    function handleChange(values: Array<DisableQuestsSettingOption | string>) {
+    function handleChange(values: Array<DynamicDropdownSettingOption | string>) {
         if (values.length === 0) {
             updateSettingsTruthy([]);
             return;
@@ -600,13 +604,13 @@ function DisableQuestsSetting(): JSX.Element {
             return;
         }
 
-        const stringlessValues = values.filter(v => typeof v !== "string") as DisableQuestsSettingOption[];
+        const stringlessValues = values.filter(v => typeof v !== "string") as DynamicDropdownSettingOption[];
         const selectedOption = values.find(v => typeof v === "string") as string;
 
         if (stringlessValues.some(option => option.value === selectedOption)) {
             updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption && option.value !== everythingOnly.value));
         } else {
-            const newSelectedOptions = [...stringlessValues.filter(option => option.value !== everythingOnly.value), options.find(option => option.value === selectedOption) as DisableQuestsSettingOption];
+            const newSelectedOptions = [...stringlessValues.filter(option => option.value !== everythingOnly.value), options.find(option => option.value === selectedOption) as DynamicDropdownSettingOption];
             updateSettingsTruthy(newSelectedOptions);
         }
     }
@@ -620,83 +624,11 @@ function DisableQuestsSetting(): JSX.Element {
                         Quest Features
                     </Forms.FormTitle>
                     <Forms.FormText className={q("form-description")}>
-                        Disable specific Quest features, such as the popup for new Quests.
+                        Modify specific Quest features, such as disabling the popup for new Quests.
                     </Forms.FormText>
                     <DynamicDropdown
-                        placeholder="Select which Quest features to disable."
+                        placeholder="Select which Quest features to modify."
                         feedback="There's no supported Quest feature by that name."
-                        className={q("select")}
-                        maxVisibleItems={options.length}
-                        clearable={true}
-                        multi={true}
-                        value={currentValue as any}
-                        options={options}
-                        onChange={handleChange}
-                        closeOnSelect={false}
-                    >
-                    </DynamicDropdown>
-                </Forms.FormSection>
-            </div>
-        </ErrorBoundary>
-    );
-}
-
-function ModifyQuestsCompletionSetting(): JSX.Element {
-    const {
-        makeMobileQuestsDesktopCompatible
-    } = settings.use([
-        "makeMobileQuestsDesktopCompatible"
-    ]);
-
-    const options: DisableQuestsSettingOption[] = [
-        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, setting: "makeMobileQuestsDesktopCompatible" }
-    ];
-
-    const [currentValue, setCurrentValue] = useState(options.filter(option => option.selected));
-
-    function updateSettingsTruthy(enabled: DisableQuestsSettingOption[]) {
-        const enabledValues = enabled.map(option => option.value);
-
-        options.forEach(option => {
-            option.selected = enabledValues.includes(option.value);
-        });
-
-        settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
-
-        setCurrentValue(enabled);
-    }
-
-    function handleChange(values: Array<DisableQuestsSettingOption | string>) {
-        if (values.length === 0) {
-            updateSettingsTruthy([]);
-            return;
-        }
-
-        const stringlessValues = values.filter(v => typeof v !== "string") as DisableQuestsSettingOption[];
-        const selectedOption = values.find(v => typeof v === "string") as string;
-
-        if (stringlessValues.some(option => option.value === selectedOption)) {
-            updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption));
-        } else {
-            const newSelectedOptions = [...stringlessValues, options.find(option => option.value === selectedOption) as DisableQuestsSettingOption];
-            updateSettingsTruthy(newSelectedOptions);
-        }
-    }
-
-    return (
-        <ErrorBoundary>
-            <Forms.FormDivider className={q("setting-divider")} />
-            <div className={q("setting", "modify-quests-completion-setting")}>
-                <Forms.FormSection>
-                    <Forms.FormTitle className={q("form-title")}>
-                        Quest Completion
-                    </Forms.FormTitle>
-                    <Forms.FormText className={q("form-description")}>
-                        Modify various aspects of completing Quests, such as platform compatibility.
-                    </Forms.FormText>
-                    <DynamicDropdown
-                        placeholder="Select which Quest completion modifications to enable."
-                        feedback="There's no supported Quest completion modification by that name."
                         className={q("select")}
                         maxVisibleItems={options.length}
                         clearable={true}
@@ -1563,11 +1495,6 @@ export const settings = definePluginSettings({
         description: "Disable the promotion of Quests for games played by friends.",
         default: true,
         hidden: true
-    },
-    questCompletion: {
-        type: OptionType.COMPONENT,
-        component: ModifyQuestsCompletionSetting,
-        description: "Select which Quest completion aspects to modify."
     },
     makeMobileQuestsDesktopCompatible: {
         type: OptionType.BOOLEAN,

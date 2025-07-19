@@ -35,7 +35,7 @@ export interface SelectOption {
     value: string | number;
 }
 
-export interface DisableQuestsSettingOption {
+export interface DynamicDropdownSettingOption {
     label: string;
     value: string;
     selected: boolean;
