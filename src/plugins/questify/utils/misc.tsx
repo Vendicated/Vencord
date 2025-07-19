@@ -135,7 +135,7 @@ export async function fetchAndDispatchQuests(source?: string, logger?: Logger): 
 
         return body.quests;
     } catch (e) {
-        logger?.warn(`[${getFormattedNow()}] Failed to fetch and dispatch quests:`, e);
+        logger?.warn(`[${getFormattedNow()}] Failed to fetch and dispatch Quests:`, e);
         return null;
     }
 }
@@ -147,10 +147,10 @@ export async function enrollInQuest(quest: Quest, logger?: Logger): Promise<bool
         }
 
         await RestAPI.post({ url: `/quests/${quest.id}/enroll`, body: { location: 11 } });
-        logger?.info(`Enrolled in quest: ${quest.config.messages.questName}`);
+        logger?.info(`Enrolled in Quest ${quest.config.messages.questName}`);
         return true;
     } catch (error) {
-        logger?.error(`Failed to enroll in quest ${quest.config.messages.questName}:`, error);
+        logger?.error(`Failed to enroll in Quest ${quest.config.messages.questName}:`, error);
         return false;
     }
 }
@@ -161,7 +161,7 @@ export async function reportVideoQuestProgress(quest: Quest, currentProgress: nu
         logger?.info(`Quest ${quest.config.messages.questName} progress reported: ${currentProgress} seconds.`);
         return true;
     } catch (error) {
-        logger?.error(`Failed to report progress for quest ${quest.config.messages.questName}:`, error);
+        logger?.error(`Failed to report progress for Quest ${quest.config.messages.questName}:`, error);
         return false;
     }
 }

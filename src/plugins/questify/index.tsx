@@ -506,6 +506,7 @@ function startProgressTracking(quest: Quest, questDuration: number, initialProgr
         if (currentProgress >= questDuration - 10) {
             clearInterval(intervalId);
             activeQuestIntervals.delete(quest.id);
+
             reportVideoQuestProgress(quest, questDuration, QuestifyLogger).then(success => {
                 if (success) {
                     QuestifyLogger.info(`Quest ${quest.config.messages.questName} completed.`);
@@ -517,7 +518,6 @@ function startProgressTracking(quest: Quest, questDuration: number, initialProgr
     }, threshold * 1000);
 
     activeQuestIntervals.set(quest.id, intervalId);
-
     const timeRemaining = Math.max(0, questDuration - initialProgress);
     QuestifyLogger.info(`Quest ${quest.config.messages.questName} will be completed in the background in ${timeRemaining} seconds.`);
 }
@@ -552,8 +552,7 @@ function processVideoQuest(quest: Quest): boolean {
     }
 
     const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : new Date();
-    const now = new Date();
-    const timeElapsed = Math.floor((now.getTime() - questEnrolledAt.getTime()) / 1000);
+    const timeElapsed = Math.floor(((new Date()).getTime() - questEnrolledAt.getTime()) / 1000);
     const timeRemaining = Math.max(0, questDuration - timeElapsed);
 
     if (timeRemaining <= 10) {
