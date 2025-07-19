@@ -16,8 +16,7 @@ Enhance your Quest experience with a suite of features, or disable them entirely
         - Gift Inventory Relocation Notice — Hides the text in the gift inventory which doubles as a shortcut to the Quests page.
         - Friends List Active Now Promotion — Hides the promotion that displays when your friends play a game which has an active Quest.
     - Allows for modifying the following Quest related features:
-        - Complete Video Quests in Background — Click the watch button on video quests and wait for the video duration to pass.
-        - Prevent Video Quest Modal — Make clicking the watch button do nothing the first time. Subsequent clicks will show the modal as normal.
+        - Complete Video Quests in Background — Click the watch button on video Quests and wait for the video duration to pass. The first click will start the Quest without opening the video modal. Subsequent clicks will show the modal as normal.
         - Make Mobile Quests Desktop Compatible — Make mobile-only video Quests completable on Desktop.
 2. Quests Button
     - Show a Quest button in the server list with an optional indicator for unclaimed Quests.
@@ -39,7 +38,7 @@ Enhance your Quest experience with a suite of features, or disable them entirely
         - Nothing — Do nothing.
 3. Fetching Quests
     - Configure how often to fetch Quests from Discord and set up alerts for new Quests.
-    - By default, Discord only fetches quests on load and when visiting the Quests page. This means that without a fetch interval defined below, this plugin will become unaware of new Quests added throughout the day.
+    - By default, Discord only fetches Quests on load and when visiting the Quests page. This means that without a fetch interval defined below, this plugin will become unaware of new Quests added throughout the day.
     - This relies on the Quest Button being enabled and set to either `Unclaimed`, or set to `Always` with unclaimed `Pill`, `Badge`, or `Both` indicators enabled. Otherwise, there is no reason to periodically fetch Quests.
     - Also, if `Fetching Quests` is blocked in the `Quest Features` setting, this will not work.
     - Fetch Interval

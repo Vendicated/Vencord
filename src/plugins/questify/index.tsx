@@ -523,7 +523,7 @@ function startProgressTracking(quest: Quest, questDuration: number, initialProgr
 }
 
 function processVideoQuest(quest: Quest): boolean {
-    const { preventVideoQuestsModal, completeVideoQuestsInBackgroundOption } = settings.store;
+    const { completeVideoQuestsInBackgroundOption } = settings.store;
 
     if (quest.userStatus?.completedAt) {
         return true;
@@ -566,7 +566,7 @@ function processVideoQuest(quest: Quest): boolean {
         startProgressTracking(quest, questDuration, timeElapsed);
     }
 
-    return !preventVideoQuestsModal;
+    return false; // Prevent the video modal from opening on the first click.
 }
 
 export default definePlugin({

@@ -543,8 +543,7 @@ function DisableQuestsSetting(): JSX.Element {
         disableQuestsGiftInventoryRelocationNotice,
         disableFriendsListActiveNowPromotion,
         makeMobileQuestsDesktopCompatible,
-        completeVideoQuestsInBackgroundOption,
-        preventVideoQuestsModal
+        completeVideoQuestsInBackgroundOption
     } = settings.use([
         "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
@@ -554,8 +553,7 @@ function DisableQuestsSetting(): JSX.Element {
         "disableQuestsGiftInventoryRelocationNotice",
         "disableFriendsListActiveNowPromotion",
         "makeMobileQuestsDesktopCompatible",
-        "completeVideoQuestsInBackgroundOption",
-        "preventVideoQuestsModal"
+        "completeVideoQuestsInBackgroundOption"
     ]);
 
     const options: DynamicDropdownSettingOption[] = [
@@ -567,7 +565,6 @@ function DisableQuestsSetting(): JSX.Element {
         { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, setting: "disableGiftInventoryRelocationNotice" },
         { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, setting: "disableFriendsListActiveNowPromotion" },
         { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackgroundOption, setting: "videoQuestsBackground" },
-        { label: "Prevent Video Quests Modal from Opening", value: "video-quests-modal", selected: preventVideoQuestsModal, setting: "preventVideoQuestsModal" },
         { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, setting: "makeMobileQuestsDesktopCompatible" }
     ];
 
@@ -594,7 +591,6 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
         settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
         settings.store.completeVideoQuestsInBackgroundOption = enabledValues.includes("video-quests-background");
-        settings.store.preventVideoQuestsModal = enabledValues.includes("video-quests-modal");
         settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
 
         redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
@@ -645,11 +641,9 @@ function DisableQuestsSetting(): JSX.Element {
                         <br /><br />
                         The <span className="questify-inline-code-block">Complete Video Quests in Background</span> option
                         will wait for the duration of the video Quest and mark it as completed automatically. You still must
-                        start the Quest manually, but can close the video modal immediately after.
-                        <br /><br />
-                        Alternatively, enable the <span className="questify-inline-code-block">Prevent Video Quests Modal from Opening</span> option
-                        to bypass the video modal entirely. The modal will only be blocked if the background option is enabled. This will only affect
-                        the first click which starts the video Quest. Subsequent clicks will open the video modal as normal.
+                        start the Quest manually. The first click will start the video Quest in the background without opening
+                        the video modal. Subsequent clicks will open the video modal as normal. To abort the video Quest, you
+                        must restart your Discord client.
                     </Forms.FormText>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."
@@ -1531,12 +1525,6 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Complete video Quests in the background after the video duration has passed.",
         default: true,
-        hidden: true
-    },
-    preventVideoQuestsModal: {
-        type: OptionType.BOOLEAN,
-        description: "Prevent the video Quests modal from opening when clicking on a video Quest. Relies on the background completion option.",
-        default: false,
         hidden: true
     },
     questButton: {
