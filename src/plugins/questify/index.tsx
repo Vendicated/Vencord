@@ -676,7 +676,7 @@ export default definePlugin({
             ]
         },
         {
-            // Prevents fetching quests.
+            // Prevents fetching Quests.
             find: 'type:"QUESTS_FETCH_CURRENT_QUESTS_BEGIN"',
             group: true,
             replacement: [
@@ -755,7 +755,7 @@ export default definePlugin({
             ]
         },
         {
-            // Prevents default pinning of specific quests to the top of the list.
+            // Prevents default pinning of specific Quests to the top of the list.
             find: "QUEST_HOME_DESKTOP},",
             replacement: {
                 match: /\i.unshift\(\i\):(\i.push\(\i\))/,
@@ -764,7 +764,7 @@ export default definePlugin({
         },
         {
             // Sorts the "All Quests" tab quest tiles.
-            // Also sets mobile-only quests as desktop compatible if the setting is enabled.
+            // Also sets mobile-only Quests as desktop compatible if the setting is enabled.
             find: ".ALL);return(",
             replacement: {
                 match: /(quests:(\i)[^;]+;)/,
@@ -790,7 +790,7 @@ export default definePlugin({
             }
         },
         {
-            // Sets intervals to progress video quests in the background.
+            // Sets intervals to progress video Quests in the background.
             find: "IN_PROGRESS:if(",
             group: true,
             replacement: [

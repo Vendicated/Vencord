@@ -6,7 +6,7 @@ Enhance your Quest experience with a suite of features, or disable them entirely
 
 ## Features
 1. Quest Features
-    - Disable specific Quest features, such as the popup for new Quests.
+    - Modify specific Quest features.
     - Allows for disabling the following Quest related features:
         - Everything — All of the below is disabled.
         - Discovery Tab — Quests tab becomes hidden.
@@ -15,6 +15,10 @@ Enhance your Quest experience with a suite of features, or disable them entirely
         - Popup Above User Panel — Hides the new Quest promotion that appears above your profile panel.
         - Gift Inventory Relocation Notice — Hides the text in the gift inventory which doubles as a shortcut to the Quests page.
         - Friends List Active Now Promotion — Hides the promotion that displays when your friends play a game which has an active Quest.
+    - Allows for modifying the following Quest related features:
+        - Complete Video Quests in Background — Click the watch button on video quests and wait for the video duration to pass.
+        - Prevent Video Quest Modal — Make clicking the watch button do nothing the first time. Subsequent clicks will show the modal as normal.
+        - Make Mobile Quests Desktop Compatible — Make mobile-only video Quests completable on Desktop.
 2. Quests Button
     - Show a Quest button in the server list with an optional indicator for unclaimed Quests.
     - Button Visibility

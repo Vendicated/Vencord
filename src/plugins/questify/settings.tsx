@@ -648,7 +648,8 @@ function DisableQuestsSetting(): JSX.Element {
                         start the Quest manually, but can close the video modal immediately after.
                         <br /><br />
                         Alternatively, enable the <span className="questify-inline-code-block">Prevent Video Quests Modal from Opening</span> option
-                        to bypass the video modal entirely. The modal will only be blocked if the background option is enabled.
+                        to bypass the video modal entirely. The modal will only be blocked if the background option is enabled. This will only affect
+                        the first click which starts the video Quest. Subsequent clicks will open the video modal as normal.
                     </Forms.FormText>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."
