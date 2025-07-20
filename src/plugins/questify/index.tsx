@@ -492,9 +492,9 @@ function shouldPreloadQuestAssets(): boolean {
 
 function startVideoProgressTracking(quest: Quest, questDuration: number, initialProgress: number): void {
     const start = new Date();
-    const reportEverySec = 10;
     const initialReportJustEnrolled = 5;
     const timeRemaining = Math.max(0, questDuration - initialProgress);
+    const reportEverySec = 10;
 
     if (!initialProgress) {
         enrollInQuest(quest, QuestifyLogger).then(success => {
@@ -509,24 +509,35 @@ function startVideoProgressTracking(quest: Quest, questDuration: number, initial
     }
 
     let currentProgress = initialProgress;
+    let intervalId: NodeJS.Timeout;
 
-    const intervalId = setInterval(async () => {
-        currentProgress += reportEverySec;
+    async function handleSendComplete() {
+        clearInterval(intervalId);
+        activeQuestIntervals.delete(quest.id);
+        const success = await reportVideoQuestProgress(quest, questDuration, QuestifyLogger);
 
-        if (currentProgress >= questDuration - 10) {
-            clearInterval(intervalId);
-            activeQuestIntervals.delete(quest.id);
-            const success = await reportVideoQuestProgress(quest, questDuration, QuestifyLogger);
-
-            if (success) {
-                QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} completed.`);
-            } else {
-                QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${quest.config.messages.questName}.`);
-            }
+        if (success) {
+            QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} completed.`);
         } else {
-            await reportVideoQuestProgress(quest, currentProgress, QuestifyLogger);
+            QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${quest.config.messages.questName}.`);
         }
-    }, reportEverySec * 1000);
+    }
+
+    if (timeRemaining < reportEverySec) {
+        intervalId = setTimeout(async () => {
+            await handleSendComplete();
+        }, timeRemaining * 1000);
+    } else {
+        intervalId = setInterval(async () => {
+            currentProgress += reportEverySec;
+
+            if (currentProgress >= questDuration - 10) {
+                await handleSendComplete();
+            } else {
+                await reportVideoQuestProgress(quest, currentProgress, QuestifyLogger);
+            }
+        }, reportEverySec * 1000);
+    }
 
     activeQuestIntervals.set(quest.id, intervalId);
     QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} will be completed in the background in ${timeRemaining} seconds.`);
