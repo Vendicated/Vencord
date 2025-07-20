@@ -650,7 +650,6 @@ function processPlayGameQuest(quest: Quest): boolean {
     const existingInterval = activeQuestIntervals.get(quest.id);
 
     if (existingInterval) {
-        console.warn(`Quest ${quest.config.messages.questName} is already being tracked.`);
         return true;
     }
 
