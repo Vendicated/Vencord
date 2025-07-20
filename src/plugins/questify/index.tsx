@@ -519,9 +519,9 @@ function startVideoProgressTracking(quest: Quest, questDuration: number, initial
             const success = await reportVideoQuestProgress(quest, questDuration, QuestifyLogger);
 
             if (success) {
-                QuestifyLogger.info(`Quest ${quest.config.messages.questName} completed.`);
+                QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} completed.`);
             } else {
-                QuestifyLogger.error(`Failed to complete Quest ${quest.config.messages.questName}.`);
+                QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${quest.config.messages.questName}.`);
             }
         } else {
             await reportVideoQuestProgress(quest, currentProgress, QuestifyLogger);
@@ -529,7 +529,7 @@ function startVideoProgressTracking(quest: Quest, questDuration: number, initial
     }, reportEverySec * 1000);
 
     activeQuestIntervals.set(quest.id, intervalId);
-    QuestifyLogger.info(`Quest ${quest.config.messages.questName} will be completed in the background in ${timeRemaining} seconds.`);
+    QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} will be completed in the background in ${timeRemaining} seconds.`);
 }
 
 function processVideoQuest(quest: Quest): boolean {
@@ -586,7 +586,7 @@ function startPlayGameProgressTracking(quest: Quest, questDuration: number, init
         if (result.progress === null) {
             clearInterval(intervalId);
             activeQuestIntervals.delete(quest.id);
-            QuestifyLogger.error(`Failed to send heartbeat for Quest ${quest.config.messages.questName}.`);
+            QuestifyLogger.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${quest.config.messages.questName}.`);
             return;
         }
 
@@ -599,9 +599,9 @@ function startPlayGameProgressTracking(quest: Quest, questDuration: number, init
             const success = await reportPlayGameQuestProgress(quest, true, QuestifyLogger);
 
             if (success) {
-                QuestifyLogger.info(`Quest ${quest.config.messages.questName} completed.`);
+                QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} completed.`);
             } else {
-                QuestifyLogger.error(`Failed to complete Quest ${quest.config.messages.questName}.`);
+                QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${quest.config.messages.questName}.`);
             }
         } else if (timeRemaining < heartbeatInterval) {
             clearInterval(intervalId);
@@ -611,16 +611,16 @@ function startPlayGameProgressTracking(quest: Quest, questDuration: number, init
                 const success = await reportPlayGameQuestProgress(quest, true, QuestifyLogger);
 
                 if (success) {
-                    QuestifyLogger.info(`Quest ${quest.config.messages.questName} completed.`);
+                    QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} completed.`);
                 } else {
-                    QuestifyLogger.error(`Failed to complete Quest ${quest.config.messages.questName}.`);
+                    QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${quest.config.messages.questName}.`);
                 }
             }, (timeRemaining + 1) * 1000);
         }
     }, heartbeatInterval * 1000);
 
     activeQuestIntervals.set(quest.id, intervalId);
-    QuestifyLogger.info(`Quest ${quest.config.messages.questName} will be completed in the background in ${remaining} seconds.`);
+    QuestifyLogger.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} will be completed in the background in ${remaining} seconds.`);
 }
 
 function processPlayGameQuest(quest: Quest): boolean {
@@ -1003,6 +1003,28 @@ export default definePlugin({
         QUESTS_CLAIM_REWARD_SUCCESS(data) {
             QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_CLAIM_REWARD_SUCCESS]\n`, data);
             fetchAndDispatchQuests("Questify", QuestifyLogger);
+        },
+
+        // Stops any Game Quest background completion intervals for running games to prevent duplicate heartbeats.
+        // This will also update the button text back to "Quest Accepted" from "Resume" if the Quest is in progress.
+        RUNNING_GAMES_CHANGE(data) {
+            const gameIDs: string[] = data.games.map(game => game.id);
+            let refreshQuests = false;
+
+            (Array.from(QuestsStore.quests.values()) as Quest[]).forEach(quest => {
+                const questAppID = quest.config.application.id;
+
+                if (gameIDs.includes(questAppID) && activeQuestIntervals.has(quest.id)) {
+                    clearInterval(activeQuestIntervals.get(quest.id));
+                    activeQuestIntervals.delete(quest.id);
+                    QuestifyLogger.info(`[${getFormattedNow()}] Application for Quest ${quest.config.messages.questName} that was being completed in the background has been launched. Stopping background completion to prevent duplicate heartbeats.`);
+                    refreshQuests = true;
+                }
+            });
+
+            if (refreshQuests) {
+                settings.store.triggerQuestsRerender = !settings.store.triggerQuestsRerender;
+            }
         },
     },
 

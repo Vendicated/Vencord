@@ -51,6 +51,10 @@ export type QuestMap = Map<string, Quest>;
 export interface Quest {
     id: string;
     config: {
+        application: {
+            id: string;
+            name: string;
+        },
         startsAt: string;
         expiresAt: string;
         messages: {

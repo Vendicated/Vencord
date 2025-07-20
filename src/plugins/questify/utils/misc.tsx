@@ -147,10 +147,10 @@ export async function enrollInQuest(quest: Quest, logger?: Logger): Promise<bool
         }
 
         await RestAPI.post({ url: `/quests/${quest.id}/enroll`, body: { location: 11 } });
-        logger?.info(`Enrolled in Quest ${quest.config.messages.questName}.`);
+        logger?.info(`[${getFormattedNow()}] Enrolled in Quest ${quest.config.messages.questName}.`);
         return true;
     } catch (error) {
-        logger?.error(`Failed to enroll in Quest ${quest.config.messages.questName}:`, error);
+        logger?.error(`[${getFormattedNow()}] Failed to enroll in Quest ${quest.config.messages.questName}:`, error);
         return false;
     }
 }
@@ -158,10 +158,10 @@ export async function enrollInQuest(quest: Quest, logger?: Logger): Promise<bool
 export async function reportVideoQuestProgress(quest: Quest, currentProgress: number, logger?: Logger): Promise<boolean> {
     try {
         await RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: currentProgress } });
-        logger?.info(`Quest ${quest.config.messages.questName} progress reported: ${currentProgress} seconds.`);
+        logger?.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} progress reported: ${currentProgress} seconds.`);
         return true;
     } catch (error) {
-        logger?.error(`Failed to report progress for Quest ${quest.config.messages.questName}:`, error);
+        logger?.error(`[${getFormattedNow()}] Failed to report progress for Quest ${quest.config.messages.questName}:`, error);
         return false;
     }
 }
@@ -182,14 +182,14 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
         const progress = progressPlayType?.value || 0;
 
         if (!questPlayType) {
-            logger?.warn(`Quest ${quest.config.messages.questName} does not have a valid play type configured.`);
+            logger?.warn(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} does not have a valid play type configured.`);
             return { progress: null };
         }
 
-        logger?.info(`Heartbeat sent for Quest ${quest.config.messages.questName} with progress: ${progress}/${questPlayType.target}.`);
+        logger?.info(`[${getFormattedNow()}] Heartbeat sent for Quest ${quest.config.messages.questName} with progress: ${progress}/${questPlayType.target}.`);
         return { progress };
     } catch (error) {
-        logger?.error(`Failed to send heartbeat for Quest ${quest.config.messages.questName}:`, error);
+        logger?.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${quest.config.messages.questName}:`, error);
         return { progress: null };
     }
 }
