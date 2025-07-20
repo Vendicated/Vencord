@@ -147,7 +147,7 @@ export async function enrollInQuest(quest: Quest, logger?: Logger): Promise<bool
         }
 
         await RestAPI.post({ url: `/quests/${quest.id}/enroll`, body: { location: 11 } });
-        logger?.info(`Enrolled in Quest ${quest.config.messages.questName}`);
+        logger?.info(`Enrolled in Quest ${quest.config.messages.questName}.`);
         return true;
     } catch (error) {
         logger?.error(`Failed to enroll in Quest ${quest.config.messages.questName}:`, error);
@@ -163,6 +163,34 @@ export async function reportVideoQuestProgress(quest: Quest, currentProgress: nu
     } catch (error) {
         logger?.error(`Failed to report progress for Quest ${quest.config.messages.questName}:`, error);
         return false;
+    }
+}
+
+export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolean, logger?: Logger): Promise<{ progress: number | null; }> {
+    try {
+        const response = await RestAPI.post({
+            url: `/quests/${quest.id}/heartbeat`,
+            body: {
+                stream_key: `call:${quest.id}:1`,
+                terminal
+            }
+        });
+
+        const { body } = snakeToCamel(response);
+        const progressPlayType = body.progress.PLAY_ON_DESKTOP || body.progress.PLAY_ON_XBOX || body.progress.PLAY_ON_PLAYSTATION || body.progress.PLAY_ACTIVITY;
+        const questPlayType = quest.config.taskConfigV2.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2.tasks.PLAY_ACTIVITY;
+        const progress = progressPlayType?.value || 0;
+
+        if (!questPlayType) {
+            logger?.warn(`Quest ${quest.config.messages.questName} does not have a valid play type configured.`);
+            return { progress: null };
+        }
+
+        logger?.info(`Heartbeat sent for Quest ${quest.config.messages.questName} with progress: ${progress}/${questPlayType.target}.`);
+        return { progress };
+    } catch (error) {
+        logger?.error(`Failed to send heartbeat for Quest ${quest.config.messages.questName}:`, error);
+        return { progress: null };
     }
 }
 

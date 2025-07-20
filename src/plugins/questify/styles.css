@@ -321,7 +321,7 @@
 }
 
 .questify-quest-item-restyle> :nth-child(2)> div> button:not([disabled]):hover {
-    background-color: var(--questify-button-hover);
+    background-color: var(--questify-button-hover) !important; /* Necessary !important */
     transition: background-color 0.2s ease-in-out;
 }
 

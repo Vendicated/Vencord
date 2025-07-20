@@ -67,6 +67,22 @@ export interface Quest {
                     type: "WATCH_VIDEO_ON_MOBILE";
                     target: number;
                 },
+                PLAY_ON_DESKTOP?: {
+                    type: "PLAY_ON_DESKTOP";
+                    target: number;
+                },
+                PLAY_ON_XBOX?: {
+                    type: "PLAY_ON_XBOX";
+                    target: number;
+                },
+                PLAY_ON_PLAYSTATION?: {
+                    type: "PLAY_ON_PLAYSTATION";
+                    target: number;
+                },
+                PLAY_ACTIVITY?: {
+                    type: "PLAY_ACTIVITY";
+                    target: number;
+                };
             };
         };
     },
@@ -81,6 +97,22 @@ export interface Quest {
             },
             WATCH_VIDEO_ON_MOBILE?: {
                 eventName: "WATCH_VIDEO_ON_MOBILE";
+                value: number;
+            },
+            PLAY_ON_DESKTOP?: {
+                eventName: "PLAY_ON_DESKTOP";
+                value: number;
+            },
+            PLAY_ON_XBOX?: {
+                eventName: "PLAY_ON_XBOX";
+                value: number;
+            },
+            PLAY_ON_PLAYSTATION?: {
+                eventName: "PLAY_ON_PLAYSTATION";
+                value: number;
+            },
+            PLAY_ACTIVITY?: {
+                eventName: "PLAY_ACTIVITY";
                 value: number;
             },
         };

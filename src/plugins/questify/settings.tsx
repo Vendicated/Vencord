@@ -543,7 +543,8 @@ function DisableQuestsSetting(): JSX.Element {
         disableQuestsGiftInventoryRelocationNotice,
         disableFriendsListActiveNowPromotion,
         makeMobileQuestsDesktopCompatible,
-        completeVideoQuestsInBackgroundOption
+        completeVideoQuestsInBackgroundOption,
+        completePlayGameQuestsInBackground
     } = settings.use([
         "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
@@ -553,7 +554,8 @@ function DisableQuestsSetting(): JSX.Element {
         "disableQuestsGiftInventoryRelocationNotice",
         "disableFriendsListActiveNowPromotion",
         "makeMobileQuestsDesktopCompatible",
-        "completeVideoQuestsInBackgroundOption"
+        "completeVideoQuestsInBackgroundOption",
+        "completePlayGameQuestsInBackground"
     ]);
 
     const options: DynamicDropdownSettingOption[] = [
@@ -565,6 +567,7 @@ function DisableQuestsSetting(): JSX.Element {
         { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, setting: "disableGiftInventoryRelocationNotice" },
         { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, setting: "disableFriendsListActiveNowPromotion" },
         { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackgroundOption, setting: "videoQuestsBackground" },
+        { label: "Complete Play Game Quests in Background", value: "play-game-quests-background", selected: completePlayGameQuestsInBackground, setting: "playGameQuestsBackground" },
         { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, setting: "makeMobileQuestsDesktopCompatible" }
     ];
 
@@ -591,6 +594,7 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
         settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
         settings.store.completeVideoQuestsInBackgroundOption = enabledValues.includes("video-quests-background");
+        settings.store.completePlayGameQuestsInBackground = enabledValues.includes("play-game-quests-background");
         settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
 
         redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
@@ -640,10 +644,16 @@ function DisableQuestsSetting(): JSX.Element {
                         will be ignored for completed Quests and Quest progress tracking.
                         <br /><br />
                         The <span className="questify-inline-code-block">Complete Video Quests in Background</span> option
-                        will wait for the duration of the video Quest and mark it as completed automatically. You still must
-                        start the Quest manually. The first click will start the video Quest in the background without opening
-                        the video modal. Subsequent clicks will open the video modal as normal. To abort the video Quest, you
+                        will wait for the duration of the video Quest and mark it as completed automatically.
+                        <br /><br />
+                        Similarly, the <span className="questify-inline-code-block">Complete Play Game Quests in Background</span> option
+                        will wait for the duration of the game Quest and mark it as completed automatically.
+                        <br /><br />
+                        You still must start the Quests manually. The first click will start the Quests in the background.
+                        For video Quests, subsequent clicks will open the video modal as normal. To abort the Quests, you
                         must restart your Discord client.
+                        <br /><br />
+                        Using either of those options is against Discord's TOS. Use at your own risk.
                     </Forms.FormText>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."
@@ -1524,7 +1534,13 @@ export const settings = definePluginSettings({
     completeVideoQuestsInBackgroundOption: {
         type: OptionType.BOOLEAN,
         description: "Complete video Quests in the background after the video duration has passed.",
-        default: true,
+        default: false,
+        hidden: true
+    },
+    completePlayGameQuestsInBackground: {
+        type: OptionType.BOOLEAN,
+        description: "Complete play game Quests in the background after the game duration has passed.",
+        default: false,
         hidden: true
     },
     questButton: {
@@ -1672,5 +1688,11 @@ export const settings = definePluginSettings({
         description: "Whether the user is currently on the quests page.",
         default: false,
         hidden: true
-    }
+    },
+    triggerQuestsRerender: {
+        type: OptionType.BOOLEAN,
+        description: "Trigger a rerender of the Quests page.",
+        default: false,
+        hidden: true
+    },
 });
