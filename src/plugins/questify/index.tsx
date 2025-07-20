@@ -313,8 +313,8 @@ function preprocessQuests(quests: Quest[]): Quest[] {
         ignoredSubsort,
         expiredSubsort,
         makeMobileQuestsDesktopCompatible,
-        completeVideoQuestsInBackgroundOption,
-        completePlayGameQuestsInBackground,
+        completeVideoQuestsInBackground,
+        completeGameQuestsInBackground,
         triggerQuestsRerender
     } = settings.use([
         "ignoredQuests",
@@ -324,8 +324,8 @@ function preprocessQuests(quests: Quest[]): Quest[] {
         "ignoredSubsort",
         "expiredSubsort",
         "makeMobileQuestsDesktopCompatible",
-        "completeVideoQuestsInBackgroundOption",
-        "completePlayGameQuestsInBackground",
+        "completeVideoQuestsInBackground",
+        "completeGameQuestsInBackground",
         "triggerQuestsRerender"
     ]);
 
@@ -532,13 +532,13 @@ function startVideoProgressTracking(quest: Quest, questDuration: number, initial
 }
 
 function processVideoQuest(quest: Quest): boolean {
-    const { completeVideoQuestsInBackgroundOption } = settings.store;
+    const { completeVideoQuestsInBackground } = settings.store;
 
     if (quest.userStatus?.completedAt) {
         return true;
     }
 
-    if (!completeVideoQuestsInBackgroundOption) {
+    if (!completeVideoQuestsInBackground) {
         return true;
     }
 
@@ -623,13 +623,13 @@ function startPlayGameProgressTracking(quest: Quest, questDuration: number, init
 }
 
 function processPlayGameQuest(quest: Quest): boolean {
-    const { completePlayGameQuestsInBackground } = settings.store;
+    const { completeGameQuestsInBackground } = settings.store;
 
     if (quest.userStatus?.completedAt) {
         return true;
     }
 
-    if (!completePlayGameQuestsInBackground || !IS_DISCORD_DESKTOP) {
+    if (!completeGameQuestsInBackground || !IS_DISCORD_DESKTOP) {
         return true;
     }
 
@@ -661,9 +661,9 @@ function processPlayGameQuest(quest: Quest): boolean {
 
 function shouldDisableQuestAcceptedButton(quest: Quest): boolean {
     const playType = quest.config.taskConfigV2.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2.tasks.PLAY_ACTIVITY;
-    const { completePlayGameQuestsInBackground } = settings.store;
+    const { completeGameQuestsInBackground } = settings.store;
 
-    return !playType || !(completePlayGameQuestsInBackground && IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id));
+    return !playType || !(completeGameQuestsInBackground && IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id));
 }
 
 function questAcceptedResumeButtonClicked(quest: Quest): void {
@@ -676,9 +676,9 @@ function questAcceptedResumeButtonClicked(quest: Quest): void {
 }
 
 function getQuestAcceptedButtonText(quest: Quest, resumeText: string, questAcceptedText: string): string {
-    const { completePlayGameQuestsInBackground } = settings.store;
+    const { completeGameQuestsInBackground } = settings.store;
 
-    if (completePlayGameQuestsInBackground && IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id)) {
+    if (completeGameQuestsInBackground && IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id)) {
         return resumeText;
     } else {
         return questAcceptedText;

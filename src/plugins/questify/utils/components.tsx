@@ -38,7 +38,6 @@ export interface DynamicDropdownSettingOption {
     label: string;
     value: string;
     selected: boolean;
-    setting: string;
 }
 
 export interface RGB {

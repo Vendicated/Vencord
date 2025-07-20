@@ -543,8 +543,8 @@ function DisableQuestsSetting(): JSX.Element {
         disableQuestsGiftInventoryRelocationNotice,
         disableFriendsListActiveNowPromotion,
         makeMobileQuestsDesktopCompatible,
-        completeVideoQuestsInBackgroundOption,
-        completePlayGameQuestsInBackground
+        completeVideoQuestsInBackground,
+        completeGameQuestsInBackground
     } = settings.use([
         "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
@@ -554,21 +554,21 @@ function DisableQuestsSetting(): JSX.Element {
         "disableQuestsGiftInventoryRelocationNotice",
         "disableFriendsListActiveNowPromotion",
         "makeMobileQuestsDesktopCompatible",
-        "completeVideoQuestsInBackgroundOption",
-        "completePlayGameQuestsInBackground"
+        "completeVideoQuestsInBackground",
+        "completeGameQuestsInBackground"
     ]);
 
     const options: DynamicDropdownSettingOption[] = [
-        { label: "Disable Everything", value: "everything", selected: disableQuestsEverything, setting: "disableQuests" },
-        { label: "Disable Fetching Quests", value: "fetching", selected: disableQuestsFetchingQuests, setting: "disableFetchingQuests" },
-        { label: "Disable Discovery Quests Tab", value: "discovery", selected: disableQuestsDiscoveryTab, setting: "disableDiscoveryTab" },
-        { label: "Disable Badge on User Profiles", value: "badge", selected: disableQuestsBadgeOnUserProfiles, setting: "disableBadgeOnUserProfiles" },
-        { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel, setting: "disablePopupAboveAccountPanel" },
-        { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, setting: "disableGiftInventoryRelocationNotice" },
-        { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, setting: "disableFriendsListActiveNowPromotion" },
-        { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackgroundOption, setting: "videoQuestsBackground" },
-        { label: "Complete Play Game Quests in Background", value: "play-game-quests-background", selected: completePlayGameQuestsInBackground, setting: "playGameQuestsBackground" },
-        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, setting: "makeMobileQuestsDesktopCompatible" }
+        { label: "Disable Everything", value: "everything", selected: disableQuestsEverything },
+        { label: "Disable Fetching Quests", value: "fetching", selected: disableQuestsFetchingQuests },
+        { label: "Disable Discovery Quests Tab", value: "discovery", selected: disableQuestsDiscoveryTab },
+        { label: "Disable Badge on User Profiles", value: "badge", selected: disableQuestsBadgeOnUserProfiles },
+        { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel },
+        { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice },
+        { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion },
+        { label: "Complete Game Quests in Background", value: "game-quests-background", selected: completeGameQuestsInBackground },
+        { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackground },
+        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible }
     ];
 
     const everythingOnly = options.find(option => option.value === "everything") as DynamicDropdownSettingOption;
@@ -593,8 +593,8 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableQuestsBadgeOnUserProfiles = enabledValues.includes("badge");
         settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
         settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
-        settings.store.completeVideoQuestsInBackgroundOption = enabledValues.includes("video-quests-background");
-        settings.store.completePlayGameQuestsInBackground = enabledValues.includes("play-game-quests-background");
+        settings.store.completeGameQuestsInBackground = enabledValues.includes("game-quests-background");
+        settings.store.completeVideoQuestsInBackground = enabledValues.includes("video-quests-background");
         settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
 
         redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
@@ -644,14 +644,14 @@ function DisableQuestsSetting(): JSX.Element {
                         will be ignored for completed Quests and Quest progress tracking.
                         <br /><br />
                         The <span className="questify-inline-code-block">Complete Video Quests in Background</span> option
-                        will wait for the duration of the video Quest and mark it as completed automatically.
+                        will wait for the duration of the Video Quest and mark it as completed automatically.
                         <br /><br />
                         Similarly, the <span className="questify-inline-code-block">Complete Play Game Quests in Background</span> option
-                        will wait for the duration of the game Quest and mark it as completed automatically. This option is only supported
+                        will wait for the duration of the Game Quest and mark it as completed automatically. This option is only supported
                         on the official desktop client.
                         <br /><br />
                         You still must start the Quests manually. The first click will start the Quests in the background.
-                        For video Quests, subsequent clicks will open the video modal as normal. To abort the Quests, you
+                        For Video Quests, subsequent clicks will open the video modal as normal. To abort the Quests, you
                         must restart your Discord client.
                         <br /><br />
                         Using either of those options is against Discord's TOS. Use at your own risk.
@@ -1532,15 +1532,15 @@ export const settings = definePluginSettings({
         default: true,
         hidden: true
     },
-    completeVideoQuestsInBackgroundOption: {
+    completeVideoQuestsInBackground: {
         type: OptionType.BOOLEAN,
-        description: "Complete video Quests in the background after the video duration has passed.",
+        description: "Complete Video Quests in the background after the video duration has passed.",
         default: false,
         hidden: true
     },
-    completePlayGameQuestsInBackground: {
+    completeGameQuestsInBackground: {
         type: OptionType.BOOLEAN,
-        description: "Complete play game Quests in the background after the game duration has passed.",
+        description: "Complete Game Quests in the background after the game duration has passed.",
         default: false,
         hidden: true
     },
