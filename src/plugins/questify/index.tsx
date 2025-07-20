@@ -663,7 +663,7 @@ function shouldDisableQuestAcceptedButton(quest: Quest): boolean {
     const playType = quest.config.taskConfigV2.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2.tasks.PLAY_ACTIVITY;
     const { completePlayGameQuestsInBackground } = settings.store;
 
-    return !playType || !(completePlayGameQuestsInBackground && !!IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id));
+    return !playType || !(completePlayGameQuestsInBackground && IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id));
 }
 
 function questAcceptedResumeButtonClicked(quest: Quest): void {
@@ -678,7 +678,7 @@ function questAcceptedResumeButtonClicked(quest: Quest): void {
 function getQuestAcceptedButtonText(quest: Quest, resumeText: string, questAcceptedText: string): string {
     const { completePlayGameQuestsInBackground } = settings.store;
 
-    if (completePlayGameQuestsInBackground && !!IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id)) {
+    if (completePlayGameQuestsInBackground && IS_DISCORD_DESKTOP && !activeQuestIntervals.has(quest.id)) {
         return resumeText;
     } else {
         return questAcceptedText;
