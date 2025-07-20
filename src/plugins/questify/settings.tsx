@@ -647,7 +647,8 @@ function DisableQuestsSetting(): JSX.Element {
                         will wait for the duration of the video Quest and mark it as completed automatically.
                         <br /><br />
                         Similarly, the <span className="questify-inline-code-block">Complete Play Game Quests in Background</span> option
-                        will wait for the duration of the game Quest and mark it as completed automatically.
+                        will wait for the duration of the game Quest and mark it as completed automatically. This option is only supported
+                        on the official desktop client.
                         <br /><br />
                         You still must start the Quests manually. The first click will start the Quests in the background.
                         For video Quests, subsequent clicks will open the video modal as normal. To abort the Quests, you
