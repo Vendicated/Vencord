@@ -10,6 +10,7 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import { ErrorBoundary } from "@components/index";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/index";
 import definePlugin, { StartAt } from "@utils/types";
 import { ContextMenuApi, Menu, NavigationRouter } from "@webpack/common";
 import { JSX } from "react";
@@ -710,6 +711,7 @@ export default definePlugin({
     processVideoQuest,
     processPlayGameQuest,
     activeQuestIntervals,
+    getIntlMessage,
 
     patches: [
         {
@@ -956,10 +958,10 @@ export default definePlugin({
                     replace: "onClick:()=>{$self.questAcceptedResumeButtonClicked(arguments[0].quest)},$1",
                 },
                 {
-                    // The Quest Accepted button text is changed to "Resume" if the Quest is in progress.
+                    // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress.
                     // If the Quest is resumed, trigger a rerender to revert the text.
-                    match: /\["9KoPyM"\]/,
-                    replace: "[$self.getQuestAcceptedButtonText(arguments[0].quest, \"YGm6SU\",\"9KoPyM\")]"
+                    match: /\i.intl.string\(\i.\i#{intl::QUEST_ACCEPTED}\)/,
+                    replace: "$self.getQuestAcceptedButtonText(arguments[0].quest,$self.getIntlMessage(\"GAME_LIBRARY_UPDATES_ACTION_RESUME\"),$self.getIntlMessage(\"QUEST_ACCEPTED\"))"
                 }
             ]
         },
