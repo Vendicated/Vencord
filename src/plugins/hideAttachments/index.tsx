@@ -25,8 +25,8 @@ import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { MessageSnapshot } from "@vencord/discord-types";
 import { ChannelStore } from "@webpack/common";
-import { MessageSnapshot } from "@webpack/types";
 
 const KEY = "HideAttachments_HiddenIds";
 
@@ -56,7 +56,7 @@ export default definePlugin({
     }],
 
     renderMessagePopoverButton(msg) {
-        // @ts-ignore - discord-types lags behind discord.
+        // @ts-expect-error - discord-types lags behind discord.
         const hasAttachmentsInShapshots = msg.messageSnapshots.some(
             (snapshot: MessageSnapshot) => snapshot?.message.attachments.length
         );
