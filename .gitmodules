@@ -22,9 +22,6 @@
 [submodule "src/userplugins/vc-message-logger-enhanced"]
 	path = src/userplugins/vc-message-logger-enhanced
 	url = https://github.com/Syncxv/vc-message-logger-enhanced
-[submodule "src/userplugins/vc-newPluginsManager"]
-	path = src/userplugins/vc-newPluginsManager
-	url = https://github.com/Sqaaakoi/vc-newPluginsManager
 [submodule "src/userplugins/vc-sidebarchat"]
 	path = src/userplugins/vc-sidebarchat
 	url = https://github.com/Masterjoona/vc-sidebarchat
