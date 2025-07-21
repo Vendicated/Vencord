@@ -77,10 +77,12 @@
     min-height: 43px;
     display: flex;
     align-items: center;
+    transition: color 0.2s ease-in-out;
 }
 
 .questify-alert-icon.questify-playing-audio {
     color: var(--red-500);
+    transition: color 0.2s ease-in-out;
 }
 
 .questify-button [class^="contents"] {
@@ -88,7 +90,7 @@
 }
 
 .questify-button-red {
-    background-color: var(--control-background-critical-primary-default) !important; /* Necessary !important */
+    background-color: var(--red-500) !important; /* Necessary !important */
 }
 
 .questify-button-red:hover {
@@ -97,7 +99,7 @@
 }
 
 .questify-button-blue {
-    background-color: var(--control-background-primary-default) !important; /* Necessary !important */
+    background-color: var(--blue-500) !important; /* Necessary !important */
 }
 
 .questify-button-blue:hover {
