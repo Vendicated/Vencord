@@ -9,7 +9,7 @@ import "@equicordplugins/_misc/styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Forms } from "@webpack/common";
+import { Forms, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     platform: {
@@ -61,33 +61,37 @@ export default definePlugin({
             find: "_doIdentify(){",
             replacement: {
                 match: /(\[IDENTIFY\].*let.{0,5}=\{.*properties:)(.*),presence/,
-                replace: "$1{...$2,...$self.getPlatform()},presence"
+                replace: "$1{...$2,...$self.getPlatform(true)},presence"
             }
         },
         {
             find: "voiceChannelEffect]:",
             replacement: {
-                match: /(?<=participantType:\i,platform:)(\i)(?=,className:\i\(\))/,
-                replace: "$self.getPlatform().vcIcon||$1"
+                match: /(?<=participantUserId:(\i).{0,2000}participantType:\i,platform:)(\i)(?=,className:\i\(\))/,
+                replace: "$self.getPlatform(false, $1)?.vcIcon||$2"
             }
         }
     ],
-    getPlatform() {
+    getPlatform(bypass, userId?: any) {
         const platform = settings.store.platform ?? "desktop";
 
-        switch (platform) {
-            case "desktop":
-                return { browser: "Discord Client", vcIcon: 0 };
-            case "web":
-                return { browser: "Discord Web", vcIcon: 0 };
-            case "ios":
-                return { browser: "Discord iOS", vcIcon: 1 };
-            case "android":
-                return { browser: "Discord Android", vcIcon: 1 };
-            case "xbox":
-                return { browser: "Discord Embedded", vcIcon: 2 };
-            case "playstation":
-                return { browser: "Discord Embedded", vcIcon: 3 };
+        if (bypass || userId === UserStore.getCurrentUser().id) {
+            switch (platform) {
+                case "desktop":
+                    return { browser: "Discord Client", vcIcon: 0 };
+                case "web":
+                    return { browser: "Discord Web", vcIcon: 0 };
+                case "ios":
+                    return { browser: "Discord iOS", vcIcon: 1 };
+                case "android":
+                    return { browser: "Discord Android", vcIcon: 1 };
+                case "xbox":
+                    return { browser: "Discord Embedded", vcIcon: 2 };
+                case "playstation":
+                    return { browser: "Discord Embedded", vcIcon: 3 };
+            }
         }
+
+        return null;
     }
 });
