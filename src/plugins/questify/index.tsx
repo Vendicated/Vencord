@@ -782,7 +782,7 @@ export default definePlugin({
                 },
                 {
                     match: /badges:(\i)/,
-                    replace: 'badges:$1.filter(badge=>!(badge.id==="quest_completed"&&shouldHideBadgeOnUserProfiles))',
+                    replace: 'badges:$1.filter(badge=>!(["quest_completed","orb_profile_badge"].includes(badge.id)&&shouldHideBadgeOnUserProfiles))',
                 }
             ]
         },

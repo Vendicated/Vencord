@@ -559,18 +559,20 @@ function DisableQuestsSetting(): JSX.Element {
     ]);
 
     const options: DynamicDropdownSettingOption[] = [
-        { label: "Disable Everything", value: "everything", selected: disableQuestsEverything },
-        { label: "Disable Fetching Quests", value: "fetching", selected: disableQuestsFetchingQuests },
-        { label: "Disable Discovery Quests Tab", value: "discovery", selected: disableQuestsDiscoveryTab },
-        { label: "Disable Badge on User Profiles", value: "badge", selected: disableQuestsBadgeOnUserProfiles },
-        { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel },
-        { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice },
-        { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion },
-        { label: "Complete Game Quests in Background", value: "game-quests-background", selected: completeGameQuestsInBackground },
-        { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackground },
-        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible }
+        { label: "Disable Everything", value: "everything", selected: disableQuestsEverything, type: "disable" },
+        { label: "Disable Fetching Quests", value: "fetching", selected: disableQuestsFetchingQuests, type: "disable" },
+        { label: "Disable Discovery Quests Tab", value: "discovery", selected: disableQuestsDiscoveryTab, type: "disable" },
+        { label: "Disable Badge on User Profiles", value: "badge", selected: disableQuestsBadgeOnUserProfiles, type: "disable" },
+        { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel, type: "disable" },
+        { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, type: "disable" },
+        { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, type: "disable" },
+        { label: "Complete Game Quests in Background", value: "game-quests-background", selected: completeGameQuestsInBackground, type: "modification" },
+        { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackground, type: "modification" },
+        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, type: "modification" }
     ];
 
+    const disableOptions = options.filter(option => option.type === "disable");
+    const modificationOptions = options.filter(option => option.type === "modification");
     const everythingOnly = options.find(option => option.value === "everything") as DynamicDropdownSettingOption;
     const [currentValue, setCurrentValue] = useState(options.filter(option => option.selected));
 
@@ -598,7 +600,6 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
 
         redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
-
         setCurrentValue(enabled);
     }
 
@@ -608,24 +609,31 @@ function DisableQuestsSetting(): JSX.Element {
             return;
         }
 
-        if (values.some(v => typeof v === "string" && v === "everything")) {
-            if (everythingOnly.selected) {
-                updateSettingsTruthy([]);
-            } else {
-                updateSettingsTruthy([everythingOnly]);
-            }
-
-            return;
-        }
-
         const stringlessValues = values.filter(v => typeof v !== "string") as DynamicDropdownSettingOption[];
         const selectedOption = values.find(v => typeof v === "string") as string;
 
-        if (stringlessValues.some(option => option.value === selectedOption)) {
-            updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption && option.value !== everythingOnly.value));
-        } else {
-            const newSelectedOptions = [...stringlessValues.filter(option => option.value !== everythingOnly.value), options.find(option => option.value === selectedOption) as DynamicDropdownSettingOption];
-            updateSettingsTruthy(newSelectedOptions);
+        if (selectedOption === "everything") {
+            if (everythingOnly.selected) { // If was already selected when clicked.
+                updateSettingsTruthy([...stringlessValues.filter(option => option.type !== "disable")]);
+            } else {
+                updateSettingsTruthy([...stringlessValues.filter(option => option.type !== "disable"), everythingOnly]);
+            }
+        } else if (disableOptions.some(option => option.value === selectedOption)) {
+            const option = disableOptions.find(option => option.value === selectedOption) as DynamicDropdownSettingOption;
+
+            if (option.selected) { // If was already selected when clicked.
+                updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption && option.value !== everythingOnly.value));
+            } else {
+                updateSettingsTruthy([...stringlessValues.filter(option => option.value !== everythingOnly.value), option]);
+            }
+        } else if (modificationOptions.some(option => option.value === selectedOption)) {
+            const option = modificationOptions.find(option => option.value === selectedOption) as DynamicDropdownSettingOption;
+
+            if (option.selected) { // If was already selected when clicked.
+                updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption));
+            } else {
+                updateSettingsTruthy([...stringlessValues, option]);
+            }
         }
     }
 
