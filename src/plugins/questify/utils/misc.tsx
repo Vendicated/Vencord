@@ -178,8 +178,8 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
 
         const { body } = snakeToCamel(response);
         const progressPlayType = body.progress.PLAY_ON_DESKTOP || body.progress.PLAY_ON_XBOX || body.progress.PLAY_ON_PLAYSTATION || body.progress.PLAY_ACTIVITY;
-        const questPlayType = quest.config.taskConfigV2.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2.tasks.PLAY_ACTIVITY;
-        const progress = progressPlayType?.value || 0;
+        const questPlayType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
+        const progress = progressPlayType?.value || 1;
 
         if (!questPlayType) {
             logger?.warn(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} does not have a valid play type configured.`);

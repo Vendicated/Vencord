@@ -8,6 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
+import { findLazy } from "@webpack";
 import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -15,6 +16,7 @@ import { getQuestTileClasses } from "./index";
 import { DynamicDropdown, DynamicDropdownSettingOption, GuildlessServerListItem, Quest, QuestIcon, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
 import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, isDarkish, isSoundAllowed, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, QuestsStore, rightClick, validCommaSeparatedList } from "./utils/misc";
 
+let defaultSounds: string[] | null = null;
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;
 const defaultLeftClickAction = "open-quests";
 const defaultMiddleClickAction = "plugin-settings";
@@ -28,8 +30,13 @@ const defaultIgnoredColor = 8334124;
 const defaultExpiredColor = 2368553;
 const defaultRestyleQuestsGradient = "intense";
 const defaultFetchQuestsAlert = "discodo";
+const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")));
 export const minimumAutoFetchIntervalValue = 30 * 60;
 export const maximumAutoFetchIntervalValue = 12 * 60 * 60;
+
+export function rerenderQuests(): void {
+    settings.store.triggerQuestsRerender = !settings.store.triggerQuestsRerender;
+}
 
 export function fetchAndAlertQuests(source: string, logger: Logger): void {
     const currentQuests = Array.from(QuestsStore.quests.values()) as Quest[];
@@ -1118,88 +1125,15 @@ function FetchingQuestsSetting(): JSX.Element {
         { value: 60 * 60 * 6, label: "12 Hours" },
     ];
 
-    const resolvedSounds: SelectOption[] = [
-        { value: "activity_end", label: "Activity End" },
-        { value: "activity_launch", label: "Activity Launch" },
-        { value: "activity_user_join", label: "Activity User Join" },
-        { value: "activity_user_left", label: "Activity User Left" },
-        { value: "asmr_message1", label: "ASMR Message 1" },
-        { value: "bit_message1", label: "Bit Message 1" },
-        { value: "bop_message1", label: "Bop Message 1" },
-        { value: "call_calling", label: "Call Calling" },
-        { value: "call_ringing", label: "Call Ringing" },
-        { value: "call_ringing_beat", label: "Call Ringing Beat" },
-        { value: "call_ringing_snow_halation", label: "Call Ringing Snow Halation" },
-        { value: "call_ringing_snowsgiving", label: "Call Ringing Snowsgiving" },
-        { value: "clip_error", label: "Clip Error" },
-        { value: "clip_save", label: "Clip Save" },
-        { value: "ddr-down", label: "DDR Down" },
-        { value: "ddr-left", label: "DDR Left" },
-        { value: "ddr-right", label: "DDR Right" },
-        { value: "ddr-up", label: "DDR Up" },
-        { value: "deafen", label: "Deafen" },
-        { value: "discodo", label: "Discodo" },
-        { value: "disconnect", label: "Disconnect" },
-        { value: "ducky_message1", label: "Ducky Message 1" },
-        { value: "halloween_call_calling", label: "Halloween Call Calling" },
-        { value: "halloween_call_ringing", label: "Halloween Call Ringing" },
-        { value: "halloween_deafen", label: "Halloween Deafen" },
-        { value: "halloween_defean", label: "Halloween Defean" },
-        { value: "halloween_disconnect", label: "Halloween Disconnect" },
-        { value: "halloween_message1", label: "Halloween Message 1" },
-        { value: "halloween_mute", label: "Halloween Mute" },
-        { value: "halloween_undeafen", label: "Halloween Undeafen" },
-        { value: "halloween_undefean", label: "Halloween Undefean" },
-        { value: "halloween_unmute", label: "Halloween Unmute" },
-        { value: "halloween_user_join", label: "Halloween User Join" },
-        { value: "halloween_user_leave", label: "Halloween User Leave" },
-        { value: "highfive_clap", label: "Highfive Clap" },
-        { value: "highfive_whistle", label: "Highfive Whistle" },
-        { value: "human_man", label: "Human Man" },
-        { value: "lofi_message1", label: "Lofi Message 1" },
-        { value: "mention1", label: "Mention 1" },
-        { value: "mention2", label: "Mention 2" },
-        { value: "mention3", label: "Mention 3" },
-        { value: "message1", label: "Message 1" },
-        { value: "message2", label: "Message 2" },
-        { value: "message3", label: "Message 3" },
-        { value: "mute", label: "Mute" },
-        { value: "overlayunlock", label: "Overlay Unlock" },
-        { value: "poggermode_achievement_unlock", label: "Poggermode Achievement Unlock" },
-        { value: "poggermode_applause", label: "Poggermode Applause" },
-        { value: "poggermode_enabled", label: "Poggermode Enabled" },
-        { value: "poggermode_message_send", label: "Poggermode Message Send" },
-        { value: "ptt_start", label: "PTT Start" },
-        { value: "ptt_stop", label: "PTT Stop" },
-        { value: "reconnect", label: "Reconnect" },
-        { value: "robot_man", label: "Robot Man" },
-        { value: "stage_waiting", label: "Stage Waiting" },
-        { value: "stream_ended", label: "Stream Ended" },
-        { value: "stream_started", label: "Stream Started" },
-        { value: "stream_user_joined", label: "Stream User Joined" },
-        { value: "stream_user_left", label: "Stream User Left" },
-        { value: "success", label: "Success" },
-        { value: "undeafen", label: "Undeafen" },
-        { value: "unmute", label: "Unmute" },
-        { value: "user_join", label: "User Join" },
-        { value: "user_leave", label: "User Leave" },
-        { value: "user_moved", label: "User Moved" },
-        { value: "vibing_wumpus", label: "Vibing Wumpus" },
-        { value: "voice_filter_loopback_off", label: "Voice Filter Loopback Off" },
-        { value: "voice_filter_loopback_on", label: "Voice Filter Loopback On" },
-        { value: "voice_filter_off", label: "Voice Filter Off" },
-        { value: "voice_filter_on", label: "Voice Filter On" },
-        { value: "voice_filter_swap", label: "Voice Filter Swap" },
-        { value: "winter_call_calling", label: "Winter Call Calling" },
-        { value: "winter_call_ringing", label: "Winter Call Ringing" },
-        { value: "winter_deafen", label: "Winter Deafen" },
-        { value: "winter_disconnect", label: "Winter Disconnect" },
-        { value: "winter_mute", label: "Winter Mute" },
-        { value: "winter_undeafen", label: "Winter Undeafen" },
-        { value: "winter_unmute", label: "Winter Unmute" },
-        { value: "winter_user_join", label: "Winter User Join" },
-        { value: "winter_user_leave", label: "Winter User Leave" },
-    ];
+    defaultSounds ??= (findDefaultSounds.keys() || []).map(key => {
+        const match = key.match(/((?:\w|-)+)\.mp3$/);
+        return match ? match[1] : null;
+    }).filter(Boolean) as string[];
+
+    const resolvedSounds: SelectOption[] = defaultSounds.map(sound => {
+        const label = sound.toUpperCase().replace(/_/g, " ").replace(/(\d+)/g, " $1");
+        return { value: sound, label };
+    });
 
     function createIntervalSelectOptionFromValue(value: number): SelectOption {
         const existingOption = resolvedIntervals.find(option => option.value === value);
@@ -1234,8 +1168,8 @@ function FetchingQuestsSetting(): JSX.Element {
             ?.split(".")[0]
             ?.replace(/_/g, " ")
             .replace(/\w\S*/g, word =>
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            ) || "Custom Sound";
+                word.toUpperCase()
+            ) || "CUSTOM SOUND";
 
         return {
             value: value,
