@@ -154,7 +154,7 @@ export default definePlugin({
         {
             find: "#{intl::CUSTOM_STATUS_SET_CUSTOM_STATUS}",
             replacement: {
-                match: /cancelButton,children:\i\.\i\.string\(\i\.\i#{intl::CANCEL}\)\}\)/,
+                match: /cancelButton,text:\i\.\i\.string\(\i\.\i#{intl::CANCEL}\)\}\)/,
                 replace: "$&,$self.renderRememberButton(this.state)"
             }
         },
