@@ -100,7 +100,7 @@ export function QuestButton(): JSX.Element {
                     <Menu.MenuItem
                         id={q("fetch-quests-option")}
                         label="Fetch Quests"
-                        action={() => fetchAndAlertQuests("Questify-Manual", QuestifyLogger)}
+                        action={() => fetchAndAlertQuests("Questify-ManualFetch", QuestifyLogger)}
                     />
                 </Menu.Menu>
             ));

@@ -648,13 +648,13 @@ function DisableQuestsSetting(): JSX.Element {
                     <Forms.FormText className={q("form-description")}>
                         Modify specific Quest features.
                         <br /><br />
-                        The <span className="questify-inline-code-block">Disable Quest Popup Above Account Panel</span> option
+                        The <span className={q("inline-code-block")}>Disable Quest Popup Above Account Panel</span> option
                         will be ignored for completed Quests and Quest progress tracking.
                         <br /><br />
-                        The <span className="questify-inline-code-block">Complete Video Quests in Background</span> option
+                        The <span className={q("inline-code-block")}>Complete Video Quests in Background</span> option
                         will wait for the duration of the Video Quest and mark it as completed automatically.
                         <br /><br />
-                        Similarly, the <span className="questify-inline-code-block">Complete Play Game Quests in Background</span> option
+                        Similarly, the <span className={q("inline-code-block")}>Complete Play Game Quests in Background</span> option
                         will wait for the duration of the Game Quest and mark it as completed automatically. This option is only supported
                         on the official desktop client.
                         <br /><br />
@@ -697,10 +697,10 @@ function IgnoredQuestsSetting(): JSX.Element {
                             Ignored Quests
                         </Forms.FormTitle>
                         <Forms.FormText className={q("form-description")}>
-                            A list of Quest names to exclude from the <span className="questify-inline-code-block">Unclaimed Indicator</span>.
+                            A list of Quest names to exclude from the <span className={q("inline-code-block")}>Unclaimed Indicator</span>.
                             <br /><br />
                             One Quest name per line. Names must match the spelling displayed on the Quests page.
-                            Alternatively, click the three dots on a Quest tile and select the <span className="questify-inline-code-block">Mark as Ignored</span> option.
+                            Alternatively, click the three dots on a Quest tile and select the <span className={q("inline-code-block")}>Mark as Ignored</span> option.
                         </Forms.FormText>
                     </div>
                     <div>
@@ -996,7 +996,7 @@ function ReorderQuestsSetting(): JSX.Element {
                         <Forms.FormText className={q("form-description")}>
                             Sort Quests by their status. Leave empty for default sorting.
                             <br /><br />
-                            Comma-separated list must contain all of: <span className="questify-inline-code-block">UNCLAIMED, CLAIMED, IGNORED, EXPIRED</span>.
+                            Comma-separated list must contain all of: <span className={q("inline-code-block")}>UNCLAIMED, CLAIMED, IGNORED, EXPIRED</span>.
                         </Forms.FormText>
                     </div>
                     <div>
@@ -1397,10 +1397,10 @@ function FetchingQuestsSetting(): JSX.Element {
                             This means that without a fetch interval defined below, this plugin will become unaware
                             of new Quests added throughout the day.
                             <br /><br />
-                            This relies on the Quest Button being enabled and set to either <span className="questify-inline-code-block">Unclaimed</span>, or set to <span className="questify-inline-code-block">Always</span> with
-                            unclaimed <span className="questify-inline-code-block">Pill</span>, <span className="questify-inline-code-block">Badge</span>, or <span className="questify-inline-code-block">Both</span> indicators enabled. Otherwise, there is no reason to periodically fetch Quests.
+                            This relies on the Quest Button being enabled and set to either <span className={q("inline-code-block")}>Unclaimed</span>, or set to <span className={q("inline-code-block")}>Always</span> with
+                            unclaimed <span className={q("inline-code-block")}>Pill</span>, <span className={q("inline-code-block")}>Badge</span>, or <span className={q("inline-code-block")}>Both</span> indicators enabled. Otherwise, there is no reason to periodically fetch Quests.
                             <br /><br />
-                            Also, if <span className="questify-inline-code-block">Fetching Quests</span> is blocked in the <span className="questify-inline-code-block">Quest Features</span> setting, this will not work.
+                            Also, if <span className={q("inline-code-block")}>Fetching Quests</span> is blocked in the <span className={q("inline-code-block")}>Quest Features</span> setting, this will not work.
                         </Forms.FormText>
                     </div>
                     <div>
