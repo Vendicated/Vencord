@@ -9,8 +9,8 @@ import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, Toasts } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, TextInput, Toasts } from "@webpack/common";
 
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
@@ -22,6 +22,8 @@ import { isLinux, isMac, isWin, Replacements } from "./utils/Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("./native")>;
 const jumpToMessage = findByPropsLazy("jumpToMessage"); // snippet from quickReply plugin
+const addReaction = findByCodeLazy("MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE", "Message Shortcut");
+
 const logger = new Logger("BetterNotifications");
 
 export const settings = definePluginSettings({
@@ -187,6 +189,87 @@ export const settings = definePluginSettings({
         hidden: !isWin
     },
 
+    notificationQuickReactEnabled: {
+        type: OptionType.COMPONENT,
+        component: () => <></>,
+        default: false
+    },
+    notificationQuickReact: {
+        type: OptionType.COMPONENT,
+        component: props => {
+            const [switchValue, setSwitchValue] = React.useState<boolean>(settings.store.notificationQuickReactEnabled);
+            const [reactions, setReactions] = React.useState<string[]>(settings.store.notificationQuickReact || []);
+
+            React.useEffect(() => {
+                settings.store.notificationQuickReactEnabled = switchValue;
+            }, [switchValue]);
+
+            React.useEffect(() => {
+                props.setValue(reactions);
+                if (settings.store.inlineReplyLinux) settings.store.inlineReplyLinux = false;
+            }, [reactions]);
+
+            const updateReaction = (index: number, value: string) => {
+                const newReactions = [...reactions];
+                newReactions[index] = value;
+                setReactions(newReactions);
+            };
+
+            const addReaction = () => {
+                if (reactions.length >= 5) { return; }
+                setReactions([...reactions, ""]);
+            };
+
+            const removeReaction = (index: number) => {
+                const newReactions = reactions.filter((_, i) => i !== index);
+                setReactions(newReactions);
+            };
+
+            return (
+                <>
+                    <Forms.FormSection>
+                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable quick reactions</Forms.FormTitle>
+                            <Switch
+                                style={{ width: "fit-content", marginBottom: "0px" }}
+                                hideBorder={true}
+                                value={switchValue}
+                                onChange={setSwitchValue}
+                            />
+                        </div>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                            Add reaction buttons to notifications
+                        </Forms.FormText>
+
+                        {switchValue && (
+                            <div style={{ marginTop: "12px" }}>
+                                <Forms.FormSection>
+                                    <Forms.FormText>Quick Reactions</Forms.FormText>
+                                    {reactions.map((emoji, index) => (
+                                        <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+                                            <TextInput
+                                                value={emoji}
+                                                onChange={val => updateReaction(index, val)}
+                                                placeholder="e.g. "
+                                            />
+                                            <Button style={{ width: "3ch", marginLeft: "4px" }} onClick={() => removeReaction(index)}>
+                                                X
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    <Button disabled={reactions.length >= 5} onClick={addReaction}>
+                                        Add Reaction
+                                    </Button>
+                                </Forms.FormSection>
+                            </div>
+                        )}
+                    </Forms.FormSection>
+                </>
+            );
+        },
+        default: ["👍", "❤️"],
+        hidden: !isWin
+    },
 
     allowBotNotifications: {
         type: OptionType.BOOLEAN,
@@ -261,12 +344,35 @@ export const settings = definePluginSettings({
         ],
         hidden: !isLinux && Native.checkLinuxDE("KDE")
     },
+    inlineReplyLinux: {
+        type: OptionType.COMPONENT,
+        description: "Enable inline replies from notifications.",
+        component: props => {
+            const [value, setValue] = React.useState<boolean>(settings.store.inlineReplyLinux);
+
+            React.useEffect(() => {
+                props.setValue(value);
+                if (settings.store.notificationQuickReactEnabled) settings.store.notificationQuickReactEnabled = false;
+            }, [value]);
+
+            return <div style={{ marginBottom: "0.5em", height: "100%" }}>
+                <Forms.FormSection>
+                    <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
+                        <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable support for inline replies from notifications</Forms.FormTitle>
+                        <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={value} onChange={setValue}></Switch>
+                    </div>
+                </Forms.FormSection>
+            </div>;
+        },
+        default: true,
+        hidden: !isLinux && Native.checkLinuxDE("KDE")
+    },
     notificationAttachmentFit: {
         type: OptionType.SELECT,
         description: "How to process attachments for notifications",
         options: [
-            { label: "Let operating system decide", value: AttachmentManipulation.none, default: true },
-            { label: "Fill in blanks (blur background)", value: AttachmentManipulation.fillBlank },
+            { label: "Let operating system decide", value: AttachmentManipulation.none },
+            { label: "Fill in blanks (blur background). Supports displaying multiple attachments at once", value: AttachmentManipulation.fillBlank, default: true },
             { label: "Crop to top", value: AttachmentManipulation.cropTop },
             { label: "Crop to center", value: AttachmentManipulation.cropCenter },
             { label: "Crop to bottom", value: AttachmentManipulation.cropBottom },
@@ -308,7 +414,6 @@ export function notificationShouldBeShown(advancedData: AdvancedNotification): b
     }
     return true;
 }
-
 
 export default definePlugin({
     name: "BetterNotifications",
@@ -363,18 +468,34 @@ export default definePlugin({
     },
 
     NotificationReplyEvent(text: string, channelId: string, messageId: string) {
-        logger.info(`Recieved reply event to channel ${channelId}`);
+        logger.info(`Recieved reply event with text ${text} to channel ${channelId} replying to ${messageId}`);
         sendMessage(
             channelId,
             { content: text },
             true,
             {
                 "messageReference": {
-                    "channel_id": channelId,
-                    "message_id": messageId
+                    "channel_id": channelId.toString(),
+                    "message_id": messageId.toString()
                 }
             }
         );
+
+        ChannelRouter.transitionToChannel(channelId);
+        jumpToMessage.jumpToMessage({
+            channelId,
+            messageId,
+            flash: true,
+            jumpType: "INSTANT"
+        });
+    },
+
+    NotificationReactEvent(channelId: string, messageId: string, emoji: string) {
+        addReaction(channelId.toString(), messageId.toString(), {
+            animated: false,
+            id: null,
+            name: emoji
+        });
     },
 
     ShouldUseCustomFunc() {

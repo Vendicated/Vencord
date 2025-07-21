@@ -17,6 +17,10 @@ import { isLinux, replaceVariables } from "./Variables";
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
 
+export interface SuitableAttachment {
+    isSpoiler: boolean,
+    url: string;
+}
 
 export async function SendNativeNotification(avatarUrl: string,
     notificationTitle: string, notificationBody: string,
@@ -48,7 +52,8 @@ export async function SendNativeNotification(avatarUrl: string,
     const { attachments } = advancedNotification.messageRecord;
     let contentType: string;
     let imageType: "png" | "jpeg";
-    let isAttachmentSpoiler: boolean = false;
+    const isAttachmentSpoiler: boolean = false;
+    const suitableAttachments: SuitableAttachment[] = [];
 
     for (const attachment of attachments) {
         contentType = attachment.content_type;
@@ -72,10 +77,12 @@ export async function SendNativeNotification(avatarUrl: string,
         imageType = contentType.split("/")[1];
 
         logger.info("Found suitable attachment");
-        isAttachmentSpoiler = attachment.spoiler;
         logger.debug(attachment.url);
+        suitableAttachments.push({ url: attachmentUrl, isSpoiler: attachment.spoiler });
 
-        break;
+        if (suitableAttachments.length >= 3) {
+            break;
+        }
     }
 
     logger.debug(`Notification type ${basicNotification.channel_type}`);
@@ -95,9 +102,9 @@ export async function SendNativeNotification(avatarUrl: string,
             advancedNotification.messageRecord.author.avatar || advancedNotification.messageRecord.author.id,
             avatar,
             {
-                channelId: `${advancedNotification.messageRecord.channel_id}`, // big numbers seem to get rounded when passing them to windows' notification XML.
+                channelId: `${advancedNotification.messageRecord.channel_id}`, // big numbers seem to get rounded when passing them to windows' notification XML. Use strings instead
                 messageId: `${basicNotification.message_id}`,
-                guildId: basicNotification.guild_id
+                guildId: `${basicNotification.guild_id ?? "@me"}`
             },
             {
                 messageOptions: {
@@ -114,7 +121,9 @@ export async function SendNativeNotification(avatarUrl: string,
 
                 linuxFormattedText: settings.store.notificationMarkupSupported
                     ? SimpleMarkdown.defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(notificationBody))
-                    : undefined
+                    : undefined,
+                quickReactions: JSON.stringify(settings.store.notificationQuickReactEnabled ? settings.store.notificationQuickReact : []),
+                inlineReply: settings.store.inlineReplyLinux
             }
         );
     }
@@ -133,13 +142,16 @@ export async function SendNativeNotification(avatarUrl: string,
         finalAvatarData = avatarUrl;
     }
 
-    let finalAttachment: string | undefined = attachmentUrl;
-    if (attachmentUrl && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
-        console.log("Fitting attachment");
-        finalAttachment = await fitAttachmentIntoCorrectAspectRatio(attachmentUrl, settings.store.notificationAttachmentFit);
+    for (const attachment of suitableAttachments) {
+        if (attachment.isSpoiler) {
+            attachment.url = await blurImage(attachment.url);
+        }
     }
-    if (attachmentUrl && isAttachmentSpoiler) {
-        finalAttachment = await blurImage(finalAttachment);
+
+    let finalAttachment: string | undefined = suitableAttachments.at(0)?.url;
+    if (suitableAttachments.length > 0 && settings.store.notificationAttachmentFit !== AttachmentManipulation.none) {
+        console.log("Fitting attachment");
+        finalAttachment = await fitAttachmentIntoCorrectAspectRatio(suitableAttachments.map(img => img.url), settings.store.notificationAttachmentFit);
     }
     if (finalAttachment) {
         notify(finalAvatarData, finalAttachment);
