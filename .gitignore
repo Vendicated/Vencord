@@ -21,4 +21,4 @@ lerna-debug.log*
 
 
 ExtensionCache/
-settings/
+/settings
