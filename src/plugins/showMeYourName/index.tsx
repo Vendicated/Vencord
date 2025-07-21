@@ -148,7 +148,7 @@ export default definePlugin({
     ],
     settings,
     getUsername,
-    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride, guildId }: UsernameProps) => {
+    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
             const user = userOverride ?? message.author;
             const username = getUsername(user, author.guildId);
