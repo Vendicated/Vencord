@@ -7,8 +7,7 @@
 import "./styles.css";
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
-import { ErrorBoundary } from "@components/index";
-import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { ErrorBoundary, openPluginModal } from "@components/index";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/index";
 import definePlugin, { StartAt } from "@utils/types";
