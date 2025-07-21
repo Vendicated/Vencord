@@ -89,6 +89,8 @@ export default definePlugin({
                     return { browser: "Discord Embedded", vcIcon: 2 };
                 case "playstation":
                     return { browser: "Discord Embedded", vcIcon: 3 };
+                default:
+                    return null;
             }
         }
 
