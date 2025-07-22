@@ -18,11 +18,10 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { createRoot, Menu } from "@webpack/common";
 import { JSX } from "react";
 import type { Root } from "react-dom/client";

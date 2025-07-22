@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { FluxStore, Message } from "@vencord/discord-types";
+import { Message } from "@vencord/discord-types";
 import { MessageCache, MessageStore } from "@webpack/common";
 
 /**
@@ -24,5 +24,5 @@ export function updateMessage(channelId: string, messageId: string, fields?: Par
     });
 
     MessageCache.commit(newChannelMessageCache);
-    (MessageStore as unknown as FluxStore).emitChange();
+    MessageStore.emitChange();
 }
