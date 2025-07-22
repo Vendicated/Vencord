@@ -1059,6 +1059,7 @@ export default definePlugin({
         QUESTS_CLAIM_REWARD_SUCCESS(data) {
             QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_CLAIM_REWARD_SUCCESS]\n`, data);
             fetchAndDispatchQuests("Questify", QuestifyLogger);
+            validateAndOverwriteIgnoredQuests();
         },
 
         // Stops any Game Quest background completion intervals for running games to prevent duplicate heartbeats.
