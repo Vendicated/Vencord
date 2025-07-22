@@ -59,7 +59,6 @@ You can join our [discord server](https://discord.gg/equicord-117327988606502929
 - Encryptcord by Inbestigator
 - EquicordHelper by thororen & nyx
 - Equissant by SomeAspy & thororen
-- ExpandedUserTags by Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN, hen
 - ExportContacts by dat_insanity
 - ExportMessages by veygax
 - FakeProfileThemesAndEffects by ryan
@@ -122,6 +121,7 @@ You can join our [discord server](https://discord.gg/equicord-117327988606502929
 - MoreCommands by Arjix, echo, Samu
 - MoreKaomoji by JacobTm & voidbbg
 - MoreStickers by Leko & Arjix
+- MoreUserTags by Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN, hen
 - Morse by zyqunix
 - Moyai by Megu & Nuckyz
 - NeverPausePreviews by vappstar
