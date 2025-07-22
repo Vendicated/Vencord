@@ -5,9 +5,8 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import type { Channel, Message } from "@vencord/discord-types";
 import { ApplicationStreamingStore, Button, ChannelStore, MessageStore, PresenceStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
 import { Webpack } from "Vencord";
