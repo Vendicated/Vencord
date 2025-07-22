@@ -11,6 +11,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, UserStore } from "@webpack/common";
+import { JSX } from "react";
 
 const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
 const StreamerModeStore = findStoreLazy("StreamerModeStore");
@@ -274,8 +275,16 @@ const settings = definePluginSettings({
     }
 });
 
-export function renderedUsername(props: any) {
-    const { replies, mentions, discriminators, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor } = settings.use();
+export function getRenderedUsernameElement(props: any): JSX.Element {
+    return renderedUsername(props)[1];
+}
+
+export function getRenderedUsernameText(props: any): string {
+    return renderedUsername(props)[0];
+}
+
+function renderedUsername(props: any): [string, JSX.Element] {
+    const { replies, mentions, discriminators, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor, animateGradients, ignoreGradients } = settings.use();
 
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
     const renderType = props.className === "mention" ? "mention" : "message";
@@ -348,11 +357,14 @@ export function renderedUsername(props: any) {
     const thirdValue = wrapEmojis(third ? values[third].value : "");
 
     if (!author || !username) {
-        return <>{mentionSymbol}Unknown</>;
+        const fallbackText = `${mentionSymbol}Unknown`;
+        return [fallbackText, <>{fallbackText}</>];
     } else if (isRepliedMessage && !replies) {
-        return <>{mentionSymbol}{nick || display || username}</>;
+        const fallbackText = `${mentionSymbol}${nick || display || username}`;
+        return [fallbackText, <>{fallbackText}</>];
     } else if (isMention && !mentions) {
-        return <>{mentionSymbol}{nick || display || username}</>;
+        const fallbackText = `${mentionSymbol}${nick || display || username}`;
+        return [fallbackText, <>{fallbackText}</>];
     }
 
     if (removeDuplicates) {
@@ -364,7 +376,21 @@ export function renderedUsername(props: any) {
         third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
     }
 
-    return (
+    let dataText = `${mentionSymbol}${values[first].value}`;
+
+    if (animateGradients && !ignoreGradients) {
+        if (second) {
+            dataText += ` ${values[second].prefix}${values[second].value}${values[second].suffix}`;
+        }
+
+        if (third) {
+            dataText += ` ${values[third].prefix}${values[third].value}${values[third].suffix}`;
+        }
+    }
+
+    dataText = dataText.replace(/@/g, "A"); // Discord uses attr("data-text") which can't handle @ symbols.
+
+    const nameElement = (
         <span>
             {mentionSymbol && <span>{mentionSymbol}</span>}
             {/* If it's a message render, let Discord handle the default coloring.
@@ -395,7 +421,7 @@ export function renderedUsername(props: any) {
                             : settings.store.animateGradients && values[second].style.gradient
                                 ? values[second].style.gradient.animated.original
                                 : values[second].style.gradient
-                                    ? values[second].style.gradient.static.adjusted
+                                    ? values[second].style.gradient.static.original
                                     : values[second].style.normal.adjusted
                     }>
                         {secondValue}</span>
@@ -414,7 +440,7 @@ export function renderedUsername(props: any) {
                             : settings.store.animateGradients && values[third].style.gradient
                                 ? values[third].style.gradient.animated.original
                                 : values[third].style.gradient
-                                    ? values[third].style.gradient.static.adjusted
+                                    ? values[third].style.gradient.static.original
                                     : values[third].style.normal.adjusted
                     }>
                         {thirdValue}</span>
@@ -424,30 +450,33 @@ export function renderedUsername(props: any) {
             )}
         </span>
     );
+
+    return [dataText, nameElement];
 }
 
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display any permutation of nicknames, display names, and usernames in chat.",
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.Etorix, Devs.sadan],
+    settings,
 
     patches: [
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(onContextMenu:\i,children:)[^}]+}[^}]+/,
-                replace: "$1$self.renderUsername(arguments[0])"
+                match: /(onContextMenu:\i,children:).{0,100}?"data-text":\i\+\i/,
+                replace: "$1$self.getRenderedUsernameElement(arguments[0]),\"data-text\":$self.getRenderedUsernameText(arguments[0])"
             }
         },
         {
             find: ".USER_MENTION)",
             replacement: {
                 match: /"@"\.concat\(null!=\i\?\i:\i\)/,
-                replace: "$self.renderUsername(arguments[0])"
+                replace: "$self.getRenderedUsernameElement(arguments[0])"
             }
         }
     ],
-    settings,
 
-    renderUsername: ErrorBoundary.wrap(renderedUsername, { noop: true }),
+    getRenderedUsernameText,
+    getRenderedUsernameElement: ErrorBoundary.wrap(getRenderedUsernameElement, { noop: true }),
 });
