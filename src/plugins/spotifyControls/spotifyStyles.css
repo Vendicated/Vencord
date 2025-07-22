@@ -1,16 +1,18 @@
 #vc-spotify-player {
     padding: 0.375rem 0.5rem;
-    border-bottom: 1px solid var(--background-modifier-accent);
+    border-bottom: 1px solid var(--border-subtle);
 
-    --vc-spotify-green: #1db954; /* so custom themes can easily change it */
+    --vc-spotify-green: var(--spotify, #1db954); /* so custom themes can easily change it */
+    --vc-spotify-green-90: color-mix(in hsl, var(--vc-spotify-green), transparent 90%);
+    --vc-spotify-green-80: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
 }
 
 .theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--background-secondary-alt));
+    background: var(--bg-overlay-3, var(--background-base-lower-alt));
 }
 
 .theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--background-secondary-alt));
+    background: var(--bg-overlay-1, var(--background-base-lower-alt));
 }
 
 .vc-spotify-button {
@@ -141,7 +143,7 @@
 
 #vc-spotify-progress-bar {
     position: relative;
-    color: var(--text-normal);
+    color: var(--text-default);
     width: 100%;
     margin: 0.5em 0;
     margin-bottom: 5px;
@@ -193,5 +195,5 @@
 
 .vc-spotify-fallback {
     padding: 0.5em;
-    color: var(--text-normal);
+    color: var(--text-default);
 }

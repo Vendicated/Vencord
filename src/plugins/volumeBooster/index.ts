@@ -17,9 +17,8 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
     multiplier: {
@@ -136,7 +135,7 @@ export default definePlugin({
         // @ts-expect-error
         if (data.sinkId != null && data.sinkId !== data.audioContext.sinkId && "setSinkId" in AudioContext.prototype) {
             // @ts-expect-error https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/setSinkId
-            data.audioContext.setSinkId(data.sinkId);
+            data.audioContext.setSinkId(data.sinkId === "default" ? "" : data.sinkId);
         }
 
         data.gainNode.gain.value = data._mute
