@@ -10,8 +10,8 @@ import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { Channel, Message, User } from "@vencord/discord-types";
 import { ChannelStore, GuildStore, PermissionsBits, SelectedChannelStore, UserStore } from "@webpack/common";
-import { Channel, Message, User } from "discord-types/general";
 
 import { computePermissions, Tag, tags } from "./consts";
 import { settings } from "./settings";
@@ -95,7 +95,7 @@ export default definePlugin({
     renderMemberListDecorator(props) {
         const tagId = this.getTag({
             user: props.user,
-            channel: props.channel,
+            channel: ChannelStore.getChannel(this.getChannelId()),
             isChat: false
         });
 
@@ -126,7 +126,6 @@ export default definePlugin({
 
         if (!user) return null;
         if (isChat && user.id === "1") return null;
-        if (user.isClyde()) return null;
         if (user.bot && settings.dontShowForBots) return null;
 
         channel ??= ChannelStore.getChannel(channelId!) as any;
