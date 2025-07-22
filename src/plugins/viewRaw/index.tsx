@@ -118,26 +118,39 @@ const settings = definePluginSettings({
     }
 });
 
-function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavContextMenuPatchCallback {
+function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Message"): NavContextMenuPatchCallback {
     return (children, props) => {
-        const value = props[name.toLowerCase()];
+        let value = props[name.toLowerCase()];
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
 
         const lastChild = children.at(-1);
-        if (lastChild?.key === "developer-actions") {
+        let sliceIndex = -1;
+        if (lastChild?.props?.children?.length>0) {
+            if (lastChild?.props.children[0]?.key?.startsWith("devmode-copy-id")) {
+                children = lastChild?.props.children;
+                sliceIndex = 0;
+            }
+        } else if (lastChild?.props?.children?.key?.startsWith("devmode-copy-id")) {
             const p = lastChild.props;
             if (!Array.isArray(p.children))
                 p.children = [p.children];
 
             children = p.children;
+            sliceIndex = 0;
         }
 
-        children.splice(-1, 0,
+        let messageContent = undefined;
+        if (name === "Message") {
+            value = cleanMessage(value as Message);
+            messageContent = value.content;
+        }
+
+        children.splice(sliceIndex, 0,
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
-                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
+                action={() => openViewRawModal(JSON.stringify(value, null, 4), name, messageContent)}
                 icon={CopyIcon}
             />
         );
@@ -151,7 +164,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
     const role = GuildRoleStore.getRole(guild.id, id);
     if (!role) return;
 
-    children.push(
+    children.splice(0, 0,
         <Menu.MenuItem
             id={"vc-view-role-raw"}
             label="View Raw"
@@ -174,6 +187,7 @@ export default definePlugin({
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
+        "message": MakeContextCallback("Message"),
         "dev-context": devContextCallback
     },
 
