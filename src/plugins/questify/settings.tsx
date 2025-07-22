@@ -1634,7 +1634,7 @@ export const settings = definePluginSettings({
     },
     triggerQuestsRerender: {
         type: OptionType.BOOLEAN,
-        description: "Trigger a rerender of the Quests page.",
+        description: "Trigger a rerender of the Quests page by toggling this setting.",
         default: false,
         hidden: true
     },

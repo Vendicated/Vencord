@@ -543,6 +543,8 @@ function startVideoProgressTracking(quest: Quest, questDuration: number, initial
             await handleSendComplete();
         }, timeRemaining * 1000);
     } else {
+        // Technically, reporting progress for videos isn't necessary. We could wait the duration of the video and then
+        // report a completion, however an interval allows a live visual of the progress to be displayed on the quest tile.
         intervalId = setInterval(async () => {
             currentProgress += reportEverySec;
 
@@ -597,7 +599,7 @@ function processVideoQuest(quest: Quest): boolean {
 
 function startPlayGameProgressTracking(quest: Quest, questDuration: number, initialProgress: number): void {
     const remaining = Math.max(0, questDuration - initialProgress);
-    const heartbeatInterval = 20;
+    const heartbeatInterval = 20; // Heartbeats must be at most 2 minutes apart.
 
     if (!initialProgress) {
         enrollInQuest(quest, QuestifyLogger).then(success => {
