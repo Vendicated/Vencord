@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
+import { getCurrentChannel, getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
 import { ChannelStore, GuildStore, PermissionsBits, SelectedChannelStore, UserStore } from "@webpack/common";
@@ -95,7 +95,7 @@ export default definePlugin({
     renderMemberListDecorator(props) {
         const tagId = this.getTag({
             user: props.user,
-            channel: ChannelStore.getChannel(this.getChannelId()),
+            channel: getCurrentChannel(),
             isChat: false
         });
 
