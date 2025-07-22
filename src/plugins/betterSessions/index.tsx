@@ -77,6 +77,14 @@ export default definePlugin({
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
+        },
+        // Allow passing custom size to BlobMask
+        {
+            find: "!1,lowerBadgeSize:",
+            replacement: {
+                match: /\i.modules.guildbar.FOLDER_SIZE\),\i=/,
+                replace: "$& arguments[0].size != null ? arguments[0].size : "
+            }
         }
     ],
 
@@ -124,6 +132,7 @@ export default definePlugin({
         return (
             <BlobMask
                 style={{ cursor: "unset" }}
+                size={48}
                 selected={false}
                 lowerBadge={
                     <div
@@ -153,7 +162,7 @@ export default definePlugin({
                     className={SessionIconClasses.sessionIcon}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
-                    <DeviceIcon width={28} height={28} color="currentColor" />
+                    <DeviceIcon size="md" color="currentColor" />
                 </div>
             </BlobMask>
         );
