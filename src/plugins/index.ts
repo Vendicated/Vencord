@@ -20,6 +20,7 @@ import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { addExpressionPickerTab, removeExpressionPickerTab } from "@api/ExpressionPickerTabs";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
@@ -260,7 +261,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton,
+        expressionPickerTabs
     } = p;
 
     if (p.start) {
@@ -316,6 +318,17 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
 
+    if (expressionPickerTabs) {
+        if (typeof expressionPickerTabs === "function") {
+            addExpressionPickerTab(name, name, expressionPickerTabs);
+        } else {
+            (Array.isArray(expressionPickerTabs) ? expressionPickerTabs : [expressionPickerTabs])
+                .forEach(tab => {
+                    addExpressionPickerTab(name, tab.title, tab.Component);
+                });
+        }
+    }
+
     return true;
 }, p => `startPlugin ${p.name}`);
 
@@ -323,7 +336,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton,
+        expressionPickerTabs
     } = p;
 
     if (p.stop) {
@@ -376,6 +390,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (renderMessagePopoverButton) removeMessagePopoverButton(name);
+
+    if (expressionPickerTabs) removeExpressionPickerTab(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);

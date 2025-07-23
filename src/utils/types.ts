@@ -19,6 +19,7 @@
 import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { ExpressionPickerTabs } from "@api/ExpressionPickerTabs";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
@@ -183,6 +184,8 @@ export interface PluginDef {
     renderMemberListDecorator?: MemberListDecoratorFactory;
 
     renderChatBarButton?: ChatBarButtonFactory;
+
+    expressionPickerTabs?: ExpressionPickerTabs;
 }
 
 export const enum StartAt {
