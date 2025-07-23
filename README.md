@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/equicord-117327988606502929
 ### Extra included plugins
 
 <details>
-<summary>195 additional plugins</summary>
+<summary>194 additional plugins</summary>
 
 ### All Platforms
 
@@ -52,7 +52,6 @@ You can join our [discord server](https://discord.gg/equicord-117327988606502929
 - CutePats by thororen
 - DecodeBase64 by ThePirateStoner
 - Demonstration by Samwich
-- DisableAnimations by S€th
 - DiscordDevBanner by KrystalSkull
 - DisableCameras by Joona
 - DontFilterMe by Samwich
