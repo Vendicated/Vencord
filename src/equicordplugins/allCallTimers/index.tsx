@@ -109,7 +109,7 @@ export default definePlugin({
             predicate: () => !settings.store.showWithoutHover,
             replacement: [
                 {
-                    match: /(?<=user:(\i).*?)iconGroup,children:\[/,
+                    match: /(?<=user:(\i).*?)iconGroup,.{0,200}children:\[/,
                     replace: "$&$self.renderTimer($1.id),"
                 },
             ]
