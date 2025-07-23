@@ -18,8 +18,9 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { openPluginModal } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
@@ -28,41 +29,81 @@ import { ChannelStore, FluxDispatcher, Menu, React } from "@webpack/common";
 const settings = definePluginSettings({
     enabled: {
         type: OptionType.BOOLEAN,
-        description: "Toggle functionality globally.",
+        description: "Toggle functionality of your own typing indicator globally.",
         default: true,
+    },
+    hideChatBoxTypingIndicators: {
+        type: OptionType.BOOLEAN,
+        description: "Hide other users' typing indicators from above the chat bar.",
+        default: false,
+    },
+    hideMembersListTypingIndicators: {
+        type: OptionType.BOOLEAN,
+        description: "Hide other users' typing indicators from the members list.",
+        default: false,
     },
     chatIcon: {
         type: OptionType.BOOLEAN,
-        description: "Show an icon in the chat bar for toggling the plugin on the go. Left click to toggle the current channel, middle click to toggle the current guild, and right click to toggle globally.",
+        description: "Show an icon in the chat bar for modifying the plugin on the go.",
         default: true,
+    },
+    chatIconLeftClickAction: {
+        type: OptionType.SELECT,
+        description: "What to do when left clicking the chat icon.",
+        options: [
+            { label: "Toggle Plugin Functionality", value: "global" },
+            { label: "Toggle Typing in Channel", value: "channel", default: true },
+            { label: "Toggle Typing in Guild", value: "guild" },
+            { label: "Open Plugin Settings", value: "settings" }
+        ]
+    },
+    chatIconMiddleClickAction: {
+        type: OptionType.SELECT,
+        description: "What to do when middle clicking the chat icon.",
+        options: [
+            { label: "Toggle Plugin Functionality", value: "global" },
+            { label: "Toggle Typing in Channel", value: "channel" },
+            { label: "Toggle Typing in Guild", value: "guild" },
+            { label: "Open Plugin Settings", value: "settings", default: true }
+        ]
+    },
+    chatIconRightClickAction: {
+        type: OptionType.SELECT,
+        description: "What to do when right clicking the chat icon.",
+        options: [
+            { label: "Toggle Plugin Functionality", value: "global", default: true },
+            { label: "Toggle Typing in Channel", value: "channel" },
+            { label: "Toggle Typing in Guild", value: "guild" },
+            { label: "Open Plugin Settings", value: "settings" }
+        ]
     },
     chatContextMenu: {
         type: OptionType.BOOLEAN,
-        description: "Show a dropdown in the chat context menu to toggle plugin settings on the go.",
+        description: "Show a dropdown in the chat context menu to modify plugin settings on the go.",
         default: true
     },
     defaultHidden: {
         type: OptionType.BOOLEAN,
-        description: "If enabled, the plugin will hide typing in any DMs/channels/guilds not listed in \"Disabled Locations\" below. If disabled, the plugin will show typing for any DMs/channels/guilds not listed in \"Enabled Locations\" below.",
+        description: "If enabled, the plugin will hide your typing from others in any DMs/channels/guilds not listed in \"Disabled Locations\" below. If disabled, the plugin will show your typing to others for any DMs/channels/guilds not listed in \"Enabled Locations\" below.",
         default: true,
     },
     enabledLocations: {
         type: OptionType.STRING,
-        description: "Enable functionality for these IDs. Accepts a comma separated list of DMs (User IDs), channel IDs, and guild IDs. Only used if \"Default Hidden\" is disabled.",
+        description: "Enable functionality for these IDs. Accepts a comma separated list of DM IDs, channel IDs, and guild IDs. Only used if \"Default Hidden\" is disabled.",
         default: "",
     },
     disabledLocations: {
         type: OptionType.STRING,
-        description: "Disable functionality for these IDs. Accepts a comma separated list of DMs (User IDs), channel IDs, and guild IDs. Only used if \"Default Hidden\" is enabled.",
+        description: "Disable functionality for these IDs. Accepts a comma separated list of DM IDs, channel IDs, and guild IDs. Only used if \"Default Hidden\" is enabled.",
         default: "",
     },
 });
 
-const toggleGlobal = () => {
+function toggleGlobal(): void {
     settings.store.enabled = !settings.store.enabled;
-};
+}
 
-const toggleLocation = (locationId: string, effectiveList: string[], defaultHidden: boolean) => {
+function toggleLocation(locationId: string, effectiveList: string[], defaultHidden: boolean): void {
     if (effectiveList.includes(locationId)) {
         effectiveList.splice(effectiveList.indexOf(locationId), 1);
     } else {
@@ -74,10 +115,29 @@ const toggleLocation = (locationId: string, effectiveList: string[], defaultHidd
     } else {
         settings.store.enabledLocations = effectiveList.join(", ");
     }
-};
+}
 
 const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
-    const { enabled, chatIcon, defaultHidden, enabledLocations, disabledLocations } = settings.use(["enabled", "chatIcon", "defaultHidden", "enabledLocations", "disabledLocations"]);
+    const {
+        enabled,
+        chatIcon,
+        defaultHidden,
+        enabledLocations,
+        disabledLocations,
+        chatIconLeftClickAction,
+        chatIconMiddleClickAction,
+        chatIconRightClickAction,
+    } = settings.use([
+        "enabled",
+        "chatIcon",
+        "defaultHidden",
+        "enabledLocations",
+        "disabledLocations",
+        "chatIconLeftClickAction",
+        "chatIconMiddleClickAction",
+        "chatIconRightClickAction",
+    ]);
+
     const validChat = ["normal", "sidebar"].some(x => type.analyticsName === x);
 
     if (!validChat || !chatIcon) return null;
@@ -88,24 +148,41 @@ const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
 
     const tooltip = enabled ? (
         enabledLocally ? `Typing Hidden (${location})` : `Typing Visible (${location})`
-    ) : "Plugin Disabled";
+    ) : "Typing Visible (Global)";
+
+    function performAction(action: string): void {
+        switch (action) {
+            case "global":
+                toggleGlobal();
+                break;
+            case "channel":
+                toggleLocation(channel.id, effectiveList, defaultHidden);
+                break;
+            case "guild":
+                channel.guild_id ? toggleLocation(channel.guild_id, effectiveList, defaultHidden) : null;
+                break;
+            case "settings":
+                openPluginModal(Vencord.Plugins.plugins.SilentTyping);
+                break;
+        }
+    }
 
     return (
         <ChatBarButton
             tooltip={tooltip}
             onClick={e => {
                 if (e.button === 0) {
-                    toggleLocation(channel.id, effectiveList, defaultHidden);
+                    performAction(settings.store.chatIconLeftClickAction);
                 }
             }}
             onAuxClick={e => {
-                if (e.button === 1 && channel.guild_id) {
-                    toggleLocation(channel.guild_id, effectiveList, defaultHidden);
+                if (e.button === 1) {
+                    performAction(settings.store.chatIconMiddleClickAction);
                 }
             }}
             onContextMenu={e => {
                 if (e.button === 2) {
-                    toggleGlobal();
+                    performAction(settings.store.chatIconRightClickAction);
                 }
             }}>
             <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style={{ scale: "1.2" }}>
@@ -124,7 +201,7 @@ const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
     );
 };
 
-const getEffectiveList = () => {
+function getEffectiveList(): string[] {
     if (settings.store.defaultHidden) {
         if (!settings.store.disabledLocations) {
             settings.store.disabledLocations = "";
@@ -142,7 +219,7 @@ const getEffectiveList = () => {
     }
 };
 
-const checkEnabled = (channel: string | Channel) => {
+function checkEnabled(channel: string | Channel): boolean {
     if (!settings.store.enabled) return false;
 
     const channelId = typeof channel === "string" ? channel : channel.id;
@@ -156,11 +233,26 @@ const checkEnabled = (channel: string | Channel) => {
     }
 };
 
-const chatBarContextCheckbox: NavContextMenuPatchCallback = children => {
-    const { chatIcon, chatContextMenu, enabled, defaultHidden } = settings.use(["chatIcon", "chatContextMenu", "enabled", "defaultHidden"]);
+function chatBarContextCheckbox(children: React.ReactNode[]): void {
+    const {
+        chatIcon,
+        chatContextMenu,
+        enabled,
+        defaultHidden,
+        hideChatBoxTypingIndicators,
+        hideMembersListTypingIndicators
+    } = settings.use([
+        "chatIcon",
+        "chatContextMenu",
+        "enabled",
+        "defaultHidden",
+        "hideChatBoxTypingIndicators",
+        "hideMembersListTypingIndicators"
+    ]);
+
     if (!chatContextMenu) return;
 
-    const group = findGroupChildrenByChildId("submit-button", children);
+    const group = findGroupChildrenByChildId("submit-button", children as (React.ReactElement | null | undefined)[]);
 
     if (!group) return;
 
@@ -170,6 +262,10 @@ const chatBarContextCheckbox: NavContextMenuPatchCallback = children => {
         <Menu.MenuItem id="vc-silent-typing" label="Silent Typing">
             <Menu.MenuCheckboxItem id="vc-silent-typing-enabled" label="Enabled" checked={enabled}
                 action={() => settings.store.enabled = !settings.store.enabled} />
+            <Menu.MenuCheckboxItem id="vc-silent-typing-chat-bar-indicators" label="Chat Bar Indicators" checked={settings.store.hideChatBoxTypingIndicators}
+                action={() => settings.store.hideChatBoxTypingIndicators = !settings.store.hideChatBoxTypingIndicators} />
+            <Menu.MenuCheckboxItem id="vc-silent-typing-members-list-indicators" label="Members List Indicators" checked={settings.store.hideMembersListTypingIndicators}
+                action={() => settings.store.hideMembersListTypingIndicators = !settings.store.hideMembersListTypingIndicators} />
             <Menu.MenuCheckboxItem id="vc-silent-typing-chat-icon" label="Chat Icon" checked={chatIcon}
                 action={() => settings.store.chatIcon = !settings.store.chatIcon} />
             <Menu.MenuCheckboxItem id="vc-silent-typing-default" label="Default Hidden" checked={defaultHidden}
@@ -178,21 +274,50 @@ const chatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     );
 };
 
+function shouldHideChatBarTypingIndicators(): boolean {
+    const { hideChatBoxTypingIndicators } = settings.use(["hideChatBoxTypingIndicators"]);
+    return hideChatBoxTypingIndicators;
+}
+
+function shouldHideMembersListTypingIndicators(): boolean {
+    const { hideMembersListTypingIndicators } = settings.use(["hideMembersListTypingIndicators"]);
+    return hideMembersListTypingIndicators;
+}
+
 export default definePlugin({
     name: "SilentTyping",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana, Devs.Etorix],
     description: "Hide your typing indicator from chat.",
     dependencies: ["ChatInputButtonAPI"],
     settings,
+
+    shouldHideChatBarTypingIndicators,
+    shouldHideMembersListTypingIndicators,
+
     contextMenus: {
         "textarea-context": chatBarContextCheckbox
     },
+
     patches: [
         {
             find: '.dispatch({type:"TYPING_START_LOCAL"',
             replacement: {
                 match: /startTyping\(\i\){.+?},stop/,
                 replace: "startTyping:$self.startTyping,stop"
+            }
+        },
+        {
+            find: "activityInviteEducationActivity:",
+            replacement: {
+                match: /(typingDots,children:)(\[.{0,200}?}\)\])/,
+                replace: "$1$self.shouldHideChatBarTypingIndicators()?[]:$2"
+            }
+        },
+        {
+            find: ",{avatarCutoutX",
+            replacement: {
+                match: /isTyping:(\i)=!1(,typingIndicatorRef:\i,isSpeaking:)/,
+                replace: "silentTypingIsTyping:$1=$self.shouldHideMembersListTypingIndicators()?!1:arguments[0].isTyping$2"
             }
         },
     ],
@@ -213,6 +338,18 @@ export default definePlugin({
                     { name: "Channel", label: "Channel", value: "channel" },
                     { name: "Guild", label: "Guild", value: "guild" },
                 ]
+            },
+            {
+                name: "chat-bar-indicators",
+                description: "Hide other users' typing indicators from above the chat bar.",
+                required: false,
+                type: ApplicationCommandOptionType.BOOLEAN,
+            },
+            {
+                name: "members-list-indicators",
+                description: "Hide other users' typing indicators from the members list.",
+                required: false,
+                type: ApplicationCommandOptionType.BOOLEAN,
             },
             {
                 name: "chat-icon",
