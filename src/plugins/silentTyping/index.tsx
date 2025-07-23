@@ -18,7 +18,7 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { findGroupChildrenByChildId } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { openPluginModal } from "@components/index";
 import { Devs } from "@utils/constants";
@@ -117,7 +117,7 @@ function toggleLocation(locationId: string, effectiveList: string[], defaultHidd
     }
 }
 
-const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
+const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type, isMainChat }) => {
     const {
         enabled,
         chatIcon,
@@ -138,9 +138,7 @@ const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
         "chatIconRightClickAction",
     ]);
 
-    const validChat = ["normal", "sidebar"].some(x => type.analyticsName === x);
-
-    if (!validChat || !chatIcon) return null;
+    if (!isMainChat || !chatIcon) return null;
 
     const effectiveList = getEffectiveList();
     const enabledLocally = enabled && checkEnabled(channel);
@@ -217,7 +215,7 @@ function getEffectiveList(): string[] {
             return settings.store.enabledLocations.split(",").map(x => x.trim()).filter(Boolean);
         }
     }
-};
+}
 
 function checkEnabled(channel: string | Channel): boolean {
     if (!settings.store.enabled) return false;
@@ -231,9 +229,9 @@ function checkEnabled(channel: string | Channel): boolean {
     } else {
         return effectiveChannels.includes(guildId) || effectiveChannels.includes(channelId);
     }
-};
+}
 
-function chatBarContextCheckbox(children: React.ReactNode[]): void {
+const chatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     const {
         chatIcon,
         chatContextMenu,
