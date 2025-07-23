@@ -117,7 +117,7 @@ function toggleLocation(locationId: string, effectiveList: string[], defaultHidd
     }
 }
 
-const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type, isMainChat }) => {
+const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
     const {
         enabled,
         chatIcon,
@@ -138,7 +138,9 @@ const silentTypingChatToggle: ChatBarButtonFactory = ({ channel, type, isMainCha
         "chatIconRightClickAction",
     ]);
 
-    if (!isMainChat || !chatIcon) return null;
+    const validChat = ["normal", "sidebar"].some(x => type.analyticsName === x);
+
+    if (!validChat || !chatIcon) return null;
 
     const effectiveList = getEffectiveList();
     const enabledLocally = enabled && checkEnabled(channel);
