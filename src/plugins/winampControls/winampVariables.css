@@ -1,0 +1,238 @@
+/* === WINAMP CONTROLS VARIABLES === */
+/* Comprehensive variable system with dynamic fallback chains */
+
+:root {
+    /* === PRIMARY COLORS === */
+    --vc-winamp-primary: var(
+        --winamp-primary,
+        var(--brand-color, var(--interactive-active, var(--accent-color, #ff6600)))
+    );
+    --vc-winamp-secondary: var(
+        --winamp-secondary,
+        var(--brand-secondary, var(--interactive-normal, var(--text-muted, #b3b3b3)))
+    );
+    --vc-winamp-accent: var(--winamp-accent, var(--brand-accent, var(--interactive-hover, var(--link-color, #ff8c42))));
+
+    /* === BACKGROUND COLORS === */
+    --vc-winamp-bg-primary: var(
+        --winamp-bg-primary,
+        var(
+            --custom-bg-primary,
+            var(--bg-overlay-floating, var(--background-base-low, var(--background-base-lower-alt, #2f3136)))
+        )
+    );
+    --vc-winamp-bg-secondary: var(
+        --winamp-bg-secondary,
+        var(
+            --custom-bg-secondary,
+            var(--bg-overlay-1, var(--background-base-lower, var(--background-secondary, #36393f)))
+        )
+    );
+    --vc-winamp-bg-tertiary: var(
+        --winamp-bg-tertiary,
+        var(
+            --custom-bg-tertiary,
+            var(--bg-overlay-2, var(--background-base-lower-alt, var(--background-tertiary, #202225)))
+        )
+    );
+    --vc-winamp-bg-hover: var(
+        --winamp-bg-hover,
+        var(--custom-bg-hover, var(--background-modifier-hover, var(--bg-overlay-3, #40444b)))
+    );
+    --vc-winamp-bg-selected: var(
+        --winamp-bg-selected,
+        var(--custom-bg-selected, var(--background-modifier-selected, var(--bg-overlay-4, #4f545c)))
+    );
+    --vc-winamp-bg-active: var(
+        --winamp-bg-active,
+        var(--custom-bg-active, var(--background-modifier-active, var(--bg-overlay-5, #5865f2)))
+    );
+
+    /* === TEXT COLORS === */
+    --vc-winamp-text-primary: var(
+        --winamp-text-primary,
+        var(--custom-text-primary, var(--text-default, var(--header-primary, #ffffff)))
+    );
+    --vc-winamp-text-secondary: var(
+        --winamp-text-secondary,
+        var(--custom-text-secondary, var(--text-muted, var(--header-secondary, #b9bbbe)))
+    );
+    --vc-winamp-text-tertiary: var(
+        --winamp-text-tertiary,
+        var(--custom-text-tertiary, var(--text-faint, var(--text-disabled, #72767d)))
+    );
+    --vc-winamp-text-link: var(
+        --winamp-text-link,
+        var(--custom-text-link, var(--text-link, var(--brand-color, #00aff4)))
+    );
+    --vc-winamp-text-danger: var(
+        --winamp-text-danger,
+        var(--custom-text-danger, var(--text-danger, var(--status-danger, #f04747)))
+    );
+    --vc-winamp-text-success: var(
+        --winamp-text-success,
+        var(--custom-text-success, var(--text-success, var(--status-positive, #43b581)))
+    );
+    --vc-winamp-text-warning: var(
+        --winamp-text-warning,
+        var(--custom-text-warning, var(--text-warning, var(--status-warning, #faa61a)))
+    );
+
+    /* === INTERACTIVE STATES === */
+    --vc-winamp-interactive-normal: var(
+        --winamp-interactive-normal,
+        var(--custom-interactive-normal, var(--interactive-normal, var(--text-muted, #b9bbbe)))
+    );
+    --vc-winamp-interactive-hover: var(
+        --winamp-interactive-hover,
+        var(--custom-interactive-hover, var(--interactive-hover, var(--text-default, #dcddde)))
+    );
+    --vc-winamp-interactive-active: var(
+        --winamp-interactive-active,
+        var(--custom-interactive-active, var(--interactive-active, var(--brand-color, #ffffff)))
+    );
+    --vc-winamp-interactive-muted: var(
+        --winamp-interactive-muted,
+        var(--custom-interactive-muted, var(--interactive-muted, var(--text-disabled, #4f545c)))
+    );
+
+    /* === BORDER COLORS === */
+    --vc-winamp-border-primary: var(
+        --winamp-border-primary,
+        var(--custom-border-primary, var(--border-default, var(--background-modifier-accent, #4f545c)))
+    );
+    --vc-winamp-border-secondary: var(
+        --winamp-border-secondary,
+        var(--custom-border-secondary, var(--border-subtle, var(--background-modifier-selected, #40444b)))
+    );
+    --vc-winamp-border-hover: var(
+        --winamp-border-hover,
+        var(--custom-border-hover, var(--border-hover, var(--interactive-hover, #dcddde)))
+    );
+    --vc-winamp-border-active: var(
+        --winamp-border-active,
+        var(--custom-border-active, var(--border-active, var(--interactive-active, #5865f2)))
+    );
+
+    /* === SIZING & SPACING === */
+    --vc-winamp-spacing-xs: var(--winamp-spacing-xs, var(--custom-spacing-xs, var(--spacing-xs, 4px)));
+    --vc-winamp-spacing-sm: var(--winamp-spacing-sm, var(--custom-spacing-sm, var(--spacing-sm, 8px)));
+    --vc-winamp-spacing-md: var(--winamp-spacing-md, var(--custom-spacing-md, var(--spacing-md, 12px)));
+    --vc-winamp-spacing-lg: var(--winamp-spacing-lg, var(--custom-spacing-lg, var(--spacing-lg, 16px)));
+    --vc-winamp-spacing-xl: var(--winamp-spacing-xl, var(--custom-spacing-xl, var(--spacing-xl, 24px)));
+
+    /* === BORDER RADIUS === */
+    --vc-winamp-border-radius: var(
+        --winamp-border-radius,
+        var(--custom-border-radius, var(--radius-sm, var(--border-radius, 10px)))
+    );
+    --vc-winamp-border-radius-sm: var(
+        --winamp-border-radius-sm,
+        var(--custom-border-radius-sm, var(--radius-xs, var(--border-radius-sm, 3px)))
+    );
+    --vc-winamp-border-radius-lg: var(
+        --winamp-border-radius-lg,
+        var(--custom-border-radius-lg, var(--radius-md, var(--border-radius-lg, 16px)))
+    );
+
+    /* === TYPOGRAPHY === */
+    --vc-winamp-font-family: var(
+        --winamp-font-family,
+        var(
+            --custom-font-family,
+            var(
+                --font-primary,
+                var(--font-display, "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif)
+            )
+        )
+    );
+    --vc-winamp-font-family-code: var(
+        --winamp-font-family-code,
+        var(--custom-font-family-code, var(--font-code, var(--font-mono, "Consolas", "Monaco", "Menlo", monospace)))
+    );
+    --vc-winamp-font-size-xs: var(--winamp-font-size-xs, var(--custom-font-size-xs, var(--font-size-xs, 10px)));
+    --vc-winamp-font-size-sm: var(--winamp-font-size-sm, var(--custom-font-size-sm, var(--font-size-sm, 12px)));
+    --vc-winamp-font-size-md: var(--winamp-font-size-md, var(--custom-font-size-md, var(--font-size-md, 14px)));
+    --vc-winamp-font-size-lg: var(--winamp-font-size-lg, var(--custom-font-size-lg, var(--font-size-lg, 16px)));
+    --vc-winamp-font-weight-normal: var(
+        --winamp-font-weight-normal,
+        var(--custom-font-weight-normal, var(--font-weight-normal, 400))
+    );
+    --vc-winamp-font-weight-medium: var(
+        --winamp-font-weight-medium,
+        var(--custom-font-weight-medium, var(--font-weight-medium, 500))
+    );
+    --vc-winamp-font-weight-semibold: var(
+        --winamp-font-weight-semibold,
+        var(--custom-font-weight-semibold, var(--font-weight-semibold, 600))
+    );
+    --vc-winamp-font-weight-bold: var(
+        --winamp-font-weight-bold,
+        var(--custom-font-weight-bold, var(--font-weight-bold, 700))
+    );
+
+    /* === SHADOWS === */
+    --vc-winamp-shadow-sm: var(
+        --winamp-shadow-sm,
+        var(--custom-shadow-sm, var(--shadow-sm, var(--elevation-low, 0 2px 4px rgba(0, 0, 0, 0.1))))
+    );
+    --vc-winamp-shadow-md: var(
+        --winamp-shadow-md,
+        var(--custom-shadow-md, var(--shadow-md, var(--elevation-medium, 0 4px 8px rgba(0, 0, 0, 0.15))))
+    );
+    --vc-winamp-shadow-lg: var(
+        --winamp-shadow-lg,
+        var(--custom-shadow-lg, var(--shadow-lg, var(--elevation-high, 0 8px 16px rgba(0, 0, 0, 0.2))))
+    );
+
+    /* === TRANSITIONS === */
+    --vc-winamp-transition-fast: var(
+        --winamp-transition-fast,
+        var(--custom-transition-fast, var(--transition-fast, 0.1s))
+    );
+    --vc-winamp-transition-normal: var(
+        --winamp-transition-normal,
+        var(--custom-transition-normal, var(--transition-normal, 0.2s))
+    );
+    --vc-winamp-transition-slow: var(
+        --winamp-transition-slow,
+        var(--custom-transition-slow, var(--transition-slow, 0.3s))
+    );
+    --vc-winamp-transition-easing: var(
+        --winamp-transition-easing,
+        var(--custom-transition-easing, var(--transition-easing, ease-in-out))
+    );
+
+    /* === COMPONENT SPECIFIC === */
+    --vc-winamp-button-size: var(--winamp-button-size, var(--custom-button-size, var(--button-size, 32px)));
+    --vc-winamp-button-icon-size: var(
+        --winamp-button-icon-size,
+        var(--custom-button-icon-size, var(--icon-size, 24px))
+    );
+    --vc-winamp-button-small-icon-size: var(
+        --winamp-button-small-icon-size,
+        var(--custom-button-small-icon-size, var(--icon-size-sm, 22px))
+    );
+    --vc-winamp-slider-height: var(--winamp-slider-height, var(--custom-slider-height, var(--slider-height, 3px)));
+    --vc-winamp-slider-thumb-size: var(
+        --winamp-slider-thumb-size,
+        var(--custom-slider-thumb-size, var(--slider-thumb-size, 16px))
+    );
+    --vc-winamp-album-height: var(--winamp-album-height, var(--custom-album-height, var(--album-height, 90%)));
+
+    /* === COLOR VARIATIONS (using color-mix) === */
+    --vc-winamp-primary-10: color-mix(in hsl, var(--vc-winamp-primary), transparent 90%);
+    --vc-winamp-primary-20: color-mix(in hsl, var(--vc-winamp-primary), transparent 80%);
+    --vc-winamp-primary-30: color-mix(in hsl, var(--vc-winamp-primary), transparent 70%);
+    --vc-winamp-primary-40: color-mix(in hsl, var(--vc-winamp-primary), transparent 60%);
+    --vc-winamp-primary-50: color-mix(in hsl, var(--vc-winamp-primary), transparent 50%);
+    --vc-winamp-primary-60: color-mix(in hsl, var(--vc-winamp-primary), transparent 40%);
+    --vc-winamp-primary-70: color-mix(in hsl, var(--vc-winamp-primary), transparent 30%);
+    --vc-winamp-primary-80: color-mix(in hsl, var(--vc-winamp-primary), transparent 20%);
+    --vc-winamp-primary-90: color-mix(in hsl, var(--vc-winamp-primary), transparent 10%);
+
+    /* === LEGACY COMPATIBILITY === */
+    --vc-winamp-orange: var(--vc-winamp-primary);
+    --vc-winamp-orange-90: var(--vc-winamp-primary-10);
+    --vc-winamp-orange-80: var(--vc-winamp-primary-20);
+}
