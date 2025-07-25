@@ -1,0 +1,113 @@
+/* =============================================================================
+   STAGGERED HOVER ANIMATIONS
+   ============================================================================= */
+
+:root {
+    /*
+     * DYNAMIC TIMING SYSTEM
+     *
+     * Adjust durations here - delays auto-calculate to maintain stagger flow:
+     * Stage 1: Button row (immediate)
+     * Stage 2: Seekbar (parallel with stage 1)
+     * Stage 3: Progress text & divider (starts after seekbar finishes)
+     */
+
+    /* Animation durations */
+    --vc-winamp-button-duration: 0.12s;
+    --vc-winamp-seekbar-duration: 0.18s;
+    --vc-winamp-progress-duration: 0.15s;
+    --vc-winamp-divider-duration: 0.1s;
+
+    /* Calculated delays (auto-adjusting) */
+    --vc-winamp-stage1-delay: 0s;
+    --vc-winamp-stage2-delay: 0s;
+    --vc-winamp-stage3-delay: var(--vc-winamp-seekbar-duration);
+
+    /* Easing functions */
+    --vc-winamp-ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --vc-winamp-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --vc-winamp-ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Stage 1: Button Row (Immediate - 0s delay) */
+.vc-winamp-button-row {
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--vc-winamp-button-duration) var(--vc-winamp-ease-default);
+    transition-property: height;
+    transition-delay: var(--vc-winamp-stage1-delay);
+}
+
+#vc-winamp-player:hover .vc-winamp-button-row {
+    opacity: 1;
+    height: 32px;
+    pointer-events: auto;
+    /* only transition opacity on show to prevent clipping */
+    transition-property: height, opacity;
+    transition-delay: var(--vc-winamp-stage1-delay);
+}
+
+/* Stage 2: Seekbar (starts immediately, duration auto-calculated) */
+#vc-winamp-progress-bar:not(.vc-winamp-no-hover) .vc-winamp-slider {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--vc-winamp-seekbar-duration) var(--vc-winamp-ease-default);
+    transition-property: max-height;
+    transition-delay: var(--vc-winamp-stage2-delay);
+}
+
+#vc-winamp-player:hover #vc-winamp-progress-bar:not(.vc-winamp-no-hover) .vc-winamp-slider {
+    opacity: 1;
+    pointer-events: auto;
+    max-height: 500px;
+    /* only transition opacity on show to prevent clipping */
+    transition-property: max-height, opacity;
+    transition-delay: var(--vc-winamp-stage2-delay);
+}
+
+/* Stage 3: Progress Text & Divider (delay auto-calculated after seekbar) */
+#vc-winamp-progress-bar:not(.vc-winamp-no-hover) #vc-winamp-progress-text {
+    width: 50%;
+    transition: var(--vc-winamp-progress-duration) var(--vc-winamp-ease-out);
+    transition-property: width;
+    transition-delay: 0s;
+}
+
+#vc-winamp-player:hover #vc-winamp-progress-bar:not(.vc-winamp-no-hover) #vc-winamp-progress-text {
+    width: 100%;
+    transition: var(--vc-winamp-progress-duration) var(--vc-winamp-ease-in);
+    transition-property: width;
+    transition-delay: var(--vc-winamp-stage3-delay);
+}
+
+#vc-winamp-progress-bar:not(.vc-winamp-no-hover) .vc-winamp-progress-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 12px;
+    overflow: hidden;
+    transition: var(--vc-winamp-progress-duration) var(--vc-winamp-ease-out);
+    transition-property: height;
+    transition-delay: 0s;
+}
+
+#vc-winamp-player:hover #vc-winamp-progress-bar:not(.vc-winamp-no-hover) .vc-winamp-progress-divider {
+    height: 0;
+    transition: var(--vc-winamp-divider-duration) var(--vc-winamp-ease-in);
+    transition-property: height;
+    transition-delay: var(--vc-winamp-stage3-delay);
+}
+
+/* =============================================================================
+   ENHANCED STYLING
+   ============================================================================= */
+
+.vc-winamp-progress-time {
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Courier New", monospace;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+}

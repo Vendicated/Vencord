@@ -1,0 +1,325 @@
+@import url("./winampVariables.css");
+
+#vc-winamp-player {
+    padding: var(--vc-winamp-spacing-md);
+    background: var(--vc-winamp-bg-primary);
+    margin: 0;
+    border-top-left-radius: var(--vc-winamp-border-radius);
+    border-top-right-radius: var(--vc-winamp-border-radius);
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-winamp-button {
+    background: none;
+    color: var(--vc-winamp-interactive-normal);
+    padding: 0;
+    width: var(--vc-winamp-button-size);
+    height: var(--vc-winamp-button-size);
+    border-radius: var(--vc-winamp-border-radius-sm);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 var(--vc-winamp-spacing-xs);
+    transition: var(--vc-winamp-transition-normal) var(--vc-winamp-transition-easing);
+    transition-property: color, background-color, border-color, box-shadow;
+}
+
+.vc-winamp-button:hover {
+    color: var(--vc-winamp-interactive-hover);
+    background-color: var(--vc-winamp-bg-hover);
+}
+
+.vc-winamp-button-icon {
+    height: var(--vc-winamp-button-icon-size);
+    width: var(--vc-winamp-button-icon-size);
+}
+
+.vc-winamp-shuffle .vc-winamp-button-icon,
+.vc-winamp-repeat .vc-winamp-button-icon {
+    width: var(--vc-winamp-button-small-icon-size);
+    height: var(--vc-winamp-button-small-icon-size);
+}
+
+.vc-winamp-shuffle-on,
+.vc-winamp-repeat-playlist,
+.vc-winamp-repeat-track {
+    color: var(--vc-winamp-primary);
+    background-color: var(--vc-winamp-primary-10);
+}
+
+.vc-winamp-shuffle-on:hover,
+.vc-winamp-repeat-playlist:hover,
+.vc-winamp-repeat-track:hover {
+    color: var(--vc-winamp-primary);
+    background-color: var(--vc-winamp-primary-20);
+}
+
+.vc-winamp-tooltip-text {
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 0.2em;
+    max-width: 100%;
+    margin: unset;
+}
+
+.vc-winamp-repeat-1 {
+    font-size: 70%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.vc-winamp-button-row {
+    justify-content: center;
+    align-items: center;
+    padding: var(--vc-winamp-spacing-xs) 0;
+}
+
+#vc-winamp-info-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 3em;
+    gap: var(--vc-winamp-spacing-sm);
+}
+
+#vc-winamp-album-image {
+    height: var(--vc-winamp-album-height);
+    object-fit: contain;
+    border-radius: var(--vc-winamp-border-radius-sm);
+    transition: filter var(--vc-winamp-transition-normal) var(--vc-winamp-transition-easing);
+}
+
+#vc-winamp-album-image:hover {
+    filter: brightness(1.2);
+    cursor: pointer;
+}
+
+#vc-winamp-album-expanded-wrapper #vc-winamp-album-image {
+    width: 100%;
+    object-fit: contain;
+}
+
+#vc-winamp-titles {
+    display: flex;
+    flex-direction: column;
+    padding: var(--vc-winamp-spacing-xs);
+    align-items: flex-start;
+    place-content: flex-start center;
+    overflow: hidden;
+}
+
+#vc-winamp-song-title {
+    color: var(--vc-winamp-text-primary);
+    font-size: var(--vc-winamp-font-size-md);
+    font-weight: var(--vc-winamp-font-weight-semibold);
+}
+
+.vc-winamp-ellipoverflow {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
+}
+
+.vc-winamp-artist,
+.vc-winamp-album {
+    font-size: var(--vc-winamp-font-size-sm);
+    text-decoration: none;
+    color: var(--vc-winamp-text-primary);
+}
+
+.vc-winamp-comma {
+    color: var(--vc-winamp-text-secondary);
+}
+
+.vc-winamp-artist[role="link"]:hover,
+#vc-winamp-album-title[role="link"]:hover,
+#vc-winamp-song-title[role="link"]:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.vc-winamp-song-info-prefix {
+    display: none;
+}
+
+.vc-winamp-secondary-song-info {
+    font-size: var(--vc-winamp-font-size-sm);
+}
+
+/* Base slider styling - used by both progress bar and volume slider */
+.vc-winamp-slider {
+    flex-grow: 1;
+    width: 100%;
+    padding: 0 !important;
+    margin: 0 var(--vc-winamp-spacing-sm);
+    max-height: 500px;
+    overflow: hidden;
+}
+
+.vc-winamp-slider [class^="bar"] {
+    height: var(--vc-winamp-slider-height) !important;
+    background: var(--vc-winamp-border-primary);
+    border-radius: var(--vc-winamp-border-radius-sm);
+    top: calc(12px - 4px / 2 + var(--bar-offset));
+}
+
+.vc-winamp-slider [class^="barFill"] {
+    background-color: var(--vc-winamp-interactive-active) !important;
+    border-radius: var(--vc-winamp-border-radius-sm);
+}
+
+.vc-winamp-slider:hover [class^="barFill"] {
+    background-color: var(--vc-winamp-primary) !important;
+}
+
+.vc-winamp-slider [class^="grabber"] {
+    background-color: var(--vc-winamp-interactive-active) !important;
+    border-color: var(--vc-winamp-interactive-active) !important;
+    color: var(--vc-winamp-interactive-active);
+    width: var(--vc-winamp-slider-thumb-size) !important;
+    height: var(--vc-winamp-slider-thumb-size) !important;
+    border-radius: 50% !important;
+    position: absolute !important;
+    top: 50% !important;
+    margin-top: calc(17px / -2 + var(--bar-offset) / 2) !important;
+    margin-left: -0.5px;
+    opacity: 0;
+    transform: scale(0);
+    transition: var(--vc-winamp-transition-normal) var(--vc-winamp-transition-easing);
+    transition-property: opacity, transform;
+}
+
+.vc-winamp-slider [class^="grabber"]:hover {
+    background-color: var(--vc-winamp-interactive-hover) !important;
+    border-color: var(--vc-winamp-interactive-hover) !important;
+}
+
+/* Progress bar specific styling */
+#vc-winamp-progress-bar {
+    position: relative;
+    color: var(--vc-winamp-text-primary);
+    width: 100%;
+    margin-bottom: 0;
+    order: 3; /* Place at bottom */
+}
+
+#vc-winamp-progress-bar:hover .vc-winamp-slider [class^="grabber"] {
+    opacity: 0;
+    transform: scale(1);
+}
+
+#vc-winamp-progress-text {
+    display: flex;
+    margin: auto auto;
+    margin-top: var(--vc-winamp-spacing-sm);
+    align-items: center;
+    justify-content: space-between;
+    transition: 0.2s width;
+}
+
+.vc-winamp-progress-time {
+    font-size: var(--vc-winamp-font-size-sm);
+    font-family: var(--vc-winamp-font-family-code);
+    position: relative;
+    display: inline-block;
+}
+#vc-winamp-progress-bar.vc-winamp-progress-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 12px;
+    overflow: hidden;
+}
+/* Volume control styling - matches progress bar structure */
+#vc-winamp-volume-bar {
+    position: relative;
+    color: var(--vc-winamp-text-primary);
+    width: 100%;
+    margin-bottom: 0;
+}
+
+#vc-winamp-volume-bar .vc-winamp-slider [class^="grabber"] {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.vc-winamp-fallback {
+    padding: var(--vc-winamp-spacing-sm);
+    color: var(--vc-winamp-text-primary);
+}
+
+/* Tooltips for buttons */
+.vc-winamp-tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.vc-winamp-tooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--vc-winamp-bg-tertiary);
+    color: var(--vc-winamp-text-primary);
+    padding: 4px 8px;
+    border-radius: var(--vc-winamp-border-radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border: 1px solid var(--vc-winamp-border-secondary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.vc-winamp-tooltip-arrow {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--vc-winamp-bg-tertiary);
+}
+
+.vc-winamp-tooltip-container:hover .vc-winamp-tooltip {
+    opacity: 1;
+}
+
+/* Persistent labels */
+.vc-winamp-persistent-label-container {
+    position: relative;
+}
+.vc-winamp-persistent-label.vc-winamp-above {
+    top: -10px;
+}
+.vc-winamp-persistent-label.vc-winamp-below {
+    bottom: -20px;
+}
+.vc-winamp-persistent-label {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--vc-winamp-text-tertiary);
+    background: var(--vc-winamp-bg-primary);
+    padding: 1px 6px;
+    border-radius: 2px;
+    border: 1px solid var(--vc-winamp-border-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    opacity: 1;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
