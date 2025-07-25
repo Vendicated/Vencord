@@ -341,8 +341,6 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
         })));
     }
 
-    // not using the SettingsSection component here because it uses bottom20 margins and that looks shit with the input
-    // boxes/searchable selects, the gaps are just too long for whatever reason?
     return (
         <SettingsSection name={id} description={option.description} error={error}>
             {
