@@ -23,13 +23,6 @@ import { Channel, Message } from "@vencord/discord-types";
 import { findLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, MessageActions } from "@webpack/common";
 
-interface Sticker {
-    id: string;
-    format_type: number;
-    description: string;
-    name: string;
-}
-
 enum GreetMode {
     Greet = "Greet",
     NormalMessage = "Message"
@@ -168,7 +161,7 @@ export default definePlugin({
         {
             find: "#{intl::WELCOME_CTA_LABEL}",
             replacement: {
-                match: /innerClassName:\i\.welcomeCTAButton,(?<={channel:\i,message:\i}=(\i).{0,400}?)/,
+                match: /innerClassName:\i\.welcomeCTAButton,(?<={channel:\i,message:\i}=(\i).+?)/,
                 replace: "$&onContextMenu:(vcEvent)=>$self.pickSticker(vcEvent, $1),"
             }
         }
