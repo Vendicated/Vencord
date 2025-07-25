@@ -50,8 +50,9 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=onContextMenu:\i,children:)\i/,
-                replace: "$self.renderUsername(arguments[0])"
+                // The field is named "userName", but as this is unusual casing, the regex also matches username, in case they change it
+                match: /(?<=onContextMenu:\i,children:)\i\?(?=.{0,100}?user[Nn]ame:)/,
+                replace: "$self.renderUsername(arguments[0]),_oldChildren:$&"
             }
         },
     ],

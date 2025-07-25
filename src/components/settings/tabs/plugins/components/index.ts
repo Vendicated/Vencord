@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { OptionType } from "@utils/types";
 import { ComponentType } from "react";
 

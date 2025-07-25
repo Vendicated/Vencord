@@ -40,11 +40,11 @@ export function TextSetting({ option, pluginSettings, definedSettings, id, onCha
         <SettingsSection name={id} description={option.description} error={error}>
             <TextInput
                 type="text"
+                placeholder={option.placeholder ?? "Enter a value"}
                 value={state}
                 onChange={handleChange}
-                placeholder={option.placeholder ?? "Enter a value"}
-                disabled={option.disabled?.call(definedSettings) ?? false}
                 maxLength={null}
+                disabled={option.disabled?.call(definedSettings) ?? false}
                 {...option.componentProps}
             />
         </SettingsSection>
