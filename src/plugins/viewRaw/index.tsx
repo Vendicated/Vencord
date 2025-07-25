@@ -182,7 +182,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message, channel or guild",
-    authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
+    authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna, Devs.TomW1605],
     settings,
 
     contextMenus: {
