@@ -4,20 +4,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./style.css";
+
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildMember, User } from "@vencord/discord-types";
+import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, RelationshipStore, UserStore, MessageStore } from "@webpack/common";
 import { JSX } from "react";
 
 const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
 const StreamerModeStore = findStoreLazy("StreamerModeStore");
+const AccessibilityStore = findStoreLazy("AccessibilityStore");
 const colorPattern = /^#(?:[\da-f]{3}){1,2}$|^#(?:[\da-f]{4}){1,2}$|(rgb|hsl)a?\((\s*-?\d+%?\s*,){2}(\s*-?\d+%?\s*)\)|(rgb|hsl)a?\((\s*-?\d+%?\s*,){3}\s*(0|(0?\.\d+)|1)\)$/iu;
 const roleColorPattern = /^role((?:\+|-)\d{0,4})?$/iu;
 const symbolPattern = /^[\p{S}\p{P}]{1,3}$/iu;
+const templatePattern = /(?:\{(?:friend|nick|display|user)(?:,\s*(?:friend|nick|display|user))*\})/iu;
 
 function adjustHex(color: string, percent: number): string {
     let hex = color.replace("#", "");
@@ -65,7 +68,7 @@ function validColor(color: string) {
     return isValid;
 }
 
-function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string) {
+function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string): any {
     const fallbackReturn = {
         normal: {
             original: {
@@ -92,7 +95,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
 
     if (savedColor.toLowerCase().includes("role")) {
         const percentage = roleColorPattern.exec(savedColor)?.[1] || "";
-        if (percentage && isNaN(parseInt(percentage))) return { color: fallbackColor };
+        if (percentage && isNaN(parseInt(percentage))) return fallbackReturn;
 
         const colorStrings = (user as any)?.colorStrings || {};
         primaryColor = colorStrings.primaryColor || null;
@@ -115,23 +118,21 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         if (tertiaryColor && percentage) {
             tertiaryAdjusted = adjustHex(tertiaryColor, parseInt(percentage));
         }
-
-        gradient = !secondaryColor
-            ? null
-            : tertiaryColor
-                ? "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-1))"
-                : "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-3),var(--custom-gradient-color-1))";
     }
 
+    gradient = !secondaryColor
+        ? null
+        : tertiaryColor
+            ? "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-3),var(--custom-gradient-color-1))"
+            : "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-1))";
+
     const baseNormalStyle = {
-        "font-weight": "initial",
         "isolation": "isolate",
     };
 
-    const baseGradientStaticStyle = {
-        "font-weight": "initial",
-        "background": gradient,
+    const baseGradientStyle = {
         "background-clip": "text",
+        "background-size": "100px auto",
         "-webkit-text-fill-color": "transparent",
         "-webkit-background-clip": "text",
         "isolation": "isolate",
@@ -144,80 +145,547 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         },
         gradient: gradient ? {
             animated: {
-                original: { "color": primaryColor, "text-decoration-color": primaryColor },
-                adjusted: { "color": primaryAdjusted, "text-decoration-color": primaryAdjusted },
+                ...baseGradientStyle,
+                "color": primaryColor,
+                "text-decoration-color": primaryColor,
+                "--custom-gradient-color-1": primaryColor,
+                "--custom-gradient-color-2": secondaryColor || primaryColor,
+                "--custom-gradient-color-3": tertiaryColor || primaryColor,
+                "background-image": gradient,
+                "animation": "show-me-your-name-animation 1.5s linear infinite"
             },
             static: {
                 original: {
-                    ...baseGradientStaticStyle,
+                    ...baseGradientStyle,
                     "color": primaryColor,
                     "text-decoration-color": primaryColor,
                     "--custom-gradient-color-1": primaryColor,
                     "--custom-gradient-color-2": secondaryColor || primaryColor,
-                    "--custom-gradient-color-3": tertiaryColor || primaryColor
+                    "--custom-gradient-color-3": tertiaryColor || primaryColor,
+                    "background-image": gradient,
                 },
                 adjusted: {
-                    ...baseGradientStaticStyle,
+                    ...baseGradientStyle,
                     "color": primaryAdjusted,
                     "text-decoration-color": primaryAdjusted,
                     "--custom-gradient-color-1": primaryAdjusted,
                     "--custom-gradient-color-2": secondaryAdjusted || primaryAdjusted,
-                    "--custom-gradient-color-3": tertiaryAdjusted || primaryAdjusted
+                    "--custom-gradient-color-3": tertiaryAdjusted || primaryAdjusted,
+                    "background-image": gradient,
                 },
             }
         } : null,
     };
 }
 
-function validTemplate(value: string) {
-    const items = value.trim().split(/\s+/);
-    if (items.length > 3 || !items.length) return false;
-
-    const invalidItems = items.some(item => !/(?:\{(nick|display|user)\})/i.test(item));
-    if (invalidItems) return false;
-
-    const affixes = parseAffixes(value);
-    if (!affixes.order.length || affixes.order.length !== items.length) return false;
-
-    return ["nick", "display", "user"].every(name => {
-        const { prefix, suffix } = affixes[name];
-        return prefix.length <= 3 && suffix.length <= 3 && (!prefix || symbolPattern.test(prefix)) && (!suffix || symbolPattern.test(suffix));
-    });
+function splitTemplate(template: string) {
+    const items = template.trim().split(/(?<!,\s*)\s+/);
+    return items;
 }
 
-function parseAffixes(template: string) {
-    const affixes = {
-        order: [] as string[],
-        nick: { included: false, prefix: "", suffix: "" },
-        display: { included: false, prefix: "", suffix: "" },
-        user: { included: false, prefix: "", suffix: "" }
+function parseTemplateItem(entry: string) {
+    const [prefix, suffix] = entry.split(templatePattern);
+    const names = entry.replace(prefix, "").replace(suffix, "").trim().replaceAll(/{|}/g, "").split(/,\s*/);
+
+    return {
+        prefix: prefix ? prefix.trim() : "",
+        suffix: suffix ? suffix.trim() : "",
+        targetProcessedNames: names.map(name => name.trim()).filter(name => name.length > 0)
     };
+}
 
-    const types = ["nick", "display", "user"];
+function validTemplate(value: string) {
+    const items = splitTemplate(value);
 
-    template.split(/\s+/).forEach(item => {
-        types.forEach(type => {
-            if (item.includes(`{${type}}`)) {
-                const [prefix, , suffix] = item.split(/(?:\{(nick|display|user)\})/i);
-                affixes.order.push(type);
-                affixes[type] = { included: true, prefix, suffix };
-            }
-        });
+    if (items.length > 4 || !items.length) {
+        return false;
+    }
+
+    const invalidOptions = items.some(item => {
+        const { prefix, suffix, targetProcessedNames } = parseTemplateItem(item);
+
+        return (
+            prefix.length > 3 ||
+            suffix.length > 3 ||
+            (!!prefix && !symbolPattern.test(prefix)) ||
+            (!!suffix && !symbolPattern.test(suffix)) ||
+            (!prefix && !!suffix) ||
+            (!!prefix && !suffix) ||
+            targetProcessedNames.length > 4 ||
+            targetProcessedNames.some(name => !["friend", "nick", "display", "user"].includes(name.trim()))
+        );
     });
 
-    return affixes;
+    if (invalidOptions) {
+        return false;
+    }
+}
+
+function getProcessedNames(author: any, truncateAllNamesWithStreamerMode: boolean, discriminators: boolean): [string | null, string | null, string | null, string | null] {
+    let discriminator: string | null = null;
+
+    if (discriminators) {
+        const userAuthor = author as User | null;
+
+        if (userAuthor?.bot && !isNaN(userAuthor?.discriminator as any) && Number(userAuthor?.discriminator) !== 0) {
+            discriminator = userAuthor.discriminator;
+
+            if (!!userAuthor) {
+                userAuthor.globalName = userAuthor.username;
+            }
+        }
+    }
+
+    const username: string | null = !author?.username ? null
+        : StreamerModeStore.enabled
+            ? author.username[0] + "..."
+            : author.username as string + (discriminator ? `#${discriminator}` : "");
+
+    const display: string | null = !author?.globalName ? null
+        : StreamerModeStore.enabled && (truncateAllNamesWithStreamerMode || author.globalName.toLowerCase() === author.username.toLowerCase())
+            ? author.globalName[0] + "..."
+            : author.globalName as string;
+
+    const nick: string | null = !author?.nick ? null
+        : StreamerModeStore.enabled && (truncateAllNamesWithStreamerMode || author.nick.toLowerCase() === author.username.toLowerCase())
+            ? author.nick[0] + "..."
+            : author.nick as string;
+
+    const friendName: string | null = author ? RelationshipStore.getNickname(author.id) || null : null;
+    const friend: string | null = !friendName ? null
+        : StreamerModeStore.enabled && (truncateAllNamesWithStreamerMode || friendName.toLowerCase() === author.username.toLowerCase())
+            ? friendName[0] + "..."
+            : friendName as string;
+
+    return [username, display, nick, friend];
+}
+
+interface mentionProps {
+    userId: string;
+    channelId?: string;
+    props?: {
+        messageId?: string;
+        groupId?: string;
+    },
+}
+
+interface messageProps {
+    message: Message;
+    userOverride?: User;
+    isRepliedMessage?: boolean;
+    withMentionPrefix?: boolean;
+}
+
+interface memberListProfileReactionProps {
+    user: User;
+    guildId?: string;
+    tags?: any;
+}
+
+function getMemberListProfilesReactionsVoiceName(
+    props: memberListProfileReactionProps,
+    type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel"
+): [string | null, JSX.Element | null, string | null] {
+    const user = props.user;
+    // props.guildId for member list & preview profile, props.tags.props.displayProfile.guildId
+    // for full guild profile and main profile, which is indicated by whether it is null or not.
+    const guildId = props.guildId || props.tags?.props?.displayProfile?.guildId || null;
+    const member = guildId ? GuildMemberStore.getMember(guildId, user.id) : null;
+    const author = user && member ? { ...user, ...member } : user || member || null;
+    const shouldHookless = type === "reactionsTooltip" || type === "profilesTooltip";
+    return renderUsername(author, null, null, type, "", shouldHookless);
+}
+
+function getMemberListProfilesReactionsVoiceNameText(props: memberListProfileReactionProps, type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel"): string | null {
+    return getMemberListProfilesReactionsVoiceName(props, type as any)[2];
+}
+
+function getMemberListProfilesReactionsVoiceNameElement(props: memberListProfileReactionProps, type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel"): JSX.Element | null {
+    return getMemberListProfilesReactionsVoiceName(props, type as any)[1];
+}
+
+function getMessageName(props: messageProps): [string | null, JSX.Element | null, string | null] {
+    const { hideDefaultAtSign, replies } = settings.use();
+    const { message, userOverride, isRepliedMessage, withMentionPrefix } = props;
+    const channel = ChannelStore.getChannel(message.channel_id) || {};
+    const target = userOverride || message.author;
+    const user = UserStore.getUser(target.id);
+    const member = GuildMemberStore.getMember(channel.guild_id, target.id);
+    const author = user && member ? { ...user, ...member } : user || member || null;
+    const mentionSymbol = hideDefaultAtSign && (!isRepliedMessage || replies) ? "" : withMentionPrefix ? "@" : "";
+    return renderUsername(author, channel.id, message.id, isRepliedMessage ? "replies" : "messages", mentionSymbol);
+}
+
+function getMessageNameElement(props: messageProps): JSX.Element | null {
+    return getMessageName(props)[1];
+}
+
+function getMessageNameText(props: messageProps): string | null {
+    return getMessageName(props)[0];
+}
+
+export function getMentionNameElement(props: mentionProps): JSX.Element | null {
+    const { hideDefaultAtSign, mentions } = settings.use();
+    const { channelId, userId, props: nestedProps } = props;
+    const channel = channelId ? ChannelStore.getChannel(channelId) || null : null;
+    const user = UserStore.getUser(userId);
+    const member = channel ? GuildMemberStore.getMember(channel.guild_id, userId) : null;
+    const author = user && member ? { ...user, ...member } : user || member || null;
+    const mentionSymbol = hideDefaultAtSign && mentions ? "" : "@";
+    return renderUsername(author, channelId || null, nestedProps?.messageId || null, "mentions", mentionSymbol)[1];
+}
+
+function renderUsername(
+    author: User | GuildMember | null,
+    channelId: string | null,
+    messageId: string | null,
+    type: "messages" | "replies" | "mentions" | "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel",
+    mentionSymbol: string,
+    hookless = false
+): [string | null, JSX.Element | null, string | null] {
+    const isMessage = type === "messages";
+    const isReply = type === "replies";
+    const isMention = type === "mentions";
+    const isMember = type === "membersList";
+    const isProfile = type === "profilesPopout";
+    const isReactionsPopout = type === "reactionsPopout";
+    const isReactionsTooltip = type === "reactionsTooltip";
+    const isReaction = isReactionsTooltip || isReactionsPopout;
+    const isVoice = type === "voiceChannel";
+
+    const config = hookless ? settings.store : settings.use();
+    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, triggerNameRerender } = config;
+
+    const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
+    const options = splitTemplate(includedNames);
+    const resolvedUsernameColor = author ? resolveColor(author, usernameColor.trim(), "") : null;
+    const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "") : null;
+    const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "") : null;
+    const resolvedFriendNameColor = author ? resolveColor(author, friendNameColor.trim(), "") : null;
+    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate" };
+    const [username, display, nick, friend] = getProcessedNames(author, truncateAllNamesWithStreamerMode, discriminators);
+
+    const names: Record<string, [string | null, object | null]> = {
+        user: [username, resolvedUsernameColor],
+        display: [display, resolvedDisplayNameColor],
+        nick: [nick, resolvedNicknameColor],
+        friend: [friend, resolvedFriendNameColor],
+    };
+
+    const outputs: any[] = [];
+
+    for (const option of options) {
+        const { prefix, suffix, targetProcessedNames } = parseTemplateItem(option);
+        let chosenName: string | null = null;
+        let chosenStyle: object | null = null;
+        let chosenType = "";
+
+        for (const name of targetProcessedNames) {
+            if (!names[name]) {
+                continue;
+            }
+
+            chosenName = names[name][0];
+            chosenStyle = names[name][1];
+            chosenType = name;
+
+            if (chosenName) {
+                break;
+            }
+        }
+
+        if (!chosenName || !chosenStyle) {
+            continue;
+        }
+
+        outputs.push({
+            prefix: prefix || "",
+            name: chosenName,
+            wrapped: chosenName,
+            type: chosenType,
+            suffix: suffix || "",
+            style: chosenStyle as React.CSSProperties
+        });
+    }
+
+    if (!outputs.length) {
+        outputs.push({
+            prefix: "",
+            name: username || "Unknown",
+            wrapped: username || "Unknown",
+            suffix: "",
+            style: resolvedUsernameColor
+        });
+    }
+
+    let first = outputs.shift();
+    let second = outputs.shift();
+    let third = outputs.shift();
+    let fourth = outputs.shift();
+
+    const firstValueWrapped = hookless ?
+        (first.name || "")
+        : wrapEmojis(first.name || "");
+
+    const secondValueWrapped = hookless ?
+        ((second ?? {}).name || "")
+        : wrapEmojis((second ?? {}).name || "");
+
+    const thirdValueWrapped = hookless ?
+        ((third ?? {}).name || "")
+        : wrapEmojis((third ?? {}).name || "");
+
+    const fourthValueWrapped = hookless ?
+        ((fourth ?? {}).name || "")
+        : wrapEmojis((fourth ?? {}).name || "");
+
+    first.wrapped = firstValueWrapped;
+    second && (second.wrapped = secondValueWrapped);
+    third && (third.wrapped = thirdValueWrapped);
+    fourth && (fourth.wrapped = fourthValueWrapped);
+
+    if (isMessage && !messages) {
+        return [null, null, null];
+    } else if (isReply && !replies) {
+        return [null, null, null];
+    } else if (isMention && !mentions) {
+        return [null, null, null];
+    } else if (isMember && !memberList) {
+        return [null, null, null];
+    } else if (isProfile && !profilePopout) {
+        return [null, null, null];
+    } else if (isReaction && !reactions) {
+        return [null, null, null];
+    } else if (isVoice && !reactions) {
+        return [null, null, null];
+    } else if (!author || !username) {
+        const fallbackText = `${mentionSymbol}Unknown`;
+        return [fallbackText, <>{fallbackText}</>, fallbackText];
+    }
+
+    const prioritizeUsername = (new Set([first, second, third, fourth].filter(Boolean).map(pos => pos.name.toLowerCase())).size > 1);
+
+    if (removeDuplicates) {
+        // Remove duplicates from back to front. Prioritize the earlier name, unless it's the username and there's more than one unique option, then prioritize it.
+        fourth && third && fourth.name.toLowerCase() === third.name.toLowerCase() ? fourth.type === "user" && prioritizeUsername ? third = null : fourth = null : null;
+        fourth && second && fourth.name.toLowerCase() === second.name.toLowerCase() ? fourth.type === "user" && prioritizeUsername ? second = null : fourth = null : null;
+        fourth && first && fourth.name.toLowerCase() === first.name.toLowerCase() ? fourth.type === "user" && prioritizeUsername ? first = null : fourth = null : null;
+        third && second && third.name.toLowerCase() === second.name.toLowerCase() ? third.type === "user" && prioritizeUsername ? second = null : third = null : null;
+        third && first && third.name.toLowerCase() === first.name.toLowerCase() ? third.type === "user" && prioritizeUsername ? first = null : third = null : null;
+        second && first && second.name.toLowerCase() === first.name.toLowerCase() ? second.type === "user" && prioritizeUsername ? first = null : second = null : null;
+    }
+
+    const remainingNames = [first, second, third, fourth].filter(Boolean);
+    first = remainingNames.shift();
+    second = remainingNames.shift();
+    third = remainingNames.shift();
+    fourth = remainingNames.shift();
+
+    const topRoleStyle = isMention || isReactionsPopout ? resolveColor(author, "Role", "") : first.style;
+    const hasGradient = !!topRoleStyle?.gradient && Object.keys(topRoleStyle.gradient).length > 0;
+    const message = channelId && messageId ? MessageStore.getMessage(channelId, messageId) : null;
+    const groupId = (message as any)?.showMeYourNameGroupId || null;
+    const isHovering = (isMessage || isReply || isMention)
+        ? (hoveringMessageSet.has(Number(messageId)) || hoveringMessageSet.has(Number(groupId)))
+        : isReactionsPopout
+            ? hoveringReactionPopoutSet.has(Number((author as User).id))
+            : false;
+
+    const shouldGradientGlow = isHovering && hasGradient;
+    const shouldAnimateGradients = shouldGradientGlow && !AccessibilityStore.useReducedMotion;
+    const shouldAnimateSecondaryNames = animateGradients && !ignoreGradients;
+
+    // Replace spaces and @ symbols because attr(data-text) seems to struggle with them.
+    const firstDataText = mentionSymbol + first.name.replaceAll(/\s/g, ".").replaceAll(/@/g, "at");
+    const secondDataText = second && shouldAnimateSecondaryNames ? (second.prefix + second.name + second.suffix).replaceAll(/\s/g, ".").replaceAll(/@/g, "at") : "";
+    const thirdDataText = third && shouldAnimateSecondaryNames ? (third.prefix + third.name + third.suffix).replaceAll(/\s/g, ".").replaceAll(/@/g, "at") : "";
+    const fourthDataText = fourth && shouldAnimateSecondaryNames ? (fourth.prefix + fourth.name + fourth.suffix).replaceAll(/\s/g, ".").replaceAll(/@/g, "at") : "";
+    const allDataText = [firstDataText, secondDataText, thirdDataText, fourthDataText].filter(Boolean).join(" ").trim().replaceAll(/\s/g, ".").replaceAll(/@/g, "at");
+
+    // Only mentions and reactions popouts should patch in the gradient glow or else a double glow will appear on messages.
+    const hoveringClass = (isHovering ? " show-me-your-name-gradient-hovered" : "");
+    const gradientClasses = isMention || isReactionsPopout
+        ? "show-me-your-name-gradient show-me-your-name-gradient-inherit-bg" + hoveringClass
+        : "show-me-your-name-gradient show-me-your-name-gradient-unset-bg" + hoveringClass;
+
+    const topLevelStyle = {
+        // Allows names to wrap in reaction popouts.
+        ...(isReactionsPopout
+            ? { display: "flex", flexWrap: "wrap", lineHeight: "1.1em", fontSize: "0.9em" }
+            : {}),
+    } as React.CSSProperties;
+
+    const nameElement = (
+        <span style={topLevelStyle ? topLevelStyle : undefined}>
+            {mentionSymbol && <span>{mentionSymbol}</span>}
+            {(
+                <span
+                    className={(shouldGradientGlow ? gradientClasses : "")}
+                    data-text={shouldGradientGlow ? firstDataText : undefined}
+                    style={(shouldGradientGlow ? topRoleStyle.gradient.animated : undefined) as React.CSSProperties}
+                >
+                    <span
+                        style={
+                            shouldAnimateGradients && topRoleStyle.gradient
+                                ? topRoleStyle.gradient.animated
+                                : topRoleStyle.gradient
+                                    ? topRoleStyle.gradient.static.original
+                                    : topRoleStyle.normal.original
+                        }>
+                        {first.wrapped}</span>
+                </span>
+            )}
+            {second && (
+                <span
+                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? gradientClasses : "")}
+                    data-text={shouldGradientGlow && secondDataText ? secondDataText : undefined}
+                    style={(shouldGradientGlow && shouldAnimateSecondaryNames ? second.style.gradient.animated : undefined) as React.CSSProperties}
+                >
+                    <span>&nbsp;</span>
+                    <span style={affixColor as React.CSSProperties}>
+                        {second.prefix}</span>
+                    <span
+                        // On non-primary names, allow disabling the gradients completely, or just their animation & glow.
+                        style={
+                            ignoreGradients
+                                ? second.style.normal.adjusted
+                                : shouldAnimateGradients && shouldAnimateSecondaryNames && second.style.gradient
+                                    ? second.style.gradient.animated
+                                    : second.style.gradient
+                                        ? second.style.gradient.static.original
+                                        : second.style.normal.adjusted
+                        }>
+                        {second.wrapped}</span>
+                    <span style={affixColor as React.CSSProperties}>
+                        {second.suffix}</span>
+                </span>
+            )}
+            {third && (
+                <span
+                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? gradientClasses : "")}
+                    data-text={shouldGradientGlow && thirdDataText ? thirdDataText : undefined}
+                    style={(shouldGradientGlow && shouldAnimateSecondaryNames ? third.style.gradient.animated : undefined) as React.CSSProperties}
+                >
+                    <span>&nbsp;</span>
+                    <span style={affixColor as React.CSSProperties}>
+                        {third.prefix}</span>
+                    <span style={
+                        ignoreGradients
+                            ? third.style.normal.adjusted
+                            : shouldAnimateGradients && shouldAnimateSecondaryNames && third.style.gradient
+                                ? third.style.gradient.animated
+                                : third.style.gradient
+                                    ? third.style.gradient.static.original
+                                    : third.style.normal.adjusted
+                    }>
+                        {third.wrapped}</span>
+                    <span style={affixColor as React.CSSProperties}>
+                        {third.suffix}</span>
+                </span>
+            )}
+            {fourth && (
+                <span
+                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? gradientClasses : "")}
+                    data-text={shouldGradientGlow && fourthDataText ? fourthDataText : undefined}
+                    style={(shouldGradientGlow && shouldAnimateSecondaryNames ? fourth.style.gradient.animated : undefined) as React.CSSProperties}
+                >
+                    <span>&nbsp;</span>
+                    <span style={affixColor as React.CSSProperties}>
+                        {fourth.prefix}</span>
+                    <span style={
+                        ignoreGradients
+                            ? fourth.style.normal.adjusted
+                            : shouldAnimateGradients && shouldAnimateSecondaryNames && fourth.style.gradient
+                                ? fourth.style.gradient.animated
+                                : fourth.style.gradient
+                                    ? fourth.style.gradient.static.original
+                                    : fourth.style.normal.adjusted
+                    }>
+                        {fourth.wrapped}</span>
+                    <span style={affixColor as React.CSSProperties}>
+                        {fourth.suffix}</span>
+                </span>
+            )}
+        </span>
+    );
+
+    return [allDataText, nameElement, first.name];
+}
+
+let hoveringMessageSet = new Set<number>();
+let hoveringReactionPopoutSet = new Set<number>();
+
+function addHoveringMessage(id: string) {
+    const prevSize = hoveringMessageSet.size;
+    hoveringMessageSet.add(Number(id));
+
+    if (hoveringMessageSet.size !== prevSize) {
+        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+    }
+}
+
+function removeHoveringMessage(id: string) {
+    const prevSize = hoveringMessageSet.size;
+    hoveringMessageSet.delete(Number(id));
+
+    if (hoveringMessageSet.size !== prevSize) {
+        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+    }
+}
+
+function addHoveringReactionPopout(id: string) {
+    const prevSize = hoveringReactionPopoutSet.size;
+    hoveringReactionPopoutSet.add(Number(id));
+
+    if (hoveringReactionPopoutSet.size !== prevSize) {
+        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+    }
+}
+
+function removeHoveringReactionPopout(id: string) {
+    const prevSize = hoveringReactionPopoutSet.size;
+    hoveringReactionPopoutSet.delete(Number(id));
+
+    if (hoveringReactionPopoutSet.size !== prevSize) {
+        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+    }
 }
 
 const settings = definePluginSettings({
+    messages: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Display custom name format in messages.",
+    },
     replies: {
         type: OptionType.BOOLEAN,
-        default: false,
-        description: "Also display extra names in replies.",
+        default: true,
+        description: "Display custom name format in replies.",
     },
     mentions: {
         type: OptionType.BOOLEAN,
-        default: false,
-        description: "Also display extra names in mentions.",
+        default: true,
+        description: "Display custom name format in mentions.",
+    },
+    memberList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Display the first available name listed in your custom name format in the member list.",
+    },
+    profilePopout: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Display the first available name listed in your custom name format in profile popouts.",
+    },
+    voiceChannels: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Display the first available name listed in your custom name format in voice channels.",
+    },
+    reactions: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Display the first available name listed in your custom name format in reaction tooltips, and the full name in reaction popouts.",
     },
     discriminators: {
         type: OptionType.BOOLEAN,
@@ -229,10 +697,10 @@ const settings = definePluginSettings({
         default: false,
         description: "Hide the default \"@\" symbol before the name in mentions and replies. Only applied if either feature is enabled.",
     },
-    respectStreamerMode: {
+    truncateAllNamesWithStreamerMode: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Truncate usernames in Streamer Mode as Discord does everywhere else.",
+        description: "Truncate all names, not just usernames, while in Streamer Mode.",
     },
     removeDuplicates: {
         type: OptionType.BOOLEAN,
@@ -242,18 +710,24 @@ const settings = definePluginSettings({
     ignoreGradients: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "For the second and third names, if the color is set to \"Role+-\" and the role has a gradient, flatten it to the primary color.",
+        description: "For the second, third, and fourth names, if the role has a gradient, ignore it in favor of the value below.",
     },
     animateGradients: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "For the second and third names, if the color is set to \"Role+-\" and the role has a gradient, animate it. This is disabled by \"Ignore Gradients\" and will cause the +- percentage to role colors to be ignored as well.",
+        description: "For the second, third, and fourth names, if the role has a gradient, animate it. This is disabled by \"Ignore Gradients\" and reduced motion.",
     },
     includedNames: {
         type: OptionType.STRING,
-        description: "The order to display usernames, nicknames, and display names. Use the following placeholders: {nick}, {display}, {user}. You can have up to three prefixes and three suffixes per name.",
-        default: "{nick} [{display}] (@{user})",
+        description: "The order to display usernames, display names, nicknames, and friend names. Use the following placeholders: {user}, {display}, {nick}, {friend}. You can provide multiple name options to use as fallbacks if one is unavailable by separating them with commas as such: {friend, nick, display}. You can have up to three prefixes and three suffixes per name.",
+        default: "{friend, nick} [{display}] (@{user})",
         isValid: validTemplate,
+    },
+    friendNameColor: {
+        type: OptionType.STRING,
+        description: "The color to use for a friend's nickname if it's not the first displayed. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        default: "Role-25",
+        isValid: validColor,
     },
     nicknameColor: {
         type: OptionType.STRING,
@@ -272,187 +746,14 @@ const settings = definePluginSettings({
         description: "The color to use for the username if it's not the first displayed. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
         default: "Role-25",
         isValid: validColor,
-    }
+    },
+    triggerNameRerender: {
+        type: OptionType.BOOLEAN,
+        description: "Trigger a name rerender by toggling this setting.",
+        default: false,
+        hidden: true
+    },
 });
-
-export function getRenderedUsernameElement(props: any): JSX.Element {
-    return renderedUsername(props)[1];
-}
-
-export function getRenderedUsernameText(props: any): string {
-    return renderedUsername(props)[0];
-}
-
-function renderedUsername(props: any): [string, JSX.Element] {
-    const { replies, mentions, discriminators, hideDefaultAtSign, respectStreamerMode, removeDuplicates, includedNames, nicknameColor, displayNameColor, usernameColor, animateGradients, ignoreGradients } = settings.use();
-
-    const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
-    const renderType = props.className === "mention" ? "mention" : "message";
-    const isMention = renderType === "mention";
-    const isMessage = renderType === "message";
-    let author: any = null;
-    let isRepliedMessage = false;
-    let mentionSymbol = "";
-    let discriminator = null;
-    let topRoleStyle: any = null;
-
-    if (isMention) {
-        const channel = ChannelStore.getChannel(props.channelId) || {};
-        const usr = UserStore.getUser(props.userId) || {};
-        const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
-        author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
-        isRepliedMessage = false;
-        mentionSymbol = hideDefaultAtSign && mentions ? "" : "@";
-        topRoleStyle = resolveColor(author, "Role", "");
-    } else if (isMessage) {
-        // props.message.author only has a globalName attribute.
-        // props.author only has a nick attribute, but it is overwritten by the globalName if no nickname is set.
-        // getUser only has a globalName attribute.
-        // getMember only has a nick attribute, and it is null if no nickname is set.
-        // Therefore just using the author props is not enough for an accurate result and we instead need to combine the results of getUser and getMember.
-        const channel = ChannelStore.getChannel(props.message.channel_id) || {};
-        const athr = props.userOverride ? props.userOverride : props.message.author;
-        const usr = UserStore.getUser(athr.id) || {};
-        const mem = GuildMemberStore.getMember(channel.guild_id, athr.id) || {};
-        author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
-        // Treat interactions as replies. Compare user override against message author to not mislabel the bot's name as a name-in-reply.
-        isRepliedMessage = props.isRepliedMessage || !!(!!props.userOverride && !!props.message.interaction && props.message.author.id !== props.userOverride.id);
-        mentionSymbol = hideDefaultAtSign && (!isRepliedMessage || replies) ? "" : props.withMentionPrefix ? "@" : "";
-    }
-
-    author?.bot && discriminators && !isNaN(author.discriminator) && Number(author.discriminator) !== 0 ? discriminator = author.discriminator : null;
-
-    if (discriminator) {
-        author.globalName = author.username;
-        author.username = `${author.username}#${discriminator}`;
-    }
-
-    const username = StreamerModeStore.enabled && respectStreamerMode ? author?.username[0] + "..." : author?.username || "";
-    const display = StreamerModeStore.enabled && respectStreamerMode && author?.globalName?.toLowerCase() === author?.username.toLowerCase() ? author?.globalName[0] + "..." : author?.globalName || "";
-    const nick = StreamerModeStore.enabled && respectStreamerMode && author?.nick?.toLowerCase() === author?.username.toLowerCase() ? author?.nick[0] + "..." : author?.nick || "";
-
-    const affixes = parseAffixes(includedNames);
-    const resolvedUsernameColor = author ? resolveColor(author, usernameColor.trim(), "") : null;
-    const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "") : null;
-    const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "") : null;
-    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue };
-
-    const values = {
-        "user": { "value": username, "prefix": affixes.user.prefix, "suffix": affixes.user.suffix, "style": resolvedUsernameColor },
-        "display": { "value": display, "prefix": affixes.display.prefix, "suffix": affixes.display.suffix, "style": resolvedDisplayNameColor },
-        "nick": { "value": nick, "prefix": affixes.nick.prefix, "suffix": affixes.nick.suffix, "style": resolvedNicknameColor }
-    };
-
-    let { order } = affixes;
-    order.includes("nick") && !values.nick.value && !order.includes("display") && values.display.value ? order[order.indexOf("nick")] = "display" : null;
-    order.includes("display") && !values.display.value && !order.includes("user") && values.user.value ? order[order.indexOf("display")] = "user" : null;
-    order = order.filter((name: string) => values[name].value);
-
-    const first = order.shift() || "user";
-    let second = order.shift() || null;
-    let third = order.shift() || null;
-
-    const firstValue = wrapEmojis(values[first].value);
-    const secondValue = wrapEmojis(second ? values[second].value : "");
-    const thirdValue = wrapEmojis(third ? values[third].value : "");
-
-    if (!author || !username) {
-        const fallbackText = `${mentionSymbol}Unknown`;
-        return [fallbackText, <>{fallbackText}</>];
-    } else if (isRepliedMessage && !replies) {
-        const fallbackText = `${mentionSymbol}${nick || display || username}`;
-        return [fallbackText, <>{fallbackText}</>];
-    } else if (isMention && !mentions) {
-        const fallbackText = `${mentionSymbol}${nick || display || username}`;
-        return [fallbackText, <>{fallbackText}</>];
-    }
-
-    if (removeDuplicates) {
-        // If third is the same as second, remove it, unless third is the username, then prioritize it.
-        second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third === "user" ? second = null : third = null : null;
-        // If second is the same as first, remove it.
-        second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
-        // If third is the same as first, remove it.
-        third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
-    }
-
-    let dataText = `${mentionSymbol}${values[first].value}`;
-
-    if (animateGradients && !ignoreGradients) {
-        if (second) {
-            dataText += ` ${values[second].prefix}${values[second].value}${values[second].suffix}`;
-        }
-
-        if (third) {
-            dataText += ` ${values[third].prefix}${values[third].value}${values[third].suffix}`;
-        }
-    }
-
-    dataText = dataText.replace(/@/g, "A"); // Discord uses attr("data-text") which can't handle @ symbols.
-
-    const nameElement = (
-        <span>
-            {mentionSymbol && <span>{mentionSymbol}</span>}
-            {/* If it's a message render, let Discord handle the default coloring.
-                If it's a mention, patch in the top role color.*/}
-            {(
-                <span>
-                    <span style={
-                        !topRoleStyle
-                            ? undefined
-                            : !topRoleStyle.gradient
-                                ? topRoleStyle.normal.original
-                                : isMention
-                                    ? topRoleStyle.gradient.static.original
-                                    : topRoleStyle.gradient.animated.original
-                    }>
-                        {firstValue}
-                    </span>
-                </span>
-            )}
-            {second && (
-                <span>
-                    <span>&nbsp;</span>
-                    <span style={affixColor}>
-                        {values[second].prefix}</span>
-                    <span style={
-                        settings.store.ignoreGradients
-                            ? values[second].style.normal.adjusted
-                            : settings.store.animateGradients && values[second].style.gradient
-                                ? values[second].style.gradient.animated.original
-                                : values[second].style.gradient
-                                    ? values[second].style.gradient.static.original
-                                    : values[second].style.normal.adjusted
-                    }>
-                        {secondValue}</span>
-                    <span style={affixColor}>
-                        {values[second].suffix}</span>
-                </span>
-            )}
-            {third && (
-                <span>
-                    <span>&nbsp;</span>
-                    <span style={affixColor}>
-                        {values[third].prefix}</span>
-                    <span style={
-                        settings.store.ignoreGradients
-                            ? values[third].style.normal.adjusted
-                            : settings.store.animateGradients && values[third].style.gradient
-                                ? values[third].style.gradient.animated.original
-                                : values[third].style.gradient
-                                    ? values[third].style.gradient.static.original
-                                    : values[third].style.normal.adjusted
-                    }>
-                        {thirdValue}</span>
-                    <span style={affixColor}>
-                        {values[third].suffix}</span>
-                </span>
-            )}
-        </span>
-    );
-
-    return [dataText, nameElement];
-}
 
 export default definePlugin({
     name: "ShowMeYourName",
@@ -463,20 +764,170 @@ export default definePlugin({
     patches: [
         {
             find: '="SYSTEM_TAG"',
+            group: true,
+            replacement: [
+                {
+                    // Replace names in messages and replies.
+                    match: /(onContextMenu:\i,children:)(.{0,100}?),"data-text":(\i\+\i)/,
+                    replace: "$1$self.getMessageNameElement(arguments[0])??($2),\"data-text\":$self.getMessageNameText(arguments[0])??($3)"
+                },
+                {
+                    // Animate gradients in first-level messages.
+                    match: /(let{setAnimate:\i}=(\i);)/,
+                    replace: "$1if($2.animate){$self.addHoveringMessage(arguments[0].message.id)}else{$self.removeHoveringMessage(arguments[0].message.id)};"
+                }
+            ]
+        },
+        {
+            // Replace names in mentions.
+            find: ".USER_MENTION)",
             replacement: {
-                match: /(onContextMenu:\i,children:).{0,100}?"data-text":\i\+\i/,
-                replace: "$1$self.getRenderedUsernameElement(arguments[0]),\"data-text\":$self.getRenderedUsernameText(arguments[0])"
+                match: /("@"\.concat\(null!=\i\?\i:\i\))/,
+                replace: "$self.getMentionNameElement(arguments[0])??($1)"
             }
         },
         {
-            find: ".USER_MENTION)",
+            // Pass on the props to the mention renderer so that hovering second-level
+            // message mentions can accurately be tracked based on props.messageId
+            find: "noStyleAndInteraction},",
             replacement: {
-                match: /"@"\.concat\(null!=\i\?\i:\i\)/,
-                replace: "$self.getRenderedUsernameElement(arguments[0])"
+                match: /(className:"mention",)/,
+                replace: "$1props:arguments[2],"
+            }
+        },
+        {
+            // Track hovering over second-level messages to animate gradients.
+            // Tack on the groupId, which is how the client groups messages from
+            // the same author together, to the message temporarily so that mentions
+            // across a group can animate together. By default, Discord handles this
+            // by animating the second-level message if you are hovering the first-level
+            // message, but not the other way around. This patch allows both.
+            find: "CUSTOM_GIFT\?\"\":",
+            replacement: {
+                match: /(\(\i,\i,\i\);)(let \i=\i.id===\i(?:.{0,300}?)hovering:(\i))/,
+                replace: "$1arguments[0].message.showMeYourNameGroupId=arguments[0].groupId;if($3){$self.addHoveringMessage(arguments[0].groupId);}else{$self.removeHoveringMessage(arguments[0].groupId)};$2"
+            },
+        },
+        {
+            // Replace names in the member list.
+            find: "let{colorRoleName:",
+            replacement: {
+                match: /(let{colorRoleName:\i,colorString:\i,)name:(\i)/,
+                replace: "$1showMeYourNameName:$2=$self.getMemberListProfilesReactionsVoiceNameText(arguments[0],\"membersList\")??(arguments[0].name)"
+            }
+        },
+        {
+            // Replace names in profile popouts.
+            find: "clickableUsername,children",
+            replacement: {
+                match: /(tags:\i,)nickname:(\i)/,
+                replace: "$1showMeYourNameNickname:$2=$self.getMemberListProfilesReactionsVoiceNameText(arguments[0],\"profilesPopout\")??(arguments[0].nickname)"
+            },
+        },
+        {
+            // Tags *should* contain the guild ID nested in its structure, but on the first time
+            // loading a guild member's preview profile, it will be undefined. This patch bypasses 
+            // that by passing the guild ID as its own prop.
+            find: ".hasAvatarForGuild(null==",
+            replacement: {
+                match: /(pronouns,tags:)/,
+                replace: "pronouns,guildId:arguments[0]?.guild?.id??null,tags:"
+            }
+        },
+        {
+            // Same as above, but for bot members.
+            find: "BotUserProfilePopoutBody\"}",
+            replacement: {
+                match: /(pronouns,tags:)/,
+                replace: "pronouns,guildId:arguments[0]?.guild?.id??null,tags:"
+            }
+        },
+        {
+            // Replace names in the profile tooltip for switching between guild and global profiles.
+            find: "\"view-main-profile\",",
+            group: true,
+            replacement: [
+                {
+                    match: /(displayName:)(\i.\i.getName\(void 0,void 0,\i\))/,
+                    replace: "$1$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:null},\"profilesTooltip\")??($2)"
+                },
+                {
+                    match: /(displayName:)(\i.\i.getName\(\i,\i,\i\))/,
+                    replace: "$1$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].guildId},\"profilesTooltip\")??($2)"
+                }
+            ]
+        },
+        {
+            // Replace names in reaction tooltips.
+            find: "reactionTooltip1,",
+            replacement: {
+                match: /(\i.\i.getName\((\i),null==(?:.{0,15}?)(\i)\))/,
+                replace: "$self.getMemberListProfilesReactionsVoiceNameText({user:$3,guildId:$2},\"reactionsTooltip\")??($1)"
+            }
+        },
+        {
+            find: "discriminator,forceUsername",
+            group: true,
+            replacement: [
+                {
+                    // Replace names in reaction popouts.
+                    match: /children:(\[null!=(?:.{0,300}?)forceUsername:!0}\)\])/,
+                    replace: "children:($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId},\"reactionsPopout\"))??($1)"
+                },
+                {
+                    // Track hovering over reaction popouts.
+                    match: /(return\(0,\i.\i\)\(\i.\i,{className:\i.reactorDefault,)(onContextMenu)/,
+                    replace: "$1onMouseEnter:()=>{$self.addHoveringReactionPopout(arguments[0].user.id)},onMouseLeave:()=>{$self.removeHoveringReactionPopout(arguments[0].user.id)},$2"
+                }
+            ]
+        },
+        {
+            // Let gradient glow overflow in reaction popouts.
+            find: "lineClamp2Plus,",
+            replacement: {
+                match: /style:(Object.values\(\i\).filter\(Boolean\).length>0\?\i:void 0),/,
+                replace: "style:{overflow:\"visible\",...$1},"
+            }
+        },
+        {
+            // Replace names in voice channels.
+            find: ",connectUserDragSource:",
+            replacement: {
+                match: /(serverDeaf:\i,)nick:(\i)/,
+                replace: "$1showMeYourNameVoice:$2=$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].channel.guild_id},\"voiceChannel\")??($2)"
             }
         }
     ],
 
-    getRenderedUsernameText,
-    getRenderedUsernameElement: ErrorBoundary.wrap(getRenderedUsernameElement, { noop: true }),
+    flux: {
+        RELATIONSHIP_UPDATE(data) {
+            // Allows rerendering when changing friend names.
+            settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+        },
+
+        RUNNING_STREAMER_TOOLS_CHANGE(data) {
+            // Allows rerendering when toggling streamer mode.
+            settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+        },
+
+        ACCESSIBILITY_SYSTEM_PREFERS_REDUCED_MOTION_CHANGED(data) {
+            // Allows rerendering when toggling reduced motion.
+            settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+        },
+
+        ACCESSIBILITY_SET_PREFERS_REDUCED_MOTION(data) {
+            // Allows rerendering when toggling reduced motion.
+            settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+        }
+    },
+
+    addHoveringMessage,
+    removeHoveringMessage,
+    addHoveringReactionPopout,
+    removeHoveringReactionPopout,
+    getMessageNameText,
+    getMessageNameElement,
+    getMentionNameElement,
+    getMemberListProfilesReactionsVoiceNameText,
+    getMemberListProfilesReactionsVoiceNameElement,
 });

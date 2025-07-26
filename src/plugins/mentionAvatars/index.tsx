@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { GuildRoleStore, SelectedGuildStore, UserStore, useState } from "@webpack/common";
-import { getRenderedUsernameElement } from "plugins/showMeYourName";
+import { getMentionNameElement } from "plugins/showMeYourName";
 
 const settings = definePluginSettings({
     showAtSymbol: {
@@ -69,8 +69,9 @@ export default definePlugin({
         const [isHovering, setIsHovering] = useState(false);
         const usr = user || UserStore.getUser(props.userId);
 
-        const nameContent = Vencord.Settings.plugins.ShowMeYourName.enabled
-            ? getRenderedUsernameElement(props)
+        const showMeYourNameMention = getMentionNameElement({ channelId: props.channelId, userId: usr.id, props: props.props });
+        const nameContent = Vencord.Settings.plugins.ShowMeYourName.enabled && Vencord.Settings.plugins.ShowMeYourName.mentions
+            ? showMeYourNameMention
             : <>{getUsernameString(username)}</>;
 
         return (
