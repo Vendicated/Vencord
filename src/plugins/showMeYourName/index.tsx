@@ -286,7 +286,7 @@ function getMemberListProfilesReactionsVoiceName(
     props: memberListProfileReactionProps,
     type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel"
 ): [string | null, JSX.Element | null, string | null] {
-    const user = props.user;
+    const { user } = props;
     // props.guildId for member list & preview profile, props.tags.props.displayProfile.guildId
     // for full guild profile and main profile, which is indicated by whether it is null or not.
     const guildId = props.guildId || props.tags?.props?.displayProfile?.guildId || null;
@@ -516,7 +516,7 @@ function renderUsername(
     } as React.CSSProperties;
 
     const nameElement = (
-        <span style={topLevelStyle ? topLevelStyle : undefined}>
+        <span style={topLevelStyle}>
             {mentionSymbol && <span>{mentionSymbol}</span>}
             {(
                 <span
@@ -612,8 +612,8 @@ function renderUsername(
     return [allDataText, nameElement, first.name];
 }
 
-let hoveringMessageSet = new Set<number>();
-let hoveringReactionPopoutSet = new Set<number>();
+const hoveringMessageSet = new Set<number>();
+const hoveringReactionPopoutSet = new Set<number>();
 
 function addHoveringMessage(id: string) {
     const prevSize = hoveringMessageSet.size;
@@ -802,7 +802,7 @@ export default definePlugin({
             // across a group can animate together. By default, Discord handles this
             // by animating the second-level message if you are hovering the first-level
             // message, but not the other way around. This patch allows both.
-            find: "CUSTOM_GIFT\?\"\":",
+            find: "CUSTOM_GIFT?\"\":",
             replacement: {
                 match: /(\(\i,\i,\i\);)(let \i=\i.id===\i(?:.{0,300}?)hovering:(\i))/,
                 replace: "$1arguments[0].message.showMeYourNameGroupId=arguments[0].groupId;if($3){$self.addHoveringMessage(arguments[0].groupId);}else{$self.removeHoveringMessage(arguments[0].groupId)};$2"
@@ -826,7 +826,7 @@ export default definePlugin({
         },
         {
             // Tags *should* contain the guild ID nested in its structure, but on the first time
-            // loading a guild member's preview profile, it will be undefined. This patch bypasses 
+            // loading a guild member's preview profile, it will be undefined. This patch bypasses
             // that by passing the guild ID as its own prop.
             find: ".hasAvatarForGuild(null==",
             replacement: {
