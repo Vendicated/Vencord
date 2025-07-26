@@ -26,7 +26,7 @@ import { Forms } from "@webpack/common";
 export default definePlugin({
     name: "EquicordHelper",
     description: "Fixes some misc issues with discord",
-    authors: [EquicordDevs.thororen, EquicordDevs.nyx],
+    authors: [EquicordDevs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu],
     settingsAboutComponent: () => <>
         <Forms.FormText className="plugin-warning" style={{ textAlign: "left" }}>
             This plugin was created to allow us as the Equicord Team & Contributors

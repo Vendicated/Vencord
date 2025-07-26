@@ -71,7 +71,7 @@ jobs:
               run: |
                   gh release upload latest --clobber dist/release/*
 
-            - name: Upload Plugins JSON to Equibored repo
+            - name: Upload Plugin JSONs to Equibored repo
               run: |
                   git config --global user.name "GitHub-Actions"
                   git config --global user.email actions@github.com
