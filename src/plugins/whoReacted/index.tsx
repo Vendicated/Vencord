@@ -22,12 +22,10 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
-import { Message, ReactionEmoji, User } from "discord-types/general";
+import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
 const queue = new Queue();
