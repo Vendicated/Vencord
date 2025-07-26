@@ -33,7 +33,7 @@ export default function PluginsSubmenu() {
         && (
             p.name.toLowerCase().includes(search)
             || p.description.toLowerCase().includes(search)
-            || p.tags?.some(t => t.toLowerCase().includes(search))
+            || p.keywords?.some(t => t.toLowerCase().includes(search))
         )
     );
 
