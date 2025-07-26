@@ -117,6 +117,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                 userId={userId}
                 channelId={data.channelId}
                 inlinePreview={props.noStyleAndInteraction}
+                props={props}
                 key={props.key}
             />
         );
@@ -128,6 +129,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
         // Discord is deranged and renders unknown user mentions as role mentions
         <RoleMention
             {...data}
+            props={props}
             inlinePreview={props.formatInline}
         >
             <span

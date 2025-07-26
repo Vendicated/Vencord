@@ -11,7 +11,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
-import { GuildRoleStore, SelectedGuildStore, useState } from "@webpack/common";
+import { GuildRoleStore, SelectedGuildStore, UserStore, useState } from "@webpack/common";
+import { getMentionNameElement } from "plugins/showMeYourName";
 
 const settings = definePluginSettings({
     showAtSymbol: {
@@ -51,7 +52,7 @@ export default definePlugin({
         find: ".USER_MENTION)",
         replacement: {
             match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
-            replace: "children:$self.renderUsername({username:$1,user:$2})"
+            replace: "children:$self.renderUsername({props:arguments[0],username:$1,user:$2})"
         }
     },
     {
@@ -64,23 +65,29 @@ export default definePlugin({
 
     settings,
 
-    renderUsername: ErrorBoundary.wrap((props: { user: User, username: string; }) => {
-        const { user, username } = props;
+    renderUsername: ErrorBoundary.wrap(({ props, user, username }: { props: any, user: User, username: string; }) => {
         const [isHovering, setIsHovering] = useState(false);
+        const usr = user || UserStore.getUser(props.userId);
 
-        if (!user) return <>{getUsernameString(username)}</>;
+        const showMeYourNameMention = getMentionNameElement({ channelId: props.channelId, userId: usr.id, props: props.props });
+        const nameContent = Vencord.Settings.plugins.ShowMeYourName.enabled && Vencord.Settings.plugins.ShowMeYourName.mentions
+            ? showMeYourNameMention
+            : <>{getUsernameString(username)}</>;
 
         return (
             <span
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
+                className="vc-mentionAvatars-container"
             >
-                <img
-                    src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)}
-                    className="vc-mentionAvatars-icon"
-                    style={{ borderRadius: "50%" }}
-                />
-                {getUsernameString(username)}
+                {usr && (
+                    <img
+                        src={usr.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)}
+                        className="vc-mentionAvatars-icon"
+                        style={{ borderRadius: "50%" }}
+                    />
+                )}
+                {nameContent}
             </span>
         );
     }, { noop: true }),
