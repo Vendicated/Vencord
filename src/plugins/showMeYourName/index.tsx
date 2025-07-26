@@ -11,7 +11,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, RelationshipStore, UserStore, MessageStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, MessageStore, RelationshipStore, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
