@@ -229,8 +229,7 @@ async function parseFile(fileName: string) {
         data.filePath = posixNormalize(fileName)
             .split(sep)
             .join(posixSep)
-            .replace(/\/index\.([jt]sx?)$/, "")
-            .replace(/^src\/plugins\//, "");
+            .replace(/\/index\.([jt]sx?)$/, "");
 
         return [data] as const;
     }
