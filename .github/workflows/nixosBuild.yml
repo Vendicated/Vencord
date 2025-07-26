@@ -34,11 +34,11 @@ jobs:
             - name: Build
               run: pnpm buildStandalone
 
-            - name: Generate plugin list
-              run: pnpm generatePluginJson dist/vencordplugins.json
-
-            - name: Generate Equicord plugin list
-              run: pnpm generateEquicordPluginJson dist/equicordplugins.json
+            - name: Generate plugin lists
+              run: |
+                pnpm generatePluginJson dist/plugins.json
+                pnpm generateEquicordPluginJson dist/equicordplugins.json
+                pnpm generateVencordPluginJson dist/vencordplugins.json
 
             - name: Collect files to be released
               run: |
