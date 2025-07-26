@@ -7,6 +7,7 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
@@ -278,15 +279,15 @@ interface messageProps {
 
 interface memberListProfileReactionProps {
     user: User;
+    type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel";
     guildId?: string;
     tags?: any;
 }
 
 function getMemberListProfilesReactionsVoiceName(
     props: memberListProfileReactionProps,
-    type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel"
 ): [string | null, JSX.Element | null, string | null] {
-    const { user } = props;
+    const { user, type } = props;
     // props.guildId for member list & preview profile, props.tags.props.displayProfile.guildId
     // for full guild profile and main profile, which is indicated by whether it is null or not.
     const guildId = props.guildId || props.tags?.props?.displayProfile?.guildId || null;
@@ -296,12 +297,12 @@ function getMemberListProfilesReactionsVoiceName(
     return renderUsername(author, null, null, type, "", shouldHookless);
 }
 
-function getMemberListProfilesReactionsVoiceNameText(props: memberListProfileReactionProps, type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel"): string | null {
-    return getMemberListProfilesReactionsVoiceName(props, type as any)[2];
+function getMemberListProfilesReactionsVoiceNameText(props: memberListProfileReactionProps): string | null {
+    return getMemberListProfilesReactionsVoiceName(props)[2];
 }
 
-function getMemberListProfilesReactionsVoiceNameElement(props: memberListProfileReactionProps, type: "membersList" | "profilesPopout" | "profilesTooltip" | "reactionsTooltip" | "reactionsPopout" | "voiceChannel"): JSX.Element | null {
-    return getMemberListProfilesReactionsVoiceName(props, type as any)[1];
+function getMemberListProfilesReactionsVoiceNameElement(props: memberListProfileReactionProps): JSX.Element | null {
+    return getMemberListProfilesReactionsVoiceName(props)[1];
 }
 
 function getMessageName(props: messageProps): [string | null, JSX.Element | null, string | null] {
@@ -813,7 +814,7 @@ export default definePlugin({
             find: "let{colorRoleName:",
             replacement: {
                 match: /(let{colorRoleName:\i,colorString:\i,)name:(\i)/,
-                replace: "$1showMeYourNameName:$2=$self.getMemberListProfilesReactionsVoiceNameText(arguments[0],\"membersList\")??(arguments[0].name)"
+                replace: "$1showMeYourNameName:$2=$self.getMemberListProfilesReactionsVoiceNameText({...arguments[0],type:\"membersList\"})??(arguments[0].name)"
             }
         },
         {
@@ -821,7 +822,7 @@ export default definePlugin({
             find: "clickableUsername,children",
             replacement: {
                 match: /(tags:\i,)nickname:(\i)/,
-                replace: "$1showMeYourNameNickname:$2=$self.getMemberListProfilesReactionsVoiceNameText(arguments[0],\"profilesPopout\")??(arguments[0].nickname)"
+                replace: "$1showMeYourNameNickname:$2=$self.getMemberListProfilesReactionsVoiceNameText({...arguments[0],type:\"profilesPopout\"})??(arguments[0].nickname)"
             },
         },
         {
@@ -849,11 +850,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(displayName:)(\i.\i.getName\(void 0,void 0,\i\))/,
-                    replace: "$1$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:null},\"profilesTooltip\")??($2)"
+                    replace: "$1$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:null,type:\"profilesTooltip\"})??($2)"
                 },
                 {
                     match: /(displayName:)(\i.\i.getName\(\i,\i,\i\))/,
-                    replace: "$1$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].guildId},\"profilesTooltip\")??($2)"
+                    replace: "$1$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].guildId,type:\"profilesTooltip\"})??($2)"
                 }
             ]
         },
@@ -862,7 +863,7 @@ export default definePlugin({
             find: "reactionTooltip1,",
             replacement: {
                 match: /(\i.\i.getName\((\i),null==(?:.{0,15}?)(\i)\))/,
-                replace: "$self.getMemberListProfilesReactionsVoiceNameText({user:$3,guildId:$2},\"reactionsTooltip\")??($1)"
+                replace: "$self.getMemberListProfilesReactionsVoiceNameText({user:$3,guildId:$2,type:\"reactionsTooltip\"})??($1)"
             }
         },
         {
@@ -872,7 +873,7 @@ export default definePlugin({
                 {
                     // Replace names in reaction popouts.
                     match: /children:(\[null!=(?:.{0,300}?)forceUsername:!0}\)\])/,
-                    replace: "children:($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId},\"reactionsPopout\"))??($1)"
+                    replace: "children:($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId,type:\"reactionsPopout\"}))??($1)"
                 },
                 {
                     // Track hovering over reaction popouts.
@@ -894,7 +895,7 @@ export default definePlugin({
             find: ",connectUserDragSource:",
             replacement: {
                 match: /(serverDeaf:\i,)nick:(\i)/,
-                replace: "$1showMeYourNameVoice:$2=$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].channel.guild_id},\"voiceChannel\")??($2)"
+                replace: "$1showMeYourNameVoice:$2=$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].channel.guild_id,type:\"voiceChannel\"})??($2)"
             }
         }
     ],
@@ -926,8 +927,8 @@ export default definePlugin({
     addHoveringReactionPopout,
     removeHoveringReactionPopout,
     getMessageNameText,
-    getMessageNameElement,
-    getMentionNameElement,
+    getMessageNameElement: ErrorBoundary.wrap(getMessageNameElement, { noop: true }),
+    getMentionNameElement: ErrorBoundary.wrap(getMentionNameElement, { noop: true }),
     getMemberListProfilesReactionsVoiceNameText,
-    getMemberListProfilesReactionsVoiceNameElement,
+    getMemberListProfilesReactionsVoiceNameElement: ErrorBoundary.wrap(getMemberListProfilesReactionsVoiceNameElement, { noop: true })
 });
