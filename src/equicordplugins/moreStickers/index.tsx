@@ -34,7 +34,7 @@ export default definePlugin({
         {
             find: ".stickerButton)},",
             replacement: [{
-                match: /(children:\(0,\i\.jsx\)\()(.{0,10})({className.{10,30}\.stickerButton)/,
+                match: /(children:\(0,\i\.jsx\)\()(.{0,20})({className.{10,30}\.stickerButton)/,
                 replace: "$1arguments[0]?.stickersType?$self.stickerButton:$2$3"
             }, {
                 match: /(\i=)((\i\.useCallback\(\(\)=>\{\(.*?\)\().*?\.STICKER,(\i.{0,25}\]\)))/,
