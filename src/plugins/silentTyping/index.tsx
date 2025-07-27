@@ -317,7 +317,7 @@ export default definePlugin({
             find: ",{avatarCutoutX",
             replacement: {
                 match: /isTyping:(\i)=!1(,typingIndicatorRef:\i,isSpeaking:)/,
-                replace: "silentTypingIsTyping:$1=$self.shouldHideMembersListTypingIndicators()?!1:arguments[0].isTyping$2"
+                replace: "silentTypingIsTyping:$1=$self.shouldHideMembersListTypingIndicators()?false:(arguments[0].isTyping??false)$2"
             }
         },
     ],
