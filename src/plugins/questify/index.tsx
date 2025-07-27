@@ -666,14 +666,14 @@ function processPlayGameQuest(quest: Quest): boolean {
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
 
     if (!playType) {
-        console.warn(`Quest ${quest.config.messages.questName} does not have a valid play type configured.`);
+        QuestifyLogger.warn(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} does not have a valid play type configured.`);
         return true;
     }
 
     const questDuration = playType.target || 0;
 
     if (!questDuration) {
-        console.warn(`Quest ${quest.config.messages.questName} has no target duration set for the play type.`);
+        QuestifyLogger.warn(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} has no target duration set for the play type.`);
         return true;
     }
 
