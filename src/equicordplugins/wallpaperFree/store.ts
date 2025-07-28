@@ -6,21 +6,19 @@
 
 import { proxyLazy } from "@utils/lazy";
 import { Channel, FluxEmitter, FluxStore } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher } from "@webpack/common";
+import { Flux as FluxWP, FluxDispatcher } from "@webpack/common";
 
 interface IFlux {
     PersistedStore: typeof FluxStore;
     Emitter: FluxEmitter;
 }
-const Flux: IFlux = findByPropsLazy("connectStores");
 
 export const WallpaperFreeStore = proxyLazy(() => {
     const wallpaperChannelMap: Map<string, string> = new Map();
     const wallpaperGuildMap: Map<string, string> = new Map();
     let globalDefault: string | undefined;
 
-    class WallpaperFreeStore extends Flux.PersistedStore {
+    class WallpaperFreeStore extends (FluxWP as unknown as IFlux).PersistedStore {
         static persistKey = "WallpaperFreeStore";
 
         // @ts-ignore
@@ -44,23 +42,26 @@ export const WallpaperFreeStore = proxyLazy(() => {
             return { guildMap: Array.from(wallpaperGuildMap), channelMap: Array.from(wallpaperChannelMap), globalDefault };
         }
 
-        getUrl(channel: Channel): string | undefined {
+        getUrl(channel: Channel) {
             return (
                 wallpaperChannelMap.get(channel.id) ??
                 wallpaperGuildMap.get(channel.guild_id) ??
                 globalDefault
             );
         }
+
+        getForChannel(id: string) { return wallpaperChannelMap.get(id); }
+
+        getForGuild(id: string) { return wallpaperGuildMap.get(id); }
+
+        get globalDefault() { return globalDefault; }
     }
 
     const store = new WallpaperFreeStore(FluxDispatcher, {
         // @ts-ignore
         VC_WALLPAPER_FREE_CHANGE({ guildId, channelId, url }: { guildId: string | undefined, channelId: string | undefined, url: string; }) {
-            if (guildId) {
-                wallpaperGuildMap.set(guildId, url);
-            } else if (channelId) {
-                wallpaperChannelMap.set(channelId, url);
-            }
+            guildId && wallpaperGuildMap.set(guildId, url);
+            channelId && wallpaperChannelMap.set(channelId, url);
             store.emitChange();
         },
 

@@ -26,7 +26,7 @@ export default definePlugin({
         {
             find: "this.isCopiedStreakGodlike",
             replacement: {
-                match: /Vencord.Plugins.plugins\["SpotifyControls"\].PanelWrapper/,
+                match: /Vencord\.Plugins\.plugins\["SpotifyControls"\]\.PanelWrapper/,
                 replace: "$self.FakePanelWrapper",
             },
             predicate: () => Settings.plugins.SpotifyControls.enabled,

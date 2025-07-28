@@ -1,6 +1,5 @@
 .vc-spotify-lyrics {
     padding: 0.375rem 0.5rem;
-    border-bottom: 1px solid var(--background-modifier-accent);
     text-align: center;
     overflow: hidden;
     max-height: 60px;
@@ -18,7 +17,7 @@
 
 .vc-spotify-lyrics-next,
 .vc-spotify-lyrics-prev {
-    opacity: 0.6;
+    color: var(--text-muted);
     margin-bottom: 1%;
 }
 

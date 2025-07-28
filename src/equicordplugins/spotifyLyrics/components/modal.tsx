@@ -44,12 +44,12 @@ function ModalHeaderContent({ track }: { track: Track; }) {
 }
 
 export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
-    const { track, lyricsInfo, currLrcIndex } = useLyrics();
+    const { track, lyricsInfo, currLrcIndex } = useLyrics({ scroll: false });
     const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric] || null;
 
     return (
         <ModalRoot {...rootProps}>
-            <ModalHeaderContent track={track} />
+            <ModalHeaderContent track={track!} />
             <ModalContent>
                 <div className={cl("lyrics-modal-container") + ` ${scrollClasses.auto}`}>
                     {currentLyrics ? (

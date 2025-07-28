@@ -6,6 +6,7 @@
 
 import { openModal } from "@utils/modal";
 import { ContextMenuApi, React, Text, TooltipContainer, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { SpotifyStore } from "plugins/spotifyControls/SpotifyStore";
 
 import { SpotifyLrcStore } from "../providers/store";
 import settings from "../settings";
@@ -13,9 +14,9 @@ import { LyricsContextMenu } from "./ctxMenu";
 import { LyricsModal } from "./modal";
 import { cl, NoteSvg, useLyrics } from "./util";
 
-function LyricsDisplay() {
+function LyricsDisplay({ scroll = true }: { scroll?: boolean; }) {
     const { ShowMusicNoteOnNoLyrics } = settings.use(["ShowMusicNoteOnNoLyrics"]);
-    const { lyricsInfo, lyricRefs, currLrcIndex } = useLyrics();
+    const { lyricsInfo, lyricRefs, currLrcIndex } = useLyrics({ scroll });
 
     const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric] || null;
 
@@ -31,7 +32,7 @@ function LyricsDisplay() {
     };
 
     if (!lyricsInfo) {
-        return ShowMusicNoteOnNoLyrics && (
+        return ShowMusicNoteOnNoLyrics ? (
             <div className="vc-spotify-lyrics"
                 onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <LyricsContextMenu />)}
             >
@@ -39,7 +40,7 @@ function LyricsDisplay() {
                     {NoteElement}
                 </TooltipContainer>
             </div>
-        );
+        ) : null;
     }
 
     return (
@@ -62,22 +63,23 @@ function LyricsDisplay() {
     );
 }
 
-export function Lyrics() {
+export function Lyrics({ scroll = true }: { scroll?: boolean; } = {}) {
+    SpotifyLrcStore.init();
     const track = useStateFromStores(
-        [SpotifyLrcStore],
-        () => SpotifyLrcStore.track,
+        [SpotifyStore],
+        () => SpotifyStore.track,
         null,
         (prev, next) => (prev?.id ? prev.id === next?.id : prev?.name === next?.name)
     );
 
     const device = useStateFromStores(
-        [SpotifyLrcStore],
-        () => SpotifyLrcStore.device,
+        [SpotifyStore],
+        () => SpotifyStore.device,
         null,
         (prev, next) => prev?.id === next?.id
     );
 
-    const isPlaying = useStateFromStores([SpotifyLrcStore], () => SpotifyLrcStore.isPlaying);
+    const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
     const [shouldHide, setShouldHide] = useState(false);
 
     useEffect(() => {
@@ -90,5 +92,5 @@ export function Lyrics() {
 
     if (!track || !device?.is_active || shouldHide) return null;
 
-    return <LyricsDisplay />;
+    return <LyricsDisplay scroll={scroll} />;
 }

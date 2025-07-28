@@ -7,7 +7,6 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
@@ -28,13 +27,13 @@ export const settings = definePluginSettings({
         description: "",
         type: OptionType.COMPONENT,
         component: TipsComponent,
-    }
+    },
 });
 
 export default definePlugin({
     name: "WallpaperFree",
     authors: [Devs.Joona],
-    description: "Recreation of the old DM wallpaper experiment; Set a background image for any channel or server.",
+    description: "Recreation of the old DM wallpaper experiment; Set a background image for any channel, user or server.",
     patches: [
         {
             find: ".handleSendMessage,onResize",
@@ -56,20 +55,20 @@ export default definePlugin({
         "user-context": UserContextPatch,
         "channel-context": ChannelContextPatch,
         "thread-context": ChannelContextPatch,
-        "guild-context": GuildContextPatch,
         "gdm-context": ChannelContextPatch,
+        "guild-context": GuildContextPatch,
     },
     Wallpaper({ url }: { url: string; }) {
         // no we cant place the hook here
         if (!url) return null;
 
-        return <ErrorBoundary noop>
-            <div className="wallpaperContainer vc-wpfree-wp-container" style={{
+        return <div
+            className="vc-wpfree-wp-container"
+            style={{
                 backgroundImage: `url(${url})`,
-            }}></div>
-        </ErrorBoundary>;
+            }}></div>;
     },
     WallpaperState(channel: Channel) {
         return useStateFromStores([WallpaperFreeStore], () => WallpaperFreeStore.getUrl(channel));
-    }
+    },
 });
