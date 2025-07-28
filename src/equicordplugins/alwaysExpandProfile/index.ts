@@ -15,16 +15,16 @@ export default definePlugin({
     authors: [EquicordDevs.thororen],
     patches: [
         {
-            find: '"UserProfilePopout"',
+            find: '"UserProfilePopout"})',
             replacement: {
-                match: /(?<=user:(\i).*?"PRESS_VIEW_PROFILE".{0,50})return/,
+                match: /(?<=user:(\i).*?"PRESS_VIEW_PROFILE".{0,150})return/,
                 replace: "return $self.openUserProfile($1);"
             }
         },
         {
             find: '"BotUserProfilePopout"',
             replacement: {
-                match: /(?<=user:(\i).*?"PRESS_VIEW_PROFILE".{0,50})return/,
+                match: /(?<=user:(\i).*?"PRESS_VIEW_PROFILE".{0,100})return/,
                 replace: "return $self.openUserProfile($1);"
             }
         },

@@ -76,9 +76,9 @@ export default definePlugin({
             }
         },
         {
-            find: "#{intl::CONNECTIONS}),scrollIntoView",
+            find: "appsConnections,applicationRoleConnection",
             replacement: {
-                match: /(?<=user:(\i).{0,15}displayProfile:(\i).*?CONNECTIONS.{0,100}\}\)\}\))/,
+                match: /(?<=user:(\i).{0,15}displayProfile:(\i).*?application\.id\)\)\}\))/,
                 replace: ",$self.ProfilePopoutComponent({ user: $1, displayProfile: $2 })"
             }
         }
