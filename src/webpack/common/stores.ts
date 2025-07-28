@@ -17,7 +17,7 @@
 */
 
 import * as t from "@vencord/discord-types";
-import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 
 import { waitForStore } from "./internal";
 
@@ -86,7 +86,3 @@ waitForStore("ThemeStore", m => {
     Vencord.QuickCss.initQuickCssThemeStore();
 });
 waitForStore("VoiceStateStore", m => VoiceStateStore = m);
-
-// GuildRoleStore is new, this code is for stable + canary compatibility
-// TODO: Change to waitForStore once GuildRoleStore is on stable
-waitFor(["getRole", "getRoles"], m => GuildRoleStore = m);

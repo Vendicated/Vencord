@@ -7,9 +7,7 @@
 // https://github.com/Masterjoona/vc-betterplusreacts/blob/main/index.ts
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-
-const { getMessages } = findByPropsLazy("getMessages");
+import { MessageStore } from "@webpack/common";
 
 export default definePlugin({
     name: "BetterPlusReacts",
@@ -56,6 +54,7 @@ export default definePlugin({
         return message;
     },
     setMsgReference(plusses: string, channelId: string) {
+        const { getMessages } = MessageStore;
         this.message = getMessages(channelId).getByIndex(getMessages(channelId).length - plusses.split("+").length + 1);
     }
 });
