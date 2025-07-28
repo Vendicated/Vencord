@@ -29,7 +29,7 @@ export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermission
 export const cl = classNameFactory("vc-permviewer-");
 
 export function getSortedRoles({ id }: Guild, member: GuildMember) {
-    const roles = GuildRoleStore.getRoles(id);
+    const roles = GuildRoleStore.getUnsafeMutableRoles(id);
 
     return [...member.roles, id]
         .map(id => roles[id])

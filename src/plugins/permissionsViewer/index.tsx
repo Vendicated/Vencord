@@ -107,7 +107,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         };
                     })
                     .otherwise(() => {
-                        const permissions = Object.values(GuildRoleStore.getRoles(guild.id)).map(role => ({
+                        const permissions = Object.values(GuildRoleStore.getUnsafeMutableRoles(guild.id)).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));
