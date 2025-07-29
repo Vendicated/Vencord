@@ -44,7 +44,9 @@ export default definePlugin({
                 if (!this.audio) return reject("No audio element");
 
                 this.audio.oncanplaythrough = () => resolve();
+
                 this.audio.onerror = e => {
+                    console.error("[CustomRingTone] Failed to load audio:", e);
                     this.audio = null;
                     reject(e);
                 };
@@ -52,6 +54,7 @@ export default definePlugin({
                 this.audio.load();
             });
         } catch (e) {
+            console.error("[CustomRingTone] Error loading audio:", e);
             this.audio = null;
             throw e;
         }
@@ -62,16 +65,23 @@ export default definePlugin({
 
         try {
             this.audio.currentTime = 0;
-            this.audio.play().catch(() => {
-                const playOnClick = () => {
-                    if (this.audio) this.audio.play();
-                    document.removeEventListener("click", playOnClick);
-                };
-                document.addEventListener("click", playOnClick, { once: true });
-            });
+
+            this.audio.play()
+                .catch(e => {
+                    console.error("[CustomRingTone] Error playing audio:", e);
+                    const playOnClick = () => {
+                        if (this.audio) {
+                            this.audio.play()
+                                .catch(e => console.error("[CustomRingTone] Still failed to play audio after user interaction:", e));
+                        }
+                        document.removeEventListener("click", playOnClick);
+                    };
+                    document.addEventListener("click", playOnClick, { once: true });
+                });
 
             return true;
-        } catch {
+        } catch (e) {
+            console.error("[CustomRingTone] Error in playAudio:", e);
             return false;
         }
     },
@@ -79,10 +89,15 @@ export default definePlugin({
     async start() {
         try {
             const url = parseUrl(settings.store.customURL);
-            if (!url) return;
+            if (!url) {
+                console.error("[CustomRingTone] Invalid URL:", settings.store.customURL);
+                return;
+            }
 
             await this.loadAudio(url);
-        } catch {}
+        } catch (e) {
+            console.error("[CustomRingTone] Error in start:", e);
+        }
     },
 
     stop() {
@@ -101,14 +116,14 @@ export default definePlugin({
             find: "class{get volume(){return this._volume}set volume",
             replacement: {
                 match: /ensureAudio\(\)\{([^}]*)\}/,
-                replace: "ensureAudio(){if(Vencord.Plugins.plugins.CustomRingTone?.isRingtone(this.name) && Vencord.Plugins.plugins.CustomRingTone?.audio){try{Vencord.Plugins.plugins.CustomRingTone.playAudio();return Promise.resolve(Vencord.Plugins.plugins.CustomRingTone.audio);}catch{}}$1}"
+                replace: "ensureAudio(){if(Vencord.Plugins.plugins.CustomRingTone?.isRingtone(this.name) && Vencord.Plugins.plugins.CustomRingTone?.audio){try{Vencord.Plugins.plugins.CustomRingTone.playAudio();return Promise.resolve(Vencord.Plugins.plugins.CustomRingTone.audio);}catch(e){console.error(\"[CustomRingTone] Error in ensureAudio patch:\", e);}}$1}"
             }
         },
         {
             find: "destroyAudio(){null!=this._audio",
             replacement: {
                 match: /destroyAudio\(\)\{(null!=this\._audio[^}]*)\}/,
-                replace: "destroyAudio(){try{if(Vencord.Plugins.plugins.CustomRingTone?.isRingtone(this.name) && Vencord.Plugins.plugins.CustomRingTone?.audio){Vencord.Plugins.plugins.CustomRingTone.audio.pause();}}catch{}$1}"
+                replace: "destroyAudio(){try{if(Vencord.Plugins.plugins.CustomRingTone?.isRingtone(this.name)){if(Vencord.Plugins.plugins.CustomRingTone?.audio){Vencord.Plugins.plugins.CustomRingTone.audio.pause();}}}catch(e){console.error(\"[CustomRingTone] Error in destroyAudio patch:\",e);}$1}"
             }
         },
         {
