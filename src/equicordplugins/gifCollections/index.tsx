@@ -31,10 +31,10 @@ export const SortingOptions = {
     MODIFIED_DATE: 3
 };
 
-const addCollectionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+const addCollectionContextMenuPatch: NavContextMenuPatchCallback = async (children, props) => {
     if (!props) return;
     const { message, itemSrc, itemHref, target } = props;
-    const gif = getGif(message, itemSrc ?? itemHref, target);
+    const gif = await getGif(message, itemSrc ?? itemHref, target);
     if (!gif) return;
 
     const group = findGroupChildrenByChildId("open-native-link", children) ?? findGroupChildrenByChildId("copy-link", children);

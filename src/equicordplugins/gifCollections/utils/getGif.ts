@@ -13,7 +13,7 @@ import { cleanUrl } from "./cleanUrl";
 import { isAudio } from "./isAudio";
 import { uuidv4 } from "./uuidv4";
 
-export function getGifByTarget(url: string, target?: HTMLDivElement | null): Gif | null {
+export async function getGifByTarget(url: string, target?: HTMLDivElement | null): Promise<Gif | null> {
     const liElement = target?.closest("li");
     if (!target || !liElement || !liElement.id) return null;
 
@@ -24,28 +24,28 @@ export function getGifByTarget(url: string, target?: HTMLDivElement | null): Gif
     const message = MessageStore.getMessage(channelId, messageId);
     if (!message || !message.embeds.length && !message.attachments.length) return null;
 
-    return getGifByMessageAndUrl(url, message);
+    return await getGifByMessageAndUrl(url, message);
 }
 
 
-export function getGifByMessageAndTarget(target: HTMLDivElement, message: Message) {
+export async function getGifByMessageAndTarget(target: HTMLDivElement, message: Message) {
     const url = target.closest('[class^="imageWrapper"]')?.querySelector("video")?.src ?? target.closest('[class^="imageWrapper"]')?.querySelector("img")?.src;
 
     if (!url) return null;
 
-    return getGifByMessageAndUrl(url, message);
+    return await getGifByMessageAndUrl(url, message);
 }
 
-export function getGifByMessageAndUrl(url: string, message: Message): Gif | null {
+export async function getGifByMessageAndUrl(url: string, message: Message): Promise<Gif | null> {
     if (!message.embeds.length && !message.attachments.length || isAudio(url))
         return null;
 
-    const cleanedUrl = cleanUrl(url);
+    const cleanedUrl = await cleanUrl(url);
 
     // find embed with matching url or image/thumbnail url
-    const embed = message.embeds.find(e => {
-        const hasMatchingUrl = e.url && cleanUrl(e.url) === cleanedUrl;
-        const hasMatchingImage = e.image && cleanUrl(e.image.url) === cleanedUrl;
+    const embed = message.embeds.find(async e => {
+        const hasMatchingUrl = e.url && await cleanUrl(e.url) === cleanedUrl;
+        const hasMatchingImage = e.image && await cleanUrl(e.image.url) === cleanedUrl;
         const hasMatchingImageProxy = e.image?.proxyURL === cleanedUrl;
         const hasMatchingVideoProxy = e.video?.proxyURL === cleanedUrl;
         const hasMatchingThumbnailProxy = e.thumbnail?.proxyURL === cleanedUrl;
@@ -87,7 +87,7 @@ export function getGifByMessageAndUrl(url: string, message: Message): Gif | null
     }
 
 
-    const attachment = message.attachments.find(a => cleanUrl(a.url) === cleanedUrl || a.proxy_url === cleanedUrl);
+    const attachment = message.attachments.find(async a => await cleanUrl(a.url) === cleanedUrl || a.proxy_url === cleanedUrl);
     if (attachment) return {
         id: uuidv4(settings.store.itemPrefix),
         height: attachment.height ?? 50,
@@ -99,9 +99,9 @@ export function getGifByMessageAndUrl(url: string, message: Message): Gif | null
     return null;
 }
 
-export const getGif = (message: Message | null, url: string | null, target: HTMLDivElement | null) => {
+export const getGif = async (message: Message | null, url: string | null, target: HTMLDivElement | null) => {
     if (message && url) {
-        const gif = getGifByMessageAndUrl(url, message);
+        const gif = await getGifByMessageAndUrl(url, message);
         if (!gif) return null;
 
         return gif;
@@ -114,7 +114,7 @@ export const getGif = (message: Message | null, url: string | null, target: HTML
     }
     if (url && target && !message) {
         // youtube thumbnail url is message link for some reason eh
-        const gif = getGifByTarget(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target);
+        const gif = await getGifByTarget(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target);
         if (!gif) return null;
 
         return gif;
