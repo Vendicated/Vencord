@@ -19,6 +19,14 @@ export const ServerListItemUpperBadgeComponent = findComponentByCodeLazy("STATUS
 export const RadioGroup = findComponentByCodeLazy("radioItemIconClassName,");
 export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannelMetadata");
 
+export enum QuestStatus {
+    Claimed = "CLAIMED",
+    Unclaimed = "UNCLAIMED",
+    Ignored = "IGNORED",
+    Expired = "EXPIRED",
+    Unknown = "UNKNOWN"
+}
+
 export interface FetchingQuestsSettingProps {
     interval: number | null;
     alert: string | null;
@@ -50,6 +58,7 @@ export interface RGB {
 export type QuestMap = Map<string, Quest>;
 
 export interface Quest {
+    questifyNumber: number;
     id: string;
     config: {
         application: {

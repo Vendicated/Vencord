@@ -9,7 +9,8 @@ import { Logger } from "@utils/Logger";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
 
-import { Quest, RGB } from "./components";
+import { questIsIgnored } from "../settings";
+import { Quest, QuestStatus, RGB } from "./components";
 
 export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
@@ -20,10 +21,33 @@ const AudioPlayerConstructor = findByCodeLazy("sound has no duration");
 export function AudioPlayer(name: string, volume: number = 1, callback?: () => void): any { return new AudioPlayerConstructor(name, null, volume, "default", callback || (() => { })); }
 export const QuestsStore = findStoreLazy("QuestsStore");
 export const questPath = "/discovery/quests";
-export const questEndpoint = "/quests/@me";
 export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;
+
+export function getQuestStatus(quest: Quest, checkIgnored: boolean = true): QuestStatus {
+    const questName = normalizeQuestName(quest.config.messages.questName);
+    const completedQuest = quest.userStatus?.completedAt;
+    const claimedQuest = quest.userStatus?.claimedAt;
+    const expiredQuest = new Date(quest.config.expiresAt) < new Date();
+    const questIgnored = questIsIgnored(questName);
+
+    if (claimedQuest) {
+        return QuestStatus.Claimed;
+    } else if (checkIgnored && questIgnored) {
+        return QuestStatus.Ignored;
+    } else if (completedQuest || !expiredQuest) {
+        return QuestStatus.Unclaimed;
+    } else if (expiredQuest) {
+        return QuestStatus.Expired;
+    }
+
+    return QuestStatus.Unknown;
+}
+
+export function refreshQuest(quest: Quest): Quest {
+    return QuestsStore.getQuest(quest.id) as Quest ?? quest;
+}
 
 export function isSoundAllowed(url: string): Promise<boolean> {
     return VencordNative.csp.isDomainAllowed(url, ["img-src"]);
@@ -123,7 +147,7 @@ export function normalizeQuestName(name: string): string {
 
 export async function fetchAndDispatchQuests(source?: string, logger?: Logger): Promise<Quest[] | null> {
     try {
-        const { body } = snakeToCamel(await RestAPI.get({ url: questEndpoint, retries: 3 }));
+        const { body } = snakeToCamel(await RestAPI.get({ url: "/quests/@me", retries: 3 }));
 
         FluxDispatcher.dispatch({
             type: "QUESTS_FETCH_CURRENT_QUESTS_SUCCESS",
@@ -140,33 +164,73 @@ export async function fetchAndDispatchQuests(source?: string, logger?: Logger): 
     }
 }
 
-export async function enrollInQuest(quest: Quest, logger?: Logger): Promise<boolean> {
-    try {
-        if (!!quest.userStatus?.enrolledAt) {
-            return true;
-        }
+export async function waitUntilEnrolled(quest: Quest, timeout: number = 30000, interval: number = 500, logger?: Logger): Promise<boolean> {
+    const questName = normalizeQuestName(quest.config.messages.questName);
+    const start = Date.now();
 
-        await RestAPI.post({ url: `/quests/${quest.id}/enroll`, body: { location: 11 } });
-        logger?.info(`[${getFormattedNow()}] Enrolled in Quest ${quest.config.messages.questName}.`);
+    if (quest.userStatus?.enrolledAt) {
+        logger?.info(`[${getFormattedNow()}] Quest ${questName} is already enrolled.`);
         return true;
-    } catch (error) {
-        logger?.error(`[${getFormattedNow()}] Failed to enroll in Quest ${quest.config.messages.questName}:`, error);
+    } else if (quest.userStatus?.completedAt) {
+        logger?.warn(`[${getFormattedNow()}] Cannot enroll in completed Quest ${questName}.`);
+        return false;
+    } else {
+        logger?.info(`[${getFormattedNow()}] Waiting for enrollment in Quest ${questName}...`);
+    }
+
+    while (!quest.userStatus?.enrolledAt && (Date.now() - start) < timeout) {
+        await new Promise(resolve => setTimeout(resolve, interval));
+        quest = refreshQuest(quest);
+    }
+
+    if (quest.userStatus?.enrolledAt) {
+        logger?.info(`[${getFormattedNow()}] Successfully waited for enrollment in Quest ${questName}.`);
+        return true;
+    } else {
+        logger?.warn(`[${getFormattedNow()}] Timeout waiting for enrollment in Quest ${questName}.`);
         return false;
     }
 }
 
 export async function reportVideoQuestProgress(quest: Quest, currentProgress: number, logger?: Logger): Promise<boolean> {
+    const questName = normalizeQuestName(quest.config.messages.questName);
+
+    if (!quest.userStatus?.enrolledAt) {
+        logger?.warn(`[${getFormattedNow()}] Cannot report progress for unenrolled Quest ${questName}.`);
+        return false;
+    } else if (quest.userStatus?.completedAt) {
+        return true;
+    }
+
     try {
-        await RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: currentProgress } });
-        logger?.info(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} progress reported: ${currentProgress} seconds.`);
+        const response = await RestAPI.post({
+            url: `/quests/${quest.id}/video-progress`,
+            body: { timestamp: currentProgress }
+        });
+
+        if (!response || !response.body) {
+            logger?.warn(`[${getFormattedNow()}] No response body received while reporting video progress for Quest ${questName}.`);
+            return false;
+        }
+
+        logger?.info(`[${getFormattedNow()}] Quest ${questName} progress reported: ${currentProgress} seconds.`);
         return true;
     } catch (error) {
-        logger?.error(`[${getFormattedNow()}] Failed to report progress for Quest ${quest.config.messages.questName}:`, error);
+        logger?.error(`[${getFormattedNow()}] Failed to report progress for Quest ${questName}:`, error);
         return false;
     }
 }
 
 export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolean, logger?: Logger): Promise<{ progress: number | null; }> {
+    const questName = normalizeQuestName(quest.config.messages.questName);
+
+    if (!quest.userStatus?.enrolledAt) {
+        logger?.warn(`[${getFormattedNow()}] Cannot send heartbeat for unenrolled Quest ${questName}.`);
+        return { progress: null };
+    } else if (quest.userStatus?.completedAt) {
+        return { progress: null };
+    }
+
     try {
         const response = await RestAPI.post({
             url: `/quests/${quest.id}/heartbeat`,
@@ -176,20 +240,25 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
             }
         });
 
+        if (!response || !response.body) {
+            logger?.warn(`[${getFormattedNow()}] No response body received while sending heartbeat for Quest ${questName}.`);
+            return { progress: null };
+        }
+
         const { body } = snakeToCamel(response);
         const progressPlayType = body.progress.PLAY_ON_DESKTOP || body.progress.PLAY_ON_XBOX || body.progress.PLAY_ON_PLAYSTATION || body.progress.PLAY_ACTIVITY;
         const questPlayType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
         const progress = progressPlayType?.value || 1;
 
         if (!questPlayType) {
-            logger?.warn(`[${getFormattedNow()}] Quest ${quest.config.messages.questName} does not have a valid play type configured.`);
+            logger?.warn(`[${getFormattedNow()}] Could not recognize the quest type for Quest ${questName}.`);
             return { progress: null };
         }
 
-        logger?.info(`[${getFormattedNow()}] Heartbeat sent for Quest ${quest.config.messages.questName} with progress: ${progress}/${questPlayType.target}.`);
+        logger?.info(`[${getFormattedNow()}] Heartbeat sent for Quest ${questName} with progress: ${progress}/${questPlayType.target}.`);
         return { progress };
     } catch (error) {
-        logger?.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${quest.config.messages.questName}:`, error);
+        logger?.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${questName}:`, error);
         return { progress: null };
     }
 }
