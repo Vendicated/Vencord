@@ -984,7 +984,8 @@ export default definePlugin({
                     replace: "$1$self.getQuestAcceptedButtonText(arguments[0].quest)??",
                 },
                 {
-                    match: /(}\)}},\[)/,
+                    // Add trigger to memo for rerendering the progress label.
+                    match: /(\i.intl.string\(\i.\i#{intl::QUESTS_SEE_CODE}\)}\)}},\[)/,
                     replace: "$1$self.settings.store.triggerQuestsRerender,"
                 },
             ]
