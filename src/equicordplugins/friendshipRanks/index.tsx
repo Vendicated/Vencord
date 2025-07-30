@@ -5,6 +5,7 @@
  */
 
 import { BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { Badges } from "@api/index";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -120,23 +121,23 @@ function getBadgeComponent(rank,) {
     );
 }
 
+function shouldShowBadge(userId: string, requirement: number, index: number) {
+    if (!RelationshipStore.isFriend(userId)) return false;
+
+    const days = daysSince(RelationshipStore.getSince(userId));
+
+    if (ranks[index + 1] == null) return days > requirement;
+
+    return (days > requirement && days < ranks[index + 1].requirement);
+}
+
 function getBadgesToApply() {
-    const badgesToApply: ProfileBadge[] = ranks.map((rank, index, self) => {
+    const badgesToApply: ProfileBadge[] = ranks.map((rank, index) => {
         return (
             {
                 description: rank.title,
                 component: () => getBadgeComponent(rank),
-                shouldShow: (info: BadgeUserArgs) => {
-                    if (!RelationshipStore.isFriend(info.userId)) { return false; }
-
-                    const days = daysSince(RelationshipStore.getSince(info.userId));
-
-                    if (self[index + 1] == null) {
-                        return days > rank.requirement;
-                    }
-
-                    return (days > rank.requirement && days < self[index + 1].requirement);
-                },
+                shouldShow: (info: BadgeUserArgs) => shouldShowBadge(info.userId, rank.requirement, index),
             });
     });
 
@@ -148,10 +149,10 @@ export default definePlugin({
     description: "Adds badges showcasing how long you have been friends with a user for",
     authors: [Devs.Samwich],
     start() {
-        getBadgesToApply().forEach(thing => Vencord.Api.Badges.addProfileBadge(thing));
+        getBadgesToApply().forEach(b => Badges.addProfileBadge(b));
 
     },
     stop() {
-        getBadgesToApply().forEach(thing => Vencord.Api.Badges.removeProfileBadge(thing));
+        getBadgesToApply().forEach(b => Badges.removeProfileBadge(b));
     },
 });
