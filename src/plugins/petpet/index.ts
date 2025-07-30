@@ -174,7 +174,6 @@ export default definePlugin({
 
                 const canvas = document.createElement("canvas");
                 canvas.width = canvas.height = resolution;
-                canvas;
                 const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
                 UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
