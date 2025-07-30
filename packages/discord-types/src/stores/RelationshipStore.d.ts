@@ -27,11 +27,11 @@ export class RelationshipStore extends FluxStore {
     getSinces(): Record<number, string>;
 
     getFriendCount(): number;
+    getRelationshipCount(): number;
+    getOutgoingCount(): number;
     getPendingCount(): number;
     getPendingIgnoredCount(): number;
     getSpamCount(): number;
-    getRelationshipCount(): number;
-    getOutgoingCount(): number;
 
     getMutableRelationships(): Map<string, number>;
     getVersion(): number;

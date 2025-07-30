@@ -1,7 +1,12 @@
-import { FluxStore, Role } from "..";
+import { FluxStore, Guild, Role } from "..";
 
 export class GuildRoleStore extends FluxStore {
+    serializeAllGuildRoles(): Array<{ partitionKey: string; values: Record<string, Role>; }>;
+    getUnsafeMutableRoles(guildId: string): Record<string, Role>;
+    getManyRoles(guildId: string, roleIds: string[]): Role[];
     getRole(guildId: string, roleId: string): Role;
-    getRoles(guildId: string): Record<string, Role>;
-    getAllGuildRoles(): Record<string, Record<string, Role>>;
+    getNumRoles(guildId: string): number;
+    getEveryoneRole(guild: Guild): Role;
+    getRolesSnapshot(guildId: string): Record<string, Role>;
+    getSortedRoles(guildId: string): Role[];
 }
