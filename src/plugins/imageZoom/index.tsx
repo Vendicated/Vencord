@@ -385,11 +385,12 @@ export default definePlugin({
     renderMagnifier(instance) {
         try {
             if (instance.props.id === ELEMENT_ID) {
-                if (!this.currentMagnifierElement) {
-                    this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                if (!this.root) {
                     this.root = createRoot(this.element!);
-                    this.root.render(this.currentMagnifierElement);
                 }
+
+                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                this.root.render(this.currentMagnifierElement);
             }
         } catch (error) {
             new Logger("ImageZoom").error("Failed to render magnifier:", error);
@@ -397,7 +398,6 @@ export default definePlugin({
     },
 
     updateMagnifier(instance) {
-        this.unMountMagnifier();
         this.renderMagnifier(instance);
     },
 
