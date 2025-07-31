@@ -115,7 +115,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Style the indicator and add function call to modify the children before rendering
-                    match: /(?<=children:\[(\i)\.length>0.{0,300}?"aria-atomic":!0,children:)\i/,
+                    match: /(?<=children:\[(\i)\.length>0.{0,500}?"aria-atomic":!0,children:)\i/,
                     replace: "$self.renderTypingUsers({ users: $1, guildId: arguments[0]?.channel?.guild_id, children: $& })"
                 },
                 {
