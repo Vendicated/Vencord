@@ -81,7 +81,7 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
+                match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
                 replace: "$&,$self.TrashIcon($1)"
             }
         },
