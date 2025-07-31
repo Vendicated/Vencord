@@ -44,7 +44,7 @@ export default definePlugin({
         this.preSend = addMessagePreSendListener(async (channelId, messageObj) => {
             const channel = ChannelStore.getChannel(channelId);
             if (channel.isDM()) return { cancel: false };
-            if (PermissionStore.can(PermissionsBits.ADMINISTRATOR, channel) || PermissionStore.can(PermissionsBits.MANAGE_GUILD, channel)) return { cancel: true };
+            if (PermissionStore.can(PermissionsBits.ADMINISTRATOR, channel) || PermissionStore.can(PermissionsBits.MANAGE_GUILD, channel)) return { cancel: false };
 
             const escapedStrings = filterList.map(escapeRegex);
             const regexString = escapedStrings.join("|");
@@ -56,6 +56,7 @@ export default definePlugin({
                     return { cancel: true };
                 }
             }
+
             return { cancel: false };
         });
     }
