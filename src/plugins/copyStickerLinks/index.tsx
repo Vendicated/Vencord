@@ -85,7 +85,6 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
             case "sticker":
                 const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
                 if (!sticker?.format_type) return;
-                console.log(props.message.stickerItems[0]);
                 return buildMenuItem("Sticker", () => props.message.stickerItems[0]);
         }
     })();
@@ -101,7 +100,6 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     if (!props.target.className?.includes("lottieCanvas")) {
         const stickerCache = StickersStore.getStickerById(id);
         if (stickerCache) {
-            console.log(stickerCache);
             const stickerInfo = {
                 format_type: stickerCache.format_type,
                 id: stickerCache.id,
