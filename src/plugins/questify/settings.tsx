@@ -1237,6 +1237,7 @@ function FetchingQuestsSetting(): JSX.Element {
             for (const scale of Object.values(intervalScales)) {
                 // Try each allowed scale to see if the value fits within the min/max range.
                 const valueInSeconds = Math.ceil((num * scale.multiplier) * 100) / 100;
+
                 if (valueInSeconds >= minimumAutoFetchIntervalValue && valueInSeconds <= maximumAutoFetchIntervalValue) {
                     options.push(createIntervalSelectOptionFromValue(valueInSeconds));
                 }
