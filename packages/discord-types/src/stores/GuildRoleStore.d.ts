@@ -1,7 +1,8 @@
 import { FluxStore, Role } from "..";
 
+// TODO: add the rest of the methods for GuildRoleStore
 export class GuildRoleStore extends FluxStore {
     getRole(guildId: string, roleId: string): Role;
-    getRoles(guildId: string): Record<string, Role>;
-    getAllGuildRoles(): Record<string, Record<string, Role>>;
+    getSortedRoles(guildId: string): Role[];
+    getRolesSnapshot(guildId: string): Record<string, Role>;
 }

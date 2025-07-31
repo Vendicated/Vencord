@@ -200,7 +200,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
         "Server Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
         "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
-        "Roles": Object.keys(GuildRoleStore.getRoles(guild.id)).length - 1, // - @everyone
+        "Roles": GuildRoleStore.getSortedRoles(guild.id).length - 1, // - @everyone
     };
 
     return (

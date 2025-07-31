@@ -17,7 +17,7 @@
 */
 
 import * as t from "@vencord/discord-types";
-import { findByCodeLazy, findByPropsLazy, waitFor } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 
 import { waitForStore } from "./internal";
 
@@ -71,6 +71,7 @@ waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
 waitForStore("GuildChannelStore", m => GuildChannelStore = m);
+waitForStore("GuildRoleStore", m => GuildRoleStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
@@ -79,7 +80,3 @@ waitForStore("ThemeStore", m => {
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
     Vencord.QuickCss.initQuickCssThemeStore();
 });
-
-// GuildRoleStore is new, this code is for stable + canary compatibility
-// TODO: Change to waitForStore once GuildRoleStore is on stable
-waitFor(["getRole", "getRoles"], m => GuildRoleStore = m);
