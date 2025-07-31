@@ -178,7 +178,7 @@ export default definePlugin({
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
-                    match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
+                    match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
                     replace: (m, channel) => `${m},$self.isHiddenChannel(${channel})?$self.HiddenChannelIcon():null`
                 },
                 // Make voice channels also appear as muted if they are muted
