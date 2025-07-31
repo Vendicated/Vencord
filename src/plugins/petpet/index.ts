@@ -89,9 +89,8 @@ function rgb888_to_rgb565(r: number, g: number, b: number) {
     return ((r << 8) & 0xf800) | ((g << 3) & 0x07e0) | (b >> 3);
 }
 
-function applyPaletteTransparent(data: Uint8Array | Uint8ClampedArray, palette: number[][], threshold: number): Uint8Array {
+function applyPaletteTransparent(data: Uint8Array | Uint8ClampedArray, palette: number[][], cache: number[], threshold: number): Uint8Array {
     const index = new Uint8Array(Math.floor(data.length / 4));
-    const cache = new Array(65536);
 
     for (let i = 0; i < data.length; i += 1) {
         const r = data[4 * i];
@@ -172,11 +171,23 @@ export default definePlugin({
 
                 const gif = GIFEncoder();
 
+                const paletteImageSize = Math.min(120, resolution);
+
                 const canvas = document.createElement("canvas");
-                canvas.width = canvas.height = resolution;
+                canvas.width = resolution;
+                canvas.height = Math.max(resolution, 2 * paletteImageSize);
+
                 const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
                 UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+
+                // Generate palette from an image where hand and avatar are fully visible
+                ctx.drawImage(avatar, 0, paletteImageSize, 0.8 * paletteImageSize, 0.8 * paletteImageSize);
+                ctx.drawImage(frames[0], 0, 0, paletteImageSize, paletteImageSize);
+                const { data } = ctx.getImageData(0, 0, paletteImageSize, 2 * paletteImageSize);
+                const palette = quantize(data, 255);
+
+                const cache = new Array(65536);
 
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -191,8 +202,7 @@ export default definePlugin({
                     ctx.drawImage(frames[i], 0, 0, resolution, resolution);
 
                     const { data } = ctx.getImageData(0, 0, resolution, resolution);
-                    const palette = quantize(data, 255);
-                    const index = applyPaletteTransparent(data, palette, 1);
+                    const index = applyPaletteTransparent(data, palette, cache, 1);
 
                     gif.writeFrame(index, resolution, resolution, {
                         transparent: true,
