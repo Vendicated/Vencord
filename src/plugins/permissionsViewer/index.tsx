@@ -73,10 +73,11 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     .with(MenuItemParentType.User, () => {
                         const member = GuildMemberStore.getMember(guildId, id!)!;
 
-                        const permissions: RoleOrUserPermission[] = getSortedRolesForMember(guild, member).map(role => ({
-                            type: PermissionType.Role,
-                            ...role
-                        }));
+                        const permissions: RoleOrUserPermission[] = getSortedRolesForMember(guild, member)
+                            .map(role => ({
+                                type: PermissionType.Role,
+                                ...role
+                            }));
 
                         if (guild.ownerId === id) {
                             permissions.push({

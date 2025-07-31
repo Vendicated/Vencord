@@ -1,5 +1,6 @@
 import { FluxStore, Guild, Role } from "..";
 
+// TODO: add the rest of the methods for GuildRoleStore
 export class GuildRoleStore extends FluxStore {
     serializeAllGuildRoles(): Array<{ partitionKey: string; values: Record<string, Role>; }>;
     getUnsafeMutableRoles(guildId: string): Record<string, Role>;
