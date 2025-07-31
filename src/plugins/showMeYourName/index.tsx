@@ -482,7 +482,7 @@ function renderUsername(
     third = remainingNames.shift();
     fourth = remainingNames.shift();
 
-    const topRoleStyle = isMention || isReactionsPopout ? resolveColor(author, "Role", "") : first.style;
+    const topRoleStyle = isMention || isReactionsPopout ? resolveColor(author, "Role", "") : null;
     const hasGradient = !!topRoleStyle?.gradient && Object.keys(topRoleStyle.gradient).length > 0;
     const message = channelId && messageId ? MessageStore.getMessage(channelId, messageId) : null;
     const groupId = (message as any)?.showMeYourNameGroupId || null;
@@ -523,15 +523,17 @@ function renderUsername(
                 <span
                     className={(shouldGradientGlow ? gradientClasses : "")}
                     data-text={shouldGradientGlow ? firstDataText : undefined}
-                    style={(shouldGradientGlow ? topRoleStyle.gradient.animated : undefined) as React.CSSProperties}
+                    style={(shouldGradientGlow && topRoleStyle ? topRoleStyle.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span
                         style={
-                            shouldAnimateGradients && topRoleStyle.gradient
-                                ? topRoleStyle.gradient.animated
-                                : topRoleStyle.gradient
-                                    ? topRoleStyle.gradient.static.original
-                                    : topRoleStyle.normal.original
+                            topRoleStyle ?
+                                shouldAnimateGradients && topRoleStyle.gradient
+                                    ? topRoleStyle.gradient.animated
+                                    : topRoleStyle.gradient
+                                        ? topRoleStyle.gradient.static.original
+                                        : topRoleStyle.normal.original
+                                : undefined
                         }>
                         {first.wrapped}</span>
                 </span>
