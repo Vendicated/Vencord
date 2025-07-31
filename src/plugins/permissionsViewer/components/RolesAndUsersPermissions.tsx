@@ -108,7 +108,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         <ScrollerThin className={cl("modal-list")} orientation="auto">
                             {permissions.map((permission, index) => {
                                 const user: User | undefined = UserStore.getUser(permission.id ?? "");
-                                const role: Role | undefined = roles.find(role => role.id === permission.id);
+                                const role: Role | undefined = roles[permission.id ?? ""];
                                 const roleIconSrc = role != null ? getRoleIconSrc(role) : undefined;
 
                                 return (
