@@ -784,10 +784,17 @@ export default definePlugin({
         {
             // Replace names in mentions.
             find: ".USER_MENTION)",
-            replacement: {
-                match: /("@"\.concat\(null!=\i\?\i:\i\))/,
-                replace: "$self.getMentionNameElement(arguments[0])??($1)"
-            }
+            group: false, // Let mentionAvatars make use of the showMeYourNameMention variable as well.
+            replacement: [
+                {
+                    match: /(let \i=\i=>\(0,)/,
+                    replace: "const showMeYourNameMention=$self.getMentionNameElement(arguments[0]);$1"
+                },
+                {
+                    match: /("@"\.concat\(null!=\i\?\i:\i\))/,
+                    replace: "showMeYourNameMention??($1)"
+                }
+            ]
         },
         {
             // Pass on the props to the mention renderer so that hovering second-level
@@ -930,8 +937,8 @@ export default definePlugin({
     addHoveringReactionPopout,
     removeHoveringReactionPopout,
     getMessageNameText,
-    getMessageNameElement: ErrorBoundary.wrap(getMessageNameElement, { noop: true }),
-    getMentionNameElement: ErrorBoundary.wrap(getMentionNameElement, { noop: true }),
+    getMessageNameElement,
+    getMentionNameElement,
     getMemberListProfilesReactionsVoiceNameText,
-    getMemberListProfilesReactionsVoiceNameElement: ErrorBoundary.wrap(getMemberListProfilesReactionsVoiceNameElement, { noop: true })
+    getMemberListProfilesReactionsVoiceNameElement
 });

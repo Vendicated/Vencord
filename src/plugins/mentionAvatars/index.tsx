@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { GuildRoleStore, SelectedGuildStore, UserStore, useState } from "@webpack/common";
-import { getMentionNameElement } from "plugins/showMeYourName";
+import { JSX } from "react";
 
 const settings = definePluginSettings({
     showAtSymbol: {
@@ -52,7 +52,7 @@ export default definePlugin({
         find: ".USER_MENTION)",
         replacement: {
             match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
-            replace: "children:$self.renderUsername({props:arguments[0],username:$1,user:$2})"
+            replace: "children:$self.renderUsername({props:arguments[0],username:$1,user:$2,showMeYourNameMention:typeof showMeYourNameMention!=='undefined'?showMeYourNameMention:undefined})"
         }
     },
     {
@@ -65,14 +65,12 @@ export default definePlugin({
 
     settings,
 
-    renderUsername: ErrorBoundary.wrap(({ props, user, username }: { props: any, user: User, username: string; }) => {
+    renderUsername: ErrorBoundary.wrap(({ props, user, username, showMeYourNameMention }: { props: any, user: User, username: string, showMeYourNameMention: JSX.Element | null | undefined; }) => {
         const [isHovering, setIsHovering] = useState(false);
         const usr = user || UserStore.getUser(props.userId);
 
-        const showMeYourNameMention = getMentionNameElement({ channelId: props.channelId, userId: usr.id, props: props.props });
-        const nameContent = Vencord.Settings.plugins.ShowMeYourName.enabled && Vencord.Settings.plugins.ShowMeYourName.mentions
-            ? showMeYourNameMention
-            : <>{getUsernameString(username)}</>;
+        const nameContent = Vencord.Settings.plugins.ShowMeYourName.enabled && showMeYourNameMention
+            ? showMeYourNameMention : <>{getUsernameString(username)}</>;
 
         return (
             <span
