@@ -815,13 +815,13 @@ export default definePlugin({
             // Replace names in the member list.
             find: "let{colorRoleName:",
             replacement: {
-                match: /(let{colorRoleName:\i,colorString:\i,)name:(\i)/,
+                match: /(let{colorRoleName:\i,colorString:\i,colorStrings:\i,)name:(\i)/,
                 replace: "$1showMeYourNameName:$2=$self.getMemberListProfilesReactionsVoiceNameText({...arguments[0],type:\"membersList\"})??(arguments[0].name)"
             }
         },
         {
             // Replace names in profile popouts.
-            find: "clickableUsername,children",
+            find: "clickableUsername,\"aria-label\":",
             replacement: {
                 match: /(tags:\i,)nickname:(\i)/,
                 replace: "$1showMeYourNameNickname:$2=$self.getMemberListProfilesReactionsVoiceNameText({...arguments[0],type:\"profilesPopout\"})??(arguments[0].nickname)"
@@ -847,6 +847,7 @@ export default definePlugin({
         },
         {
             // Replace names in the profile tooltip for switching between guild and global profiles.
+            // You must open a profile modal before the code this is patching will be searchable.
             find: "\"view-main-profile\",",
             group: true,
             replacement: [
