@@ -7,7 +7,7 @@
 
     --vc-ytm-slider-gradient: linear-gradient(to right, #f03 80%, #ff2791 100%);
     --vc-ytm-slider-grabber: #f03;
-    
+
     /* so custom themes can easily change it */
     --vc-ytm-red-90: color-mix(in hsl, var(--vc-ytm-slider-grabber), transparent 90%);
     --vc-ytm-red-80: color-mix(in hsl, var(--vc-ytm-slider-grabber), transparent 80%);
@@ -55,8 +55,6 @@
 
 #vc-ytm-progress-bar>[class^="slider"] [class^="grabber"] {
     background-color: var(--vc-ytm-slider-grabber);
-    
-    /* background-color: var(--interactive-active); */
     width: 12px !important;
     height: 12px !important;
     margin-top: calc(13px/-2 + var(--bar-offset)/2);
@@ -74,6 +72,9 @@
 .vc-ytm-progress-time {
     margin-top: 8px;
     font-family: var(--font-code);
+    font-size: 12px;
+    top: 10px;
+    position: absolute;
 }
 
 .vc-ytm-button-row {
