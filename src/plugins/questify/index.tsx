@@ -19,7 +19,7 @@ import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, RGB }
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, waitUntilEnrolled } from "./utils/misc";
 
 const patchedMobileQuests = new Set<string>();
-export const activeQuestIntervals = new Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }>();
+export const activeQuestIntervals = new Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; duration: number, type: string; }>();
 
 function questMenuUnignoreClicked(): void {
     validateAndOverwriteIgnoredQuests("");
@@ -169,10 +169,12 @@ function shouldHideBadgeOnUserProfiles(): boolean {
 function shouldHideQuestPopup(quest: Quest | null): boolean {
     const {
         disableQuestsPopupAboveAccountPanel,
-        disableQuestsEverything
+        disableQuestsEverything,
+        triggerQuestsRerender
     } = settings.use([
         "disableQuestsPopupAboveAccountPanel",
-        "disableQuestsEverything"
+        "disableQuestsEverything",
+        "triggerQuestsRerender"
     ]);
 
     const noProgress = !quest?.userStatus?.progress || Object.keys(quest?.userStatus?.progress || {}).length === 0;
@@ -572,7 +574,7 @@ async function startVideoProgressTracking(quest: Quest, questDuration: number): 
         rerenderQuests();
     }, 1000);
 
-    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initialProgress, type: "watch" });
+    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initialProgress, duration: questDuration, type: "watch" });
 
     if (timeRemaining > 0) {
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} will be completed in the background in ${timeRemaining} seconds.`);
@@ -653,7 +655,7 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
         rerenderQuests();
     }, 1000);
 
-    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initialProgress, type: "play" });
+    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initialProgress, duration: questDuration, type: "play" });
 
     if (remaining > 0) {
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} will be completed in the background in ${remaining} seconds.`);
@@ -730,6 +732,28 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
     return null;
 }
 
+function getActiveQuestClosestToCompletion(): Quest | null {
+    let closestQuest: Quest | null = null;
+    let closestTimeRemaining = Infinity;
+
+    activeQuestIntervals.forEach((interval, questId) => {
+        const quest = QuestsStore.getQuest(questId);
+
+        if (!quest) {
+            return;
+        }
+
+        const timeRemaining = interval.duration - interval.progress;
+
+        if (timeRemaining < closestTimeRemaining) {
+            closestTimeRemaining = timeRemaining;
+            closestQuest = quest;
+        }
+    });
+
+    return closestQuest;
+}
+
 export default definePlugin({
     name: "Questify",
     description: "Enhance your Quest experience with a suite of features, or disable them entirely if they're not your thing.",
@@ -750,6 +774,7 @@ export default definePlugin({
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
     shouldDisableQuestAcceptedButton,
+    getActiveQuestClosestToCompletion,
     getQuestAcceptedButtonText,
     processQuestForAutoComplete,
     activeQuestIntervals,
@@ -818,10 +843,20 @@ export default definePlugin({
         },
         {
             // Hides the new Quest popup above the account panel.
+            // Allows in-progress quests to still show.
             find: "QUESTS_BAR,questId",
             replacement: {
                 match: /return null==(\i)\?null:\(/,
                 replace: "return !$self.shouldHideQuestPopup($1)&&("
+            }
+        },
+        {
+            // Replaces the default displayed Quest with the soonest to
+            // be completed Quest which is actively being auto-completed.
+            find: "questDeliveryOverride)?",
+            replacement: {
+                match: /(\i=)(\i.\i.questDeliveryOverride)/,
+                replace: "$1$self.getActiveQuestClosestToCompletion()??$2"
             }
         },
         {
