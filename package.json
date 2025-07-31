@@ -48,18 +48,18 @@
         "@vap/shiki": "0.10.5",
         "fflate": "^0.8.2",
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
-        "jsqr": "1.4.0",
         "idb": "8.0.3",
+        "jsqr": "1.4.0",
         "monaco-editor": "^0.52.2",
         "nanoid": "^5.1.5",
+        "openai": "^4.30.0",
         "socket.io": "^4.8.1",
         "usercss-meta": "^0.12.0",
-        "openai": "^4.30.0",
         "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^4.2.0",
         "@electron/asar": "^3.2.10",
+        "@stylistic/eslint-plugin": "^4.2.0",
         "@types/chrome": "^0.0.312",
         "@types/diff": "^7.0.2",
         "@types/lodash": "^4.17.14",
@@ -94,7 +94,7 @@
         "zip-local": "^0.3.5",
         "zustand": "^3.7.2"
     },
-    "packageManager": "pnpm@10.4.1",
+    "packageManager": "pnpm@10.14.0",
     "pnpm": {
         "patchedDependencies": {
             "eslint@9.20.1": "patches/eslint@9.20.1.patch",

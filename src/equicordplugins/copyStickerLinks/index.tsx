@@ -18,7 +18,7 @@ interface Sticker {
     type: number;
 }
 
-const StickerExt = ["png", "png", "json", "gif"] as const;
+const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Sticker) {
     if (data.format_type === 4)
@@ -39,44 +39,12 @@ function buildMenuItem(Sticker, fetchData: () => Promisable<Omit<Sticker, "t">>)
                 action={async () => {
                     const res = await fetchData();
                     const data = { t: Sticker, ...res } as Sticker;
-                    const url = getUrl(data[0]);
-                    copyWithToast(url, "Link copied!");
-                }
-                }
-            />
-
-            <Menu.MenuItem
-                id="openstickerlink"
-                key="openstickerlink"
-                label={"Open URL"}
-                action={async () => {
-                    const res = await fetchData();
-                    const data = { t: Sticker, ...res } as Sticker;
-                    const url = getUrl(data[0]);
-                    VencordNative.native.openExternal(url);
-                }
-                }
-            />
-        </>
-    );
-}
-
-function buildMenuExpression(Sticker, fetchData: () => Promisable<Omit<Sticker, "t">>) {
-    return (
-        <>
-            <Menu.MenuSeparator></Menu.MenuSeparator>
-            <Menu.MenuItem
-                id="copystickerurl"
-                key="copystickerurl"
-                label={"Copy URL"}
-                action={async () => {
-                    const res = await fetchData();
-                    const data = { t: Sticker, ...res } as Sticker;
                     const url = getUrl(data);
                     copyWithToast(url, "Link copied!");
                 }
                 }
             />
+
             <Menu.MenuItem
                 id="openstickerlink"
                 key="openstickerlink"
@@ -96,12 +64,13 @@ function buildMenuExpression(Sticker, fetchData: () => Promisable<Omit<Sticker, 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, favoriteableType } = props ?? {};
     if (!favoriteableId) return;
+
     const menuItem = (() => {
-        const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
-        if (sticker?.format_type === 3) return;
         switch (favoriteableType) {
             case "sticker":
-                return buildMenuItem("Sticker", () => props.message.stickerItems);
+                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                if (!sticker?.format_type) return;
+                return buildMenuItem("Sticker", () => props.message.stickerItems[0]);
         }
     })();
 
@@ -116,7 +85,12 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     if (!props.target.className?.includes("lottieCanvas")) {
         const stickerCache = StickerStore.getStickerById(id);
         if (stickerCache) {
-            children.push(buildMenuExpression("Sticker", () => stickerCache));
+            const stickerInfo = {
+                format_type: stickerCache.format_type,
+                id: stickerCache.id,
+                type: stickerCache.type
+            };
+            children.push(buildMenuItem("Sticker", () => stickerInfo));
         }
     }
 };
