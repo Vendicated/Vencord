@@ -19,11 +19,13 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Lyrics } from "@equicordplugins/spotifyLyrics/components/lyrics";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Player as SpotifyPlayer } from "plugins/spotifyControls/PlayerComponent";
 
 import hoverOnlyStyle from "./hoverOnly.css?managed";
 import { Player } from "./PlayerComponent";
-import { EquicordDevs } from "@utils/constants";
 
 function toggleHoverControls(value: boolean) {
     (value ? enableStyle : disableStyle)(hoverOnlyStyle);
@@ -70,28 +72,53 @@ export default definePlugin({
         {
             find: "this.isCopiedStreakGodlike",
             replacement: {
+                match: /Vencord\.Plugins\.plugins\["SpotifyControls"\]\.PanelWrapper/,
+                replace: "$self.PanelWrapper"
+            },
+            predicate: () => Settings.plugins.SpotifyControls.enabled,
+        },
+        {
+            find: "this.isCopiedStreakGodlike",
+            replacement: {
+                match: /Vencord\.Plugins\.plugins\["SpotifyLyrics"\]\.FakePanelWrapper/,
+                replace: "$self.PanelWrapper"
+            },
+            predicate: () => Settings.plugins.SpotifyLyrics.enabled,
+        },
+        {
+            find: "this.isCopiedStreakGodlike",
+            replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
                 match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
                 // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
                 replace: "$self.PanelWrapper,{VencordOriginal:$1,"
-            }
+            },
+            predicate: () => !Settings.plugins.SpotifyControls.enabled,
         },
     ],
 
     start: () => toggleHoverControls(Settings.plugins.YouTubeMusicControls.hoverControls),
 
     PanelWrapper({ VencordOriginal, ...props }) {
+        const showSpotifyControls = Settings.plugins.SpotifyControls.enabled;
+        const showSpotifyLyrics = Settings.plugins.SpotifyLyrics.enabled;
+        const LyricsPosition = showSpotifyLyrics ? Settings.plugins.SpotifyLyrics.LyricsPosition : null;
+
         return (
             <>
                 <ErrorBoundary
                     fallback={() => (
                         <div className="vc-ytmusic-fallback">
                             <p>Failed to render YouTube Music Modal :(</p>
-                            <p >Check the console for errors</p>
+                            <p>Check the console for errors</p>
                         </div>
                     )}
                 >
                     <Player />
+
+                    {showSpotifyLyrics && LyricsPosition === "above" && <Lyrics />}
+                    {showSpotifyControls && <SpotifyPlayer />}
+                    {showSpotifyLyrics && LyricsPosition === "below" && <Lyrics />}
                 </ErrorBoundary>
 
                 <VencordOriginal {...props} />
