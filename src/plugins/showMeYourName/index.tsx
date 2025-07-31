@@ -898,7 +898,7 @@ export default definePlugin({
             find: ",connectUserDragSource:",
             replacement: {
                 match: /(serverDeaf:\i,)nick:(\i)/,
-                replace: "$1showMeYourNameVoice:$2=$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].channel.guild_id,type:\"voiceChannel\"})??($2)"
+                replace: "$1showMeYourNameVoice:$2=$self.getMemberListProfilesReactionsVoiceNameText({user:arguments[0].user,guildId:arguments[0].channel.guild_id,type:\"voiceChannel\"})??(arguments[0].nick)"
             }
         }
     ],
