@@ -1,0 +1,82 @@
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+.vc-plugins-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.vc-plugins-info-button {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+    background: transparent;
+    margin-right: 8px;
+}
+
+.vc-plugins-settings-button:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-plugins-filter-controls {
+    display: grid;
+    height: 40px;
+    gap: 10px;
+    grid-template-columns: 1fr 150px;
+}
+
+.vc-addon-badge {
+    padding: 0 6px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    border-radius: 8px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--white-500);
+    text-align: center;
+}
+
+.vc-plugins-dep-name {
+    margin: 0 auto;
+}
+
+.vc-plugins-info-card {
+    padding: 1em;
+    height: 8em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+
+.vc-plugins-restart-button {
+    margin-top: 0.5em;
+    background: var(--info-warning-foreground) !important;
+}
+
+.vc-plugins-info-icon:not(:hover, :focus) {
+    color: var(--text-muted);
+}
+
+.vc-plugins-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+}
