@@ -189,7 +189,6 @@ export default definePlugin({
 
                 const cache = new Array(65536);
 
-                let first = true;
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -205,7 +204,7 @@ export default definePlugin({
                     const { data } = ctx.getImageData(0, 0, resolution, resolution);
                     const index = applyPaletteTransparent(data, palette, cache, 1);
 
-                    if (first) {
+                    if (i === 0) {
                         gif.writeFrame(index, resolution, resolution, {
                             transparent: true,
                             transparentIndex: 255,
@@ -219,7 +218,6 @@ export default definePlugin({
                             delay,
                         });
                     }
-                    first = false;
                 }
 
                 gif.finish();
