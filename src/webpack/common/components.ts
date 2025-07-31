@@ -17,10 +17,10 @@
 */
 
 import { LazyComponent } from "@utils/lazyReact";
+import * as t from "@vencord/discord-types";
 import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
-import * as t from "./types/components";
 
 
 const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat', '="h5"'));
@@ -51,7 +51,7 @@ const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
 export const Tooltip = LazyComponent(() => Tooltips.Tooltip);
 export const TooltipContainer = LazyComponent(() => Tooltips.TooltipContainer);
 
-export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode(".error]:this.hasError()"));
+export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode("#{intl::MAXIMUM_LENGTH_ERROR}", '"input"'));
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("this.getPaddingRight()},id:"));
 export const Text = waitForComponent<t.Text>("Text", filters.componentByCode('case"always-white"'));
 export const Heading = waitForComponent<t.Heading>("Heading", filters.componentByCode(">6?{", "variant:"));
@@ -67,6 +67,7 @@ export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCo
 
 export const ColorPicker = waitForComponent<t.ColorPicker>("ColorPicker", filters.componentByCode("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", "showEyeDropper"));
 
+export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.componentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 
 export let createScroller: (scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin;
 export let scrollerClasses: Record<string, string>;

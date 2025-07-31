@@ -1,0 +1,35 @@
+.vc-plugins-setting-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.vc-plugins-setting-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.vc-plugins-setting-inline {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vc-plugins-setting-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+
+.vc-plugins-setting-title {
+    color: var(--header-primary);
+}
+
+.vc-plugins-setting-description {
+    color: var(--header-secondary);
+}
+
+.vc-plugins-setting-error {
+    color: var(--text-danger);
+}

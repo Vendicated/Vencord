@@ -10,7 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, User } from "discord-types/general";
+import { Message, User } from "@vencord/discord-types";
 
 interface UsernameProps {
     author: { nick: string; };
@@ -50,8 +50,9 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=onContextMenu:\i,children:)\i/,
-                replace: "$self.renderUsername(arguments[0])"
+                // The field is named "userName", but as this is unusual casing, the regex also matches username, in case they change it
+                match: /(?<=onContextMenu:\i,children:)\i\?(?=.{0,100}?user[Nn]ame:)/,
+                replace: "$self.renderUsername(arguments[0]),_oldChildren:$&"
             }
         },
     ],
@@ -62,7 +63,7 @@ export default definePlugin({
             const user = userOverride ?? message.author;
             let { username } = user;
             if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+                username = user.globalName || username;
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
