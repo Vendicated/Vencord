@@ -189,7 +189,7 @@ export default definePlugin({
 
                 const cache = new Array(65536);
 
-                const first = true;
+                let first = true;
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -219,7 +219,7 @@ export default definePlugin({
                             delay,
                         });
                     }
-
+                    first = false;
                 }
 
                 gif.finish();
