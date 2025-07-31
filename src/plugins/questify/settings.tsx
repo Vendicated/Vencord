@@ -1233,22 +1233,21 @@ function FetchingQuestsSetting(): JSX.Element {
 
         const options: SelectOption[] = [];
 
-        if (!!resolvedScale === false) {
+        if (!resolvedScale) {
             for (const scale of Object.values(intervalScales)) {
                 // Try each allowed scale to see if the value fits within the min/max range.
-                const valueInScale = Math.ceil((num * scale.multiplier) * 100) / 100;
-
-                if (valueInScale >= minimumAutoFetchIntervalValue && valueInScale <= maximumAutoFetchIntervalValue) {
-                    options.push(createIntervalSelectOptionFromValue(valueInScale));
+                const valueInSeconds = Math.ceil((num * scale.multiplier) * 100) / 100;
+                if (valueInSeconds >= minimumAutoFetchIntervalValue && valueInSeconds <= maximumAutoFetchIntervalValue) {
+                    options.push(createIntervalSelectOptionFromValue(valueInSeconds));
                 }
             }
         } else {
             // If a specific scale was provided, use it to create the option.
             const scale = allowedScales[resolvedScale];
-            const valueInScale = Math.ceil((num * scale.multiplier) * 100) / 100;
+            const valueInSeconds = Math.ceil((num * scale.multiplier) * 100) / 100;
 
-            if (valueInScale >= minimumAutoFetchIntervalValue && valueInScale <= maximumAutoFetchIntervalValue) {
-                options.push(createIntervalSelectOptionFromValue(valueInScale));
+            if (valueInSeconds >= minimumAutoFetchIntervalValue && valueInSeconds <= maximumAutoFetchIntervalValue) {
+                options.push(createIntervalSelectOptionFromValue(valueInSeconds));
             }
         }
 
@@ -1344,6 +1343,7 @@ function FetchingQuestsSetting(): JSX.Element {
                         </div>
                         <div>
                             <DynamicDropdown
+                                filter={(options, query) => options}
                                 placeholder="Select or type an interval between 30 minutes and 12 hours."
                                 feedback="Intervals must be between 30 minutes and 12 hours."
                                 className={q("select")}
@@ -1354,6 +1354,7 @@ function FetchingQuestsSetting(): JSX.Element {
                                 options={currentIntervalOptions}
                                 closeOnSelect={true}
                                 onSearchChange={handleScaleSearchChange}
+                                onClose={() => { setCurrentIntervalOptions(getAllIntervalOptions(currentIntervalSelection)); }}
                                 onChange={value => {
                                     const option = currentIntervalOptions.find(o => o.value === value) as SelectOption;
                                     settings.store.fetchingQuestsInterval = option.value as number;
@@ -1385,6 +1386,7 @@ function FetchingQuestsSetting(): JSX.Element {
                                     options={currentAlertOptions}
                                     closeOnSelect={false}
                                     onSearchChange={handleAlertSearchChange}
+                                    onClose={() => { setCurrentAlertOptions(getAllAlertOptions(currentAlertSelection)); }}
                                     onChange={value => {
                                         const option = currentAlertOptions.find(o => o.value === value) as SelectOption;
                                         settings.store.fetchingQuestsAlert = value ? option.value as string : null as any;
