@@ -47,7 +47,7 @@ export function sortUserRoles(roles: Role[]) {
 }
 
 export function sortPermissionOverwrites<T extends { id: string; type: number; }>(overwrites: T[], guildId: string) {
-    const roles = Object.fromEntries(GuildRoleStore.getSortedRoles(guildId).map(role => [role.id, role] as const));
+    const roles = GuildRoleStore.getRolesSnapshot(guildId);
 
     return overwrites.sort((a, b) => {
         if (a.type !== PermissionType.Role || b.type !== PermissionType.Role) return 0;
