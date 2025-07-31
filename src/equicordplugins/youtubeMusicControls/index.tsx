@@ -76,6 +76,7 @@ export default definePlugin({
                 replace: "$self.PanelWrapper"
             },
             predicate: () => Settings.plugins.SpotifyControls.enabled && !Settings.plugins.SpotifyLyrics.enabled,
+            noWarn: true,
         },
         {
             find: "this.isCopiedStreakGodlike",
@@ -84,6 +85,7 @@ export default definePlugin({
                 replace: "$self.PanelWrapper"
             },
             predicate: () => Settings.plugins.SpotifyLyrics.enabled,
+            noWarn: true,
         },
         {
             find: "this.isCopiedStreakGodlike",
@@ -94,6 +96,7 @@ export default definePlugin({
                 replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             },
             predicate: () => !Settings.plugins.SpotifyControls.enabled,
+            noWarn: true,
         },
     ],
 
