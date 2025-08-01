@@ -798,8 +798,8 @@ export default definePlugin({
                 },
                 {
                     // Makes use of the callback if provided.
-                    match: /.onended=\(\)=>this.destroyAudio\(\)/,
-                    replace: ".onended=()=>{this.callback?this.callback():null;this.destroyAudio();}"
+                    match: /(?<=.onended=\(\)=>)(this.destroyAudio\(\))/,
+                    replace: "{this.callback?this.callback():null;$1;}"
                 }
             ]
         },
@@ -821,8 +821,8 @@ export default definePlugin({
                     replace: "$1const shouldHideDiscoveryTab=$self.shouldHideDiscoveryTab();"
                 },
                 {
-                    match: /GLOBAL_DISCOVERY_TABS.map/,
-                    replace: 'GLOBAL_DISCOVERY_TABS.filter(tab=>!(tab==="quests"&&shouldHideDiscoveryTab)).map'
+                    match: /(GLOBAL_DISCOVERY_TABS).map/,
+                    replace: '$1.filter(tab=>!(tab==="quests"&&shouldHideDiscoveryTab)).map'
                 }
             ]
         },
@@ -836,8 +836,8 @@ export default definePlugin({
                     replace: "const shouldHideBadgeOnUserProfiles=$self.shouldHideBadgeOnUserProfiles();$1"
                 },
                 {
-                    match: /badges:(\i)/,
-                    replace: 'badges:$1.filter(badge=>!(["quest_completed","orb_profile_badge"].includes(badge.id)&&shouldHideBadgeOnUserProfiles))',
+                    match: /(badges:\i)/,
+                    replace: '$1.filter(badge=>!(["quest_completed","orb_profile_badge"].includes(badge.id)&&shouldHideBadgeOnUserProfiles))',
                 }
             ]
         },
