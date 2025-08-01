@@ -83,6 +83,7 @@ const enum NameFormat {
 
 const applicationId = "1108588077900898414";
 const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
+const trackPlaceholderRegex = /\$\{(name|artist|album)\}/gi;
 
 const logger = new Logger("LastFMRichPresence");
 
@@ -90,6 +91,12 @@ const PresenceStore = findByPropsLazy("getLocalPresence");
 
 async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
+}
+
+function applyPlaceholders(tmpl: string, t: TrackData) {
+    return tmpl.replace(trackPlaceholderRegex, (_, key: keyof TrackData) => {
+        return t[key] ?? "";
+    }).trim();
 }
 
 function setActivity(activity: Activity | null) {
@@ -130,7 +137,7 @@ const settings = definePluginSettings({
         default: false,
     },
     statusName: {
-        description: "custom status text",
+        description: "custom status text. Placeholders: ${name} | ${artist} | ${album}",
         type: OptionType.STRING,
         default: "some music",
     },
@@ -195,7 +202,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "LastFMRichPresence",
     description: "Little plugin for Last.fm rich presence",
-    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
+    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu, Devs.balaclava],
 
     settingsAboutComponent: () => (
         <>
@@ -323,7 +330,7 @@ export default definePlugin({
                 url: trackData.url,
             });
 
-        const statusName = (() => {
+        const rawStatusName = (() => {
             switch (settings.store.nameFormat) {
                 case NameFormat.ArtistFirst:
                     return trackData.artist + " - " + trackData.name;
@@ -339,6 +346,8 @@ export default definePlugin({
                     return settings.store.statusName;
             }
         })();
+
+        const statusName = applyPlaceholders(rawStatusName, trackData);
 
         return {
             application_id: applicationId,
