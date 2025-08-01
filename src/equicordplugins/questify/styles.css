@@ -1,0 +1,340 @@
+/* Plugin Settings */
+.questify-setting-divider {
+    margin: 0;
+}
+
+.questify-setting {
+    border-left: 3px solid var(--header-primary);
+    padding: 3px 0 3px 8px;
+    border-radius: 3px;
+    user-select: text;
+}
+
+.questify-main-inline-group {
+    margin-top: 4px;
+    display: flex;
+    gap: 12px;
+}
+
+.questify-sub-inline-group {
+    display: flex;
+    gap: 8px;
+}
+
+.questify-inline-group-item {
+    flex: 1;
+}
+
+.questify-form-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.questify-form-subtitle {
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.questify-form-subtitle-spacier {
+    margin-top: 8px;
+}
+
+.questify-form-description {
+    font-size: 14px;
+}
+
+.questify-select {
+    border-radius: 3px !important; /* Necessary !important */
+    margin-top: 8px;
+    min-height: 45px;
+}
+
+.questify-inline-group-item .questify-select {
+    margin-top: 0;
+}
+
+.questify-button,
+.questify-sub-inline-group [class^="swatch"] {
+    height: 38px;
+    min-height: 38px;
+    width: 80px;
+    min-width: 80px;
+    padding: 2px;
+    border-radius: 3px;
+}
+
+.questify-alert-icon {
+    flex: 0;
+    place-content: center center;
+    background-color: var(--input-background);
+    border-radius: 3px;
+    padding: 0 10px;
+    color: var(--text-default);
+    border: 1px solid var(--border-normal);
+    min-height: 43px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease-in-out;
+}
+
+.questify-alert-icon.questify-playing-audio {
+    color: var(--red-500);
+    transition: color 0.2s ease-in-out;
+}
+
+.questify-button [class^="contents"] {
+    margin: 0 8px;
+}
+
+.questify-button-red {
+    background-color: var(--red-500) !important; /* Necessary !important */
+}
+
+.questify-button-red:hover {
+    filter: brightness(0.75);
+    transition: filter 0.2s ease-in-out;
+}
+
+.questify-button-blue {
+    background-color: var(--blue-500) !important; /* Necessary !important */
+}
+
+.questify-button-blue:hover {
+    filter: brightness(0.75);
+    transition: filter 0.2s ease-in-out;
+}
+
+#questify-dummy-quest-button {
+    border-left: 5px solid var(--header-primary);
+    border-radius: 4px;
+}
+
+.questify-text-input,
+.questify-text-area {
+    margin-top: 4px;
+    width: 100%;
+    border-radius: 3px;
+}
+
+.questify-text-area {
+    height: 150px;
+}
+
+.questify-color-picker-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.questify-color-picker-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.questify-color-picker-with-buttons {
+    background-color: var(--input-background);
+    border: 1px solid var(--border-normal);
+    border-radius: 3px;
+    padding: 8px;
+}
+
+.questify-color-picker-with-buttons [class^="swatch"],
+.questify-color-picker-with-buttons [class^="colorSwatch"] {
+    border-radius: 3px;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.questify-wide-button {
+    width: 100%;
+    flex: 1;
+}
+
+.questify-flex-65 {
+    flex: 6;
+}
+
+.questify-flex-35 {
+    flex: 4;
+}
+
+.questify-inline-code-block {
+    display: inline-block;
+    padding: 0 4px;
+    border-radius: 4px;
+    background-color: var(--background-code);
+    border: 1px solid var(--border-normal);
+    font-family: var(--font-code);
+    font-size: 90%;
+}
+
+.questify-dummy-quest {
+    margin-top: 8px;
+}
+
+.questify-dummy-quest:active {
+    pointer-events: none;
+    user-select: none;
+}
+
+.questify-quest-button-pill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    pointer-events: none;
+}
+
+.questify-quest-button-pill>[class^="item"] {
+    will-change: transform;
+    max-height: 8px;
+    min-height: 8px;
+    transition: max-height 0.2s ease-in-out;
+}
+
+.questify-quest-button-pill.hovered>[class^="item"] {
+    max-height: 20px;
+}
+
+.questify-quest-button-pill.selected>[class^="item"] {
+    max-height: 40px;
+}
+
+.questify-quest-button-server-list-button-container {
+    position: relative;
+}
+
+.questify-quest-button-icon-container {
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.questify-quest-button-container {
+    position: relative;
+}
+
+/* Background of bottom half of Quest tile. */
+.questify-quest-item-restyle>div {
+    background-color: var(--questify-color);
+}
+
+/* Normal button text + SVG button text color. */
+.questify-quest-item-restyle> :nth-child(2) button>div,
+.questify-quest-item-restyle> :nth-child(2) button>div>div>span {
+    color: var(--questify-quest-name);
+}
+
+/* Watch again button SVG color. */
+.questify-quest-item-restyle> :nth-child(2) button>div>div>svg path {
+    fill: var(--questify-quest-name);
+}
+
+/* Allows glowing reward previews which aren't confined to their own
+    square video frame to overflow so the glow doesn't get cut off. */
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"] {
+    overflow: visible;
+}
+
+/* Quest name color. */
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>h2[class^="eyebrow"] {
+    color: var(--questify-quest-name) !important; /* Necessary !important */
+}
+
+/* Reward title + Orbs reward title text color. */
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"],
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"]>span {
+    color: var(--questify-reward-title) !important; /* Necessary !important */
+}
+
+/* Quest description text color. */
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-sm"] {
+    color: var(--questify-reward-description) !important; /* Necessary !important */
+}
+
+/* Hides the gray placeholder elements which distract from the restyles. */
+.questify-quest-item-restyle [class^="placeholderElement"] {
+    background-color: transparent;
+}
+
+/* Promoted by XYZ text color. */
+.questify-quest-item-restyle>div[class^="container"]>div[class^="positionContentOverBackground"]>div[class^="contents"]>div[class^="bottomRow"]>div[class^="text-sm"] {
+    color: var(--questify-reward-description) !important; /* Necessary !important */
+}
+
+/* Drop shadow for >87.5% luminance (near-white) restyle gradients so logos are legible. */
+.questify-quest-item-contrast-logo>div[class^="container"]>div[class^="positionContentOverBackground"]>div[class^="contents"]>div[class^="partnerBranding"]>img {
+    filter: drop-shadow(0 0 10px rgb(0 0 0 / 80%));
+}
+
+/* Increased gradient intensity with restyle color. */
+.questify-quest-item-intense-gradient> :nth-child(1) [class^="overlay"] {
+    background: linear-gradient(to top,
+            var(--questify-color) 0,
+            hsl(from var(--questify-color) h s l / 100%) 20.5%,
+            hsl(from var(--questify-color) h s l / 99.5%) 23.33%,
+            hsl(from var(--questify-color) h s l / 98%) 26.66%,
+            hsl(from var(--questify-color) h s l / 97%) 30%,
+            hsl(from var(--questify-color) h s l / 90%) 40%,
+            hsl(from var(--questify-color) h s l / 77%) 50%,
+            hsl(from var(--questify-color) h s l / 0%) 100%);
+}
+
+/* Default gradient intensity with restyle color. */
+.questify-quest-item-default-gradient> :nth-child(1) [class^="overlay"] {
+    background: linear-gradient(to top,
+            var(--questify-color) 0,
+            hsl(from var(--questify-color) h s l / 95%) 20.31%,
+            hsl(from var(--questify-color) h s l / 0%) 100%);
+}
+
+/* Subtle black gradient. */
+.questify-quest-item-black-gradient> :nth-child(1) [class^="overlay"] {
+    background: linear-gradient(to top,
+            hsl(0deg 0% 0% / 80%) 10%,
+            hsl(0deg 0% 0% / 65%) 20%,
+            hsl(0deg 0% 0% / 50%) 50%,
+            hsl(0deg 0% 0% / 10%) 75%,
+            hsl(0deg 0% 0% / 0%) 90%);
+}
+
+/* Hides the gradient altogether. */
+.questify-quest-item-hide-gradient> :nth-child(1) [class^="overlay"] {
+    display: none;
+}
+
+/* Matches the text overlay which darkens the text of long
+    descriptions until hovered with the chosen restyle color. */
+.questify-quest-item-restyle> :nth-child(2) [class^="textOverflowBlur"] {
+    background: linear-gradient(transparent 50%, var(--questify-color) 100%);
+    filter: brightness(0.9);
+}
+
+/* Quest tile button color. */
+.questify-quest-item-restyle> :nth-child(2)> div> button {
+    background-color: var(--questify-button-normal) !important; /* Necessary !important */
+}
+
+.questify-quest-item-restyle> :nth-child(2)> div> button:not([disabled]):hover {
+    background-color: var(--questify-button-hover) !important; /* Necessary !important */
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Quest tile border radius. */
+
+.questify-quest-item-restyle> :nth-child(1)[class^="container"] {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.questify-quest-item-restyle> :nth-child(2)[class^="container"] {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
