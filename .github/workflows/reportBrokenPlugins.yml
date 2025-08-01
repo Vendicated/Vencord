@@ -106,7 +106,11 @@ jobs:
 
                   if git diff --cached --quiet; then
                     echo "Nothing to commit"
-                    exit 0
+                    if [[ $exit_code -eq 0 ]]; then
+                        exit 0
+                    else
+                        exit 1
+                    fi
                   else
                     git commit -m "Reporter Results"
                     git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git
