@@ -1,0 +1,40 @@
+@keyframes show-me-your-name-animation {
+    0% {
+        background-position: 0;
+    }
+
+    100% {
+        background-position: 100px;
+    }
+}
+
+.show-me-your-name-gradient {
+    position: relative;
+    z-index: 0;
+}
+
+.show-me-your-name-gradient::after {
+    background-clip: text;
+    content: attr(data-text) / "";
+    inset: 0;
+    position: absolute;
+    filter: blur(4px);
+    opacity: 0;
+    text-indent: 0;
+    transition: opacity .1s ease-in-out;
+    text-wrap-style: balance;
+    z-index: -1;
+}
+
+.show-me-your-name-gradient-unset-bg::after {
+    background: unset;
+}
+
+.show-me-your-name-gradient-inherit-bg::after {
+    background: inherit;
+}
+
+.show-me-your-name-gradient-hovered::after {
+    opacity: .7;
+    transition: opacity .1s ease-in-out
+}
