@@ -26,6 +26,7 @@ import { Player as SpotifyPlayer } from "plugins/spotifyControls/PlayerComponent
 
 import hoverOnlyStyle from "./hoverOnly.css?managed";
 import { Player } from "./PlayerComponent";
+import { Forms, MaskedLink } from "@webpack/common";
 
 function toggleHoverControls(value: boolean) {
     (value ? enableStyle : disableStyle)(hoverOnlyStyle);
@@ -40,7 +41,35 @@ function isUrlValid(value: string) {
     }
 }
 
+function InstallIstructions() {
+    return (
+        <Forms.FormSection>
+            <Forms.FormTitle tag="h3">How to install</Forms.FormTitle>
+            <Forms.FormText>Instructions on how to install YouTube music with websocket plugin</Forms.FormText>
+
+            <Forms.FormText>
+
+                <span>Software needed: <MaskedLink href="https://git-scm.com/downloads">git</MaskedLink>,<MaskedLink href="https://nodejs.org/en/download">node.js</MaskedLink> &gt;= 22.12.0,<MaskedLink href="https://pnpm.io/installation">pnpm</MaskedLink></span>
+
+                <code className="hljs" style={{ userSelect: "text", cursor: "text" }}>
+                    git clone https://github.com/th-ch/youtube-music<br />
+                    cd .\youtube-music\<br />
+                    git remote add johannes https://github.com/Johannes7k75/youtube-music.git<br />
+                    git fetch johannes<br />
+                    git merge johannes/feat/api-websocket<br />
+                    pnpm install --frozen-lockfile<br />
+                    pnpm dist:win<br />
+                </code>
+            </Forms.FormText>
+        </Forms.FormSection>
+    );
+}
+
 const settings = definePluginSettings({
+    installYtmWithWebsocket: {
+        type: OptionType.COMPONENT,
+        component: () => <InstallIstructions></InstallIstructions>
+    },
     hoverControls: {
         description: "Show controls on hover",
         type: OptionType.BOOLEAN,
@@ -65,7 +94,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "YouTubeMusicControls",
-    description: "Adds a YouTube Music player above the account panel",
+    description: "Adds a YouTube Music player above the account panel, requires `https://github.com/th-ch/youtube-music` with an custom websocket plugin. See Readme of ths Plugin for instructions",
     authors: [EquicordDevs.Johannes7k75],
     settings,
     patches: [
