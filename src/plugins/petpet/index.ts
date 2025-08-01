@@ -166,7 +166,10 @@ export default definePlugin({
 
                 const avatar = await loadImage(url);
 
-                const delay = findOption(opts, "delay", DEFAULT_DELAY);
+                let delay = findOption(opts, "delay", DEFAULT_DELAY);
+                // Frame delays < 20ms don't function correctly on chromium and firefox
+                if (delay < 20) delay = 20;
+
                 const resolution = findOption(opts, "resolution", DEFAULT_RESOLUTION);
 
                 const gif = GIFEncoder();
