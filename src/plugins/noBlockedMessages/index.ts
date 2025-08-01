@@ -85,7 +85,7 @@ export default definePlugin({
             find: "referencedUsernameProfile,referencedAvatarProfile",
             replacement: [
                 {
-                    match: /CUSTOM_GIFT.*?=(?=\(0,\i.jsx\)\(\i.\i\i)/,
+                    match: /(?=\(0,\i.jsx\)\(\i.\i,\{offset)/,
                     replace: "$&!$self.isReplyToBlocked(arguments[0].message)&&",
                 }
             ],

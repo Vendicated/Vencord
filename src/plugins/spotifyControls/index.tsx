@@ -53,6 +53,7 @@ export default definePlugin({
     },
     patches: [
         {
+            // HEY THOR UPDATE YOUTUBE MUSIC CONTROLS IF THIS SHIT CHANGES TY :)
             find: "this.isCopiedStreakGodlike",
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })

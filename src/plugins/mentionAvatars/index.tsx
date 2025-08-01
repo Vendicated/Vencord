@@ -48,10 +48,11 @@ export default definePlugin({
     description: "Shows user avatars and role icons inside mentions",
     authors: [Devs.Ven, Devs.SerStars],
     patches: [{
+        // HEY THOR UPDATE SHOW ME YOUR NAME IF THIS SHIT CHANGES TY :)
         find: ".USER_MENTION)",
         replacement: {
-            match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
-            replace: "children:$self.renderUsername({username:$1,user:$2,showMeYourNameMention:typeof showMeYourNameMention!=='undefined'?showMeYourNameMention:undefined})"
+            match: /"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
+            replace: "$self.renderUsername({username:$1,user:$2,showMeYourNameMention:showMeYourNameMention ?? undefined})"
         }
     },
     {

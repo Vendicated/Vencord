@@ -30,7 +30,7 @@ const defaultIgnoredColor = 8334124;
 const defaultExpiredColor = 2368553;
 const defaultRestyleQuestsGradient = "intense";
 const defaultFetchQuestsAlert = "discodo";
-const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")));
+const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")), false);
 export const minimumAutoFetchIntervalValue = 30 * 60;
 export const maximumAutoFetchIntervalValue = 12 * 60 * 60;
 

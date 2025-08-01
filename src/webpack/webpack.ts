@@ -409,8 +409,8 @@ export function LazyComponentWebpack<T extends object = any>(factory: () => any,
 /**
  * Find the first module that matches the filter, lazily
  */
-export function findLazy(filter: FilterFn) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["find", [filter]]);
+export function findLazy(filter: FilterFn, warning: boolean = true) {
+    if (IS_REPORTER && warning) lazyWebpackSearchHistory.push(["find", [filter]]);
 
     return proxyLazy(() => find(filter));
 }
