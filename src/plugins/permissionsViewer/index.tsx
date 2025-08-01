@@ -31,7 +31,7 @@ import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildSt
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
-import { getSortedRoles, sortPermissionOverwrites } from "./utils";
+import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
 
 const PopoutClasses = findByPropsLazy("container", "scroller", "list");
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
@@ -73,7 +73,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     .with(MenuItemParentType.User, () => {
                         const member = GuildMemberStore.getMember(guildId, id!)!;
 
-                        const permissions: RoleOrUserPermission[] = getSortedRoles(guild, member)
+                        const permissions: RoleOrUserPermission[] = getSortedRolesForMember(guild, member)
                             .map(role => ({
                                 type: PermissionType.Role,
                                 ...role
@@ -107,7 +107,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         };
                     })
                     .otherwise(() => {
-                        const permissions = Object.values(GuildRoleStore.getRoles(guild.id)).map(role => ({
+                        const permissions = GuildRoleStore.getSortedRoles(guild.id).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));
