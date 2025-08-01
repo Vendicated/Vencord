@@ -6,7 +6,7 @@
 
 import "./style.css";
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
@@ -783,7 +783,6 @@ export default definePlugin({
         {
             // Replace names in mentions.
             find: ".USER_MENTION)",
-            group: false, // Let mentionAvatars make use of the showMeYourNameMention variable as well.
             replacement: [
                 {
                     match: /(let \i=\i=>\(0,)/,
@@ -791,7 +790,8 @@ export default definePlugin({
                 },
                 {
                     match: /("@"\.concat\(null!=\i\?\i:\i\))/,
-                    replace: "showMeYourNameMention??($1)"
+                    replace: "showMeYourNameMention??($1)",
+                    predicate: () => !Settings.plugins.MentionAvatars.enabled,
                 }
             ]
         },
@@ -813,7 +813,7 @@ export default definePlugin({
             // message, but not the other way around. This patch allows both.
             find: "CUSTOM_GIFT?\"\":",
             replacement: {
-                match: /(\(\i,\i,\i\);)(let \i=\i.id===\i(?:.{0,300}?)hovering:(\i))/,
+                match: /(\(\i,\i,\i\);)(let \i=\i.id===\i(?:.{0,500}?)hovering:(\i))/,
                 replace: "$1arguments[0].message.showMeYourNameGroupId=arguments[0].groupId;if($3){$self.addHoveringMessage(arguments[0].groupId);}else{$self.removeHoveringMessage(arguments[0].groupId)};$2"
             },
         },
