@@ -52,7 +52,7 @@ export default definePlugin({
         find: ".USER_MENTION)",
         replacement: {
             match: /"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
-            replace: "$self.renderUsername({username:$1,user:$2,showMeYourNameMention:showMeYourNameMention ?? undefined})"
+            replace: "$self.renderUsername({username:$1,user:$2,showMeYourNameMention:typeof showMeYourNameMention!=='undefined'?showMeYourNameMention:undefined})"
         }
     },
     {
