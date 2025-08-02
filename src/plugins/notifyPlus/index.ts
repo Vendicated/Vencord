@@ -348,10 +348,7 @@ function handleMessage(data: any) {
 export default definePlugin({
     name: "notifyPlus",
     description: "Priority alerts for specific channels with customizable sounds, flash effects and popups",
-    authors: [{
-        name: "fax2109",
-        id: 972876830132547634n
-    }],
+    authors: [Devs.fax2109],
     settings,
 
     flux: {
