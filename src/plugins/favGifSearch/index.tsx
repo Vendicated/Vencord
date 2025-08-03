@@ -35,7 +35,7 @@ interface SearchBarComponentProps {
 }
 
 type TSearchBarComponent =
-    React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
+    React.FC<SearchBarComponentProps>;
 
 interface Gif {
     format: number;
@@ -182,7 +182,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             ref={ref}
             autoFocus={true}
             className={containerClasses.searchBar}
-            size={SearchBarComponent.Sizes.MEDIUM}
+            size="md"
             onChange={onChange}
             onClear={() => {
                 setQuery("");

@@ -25,11 +25,11 @@ export default definePlugin({
     description: "Upload with a single click, open menu with right click",
     patches: [
         {
-            find: '"ChannelAttachButton"',
+            find: ".CHAT_INPUT_BUTTON_NOTIFICATION,",
             replacement: [
                 {
-                    match: /\.attachButtonInner,.+?onDoubleClick:(.+?:void 0),.{0,100}\},(\i)\).{0,100}children:\i/,
-                    replace: "$&,onClick:$1,onContextMenu:$2.onClick,",
+                    match: /onClick:(\i\?void 0:\i)(?=,onDoubleClick:(\i\?void 0:\i))/,
+                    replace: "onContextMenu:$1,onClick:$2",
                 },
             ]
         },
