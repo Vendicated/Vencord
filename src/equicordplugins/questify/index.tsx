@@ -450,7 +450,7 @@ function preprocessQuests(quests: Quest[]): Quest[] {
     return sortedQuests;
 }
 
-function getQuestTileStyle(quest: Quest): Record<string, string> {
+export function getQuestTileStyle(quest: Quest | null): Record<string, string> {
     const {
         restyleQuests,
         ignoredQuests,
@@ -471,9 +471,9 @@ function getQuestTileStyle(quest: Quest): Record<string, string> {
     const unclaimedColor = restyleUnclaimed !== null ? decimalToRGB(restyleUnclaimed) : "";
     const ignoredColor = restyleIgnored !== null ? decimalToRGB(restyleIgnored) : "";
     const expiredColor = restyleExpired !== null ? decimalToRGB(restyleExpired) : "";
-    const dummyProvided = quest.dummyColor !== undefined;
-    const dummyColor = (quest.dummyColor !== undefined && quest.dummyColor !== null) ? decimalToRGB(quest.dummyColor) : null;
-    const questStatus = getQuestStatus(quest);
+    const dummyProvided = quest?.dummyColor !== undefined;
+    const dummyColor = (quest?.dummyColor !== undefined && quest?.dummyColor !== null) ? decimalToRGB(quest.dummyColor) : null;
+    const questStatus = quest ? getQuestStatus(quest) : null;
 
     if (questStatus === QuestStatus.Claimed) {
         themeColor = dummyProvided ? dummyColor : claimedColor || null;
