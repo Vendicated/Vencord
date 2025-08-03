@@ -882,7 +882,7 @@ export default definePlugin({
                 {
                     // Replace names in reaction popouts.
                     match: /children:(\[null!=(?:.{0,300}?)forceUsername:!0}\)\])/,
-                    replace: "children:($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId,type:\"reactionsPopout\"}))??($1)"
+                    replace: "style:{\"overflow\":\"visible\"},children:($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId,type:\"reactionsPopout\"}))??($1)"
                 },
                 {
                     // Track hovering over reaction popouts.
@@ -890,14 +890,6 @@ export default definePlugin({
                     replace: "$1onMouseEnter:()=>{$self.addHoveringReactionPopout(arguments[0].user.id)},onMouseLeave:()=>{$self.removeHoveringReactionPopout(arguments[0].user.id)},$2"
                 }
             ]
-        },
-        {
-            // Let gradient glow overflow in reaction popouts.
-            find: "lineClamp2Plus,",
-            replacement: {
-                match: /style:(Object.values\(\i\).filter\(Boolean\).length>0\?\i:void 0),/,
-                replace: "style:{overflow:\"visible\",...$1},"
-            }
         },
         {
             // Replace names in voice channels.
