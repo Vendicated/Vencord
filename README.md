@@ -59,7 +59,7 @@ cd Equicord
 Install dependencies:
 
 ```shell
-pnpm install --no-frozen-lockfile
+pnpm install --frozen-lockfile
 ```
 
 Build Equicord:

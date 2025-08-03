@@ -48,7 +48,7 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  pnpm install --no-frozen-lockfile
+                  pnpm install --frozen-lockfile
 
             - name: Install Google Chrome
               id: setup-chrome
