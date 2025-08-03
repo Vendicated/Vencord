@@ -493,7 +493,7 @@ export default definePlugin({
     ],
 
 
-    fixPermCheck(originalPerms: any, channel: Channel) {
+    fixPermCheck(originalPerms: number, channel: Channel) {
         if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
             originalPerms &= ~PermissionsBits.VIEW_CHANNEL;
             originalPerms |= PermissionsBits.CONNECT;
