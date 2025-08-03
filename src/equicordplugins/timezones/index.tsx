@@ -23,6 +23,22 @@ import { SetTimezoneModal } from "./TimezoneModal";
 export let timezones: Record<string, string | null> = {};
 export const DATASTORE_KEY = "vencord-timezones";
 
+export function resolveUserTimezone(userId: string): string | null {
+    const localTimezone = timezones[userId];
+    const shouldUseDatabase =
+        settings.store.useDatabase &&
+        (settings.store.preferDatabaseOverLocal || !localTimezone);
+
+    if (shouldUseDatabase) {
+        return getTimezone(userId) ?? localTimezone;
+    }
+    return localTimezone;
+}
+
+export function getSystemTimezone(): string {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
 const classes = findByPropsLazy("timestamp", "compact", "contentOnly");
 const locale = findByPropsLazy("getLocale");
 
@@ -63,6 +79,12 @@ export const settings = definePluginSettings({
         default: true
     },
 
+    databaseUrl: {
+        type: OptionType.STRING,
+        description: "Database URL for timezone storage",
+        default: "https://timezone.creations.works"
+    },
+
     setDatabaseTimezone: {
         description: "Set your timezone on the database",
         type: OptionType.COMPONENT,
@@ -84,19 +106,14 @@ export const settings = definePluginSettings({
                 onClick={async () => {
                     try {
                         await setUserDatabaseTimezone(UserStore.getCurrentUser().id, null);
-                        const success = await deleteTimezone();
-                        if (success) {
-                            showToast("Database timezone reset successfully!", Toasts.Type.SUCCESS);
-                        } else {
-                            showToast("Failed to reset database timezone", Toasts.Type.FAILURE);
-                        }
+                        await deleteTimezone();
                     } catch (error) {
                         console.error("Error resetting database timezone:", error);
                         showToast("Failed to reset database timezone", Toasts.Type.FAILURE);
                     }
                 }}
             >
-                Reset Database Timezones
+                Reset Database Timezone
             </Button>
         )
     },
@@ -130,16 +147,7 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
     const [timezone, setTimezone] = useState<string | null>(null);
 
     useEffect(() => {
-        const localTimezone = timezones[userId];
-        const shouldUseDatabase =
-            settings.store.useDatabase &&
-            (settings.store.preferDatabaseOverLocal || !localTimezone);
-
-        if (shouldUseDatabase) {
-            setTimezone(getTimezone(userId) ?? localTimezone);
-        } else {
-            setTimezone(localTimezone);
-        }
+        setTimezone(resolveUserTimezone(userId));
     }, [userId, settings.store.useDatabase, settings.store.preferDatabaseOverLocal]);
 
     useEffect(() => {
@@ -153,8 +161,15 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
             setCurrentTime(Date.now());
         }, delay);
 
-        return () => clearTimeout(timer);
-    }, [type, currentTime]);
+        const interval = setInterval(() => {
+            setCurrentTime(Date.now());
+        }, 60000);
+
+        return () => {
+            clearTimeout(timer);
+            clearInterval(interval);
+        };
+    }, [type]);
 
     if (!timezone) return null;
 

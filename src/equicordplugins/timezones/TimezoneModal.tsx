@@ -10,8 +10,8 @@ import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Button, Forms, SearchableSelect, useEffect, useMemo, useState } from "@webpack/common";
 
-import { DATASTORE_KEY, settings, timezones } from ".";
-import { getTimezone, setTimezone, setUserDatabaseTimezone } from "./database";
+import { DATASTORE_KEY, getSystemTimezone, resolveUserTimezone, settings, timezones } from ".";
+import { setTimezone, setUserDatabaseTimezone } from "./database";
 
 export async function setUserTimezone(userId: string, timezone: string | null) {
     timezones[userId] = timezone;
@@ -21,19 +21,11 @@ export async function setUserTimezone(userId: string, timezone: string | null) {
 const cl = classNameFactory("vc-timezone-");
 
 export function SetTimezoneModal({ userId, modalProps, database }: { userId: string, modalProps: ModalProps; database?: boolean; }) {
-    const [currentValue, setCurrentValue] = useState<string | null>(timezones[userId] ?? null);
+    const [currentValue, setCurrentValue] = useState<string | null>(null);
 
     useEffect(() => {
-        const localTimezone = timezones[userId];
-        const shouldUseDatabase =
-            settings.store.useDatabase &&
-            (settings.store.preferDatabaseOverLocal || !localTimezone);
-
-        const value = shouldUseDatabase
-            ? getTimezone(userId) ?? localTimezone
-            : localTimezone;
-
-        setCurrentValue(value ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
+        const resolvedTimezone = resolveUserTimezone(userId);
+        setCurrentValue(resolvedTimezone ?? getSystemTimezone());
     }, [userId, settings.store.useDatabase, settings.store.preferDatabaseOverLocal]);
 
     const options = useMemo(() => {
@@ -89,8 +81,10 @@ export function SetTimezoneModal({ userId, modalProps, database }: { userId: str
                     disabled={currentValue === null}
                     onClick={async () => {
                         if (database) {
-                            await setUserDatabaseTimezone(userId, currentValue);
-                            await setTimezone(currentValue!);
+                            const success = await setTimezone(currentValue!);
+                            if (success) {
+                                await setUserDatabaseTimezone(userId, currentValue);
+                            }
                         } else {
                             await setUserTimezone(userId, currentValue);
                         }
