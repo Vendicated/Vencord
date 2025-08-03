@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
@@ -732,7 +732,7 @@ function IgnoredQuestsSetting(): JSX.Element {
 }
 
 const DummyQuestPreview = ({ quest, dummyColor, dummyGradient }: { quest: Quest; dummyColor: number | null; dummyGradient: string; }) => {
-    const classes = getQuestTileClasses("", quest, dummyColor, dummyGradient);
+    const classes = Settings.plugins.Questify.enabled ? getQuestTileClasses("", quest, dummyColor, dummyGradient) : "";
 
     return (
         <QuestTile
