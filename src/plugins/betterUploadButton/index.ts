@@ -28,10 +28,19 @@ export default definePlugin({
             find: ".CHAT_INPUT_BUTTON_NOTIFICATION,",
             replacement: [
                 {
-                    match: /onClick:(\i\?void 0:\i)(?=,onDoubleClick:(\i\?void 0:\i))/,
-                    replace: "onContextMenu:$1,onClick:$2",
+                    match: /onClick:(\i\?void 0:\i)(?=,onDoubleClick:(\i\?void 0:\i),)/,
+                    replace: "$&,...$self.getOverrides(arguments[0],$1,$2)",
                 },
             ]
         },
     ],
+
+    getOverrides(props: any, onClick: any, onDoubleClick: any) {
+        if (!props?.className?.includes("attachButton")) return {};
+
+        return {
+            onClick: onDoubleClick,
+            onContextMenu: onClick
+        };
+    }
 });
