@@ -1,0 +1,9 @@
+.vc-discord-dev-banner {
+    white-space: pre-wrap;
+    padding: 2px;
+}
+
+.vc-discord-dev-banner-error {
+    margin-top: 8px;
+    color: var(--text-danger);
+}

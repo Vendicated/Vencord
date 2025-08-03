@@ -4,11 +4,49 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { migratePluginSettings } from "@api/Settings";
+import "./styles.css";
+
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import SettingsPlugin from "plugins/_core/settings";
 
-// By default Discord only seems to only display 'Staging' so we map the names ourself
+import gitHash from "~git-hash";
+
+import { settings } from "./settings";
+
+function getVersion(): string {
+    if (IS_DEV) return "Dev";
+    if (IS_WEB) return "Web";
+    if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
+    if (IS_EQUIBOP) return `Equibop v${VesktopNative.app.getVersion()}`;
+    if (IS_STANDALONE) return "Standalone";
+    return "";
+}
+
+export function transform(state?: string): string {
+    const { RELEASE_CHANNEL, BUILD_NUMBER, VERSION_HASH } = window.GLOBAL_ENV;
+    const buildChannel: string = names[RELEASE_CHANNEL] || RELEASE_CHANNEL.charAt(0).toUpperCase() + RELEASE_CHANNEL.slice(1);
+    const { chromiumVersion, electronVersion, } = SettingsPlugin;
+    const format = settings.store.format ?? "{buildChannel} {buildNumber} ({buildHash}) | {equicordName} {equicordVersion} ({equicordHash})";
+    const baseFormat = state ?? format;
+
+    const formatted = baseFormat
+        .replace(/{discordName}/g, "Discord")
+        .replace(/{buildChannel}/g, buildChannel)
+        .replace(/{buildNumber}/g, BUILD_NUMBER)
+        .replace(/{buildHash}/g, VERSION_HASH.slice(0, 9))
+        .replace(/{equicordName}/g, "Equicord")
+        .replace(/{equicordVersion}/g, VERSION)
+        .replace(/{equicordHash}/g, gitHash)
+        .replace(/{equicordPlatform}/g, getVersion())
+        .replace(/{electronName}/g, "Electron")
+        .replace(/{electronVersion}/g, electronVersion)
+        .replace(/{chromiumName}/g, "Chromium")
+        .replace(/{chromiumVersion}/g, chromiumVersion);
+
+    return formatted;
+}
+
 const names: Record<string, string> = {
     stable: "Stable",
     ptb: "PTB",
@@ -16,14 +54,11 @@ const names: Record<string, string> = {
     staging: "Staging"
 };
 
-// Useless for the normal User, but useful for me
-migratePluginSettings("DiscordDevBanner", "devBanner");
-
 export default definePlugin({
     name: "DiscordDevBanner",
     description: "Enables the Discord developer banner, in which displays the build-ID",
-    authors: [EquicordDevs.KrystalSkull],
-
+    authors: [EquicordDevs.KrystalSkull, EquicordDevs.thororen],
+    settings,
     patches: [
         {
             find: ".devBanner,",
@@ -37,20 +72,11 @@ export default definePlugin({
                     replace: "$1null;"
                 },
                 {
-                    match: /\i\.\i\.format\(.{0,15},{buildNumber:(.{0,10})}\)/,
-                    replace: "$self.transform($1)"
+                    match: /\i\.\i\.format\(.{0,40}\)/,
+                    replace: "$self.transform()"
                 },
             ]
         }
     ],
-
-    transform(buildNumber: string) {
-        const releaseChannel: string = window.GLOBAL_ENV.RELEASE_CHANNEL;
-
-        if (names[releaseChannel]) {
-            return `${names[releaseChannel]} ${buildNumber}`;
-        } else {
-            return `${releaseChannel.charAt(0).toUpperCase() + releaseChannel.slice(1)} ${buildNumber}`;
-        }
-    },
+    transform,
 });
