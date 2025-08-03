@@ -12,7 +12,7 @@ import { findLazy } from "@webpack";
 import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { activeQuestIntervals, getQuestTileClasses } from "./index";
+import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
 import { DynamicDropdown, DynamicDropdownSettingOption, GuildlessServerListItem, Quest, QuestIcon, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
 import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, QuestsStore, rightClick, validCommaSeparatedList } from "./utils/misc";
 
@@ -770,6 +770,7 @@ function RestyleQuestsSetting() {
 
     const [hasQuests, setHasQuests] = useState(false);
     const [dummyQuest, setDummyQuest] = useState<Quest | null>(null);
+    const dummyQuestStyle = getQuestTileStyle(dummyQuest);
 
     useEffect(() => {
         const handleChange = () => {
@@ -936,7 +937,7 @@ function RestyleQuestsSetting() {
                             />
                         </div>
                     </div>
-                    <div className={q("dummy-quest-preview")}>
+                    <div className={q("dummy-quest-preview")} style={dummyQuestStyle}>
                         {hasQuests && dummyQuest && (
                             <DummyQuestPreview quest={dummyQuest} dummyColor={dummyColor} dummyGradient={dummyGradient} />
                         )}
