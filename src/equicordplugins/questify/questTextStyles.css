@@ -1,0 +1,25 @@
+/* Quest name color. */
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>h2[class^="eyebrow"] {
+    color: var(--questify-quest-name) !important; /* Necessary !important */
+}
+
+/* Reward title + Orbs reward title text color. */
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"],
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"]>span {
+    color: var(--questify-reward-title) !important; /* Necessary !important */
+}
+
+/* Quest description text color. */
+.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-sm"] {
+    color: var(--questify-reward-description) !important; /* Necessary !important */
+}
+
+/* Hides the gray placeholder elements which distract from the restyles. */
+.questify-quest-item-restyle [class^="placeholderElement"] {
+    background-color: transparent;
+}
+
+/* Promoted by XYZ text color. */
+.questify-quest-item-restyle>div[class^="container"]>div[class^="positionContentOverBackground"]>div[class^="contents"]>div[class^="bottomRow"]>div[class^="text-sm"] {
+    color: var(--questify-reward-description) !important; /* Necessary !important */
+}

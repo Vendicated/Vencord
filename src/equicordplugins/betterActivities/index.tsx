@@ -36,10 +36,16 @@ export default definePlugin({
         {
             // Patch activity icons
             find: "isBlockedOrIgnored(null",
-            replacement: {
-                match: /(?<=hideTooltip:.{0,4}}=(\i).*?{}\))\]/,
-                replace: ",$self.patchActivityList($1)]"
-            },
+            replacement: [
+                {
+                    match: /(?<=className:\i,children:\[)\i\(\),/,
+                    replace: "",
+                },
+                {
+                    match: /(?<=hideTooltip:.{0,4}}=(\i).*?{}\))\]/,
+                    replace: ",$self.patchActivityList($1)]"
+                }
+            ],
             predicate: () => settings.store.memberList,
             all: true
         },

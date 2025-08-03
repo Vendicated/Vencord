@@ -24,6 +24,8 @@ import { Switch } from "@components/settings/Switch";
 import { Text, useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
+import { useTruncatedText } from "./tabs/plugins/components/truncateText";
+
 const cl = classNameFactory("vc-addon-");
 
 interface Props {
@@ -44,6 +46,7 @@ interface Props {
 export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContainerRef = useRef<HTMLDivElement>(null);
+    const { truncated, containerRef } = useTruncatedText(description ? description.toString() : "");
 
     return (
         <div
@@ -88,7 +91,14 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                 />
             </div>
 
-            <Text className={cl("note")} variant="text-sm/normal">{description}</Text>
+            <div
+                ref={containerRef}
+                className={cl("note")}
+                style={{ lineHeight: "1.25em", fontSize: "small" }}
+                title={description ? description.toString() : ""}
+            >
+                {truncated}
+            </div>
 
             {footer}
         </div>
