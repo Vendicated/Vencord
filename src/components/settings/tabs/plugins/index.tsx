@@ -27,6 +27,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
+import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -85,7 +86,11 @@ function ExcludedPluginsList({ search }: { search: string; }) {
             key={name}
             isMissing={true}
         />
-    )) : "No plugins meet the search criteria.";
+    )) : (
+        <Text variant="text-md/normal" className={Margins.top16}>
+            No plugins meet the search criteria.
+        </Text>
+    );
 }
 
 export const showRestartAlert = (body: React.ReactNode) => Alerts.show({
@@ -95,6 +100,50 @@ export const showRestartAlert = (body: React.ReactNode) => Alerts.show({
     cancelText: "Later!",
     onConfirm: () => location.reload()
 });
+
+export function MakePluginCard({
+    plugin,
+    onRestartNeeded,
+    update,
+    isNew,
+    key,
+}: {
+    plugin: Plugin;
+    onRestartNeeded: (name: string, key: string) => void;
+    update?: () => void;
+    isNew?: boolean;
+    key: string;
+}) {
+
+    const isRequired = Vencord.Plugins.isPluginRequired(plugin.name);
+
+    return isRequired ? (
+        <Tooltip text={isRequired.type === "core" ? isRequired.reason : makeDependencyList(isRequired.dependents)} key={plugin.name}>
+            {({ onMouseLeave, onMouseEnter }) =>
+                <PluginCard
+                    onMouseLeave={onMouseLeave}
+                    onMouseEnter={onMouseEnter}
+                    onRestartNeeded={onRestartNeeded}
+                    disabled={true}
+                    update={update}
+                    plugin={plugin}
+                    isNew={isNew}
+                    key={key}
+                />
+            }
+        </Tooltip>
+    ) : (
+        <PluginCard
+            onRestartNeeded={onRestartNeeded}
+            disabled={false}
+            update={update}
+            plugin={plugin}
+            isNew={isNew}
+            key={key}
+        />
+    );
+}
+
 
 function PluginSettings() {
     const settings = useSettings();
@@ -115,20 +164,6 @@ function PluginSettings() {
                     </>
                 )
             );
-    }, []);
-
-    const depMap = useMemo(() => {
-        const o = {} as Record<string, string[]>;
-        for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
-            if (deps) {
-                for (const dep of deps) {
-                    o[dep] ??= [];
-                    o[dep].push(plugin);
-                }
-            }
-        }
-        return o;
     }, []);
 
     const sortedPlugins = useMemo(() =>
@@ -194,38 +229,18 @@ function PluginSettings() {
 
         if (!pluginFilter(p)) continue;
 
-        const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
+        const onRestartNeeded = (name: string, key: string) => changes.handleChange(`${name}.${key}`);
 
-        if (isRequired) {
-            const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for Vencord to function."
-                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+        const isRequired = Vencord.Plugins.isPluginRequired(p.name);
 
-            requiredPlugins.push(
-                <Tooltip text={tooltipText} key={p.name}>
-                    {({ onMouseLeave, onMouseEnter }) => (
-                        <PluginCard
-                            onMouseLeave={onMouseLeave}
-                            onMouseEnter={onMouseEnter}
-                            onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
-                            disabled={true}
-                            plugin={p}
-                            key={p.name}
-                        />
-                    )}
-                </Tooltip>
-            );
-        } else {
-            plugins.push(
-                <PluginCard
-                    onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
-                    disabled={false}
-                    plugin={p}
-                    isNew={newPlugins?.includes(p.name)}
-                    key={p.name}
-                />
-            );
-        }
+        const card = MakePluginCard({
+            plugin: p,
+            onRestartNeeded,
+            isNew: newPlugins?.includes(p.name),
+            key: p.name
+        });
+
+        (isRequired ? requiredPlugins : plugins).push(card);
     }
 
     return (
@@ -266,7 +281,11 @@ function PluginSettings() {
                         }
                     </div>
                 )
-                : <ExcludedPluginsList search={search} />
+                : (
+                    <div className={cl("unavailable-grid")}>
+                        <ExcludedPluginsList search={search} />
+                    </div>
+                )
             }
 
 

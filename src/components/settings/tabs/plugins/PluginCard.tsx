@@ -61,7 +61,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
                 settings.enabled = true;
-                onRestartNeeded(plugin.name, "enabled");
+                onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
                 return;
             }
         }
@@ -69,7 +69,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (plugin.patches?.length) {
             settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name, "enabled");
+            onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
             return;
         }
 
@@ -122,21 +122,21 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 }
 
 export function UnavailablePluginCard({ name, description, isMissing }: { name: string; description: string, isMissing: boolean; }) {
+    const toolTipText = isMissing
+        ? `${name} is only available on the ${ExcludedReasons[ExcludedPlugins[name]]}`
+        : "This plugin is not available. Try updating!";
     return (
         <AddonCard
             name={name}
-            description={description}
+            description={description || toolTipText}
             enabled={false}
             setEnabled={() => { }}
             disabled={true}
-            infoButton={
-                <TooltipContainer text={!isMissing
-                    ? "This plugin is not available Try updating!"
-                    : `${name} is only available on ${ExcludedReasons[ExcludedPlugins[name]]}`
-                }>
+            infoButton={!description ? null : (
+                <TooltipContainer text={toolTipText}>
                     <WarningIcon />
                 </TooltipContainer>
-            }
+            )}
         />
     );
 }

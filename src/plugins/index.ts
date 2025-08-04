@@ -27,6 +27,7 @@ import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendLi
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
@@ -58,6 +59,37 @@ export function isPluginEnabled(p: string) {
         settings[p]?.enabled
     ) ?? false;
 }
+
+const getDepMap = makeLazy(() => {
+    const o = {} as Record<string, string[]>;
+    for (const plugin in Plugins) {
+        const deps = Plugins[plugin].dependencies;
+        if (deps) {
+            for (const dep of deps) {
+                o[dep] ??= [];
+                o[dep].push(plugin);
+            }
+        }
+    }
+    return o;
+});
+
+type RequiredReason = { type: "core"; reason: string; } | { type: "dependency"; dependents: string[]; } | false;
+
+export function isPluginRequired(pn: string): RequiredReason {
+    const p = Plugins[pn];
+    if (!p) return false;
+
+    const depMap = getDepMap();
+
+    if (p.required) {
+        return { type: "core", reason: "This plugin is required for Vencord to function." };
+    }
+
+    const dependents = depMap[p.name]?.filter(d => settings[d]?.enabled) ?? [];
+    return dependents.length ? { type: "dependency", dependents } : false;
+}
+
 
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     const patch = newPatch as Patch;
