@@ -35,10 +35,10 @@ import Plugins, { ExcludedPlugins } from "~plugins";
 
 import { PluginCard, UnavailablePluginCard } from "./PluginCard";
 
-const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
-
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
+
+const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (

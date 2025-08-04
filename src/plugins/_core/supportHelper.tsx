@@ -21,7 +21,8 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { PluginCard, showRestartAlert, UnavailablePluginCard } from "@components/settings/tabs/plugins";
+import { showRestartAlert } from "@components/settings/tabs/plugins";
+import { PluginCard, UnavailablePluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -34,7 +35,7 @@ import { useForceUpdater } from "@utils/react";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Channel } from "@vencord/discord-types";
+import { Channel, Embed } from "@vencord/discord-types";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -302,7 +303,7 @@ export default definePlugin({
         return (
             <>
                 <Flex>{buttons}</Flex>
-                <RenderPluginEmbed {...props} />
+                <DisplayPluginCards {...props} />
             </>
         );
     },
@@ -323,13 +324,13 @@ export default definePlugin({
     }, { noop: true }),
 });
 
-function RenderPluginEmbed(props) {
+function DisplayPluginCards(props) {
     return (
         <ErrorBoundary noop>
-            {props.message?.embeds?.map(embed => {
+            {props.message?.embeds?.map((embed: Embed) => {
                 if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
                 const pluginName = new URL(embed.url!).pathname.split("/")[2];
-                const plugin = plugins?.[pluginName];
+                const plugin = plugins[pluginName];
                 const excludedPlugin = ExcludedPlugins[pluginName];
 
                 const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
@@ -365,7 +366,7 @@ function RenderPluginEmbed(props) {
                         ) : (
                             <PluginCard
                                 onRestartNeeded={onRestartNeeded}
-                                disabled={plugin.required ?? false}
+                                disabled={false}
                                 update={update}
                                 plugin={plugin}
                             />
