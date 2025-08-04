@@ -59,15 +59,14 @@ function FormatSetting(setValue) {
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>Custom Format</Forms.FormTitle>
-            <Forms.FormText className={"vc-discord-dev-banner"}>
+            <Forms.FormText className={"vc-discord-dev-banner-text"}>
                 The format to transform the build number to. You can use the following placeholders:
                 {"\n\n"}
                 {placeholderInfo.join("\n")}
                 {"\n\n"}
             </Forms.FormText>
 
-            <Forms.FormText className="vc-discord-dev-banner">Preview:</Forms.FormText>
+            <Forms.FormText className="vc-discord-dev-banner-text">Preview:</Forms.FormText>
             <Forms.FormText style={{ padding: "2px" }}>{preview}</Forms.FormText>
             <textarea
                 className="vc-discord-dev-banner-input"
@@ -87,8 +86,6 @@ function FormatSetting(setValue) {
                     el.style.height = el.scrollHeight + "px";
                 }}
             />
-
-
 
             {error && (
                 <Forms.FormText className={"vc-discord-dev-banner-error"}>{error}</Forms.FormText>

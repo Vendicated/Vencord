@@ -30,9 +30,7 @@ export function transform(state?: string): string | JSX.Element {
     const { RELEASE_CHANNEL, BUILD_NUMBER, VERSION_HASH } = window.GLOBAL_ENV;
     const buildChannel = names[RELEASE_CHANNEL] || RELEASE_CHANNEL.charAt(0).toUpperCase() + RELEASE_CHANNEL.slice(1);
     const { chromiumVersion, electronVersion } = SettingsPlugin;
-    const format =
-        settings.store.format ??
-        "{devBannerIcon} {buildChannel} {buildNumber} ({buildHash}) | {equicordIcon} {equicordName} {equicordVersion} ({equicordHash})";
+    const format = settings.store.format ?? "{devBannerIcon} {buildChannel} {buildNumber} ({buildHash}) | {equicordIcon} {equicordName} {equicordVersion} ({equicordHash})";
     const baseFormat = state ?? format;
 
     const replaced = baseFormat
@@ -94,10 +92,6 @@ export default definePlugin({
                 {
                     match: '"staging"===window.GLOBAL_ENV.RELEASE_CHANNEL',
                     replace: "true"
-                },
-                {
-                    match: /(\i=\(\)=>)\(.*?\}\);/,
-                    replace: "$1null;"
                 },
                 {
                     match: /children:\[.*?\{\}\)\]/g,
