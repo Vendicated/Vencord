@@ -508,6 +508,17 @@ function renderUsername(
         ? "show-me-your-name-gradient show-me-your-name-gradient-inherit-bg" + hoveringClass
         : "show-me-your-name-gradient show-me-your-name-gradient-unset-bg" + hoveringClass;
 
+    const firstGroupClasses = "show-me-your-name-name-group show-me-your-name-first-name-group";
+    const secondGroupClasses = "show-me-your-name-name-group show-me-your-name-second-name-group";
+    const thirdGroupClasses = "show-me-your-name-name-group show-me-your-name-third-name-group";
+    const fourthGroupClasses = "show-me-your-name-name-group show-me-your-name-fourth-name-group";
+    const firstNameClasses = "show-me-your-name-name show-me-your-name-first-name";
+    const secondNameClasses = "show-me-your-name-name show-me-your-name-second-name";
+    const thirdNameClasses = "show-me-your-name-name show-me-your-name-third-name";
+    const fourthNameClasses = "show-me-your-name-name show-me-your-name-fourth-name";
+    const prefixClasses = "show-me-your-name-affix show-me-your-name-prefix";
+    const suffixClasses = "show-me-your-name-affix show-me-your-name-suffix";
+
     const topLevelStyle = {
         // Allows names to wrap in reaction popouts.
         ...(isReactionsPopout
@@ -516,15 +527,16 @@ function renderUsername(
     } as React.CSSProperties;
 
     const nameElement = (
-        <span style={topLevelStyle}>
+        <span style={topLevelStyle} className="show-me-your-name-container">
             {mentionSymbol && <span>{mentionSymbol}</span>}
             {(
                 <span
-                    className={(shouldGradientGlow ? gradientClasses : "")}
+                    className={(shouldGradientGlow ? (gradientClasses + " " + firstGroupClasses) : firstGroupClasses)}
                     data-text={shouldGradientGlow ? firstDataText : undefined}
                     style={(shouldGradientGlow && topRoleStyle ? topRoleStyle.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span
+                        className={firstNameClasses}
                         style={
                             topRoleStyle ?
                                 shouldAnimateGradients && topRoleStyle.gradient
@@ -539,15 +551,16 @@ function renderUsername(
             )}
             {second && (
                 <span
-                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? gradientClasses : "")}
+                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? (gradientClasses + " " + secondGroupClasses) : secondGroupClasses)}
                     data-text={shouldGradientGlow && secondDataText ? secondDataText : undefined}
                     style={(shouldGradientGlow && shouldAnimateSecondaryNames ? second.style.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span>&nbsp;</span>
-                    <span style={affixColor as React.CSSProperties}>
+                    <span style={affixColor as React.CSSProperties} className={prefixClasses}>
                         {second.prefix}</span>
                     <span
                         // On non-primary names, allow disabling the gradients completely, or just their animation & glow.
+                        className={secondNameClasses}
                         style={
                             ignoreGradients
                                 ? second.style.normal.adjusted
@@ -558,53 +571,57 @@ function renderUsername(
                                         : second.style.normal.adjusted
                         }>
                         {second.wrapped}</span>
-                    <span style={affixColor as React.CSSProperties}>
+                    <span style={affixColor as React.CSSProperties} className={suffixClasses}>
                         {second.suffix}</span>
                 </span>
             )}
             {third && (
                 <span
-                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? gradientClasses : "")}
+                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? (gradientClasses + " " + thirdGroupClasses) : thirdGroupClasses)}
                     data-text={shouldGradientGlow && thirdDataText ? thirdDataText : undefined}
                     style={(shouldGradientGlow && shouldAnimateSecondaryNames ? third.style.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span>&nbsp;</span>
-                    <span style={affixColor as React.CSSProperties}>
+                    <span style={affixColor as React.CSSProperties} className={prefixClasses}>
                         {third.prefix}</span>
-                    <span style={
-                        ignoreGradients
-                            ? third.style.normal.adjusted
-                            : shouldAnimateGradients && shouldAnimateSecondaryNames && third.style.gradient
-                                ? third.style.gradient.animated
-                                : third.style.gradient
-                                    ? third.style.gradient.static.original
-                                    : third.style.normal.adjusted
-                    }>
+                    <span
+                        className={thirdNameClasses}
+                        style={
+                            ignoreGradients
+                                ? third.style.normal.adjusted
+                                : shouldAnimateGradients && shouldAnimateSecondaryNames && third.style.gradient
+                                    ? third.style.gradient.animated
+                                    : third.style.gradient
+                                        ? third.style.gradient.static.original
+                                        : third.style.normal.adjusted
+                        }>
                         {third.wrapped}</span>
-                    <span style={affixColor as React.CSSProperties}>
+                    <span style={affixColor as React.CSSProperties} className={suffixClasses}>
                         {third.suffix}</span>
                 </span>
             )}
             {fourth && (
                 <span
-                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? gradientClasses : "")}
+                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? (gradientClasses + " " + fourthGroupClasses) : fourthGroupClasses)}
                     data-text={shouldGradientGlow && fourthDataText ? fourthDataText : undefined}
                     style={(shouldGradientGlow && shouldAnimateSecondaryNames ? fourth.style.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span>&nbsp;</span>
-                    <span style={affixColor as React.CSSProperties}>
+                    <span style={affixColor as React.CSSProperties} className={prefixClasses}>
                         {fourth.prefix}</span>
-                    <span style={
-                        ignoreGradients
-                            ? fourth.style.normal.adjusted
-                            : shouldAnimateGradients && shouldAnimateSecondaryNames && fourth.style.gradient
-                                ? fourth.style.gradient.animated
-                                : fourth.style.gradient
-                                    ? fourth.style.gradient.static.original
-                                    : fourth.style.normal.adjusted
-                    }>
+                    <span
+                        className={fourthNameClasses}
+                        style={
+                            ignoreGradients
+                                ? fourth.style.normal.adjusted
+                                : shouldAnimateGradients && shouldAnimateSecondaryNames && fourth.style.gradient
+                                    ? fourth.style.gradient.animated
+                                    : fourth.style.gradient
+                                        ? fourth.style.gradient.static.original
+                                        : fourth.style.normal.adjusted
+                        }>
                         {fourth.wrapped}</span>
-                    <span style={affixColor as React.CSSProperties}>
+                    <span style={affixColor as React.CSSProperties} className={suffixClasses}>
                         {fourth.suffix}</span>
                 </span>
             )}
