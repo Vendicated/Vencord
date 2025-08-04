@@ -30,6 +30,7 @@ import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { getDepMap } from "plugins";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
@@ -106,19 +107,26 @@ export function MakePluginCard({
     onRestartNeeded,
     update,
     isNew,
+    setIsRequired,
     key,
 }: {
     plugin: Plugin;
     onRestartNeeded: (name: string, key: string) => void;
     update?: () => void;
     isNew?: boolean;
+    setIsRequired?: (v: boolean) => void;
     key: string;
 }) {
 
-    const isRequired = Vencord.Plugins.isPluginRequired(plugin.name);
+    const depMap = getDepMap();
+
+    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d)) ?? [];
+    const isRequired = plugin.required || dependents.length > 0;
+
+    setIsRequired?.(isRequired);
 
     return isRequired ? (
-        <Tooltip text={isRequired.type === "core" ? isRequired.reason : makeDependencyList(isRequired.dependents)} key={plugin.name}>
+        <Tooltip text={dependents.length ? makeDependencyList(dependents) : "This plugin is required for Vencord to function."} key={plugin.name}>
             {({ onMouseLeave, onMouseEnter }) =>
                 <PluginCard
                     onMouseLeave={onMouseLeave}
@@ -230,17 +238,18 @@ function PluginSettings() {
         if (!pluginFilter(p)) continue;
 
         const onRestartNeeded = (name: string, key: string) => changes.handleChange(`${name}.${key}`);
-
-        const isRequired = Vencord.Plugins.isPluginRequired(p.name);
+        let isRequired = false;
+        const setIsRequired = (v: boolean) => isRequired = v;
 
         const card = MakePluginCard({
             plugin: p,
             onRestartNeeded,
             isNew: newPlugins?.includes(p.name),
+            setIsRequired,
             key: p.name
         });
 
-        (isRequired ? requiredPlugins : plugins).push(card);
+        card.props(isRequired ? requiredPlugins : plugins).push(card);
     }
 
     return (

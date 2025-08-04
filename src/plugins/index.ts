@@ -60,7 +60,7 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
-const getDepMap = makeLazy(() => {
+export const getDepMap = makeLazy(() => {
     const o = {} as Record<string, string[]>;
     for (const plugin in Plugins) {
         const deps = Plugins[plugin].dependencies;
@@ -73,22 +73,6 @@ const getDepMap = makeLazy(() => {
     }
     return o;
 });
-
-type RequiredReason = { type: "core"; reason: string; } | { type: "dependency"; dependents: string[]; } | false;
-
-export function isPluginRequired(pn: string): RequiredReason {
-    const p = Plugins[pn];
-    if (!p) return false;
-
-    const depMap = getDepMap();
-
-    if (p.required) {
-        return { type: "core", reason: "This plugin is required for Vencord to function." };
-    }
-
-    const dependents = depMap[p.name]?.filter(d => settings[d]?.enabled) ?? [];
-    return dependents.length ? { type: "dependency", dependents } : false;
-}
 
 
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
