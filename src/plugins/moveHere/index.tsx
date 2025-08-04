@@ -70,7 +70,6 @@ const UserContext: NavContextMenuPatchCallback = (children, props) => {
     children.push(<Menu.MenuSeparator/>, streamPreviewItem);
 };
 
-
 export default definePlugin({
     name: "MoveHere",
     description: "This plugin allows you to move a user to the current voice channel.",
@@ -80,7 +79,3 @@ export default definePlugin({
         // "stream-context": streamContextPatch
     }
 });
-
-
-
-
