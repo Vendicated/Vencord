@@ -7,3 +7,24 @@
     margin-top: 8px;
     color: var(--text-danger);
 }
+
+.vc-discord-dev-banner-icons {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    height: 1em;
+    width: 1em;
+    margin-right: 0.25em;
+}
+
+.vc-discord-dev-banner-input {
+    width: 100%;
+    resize: none;
+    overflow: hidden;
+    background-color: var(--background-base-low);
+    color: var(--text-default);
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 12px;
+    outline: none;
+    margin-top: 12px;
+}
