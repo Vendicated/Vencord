@@ -74,10 +74,12 @@ function parseDate(dateStr: string, format: string, relativePrefix: string): str
     let day = 1, month = 0, year = 1970;
     let match: RegExpMatchArray | null = null;
     let isRelative = false;
+
     if (relativePrefix && dateStr.startsWith(relativePrefix)) {
         isRelative = true;
         dateStr = dateStr.slice(relativePrefix.length);
     }
+
     if (format === "DD/MM/YYYY") {
         match = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
         if (match) {
@@ -109,6 +111,7 @@ function parseDate(dateStr: string, format: string, relativePrefix: string): str
     } else {
         return dateStr;
     }
+
     if (!match) return dateStr;
     const date = new Date(year, month, day);
     const unix = Math.floor(date.getTime() / 1000);
@@ -122,15 +125,18 @@ function parseDateTime(dateTimeStr: string, relativePrefix: string): string {
         isRelative = true;
         dateTimeStr = dateTimeStr.slice(relativePrefix.length);
     }
+
     dateTimeStr = dateTimeStr.trim();
     const dateFirst = /(?<date>(\d{1,4}[/-]\d{1,2}[/-]\d{1,4}))\s+(?<time>(\d{1,2}(?::\d{2})?(?::\d{2})?\s*(?:AM|PM|am|pm)?))/;
     const timeFirst = /(?<time>(\d{1,2}(?::\d{2})?(?::\d{2})?\s*(?:AM|PM|am|pm)?))\s+(?<date>(\d{1,4}[/-]\d{1,2}[/-]\d{1,4}))/;
     const match = dateTimeStr.match(dateFirst) || dateTimeStr.match(timeFirst);
+
     if (!match || !match.groups) return dateTimeStr;
     const { date, time } = match.groups;
     let day = 1, month = 0, year = 1970;
     const dmy = date.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
     const ymd = date.match(/(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);
+
     if (dmy) {
         day = parseInt(dmy[1], 10);
         month = parseInt(dmy[2], 10) - 1;
@@ -142,6 +148,7 @@ function parseDateTime(dateTimeStr: string, relativePrefix: string): string {
     } else {
         return dateTimeStr;
     }
+
     let hour = 0, minute = 0, second = 0;
     const t = time.match(/(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(am|pm)?/i);
     if (t) {
@@ -154,6 +161,7 @@ function parseDateTime(dateTimeStr: string, relativePrefix: string): string {
             if (!isPM && hour === 12) hour = 0;
         }
     }
+
     const dateObj = new Date(year, month, day, hour, minute, second);
     const unix = Math.floor(dateObj.getTime() / 1000);
     const tsFormat = isRelative ? "R" : "f";
