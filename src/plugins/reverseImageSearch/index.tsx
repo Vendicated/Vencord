@@ -28,6 +28,7 @@ const Engines = {
     Yandex: "https://yandex.com/images/search?rpt=imageview&url=",
     SauceNAO: "https://saucenao.com/search.php?url=",
     IQDB: "https://iqdb.org/?url=",
+    Bing: "https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:",
     TinEye: "https://www.tineye.com/search?url=",
     ImgOps: "https://imgops.com/start?url="
 } as const;
