@@ -178,7 +178,7 @@ export default definePlugin({
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
-                    match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
+                    match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
                     replace: (m, channel) => `${m},$self.isHiddenChannel(${channel})?$self.HiddenChannelIcon():null`
                 },
                 // Make voice channels also appear as muted if they are muted
@@ -292,8 +292,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Change the role permission check to CONNECT if the channel is locked
-                    match: /ADMINISTRATOR\)\|\|(?<=context:(\i)}.+?)(?=(.+?)VIEW_CHANNEL)/,
-                    replace: (m, channel, permCheck) => `${m}!Vencord.Webpack.Common.PermissionStore.can(${CONNECT}n,${channel})?${permCheck}CONNECT):`
+                    match: /\i\.\i\(\i\.\i\.ADMINISTRATOR,\i\.\i\.VIEW_CHANNEL\)(?<=context:(\i)}.+?)/,
+                    replace: (m, channel) => `$self.fixPermCheck(${m},${channel})`
                 },
                 {
                     // Change the permissionOverwrite check to CONNECT if the channel is locked
@@ -302,8 +302,8 @@ export default definePlugin({
                 },
                 {
                     // Include the @everyone role in the allowed roles list for Hidden Channels
-                    match: /sortBy.{0,30}?\.filter\(\i=>(?<=channel:(\i).+?)/,
-                    replace: (m, channel) => `${m}$self.isHiddenChannel(${channel})?true:`
+                    match: /getSortedRoles.+?\.filter\(\i=>(?=!)/,
+                    replace: m => `${m}$self.isHiddenChannel(arguments[0].channel)?true:`
                 },
                 {
                     // If the @everyone role has the required permissions, make the array only contain it
@@ -491,6 +491,16 @@ export default definePlugin({
             }
         }
     ],
+
+
+    fixPermCheck(originalPerms: bigint, channel: Channel) {
+        if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
+            originalPerms &= ~PermissionsBits.VIEW_CHANNEL;
+            originalPerms |= PermissionsBits.CONNECT;
+        }
+
+        return originalPerms;
+    },
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
         try {
