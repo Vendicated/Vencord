@@ -35,6 +35,12 @@ const settings = definePluginSettings({
         description: "Receive audio pings for @everyone and @here in group DMs",
         default: false,
     },
+    ignoreUsers: {
+        type: OptionType.STRING,
+        description: "User IDs (comma + space) whose pings should NEVER be throttled",
+        restartNeeded: true,
+        default: ""
+    }
 });
 
 export default definePlugin({
@@ -54,6 +60,8 @@ export default definePlugin({
         }]
     }],
     isPrivateChannelRead(message: MessageJSON) {
+        const ignoreList = settings.store.ignoreUsers.split(", ").filter(Boolean)
+        if (ignoreList.includes(message.author.id)) return true;
         const channelType = ChannelStore.getChannel(message.channel_id)?.type;
         if (
             (channelType !== ChannelType.DM && channelType !== ChannelType.GROUP_DM) ||
