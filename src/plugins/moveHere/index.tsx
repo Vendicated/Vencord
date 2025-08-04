@@ -76,6 +76,5 @@ export default definePlugin({
     authors: [Devs.PanTruskawka],
     contextMenus: {
         "user-context": UserContext,
-        // "stream-context": streamContextPatch
     }
 });
