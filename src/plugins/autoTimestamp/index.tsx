@@ -187,7 +187,7 @@ const settings = definePluginSettings({
     parseWrapper: {
         description: "Message wrapper to use for time parsing(e.g. `10pm`)",
         type: OptionType.STRING,
-        default: "`",
+        default: "",
         placeholder: "empty for no wrapper",
     },
     dateFormat: {
