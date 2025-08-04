@@ -71,7 +71,7 @@ export default definePlugin({
                 },
                 // Remove NEW label from decor avatar decorations
                 {
-                    match: /(?<=\.\i\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).+?)/,
+                    match: /(?<=\.\i\.PURCHASE)(?=,)(?<=avatarDecoration:(\i).+?)/,
                     replace: "||$1.skuId===$self.SKU_ID"
                 }
             ]
@@ -99,7 +99,7 @@ export default definePlugin({
         },
         // Current user area, at bottom of channels/dm list
         {
-            find: "renderAvatarWithPopout(){",
+            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: [
                 // Use Decor avatar decoration hook
                 {
@@ -150,5 +150,5 @@ export default definePlugin({
         }
     },
 
-    DecorSection: ErrorBoundary.wrap(DecorSection)
+    DecorSection: ErrorBoundary.wrap(DecorSection, { noop: true })
 });

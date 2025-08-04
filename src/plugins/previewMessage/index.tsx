@@ -20,9 +20,9 @@ import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
+import { MessageAttachment } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
-import { MessageAttachment } from "discord-types/general";
 
 const UploadStore = findByPropsLazy("getUploads");
 
@@ -105,8 +105,8 @@ const PreviewButton: ChatBarButtonFactory = ({ isMainChat, isEmpty, type: { atta
             <svg
                 fill="currentColor"
                 fillRule="evenodd"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 style={{ scale: "1.096", translate: "0 -1px" }}
             >

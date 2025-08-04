@@ -25,7 +25,7 @@ import { settings } from "./settings";
 import { TranslateModal } from "./TranslateModal";
 import { cl } from "./utils";
 
-export function TranslateIcon({ height = 24, width = 24, className }: { height?: number; width?: number; className?: string; }) {
+export function TranslateIcon({ height = 20, width = 20, className }: { height?: number; width?: number; className?: string; }) {
     return (
         <svg
             viewBox="0 96 960 960"

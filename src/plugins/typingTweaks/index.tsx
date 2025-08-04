@@ -21,9 +21,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
-import { User } from "discord-types/general";
 import { PropsWithChildren } from "react";
+
+import managedStyle from "./style.css?managed";
 
 const settings = definePluginSettings({
     showAvatars: {
@@ -43,14 +45,17 @@ const settings = definePluginSettings({
     }
 });
 
-export function buildSeveralUsers({ a, b, count }: { a: string, b: string, count: number; }) {
-    return [
-        <strong key="0">{a}</strong>,
-        ", ",
-        <strong key="1">{b}</strong>,
-        `, and ${count} others are typing...`
-    ];
-}
+export const buildSeveralUsers = ErrorBoundary.wrap(({ a, b, count, guildId }: { a: User, b: User, count: number; guildId: string; }) => {
+    return (
+        <>
+            <TypingUser user={a} guildId={guildId} />
+            {", "}
+            <TypingUser user={b} guildId={guildId} />
+            {", "}
+            and {count} others are typing...
+        </>
+    );
+}, { noop: true });
 
 interface Props {
     user: User;
@@ -60,24 +65,19 @@ interface Props {
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
     return (
         <strong
+            className="vc-typing-user"
             role="button"
             onClick={() => {
                 openUserProfile(user.id);
             }}
             style={{
-                display: "grid",
-                gridAutoFlow: "column",
-                gap: "4px",
                 color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
-                cursor: "pointer"
             }}
         >
             {settings.store.showAvatars && (
-                <div style={{ marginTop: "4px" }}>
-                    <Avatar
-                        size="SIZE_16"
-                        src={user.getAvatarURL(guildId, 128)} />
-                </div>
+                <Avatar
+                    size="SIZE_16"
+                    src={user.getAvatarURL(guildId, 128)} />
             )}
             {GuildMemberStore.getNick(guildId!, user.id)
                 || (!guildId && RelationshipStore.getNickname(user.id))
@@ -94,35 +94,33 @@ export default definePlugin({
     authors: [Devs.zt],
     settings,
 
+    managedStyle,
+
     patches: [
         {
             find: "#{intl::THREE_USERS_TYPING}",
+            group: true,
             replacement: [
                 {
                     // Style the indicator and add function call to modify the children before rendering
-                    match: /(?<=children:\[(\i)\.length>0.{0,200}?"aria-atomic":!0,children:)\i(?<=guildId:(\i).+?)/,
-                    replace: "$self.renderTypingUsers({ users: $1, guildId: $2, children: $& }),style:$self.TYPING_TEXT_STYLE"
+                    match: /(?<=children:\[(\i)\.length>0.{0,300}?"aria-atomic":!0,children:)\i/,
+                    replace: "$self.renderTypingUsers({ users: $1, guildId: arguments[0]?.channel?.guild_id, children: $& })"
                 },
                 {
                     // Changes the indicator to keep the user object when creating the list of typing users
-                    match: /\.map\((\i)=>\i\.\i\.getName\(\i,\i\.id,\1\)\)/,
+                    match: /\.map\((\i)=>\i\.\i\.getName\(\i(?:\.guild_id)?,\i\.id,\1\)\)/,
                     replace: ""
                 },
                 {
                     // Adds the alternative formatting for several users typing
                     match: /(,{a:(\i),b:(\i),c:\i}\):\i\.length>3&&\(\i=)\i\.\i\.string\(\i\.\i#{intl::SEVERAL_USERS_TYPING}\)(?<=(\i)\.length.+?)/,
-                    replace: (_, rest, a, b, users) => `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`,
+                    replace: (_, rest, a, b, users) =>
+                        `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2, guildId: arguments[0]?.channel?.guild_id })`,
                     predicate: () => settings.store.alternativeFormatting
                 }
             ]
         }
     ],
-
-    TYPING_TEXT_STYLE: {
-        display: "grid",
-        gridAutoFlow: "column",
-        gridGap: "0.25em"
-    },
 
     buildSeveralUsers,
 

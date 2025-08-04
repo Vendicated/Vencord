@@ -5,7 +5,8 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { ErrorBoundary, Flex } from "@components/index";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
@@ -117,6 +118,7 @@ export default definePlugin({
         this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
     },
 
+    Noop,
     NoopLogger: () => NoopLogger,
 
     shouldLog(logger: string, level: keyof AllowLevels) {
@@ -148,15 +150,15 @@ export default definePlugin({
         {
             find: "is not a valid locale.",
             replacement: {
-                match: /\i\.error\(""\.concat\(\i," is not a valid locale."\)\);/,
-                replace: ""
+                match: /\i\.error(?=\(""\.concat\(\i," is not a valid locale."\)\))/,
+                replace: "$self.Noop"
             }
         },
         {
             find: '"AppCrashedFatalReport: getLastCrash not supported."',
             replacement: {
-                match: /console\.log\("AppCrashedFatalReport: getLastCrash not supported\."\);/,
-                replace: ""
+                match: /console\.log(?=\("AppCrashedFatalReport: getLastCrash not supported\."\))/,
+                replace: "$self.Noop"
             }
         },
         {
@@ -196,7 +198,7 @@ export default definePlugin({
         },
         // Patches Discord generic logger function
         {
-            find: "Σ:",
+            find: '"file-only"!==',
             predicate: () => settings.store.disableLoggers,
             replacement: {
                 match: /(?<=&&)(?=console)/,

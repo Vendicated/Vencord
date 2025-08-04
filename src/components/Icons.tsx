@@ -27,7 +27,6 @@ interface BaseIconProps extends IconProps {
 }
 
 type IconProps = JSX.IntrinsicElements["svg"];
-type ImageProps = JSX.IntrinsicElements["img"];
 
 function Icon({ height = 24, width = 24, className, children, viewBox, ...svgProps }: PropsWithChildren<BaseIconProps>) {
     return (
