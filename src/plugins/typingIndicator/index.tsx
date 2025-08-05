@@ -23,6 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import { TypingStore as ITypingStore } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
 
@@ -30,7 +31,7 @@ import { buildSeveralUsers } from "../typingTweaks";
 
 const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
 
-const TypingStore = findStoreLazy("TypingStore");
+const TypingStore: ITypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
 const enum IndicatorMode {
@@ -46,7 +47,7 @@ function getDisplayName(guildId: string, userId: string) {
 function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: string; }) {
     const typingUsers: Record<string, number> = useStateFromStores(
         [TypingStore],
-        () => ({ ...TypingStore.getTypingUsers(channelId) as Record<string, number> }),
+        () => ({ ...TypingStore.getTypingUsers(channelId) }),
         null,
         (old, current) => {
             const oldKeys = Object.keys(old);
@@ -90,7 +91,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
         }
         default: {
             tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: UserStore.getUser(a), b: UserStore.getUser(b), count: typingUsersArray.length - 2, guildId })
+                ? buildSeveralUsers({ users: [a, b].map(UserStore.getUser), count: typingUsersArray.length - 2, guildId })
                 : getIntlMessage("SEVERAL_USERS_TYPING");
             break;
         }
