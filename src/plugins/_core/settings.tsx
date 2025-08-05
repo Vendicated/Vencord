@@ -223,7 +223,7 @@ export default definePlugin({
         }
     },
 
-    getVersionInfo(surround = true) {
+    getVersionInfo(support = true) {
         let version = "";
 
         if (IS_DEV) version = "Dev";
@@ -232,7 +232,7 @@ export default definePlugin({
         else if (IS_EQUIBOP) version = `Equibop v${VesktopNative.app.getVersion()}`;
         else if (IS_STANDALONE) version = "Standalone";
 
-        return surround && version ? `(${version})` : version;
+        return support && version ? ` (${version})` : version;
     },
 
     getInfoRows() {
