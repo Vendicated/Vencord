@@ -112,11 +112,8 @@ export default definePlugin({
                 },
                 {
                     // Prevent Discord from trying to connect to hidden voice channels
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(?=(\|\||&&)\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
-                    replace: (_, condition, channel) => condition === "||"
-                        ? `||$self.isHiddenChannel(${channel})`
-                        : `&&!$self.isHiddenChannel(${channel})`
+                    match: /(?=\|\|\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
+                    replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
                     // Make Discord show inside the channel if clicking on a hidden or locked channel
@@ -129,11 +126,8 @@ export default definePlugin({
         {
             find: ".AUDIENCE),{isSubscriptionGated",
             replacement: {
-                // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                match: /(!)?(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
-                replace: (m, not, channel) => not
-                    ? `${m}&&!$self.isHiddenChannel(${channel})`
-                    : `${m}||$self.isHiddenChannel(${channel})`
+                match: /!(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
+                replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
             }
         },
         {
@@ -183,11 +177,8 @@ export default definePlugin({
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)(if\()?(\i)(?:\)return |\?)(\i\.MUTED)/,
-                    replace: (_, otherClasses, isIf, isMuted, mutedClassExpression) => isIf
-                        ? `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
-                        : `${isMuted}?${mutedClassExpression}:"",${otherClasses}${isMuted}?""`
+                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)if\((\i)(?:\)return |\?)(\i\.MUTED)/,
+                    replace: (_, otherClasses, isMuted, mutedClassExpression) => `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
                 }
             ]
         },
@@ -197,8 +188,7 @@ export default definePlugin({
                 {
                     // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
                     predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(?<=\.LOCKED(?:;if\(|:))(?<={channel:(\i).+?)/,
+                    match: /(?<=\.LOCKED;if\()(?<={channel:(\i).+?)/,
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
