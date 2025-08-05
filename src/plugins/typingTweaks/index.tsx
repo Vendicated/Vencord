@@ -24,7 +24,7 @@ import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
-import { Avatar, GuildMemberStore, React, RelationshipStore, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
+import { AuthenticationStore, Avatar, GuildMemberStore, React, RelationshipStore, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";
@@ -137,7 +137,7 @@ export default definePlugin({
                 throw new Error("No channel");
             }
             const typingUsers = useStateFromStores([TypingStore], () => TypingStore.getTypingUsers(channel.id) as Record<string, number>);
-            const myId = useStateFromStores([UserStore], () => UserStore.getCurrentUser()?.id);
+            const myId = useStateFromStores([AuthenticationStore], () => AuthenticationStore.getId());
             return Object.keys(typingUsers)
                 .filter(id => id && id !== myId && !RelationshipStore.isBlockedOrIgnored(id))
                 .map(id => UserStore.getUser(id))
