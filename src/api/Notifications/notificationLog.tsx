@@ -103,6 +103,7 @@ export function useLogs() {
 
 function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
     const [removing, setRemoving] = useState(false);
+
     return (
         <div className={cl("wrapper", { removing })}>
             <NotificationComponent
@@ -139,18 +140,15 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
             </div>
         );
 
-    const rowHeight = 120;
-
     return (
         <ListScrollerThin
             key={key}
-            style={{ maxHeight: rowHeight * 8 }}
             className={cl("container")}
             sections={[log.length]}
             sectionHeight={0}
-            rowHeight={rowHeight}
+            rowHeight={120}
             renderSection={() => null}
-            renderRow={item => <NotificationEntry data={log[item.row]} />}
+            renderRow={item => <NotificationEntry data={log[item.row]} key={log[item.row].id} />}
         />
     );
 }

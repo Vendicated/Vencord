@@ -89,6 +89,7 @@
 
 .vc-notification-log-container {
     padding: 1em;
+    max-height: 750px;
 }
 
 .vc-notification-log-wrapper {
