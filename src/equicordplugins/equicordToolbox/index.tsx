@@ -163,9 +163,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: "toolbar:function",
+            find: '"HeaderBar"});',
             replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
+                match: /(?<=function.{0,100}\()\i.Fragment,/,
                 replace: "$self.ToolboxFragmentWrapper,"
             }
         }

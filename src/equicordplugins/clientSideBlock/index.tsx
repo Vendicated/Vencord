@@ -169,7 +169,7 @@ export default definePlugin({
         {
             find: "#{intl::BLOCKED_MESSAGE_COUNT}}",
             replacement: {
-                match: /\i.memo\(function\(\i\){/,
+                match: /1:\i\.content.length;/,
                 replace: "$&return null;"
             },
             predicate: () => settings.store.hideBlockedMessages

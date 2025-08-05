@@ -26,7 +26,7 @@ export default definePlugin({
     patches: [
         {
             predicate: () => settings.store.IconLocation === "toolbar",
-            find: "toolbar:function",
+            find: '"HeaderBar"});',
             replacement: {
                 match: /(function \i\(\i\){)(.{1,500}toolbar.{1,500}mobileToolbar)/,
                 replace: "$1$self.addSBIconToToolBar(arguments[0]);$2"

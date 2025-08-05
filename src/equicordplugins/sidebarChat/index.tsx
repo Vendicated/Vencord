@@ -57,7 +57,7 @@ const ArrowsLeftRightIcon = () => {
 const WindowLaunchIcon = findComponentByCodeLazy("1-1h6a1 1 0 1 0 0-2H5Z");
 const XSmallIcon = findComponentByCodeLazy("1.4L12 13.42l5.3 5.3Z");
 const Chat = findComponentByCodeLazy("filterAfterTimestamp:", "chatInputType");
-const Resize = findComponentByCodeLazy("sidebarType:", "homeSidebarWidth");
+const Resize = findComponentByCodeLazy("sidebarType:", ".RESIZE_HANDLE_WIDTH");
 const ChannelHeader = findComponentByCodeLazy(".forumPostTitle]:", '"channel-".concat');
 const PopoutWindow = findComponentByCodeLazy("Missing guestWindow reference");
 const FullChannelView = findComponentByCodeLazy("showFollowButton:(null");
