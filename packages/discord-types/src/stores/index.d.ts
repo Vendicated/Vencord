@@ -1,4 +1,5 @@
 // please keep in alphabetical order
+export * from "./AuthenticationStore";
 export * from "./ChannelStore";
 export * from "./DraftStore";
 export * from "./EmojiStore";
