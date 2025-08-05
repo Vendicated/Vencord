@@ -309,7 +309,7 @@ export default definePlugin({
         {
             find: "activityInviteEducationActivity:",
             replacement: {
-                match: /(typingDots,children:)(\[.{0,200}?}\)\])/,
+                match: /(typingDots,ref:\i,children:)(\[.{0,300}?}\)\])/,
                 replace: "$1$self.shouldHideChatBarTypingIndicators()?[]:$2"
             }
         },
