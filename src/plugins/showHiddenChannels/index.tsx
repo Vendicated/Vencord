@@ -293,7 +293,7 @@ export default definePlugin({
                 {
                     // Include the @everyone role in the allowed roles list for Hidden Channels
                     match: /getSortedRoles.+?\.filter\(\i=>(?=!)/,
-                    replace: m => `${m}$self.isHiddenChannel(arguments[0].channel)?true:`
+                    replace: m => `${m}$self.isHiddenChannel(arguments[0]?.channel)?true:`
                 },
                 {
                     // If the @everyone role has the required permissions, make the array only contain it
