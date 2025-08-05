@@ -60,7 +60,7 @@ export default definePlugin({
         }]
     }],
     isPrivateChannelRead(message: MessageJSON) {
-        const ignoreList = settings.store.ignoreUsers.split(", ").filter(Boolean)
+        const ignoreList = settings.store.ignoreUsers.split(", ").filter(Boolean);
         if (ignoreList.includes(message.author.id)) return true;
         const channelType = ChannelStore.getChannel(message.channel_id)?.type;
         if (

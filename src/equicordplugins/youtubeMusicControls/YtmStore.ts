@@ -57,12 +57,12 @@ export type Repeat = "NONE" | "ONE" | "ALL";
 
 const nextRepeat = (repeat: Repeat) => {
     switch (repeat) {
-        case 'NONE':
-            return 'ALL' as const;
-        case 'ALL':
-            return 'ONE' as const;
-        case 'ONE':
-            return 'NONE' as const;
+        case "NONE":
+            return "ALL" as const;
+        case "ALL":
+            return "ONE" as const;
+        case "ONE":
+            return "NONE" as const;
     }
 };
 
@@ -175,7 +175,7 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
             if (message.song) {
                 store.song = message.song;
                 store.position = message.song.elapsedSeconds ?? 0;
-            };
+            }
             if (message.isPlaying != null) store.isPlaying = message.isPlaying;
             if (message.position && message.position !== store.position) store.position = message.position ?? 0;
             if (message.volume) store.volume = message.volume ?? 0;
@@ -271,7 +271,7 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
         }
 
         private req(method: "post" | "get" | "put", route: string, data: any = {}) {
-            const apiServerUrl = Settings.plugins.YouTubeMusicControls.apiServerUrl;
+            const { apiServerUrl } = Settings.plugins.YouTubeMusicControls;
             if (apiServerUrl === "") return;
             console.log(fetch(apiServerUrl + route, {
                 method,

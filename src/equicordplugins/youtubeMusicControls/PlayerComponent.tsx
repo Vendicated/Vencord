@@ -19,13 +19,13 @@
 import "./ytmStyles.css";
 
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
+import { SeekBar } from "@plugins/spotifyControls/SeekBar";
 import { debounce } from "@shared/debounce";
 import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenuApi, Flex, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { type PlayerState, type Repeat, YoutubeMusicStore } from "./YtmStore";
-import { SeekBar } from "@plugins/spotifyControls/SeekBar";
 
 const cl = (className: string) => `vc-ytm-${className}`;
 
@@ -167,7 +167,6 @@ function YtmSeekBar() {
 
     const [position, setPosition] = useState<number>(storePosition);
 
-    // eslint-disable-next-line consistent-return
     useEffect(() => {
         if (isPlaying && !isSettingPosition) {
             setPosition(YoutubeMusicStore.position);
