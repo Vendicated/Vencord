@@ -32,6 +32,7 @@
 
 .vc-notification-content {
     width: 100%;
+    overflow: hidden;
 }
 
 .vc-notification-header {
@@ -81,6 +82,11 @@
     width: 100%;
 }
 
+.vc-notification-log-modal {
+    max-width: 962px;
+    width: clamp(var(--modal-width-large, 800px), 962px, 85vw);
+}
+
 .vc-notification-log-empty {
     height: 218px;
     background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") center no-repeat;
@@ -90,14 +96,21 @@
 .vc-notification-log-container {
     padding: 1em;
     max-height: 750px;
+    width: 100%;
 }
 
 .vc-notification-log-wrapper {
     height: 120px;
+    width: 100%;
     padding-bottom: 16px;
     box-sizing: border-box;
     transition: 200ms ease;
     transition-property: height, opacity;
+
+    /* stylelint-disable-next-line no-descending-specificity */
+    .vc-notification-root {
+        height: 104px;
+    }
 }
 
 .vc-notification-log-removing {
@@ -106,9 +119,18 @@
     margin-bottom: 1em;
 }
 
-.vc-notification-log-body {
+.vc-notification-log-body-wrapper {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vc-notification-log-body {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1.2em;
 }
 
 .vc-notification-log-timestamp {

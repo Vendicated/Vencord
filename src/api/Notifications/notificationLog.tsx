@@ -23,7 +23,7 @@ import { Flex } from "@components/Flex";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
 import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Alerts, Button, Forms, ListScrollerThin, React, Text, Timestamp, useEffect, useMemo, useReducer, useState } from "@webpack/common";
+import { Alerts, Button, Forms, ListScrollerThin, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
@@ -117,19 +117,17 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
                     setTimeout(() => deleteNotification(data.timestamp), 200);
                 }}
                 richBody={
-                    <div className={cl("body")}>
-                        {data.body}
+                    <div className={cl("body-wrapper")}>
+                        <div className={cl("body")}>{data.body}</div>
                         <Timestamp timestamp={new Date(data.timestamp)} className={cl("timestamp")} />
                     </div>
                 }
             />
-        </div>
+        </div >
     );
 }
 
 export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
-    const key = useMemo(() => crypto.randomUUID(), [log]);
-
     if (!log.length && !pending)
         return (
             <div className={cl("container")}>
@@ -142,7 +140,6 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
 
     return (
         <ListScrollerThin
-            key={key}
             className={cl("container")}
             sections={[log.length]}
             sectionHeight={0}
@@ -157,13 +154,15 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     const [log, pending] = useLogs();
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.LARGE}>
+        <ModalRoot {...modalProps} size={ModalSize.LARGE} className={cl("modal")}>
             <ModalHeader>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Log</Text>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
-            <NotificationLog log={log} pending={pending} />
+            <div style={{ width: "100%" }}>
+                <NotificationLog log={log} pending={pending} />
+            </div>
 
             <ModalFooter>
                 <Flex>
