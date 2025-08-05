@@ -110,9 +110,14 @@ export default definePlugin({
                     replace: "$self.renderTypingUsers({ users: arguments[0]?.typingUserObjects, guildId: arguments[0]?.channel?.guild_id, children: $& })"
                 },
                 {
+                    match: /(?<=function \i\(\i\)\{)(?=[^}]+?\{channel:\i,isThreadCreation:\i=!1\})/,
+                    replace: "let typingUserObjects = $self.getTypingUsers(arguments[0]?.channel);"
+                },
+                {
                     // Get the typing users as user objects instead of names
                     match: /(?<=typingUsers:(\i\?\[\]:)\i,)/,
-                    replace: "typingUserObjects:$1$self.getTypingUsers(arguments[0]?.channel),"
+                    // explicitly check if undefined in the unlikely case the above patch is applied to a different function
+                    replace: "typingUserObjects: typeof typingUserObjects !== 'undefined' ? typingUserObjects : undefined,"
                 },
                 {
                     // Adds the alternative formatting for several users typing
