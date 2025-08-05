@@ -2,7 +2,7 @@
     height: 32px;
     width: 32px;
     border-radius: 50%;
-    border: 4px solid var(--background-tertiary);
+    border: 4px solid var(--background-base-lowest);
     box-sizing: border-box
 }
 

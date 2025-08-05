@@ -75,8 +75,8 @@ function createColorsOverrides(styles: string) {
     const darkThemeBaseLightness = visualRefreshColorsLightness["--neutral-69-hsl"];
 
     createOrUpdateStyle(OVERRIDES_STYLE_ID, [
-        `.visual-refresh.theme-light {\n ${generateNewColorVars(visualRefreshColorsLightness, lightThemeBaseLightness)} \n}`,
-        `.visual-refresh.theme-dark {\n ${generateNewColorVars(visualRefreshColorsLightness, darkThemeBaseLightness)} \n}`,
+        `.theme-light {\n ${generateNewColorVars(visualRefreshColorsLightness, lightThemeBaseLightness)} \n}`,
+        `.theme-dark {\n ${generateNewColorVars(visualRefreshColorsLightness, darkThemeBaseLightness)} \n}`,
     ].join("\n\n"));
 }
 

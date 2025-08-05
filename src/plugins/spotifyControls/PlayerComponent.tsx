@@ -17,7 +17,6 @@
 */
 
 import "./spotifyStyles.css";
-import "./visualRefreshSpotifyStyles.css"; // TODO: merge with spotifyStyles.css and remove when old UI is discontinued
 
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";

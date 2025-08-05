@@ -14,7 +14,7 @@
 
 .vc-settings-quickActions-pill {
     all: unset;
-    background: var(--background-base-lower);
+    background: var(--button-secondary-background);
     color: var(--header-secondary);
     display: flex;
     align-items: center;
@@ -26,7 +26,7 @@
 }
 
 .vc-settings-quickActions-pill:hover {
-    background: var(--background-base-lower-alt);
+    background: var(--button-secondary-background-hover);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
@@ -34,14 +34,6 @@
 .vc-settings-quickActions-pill:focus-visible {
     outline: 2px solid var(--focus-primary);
     outline-offset: 2px;
-}
-
-.visual-refresh .vc-settings-quickActions-pill {
-    background: var(--button-secondary-background);
-}
-
-.visual-refresh .vc-settings-quickActions-pill:hover {
-    background: var(--button-secondary-background-hover);
 }
 
 .vc-settings-quickActions-img {
