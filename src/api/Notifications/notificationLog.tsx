@@ -23,7 +23,7 @@ import { Flex } from "@components/Flex";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Alerts, Button, Forms, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { Alerts, Button, Forms, ListScrollerThin, React, Text, Timestamp, useEffect, useMemo, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
@@ -103,21 +103,8 @@ export function useLogs() {
 
 function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
     const [removing, setRemoving] = useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const div = ref.current!;
-
-        const setHeight = () => {
-            if (div.clientHeight === 0) return requestAnimationFrame(setHeight);
-            div.style.height = `${div.clientHeight}px`;
-        };
-
-        setHeight();
-    }, []);
-
     return (
-        <div className={cl("wrapper", { removing })} ref={ref}>
+        <div className={cl("wrapper", { removing })}>
             <NotificationComponent
                 {...data}
                 permanent={true}
@@ -140,6 +127,8 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
 }
 
 export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
+    const key = useMemo(() => crypto.randomUUID(), [log]);
+
     if (!log.length && !pending)
         return (
             <div className={cl("container")}>
@@ -151,9 +140,15 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
         );
 
     return (
-        <div className={cl("container")}>
-            {log.map(n => <NotificationEntry data={n} key={n.id} />)}
-        </div>
+        <ListScrollerThin
+            key={key}
+            className={cl("container")}
+            sections={[log.length]}
+            sectionHeight={0}
+            rowHeight={120}
+            renderSection={() => null}
+            renderRow={item => <NotificationEntry data={log[item.row]} />}
+        />
     );
 }
 

@@ -88,19 +88,16 @@
 }
 
 .vc-notification-log-container {
-    display: flex;
-    flex-direction: column;
     padding: 1em;
-    overflow: hidden;
+    max-height: 100%;
 }
 
 .vc-notification-log-wrapper {
+    height: 120px;
+    padding-bottom: 16px;
+    box-sizing: border-box;
     transition: 200ms ease;
     transition-property: height, opacity;
-}
-
-.vc-notification-log-wrapper:not(:last-child) {
-    margin-bottom: 1em;
 }
 
 .vc-notification-log-removing {
