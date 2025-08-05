@@ -361,19 +361,13 @@ export default definePlugin({
             replacement: [
                 {
                     // Create a variable for the channel prop
-                    match: /users:\i,maxUsers:\i.+?}=(\i).*?;/,
-                    replace: (m, props) => `${m}let{shcChannel}=${props};`
+                    match: /(function \i\(\i\)\{)([^}]+?hideOverflowCount)/,
+                    replace: "$1let {shcChannel}=arguments[0];$2"
                 },
                 {
                     // Make Discord always render the plus button if the component is used inside the HiddenChannelLockScreen
-                    match: /\i>0(?=&&.{0,30}Math.min)/,
+                    match: /\i>0(?=&&!\i&&!\i)/,
                     replace: m => `($self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)?true:${m})`
-                },
-                {
-                    // Prevent Discord from overwriting the last children with the plus button
-                    // if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
-                    match: /(?<=\i\.length-)1(?=\]=.{0,60}renderPopout)(?<=(\i)=\i\.length-\i.+?)/,
-                    replace: (_, amount) => `($self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&${amount}<=0?0:1)`
                 },
                 {
                     // Show only the plus text without overflowed children amount

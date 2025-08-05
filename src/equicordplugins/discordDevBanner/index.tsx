@@ -34,6 +34,7 @@ export function transform(state?: string): string | JSX.Element {
     const baseFormat = state ?? format;
 
     const replaced = baseFormat
+        .replace(/{discordName}/g, "Discord")
         .replace(/{buildChannel}/g, buildChannel)
         .replace(/{buildNumber}/g, BUILD_NUMBER)
         .replace(/{buildHash}/g, VERSION_HASH.slice(0, 9))

@@ -72,7 +72,7 @@ export default definePlugin({
 
         // Insert a Scan QR Code button in the Settings sheet
         {
-            find: "useGenerateUserSettingsSections",
+            find: ".isInputProfileCustom()",
             replacement: {
                 match: /\.CONNECTIONS/,
                 replace: "$&,\"SCAN_QR_CODE\""
