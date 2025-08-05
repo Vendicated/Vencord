@@ -126,8 +126,8 @@ export default definePlugin({
         {
             find: ".AUDIENCE),{isSubscriptionGated",
             replacement: {
-                match: /!(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
-                replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
+                match: /(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
+                replace: (m, channel) => `${m}||$self.isHiddenChannel(${channel})`
             }
         },
         {
