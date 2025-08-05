@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
+import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
@@ -111,7 +112,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=function \i\(\i\)\{)(?=[^}]+?\{channel:\i,isThreadCreation:\i=!1\})/,
-                    replace: "let typingUserObjects = $self.getTypingUsers(arguments[0]?.channel);"
+                    replace: "let typingUserObjects = $self.useTypingUsers(arguments[0]?.channel);"
                 },
                 {
                     // Get the typing users as user objects instead of names
@@ -130,7 +131,7 @@ export default definePlugin({
         }
     ],
 
-    getTypingUsers(channel: Channel | undefined): User[] {
+    useTypingUsers(channel: Channel | undefined): User[] {
         try {
             if (!channel) {
                 throw new Error("No channel");
@@ -138,10 +139,9 @@ export default definePlugin({
             const typingUsers = useStateFromStores([TypingStore], () => TypingStore.getTypingUsers(channel.id) as Record<string, number>);
             const myId = useStateFromStores([UserStore], () => UserStore.getCurrentUser()?.id);
             return Object.keys(typingUsers)
-                .filter(id => id && id !== myId)
-                .filter(id => !RelationshipStore.isBlockedOrIgnored(id))
+                .filter(id => id && id !== myId && !RelationshipStore.isBlockedOrIgnored(id))
                 .map(id => UserStore.getUser(id))
-                .filter(id => id != null);
+                .filter(isNonNullish);
         } catch (e) {
             new Logger("TypingTweaks").error("Failed to get typing users:", e);
             return [];
