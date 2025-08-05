@@ -92,7 +92,7 @@ export default definePlugin({
                 <span>{title}</span>
                 {(savedSession == null || savedSession.isNew) && (
                     <div
-                        className="vc-plugins-badge"
+                        className="vc-addon-badge"
                         style={{
                             backgroundColor: "#ED4245",
                             marginLeft: "2px"
@@ -123,6 +123,7 @@ export default definePlugin({
 
         return (
             <BlobMask
+                isFolder
                 style={{ cursor: "unset" }}
                 selected={false}
                 lowerBadge={
@@ -153,7 +154,7 @@ export default definePlugin({
                     className={SessionIconClasses.sessionIcon}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
-                    <DeviceIcon width={28} height={28} color="currentColor" />
+                    <DeviceIcon size="md" color="currentColor" />
                 </div>
             </BlobMask>
         );
