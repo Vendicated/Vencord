@@ -223,19 +223,22 @@ export default definePlugin({
         }
     },
 
-    get additionalInfo() {
-        if (IS_DEV) return " (Dev)";
-        if (IS_WEB) return " (Web)";
-        if (IS_VESKTOP) return ` (Vesktop v${VesktopNative.app.getVersion()})`;
-        if (IS_EQUIBOP) return ` (Equibop v${VesktopNative.app.getVersion()})`;
-        if (IS_STANDALONE) return " (Standalone)";
-        return "";
+    getVersionInfo(surround = true) {
+        let version = "";
+
+        if (IS_DEV) version = "Dev";
+        else if (IS_WEB) version = "Web";
+        else if (IS_VESKTOP) version = `Vesktop v${VesktopNative.app.getVersion()}`;
+        else if (IS_EQUIBOP) version = `Equibop v${VesktopNative.app.getVersion()}`;
+        else if (IS_STANDALONE) version = "Standalone";
+
+        return surround && version ? `(${version})` : version;
     },
 
     getInfoRows() {
-        const { electronVersion, chromiumVersion, additionalInfo } = this;
+        const { electronVersion, chromiumVersion, getVersionInfo } = this;
 
-        const rows = [`Equicord ${gitHash}${additionalInfo}`];
+        const rows = [`Equicord ${gitHash}${getVersionInfo()}`];
 
         if (electronVersion) rows.push(`Electron ${electronVersion}`);
         if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);

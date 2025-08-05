@@ -4,46 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
-import { OptionType } from "@utils/types";
 import { Forms, useState } from "@webpack/common";
 
-import { transform } from ".";
+import { chromiumVariables, discordVariables, electronVariables, equicordVariables, makeDevBanner, miscVariables, settings } from ".";
 
-export const settings = definePluginSettings({
-    format: {
-        component: ({ setValue }) => FormatSetting(setValue),
-        type: OptionType.COMPONENT,
-        default: "{buildChannel} {buildNumber} ({buildHash}) | {equicordName} {equicordVersion} ({equicordHash})",
-        restartNeeded: true
-    }
-});
 
-function FormatSetting(setValue) {
+export function FormatSetting(setValue) {
     const { format } = settings.store;
     const [state, setState] = useState(format ?? "{buildChannel} {buildNumber} ({buildHash}) | {equicordName} {equicordVersion} ({equicordHash})");
     const [error, setError] = useState<string | null>(null);
-
-    const placeholderInfo = [
-        "{discordIcon} - Discord icon",
-        "{discordName} - The word 'Discord'",
-        "{buildChannel} - Discord build channel (e.g. Stable)",
-        "{buildNumber} - Discord build number (e.g. 123456)",
-        "{buildHash} - Discord build hash (e.g. 123456789)",
-        "{equicordIcon} - Equicord icon",
-        "{equicordName} - The word 'Equicord'",
-        "{equicordVersion} - Version of Equicord (e.g. 1.0.0)",
-        "{equicordHash} - Equicord build hash (e.g. 123456789)",
-        "{equicordPlatform} - Platform Equicord is running on (e.g. Dev)",
-        "{electronIcon} - Electron icon",
-        "{electronName} - The word 'Electron'",
-        "{electronVersion} - Electron runtime version (e.g. 25.0.0)",
-        "{chromiumIcon} - Chromium icon",
-        "{chromiumName} - The word 'Chromium'",
-        "{chromiumVersion} - Chromium engine version (e.g. 125.0.0.0)",
-        "{devBannerIcon} - Dev banner icon",
-        "{newline} or \\n - Newline character"
-    ];
 
     function handleChange(newValue) {
         if (!newValue.trim()) {
@@ -55,14 +24,22 @@ function FormatSetting(setValue) {
         setValue(newValue);
     }
 
-    const preview = transform(state);
+    const preview = makeDevBanner(state);
 
     return (
         <Forms.FormSection>
             <Forms.FormText className={"vc-discord-dev-banner-text"}>
-                The format to transform the build number to. You can use the following placeholders:
+                The format for the Discord Dev Banner. You can use the following variables:
                 {"\n\n"}
-                {placeholderInfo.join("\n")}
+                {discordVariables.join("\n")}
+                {"\n\n"}
+                {equicordVariables.join("\n")}
+                {"\n\n"}
+                {electronVariables.join("\n")}
+                {"\n\n"}
+                {chromiumVariables.join("\n")}
+                {"\n\n"}
+                {miscVariables.join("\n")}
                 {"\n\n"}
             </Forms.FormText>
 
