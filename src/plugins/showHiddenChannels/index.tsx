@@ -282,8 +282,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Change the role permission check to CONNECT if the channel is locked
-                    match: /\i\.\i\(\i\.\i\.ADMINISTRATOR,\i\.\i\.VIEW_CHANNEL\)(?<=context:(\i)}.+?)/,
-                    replace: (m, channel) => `$self.fixPermCheck(${m},${channel})`
+                    match: /(forceRoles:.+?)(\i\.\i\(\i\.\i\.ADMINISTRATOR,\i\.\i\.VIEW_CHANNEL\))(?<=context:(\i)}.+?)/,
+                    replace: (_, rest, mergedPermissions, channel) => `${rest}$self.swapViewChannelWithConnectPermission(${mergedPermissions},${channel})`
                 },
                 {
                     // Change the permissionOverwrite check to CONNECT if the channel is locked
@@ -483,13 +483,13 @@ export default definePlugin({
     ],
 
 
-    fixPermCheck(originalPerms: bigint, channel: Channel) {
+    swapViewChannelWithConnectPermission(mergedPermissions: bigint, channel: Channel) {
         if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
-            originalPerms &= ~PermissionsBits.VIEW_CHANNEL;
-            originalPerms |= PermissionsBits.CONNECT;
+            mergedPermissions &= ~PermissionsBits.VIEW_CHANNEL;
+            mergedPermissions |= PermissionsBits.CONNECT;
         }
 
-        return originalPerms;
+        return mergedPermissions;
     },
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
