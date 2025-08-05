@@ -21,9 +21,9 @@ import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Alerts, Button, Forms, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { Alerts, Button, Forms, ListScrollerThin, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
@@ -103,21 +103,9 @@ export function useLogs() {
 
 function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
     const [removing, setRemoving] = useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const div = ref.current!;
-
-        const setHeight = () => {
-            if (div.clientHeight === 0) return requestAnimationFrame(setHeight);
-            div.style.height = `${div.clientHeight}px`;
-        };
-
-        setHeight();
-    }, []);
 
     return (
-        <div className={cl("wrapper", { removing })} ref={ref}>
+        <div className={cl("wrapper", { removing })}>
             <NotificationComponent
                 {...data}
                 permanent={true}
@@ -129,13 +117,13 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
                     setTimeout(() => deleteNotification(data.timestamp), 200);
                 }}
                 richBody={
-                    <div className={cl("body")}>
-                        {data.body}
+                    <div className={cl("body-wrapper")}>
+                        <div className={cl("body")}>{data.body}</div>
                         <Timestamp timestamp={new Date(data.timestamp)} className={cl("timestamp")} />
                     </div>
                 }
             />
-        </div>
+        </div >
     );
 }
 
@@ -151,9 +139,14 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
         );
 
     return (
-        <div className={cl("container")}>
-            {log.map(n => <NotificationEntry data={n} key={n.id} />)}
-        </div>
+        <ListScrollerThin
+            className={cl("container")}
+            sections={[log.length]}
+            sectionHeight={0}
+            rowHeight={120}
+            renderSection={() => null}
+            renderRow={item => <NotificationEntry data={log[item.row]} key={log[item.row].id} />}
+        />
     );
 }
 
@@ -161,15 +154,15 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     const [log, pending] = useLogs();
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.LARGE}>
+        <ModalRoot {...modalProps} size={ModalSize.LARGE} className={cl("modal")}>
             <ModalHeader>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Log</Text>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
-            <ModalContent>
+            <div style={{ width: "100%" }}>
                 <NotificationLog log={log} pending={pending} />
-            </ModalContent>
+            </div>
 
             <ModalFooter>
                 <Flex>
