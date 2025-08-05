@@ -49,12 +49,12 @@ const settings = definePluginSettings({
 export const buildSeveralUsers = ErrorBoundary.wrap(function buildSeveralUsers({ users, count, guildId }: { users: User[], count: number; guildId: string; }) {
     return (
         <>
-            {users.slice(0, count).map(user => {
-                return <React.Fragment key={user.id}>
+            {users.slice(0, count).map(user => (
+                <React.Fragment key={user.id}>
                     <TypingUser user={user} guildId={guildId} />
                     {", "}
-                </React.Fragment>;
-            })}
+                </React.Fragment>
+            ))}
             and {count} others are typing...
         </>
     );
