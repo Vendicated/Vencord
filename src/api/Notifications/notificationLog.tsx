@@ -21,7 +21,7 @@ import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Alerts, Button, Forms, ListScrollerThin, React, Text, Timestamp, useEffect, useMemo, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
@@ -139,13 +139,16 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
             </div>
         );
 
+    const rowHeight = 120;
+
     return (
         <ListScrollerThin
             key={key}
+            style={{ maxHeight: rowHeight * 8 }}
             className={cl("container")}
             sections={[log.length]}
             sectionHeight={0}
-            rowHeight={120}
+            rowHeight={rowHeight}
             renderSection={() => null}
             renderRow={item => <NotificationEntry data={log[item.row]} />}
         />
@@ -162,9 +165,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
-            <ModalContent>
-                <NotificationLog log={log} pending={pending} />
-            </ModalContent>
+            <NotificationLog log={log} pending={pending} />
 
             <ModalFooter>
                 <Flex>
