@@ -22,14 +22,11 @@ import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Channel, TypingStore as ITypingStore, User } from "@vencord/discord-types";
-import { findStoreLazy } from "@webpack";
-import { Avatar, GuildMemberStore, React, RelationshipStore, UserStore, useStateFromStores } from "@webpack/common";
+import { Channel, User } from "@vencord/discord-types";
+import { Avatar, GuildMemberStore, React, RelationshipStore, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 import managedStyle from "./style.css?managed";
-
-const TypingStore: ITypingStore = findStoreLazy("TypingStore");
 
 const settings = definePluginSettings({
     showAvatars: {
