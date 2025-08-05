@@ -9,7 +9,7 @@ import { proxyLazy } from "@utils/lazy";
 import { OptionType } from "@utils/types";
 import { FluxEmitter, FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, GuildStore, PrivateChannelsStore } from "@webpack/common";
+import { ChannelActionCreators, ChannelStore, FluxDispatcher, GuildStore } from "@webpack/common";
 
 interface IFlux {
     PersistedStore: typeof FluxStore;
@@ -73,7 +73,7 @@ export const SidebarStore = proxyLazy(() => {
                 return;
             }
 
-            channelId = await PrivateChannelsStore.getOrEnsurePrivateChannel(id);
+            channelId = await ChannelActionCreators.getOrEnsurePrivateChannel(id);
             store.emitChange();
         },
 
