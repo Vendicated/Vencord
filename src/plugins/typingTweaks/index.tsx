@@ -116,15 +116,15 @@ export default definePlugin({
                 },
                 {
                     // Get the typing users as user objects instead of names
-                    match: /(?<=typingUsers:(\i\?\[\]:)\i,)/,
+                    match: /typingUsers:(\i\?\[\]:)\i,/,
                     // explicitly check if undefined in the unlikely case the above patch is applied to a different function
-                    replace: "typingUserObjects: typeof typingUserObjects !== 'undefined' ? typingUserObjects : undefined,"
+                    replace: "$&typingUserObjects: typeof typingUserObjects !== 'undefined' ? typingUserObjects : undefined,"
                 },
                 {
                     // Adds the alternative formatting for several users typing
                     // users.length > 3 && (component = intl(key))
-                    match: /(?<=&&\(\i=)\i\.\i\.format\(\i\.\i#{intl::SEVERAL_USERS_TYPING_STRONG},\{\}\)/,
-                    replace: "$self.buildSeveralUsers({ users: arguments[0]?.typingUserObjects, count: arguments[0]?.typingUserObjects?.length - 2, guildId: arguments[0]?.channel?.guild_id })",
+                    match: /(&&\(\i=)\i\.\i\.format\(\i\.\i#{intl::SEVERAL_USERS_TYPING_STRONG},\{\}\)/,
+                    replace: "$1$self.buildSeveralUsers({ users: arguments[0]?.typingUserObjects, count: arguments[0]?.typingUserObjects?.length - 2, guildId: arguments[0]?.channel?.guild_id })",
                     predicate: () => settings.store.alternativeFormatting
                 }
             ]
@@ -136,7 +136,7 @@ export default definePlugin({
             if (!channel) {
                 throw new Error("No channel");
             }
-            const typingUsers = useStateFromStores([TypingStore], () => TypingStore.getTypingUsers(channel.id) as Record<string, number>);
+            const typingUsers = useStateFromStores([TypingStore], () => TypingStore.getTypingUsers(channel.id));
             const myId = useStateFromStores([AuthenticationStore], () => AuthenticationStore.getId());
             return Object.keys(typingUsers)
                 .filter(id => id && id !== myId && !RelationshipStore.isBlockedOrIgnored(id))
