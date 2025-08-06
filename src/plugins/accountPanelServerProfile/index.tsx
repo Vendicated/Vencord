@@ -9,9 +9,9 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { User } from "@vencord/discord-types";
+import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, useEffect, useRef } from "@webpack/common";
-import { User } from "discord-types/general";
 
 interface UserProfileProps {
     popoutProps: Record<string, any>;
@@ -19,8 +19,7 @@ interface UserProfileProps {
     originalRenderPopout: () => React.ReactNode;
 }
 
-const UserProfile = findComponentByCodeLazy("UserProfilePopoutWrapper: user cannot be undefined");
-const styles = findByPropsLazy("accountProfilePopoutWrapper");
+const UserProfile = findComponentByCodeLazy(".POPOUT,user");
 
 let openAlternatePopout = false;
 let accountPanelRef: React.RefObject<Record<PropertyKey, any> | null> = { current: null };
@@ -73,11 +72,11 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /let{speaking:\i/,
+                    match: /let{ref:\i,speaking:\i/,
                     replace: "$self.useAccountPanelRef();$&"
                 },
                 {
-                    match: /(\.AVATAR,children:.+?renderPopout:(\i)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
+                    match: /(\.AVATAR,children:.+?renderPopout:\((\i),\i\)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
                     replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}$self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},originalRenderPopout:()=>{${originalPopout}}})`
                 },
                 {
@@ -121,14 +120,18 @@ export default definePlugin({
         }
 
         const currentChannel = getCurrentChannel();
-        if (currentChannel?.getGuildId() == null) {
+        if (currentChannel?.getGuildId() == null || !UserProfile.$$vencordGetWrappedComponent()) {
             return originalRenderPopout();
         }
 
         return (
-            <div className={styles.accountProfilePopoutWrapper}>
-                <UserProfile {...popoutProps} userId={currentUser.id} guildId={currentChannel.getGuildId()} channelId={currentChannel.id} />
-            </div>
+            <UserProfile
+                {...popoutProps}
+                user={currentUser}
+                currentUser={currentUser}
+                guildId={currentChannel.getGuildId()}
+                channelId={currentChannel.id}
+            />
         );
     }, { noop: true })
 });

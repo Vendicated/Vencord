@@ -16,32 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PartialExcept } from "@utils/types";
 import { React } from "@webpack/common";
 
 import { shiki } from "../api/shiki";
 import { settings as pluginSettings, ShikiSettings } from "../settings";
 
-export function useShikiSettings<F extends keyof ShikiSettings>(settingKeys: F[], overrides?: Partial<ShikiSettings>) {
-    const settings: Partial<ShikiSettings> = pluginSettings.use(settingKeys);
+export function useShikiSettings<F extends keyof ShikiSettings>(settingKeys: F[]) {
+    const settings = pluginSettings.use([...settingKeys, "customTheme", "theme"]);
     const [isLoading, setLoading] = React.useState(false);
 
-    const withOverrides = { ...settings, ...overrides } as PartialExcept<ShikiSettings, F>;
-    const themeUrl = withOverrides.customTheme || withOverrides.theme;
+    const themeUrl = settings.customTheme || settings.theme;
 
-    if (overrides) {
-        const willChangeTheme = shiki.currentThemeUrl && themeUrl && themeUrl !== shiki.currentThemeUrl;
-        const noOverrides = Object.keys(overrides).length === 0;
+    const willChangeTheme = shiki.currentThemeUrl && themeUrl && themeUrl !== shiki.currentThemeUrl;
 
-        if (isLoading && (!willChangeTheme || noOverrides)) setLoading(false);
-        if (!isLoading && willChangeTheme) {
-            setLoading(true);
-            shiki.setTheme(themeUrl);
-        }
+    if (isLoading && (!willChangeTheme)) setLoading(false);
+    if (!isLoading && willChangeTheme) {
+        setLoading(true);
+        shiki.setTheme(themeUrl);
     }
 
     return {
-        ...withOverrides,
-        isThemeLoading: themeUrl !== shiki.currentThemeUrl,
+        ...settings,
+        isThemeLoading: isLoading,
     };
 }

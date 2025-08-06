@@ -9,8 +9,8 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { Message } from "@vencord/discord-types";
 import { DateUtils, Timestamp } from "@webpack/common";
-import type { Message } from "discord-types/general";
 
 const enum ReferencedMessageState {
     LOADED = 0,
