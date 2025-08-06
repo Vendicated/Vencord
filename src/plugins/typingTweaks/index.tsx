@@ -123,7 +123,7 @@ export default definePlugin({
                 {
                     // Adds the alternative formatting for several users typing
                     // users.length > 3 && (component = intl(key))
-                    match: /(?<=&&\(\i=)\i\.\i\.format\(\i\.\i#{intl::Q8lUnJ::raw},\{\}\)/,
+                    match: /(?<=&&\(\i=)\i\.\i\.format\(\i\.\i#{intl::SEVERAL_USERS_TYPING_STRONG},\{\}\)/,
                     replace: "$self.buildSeveralUsers({ users: arguments[0]?.typingUserObjects, count: arguments[0]?.typingUserObjects?.length - 2, guildId: arguments[0]?.channel?.guild_id })",
                     predicate: () => settings.store.alternativeFormatting
                 }
