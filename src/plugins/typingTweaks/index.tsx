@@ -117,7 +117,7 @@ export default definePlugin({
                 {
                     // Get the typing users as user objects instead of names
                     match: /typingUsers:(\i\?\[\]:)\i,/,
-                    // explicitly check if undefined in the unlikely case the above patch is applied to a different function
+                    // check by typeof so if the variable is not defined due to other patch failing, it won't throw a ReferenceError
                     replace: "$&typingUserObjects: typeof typingUserObjects !== 'undefined' ? typingUserObjects : undefined,"
                 },
                 {
@@ -136,8 +136,10 @@ export default definePlugin({
             if (!channel) {
                 throw new Error("No channel");
             }
+
             const typingUsers = useStateFromStores([TypingStore], () => TypingStore.getTypingUsers(channel.id));
             const myId = useStateFromStores([AuthenticationStore], () => AuthenticationStore.getId());
+
             return Object.keys(typingUsers)
                 .filter(id => id && id !== myId && !RelationshipStore.isBlockedOrIgnored(id))
                 .map(id => UserStore.getUser(id))
@@ -167,7 +169,7 @@ export default definePlugin({
                 return <TypingUser key={user.id} guildId={guildId} user={user} />;
             });
         } catch (e) {
-            console.error(e);
+            new Logger("TypingTweaks").error("Failed to render typing users:", e);
         }
 
         return children;
