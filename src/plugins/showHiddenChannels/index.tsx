@@ -126,11 +126,8 @@ export default definePlugin({
                 },
                 {
                     // Prevent Discord from trying to connect to hidden voice channels
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(?=(\|\||&&)\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
-                    replace: (_, condition, channel) => condition === "||"
-                        ? `||$self.isHiddenChannel(${channel})`
-                        : `&&!$self.isHiddenChannel(${channel})`
+                    match: /(?=\|\|\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
+                    replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
                     // Make Discord show inside the channel if clicking on a hidden or locked channel
@@ -143,11 +140,8 @@ export default definePlugin({
         {
             find: ".AUDIENCE),{isSubscriptionGated",
             replacement: {
-                // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                match: /(!)?(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
-                replace: (m, not, channel) => not
-                    ? `${m}&&!$self.isHiddenChannel(${channel})`
-                    : `${m}||$self.isHiddenChannel(${channel})`
+                match: /(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
+                replace: (m, channel) => `${m}||$self.isHiddenChannel(${channel})`
             }
         },
         {
@@ -210,18 +204,8 @@ export default definePlugin({
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)(if\()?(\i)(?:\)return |\?)(\i\.MUTED)/,
-                    replace: (_, otherClasses, isIf, isMuted, mutedClassExpression) => isIf
-                        ? `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
-                        : `${isMuted}?${mutedClassExpression}:"",${otherClasses}${isMuted}?""`
-                },
-                {
-                    // Make muted channels also appear as unread if hide unreads is false and the channel is hidden
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    predicate: () => settings.store.channelStyle === ChannelStyle.MutedUnread || settings.store.channelStyle === ChannelStyle.Unread,
-                    match: /(?<=\.LOCKED(?:;if\(|:))(?<={channel:(\i).+?)/,
-                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
+                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)if\((\i)(?:\)return |\?)(\i\.MUTED)/,
+                    replace: (_, otherClasses, isMuted, mutedClassExpression) => `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
                 }
             ]
         },
@@ -230,8 +214,7 @@ export default definePlugin({
             predicate: () => settings.store.channelStyle !== ChannelStyle.Unread && settings.store.channelStyle !== ChannelStyle.MutedUnread,
             replacement: [
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(?<=\.LOCKED(?:;if\(|:))(?<={channel:(\i).+?)/,
+                    match: /(?<=\.LOCKED;if\()(?<={channel:(\i).+?)/,
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
@@ -324,8 +307,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Change the role permission check to CONNECT if the channel is locked
-                    match: /\i\.\i\(\i\.\i\.ADMINISTRATOR,\i\.\i\.VIEW_CHANNEL\)(?<=context:(\i)}.+?)/,
-                    replace: (m, channel) => `$self.fixPermCheck(${m},${channel})`
+                    match: /(forceRoles:.+?)(\i\.\i\(\i\.\i\.ADMINISTRATOR,\i\.\i\.VIEW_CHANNEL\))(?<=context:(\i)}.+?)/,
+                    replace: (_, rest, mergedPermissions, channel) => `${rest}$self.swapViewChannelWithConnectPermission(${mergedPermissions},${channel})`
                 },
                 {
                     // Change the permissionOverwrite check to CONNECT if the channel is locked
@@ -335,7 +318,7 @@ export default definePlugin({
                 {
                     // Include the @everyone role in the allowed roles list for Hidden Channels
                     match: /getSortedRoles.+?\.filter\(\i=>(?=!)/,
-                    replace: m => `${m}$self.isHiddenChannel(arguments[0].channel)?true:`
+                    replace: m => `${m}$self.isHiddenChannel(arguments[0]?.channel)?true:`
                 },
                 {
                     // If the @everyone role has the required permissions, make the array only contain it
@@ -519,13 +502,13 @@ export default definePlugin({
     ],
 
 
-    fixPermCheck(originalPerms: bigint, channel: Channel) {
+    swapViewChannelWithConnectPermission(mergedPermissions: bigint, channel: Channel) {
         if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
-            originalPerms &= ~PermissionsBits.VIEW_CHANNEL;
-            originalPerms |= PermissionsBits.CONNECT;
+            mergedPermissions &= ~PermissionsBits.VIEW_CHANNEL;
+            mergedPermissions |= PermissionsBits.CONNECT;
         }
 
-        return originalPerms;
+        return mergedPermissions;
     },
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {

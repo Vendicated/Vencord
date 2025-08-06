@@ -20,4 +20,8 @@
         }
     ],
     "equicord-companion.showSidebar": true,
+    "css.format.spaceAroundSelectorSeparator": true,
+    "[css]": {
+        "editor.defaultFormatter": "vscode.css-language-features"
+    }
 }
