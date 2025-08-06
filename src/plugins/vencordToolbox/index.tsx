@@ -140,9 +140,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: '["isAuthenticated"]',
+            find: "=!0,toolbar:",
             replacement: {
-                match: /(?<=function (\i).{0,100}\()\i.Fragment,(?=.+toolbar:\1\(\))/,
+                match: /(?<=function (\i).{0,100}\()\i.Fragment,(?=.+?toolbar:\1\(\))/,
                 replace: "$self.ToolboxFragmentWrapper,"
             }
         }

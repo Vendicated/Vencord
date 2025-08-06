@@ -28,7 +28,7 @@ export default definePlugin({
         {
             find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
             replacement: {
-                // shouldBeExpanded = isShift && other conditions...
+                // isExpanded = isShiftPressed && other conditions...
                 match: /(?<=(\i)=)\i(?=&&.+isExpanded:\1)/,
                 replace: "true"
             }
