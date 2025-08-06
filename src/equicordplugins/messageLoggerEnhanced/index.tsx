@@ -262,7 +262,7 @@ export default definePlugin({
             }
         },
         {
-            find: '"HeaderBar"});',
+            find: "=!0,toolbar:",
             predicate: () => settings.store.ShowLogsButton,
             replacement: {
                 match: /(function \i\(\i\){)(.{1,200}toolbar.{1,100}mobileToolbar)/,

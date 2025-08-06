@@ -20,13 +20,13 @@ import { getListeners } from "./utils";
 
 export default definePlugin({
     name: "SoundBoardLogger",
-    authors: [Devs.Moxxie, EquicordDevs.Fres, Devs.echo, EquicordDevs.thororen],
+    authors: [Devs.Moxxie, EquicordDevs.Fres, Devs.amy, EquicordDevs.thororen],
     description: "Logs all soundboards that are played in a voice chat and allows you to download them",
     dependencies: ["ChatInputButtonAPI"],
     patches: [
         {
             predicate: () => settings.store.IconLocation === "toolbar",
-            find: '"HeaderBar"});',
+            find: "=!0,toolbar:",
             replacement: {
                 match: /(function \i\(\i\){)(.{1,500}toolbar.{1,500}mobileToolbar)/,
                 replace: "$1$self.addSBIconToToolBar(arguments[0]);$2"

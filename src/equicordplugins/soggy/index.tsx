@@ -136,7 +136,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: '"HeaderBar"});',
+            find: "=!0,toolbar:",
             replacement: {
                 match: /(function \i\(\i\){)(.{1,200}toolbar.{1,450}mobileToolbar)/,
                 replace: "$1$self.addIconToToolBar(arguments[0]);$2"

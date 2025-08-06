@@ -17,7 +17,7 @@ async function getcuteneko(): Promise<string> {
 
 export default definePlugin({
     name: "CuteNekos",
-    authors: [Devs.echo],
+    authors: [Devs.amy],
     description: "Send Nekos to others",
     commands: [{
         name: "nekos",

@@ -151,7 +151,7 @@ function uwuifyArray(arr) {
 export default definePlugin({
     name: "UwUifier",
     description: "Make everything uwu",
-    authors: [Devs.echo],
+    authors: [Devs.amy],
     dependencies: ["MessageEventsAPI"],
     settings,
 

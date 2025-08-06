@@ -277,7 +277,7 @@ export default definePlugin({
             predicate: () => !settings.store.useNavBar
         },
         {
-            find: '"HeaderBar"});',
+            find: "=!0,toolbar:",
             replacement: {
                 match: /(function \i\(\i\){)(.{1,200}toolbar.{1,200}mobileToolbar)/,
                 replace: "$1$self.toolbarAction(arguments[0]);$2"
