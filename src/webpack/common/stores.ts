@@ -50,12 +50,16 @@ export let EmojiStore: t.EmojiStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+export let StreamerModeStore: t.StreamerModeStore;
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
  */
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
+waitForStore("StreamerModeStore", m => StreamerModeStore = m);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
 waitForStore("UserProfileStore", m => UserProfileStore = m);
@@ -78,3 +82,4 @@ waitForStore("ThemeStore", m => {
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
     Vencord.QuickCss.initQuickCssThemeStore();
 });
+
