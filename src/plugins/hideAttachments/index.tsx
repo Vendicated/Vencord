@@ -57,11 +57,15 @@ export default definePlugin({
 
     renderMessagePopoverButton(msg) {
         // @ts-expect-error - discord-types lags behind discord.
-        const hasAttachmentsInShapshots = msg.messageSnapshots.some(
+        const hasAttachmentsInSnapshots = msg.messageSnapshots.some(
             (snapshot: MessageSnapshot) => snapshot?.message.attachments.length
         );
+        
+        const hasEmbedsInSnapshots = msg.messageSnapshots.some(
+            (snapshot: MessageSnapshot) => snapshot?.message.embeds.length
+        );
 
-        if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInShapshots) return null;
+        if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInSnapshots && !hasEmbedsInSnapshots) return null;
 
         const isHidden = hiddenMessages.has(msg.id);
 
