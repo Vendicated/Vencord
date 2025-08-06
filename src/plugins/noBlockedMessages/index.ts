@@ -127,7 +127,7 @@ export default definePlugin({
 
             const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
 
-            return replyMessage ? this.isBlocked(replyMessage) : false;
+            return replyMessage ? this.shouldIgnoreMessage(replyMessage) : false;
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked:", e);
         }
