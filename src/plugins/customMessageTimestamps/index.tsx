@@ -282,17 +282,17 @@ export default definePlugin({
                 {
                     // Aria label on timestamps
                     // lookbehind grabs the message ID so we can differentiate between real and demo messages
-                    match: /\i.useMemo\(\(\)=>\(0,\i\.\i\)\((\i)\),\[\i]\),(?<=isInline:\i=!0,id:(\i),.*?)/,
+                    match: /\i.useMemo\(\(\)=>\(0,\i\.\i\)\((\i)\),\[\i]\),(?<=isInline:\i=!0,id:(\i),.{0,200})/,
                     replace: "$self.renderTimestamp($1,'ariaLabel',$2),"
                 },
                 {
                     // Timestamps on messages
-                    match: /\i\.useMemo\(\(\)=>null!=\i\?\(0,\i\.\i\)\(\i,\i\):(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\),\[\i,\i,\i]\)(?<=isInline:\i=!0,id:(\i),.*?)/,
+                    match: /\i\.useMemo\(\(\)=>null!=\i\?\(0,\i\.\i\)\(\i,\i\):(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\),\[\i,\i,\i]\)(?<=isInline:\i=!0,id:(\i),.{0,200})/,
                     replace: "$self.renderTimestamp($2,$1?'compact':'cozy', $3)",
                 },
                 {
                     // Tooltips when hovering over message timestamps
-                    match: /(?<=text:)\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)(?=,)(?<=isInline:\i=!0,id:(\i),.*?)/,
+                    match: /(?<=text:)\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)(?=,)(?<=isInline:\i=!0,id:(\i),.{0,500})/,
                     replace: "$self.renderTimestamp($1,'tooltip', $2)",
                 },
             ]
