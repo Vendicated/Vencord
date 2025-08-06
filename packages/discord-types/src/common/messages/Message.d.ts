@@ -83,6 +83,9 @@ export class Message extends DiscordRecord {
         channel_id: string;
         message_id: string;
     } | undefined;
+    messageSnapshots: {
+        message: Message;
+    }[];
     nick: unknown; // probably a string
     nonce: string | undefined;
     pinned: boolean;
