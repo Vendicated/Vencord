@@ -31,8 +31,6 @@ export let MessageStore: Omit<t.MessageStore, "getMessages"> & GenericStore & {
     getMessages(chanId: string): any;
 };
 
-// TODO: The correct name for this is ChannelActionCreators and it has already been exported again from utils. Remove this export once enough time has passed
-export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
 export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;

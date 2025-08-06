@@ -18,7 +18,6 @@
 
 import { React, TextInput } from "@webpack/common";
 
-// TODO: Refactor settings to use this as well
 interface TextInputProps {
     /**
      * WARNING: Changing this between renders will have no effect!
