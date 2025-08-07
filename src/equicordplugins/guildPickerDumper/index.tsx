@@ -9,7 +9,7 @@ import { migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Guild } from "@vencord/discord-types";
-import { EmojiStore, Menu, StickerStore } from "@webpack/common";
+import { EmojiStore, Menu, StickersStore } from "@webpack/common";
 import { zipSync } from "fflate";
 
 const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild; }) => {
@@ -30,7 +30,7 @@ async function zipGuildAssets(guild: Guild, type: "emojis" | "stickers") {
     const isEmojis = type === "emojis";
     const items = isEmojis
         ? EmojiStore.getGuilds()[guild.id]?.emojis
-        : StickerStore.getStickersByGuildId(guild.id);
+        : StickersStore.getStickersByGuildId(guild.id);
 
     if (!items) {
         return console.log("Server not found!");
