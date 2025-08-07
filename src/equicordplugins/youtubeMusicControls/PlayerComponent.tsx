@@ -157,7 +157,7 @@ const seek = debounce((v: number) => {
 });
 
 function YtmSeekBar() {
-    const { songDuration, videoId } = YoutubeMusicStore.song ?? {};
+    const { songDuration, videoId } = YoutubeMusicStore.song ?? { songDuration: 0, videoId: 0 };
 
     const [storePosition, isPlaying] = useStateFromStores(
         [YoutubeMusicStore],
