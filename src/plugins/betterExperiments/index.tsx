@@ -112,7 +112,7 @@ export default definePlugin({
 
                     return <div key={bucket} className="vc-guild-experiment-bucket">
                         <div className="vc-guild-experiment-bucket-name" style={{
-                            color: "var(--text-normal)",
+                            color: "var(--text-primary)",
                             padding: "4px 0px 4px 0px",
                             fontSize: "14px",
                         }}>{description}</div>
