@@ -50,18 +50,6 @@ export default definePlugin({
             find: ".decorationGridItem,",
             replacement: [
                 {
-                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
-                    match: /(?<==)\i=>{let{children.{20,200}decorationGridItem/,
-                    replace: "$self.DecorationGridItem=$&",
-                    noWarn: true
-                },
-                {
-                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
-                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
-                    replace: "$self.DecorationGridDecoration=$&",
-                    noWarn: true
-                },
-                {
                     match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
                     replace: "$self.DecorationGridItem=$&",
                 },

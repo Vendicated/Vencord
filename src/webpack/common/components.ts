@@ -70,13 +70,22 @@ export const ColorPicker = waitForComponent<t.ColorPicker>("ColorPicker", filter
 export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.componentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));
 
 export let createScroller: (scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin;
+export let createListScroller: (scrollBarClassName: string, fadeClassName: string, someOtherClassIdkMan: string, resizeObserverClass: typeof ResizeObserver) => t.ListScrollerThin;
 export let scrollerClasses: Record<string, string>;
+export let listScrollerClasses: Record<string, string>;
+
 waitFor(filters.byCode('="ltr",orientation:', "customTheme:", "forwardRef"), m => createScroller = m);
+waitFor(filters.byCode("getScrollerNode:", "resizeObserver:", "sectionHeight:"), m => createListScroller = m);
 waitFor(["thin", "auto", "customTheme"], m => scrollerClasses = m);
+waitFor(m => m.thin && m.auto && !m.customTheme, m => listScrollerClasses = m);
 
 export const ScrollerNone = LazyComponent(() => createScroller(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme));
 export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme));
 export const ScrollerAuto = LazyComponent(() => createScroller(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme));
+
+export const ListScrollerNone = LazyComponent(() => createListScroller(listScrollerClasses.none, listScrollerClasses.fade, "", ResizeObserver));
+export const ListScrollerThin = LazyComponent(() => createListScroller(listScrollerClasses.thin, listScrollerClasses.fade, "", ResizeObserver));
+export const ListScrollerAuto = LazyComponent(() => createListScroller(listScrollerClasses.auto, listScrollerClasses.fade, "", ResizeObserver));
 
 const { FocusLock_ } = mapMangledModuleLazy('document.getElementById("app-mount"))', {
     FocusLock_: filters.componentByCode(".containerRef")
