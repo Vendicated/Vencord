@@ -10,15 +10,16 @@ interface BaseSticker {
     sort_value?: number;
     /** a comma separated string */
     tags: string;
-    type: StickerType;
 }
 
 export interface PackSticker extends BaseSticker {
     pack_id: string;
+    type: StickerType.STANDARD;
 }
 
 export interface GuildSticker extends BaseSticker {
     guild_id: string;
+    type: StickerType.GUILD;
 }
 
 export type Sticker = PackSticker | GuildSticker;
