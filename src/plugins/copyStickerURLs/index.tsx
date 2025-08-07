@@ -29,9 +29,9 @@ type PartialSticker = Pick<Sticker, "id" | "format_type">;
 
 function getUrl(data: PartialSticker): string {
     if (data.format_type === 4)
-        return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.gif?size=4096&lossless=true`;
+        return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.gif?size=512&lossless=true`;
 
-    return `https://${window.GLOBAL_ENV.CDN_HOST}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
+    return `https://${window.GLOBAL_ENV.CDN_HOST}/stickers/${data.id}.${StickerExt[data.format_type]}?size=512&lossless=true`;
 }
 
 function buildMenuItem(sticker: PartialSticker) {
