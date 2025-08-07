@@ -25,7 +25,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Guild } from "@vencord/discord-types";
+import { Guild, GuildSticker } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
@@ -34,15 +34,8 @@ const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
 
-interface Sticker {
+interface Sticker extends GuildSticker {
     t: "Sticker";
-    description: string;
-    format_type: number;
-    guild_id: string;
-    id: string;
-    name: string;
-    tags: string;
-    type: number;
 }
 
 interface Emoji {
