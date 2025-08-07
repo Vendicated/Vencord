@@ -11,6 +11,7 @@ export * from "./MessageStore";
 export * from "./RelationshipStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
+export * from "./StickersStore";
 export * from "./ThemeStore";
 export * from "./TypingStore";
 export * from "./UserProfileStore";
