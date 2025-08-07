@@ -1,64 +1,82 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 import { Message } from "@vencord/discord-types";
 import { Parser, useEffect, useState } from "@webpack/common";
 
+import { settings } from "./settings";
 import { TranslateIcon } from "./TranslateIcon";
-import { cl, TranslationValue } from "./utils";
+import { cl, TranslationValue, translate } from "./utils";
 
-const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
+const TranslationSetters = new Map<string, (v: TranslationValue | undefined) => void>();
 
 export function handleTranslate(messageId: string, data: TranslationValue) {
-    TranslationSetters.get(messageId)!(data);
+    const setter = TranslationSetters.get(messageId);
+    if (setter) setter(data);
 }
 
-function Dismiss({ onDismiss }: { onDismiss: () => void; }) {
+function Dismiss({ onDismiss }: { onDismiss: () => void }) {
     return (
         <button
             onClick={onDismiss}
             className={cl("dismiss")}
+            style={{
+                color: "#3B82F6", // blue color
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                fontWeight: "bold",
+                marginLeft: "8px",
+            }}
         >
             Dismiss
         </button>
     );
 }
 
-export function TranslationAccessory({ message }: { message: Message; }) {
-    const [translation, setTranslation] = useState<TranslationValue>();
+export function TranslationAccessory({ message }: { message: Message }) {
+    const [translation, setTranslation] = useState<TranslationValue | undefined>();
+    const autoChannelId = settings.store.autoTranslateChannelId;
+    const isAutoChannel = message.channel_id === autoChannelId;
 
+    // Register the setter for manual translate button
     useEffect(() => {
-        // Ignore MessageLinkEmbeds messages
         if ((message as any).vencordEmbeddedBy) return;
 
         TranslationSetters.set(message.id, setTranslation);
-
         return () => void TranslationSetters.delete(message.id);
-    }, []);
+    }, [message.id]);
+
+    // Auto-translate for configured channel
+    useEffect(() => {
+        if (!message.content || !autoChannelId) return;
+        if (!isAutoChannel || translation) return;
+
+        translate("received", message.content)
+            .then(res => setTranslation(res))
+            .catch(console.error);
+    }, [message.content, isAutoChannel, translation]);
 
     if (!translation) return null;
 
     return (
-        <span className={cl("accessory")}>
+        <span
+            className={cl("accessory")}
+            style={{
+                color: "#999999",
+                fontStyle: "italic",
+                marginTop: "4px",
+                display: "inline-flex",
+                alignItems: "center"
+            }}
+        >
             <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />
-            {Parser.parse(translation.text)}
-            <br />
-            (translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
+            <span style={{ marginLeft: "4px" }}>{Parser.parse(translation.text)}</span>
+            <span style={{ marginLeft: "6px", whiteSpace: "nowrap" }}>
+                (translated from {translation.sourceLanguage}
+                {!isAutoChannel && (
+                    <Dismiss onDismiss={() => setTranslation(undefined)} />
+                )}
+                )
+            </span>
         </span>
     );
 }
