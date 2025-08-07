@@ -136,7 +136,7 @@ const ReplacementRow = (props: RowProps) => {
                 <Switch value={isRegex}
                         onChange={setIsRegex}
                         className="vc-embed-replace-row-switch">
-                    Is Regex
+                    Regex
                 </Switch>
             </div>
         </div>

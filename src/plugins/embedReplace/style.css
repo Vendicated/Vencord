@@ -7,16 +7,19 @@
     width: fit-content;
     height: fit-content;
 }
+
 .vc-embed-replace-save:hover{
-    background-color: rgba(112,188,85,0.6);
+    background-color: rgb(112 188 85 / 60%);
     cursor: pointer;
 }
+
 .vc-embed-replace-duplicate:hover {
-    background-color: rgba(112,188,85,0.6);
+    background-color: rgb(112 188 85 / 60%);
     cursor: pointer;
 }
+
 .vc-embed-replace-delete:hover {
-    background-color: rgba(255, 0, 0, 0.6);
+    background-color: rgb(255 0 0 / 60%);
     cursor: pointer;
 }
 
@@ -25,6 +28,7 @@
     display: flex;
     gap: 8px;
 }
+
 .vc-embed-replace-row {
     display: flex;
     flex-direction: column;
@@ -35,6 +39,7 @@
     border-radius: 4px;
     width: 100%;
 }
+
 .vc-embed-replace-row-line {
     display: flex;
     flex-direction: row;
