@@ -22,6 +22,7 @@ import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Message, Sticker } from "@vencord/discord-types";
 import { Menu, React, StickersStore } from "@webpack/common";
+import ExpressionClonerPlugin from "plugins/expressionCloner";
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
@@ -34,23 +35,26 @@ function getUrl(data: PartialSticker): string {
     return `https://${window.GLOBAL_ENV.CDN_HOST}/stickers/${data.id}.${StickerExt[data.format_type]}?size=512&lossless=true`;
 }
 
-function buildMenuItem(sticker: PartialSticker) {
+function buildMenuItem(sticker: PartialSticker, addBottomSeparator: boolean) {
     return (
-        <Menu.MenuGroup>
-            <Menu.MenuItem
-                id="vc-copy-sticker-url"
-                key="vc-copy-sticker-url"
-                label="Copy URL"
-                action={() => copyWithToast(getUrl(sticker), "Link copied!")}
-            />
+        <>
+            <Menu.MenuGroup>
+                <Menu.MenuItem
+                    id="vc-copy-sticker-link"
+                    key="vc-copy-sticker-link"
+                    label="Copy Link"
+                    action={() => copyWithToast(getUrl(sticker), "Link copied!")}
+                />
 
-            <Menu.MenuItem
-                id="vc-open-sticker-url"
-                key="vc-open-sticker-url"
-                label="Open URL"
-                action={() => VencordNative.native.openExternal(getUrl(sticker))}
-            />
-        </Menu.MenuGroup>
+                <Menu.MenuItem
+                    id="vc-open-sticker-link"
+                    key="vc-open-sticker-link"
+                    label="Open Link"
+                    action={() => VencordNative.native.openExternal(getUrl(sticker))}
+                />
+            </Menu.MenuGroup>
+            {addBottomSeparator && <Menu.MenuSeparator />}
+        </>
     );
 }
 
@@ -63,9 +67,9 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (
     const sticker = message.stickerItems.find(s => s.id === favoriteableId);
     if (!sticker?.format_type) return;
 
-    const container = findGroupChildrenByChildId("devmode-copy-id", children, true) || children;
+    const idx = children.findIndex(c => Array.isArray(c) && findGroupChildrenByChildId("vc-copy-sticker-url", c) != null);
 
-    container.push(buildMenuItem(sticker));
+    children.splice(idx, 0, buildMenuItem(sticker, idx !== -1));
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
@@ -75,12 +79,12 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 
     const sticker = StickersStore.getStickerById(id);
     if (sticker) {
-        children.push(buildMenuItem(sticker));
+        children.push(buildMenuItem(sticker, Vencord.Plugins.isPluginEnabled(ExpressionClonerPlugin.name)));
     }
 };
 
 export default definePlugin({
-    name: "CopyStickerURLs",
+    name: "CopyStickerLinks",
     description: "Adds the ability to copy & open Sticker links",
     authors: [Devs.Ven, Devs.Byeoon],
     contextMenus: {
