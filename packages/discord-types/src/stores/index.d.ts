@@ -1,4 +1,5 @@
 // please keep in alphabetical order
+export * from "./AuthenticationStore";
 export * from "./ChannelStore";
 export * from "./DraftStore";
 export * from "./EmojiStore";
@@ -11,6 +12,7 @@ export * from "./RelationshipStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
 export * from "./ThemeStore";
+export * from "./TypingStore";
 export * from "./UserProfileStore";
 export * from "./UserStore";
 export * from "./WindowStore";
