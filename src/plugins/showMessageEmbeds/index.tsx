@@ -6,37 +6,16 @@
 
 import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
-import { ImageInvisible,ImageVisible } from "@components/Icons";
+import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { parseUrl } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, Constants, Menu, MessageStore, React, RestAPI, showToast, Toasts } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 const logger = new Logger("ShowMessageEmbeds");
-
-export default definePlugin({
-    name: "ShowMessageEmbeds",
-    description: "Adds a context menu option to show embeds for links that don't have one",
-    authors: [Devs.Suffocate],
-
-    patches: [
-        {
-            find: "className:\"attachmentLink\",",
-            replacement: {
-                match: /(?:(\i).noStyleAndInteraction.*?)attachmentName:\i.attachmentName/,
-                replace: "$&,channelId:$1.channelId,messageId:$1.messageId",
-            }
-        }
-    ],
-
-    contextMenus: {
-        "message": addShowEmbedButton,
-        "attachment-link-context": addShowAttachmentEmbedButton
-    }
-});
 
 function addShowEmbedButton(children, props) {
     if (props.itemSrc || !props.itemHref || !props.message) return; // itemSrc means the right clicked item is an image/attachment
@@ -95,6 +74,12 @@ function isUrlInMessage(message: Message, url: string): boolean {
             return true;
         }
     }
+    for (const embed of message.embeds) {
+        // check if the embed content contains the url but not the embed.url property itself
+        if (embed.url !== url && (embed.rawDescription?.includes(url) || embed.fields.some((field: any) => field.value.includes(url)))) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -135,10 +120,11 @@ function normaliseUrl(url: string): string {
 
     // tiktok adds ?enable_tiktok_webview=true
     const tiktokRegex = /(https?:\/\/(?:www\.)?)tiktok\.com(\/.*)?/;
-    const searchParams = new URLSearchParams(url.split("?")[1] || "");
+    const searchParams = url.includes("?") ? new URLSearchParams(url.split("?")[1]) : new URLSearchParams();
     if (tiktokRegex.test(url) && !searchParams.has("enable_tiktok_webview")) {
         searchParams.append("enable_tiktok_webview", "true");
-        url = url.split("?")[0] + "?" + searchParams.toString();
+        const newSearch = searchParams.toString();
+        url = url.split("?")[0] + (newSearch ? "?" + newSearch : "");
     }
 
     return url;
@@ -152,7 +138,6 @@ function unfurlEmbed(url: string, message: Message) {
     if (!parseUrl(url) || !channel) {
         return;
     }
-
 
     RestAPI.post({
         url: Constants.Endpoints.UNFURL_EMBED_URLS,
@@ -204,3 +189,24 @@ function removeEmbed(url: string, message: Message) {
 function showFailureToast(message: string) {
     showToast(message, Toasts.Type.FAILURE, { position: Toasts.Position.BOTTOM });
 }
+
+export default definePlugin({
+    name: "ShowMessageEmbeds",
+    description: "Adds a context menu option to show embeds for links that don't have one",
+    authors: [Devs.Suffocate],
+
+    patches: [
+        {
+            find: "className:\"attachmentLink\",",
+            replacement: {
+                match: /(?:(\i).noStyleAndInteraction.*?)attachmentName:\i.attachmentName/,
+                replace: "$&,channelId:$1.channelId,messageId:$1.messageId",
+            }
+        }
+    ],
+
+    contextMenus: {
+        "message": addShowEmbedButton,
+        "attachment-link-context": addShowAttachmentEmbedButton
+    }
+});
