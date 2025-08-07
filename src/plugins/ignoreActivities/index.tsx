@@ -256,8 +256,10 @@ export default definePlugin({
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
-                replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
+                // let { ... nowPlaying: a = !1 ...
+                // let { overlay: b ... } = Props
+                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)/,
+                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
         // Activities from the apps launcher in the bottom right of the chat bar
