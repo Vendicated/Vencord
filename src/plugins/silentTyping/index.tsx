@@ -308,10 +308,17 @@ export default definePlugin({
         },
         {
             find: "activityInviteEducationActivity:",
-            replacement: {
-                match: /(typingDots,ref:\i,children:)(\[.{0,300}?}\)\])/,
-                replace: "$1$self.shouldHideChatBarTypingIndicators()?[]:$2"
-            }
+            group: true,
+            replacement: [
+                {
+                    match: /(let{activityInviteEducationActivity)/,
+                    replace: "const silentTypingShouldHideChatBarTypingIndicators=$self.shouldHideChatBarTypingIndicators();$1"
+                },
+                {
+                    match: /(typingDots,ref:\i,children:)(\[.{0,340}?}\)\])/,
+                    replace: "$1silentTypingShouldHideChatBarTypingIndicators?[]:$2"
+                }
+            ]
         },
         {
             find: ",{avatarCutoutX",
