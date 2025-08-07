@@ -47,5 +47,5 @@ Or if you notice any bugs or typos, feel free to fix them!
 
 ## Help out users in our Discord community
 
-We have an open support channel in our [Discord community](https://discord.gg/equicord-1173279886065029291).
+We have an open support channel in our [Discord community](https://equicord.org/discord).
 Helping out users there is always appreciated! The more, the merrier.

@@ -19,5 +19,5 @@ DON'T
 Repetitive violations of these guidelines might get your access to the repository restricted.
 
 If you feel like a user is violating these guidelines or feel treated unfairly, please refrain from vigilantism
-and instead report the issue to a moderator! The best way is joining our [official Discord community](https://discord.gg/equicord-1173279886065029291)
+and instead report the issue to a moderator! The best way is joining our [official Discord community](https://equicord.org/discord)
 and opening a modmail ticket.

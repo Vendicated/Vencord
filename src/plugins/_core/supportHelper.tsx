@@ -245,7 +245,7 @@ export default definePlugin({
                     confirmText: "Go to Equicord Support",
                     onConfirm() {
                         clicked = true;
-                        VencordNative.native.openExternal("https://discord.gg/equicord-1173279886065029291");
+                        VencordNative.native.openExternal("https://equicord.org/discord");
                     },
                     cancelText: "Okay continue",
                     onCancel() {
@@ -284,7 +284,7 @@ export default definePlugin({
                     body: <div>
                         <Forms.FormText>You are using an externally updated Equicord version, the ability to help you here may be limited.</Forms.FormText>
                         <Forms.FormText className={Margins.top8}>
-                            Please join the <Link href="https://discord.gg/equicord-1173279886065029291">Equicord Server</Link> for support,
+                            Please join the <Link href="https://equicord.org/discord">Equicord Server</Link> for support,
                             or if this issue persists on Vencord, continue on.
                         </Forms.FormText>
                     </div>

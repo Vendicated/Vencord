@@ -9,7 +9,7 @@ body:
           value: |
               ![Are you a developer? No? This form is not for you!](https://github.com/Equicord/Equicord/blob/main/.github/ISSUE_TEMPLATE/developer-banner.png?raw=true)
 
-              GitHub Issues are for development, not support! Please use our [support server](https://discord.gg/equicord-1173279886065029291) unless you are a Equicord/Vencord Developer.
+              GitHub Issues are for development, not support! Please use our [support server](https://equicord.org/discord) unless you are a Equicord/Vencord Developer.
 
     - type: textarea
       id: bug-description
