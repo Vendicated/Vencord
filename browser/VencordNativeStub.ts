@@ -20,16 +20,13 @@
 /// <reference path="../src/globals.d.ts" />
 
 import monacoHtmlLocal from "file://monacoWin.html?minify";
-import monacoHtmlCdn from "file://../src/main/monacoWin.html?minify";
 import * as DataStore from "../src/api/DataStore";
-import { debounce } from "../src/utils";
+import { debounce, localStorage } from "../src/utils";
 import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
 import { getTheme, Theme } from "../src/utils/discord";
 import { getThemeInfo } from "../src/main/themes";
 import { Settings } from "../src/Vencord";
-
-// Discord deletes this so need to store in variable
-const { localStorage } = window;
+import { getStylusWebStoreUrl } from "@utils/web";
 
 // listeners for ipc.on
 const cssListeners = new Set<(css: string) => void>();
@@ -45,12 +42,13 @@ window.VencordNative = {
     themes: {
         uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
-        getThemesDir: async () => "",
         getThemesList: () => DataStore.entries(themeStore).then(entries =>
             entries.map(([name, css]) => getThemeInfo(css, name.toString()))
         ),
         getThemeData: (fileName: string) => DataStore.get(fileName, themeStore),
         getSystemValues: async () => ({}),
+
+        openFolder: async () => Promise.reject("themes:openFolder is not supported on web"),
     },
 
     native: {
@@ -77,6 +75,14 @@ window.VencordNative = {
         addThemeChangeListener: NOOP,
         openFile: NOOP_ASYNC,
         async openEditor() {
+            if (IS_USERSCRIPT) {
+                const shouldOpenWebStore = confirm("QuickCSS is not supported on the Userscript. You can instead use the Stylus extension.\n\nDo you want to open the Stylus web store page?");
+                if (shouldOpenWebStore) {
+                    window.open(getStylusWebStoreUrl(), "_blank");
+                }
+                return;
+            }
+
             const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
             const win = open("about:blank", "VencordQuickCss", features);
             if (!win) {
@@ -92,7 +98,7 @@ window.VencordNative = {
                     ? "vs-light"
                     : "vs-dark";
 
-            win.document.write(IS_EXTENSION ? monacoHtmlLocal : monacoHtmlCdn);
+            win.document.write(monacoHtmlLocal);
         },
     },
 
@@ -106,8 +112,9 @@ window.VencordNative = {
             }
         },
         set: async (s: Settings) => localStorage.setItem("VencordSettings", JSON.stringify(s)),
-        getSettingsDir: async () => "LocalStorage"
+        openFolder: async () => Promise.reject("settings:openFolder is not supported on web"),
     },
 
     pluginHelpers: {} as any,
+    csp: {} as any,
 };

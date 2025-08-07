@@ -14,10 +14,11 @@ export default definePlugin({
     description: "Allows you to omit either width or height when opening an image modal",
     patches: [
         {
-            find: "SCALE_DOWN:",
+            find: ".dimensionlessImage,",
             replacement: {
-                match: /!\(null==(\i)\|\|0===\i\|\|null==(\i)\|\|0===\i\)/,
-                replace: (_, width, height) => `!((null == ${width} || 0 === ${width}) && (null == ${height} || 0 === ${height}))`
+                // widthAndHeightPassed = w != null && w !== 0 && h == null || h === 0
+                match: /(?<=\i=)(null!=\i&&0!==\i)&&(null!=\i&&0!==\i)/,
+                replace: "($1)||($2)"
             }
         }
     ]
