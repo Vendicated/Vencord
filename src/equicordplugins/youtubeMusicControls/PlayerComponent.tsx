@@ -109,16 +109,16 @@ function makeContextMenu(name: string, path: string) {
 }
 
 function Controls() {
-    const [isPlaying, repeat] = useStateFromStores<[boolean, Repeat]>(
+    const [isPlaying, shuffle, repeat] = useStateFromStores(
         [YoutubeMusicStore],
-        () => [YoutubeMusicStore.isPlaying, YoutubeMusicStore.repeat]
+        () => [YoutubeMusicStore.isPlaying, YoutubeMusicStore.shuffle, YoutubeMusicStore.repeat]
     );
 
     const [nextRepeat, repeatClassName] = (() => {
         switch (repeat) {
-            case "NONE": return ["context", "repeat-off"] as const;
-            case "ALL": return ["track", "repeat-context"] as const;
-            case "ONE": return ["off", "repeat-track"] as const;
+            case "NONE": return ["ALL", "repeat-off"] as const;
+            case "ALL": return ["ONE", "repeat-context"] as const;
+            case "ONE": return ["NONE", "repeat-track"] as const;
             default: throw new Error(`Invalid repeat state ${repeat}`);
         }
     })();
@@ -128,11 +128,11 @@ function Controls() {
         <Flex className={cl("button-row")} style={{ gap: 0 }}>
             <Button
                 className={classes(cl("button"), cl("shuffle-off"))}
-                onClick={() => YoutubeMusicStore.shuffle()}
+                onClick={() => YoutubeMusicStore.setShuffle(!shuffle)}
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => YoutubeMusicStore.prev()}>
+            <Button onClick={() => YoutubeMusicStore.previous()}>
                 <SkipPrev />
             </Button>
             <Button onClick={() => YoutubeMusicStore.setPlaying(!isPlaying)}>
@@ -143,8 +143,7 @@ function Controls() {
             </Button>
             <Button
                 className={classes(cl("button"), cl(repeatClassName))}
-                onClick={() => YoutubeMusicStore.switchRepeat()}
-                style={{ position: "relative" }}
+                onClick={() => YoutubeMusicStore.setRepeat(nextRepeat)}
             >
                 {repeat === "ONE" && <span className={cl("repeat-1")}>1</span>}
                 <Repeat />
@@ -158,28 +157,30 @@ const seek = debounce((v: number) => {
 });
 
 function YtmSeekBar() {
-    const { songDuration } = YoutubeMusicStore.song!;
+    const { songDuration, videoId } = YoutubeMusicStore.song ?? {};
 
-    const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
+    const [storePosition, isPlaying] = useStateFromStores(
         [YoutubeMusicStore],
-        () => [YoutubeMusicStore.mPosition, YoutubeMusicStore.isSettingPosition, YoutubeMusicStore.isPlaying]
+        () => [YoutubeMusicStore.mPosition, YoutubeMusicStore.isPlaying]
     );
 
     const [position, setPosition] = useState<number>(storePosition);
 
     useEffect(() => {
-        if (isPlaying && !isSettingPosition) {
+        setPosition(storePosition);
+    }, [videoId, songDuration, storePosition]);
+
+    useEffect(() => {
+        if (isPlaying) {
             setPosition(YoutubeMusicStore.position);
             const interval = setInterval(() => {
                 setPosition(p => p + 1000);
             }, 1000);
-
             return () => clearInterval(interval);
         }
-    }, [storePosition, isSettingPosition, isPlaying]);
+    }, [storePosition, isPlaying]);
 
     const onChange = (v: number) => {
-        if (isSettingPosition) return;
         setPosition(v);
         seek(v);
     };

@@ -82,13 +82,6 @@ const settings = definePluginSettings({
         placeholder: "ws://localhost:26539",
         default: "ws://localhost:26539",
         isValid: isUrlValid,
-    },
-    apiServerUrl: {
-        description: "The api server url",
-        type: OptionType.STRING,
-        placeholder: "http://localhost:26538",
-        default: "http://localhost:26538",
-        isValid: isUrlValid,
     }
 });
 

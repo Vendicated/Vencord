@@ -55,25 +55,13 @@ export interface PlayerState {
 
 export type Repeat = "NONE" | "ONE" | "ALL";
 
-const nextRepeat = (repeat: Repeat) => {
-    switch (repeat) {
-        case "NONE":
-            return "ALL" as const;
-        case "ALL":
-            return "ONE" as const;
-        case "ONE":
-            return "NONE" as const;
-    }
-};
-
 const logger = new Logger("YoutubeMusicControls");
 
 type Message = { type: "PLAYER_STATE"; } & PlayerState;
 
-class YoutubemusicSocket {
-    private PORT = 26539;
+class YoutubeMusicSocket {
     public onChange: (e: Message) => void;
-    private ready = false;
+    public ready = false;
 
     private socket: WebSocket | undefined;
 
@@ -97,7 +85,7 @@ class YoutubemusicSocket {
         return {
             "play": () => this.socket?.send(JSON.stringify({ type: "ACTION", action: "play" })),
             "pause": () => this.socket?.send(JSON.stringify({ type: "ACTION", action: "pause" })),
-            "prev": () => this.socket?.send(JSON.stringify({ type: "ACTION", action: "prev" })),
+            "previous": () => this.socket?.send(JSON.stringify({ type: "ACTION", action: "previous" })),
             "next": () => this.socket?.send(JSON.stringify({ type: "ACTION", action: "next" })),
             "seek": (seconds: number) => this.socket?.send(JSON.stringify({ type: "ACTION", action: "seek", data: seconds })),
             "shuffle": () => this.socket?.send(JSON.stringify({ type: "ACTION", action: "shuffle" })),
@@ -115,7 +103,6 @@ class YoutubemusicSocket {
         this.socket = new WebSocket(url);
 
         this.socket.addEventListener("open", () => {
-            // logger.info("Connected to YouTube Music WebSocket");
             this.ready = true;
             this.routes.pause();
             this.routes.play();
@@ -129,10 +116,8 @@ class YoutubemusicSocket {
         });
 
         this.socket.addEventListener("close", e => {
-            // logger.info("YouTube Music Socket Disconnected:", e.code, e.reason);
             this.ready = false;
             if (!this.ready) setTimeout(() => this.reconnect(), 10_000);
-            // this.tryConnect();
 
             this.onChange({ type: "PLAYER_STATE", song: null, isPlaying: false, position: 0, repeat: "NONE", volume: 0 });
         });
@@ -167,11 +152,10 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
         public song: Song | null = null;
         public isPlaying = false;
         public repeat: Repeat = "NONE";
+        public shuffle = false;
         public volume = 0;
 
-        public isSettingPosition = false;
-
-        public socket = new YoutubemusicSocket((message: Message) => {
+        public socket = new YoutubeMusicSocket((message: Message) => {
             if (message.song) {
                 store.song = message.song;
                 store.position = message.song.elapsedSeconds ?? 0;
@@ -181,7 +165,6 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
             if (message.volume) store.volume = message.volume ?? 0;
             if (message.repeat) store.repeat = message.repeat;
 
-            store.isSettingPosition = false;
             store.emitChange();
         });
 
@@ -192,12 +175,8 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
                 ? encodeURI("youtubemusic://openVideo " + videoId[1])
                 : "https://music.youtube.com" + path;
 
-            console.log("Open", url);
-
-            // https://music.youtube.com/watch?v=BSHYPb15W-Y
             VencordNative.native.openExternal(url);
         }
-
 
         set position(p: number) {
             this.mPosition = p * 1000;
@@ -212,82 +191,51 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
             return pos;
         }
 
-        prev() {
-            // this.socket.routes.prev();
-            this.req("post", "/api/v1/previous");
+        previous() {
+            if (!this.ensureSocketReady()) return;
+            this.socket.routes.previous();
         }
         next() {
-            // this.socket.routes.next();
-            this.req("post", "/api/v1/next");
+            if (!this.ensureSocketReady()) return;
+            this.socket.routes.next();
         }
         setVolume(percent: number) {
-            // this.socket.routes.setVolume(percent);
-            console.log(Math.floor(percent));
-            this.req("post", "/api/v1/volume", {
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: {
-                    volume: Math.floor(percent)
-                },
-            });
+            if (!this.ensureSocketReady()) return;
+            this.socket.routes.setVolume(Math.round(percent));
+            this.volume = percent;
+            this.emitChange();
         }
         setPlaying(playing: boolean) {
-            if (playing) {
-                // YoutubemusicAPI.routes.pause.actions.do();
-                this.req("post", "/api/v1/play");
-                // this.socket.routes.play();
-            } else {
-                // YoutubemusicAPI.routes.play.actions.do();
-                this.req("post", "/api/v1/pause");
-                // this.socket.routes.pause();
-            }
+            if (!this.ensureSocketReady()) return;
+            this.socket.routes[playing ? "play" : "pause"]();
+            this.isPlaying = playing;
         }
-        switchRepeat() {
-            // this.socket.routes.repeat(nextRepeat(this.repeat));
-            this.req("post", "/api/v1/switch-repeat", {
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: {
-                    iteration: 1
-                }
-            });
+        setRepeat(state: Repeat) {
+            if (!this.ensureSocketReady()) return;
+            this.socket.routes.repeat(state);
+            this.repeat = state;
+            this.emitChange();
         }
-        shuffle() {
-            // this.socket.routes.shuffle();
-            this.req("post", "/api/v1/shuffle");
+        setShuffle(state: boolean) {
+            if (!this.ensureSocketReady()) return;
+            this.socket.routes.shuffle();
+            this.shuffle = state;
+            this.emitChange();
         }
         seek(ms: number) {
-            // this.socket.routes.seek(ms / 1000);
-            this.req("post", "/api/v1/seek-to", {
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: {
-                    seconds: Math.floor(ms / 1000)
-                }
-            });
+            if (!this.ensureSocketReady()) return;
+            this.socket.routes.seek(Math.round(ms / 1000));
         }
 
-        private req(method: "post" | "get" | "put", route: string, data: any = {}) {
-            const { apiServerUrl } = Settings.plugins.YouTubeMusicControls;
-            if (apiServerUrl === "") return;
-            console.log(fetch(apiServerUrl + route, {
-                method,
-                ...data,
-                ...(data.body && { body: JSON.stringify(data.body) })
-            }));
+        private ensureSocketReady(): boolean {
+            if (!this.socket || !this.socket.ready) {
+                return false;
+            }
+            return true;
         }
     }
 
     const store = new YoutubeMusicStore(FluxDispatcher);
 
-    logger.info("Youtube Music Controls initialized");
-
     return store;
 });
-
-function restartSocket() {
-    YoutubeMusicStore.socket.reconnect();
-}
