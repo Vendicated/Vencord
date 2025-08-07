@@ -20,17 +20,15 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { Menu, React } from "@webpack/common";
-import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
 
 interface Sticker {
-    t: "Sticker";
     format_type: number;
     id: string;
-    type: number;
 }
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
@@ -42,77 +40,54 @@ function getUrl(data: Sticker) {
     return `https://${window.GLOBAL_ENV.CDN_HOST}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
-function buildMenuItem(Sticker, fetchData: () => Promisable<Omit<Sticker, "t">>) {
+function buildMenuItem(sticker: Sticker) {
     return (
-        <>
-            <Menu.MenuSeparator></Menu.MenuSeparator>
-
+        <Menu.MenuGroup>
             <Menu.MenuItem
-                id="copystickerurl"
-                key="copystickerurl"
-                label={"Copy URL"}
-                action={async () => {
-                    const res = await fetchData();
-                    const data = { t: Sticker, ...res } as Sticker;
-                    const url = getUrl(data);
-                    copyWithToast(url, "Link copied!");
-                }
-                }
+                id="vc-copy-sticker-url"
+                key="vc-copy-sticker-url"
+                label="Copy URL"
+                action={() => copyWithToast(getUrl(sticker), "Link copied!")}
             />
 
             <Menu.MenuItem
-                id="openstickerlink"
-                key="openstickerlink"
-                label={"Open URL"}
-                action={async () => {
-                    const res = await fetchData();
-                    const data = { t: Sticker, ...res } as Sticker;
-                    const url = getUrl(data);
-                    VencordNative.native.openExternal(url);
-                }
-                }
+                id="vc-open-sticker-url"
+                key="vc-open-sticker-url"
+                label="Open URL"
+                action={() => VencordNative.native.openExternal(getUrl(sticker))}
             />
-        </>
+        </Menu.MenuGroup>
     );
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId, favoriteableType } = props ?? {};
-    if (!favoriteableId) return;
+const messageContextMenuPatch: NavContextMenuPatchCallback = (
+    children,
+    { favoriteableId, favoriteableType, message }: { favoriteableId: string; favoriteableType: string; message: Message; }
+) => {
+    if (!favoriteableId || favoriteableType !== "sticker") return;
 
-    const menuItem = (() => {
-        switch (favoriteableType) {
-            case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
-                if (!sticker?.format_type) return;
-                return buildMenuItem("Sticker", () => props.message.stickerItems[0]);
-        }
-    })();
+    const sticker = message.stickerItems.find(s => s.id === favoriteableId);
+    if (!sticker?.format_type) return;
 
-    if (menuItem)
-        findGroupChildrenByChildId("devmode-copy-id", children, true)?.push(menuItem);
+    const container = findGroupChildrenByChildId("devmode-copy-id", children, true) || children;
+
+    container.push(buildMenuItem(sticker));
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
-    const { id } = props?.target?.dataset ?? {};
+    const id = props?.target?.dataset?.id;
     if (!id) return;
+    if (props.target.className?.includes("lottieCanvas")) return;
 
-    if (!props.target.className?.includes("lottieCanvas")) {
-        const stickerCache = StickersStore.getStickerById(id);
-        if (stickerCache) {
-            const stickerInfo = {
-                format_type: stickerCache.format_type,
-                id: stickerCache.id,
-                type: stickerCache.type
-            };
-            children.push(buildMenuItem("Sticker", () => stickerInfo));
-        }
+    const sticker = StickersStore.getStickerById(id);
+    if (sticker) {
+        children.push(buildMenuItem(sticker));
     }
 };
 
 export default definePlugin({
     name: "CopyStickerLinks",
-    description: "Adds the ability to copy and open sticker links to your browser",
+    description: "Adds the ability to copy & open Sticker links",
     authors: [Devs.Byeoon],
     contextMenus: {
         "message": messageContextMenuPatch,
