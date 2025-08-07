@@ -4,8 +4,8 @@ Don't follow forwarded messages after sending them.
 
 ## Before
 
-![before](https://github.com/user-attachments/assets/9554d9d4-13ed-4639-b6e7-97515a28324a)
+![before](https://github.com/user-attachments/assets/13187c7c-37ea-41cc-bfbc-98c9f517c69b)
 
 ## After
 
-![after](https://github.com/user-attachments/assets/016f7af8-c6e1-4019-b00e-5caed2c62b1c)
+![after](https://github.com/user-attachments/assets/1b3972d9-fa8e-47c5-a39f-94f4963d94fa)
