@@ -118,7 +118,7 @@ export default definePlugin({
                     // Get the typing users as user objects instead of names
                     match: /typingUsers:(\i\?\[\]:)\i,/,
                     // check by typeof so if the variable is not defined due to other patch failing, it won't throw a ReferenceError
-                    replace: "$&typingUserObjects: typeof typingUserObjects !== 'undefined' ? typingUserObjects : undefined,"
+                    replace: "$&typingUserObjects: $1 typeof typingUserObjects !== 'undefined' ? typingUserObjects : undefined,"
                 },
                 {
                     // Adds the alternative formatting for several users typing
