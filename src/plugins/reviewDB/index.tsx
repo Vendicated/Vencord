@@ -84,13 +84,6 @@ export default definePlugin({
             }
         },
         {
-            find: ".MODAL,user:",
-            replacement: {
-                match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
-            }
-        },
-        {
             find: ".SIDEBAR,shouldShowTooltip:",
             replacement: {
                 match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
