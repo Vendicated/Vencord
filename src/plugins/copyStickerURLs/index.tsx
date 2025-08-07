@@ -20,24 +20,21 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Message } from "@vencord/discord-types";
+import { Message, Sticker } from "@vencord/discord-types";
 import { Menu, React, StickersStore } from "@webpack/common";
-
-interface Sticker {
-    format_type: number;
-    id: string;
-}
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
-function getUrl(data: Sticker) {
+type PartialSticker = Pick<Sticker, "id" | "format_type">;
+
+function getUrl(data: PartialSticker): string {
     if (data.format_type === 4)
         return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.gif?size=4096&lossless=true`;
 
     return `https://${window.GLOBAL_ENV.CDN_HOST}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
-function buildMenuItem(sticker: Sticker) {
+function buildMenuItem(sticker: PartialSticker) {
     return (
         <Menu.MenuGroup>
             <Menu.MenuItem
@@ -83,9 +80,9 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 };
 
 export default definePlugin({
-    name: "CopyStickerLinks",
+    name: "CopyStickerURLs",
     description: "Adds the ability to copy & open Sticker links",
-    authors: [Devs.Byeoon],
+    authors: [Devs.Ven, Devs.Byeoon],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch
