@@ -131,7 +131,6 @@ class YoutubeMusicSocket {
                 switch (message.type) {
                     case "PLAYER_STATE":
                         this.onChange(message);
-                        console.log(message);
                         break;
                 }
             } catch (err) {
