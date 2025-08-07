@@ -21,10 +21,7 @@ import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findStoreLazy } from "@webpack";
-import { Menu, React } from "@webpack/common";
-
-const StickersStore = findStoreLazy("StickersStore");
+import { Menu, React, StickersStore } from "@webpack/common";
 
 interface Sticker {
     format_type: number;

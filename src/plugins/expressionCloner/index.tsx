@@ -26,11 +26,10 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Guild } from "@vencord/discord-types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
-const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
