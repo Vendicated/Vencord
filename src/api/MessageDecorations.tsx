@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Channel, Message } from "discord-types/general/index.js";
+import { Channel, Message } from "@vencord/discord-types";
 import { JSX } from "react";
 
 export interface MessageDecorationProps {
@@ -48,23 +48,29 @@ export interface MessageDecorationProps {
 }
 export type MessageDecorationFactory = (props: MessageDecorationProps) => JSX.Element | null;
 
-export const decorations = new Map<string, MessageDecorationFactory>();
+export const decorationsFactories = new Map<string, MessageDecorationFactory>();
 
 export function addMessageDecoration(identifier: string, decoration: MessageDecorationFactory) {
-    decorations.set(identifier, decoration);
+    decorationsFactories.set(identifier, decoration);
 }
 
 export function removeMessageDecoration(identifier: string) {
-    decorations.delete(identifier);
+    decorationsFactories.delete(identifier);
 }
 
-export function __addDecorationsToMessage(props: MessageDecorationProps): (JSX.Element | null)[] {
-    return Array.from(
-        decorations.entries(),
+export function __addDecorationsToMessage(props: MessageDecorationProps): JSX.Element {
+    const decorations = Array.from(
+        decorationsFactories.entries(),
         ([key, Decoration]) => (
             <ErrorBoundary noop message={`Failed to render ${key} Message Decoration`} key={key}>
                 <Decoration {...props} />
             </ErrorBoundary>
         )
+    );
+
+    return (
+        <div className="vc-message-decorations-wrapper">
+            {decorations}
+        </div>
     );
 }

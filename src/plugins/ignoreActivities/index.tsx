@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
+import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -147,8 +147,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
 const settings = definePluginSettings({
     importCustomRPC: {
         type: OptionType.COMPONENT,
-        description: "",
-        component: () => <ImportCustomRPCComponent />
+        component: ImportCustomRPCComponent
     },
     listMode: {
         type: OptionType.SELECT,
@@ -168,7 +167,6 @@ const settings = definePluginSettings({
     },
     idsList: {
         type: OptionType.COMPONENT,
-        description: "",
         default: "",
         onChange(newValue: string) {
             const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
@@ -243,7 +241,7 @@ export default definePlugin({
             find: '"LocalActivityStore"',
             replacement: [
                 {
-                    match: /HANG_STATUS.+?(?=!?\i\(\)\(\i,\i\))(?<=(\i)\.push.+?)/,
+                    match: /\.LISTENING.+?(?=!?\i\(\)\(\i,\i\))(?<=(\i)\.push.+?)/,
                     replace: (m, activities) => `${m}${activities}=${activities}.filter($self.isActivityNotIgnored);`
                 }
             ]
@@ -258,18 +256,13 @@ export default definePlugin({
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
-                replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
+                // let { ... nowPlaying: a = !1 ...
+                // let { overlay: b ... } = Props
+                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)/,
+                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
-        // Discord has 2 different components for activities. Currently, the last is the one being used
-        {
-            find: ".activityTitleText,variant",
-            replacement: {
-                match: /\.activityTitleText.+?children:(\i)\.name.*?}\),/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
-            },
-        },
+        // Activities from the apps launcher in the bottom right of the chat bar
         {
             find: ".promotedLabelWrapperNonBanner,children",
             replacement: {
