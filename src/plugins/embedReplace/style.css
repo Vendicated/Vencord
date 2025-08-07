@@ -1,0 +1,52 @@
+.vc-embed-replace-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2px;
+    padding: 8px;
+    width: fit-content;
+    height: fit-content;
+}
+.vc-embed-replace-save:hover{
+    background-color: rgba(112,188,85,0.6);
+    cursor: pointer;
+}
+.vc-embed-replace-duplicate:hover {
+    background-color: rgba(112,188,85,0.6);
+    cursor: pointer;
+}
+.vc-embed-replace-delete:hover {
+    background-color: rgba(255, 0, 0, 0.6);
+    cursor: pointer;
+}
+
+.vc-embed-flex-row {
+    flex-direction: row;
+    display: flex;
+    gap: 8px;
+}
+.vc-embed-replace-row {
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    gap: 8px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    width: 100%;
+}
+.vc-embed-replace-row-line {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+}
+
+.vc-embed-replace-row-text-input {
+    width: 40%;
+}
+
+.vc-embed-replace-row-switch{
+    min-width: 25%;
+    padding-left: 8px;
+}
