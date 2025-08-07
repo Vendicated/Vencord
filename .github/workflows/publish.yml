@@ -35,7 +35,7 @@ jobs:
 
             - name: Publish extension
               run: |
-                  cd dist/chromium-unpacked
+                  cd dist/browser/chromium-unpacked
                   pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
               env:
                   EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
