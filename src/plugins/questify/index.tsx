@@ -1033,7 +1033,12 @@ export default definePlugin({
             replacement: [
                 {
                     // Initial select drop down for picking a platform.
-                    match: /(select:)(\i)(,serialize:\i=>{)/,
+                    match: /(platformSelectorPrimary.{0,130}?select:)(\i)(,serialize:\i=>{)/,
+                    replace: "$1(platform)=>{$self.processQuestForAutoComplete(arguments[0].quest),$2(platform)}$3"
+                },
+                {
+                    // Subsequent select drop down for changing the platform.
+                    match: /(platformSelectorSecondary.{0,260}?select:)(\i)(,serialize:\i=>{)/,
                     replace: "$1(platform)=>{$self.processQuestForAutoComplete(arguments[0].quest),$2(platform)}$3"
                 },
                 {
@@ -1053,24 +1058,6 @@ export default definePlugin({
                     match: /(\i.intl.string\(\i.\i#{intl::QUEST_ACCEPTED}\))/,
                     replace: "$self.getQuestAcceptedButtonText(arguments[0].quest)??$1"
                 }
-            ]
-        },
-        {
-            // Sets intervals to progress Play Game Quests in the background.
-            // Triggers if a Quest has already been started but was interrupted, such as by a reload.
-            find: "quest-home-platform-select-",
-            group: true,
-            replacement: [
-                {
-                    // Subsequent select drop down for changing platform to Desktop.
-                    match: /(action:\(\)=>)(\i\(\i.\i.DESKTOP\)),/,
-                    replace: "$1($self.processQuestForAutoComplete(arguments[0].quest),$2),"
-                },
-                {
-                    // Subsequent select drop down for changing platform to Console.
-                    match: /(action:\(\)=>)(\i\(\i.\i.CONSOLE\)),/,
-                    replace: "$1($self.processQuestForAutoComplete(arguments[0].quest),$2),"
-                },
             ]
         }
     ],

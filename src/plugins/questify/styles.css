@@ -189,18 +189,18 @@
     pointer-events: none;
 }
 
-.questify-quest-button-pill>[class^="item"] {
+.questify-quest-button-pill > [class^="item"] {
     will-change: transform;
     max-height: 8px;
     min-height: 8px;
     transition: max-height 0.2s ease-in-out;
 }
 
-.questify-quest-button-pill.hovered>[class^="item"] {
+.questify-quest-button-pill.hovered > [class^="item"] {
     max-height: 20px;
 }
 
-.questify-quest-button-pill.selected>[class^="item"] {
+.questify-quest-button-pill.selected > [class^="item"] {
     max-height: 40px;
 }
 
@@ -222,40 +222,40 @@
 }
 
 /* Background of bottom half of Quest tile. */
-.questify-quest-item-restyle>div {
+.questify-quest-item-restyle > div {
     background-color: var(--questify-color);
 }
 
 /* Normal button text + SVG button text color. */
-.questify-quest-item-restyle> :nth-child(2) button>div,
-.questify-quest-item-restyle> :nth-child(2) button>div>div>span {
+.questify-quest-item-restyle > :nth-child(2) button > div,
+.questify-quest-item-restyle > :nth-child(2) button > div > div > span {
     color: var(--questify-quest-name);
 }
 
 /* Watch again button SVG color. */
-.questify-quest-item-restyle> :nth-child(2) button>div>div>svg path {
+.questify-quest-item-restyle > :nth-child(2) button > div > div > svg path {
     fill: var(--questify-quest-name);
 }
 
 /* Allows glowing reward previews which aren't confined to their own
     square video frame to overflow so the glow doesn't get cut off. */
-.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"] {
+.questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] {
     overflow: visible;
 }
 
 /* Quest name color. */
-.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>h2[class^="eyebrow"] {
+.questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > h2[class^="eyebrow"] {
     color: var(--questify-quest-name) !important; /* Necessary !important */
 }
 
 /* Reward title + Orbs reward title text color. */
-.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"],
-.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-md"]>span {
+.questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > div[class^="text-md"],
+.questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > div[class^="text-md"] > span {
     color: var(--questify-reward-title) !important; /* Necessary !important */
 }
 
 /* Quest description text color. */
-.questify-quest-item-restyle>div>div[class^="rewardDescriptionContainer"]>div[class^="textContainer"]>div[class^="text-sm"] {
+.questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > div[class^="text-sm"] {
     color: var(--questify-reward-description) !important; /* Necessary !important */
 }
 
@@ -265,17 +265,17 @@
 }
 
 /* Promoted by XYZ text color. */
-.questify-quest-item-restyle>div[class^="container"]>div[class^="positionContentOverBackground"]>div[class^="contents"]>div[class^="bottomRow"]>div[class^="text-sm"] {
+.questify-quest-item-restyle > div[class^="container"] > div[class^="positionContentOverBackground"] > div[class^="contents"] > div[class^="bottomRow"] > div[class^="text-sm"] {
     color: var(--questify-reward-description) !important; /* Necessary !important */
 }
 
 /* Drop shadow for >87.5% luminance (near-white) restyle gradients so logos are legible. */
-.questify-quest-item-contrast-logo>div[class^="container"]>div[class^="positionContentOverBackground"]>div[class^="contents"]>div[class^="partnerBranding"]>img {
+.questify-quest-item-contrast-logo > div[class^="container"] > div[class^="positionContentOverBackground"] > div[class^="contents"] > div[class^="partnerBranding"] > img {
     filter: drop-shadow(0 0 10px rgb(0 0 0 / 80%));
 }
 
 /* Increased gradient intensity with restyle color. */
-.questify-quest-item-intense-gradient> :nth-child(1) [class^="overlay"] {
+.questify-quest-item-intense-gradient > :nth-child(1) [class^="overlay"] {
     background: linear-gradient(to top,
             var(--questify-color) 0,
             hsl(from var(--questify-color) h s l / 100%) 20.5%,
@@ -288,7 +288,7 @@
 }
 
 /* Default gradient intensity with restyle color. */
-.questify-quest-item-default-gradient> :nth-child(1) [class^="overlay"] {
+.questify-quest-item-default-gradient > :nth-child(1) [class^="overlay"] {
     background: linear-gradient(to top,
             var(--questify-color) 0,
             hsl(from var(--questify-color) h s l / 95%) 20.31%,
@@ -296,7 +296,7 @@
 }
 
 /* Subtle black gradient. */
-.questify-quest-item-black-gradient> :nth-child(1) [class^="overlay"] {
+.questify-quest-item-black-gradient > :nth-child(1) [class^="overlay"] {
     background: linear-gradient(to top,
             hsl(0deg 0% 0% / 80%) 10%,
             hsl(0deg 0% 0% / 65%) 20%,
@@ -306,35 +306,35 @@
 }
 
 /* Hides the gradient altogether. */
-.questify-quest-item-hide-gradient> :nth-child(1) [class^="overlay"] {
+.questify-quest-item-hide-gradient > :nth-child(1) [class^="overlay"] {
     display: none;
 }
 
 /* Matches the text overlay which darkens the text of long
     descriptions until hovered with the chosen restyle color. */
-.questify-quest-item-restyle> :nth-child(2) [class^="textOverflowBlur"] {
+.questify-quest-item-restyle > :nth-child(2) [class^="textOverflowBlur"] {
     background: linear-gradient(transparent 50%, var(--questify-color) 100%);
     filter: brightness(0.9);
 }
 
 /* Quest tile button color. */
-.questify-quest-item-restyle> :nth-child(2)> div> button {
+.questify-quest-item-restyle > :nth-child(2) > div button {
     background-color: var(--questify-button-normal) !important; /* Necessary !important */
 }
 
-.questify-quest-item-restyle> :nth-child(2)> div> button:not([disabled]):hover {
+.questify-quest-item-restyle > :nth-child(2) > div button:not([disabled]):hover {
     background-color: var(--questify-button-hover) !important; /* Necessary !important */
     transition: background-color 0.2s ease-in-out;
 }
 
 /* Quest tile border radius. */
 
-.questify-quest-item-restyle> :nth-child(1)[class^="container"] {
+.questify-quest-item-restyle > :nth-child(1) [class^="container"] {
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
 
-.questify-quest-item-restyle> :nth-child(2)[class^="container"] {
+.questify-quest-item-restyle > :nth-child(2) [class^="container"] {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
