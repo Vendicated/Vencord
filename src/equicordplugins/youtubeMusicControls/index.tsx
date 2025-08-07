@@ -41,7 +41,8 @@ function isUrlValid(value: string) {
     }
 }
 
-function InstallIstructions() {
+/*
+function InstallInstructions() {
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h3">How to install</Forms.FormTitle>
@@ -64,11 +65,33 @@ function InstallIstructions() {
         </Forms.FormSection>
     );
 }
+*/
+
+function InstallInstructions() {
+    return (
+        <Forms.FormSection>
+            <Forms.FormTitle tag="h3">How to install</Forms.FormTitle>
+            <Forms.FormText>Instructions on how to install YouTube music with websocket plugin</Forms.FormText>
+
+            <Forms.FormText>
+
+                <span>Software needed: <MaskedLink href="https://git-scm.com/downloads">git</MaskedLink>,<MaskedLink href="https://nodejs.org/en/download">node.js</MaskedLink> &gt;= 22.12.0,<MaskedLink href="https://pnpm.io/installation">pnpm</MaskedLink></span>
+
+                <code className="hljs" style={{ userSelect: "text", cursor: "text" }}>
+                    git clone https://github.com/thororen1234/youtube-music.git<br />
+                    cd .\youtube-music\<br />
+                    pnpm install --frozen-lockfile<br />
+                    pnpm dist:win<br />
+                </code>
+            </Forms.FormText>
+        </Forms.FormSection>
+    );
+}
 
 const settings = definePluginSettings({
     installYtmWithWebsocket: {
         type: OptionType.COMPONENT,
-        component: () => <InstallIstructions></InstallIstructions>
+        component: () => <InstallInstructions />
     },
     hoverControls: {
         description: "Show controls on hover",
