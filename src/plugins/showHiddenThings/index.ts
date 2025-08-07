@@ -73,7 +73,7 @@ export default definePlugin({
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /(?<=\.highestRole\),)role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+)/,
-                replace: "role:$self.getHighestRole(arguments[0],$2)",
+                replace: "role:$self.getHighestRole(arguments[0],$1)",
             }
         },
         // allows you to open mod view on yourself
