@@ -66,24 +66,51 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},"
+                // Override colorString with our custom color and disable gradients if applying the custom color.
+                match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i.*?}=)(\i),/,
+                replace: "$self.wrapMessageColorProps($1, arguments[0]),"
             }
         },
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=\.MEMBER_LIST}\),\[\]\),)(.+?color:)null!=.{0,50}?(?=,)/,
-                replace: (_, rest) => `ircColor=$self.calculateNameColorForListContext(arguments[0]),${rest}ircColor`
+                match: /(?<=roleName:\i,)colorString:/,
+                replace: "colorString:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }
     ],
 
+    wrapMessageColorProps(colorProps: { colorString: string, colorStrings?: Record<"primaryColor" | "secondaryColor" | "tertiaryColor", string>; }, context: any) {
+        try {
+            const colorString = this.calculateNameColorForMessageContext(context);
+            if (colorString === colorProps.colorString) {
+                return colorProps;
+            }
+
+            return {
+                ...colorProps,
+                colorString,
+                colorStrings: colorProps.colorStrings && {
+                    primaryColor: colorString,
+                    secondaryColor: undefined,
+                    tertiaryColor: undefined
+                }
+            };
+        } catch (e) {
+            console.error("Failed to calculate message color strings:", e);
+            return colorProps;
+        }
+    },
+
     calculateNameColorForMessageContext(context: any) {
-        const id = context?.message?.author?.id;
+        const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
-        const color = calculateNameColorForUser(id);
+        const color = calculateNameColorForUser(userId);
+
+        // Color preview in role settings
+        if (context?.message?.channel_id === "1337" && userId === "313337")
+            return colorString;
 
         if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
             return colorString;
@@ -93,17 +120,22 @@ export default definePlugin({
             ? color
             : colorString;
     },
+
     calculateNameColorForListContext(context: any) {
-        const id = context?.user?.id;
-        const colorString = context?.colorString;
-        const color = calculateNameColorForUser(id);
+        try {
+            const id = context?.user?.id;
+            const colorString = context?.colorString;
+            const color = calculateNameColorForUser(id);
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
+            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+                return colorString;
+            }
+
+            return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+                ? color
+                : colorString;
+        } catch (e) {
+            console.error("Failed to calculate name color for list context:", e);
         }
-
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
     }
 });

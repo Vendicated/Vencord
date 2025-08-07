@@ -100,19 +100,20 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(!)?\(0,\i\.isDesktop\)\(\)/,
-                    replace: (_, not) => not ? "false" : "true"
+                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    replace: "true"
                 }
             ]
         },
-        {
-            find: ".CONNECTED_ACCOUNT_VIEWED,",
+
+        // User Profile Modal & User Profile Modal v2
+        ...[".__invalid_connectedAccountOpenIconContainer", ".BLUESKY||"].map(find => ({
+            find,
             replacement: {
-                match: /(?<=href:\i,onClick:(\i)=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
+                match: /(?<=onClick:(\i)=>\{)(?=.{0,100}\.CONNECTED_ACCOUNT_VIEWED)(?<==(\i)\.metadata.+?)/,
                 replace: "if($self.handleAccountView($1,$2.type,$2.id)) return;"
             }
-        }
+        }))
     ],
 
     async handleLink(data: { href: string; }, event?: MouseEvent) {
