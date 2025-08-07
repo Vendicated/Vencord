@@ -70,7 +70,7 @@ export interface Quest {
         messages: {
             questName: string;
         };
-        taskConfigV2?: {
+        taskConfigV2: {
             tasks: {
                 WATCH_VIDEO?: {
                     type: "WATCH_VIDEO";
