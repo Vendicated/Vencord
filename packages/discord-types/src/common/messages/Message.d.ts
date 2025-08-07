@@ -2,6 +2,7 @@ import { CommandOption } from './Commands';
 import { User, UserJSON } from '../User';
 import { Embed, EmbedJSON } from './Embed';
 import { DiscordRecord } from "../Record";
+import { StickerFormatType } from "../../../enums";
 
 /**
  * TODO: looks like discord has moved over to Date instead of Moment;
@@ -92,7 +93,7 @@ export class Message extends DiscordRecord {
     reactions: MessageReaction[];
     state: string;
     stickerItems: {
-        format_type: number;
+        format_type: StickerFormatType;
         id: string;
         name: string;
     }[];
