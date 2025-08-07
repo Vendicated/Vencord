@@ -26,7 +26,7 @@ import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
-import { extract, filters, findAll, findModuleId, search } from "@webpack";
+import { extract, filters, findAll, findLazy, findModuleId, search } from "@webpack";
 import * as Common from "@webpack/common";
 import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
@@ -94,6 +94,9 @@ function makeShortcuts() {
     const find = newFindWrapper(f => f);
     const findByProps = newFindWrapper(filters.byProps);
 
+    // short for murmurhash3
+    const mm3 = findLazy(m => m?.toString?.().includes?.("0xcc9e2d51"));
+
     return {
         ...Object.fromEntries(Object.keys(Common).map(key => [key, { getter: () => Common[key] }])),
         wp: Webpack,
@@ -126,6 +129,17 @@ function makeShortcuts() {
         canonicalizeReplace,
         canonicalizeReplacement,
         runtimeHashMessageKey,
+        mm3: { getter: () => mm3 },
+        getAccountsHash: {
+            getter: () => (experiment: string, accountIds: string[]) => {
+                if (accountIds.length === 0) {
+                    // set from settings;
+                }
+                return accountIds.map(id => {
+                    return mm3(`${experiment}:${id}`);
+                });
+            }
+        },
         fakeRender: (component: ComponentType, props: any) => {
             const prevWin = fakeRenderWin?.deref();
             const win = prevWin?.closed === false
