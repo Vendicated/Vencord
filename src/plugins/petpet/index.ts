@@ -23,7 +23,7 @@ import definePlugin from "@utils/types";
 import { CommandArgument, CommandContext } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { DraftType, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
-import { applyPalette, GIFEncoder, quantize } from "gifenc";
+import { GIFEncoder, nearestColorIndex, quantize } from "gifenc";
 
 const DEFAULT_DELAY = 20;
 const DEFAULT_RESOLUTION = 128;
@@ -85,10 +85,33 @@ async function resolveImage(options: CommandArgument[], ctx: CommandContext, noS
     return null;
 }
 
+function rgb888_to_rgb565(r: number, g: number, b: number) {
+    return ((r << 8) & 0xf800) | ((g << 3) & 0x07e0) | (b >> 3);
+}
+
+function applyPaletteTransparent(data: Uint8Array | Uint8ClampedArray, palette: number[][], cache: number[], threshold: number): Uint8Array {
+    const index = new Uint8Array(Math.floor(data.length / 4));
+
+    for (let i = 0; i < data.length; i += 1) {
+        const r = data[4 * i];
+        const g = data[4 * i + 1];
+        const b = data[4 * i + 2];
+        const a = data[4 * i + 3];
+
+        if (a < threshold) {
+            index[i] = 255;
+        } else {
+            const key = rgb888_to_rgb565(r, g, b);
+            index[i] = key in cache ? cache[key] : (cache[key] = nearestColorIndex(palette, [r, g, b]));
+        }
+    }
+    return index;
+}
+
 export default definePlugin({
     name: "petpet",
     description: "Adds a /petpet slash command to create headpet gifs from any image",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.u32],
     commands: [
         {
             inputType: ApplicationCommandInputType.BUILT_IN,
@@ -143,16 +166,31 @@ export default definePlugin({
 
                 const avatar = await loadImage(url);
 
-                const delay = findOption(opts, "delay", DEFAULT_DELAY);
+                let delay = findOption(opts, "delay", DEFAULT_DELAY);
+                // Frame delays < 20ms don't function correctly on chromium and firefox
+                if (delay < 20) delay = 20;
+
                 const resolution = findOption(opts, "resolution", DEFAULT_RESOLUTION);
 
                 const gif = GIFEncoder();
 
+                const paletteImageSize = Math.min(120, resolution);
+
                 const canvas = document.createElement("canvas");
-                canvas.width = canvas.height = resolution;
-                const ctx = canvas.getContext("2d")!;
+                canvas.width = resolution;
+                canvas.height = Math.max(resolution, 2 * paletteImageSize);
+
+                const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
                 UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+
+                // Generate palette from an image where hand and avatar are fully visible
+                ctx.drawImage(avatar, 0, paletteImageSize, 0.8 * paletteImageSize, 0.8 * paletteImageSize);
+                ctx.drawImage(frames[0], 0, 0, paletteImageSize, paletteImageSize);
+                const { data } = ctx.getImageData(0, 0, paletteImageSize, 2 * paletteImageSize);
+                const palette = quantize(data, 255);
+
+                const cache = new Array(65536);
 
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -167,14 +205,22 @@ export default definePlugin({
                     ctx.drawImage(frames[i], 0, 0, resolution, resolution);
 
                     const { data } = ctx.getImageData(0, 0, resolution, resolution);
-                    const palette = quantize(data, 256);
-                    const index = applyPalette(data, palette);
+                    const index = applyPaletteTransparent(data, palette, cache, 1);
 
-                    gif.writeFrame(index, resolution, resolution, {
-                        transparent: true,
-                        palette,
-                        delay,
-                    });
+                    if (i === 0) {
+                        gif.writeFrame(index, resolution, resolution, {
+                            transparent: true,
+                            transparentIndex: 255,
+                            palette,
+                            delay,
+                        });
+                    } else {
+                        gif.writeFrame(index, resolution, resolution, {
+                            transparent: true,
+                            transparentIndex: 255,
+                            delay,
+                        });
+                    }
                 }
 
                 gif.finish();
