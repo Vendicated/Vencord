@@ -14,7 +14,6 @@ import type { ReactElement } from "react";
 
 import { BlockDisplayType, ColorType, regex, RenderType, replaceRegexp, settings } from "./constants";
 
-
 interface ParsedColorInfo {
     type: "color";
     color: string;
