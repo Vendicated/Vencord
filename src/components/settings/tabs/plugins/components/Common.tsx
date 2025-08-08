@@ -46,7 +46,7 @@ export function SettingsSection({ name, id, description, error, inlineSetting, c
         <div className={cl("section")}>
             <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
                 <div className={cl("label")}>
-                    {name && <Text className={cl("title")} variant="text-md/medium">{name ?? wordsToTitle(wordsFromCamel(id))}</Text>}
+                    <Text className={cl("title")} variant="text-md/medium">{name ?? wordsToTitle(wordsFromCamel(id))}</Text>
                     {description && <Text className={cl("description")} variant="text-sm/normal">{description}</Text>}
                 </div>
                 {children}
