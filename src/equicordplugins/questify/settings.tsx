@@ -9,12 +9,12 @@ import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { findLazy } from "@webpack";
-import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextArea, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
-import { DynamicDropdown, DynamicDropdownSettingOption, GuildlessServerListItem, Quest, QuestIcon, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
-import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, QuestsStore, rightClick, validCommaSeparatedList } from "./utils/misc";
+import { DynamicDropdown, DynamicDropdownSettingOption, ExcludedQuest, GuildlessServerListItem, Quest, QuestIcon, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
+import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, q, QuestifyLogger, QuestsStore, rightClick, setIgnoredQuestIDs, validCommaSeparatedList } from "./utils/misc";
 
 let defaultSounds: string[] | null = null;
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;
@@ -129,49 +129,54 @@ export const intervalScales = {
     }
 };
 
-export function removeIgnoredQuest(questName: string): void {
-    const ignoredQuests = settings.store.ignoredQuests.split("\n");
-    validateAndOverwriteIgnoredQuests(ignoredQuests.filter(name => normalizeQuestName(name) !== normalizeQuestName(questName)).join("\n"));
+export function removeIgnoredQuest(questID: string): void {
+    const ignoredQuests = getIgnoredQuestIDs();
+    const newIgnoredQuests = ignoredQuests.filter(id => id !== questID);
+    validateAndOverwriteIgnoredQuests(newIgnoredQuests);
 }
 
-export function addIgnoredQuest(questName: string): void {
-    const { ignoredQuests } = settings.store;
-    validateAndOverwriteIgnoredQuests(ignoredQuests + "\n" + normalizeQuestName(questName));
+export function addIgnoredQuest(questID: string): void {
+    const ignoredQuests = getIgnoredQuestIDs();
+    const newIgnoredQuests = ignoredQuests.concat(questID);
+    validateAndOverwriteIgnoredQuests(newIgnoredQuests);
 }
 
-export function questIsIgnored(questName: string): boolean {
-    const ignoredQuests = new Set(settings.store.ignoredQuests.split("\n").map(normalizeQuestName));
-    return ignoredQuests.has(normalizeQuestName(questName));
+export function questIsIgnored(questID: string): boolean {
+    const ignoredQuests = getIgnoredQuestIDs();
+    return ignoredQuests.includes(questID);
 }
 
-export function validateIgnoredQuests(ignoredQuests?: string, questsData?: Quest[]): [string, number] {
+export function validateIgnoredQuests(ignoredQuests?: string[], questsData?: Quest[]): [string[], number] {
     const quests = questsData ?? Array.from(QuestsStore.quests.values()) as Quest[];
-    const currentlyIgnored = new Set((ignoredQuests ?? settings.store.ignoredQuests).split("\n").map(normalizeQuestName));
+    const excludedQuests = Array.from(QuestsStore.excludedQuests.values()) as ExcludedQuest[];
+    const currentlyIgnored = ignoredQuests ? new Set(ignoredQuests) : new Set(getIgnoredQuestIDs());
     const validIgnored = new Set<string>();
     let numUnclaimedUnignoredQuests = 0;
 
     for (const quest of quests) {
         const questStatus = getQuestStatus(quest, false);
-        const normalizedName = normalizeQuestName(quest.config.messages.questName);
 
-        if (questStatus === QuestStatus.Unclaimed) {
-            if (currentlyIgnored.has(normalizedName)) {
-                validIgnored.add(normalizedName);
-            } else {
-                numUnclaimedUnignoredQuests++;
-            }
+        if (currentlyIgnored.has(quest.id)) {
+            validIgnored.add(quest.id);
+        } else if (questStatus === QuestStatus.Unclaimed) {
+            numUnclaimedUnignoredQuests++;
         }
     }
 
-    const ignoredStr = Array.from(validIgnored).join("\n");
-    return [ignoredStr, numUnclaimedUnignoredQuests];
+    for (const quest of excludedQuests) {
+        if (currentlyIgnored.has(quest.id)) {
+            validIgnored.add(quest.id);
+        }
+    }
+
+    return [Array.from(validIgnored), numUnclaimedUnignoredQuests];
 }
 
-export function validateAndOverwriteIgnoredQuests(ignoredQuests?: string, questsData?: Quest[]): string {
-    const [ignoredStr, numUnclaimedUnignoredQuests] = validateIgnoredQuests(ignoredQuests, questsData);
+export function validateAndOverwriteIgnoredQuests(ignoredQuests?: string[], questsData?: Quest[]): string[] {
+    const [validIgnored, numUnclaimedUnignoredQuests] = validateIgnoredQuests(ignoredQuests, questsData);
     settings.store.unclaimedUnignoredQuests = numUnclaimedUnignoredQuests;
-    settings.store.ignoredQuests = ignoredStr;
-    return ignoredStr;
+    setIgnoredQuestIDs(validIgnored);
+    return validIgnored;
 }
 
 interface DummyQuestButtonProps {
@@ -689,48 +694,6 @@ function DisableQuestsSetting(): JSX.Element {
     );
 }
 
-function IgnoredQuestsSetting(): JSX.Element {
-    const [ignoredQuests, setIgnoredQuests] = useState(settings.store.ignoredQuests);
-    validateAndOverwriteIgnoredQuests(ignoredQuests);
-
-    return (
-        <ErrorBoundary>
-            <Forms.FormDivider className={q("setting-divider")} />
-            <div className={q("setting", "ignored-quests-setting")}>
-                <Forms.FormSection>
-                    <div>
-                        <Forms.FormTitle className={q("form-title")}>
-                            Ignored Quests
-                        </Forms.FormTitle>
-                        <Forms.FormText className={q("form-description")}>
-                            A list of Quest names to exclude from the <span className={q("inline-code-block")}>Unclaimed Indicator</span>.
-                            <br /><br />
-                            One Quest name per line. Names must match the spelling displayed on the Quests page.
-                            Alternatively, click the three dots on a Quest tile and select the <span className={q("inline-code-block")}>Mark as Ignored</span> option.
-                        </Forms.FormText>
-                    </div>
-                    <div>
-                        <TextArea
-                            className={q("text-area")}
-                            value={ignoredQuests}
-                            onChange={newValue => {
-                                setIgnoredQuests(newValue);
-                                const [validated, badgeNum] = validateIgnoredQuests(newValue);
-
-                                if (validated.trim() === newValue.trim()) {
-                                    settings.store.ignoredQuests = validated;
-                                    settings.store.unclaimedUnignoredQuests = badgeNum;
-                                }
-                            }}
-                        />
-                    </div>
-                </Forms.FormSection>
-            </div>
-            <Forms.FormDivider className={q("setting-divider")} />
-        </ErrorBoundary>
-    );
-}
-
 const DummyQuestPreview = ({ quest, dummyColor, dummyGradient }: { quest: Quest; dummyColor: number | null; dummyGradient: string; }) => {
     const classes = getQuestTileClasses("", quest, dummyColor, dummyGradient);
 
@@ -749,14 +712,16 @@ function RestyleQuestsSetting() {
         restyleQuestsIgnored,
         restyleQuestsExpired,
         restyleQuestsGradient,
-        restyleQuestsPreload
+        restyleQuestsPreload,
+        ignoredQuestProfile
     } = settings.use([
         "restyleQuestsUnclaimed",
         "restyleQuestsClaimed",
         "restyleQuestsIgnored",
         "restyleQuestsExpired",
         "restyleQuestsGradient",
-        "restyleQuestsPreload"
+        "restyleQuestsPreload",
+        "ignoredQuestProfile"
     ]);
 
     const [unclaimedColor, setUnclaimedColor] = useState<number | null>(restyleQuestsUnclaimed);
@@ -874,7 +839,57 @@ function RestyleQuestsSetting() {
                         </Forms.FormTitle>
                         <Forms.FormText className={q("form-description")}>
                             Highlight Quests with optional theme colors for visibility.
+                            <br /><br />
+                            Claimed and Expired Quest styles will take precedence even if a Quest is ignored.
                         </Forms.FormText>
+                    </div>
+                    <div className={q("main-inline-group")}>
+                        <div className={q("gradient-setting-group", "inline-group-item", "flex-35")}>
+                            <Forms.FormTitle className={q("form-subtitle")}>
+                                Gradient Style
+                            </Forms.FormTitle>
+                            <Select
+                                options={gradientOptions}
+                                className={q("select")}
+                                popoutPosition="top"
+                                serialize={String}
+                                isSelected={(value: string) => value === restyleQuestsGradientValue}
+                                select={handleGradientChange}
+                            />
+                        </div>
+                        <div className={q("preload-setting-group", "inline-group-item", "flex-65")}>
+                            <Forms.FormTitle className={q("form-subtitle")}>
+                                Asset Preload
+                            </Forms.FormTitle>
+                            <Select
+                                options={preloadOptions}
+                                className={q("select")}
+                                popoutPosition="top"
+                                serialize={String}
+                                isSelected={(value: boolean) => value === restyleQuestsPreloadValue}
+                                select={handlePreloadChange}
+                            />
+                        </div>
+                    </div>
+                    <div className={q("main-inline-group")}>
+                        <div className={q("inline-group-item")}>
+                            <Forms.FormTitle className={q("form-subtitle")}>
+                                Ignored Quest Profile
+                            </Forms.FormTitle>
+                            <Select
+                                options={[
+                                    { label: "Shared: All accounts on this client share ignores.", value: "shared" },
+                                    { label: "Private: All accounts on this client have separate ignores.", value: "private" }
+                                ]}
+                                className={q("select")}
+                                popoutPosition="bottom"
+                                serialize={String}
+                                isSelected={(value: string) => value === ignoredQuestProfile}
+                                select={(value: string) => {
+                                    settings.store.ignoredQuestProfile = value;
+                                }}
+                            />
+                        </div>
                     </div>
                     <div className={q("color-picker-container")}>
                         {colorPickers.map(({ label, idx, defaultValue, value }) => (
@@ -908,34 +923,6 @@ function RestyleQuestsSetting() {
                                 </div>
                             </div>
                         ))}
-                    </div>
-                    <div className={q("main-inline-group")}>
-                        <div className={q("gradient-setting-group", "inline-group-item", "flex-35")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
-                                Gradient Style
-                            </Forms.FormTitle>
-                            <Select
-                                options={gradientOptions}
-                                className={q("select")}
-                                popoutPosition="top"
-                                serialize={String}
-                                isSelected={(value: string) => value === restyleQuestsGradientValue}
-                                select={handleGradientChange}
-                            />
-                        </div>
-                        <div className={q("preload-setting-group", "inline-group-item", "flex-65")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
-                                Asset Preload
-                            </Forms.FormTitle>
-                            <Select
-                                options={preloadOptions}
-                                className={q("select")}
-                                popoutPosition="top"
-                                serialize={String}
-                                isSelected={(value: boolean) => value === restyleQuestsPreloadValue}
-                                select={handlePreloadChange}
-                            />
-                        </div>
                     </div>
                     <div className={q("dummy-quest-preview")} style={dummyQuestStyle}>
                         {hasQuests && dummyQuest && (
@@ -1644,11 +1631,6 @@ export const settings = definePluginSettings({
         default: "Expiring DESC", // "Recent ASC", "Recent DESC", "Expiring ASC", "Expiring DESC"
         hidden: true
     },
-    ignoredQuests: {
-        type: OptionType.COMPONENT,
-        default: "",
-        component: IgnoredQuestsSetting
-    },
     unclaimedUnignoredQuests: {
         type: OptionType.NUMBER,
         description: "Tracks the number of unclaimed and unignored Quests.",
@@ -1667,4 +1649,16 @@ export const settings = definePluginSettings({
         default: false,
         hidden: true
     },
+    ignoredQuestProfile: {
+        type: OptionType.STRING,
+        description: "The profile used for ignored Quests.",
+        default: "private", // "shared", "private"
+        hidden: true
+    },
+    ignoredQuestIDs: {
+        type: OptionType.CUSTOM,
+        description: "An array of Quest IDs that are ignored.",
+        default: {} as Record<string, string[]>,
+        hidden: true,
+    }
 });

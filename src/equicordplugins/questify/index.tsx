@@ -14,31 +14,39 @@ import definePlugin, { StartAt } from "@utils/types";
 import { ContextMenuApi, Menu, NavigationRouter } from "@webpack/common";
 import { JSX } from "react";
 
-import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, removeIgnoredQuest, rerenderQuests, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
-import { GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, RGB } from "./utils/components";
-import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, waitUntilEnrolled } from "./utils/misc";
+import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, rerenderQuests, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
+import { ExcludedQuestMap, GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, RGB } from "./utils/components";
+import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, waitUntilEnrolled } from "./utils/misc";
 
 const patchedMobileQuests = new Set<string>();
 export const activeQuestIntervals = new Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; duration: number, type: string; }>();
 
-function questMenuUnignoreClicked(): void {
-    validateAndOverwriteIgnoredQuests("");
+function questMenuUnignoreAllClicked(): void {
+    validateAndOverwriteIgnoredQuests([]);
 }
 
-function questMenuIgnoreClicked(): void {
+function questMenuIgnoreAllClicked(): void {
     const quests = (QuestsStore.quests as QuestMap);
-    const ignoredQuestsSet = new Set();
+    const excludedQuests = (QuestsStore.excludedQuests as ExcludedQuestMap);
+    const ignoredQuestsSet = new Set<string>();
+    const ignoredQuestIDs = getIgnoredQuestIDs();
 
     for (const quest of quests.values()) {
-        const questName = normalizeQuestName(quest.config.messages.questName);
+        const questID = quest.id;
         const questStatus = getQuestStatus(quest, false);
 
-        if (questStatus === QuestStatus.Unclaimed) {
-            ignoredQuestsSet.add(questName);
+        if (questStatus === QuestStatus.Unclaimed || ignoredQuestIDs.includes(questID)) {
+            ignoredQuestsSet.add(questID);
         }
     }
 
-    settings.store.ignoredQuests = Array.from(ignoredQuestsSet).join("\n");
+    for (const quest of excludedQuests.values()) {
+        if (ignoredQuestIDs.includes(quest.id)) {
+            ignoredQuestsSet.add(quest.id);
+        }
+    }
+
+    setIgnoredQuestIDs(Array.from(ignoredQuestsSet));
     settings.store.unclaimedUnignoredQuests = 0;
 }
 
@@ -86,14 +94,14 @@ export function QuestButton(): JSX.Element {
                     <Menu.MenuItem
                         id={q("ignore-quests-option")}
                         label="Mark All Ignored"
-                        action={questMenuIgnoreClicked}
+                        action={questMenuIgnoreAllClicked}
                         disabled={!unclaimedUnignoredQuests}
                     />
                     <Menu.MenuItem
                         id={q("unignore-quests-option")}
                         label="Reset Ignored List"
-                        action={questMenuUnignoreClicked}
-                        disabled={!settings.store.ignoredQuests}
+                        action={questMenuUnignoreAllClicked}
+                        disabled={!getIgnoredQuestIDs().length}
                     />
                     <Menu.MenuItem
                         id={q("fetch-quests-option")}
@@ -198,10 +206,10 @@ function shouldHideFriendsListActiveNowPromotion(): boolean {
 }
 
 function shouldDisableQuestTileOptions(quest: Quest, shouldBeIgnored: boolean): boolean {
-    const questStatus = getQuestStatus(quest);
+    const isIgnored = questIsIgnored(quest.id);
 
     return !(
-        (shouldBeIgnored ? questStatus === QuestStatus.Ignored : questStatus === QuestStatus.Unclaimed)
+        (shouldBeIgnored ? isIgnored : !isIgnored)
     );
 }
 
@@ -212,13 +220,13 @@ function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; 
                 id={q("ignore-quests")}
                 label="Mark as Ignored"
                 disabled={shouldDisableQuestTileOptions(props.quest, false)}
-                action={() => { addIgnoredQuest(props.quest.config.messages.questName); }}
+                action={() => { addIgnoredQuest(props.quest.id); }}
             />
             <Menu.MenuItem
                 id={q("unignore-quests")}
                 label="Unmark as Ignored"
                 disabled={shouldDisableQuestTileOptions(props.quest, true)}
-                action={() => { removeIgnoredQuest(props.quest.config.messages.questName); }}
+                action={() => { removeIgnoredQuest(props.quest.id); }}
             />
             {activeQuestIntervals.has(props.quest.id) &&
                 <Menu.MenuItem
@@ -242,19 +250,21 @@ function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; 
 
 export function getQuestTileClasses(originalClasses: string, quest: Quest, color: number | null | undefined, gradient: string | undefined): string {
     const {
+        ignoredQuestIDs,
+        ignoredQuestProfile,
         restyleQuestsUnclaimed,
         restyleQuestsClaimed,
         restyleQuestsIgnored,
         restyleQuestsExpired,
-        restyleQuestsGradient,
-        ignoredQuests
+        restyleQuestsGradient
     } = settings.use([
+        "ignoredQuestIDs",
+        "ignoredQuestProfile",
         "restyleQuestsUnclaimed",
         "restyleQuestsClaimed",
         "restyleQuestsIgnored",
         "restyleQuestsExpired",
-        "restyleQuestsGradient",
-        "ignoredQuests"
+        "restyleQuestsGradient"
     ]);
 
     const customClasses = [
@@ -284,12 +294,12 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
         } else if (questStatus === QuestStatus.Unclaimed && (color || restyleQuestsUnclaimed !== null)) {
             returnClasses.push(q("quest-item-restyle"));
             isRestyledAndDarkish = isDarkish(decimalToRGB(color ?? restyleQuestsUnclaimed), 0.875);
-        } else if (questStatus === QuestStatus.Ignored && (color || restyleQuestsIgnored !== null)) {
-            returnClasses.push(q("quest-item-restyle"));
-            isRestyledAndDarkish = isDarkish(decimalToRGB(color ?? restyleQuestsIgnored), 0.875);
         } else if (questStatus === QuestStatus.Expired && (color || restyleQuestsExpired !== null)) {
             returnClasses.push(q("quest-item-restyle"));
             isRestyledAndDarkish = isDarkish(decimalToRGB(color ?? restyleQuestsExpired), 0.875);
+        } else if (questStatus === QuestStatus.Ignored && (color || restyleQuestsIgnored !== null)) {
+            returnClasses.push(q("quest-item-restyle"));
+            isRestyledAndDarkish = isDarkish(decimalToRGB(color ?? restyleQuestsIgnored), 0.875);
         }
     }
 
@@ -316,7 +326,8 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
 
 function preprocessQuests(quests: Quest[]): Quest[] {
     const {
-        ignoredQuests,
+        ignoredQuestIDs,
+        ignoredQuestProfile,
         reorderQuests,
         unclaimedSubsort,
         claimedSubsort,
@@ -327,7 +338,8 @@ function preprocessQuests(quests: Quest[]): Quest[] {
         completeGameQuestsInBackground,
         triggerQuestsRerender
     } = settings.use([
-        "ignoredQuests",
+        "ignoredQuestIDs",
+        "ignoredQuestProfile",
         "reorderQuests",
         "unclaimedSubsort",
         "claimedSubsort",
@@ -387,10 +399,10 @@ function preprocessQuests(quests: Quest[]): Quest[] {
             questGroups.claimed.push(quest);
         } else if (questStatus === QuestStatus.Unclaimed) {
             questGroups.unclaimed.push(quest);
-        } else if (questStatus === QuestStatus.Ignored) {
-            questGroups.ignored.push(quest);
         } else if (questStatus === QuestStatus.Expired) {
             questGroups.expired.push(quest);
+        } else if (questStatus === QuestStatus.Ignored) {
+            questGroups.ignored.push(quest);
         } else {
             questGroups.unknown.push(quest);
         }
@@ -453,10 +465,12 @@ function preprocessQuests(quests: Quest[]): Quest[] {
 export function getQuestTileStyle(quest: Quest | null): Record<string, string> {
     const {
         restyleQuests,
-        ignoredQuests,
+        ignoredQuestIDs,
+        ignoredQuestProfile
     } = settings.use([
         "restyleQuests",
-        "ignoredQuests",
+        "ignoredQuestIDs",
+        "ignoredQuestProfile"
     ]);
 
     const style: Record<string, string> = {};
@@ -479,10 +493,10 @@ export function getQuestTileStyle(quest: Quest | null): Record<string, string> {
         themeColor = dummyProvided ? dummyColor : claimedColor || null;
     } else if (questStatus === QuestStatus.Unclaimed) {
         themeColor = dummyProvided ? dummyColor : unclaimedColor || null;
-    } else if (questStatus === QuestStatus.Ignored) {
-        themeColor = dummyProvided ? dummyColor : ignoredColor || null;
     } else if (questStatus === QuestStatus.Expired) {
         themeColor = dummyProvided ? dummyColor : expiredColor || null;
+    } else if (questStatus === QuestStatus.Ignored) {
+        themeColor = dummyProvided ? dummyColor : ignoredColor || null;
     }
 
     if (!themeColor) return style;

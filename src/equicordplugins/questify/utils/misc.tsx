@@ -7,9 +7,9 @@
 import { classNameFactory } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, RestAPI } from "@webpack/common";
+import { FluxDispatcher, RestAPI, UserStore } from "@webpack/common";
 
-import { questIsIgnored } from "../settings";
+import { questIsIgnored, settings } from "../settings";
 import { Quest, QuestStatus, RGB } from "./components";
 
 export const q = classNameFactory("questify-");
@@ -25,16 +25,30 @@ export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;
 
+export function setIgnoredQuestIDs(questIDs: string[]): void {
+    const currentUserID = UserStore.getCurrentUser().id;
+    const { ignoredQuestProfile } = settings.store;
+    const key = ignoredQuestProfile === "shared" ? "shared" : currentUserID;
+    settings.store.ignoredQuestIDs[key] = questIDs;
+}
+
+export function getIgnoredQuestIDs(): string[] {
+    const currentUserID = UserStore.getCurrentUser().id;
+    const { ignoredQuestIDs, ignoredQuestProfile } = settings.store;
+    const key = ignoredQuestProfile === "shared" ? "shared" : currentUserID;
+    ignoredQuestIDs[key] ??= [];
+    return ignoredQuestIDs[key];
+}
+
 export function getQuestStatus(quest: Quest, checkIgnored: boolean = true): QuestStatus {
-    const questName = normalizeQuestName(quest.config.messages.questName);
     const completedQuest = quest.userStatus?.completedAt;
     const claimedQuest = quest.userStatus?.claimedAt;
     const expiredQuest = new Date(quest.config.expiresAt) < new Date();
-    const questIgnored = questIsIgnored(questName);
+    const questIgnored = questIsIgnored(quest.id);
 
     if (claimedQuest) {
         return QuestStatus.Claimed;
-    } else if (checkIgnored && questIgnored) {
+    } else if (checkIgnored && questIgnored && (!expiredQuest || completedQuest)) {
         return QuestStatus.Ignored;
     } else if (completedQuest || !expiredQuest) {
         return QuestStatus.Unclaimed;
