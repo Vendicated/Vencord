@@ -18,8 +18,8 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Emoji } from "@vencord/discord-types";
 import { EmojiStore } from "@webpack/common";
-import { Emoji } from "@webpack/types";
 
 interface EmojiAutocompleteState {
     query?: {
