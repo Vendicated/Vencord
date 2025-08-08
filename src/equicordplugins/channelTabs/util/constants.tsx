@@ -96,6 +96,27 @@ export const settings = definePluginSettings({
         markers: [500, 1000, 1500, 2000, 3000, 5000, 10000],
         default: 3000,
         stickToMarkers: false,
+    },
+    tabBarPosition: {
+        type: OptionType.SELECT,
+        description: "Where to show the tab bar.",
+        options: [
+            { label: "Top", value: "top", default: true },
+            { label: "Bottom", value: "bottom" }
+        ],
+    },
+    enableHotkeys: {
+        type: OptionType.BOOLEAN,
+        description: "Enable hotkey (1-9) for tab switching",
+        default: true,
+        restartNeeded: false
+    },
+    hotkeyCount: {
+        type: OptionType.SLIDER,
+        description: "Number of tabs accessible via keyboard shortcuts",
+        markers: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        default: 3,
+        stickToMarkers: true,
     }
 });
 

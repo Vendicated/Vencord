@@ -37,7 +37,7 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props: { channe
 export default definePlugin({
     name: "ChannelTabs",
     description: "Group your commonly visited channels in tabs, like a browser",
-    authors: [Devs.TheSun, Devs.TheKodeToad, EquicordDevs.keifufu, Devs.Nickyux],
+    authors: [Devs.TheSun, Devs.TheKodeToad, EquicordDevs.keifufu, Devs.Nickyux, EquicordDevs.DiabeloDEV],
     dependencies: ["ContextMenuAPI"],
     contextMenus: {
         "channel-mention-context": contextMenuPatch,
@@ -102,12 +102,25 @@ export default definePlugin({
         currentChannel: BasicChannelTabsProps,
         children: JSX.Element;
     }) {
+        const tabsContainer = (
+            <ErrorBoundary>
+                <ChannelsTabsContainer {...currentChannel} />
+            </ErrorBoundary>
+        );
+
+        if (settings.store.tabBarPosition === "top") {
+            return (
+                <>
+                    {tabsContainer}
+                    {children}
+                </>
+            );
+        }
+
         return (
             <>
-                <ErrorBoundary>
-                    <ChannelsTabsContainer {...currentChannel} />
-                </ErrorBoundary>
                 {children}
+                {tabsContainer}
             </>
         );
     },

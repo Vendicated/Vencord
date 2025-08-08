@@ -5,11 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { BasicChannelTabsProps, ChannelTabsProps, createTab, handleChannelSwitch, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
+import { BasicChannelTabsProps, ChannelTabsProps, createTab, handleChannelSwitch, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu } from "./ContextMenus";
@@ -20,11 +21,9 @@ const PlusSmallIcon = findComponentByCodeLazy("0v-5h5a1");
 
 const cl = classNameFactory("vc-channeltabs-");
 
-const isMac = navigator.platform.toLowerCase().startsWith("mac");
-
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     const [userId, setUserId] = useState("");
-    const { showBookmarkBar, widerTabsAndBookmarks } = settings.use(["showBookmarkBar", "widerTabsAndBookmarks"]);
+    const { showBookmarkBar, widerTabsAndBookmarks, enableHotkeys, hotkeyCount, tabBarPosition } = settings.use(["showBookmarkBar", "widerTabsAndBookmarks", "enableHotkeys", "hotkeyCount", "tabBarPosition"]);
     const GhostTabs = useGhostTabs();
 
     const _update = useForceUpdater();
@@ -57,11 +56,42 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
                 (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current.clientHeight;
             } catch { }
         }
-    }, [userId, showBookmarkBar]);
+    }, [userId, showBookmarkBar, tabBarPosition]);
 
     useEffect(() => {
         _update();
     }, [widerTabsAndBookmarks]);
+    useEffect(() => {
+        if (!enableHotkeys) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement;
+
+            if (
+                target.tagName === "INPUT" ||
+                target.tagName === "TEXTAREA" ||
+                target.isContentEditable
+            ) {
+                return;
+            }
+
+            const keyNumber = parseInt(event.key, 10);
+
+            if (!isNaN(keyNumber) && keyNumber >= 1 && keyNumber <= hotkeyCount) {
+                const tabIndex = keyNumber - 1;
+                if (openedTabs[tabIndex]) {
+                    event.preventDefault();
+                    moveToTab(openedTabs[tabIndex].id);
+                }
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [enableHotkeys, hotkeyCount]);
 
     useEffect(() => {
         if (userId) {
@@ -74,11 +104,14 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
 
     return (
         <div
-            className={cl("container")}
+            className={classes(cl("container"), tabBarPosition === "top" && cl("container-top"))}
             ref={ref}
             onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
-            style={{ marginTop: isMac ? "28px" : "0" }}
         >
+            {showBookmarkBar && <>
+                <BookmarkContainer {...props} userId={userId} />
+                <div className={cl("separator")} />
+            </>}
             <div className={cl("tab-container")}>
                 {openedTabs.map((tab, i) =>
                     <ChannelTab {...tab} index={i} key={i} />
@@ -93,10 +126,6 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
 
                 {GhostTabs}
             </div >
-            {showBookmarkBar && <>
-                <div className={cl("separator")} />
-                <BookmarkContainer {...props} userId={userId} />
-            </>}
 
         </div>
     );
