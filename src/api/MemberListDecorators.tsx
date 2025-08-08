@@ -20,14 +20,14 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Channel, User } from "@vencord/discord-types";
 import { JSX } from "react";
 
-interface DecoratorProps {
+export type DecoratorProps = {
     type: "guild" | "dm";
     user: User;
     /** only present when this is a DM list item */
     channel: Channel;
     /** only present when this is a guild list item */
     isOwner: boolean;
-}
+};
 
 export type MemberListDecoratorFactory = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";

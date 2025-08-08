@@ -21,7 +21,7 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
 import { findByPropsLazy, findStore } from "@webpack";
-import { Button, ChannelStore, GuildRoleStore, NavigationRouter, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { Button, ChannelStore, GuildRoleStore, NavigationRouter, RelationshipStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
 import { ReactNode } from "react";
 
 import { NotificationData, showNotification } from "./components/Notifications";
@@ -219,7 +219,7 @@ export default definePlugin({
             const isStreaming = findStore("ApplicationStreamingStore").getAnyStreamForUser(UserStore.getCurrentUser()?.id);
 
             const streamerMode = settings.store.disableInStreamerMode;
-            const currentUserStreamerMode = findStore("StreamerModeStore").enabled;
+            const currentUserStreamerMode = StreamerModeStore.enabled;
 
             if (streamerMode && currentUserStreamerMode) return;
             if (isStreaming && settings.store.streamingTreatment === StreamingTreatment.IGNORE) return;

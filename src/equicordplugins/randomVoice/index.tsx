@@ -10,17 +10,15 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { findByCode, findByProps, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
+import { findByCode, findByProps, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
 
 import style from "./styles.css?managed";
 
 const ChatVoiceIcon = findComponentByCodeLazy("0l1.8-1.8c.17");
 const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
-const MediaEngineStore = findStoreLazy("MediaEngineStore");
 const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
-const { toggleSelfMute } = findByPropsLazy("toggleSelfMute");
-const { toggleSelfDeaf } = findByPropsLazy("toggleSelfDeaf");
+
 const valueOperation = [
     { label: "More than", value: "<", default: false },
     { label: "Less than", value: ">", default: false },
@@ -767,8 +765,8 @@ function JoinVc(channelID) {
     if (settings.store.autoNavigate) ChannelRouter.transitionToChannel(channel.id);
     if (settings.store.autoCamera && PermissionStore.can(VIDEO, channel)) autoCamera();
     if (settings.store.autoStream && PermissionStore.can(STREAM, channel)) autoStream();
-    if (settings.store.selfMute && !MediaEngineStore.isSelfMute() && SelectedChannelStore.getVoiceChannelId()) toggleSelfMute();
-    if (settings.store.selfDeafen && !MediaEngineStore.isSelfDeaf() && SelectedChannelStore.getVoiceChannelId()) toggleSelfDeaf();
+    if (settings.store.selfMute && !MediaEngineStore.isSelfMute() && SelectedChannelStore.getVoiceChannelId()) VoiceActions.toggleSelfMute();
+    if (settings.store.selfDeafen && !MediaEngineStore.isSelfDeaf() && SelectedChannelStore.getVoiceChannelId()) VoiceActions.toggleSelfDeaf();
 }
 
 async function autoStream() {

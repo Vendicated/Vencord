@@ -156,13 +156,13 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     );
 }
 
-interface VoiceChannelIndicatorProps {
+export type VoiceChannelIndicatorProps = {
     userId: string;
     isMessageIndicator?: boolean;
     isProfile?: boolean;
     isActionButton?: boolean;
     shouldHighlight?: boolean;
-}
+};
 
 const clickTimers = {} as Record<string, any>;
 

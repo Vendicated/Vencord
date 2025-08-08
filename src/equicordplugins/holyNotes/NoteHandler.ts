@@ -14,7 +14,7 @@ import { deleteCacheFromDataStore, DeleteEntireStore, saveCacheToDataStore } fro
 export const noteHandlerCache = new Map();
 
 export default new (class NoteHandler {
-    private _formatNote(channel: Channel, message: Message): HolyNotes.Note {
+    public _formatNote(channel: Channel, message: Message): HolyNotes.Note {
         return {
             id: message.id,
             channel_id: message.channel_id,

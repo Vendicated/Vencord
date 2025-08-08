@@ -63,7 +63,7 @@ class YoutubeMusicSocket {
     public onChange: (e: Message) => void;
     public ready = false;
 
-    private socket: WebSocket | undefined;
+    public socket: WebSocket | undefined;
 
     constructor(onChange: typeof this.onChange) {
         this.reconnect();
@@ -146,7 +146,7 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
 
     class YoutubeMusicStore extends Store {
         public mPosition = 0;
-        private start = 0;
+        public start = 0;
 
         public song: Song | null = null;
         public isPlaying = false;
@@ -226,7 +226,7 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
             this.socket.routes.seek(Math.round(ms / 1000));
         }
 
-        private ensureSocketReady(): boolean {
+        public ensureSocketReady(): boolean {
             if (!this.socket || !this.socket.ready) {
                 return false;
             }

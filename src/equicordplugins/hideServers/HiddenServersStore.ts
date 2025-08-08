@@ -17,7 +17,7 @@ export const HiddenServersStore = proxyLazyWebpack(() => {
     const DB_KEY = "HideServers_servers";
 
     class HiddenServersStore extends Store {
-        private _hiddenGuilds: Set<string> = new Set();
+        public _hiddenGuilds: Set<string> = new Set();
         public get hiddenGuilds() {
             return this._hiddenGuilds;
         }
