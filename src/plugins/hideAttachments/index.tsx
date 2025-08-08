@@ -60,7 +60,7 @@ export default definePlugin({
     renderMessagePopoverButton(msg) {
         if (!hasMedia(msg) && !msg.messageSnapshots.some(s => hasMedia(s.message))) return null;
 
-        const isHidden = hiddenMessages instanceof Set ? hiddenMessages.has(msg.id) : false;
+        const isHidden = hiddenMessages.has(msg.id);
 
         return {
             label: isHidden ? "Show Media" : "Hide Media",
@@ -90,7 +90,7 @@ export default definePlugin({
     },
 
     shouldHide(messageId: string) {
-        return hiddenMessages instanceof Set ? hiddenMessages.has(messageId) : false;
+        return hiddenMessages.has(messageId);
     },
 
     async toggleHide(channelId: string, messageId: string) {
