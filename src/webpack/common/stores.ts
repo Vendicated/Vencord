@@ -76,7 +76,7 @@ waitForStore("GuildMemberStore", m => GuildMemberStore = m);
 waitForStore("RelationshipStore", m => RelationshipStore = m);
 waitForStore("MediaEngineStore", m => MediaEngineStore = m);
 waitForStore("StreamerModeStore", m => StreamerModeStore = m);
-waitForStore("SpellCheckStore", m => SpellCheckStore = m);
+waitForStore("SpellcheckStore", m => SpellCheckStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
