@@ -26,17 +26,21 @@ export default definePlugin({
     renderMessageAccessory({ message }) {
         const tidalEmbed = message.embeds?.find(embed => embed.provider?.name === "TIDAL");
         if (!tidalEmbed) return null;
-        const songId = tidalEmbed?.url?.split("/").pop().split("?")[0];
-        if (!songId) {
+        const { url } = tidalEmbed;
+        const id = url.split("/").pop().split("?")[0];
+        const isAlbum = url.includes("/album/");
+        if (!id) {
             console.warn("Tidal embed found without song ID", tidalEmbed);
             return null;
         }
+        const width = isAlbum ? 800 : 400;
+        const height = isAlbum ? 300 : 100;
         return (
             <div className="tidal-embed">
                 <iframe
-                    src={`https://embed.tidal.com/tracks/${songId}?disableAnalytics=true`}
-                    width="500"
-                    height="120"
+                    src={`https://embed.tidal.com/${isAlbum ? "albums" : "tracks"}/${id}?disableAnalytics=true`}
+                    width={width}
+                    height={height}
                     allow="encrypted-media"
                     sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
                     title="TIDAL Embed Player"
