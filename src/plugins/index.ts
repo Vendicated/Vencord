@@ -29,7 +29,7 @@ import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
-import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
+import { OptionType, Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
@@ -152,6 +152,28 @@ for (const p of pluginsValues) {
             const def = p.settings.def[name];
             const checks = p.settings.checks?.[name];
             p.options[name] = { ...def, ...checks };
+
+            // TODO remove this in a few months when everyone has updated.
+            if (
+                (def.type === OptionType.ARRAY || def.type === OptionType.USERS || def.type === OptionType.GUILDS || def.type === OptionType.CHANNELS)
+                && typeof p.settings.store[name] === "string"
+            ) {
+                if (p.settings.store[name] === "")
+                    p.settings.store[name] = def.default ?? [];
+                else {
+                    logger.info(`Converting string values of setting ${name} of plugin ${p.name} to array`);
+
+                    const sep = def.oldStringSeparator ?? ",";
+                    let newVal: string[];
+                    if (typeof sep === "string" || sep instanceof RegExp) newVal = p.settings.store[name].split(sep);
+                    else newVal = sep(p.settings.store[name]);
+
+                    // additional safeguard to prevent the new array to be an empty string, looks weird in the UI.
+                    if (newVal.length > 1 || newVal[0] !== "") p.settings.store[name] = newVal;
+                    else p.settings.store[name] = [];
+
+                }
+            }
         }
     }
 
