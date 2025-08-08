@@ -10,8 +10,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
 import { Message, User } from "@vencord/discord-types";
+import { findByCodeLazy } from "@webpack";
 
 interface UsernameProps {
     author: { nick: string; };
@@ -77,11 +77,17 @@ export default definePlugin({
     patches: [
         {
             find: '="SYSTEM_TAG"',
-            replacement: {
-                // The field is named "userName", but as this is unusual casing, the regex also matches username, in case they change it
-                match: /(?<=onContextMenu:\i,children:)\i\?(?=.{0,100}?user[Nn]ame:)/,
-                replace: "$self.renderUsername(arguments[0]),_oldChildren:$&"
-            }
+            replacement: [
+                {
+                    // The field is named "userName", but as this is unusual casing, the regex also matches username, in case they change it
+                    match: /(?<=onContextMenu:\i,children:)\i\?(?=.{0,100}?user[Nn]ame:)/,
+                    replace: "$self.renderUsername(arguments[0]),_oldChildren:$&"
+                },
+                {
+                    match: /"data-text":\i\+\i/,
+                    replace: '"data-text": $self.getUsername(arguments[0])'
+                }
+            ]
         },
     ],
     settings,
