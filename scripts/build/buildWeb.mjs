@@ -43,6 +43,7 @@ const commonOptions = {
     define: stringifyValues({
         IS_WEB: true,
         IS_EXTENSION: false,
+        IS_USERSCRIPT: false,
         IS_STANDALONE: true,
         IS_DEV,
         IS_REPORTER,
@@ -82,7 +83,7 @@ const buildConfigs = [
     {
         ...commonOptions,
         outfile: "dist/browser.js",
-        footer: { js: "//# sourceURL=VencordWeb" }
+        footer: { js: "//# sourceURL=file:///VencordWeb" }
     },
     {
         ...commonOptions,
@@ -91,13 +92,14 @@ const buildConfigs = [
             ...commonOptions.define,
             IS_EXTENSION: "true"
         },
-        footer: { js: "//# sourceURL=VencordWeb" }
+        footer: { js: "//# sourceURL=file:///VencordWeb" }
     },
     {
         ...commonOptions,
         inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
         define: {
             ...commonOptions.define,
+            IS_USERSCRIPT: "true",
             window: "unsafeWindow",
         },
         outfile: "dist/Vencord.user.js",

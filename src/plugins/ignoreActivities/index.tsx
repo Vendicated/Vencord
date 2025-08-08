@@ -256,18 +256,13 @@ export default definePlugin({
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
-                replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
+                // let { ... nowPlaying: a = !1 ...
+                // let { overlay: b ... } = Props
+                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)/,
+                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
-        // Discord has 2 different components for activities. Currently, the last is the one being used
-        {
-            find: ".activityTitleText,variant",
-            replacement: {
-                match: /\.activityTitleText.+?children:(\i)\.name.*?}\),/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
-            },
-        },
+        // Activities from the apps launcher in the bottom right of the chat bar
         {
             find: ".promotedLabelWrapperNonBanner,children",
             replacement: {

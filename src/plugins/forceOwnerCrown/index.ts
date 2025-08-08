@@ -18,8 +18,8 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, User } from "@vencord/discord-types";
 import { GuildStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
 
 export default definePlugin({
     name: "ForceOwnerCrown",
@@ -29,8 +29,8 @@ export default definePlugin({
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /,isOwner:(\i),/,
-                replace: ",_isOwner:$1=$self.isGuildOwner(e),"
+                match: /(?<=decorators:.{0,200}?isOwner:)\i/,
+                replace: "$self.isGuildOwner(arguments[0])"
             }
         }
     ],

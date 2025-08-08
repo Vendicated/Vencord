@@ -21,8 +21,8 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
-import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
+import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -32,7 +32,8 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Channel } from "@vencord/discord-types";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -42,10 +43,8 @@ import SettingsPlugin from "./settings";
 
 const CodeBlockRe = /```js\n(.+?)```/s;
 
-const AllowedChannelIds = [
-    SUPPORT_CHANNEL_ID,
+const AdditionalAllowedChannelIds = [
     "1024286218801926184", // Vencord > #bot-spam
-    "1033680203433660458", // Vencord > #v
 ];
 
 const TrustedRolesIds = [
@@ -57,6 +56,8 @@ const TrustedRolesIds = [
 const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+
+const isSupportAllowedChannel = (channel: Channel) => channel.parent_id === SUPPORT_CATEGORY_ID || AdditionalAllowedChannelIds.includes(channel.id);
 
 async function forceUpdate() {
     const outdated = await checkForUpdates();
@@ -86,7 +87,7 @@ async function generateDebugInfoMessage() {
             `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
-        Platform: window.navigator.platform
+        Platform: navigator.platform
     };
 
     if (IS_DISCORD_DESKTOP) {
@@ -155,20 +156,21 @@ export default definePlugin({
         {
             name: "vencord-debug",
             description: "Send Vencord debug info",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
             name: "vencord-plugins",
             description: "Send Vencord plugin list",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: () => ({ content: generatePluginList() })
         }
     ],
 
     flux: {
         async CHANNEL_SELECT({ channelId }) {
-            if (channelId !== SUPPORT_CHANNEL_ID) return;
+            const isSupportChannel = channelId === SUPPORT_CHANNEL_ID || ChannelStore.getChannel(channelId)?.parent_id === SUPPORT_CATEGORY_ID;
+            if (!isSupportChannel) return;
 
             const selfId = UserStore.getCurrentUser()?.id;
             if (!selfId || isPluginDev(selfId)) return;
@@ -194,7 +196,6 @@ export default definePlugin({
                 }
             }
 
-            // @ts-ignore outdated type
             const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
@@ -239,7 +240,7 @@ export default definePlugin({
             !IS_UPDATER_DISABLED
             && (
                 (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
-                (props.channel.id === SUPPORT_CHANNEL_ID && props.message.author.id === VENBOT_USER_ID)
+                (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)
             )
             && props.message.content?.includes("update");
 
@@ -265,7 +266,7 @@ export default definePlugin({
             );
         }
 
-        if (props.channel.id === SUPPORT_CHANNEL_ID) {
+        if (props.channel.parent_id === SUPPORT_CATEGORY_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
             if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
                 buttons.push(
                     <Button
@@ -317,7 +318,7 @@ export default definePlugin({
         if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id)) return null;
 
         return (
-            <Card className={`vc-plugins-restart-card ${Margins.top8}`}>
+            <Card className={`vc-warning-card ${Margins.top8}`}>
                 Please do not private message Vencord plugin developers for support!
                 <br />
                 Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
