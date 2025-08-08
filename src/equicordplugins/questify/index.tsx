@@ -974,7 +974,7 @@ export default definePlugin({
         },
         {
             // Prevents default pinning of specific Quests to the top of the list.
-            find: "QUEST_HOME_DESKTOP},",
+            find: "questTile,{[",
             replacement: {
                 match: /\i.unshift\(\i\):(\i.push\(\i\))/,
                 replace: "$1:$1"
@@ -1019,8 +1019,8 @@ export default definePlugin({
                 },
                 {
                     // Start Quest
-                    match: /(\(0,\i.\i\)\((\i).id,{questContent:)/,
-                    replace: "const questifyContinue=$self.processQuestForAutoComplete($2);$1"
+                    match: /(onClick:.{0,10}?{)(.{0,5}?0,\i.\i\)\((\i))/,
+                    replace: "$1const questifyContinue=$self.processQuestForAutoComplete($3);$2"
                 },
                 {
                     // Open Video Modal
