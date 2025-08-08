@@ -14,7 +14,7 @@ import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, MessageStore, RelationshipStore, StreamerModeStore, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
-const wrapEmojis = findByCodeLazy(/"span",\{className:\i\.emoji,children:/);
+const wrapEmojis = findByCodeLazy("lastIndex;return");
 const AccessibilityStore = findStoreLazy("AccessibilityStore");
 const colorPattern = /^#(?:[\da-f]{3}){1,2}$|^#(?:[\da-f]{4}){1,2}$|(rgb|hsl)a?\((\s*-?\d+%?\s*,){2}(\s*-?\d+%?\s*)\)|(rgb|hsl)a?\((\s*-?\d+%?\s*,){3}\s*(0|(0?\.\d+)|1)\)$/iu;
 const roleColorPattern = /^role((?:\+|-)\d{0,4})?$/iu;
