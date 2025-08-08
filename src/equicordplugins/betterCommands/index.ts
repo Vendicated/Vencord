@@ -27,7 +27,7 @@ export default definePlugin({
             predicate: () => settings.store.autoFillArguments,
             replacement: [
                 {
-                    match: /!\i\.has.{0,10}&&\(\i\.required.{0,20}\]\)/,
+                    match: /\(\i\.required.{0,20}\]\)/,
                     replace: "true"
                 },
             ]
