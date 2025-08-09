@@ -40,6 +40,28 @@ export function makeRange(start: number, end: number, step = 1) {
     return ranges;
 }
 
+export const PluginTags = [
+    "Accessibility",
+    "Activity",
+    "Appearance",
+    "Commands",
+    "Customisation",
+    "Developers",
+    "Emotes",
+    "Friends",
+    "Fun",
+    "Media",
+    "Notifications",
+    "Organisation",
+    "Privacy",
+    "Roles",
+    "Servers",
+    "Shortcuts",
+    "Utility"
+] as const;
+
+export type PluginTag = typeof PluginTags[number];
+
 export type ReplaceFn = (match: string, ...groups: string[]) => string;
 
 export interface PatchReplacement {
@@ -97,6 +119,8 @@ export interface Plugin extends PluginDef {
 export interface PluginDef {
     name: string;
     description: string;
+    keywords?: string[];
+    tags?: PluginTag[];
     authors: PluginAuthor[];
     start?(): void;
     stop?(): void;
@@ -162,8 +186,6 @@ export interface PluginDef {
      * The key will be used as text for the button
      */
     toolboxActions?: Record<string, () => void>;
-
-    tags?: string[];
 
     /**
      * Managed style to automatically enable and disable when the plugin is enabled or disabled
