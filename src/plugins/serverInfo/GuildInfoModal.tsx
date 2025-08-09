@@ -7,13 +7,13 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { openImageModal, openUserProfile } from "@utils/discord";
+import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
+import { Guild, User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
-import { Guild, User } from "discord-types/general";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "getAvatarURL");
@@ -103,7 +103,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                             width: 512,
                         })}
                     />
-                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
+                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{getGuildAcronym(guild)}</div>
                 }
 
                 <div className={cl("name-and-description")}>
@@ -200,7 +200,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         "Verification Level": ["None", "Low", "Medium", "High", "Highest"][guild.verificationLevel] || "?",
         "Server Boosts": `${guild.premiumSubscriberCount ?? 0} (Level ${guild.premiumTier ?? 0})`,
         "Channels": GuildChannelStore.getChannels(guild.id)?.count - 1 || "?", // - null category
-        "Roles": Object.keys(GuildStore.getRoles(guild.id)).length - 1, // - @everyone
+        "Roles": GuildRoleStore.getSortedRoles(guild.id).length - 1, // - @everyone
     };
 
     return (
@@ -220,12 +220,12 @@ function FriendsTab({ guild, setCount }: RelationshipProps) {
 }
 
 function BlockedUsersTab({ guild, setCount }: RelationshipProps) {
-    const blockedIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isBlocked(id));
+    const blockedIds = RelationshipStore.getBlockedIDs();
     return UserList("blocked", guild, blockedIds, setCount);
 }
 
 function IgnoredUserTab({ guild, setCount }: RelationshipProps) {
-    const ignoredIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isIgnored(id));
+    const ignoredIds = RelationshipStore.getIgnoredIDs();
     return UserList("ignored", guild, ignoredIds, setCount);
 }
 
