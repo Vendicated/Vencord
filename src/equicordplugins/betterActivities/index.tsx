@@ -59,5 +59,21 @@ export default definePlugin({
             },
             predicate: () => settings.store.userPopout
         },
+        {
+            find: ".SIDEBAR}),nicknameIcons",
+            replacement: {
+                match: /(?<=(\i)\.id\)\}\)\),(\i).*?,)\i\?.{0,250}\i\.card\}\)/,
+                replace: "$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
+            },
+            predicate: () => settings.store.userPopout
+        },
+        {
+            find: "#{intl::STATUS_MENU_LABEL}",
+            replacement: {
+                match: /(?<=,(\i)=.{0,10}\i\.id.{0,150}userId:(\i).*?,)\i\?.{0,250}onClose:\i\}\)/,
+                replace: "$self.showAllActivitiesComponent({ activity: $1, user: $2 })"
+            },
+            predicate: () => settings.store.userPopout
+        }
     ],
 });
