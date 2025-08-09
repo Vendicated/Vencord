@@ -1,0 +1,26 @@
+.vc-csp-buttonContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.vc-csp-buttonContainer>button {
+    flex: 1;
+}
+
+.vc-csp-previewCotainer {
+    background-color: var(--background-secondary-alt);
+    height: 142px;
+    overflow: hidden;
+}
+
+.vc-csp-previewImage {
+    height: 100%;
+    width: 100%;
+}
+
+.vc-csp-image {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+}
