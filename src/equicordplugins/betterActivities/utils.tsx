@@ -5,10 +5,11 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { Activity, ActivityViewProps, Application, ApplicationIcon } from "@vencord/discord-types";
+import { Activity, Application } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 
 import { settings } from "./settings";
+import { ActivityViewProps, ApplicationIcon } from "./types";
 
 const ApplicationStore: {
     getApplication: (id: string) => Application | null;
