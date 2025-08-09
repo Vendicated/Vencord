@@ -279,3 +279,11 @@
     flex-direction: column;
     gap: 1.25em;
 }
+
+.vc-plugins-page-buttons {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}

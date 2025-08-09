@@ -261,10 +261,18 @@ export default function PluginSettings() {
         .sort((a, b) => a.name.localeCompare(b.name)), []);
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const pageSize = 36;
 
     const search = searchValue.value.toLowerCase();
-    const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
-    const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
+    const onSearch = (query: string) => {
+        setSearchValue(prev => ({ ...prev, value: query }));
+        setCurrentPage(1);
+    };
+    const onStatusChange = (status: SearchStatus) => {
+        setSearchValue(prev => ({ ...prev, status }));
+        setCurrentPage(1);
+    };
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { status } = searchValue;
@@ -469,6 +477,17 @@ export default function PluginSettings() {
     const enabledStockPlugins = enabledPlugins.filter(p => !PluginMeta[p].userPlugin).length;
     const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin).length;
 
+    const paginatedPlugins = plugins.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
+
+    const totalPages = Math.ceil(plugins.length / pageSize);
+
+    function goToPage(page: number) {
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    }
+
     return (
         <SettingsTab title="Plugins">
 
@@ -518,16 +537,37 @@ export default function PluginSettings() {
 
             {plugins.length || requiredPlugins.length
                 ? (
-                    <div className={cl("grid")}>
-                        {plugins.length
-                            ? plugins
-                            : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
-                        }
-                    </div>
+                    <>
+                        <div className={cl("grid")}>
+                            {paginatedPlugins.length
+                                ? paginatedPlugins
+                                : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
+                            }
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className={cl("page-buttons")}>
+                                <Button
+                                    size={Button.Sizes.SMALL}
+                                    disabled={currentPage === 1}
+                                    onClick={() => goToPage(currentPage - 1)}
+                                >
+                                    Prev
+                                </Button>
+                                <Text>{`Page ${currentPage} of ${totalPages}`}</Text>
+                                <Button
+                                    size={Button.Sizes.SMALL}
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => goToPage(currentPage + 1)}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 )
                 : <ExcludedPluginsList search={search} />
             }
-
 
             <Forms.FormDivider className={Margins.top20} />
 
