@@ -1,0 +1,61 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+#vc-keyword-highlighter-modal {
+    display: flex;
+    flex-direction: column;
+    color: var(--text-normal);
+    padding: 1rem;
+    margin: 0;
+}
+
+#vc-keyword-highlighter-modal h1 {
+    color: var(--header-primary);
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+}
+
+.vc-keyword-highlighter-tones-list-items {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    font-weight: 500;
+    width: 100%;
+    /* stylelint-disable-next-line declaration-property-value-keyword-no-deprecated */
+    word-break: break-word;
+    margin-bottom: 0.5em;
+}
+
+.vc-keyword-highlighter-item-separator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-muted);
+    text-align: justify;
+    padding: 0 0.5em;
+    flex-shrink: 0;
+}
+
+.vc-keyword-highlighter-indicator-container {
+    overflow-y: auto;
+    max-height: 60vh;
+    padding-right: 8px;
+}
+
+.vc-keyword-highlighter-indicator-container::-webkit-scrollbar {
+    display: none;
+}
+
+.vc-keyword-highlighter-indicator-links {
+    line-height: 20px;
+}
+
+.vc-keyword-highlighter-item {
+    flex-shrink: 0;
+    min-width: 40px;
+}
+
