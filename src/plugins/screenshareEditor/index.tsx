@@ -159,7 +159,7 @@ export default definePlugin({
         const pluginSettings = Settings.plugins.ScreenshareEditor;
         return {
             enabled: pluginSettings.enabled ?? false,
-            resolution: pluginSettings.resolution ?? 1920,
+            resolution: pluginSettings.resolution ?? 1080,
             fps: pluginSettings.fps ?? 60
         };
     },
