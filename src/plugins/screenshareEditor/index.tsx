@@ -146,15 +146,6 @@ export default definePlugin({
     description: "Makes it so you can customize your discord screenshare quality",
     authors: [Devs.crimson],
     settings,
-    patches: [
-        {
-            find: "STREAM_QUALITY_",
-            replacement: {
-                match: /(children:\[)/,
-                replace: "$1$self.renderPanel(),"
-            }
-        }
-    ],
     getSettings(): StreamSettings {
         const pluginSettings = Settings.plugins.ScreenshareEditor;
         return {
