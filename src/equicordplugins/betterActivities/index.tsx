@@ -38,22 +38,23 @@ export default definePlugin({
             find: "isBlockedOrIgnored(null",
             replacement: [
                 {
-                    match: /(?<=className:\i,children:\[)\i\(\),/,
+                    match: /(?<=className:\i,children:\[).*?(?=\i\(\),\i&&)/,
                     replace: "",
+                    predicate: () => settings.store.removeGameActivityStatus,
                 },
                 {
                     match: /(?<=hideTooltip:.{0,4}}=(\i).*?{}\))\]/,
-                    replace: ",$self.patchActivityList($1)]"
+                    replace: ",$self.patchActivityList($1)]",
+                    predicate: () => settings.store.memberList,
                 }
             ],
-            predicate: () => settings.store.memberList,
             all: true
         },
         {
             // Show all activities in the user popout/sidebar
             find: '"UserProfilePopoutBody"',
             replacement: {
-                match: /(?<=(\i)\.id\)\}\)\),(\i).*?)\(0,.{0,100}\i\.id,onClose:\i\}\)/,
+                match: /(?<=(\i)\.id\)\}\)\),(\i).*?,)\i\?.{0,250}onClose:\i\}\)/,
                 replace: "$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
             },
             predicate: () => settings.store.userPopout

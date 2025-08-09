@@ -34,6 +34,12 @@ export const settings = definePluginSettings({
         default: true,
         restartNeeded: false,
     },
+    removeGameActivityStatus: {
+        type: OptionType.BOOLEAN,
+        description: "Remove game activity icon and status",
+        default: false,
+        restartNeeded: true,
+    },
     divider: {
         type: OptionType.COMPONENT,
         description: "",
