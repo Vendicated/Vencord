@@ -1,0 +1,208 @@
+#eq-tdl-player {
+    padding: 12px;
+    background: var(--bg-overlay-floating, var(--background-base-low, var(--background-base-lower-alt)));
+    margin: 0;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+
+    --eq-tdl-slider-gradient: linear-gradient(to right, #f03 80%, #ff2791 100%);
+    --eq-tdl-slider-grabber: #f03;
+
+    /* so custom themes can easily change it */
+    --eq-tdl-red-90: color-mix(in hsl, var(--eq-tdl-slider-grabber), transparent 90%);
+    --eq-tdl-red-80: color-mix(in hsl, var(--eq-tdl-slider-grabber), transparent 80%);
+}
+
+.eq-tdl-song-info-prefix {
+    display: none;
+}
+
+.eq-tdl-artist,
+.eq-tdl-album {
+    color: var(--header-primary);
+}
+
+.eq-tdl-secondary-song-info {
+    font-size: 12px;
+}
+
+#eq-tdl-progress-bar {
+    position: relative;
+    color: var(--text-default);
+    width: 100%;
+    margin: 0.5em 0;
+    margin-bottom: 5px;
+}
+
+#eq-tdl-progress-bar > [class^="slider"] {
+    flex-grow: 1;
+    width: 100%;
+    padding: 0 !important;
+}
+
+#eq-tdl-progress-bar > [class^="slider"] [class^="bar"] {
+    height: 3px !important;
+    top: calc(12px - 4px / 2 + var(--bar-offset));
+}
+
+#eq-tdl-progress-bar > [class^="slider"] [class^="barFill"] {
+    background-image: var(--eq-tdl-slider-gradient);
+}
+
+#eq-tdl-progress-bar > [class^="slider"]:hover [class^="barFill"] {
+    background-image: var(--eq-tdl-slider-gradient);
+}
+
+#eq-tdl-progress-bar > [class^="slider"] [class^="grabber"] {
+    background-color: var(--eq-tdl-slider-grabber);
+    width: 12px !important;
+    height: 12px !important;
+    margin-top: calc(13px/-2 + var(--bar-offset)/2);
+    margin-left: -0.5px;
+    border: unset;
+    color: var(--interactive-normal);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+#eq-tdl-progress-bar:hover > [class^="slider"] [class^="grabber"] {
+    opacity: 1;
+}
+
+.eq-tdl-progress-time {
+    margin-top: 8px;
+    font-family: var(--font-code);
+    font-size: 12px;
+    top: 10px;
+    position: absolute;
+}
+
+.eq-tdl-button-row {
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.eq-tdl-button {
+    margin: 0 2px;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--interactive-normal);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.eq-tdl-button:hover {
+    color: var(--interactive-hover);
+    background-color: var(--background-modifier-selected);
+}
+
+.eq-tdl-button svg {
+    height: 24px;
+    width: 24px;
+}
+
+[class*="shuffle"] > svg,
+[class*="repeat"] > svg {
+    width: 22px;
+    height: 22px;
+}
+
+.eq-tdl-button svg path {
+    width: 100%;
+    height: 100%;
+}
+
+
+.eq-tdl-repeat-context,
+.eq-tdl-repeat-track,
+.eq-tdl-shuffle-on {
+    background-color: var(--eq-tdl-red-90);
+}
+
+.eq-tdl-repeat-context:hover,
+.eq-tdl-repeat-track:hover,
+.eq-tdl-shuffle-on:hover {
+    background-color: var(--eq-tdl-red-80);
+}
+
+.eq-tdl-repeat-1 {
+    font-size: 70%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#eq-tdl-info-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 3em;
+    gap: 0.5em;
+}
+
+#eq-tdl-info-wrapper img {
+    height: 90%;
+    object-fit: contain;
+}
+
+#eq-tdl-album-expanded-wrapper img {
+    width: 100%;
+    object-fit: contain;
+}
+
+#eq-tdl-titles {
+    display: flex;
+    flex-direction: column;
+    padding: 0.2rem;
+    align-items: flex-start;
+    place-content: flex-start center;
+    overflow: hidden;
+}
+
+#eq-tdl-song-title {
+    color: var(--header-primary);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.eq-tdl-ellipoverflow {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
+}
+
+.eq-tdl-artist[role="link"]:hover,
+#eq-tdl-album-title[role="link"]:hover,
+#eq-tdl-song-title[role="link"]:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#eq-tdl-album-image {
+    border-radius: 3px;
+    transition: filter 0.2s;
+}
+
+#eq-tdl-album-image:hover {
+    filter: brightness(1.2);
+    cursor: pointer;
+}
+
+#eq-tdl-progress-text {
+    margin: 0;
+}
+
+.eq-tdl-time-left {
+    left: 0;
+}
+
+.eq-tdl-time-right {
+    right: 0;
+}

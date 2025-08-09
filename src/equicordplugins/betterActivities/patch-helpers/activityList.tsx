@@ -6,7 +6,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
-import { React, Tooltip } from "@webpack/common";
+import { Tooltip } from "@webpack/common";
 import { JSX } from "react";
 
 import { ActivityTooltip } from "../components/ActivityTooltip";
@@ -26,7 +26,7 @@ export function patchActivityList({ activities, user, hideTooltip }: ActivityLis
     const applicationIcons = getApplicationIcons(activities);
     if (applicationIcons.length) {
         const compareImageSource = (a: ApplicationIcon, b: ApplicationIcon) => {
-            return a.image.src === b.image.src;
+            return a.image?.src === b.image?.src;
         };
 
         const uniqueIcons = applicationIcons.filter((element, index, array) => {
