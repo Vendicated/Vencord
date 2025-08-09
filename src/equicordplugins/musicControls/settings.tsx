@@ -159,16 +159,6 @@ export const settings = definePluginSettings({
         default: 0,
         ...sliderOptions
     },
-    SyncMode: {
-        description: "Lyrics sync mode",
-        type: OptionType.SELECT,
-        options: [
-            { value: "line", label: "Line" },
-            { value: "word", label: "Word", default: true },
-            { value: "character", label: "Character" },
-        ],
-        default: "word",
-    },
     PurgeLyricsCache: {
         description: "Purge the lyrics cache",
         type: OptionType.COMPONENT,
