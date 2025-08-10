@@ -59,6 +59,11 @@ export const settings = definePluginSettings({
         default: true,
         restartNeeded: true,
     },
+    hideTooltip: {
+        type: OptionType.BOOLEAN,
+        description: "Hides activities in various places",
+        default: true,
+    },
     allActivitiesStyle: {
         type: OptionType.SELECT,
         description: "Style for showing all activities",

@@ -21,7 +21,7 @@ const DefaultActivityIcon = findComponentByCodeLazy("M5 2a3 3 0 0 0-3 3v14a3 3 0
 export function patchActivityList({ activities, user, hideTooltip }: ActivityListProps): JSX.Element | null {
     const icons: ActivityListIcon[] = [];
 
-    if (user.bot || hideTooltip) return null;
+    if (user.bot || settings.store.hideTooltip && hideTooltip) return null;
 
     const applicationIcons = getApplicationIcons(activities);
     if (applicationIcons.length) {
