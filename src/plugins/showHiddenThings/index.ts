@@ -18,7 +18,9 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginSettingDef } from "@utils/types";
+import { GuildMember, Role } from "@vencord/discord-types";
 
 const opt = (description: string) => ({
     type: OptionType.BOOLEAN,
@@ -58,7 +60,7 @@ export default definePlugin({
             },
         },
         {
-            find: /context:\i,checkElevated:!1\}\),\i\.\i.{0,200}autoTrackExposure/,
+            find: /,checkElevated:!1}\),\i\.\i\)}(?<=getCurrentUser\(\);return.+?)/,
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /return \i\.\i\(\i\.\i\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.\i\)/,
@@ -67,21 +69,30 @@ export default definePlugin({
         },
         // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
         {
-            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}",
+            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}),allowOverflow:",
             predicate: () => settings.store.showModView,
             replacement: {
-                match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
-                replace: "$1$2arguments[0].member.highestRoleId]",
+                match: /(?<=\.highestRole\),)role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+)/,
+                replace: "role:$self.getHighestRole(arguments[0],$1)",
             }
         },
         // allows you to open mod view on yourself
         {
-            find: ".MEMBER_SAFETY,{modViewPanel:",
+            find: 'action:"PRESS_MOD_VIEW",icon:',
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /\i(?=\?null)/,
                 replace: "false"
             }
         }
-    ]
+    ],
+
+    getHighestRole({ member }: { member: GuildMember; }, roles: Role[]): Role | undefined {
+        try {
+            return roles.find(role => role.id === member.highestRoleId);
+        } catch (e) {
+            new Logger("ShowHiddenThings").error("Failed to find highest role", e);
+            return undefined;
+        }
+    }
 });

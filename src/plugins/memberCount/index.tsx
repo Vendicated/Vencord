@@ -23,8 +23,8 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
-import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
 
@@ -65,10 +65,12 @@ export default definePlugin({
     patches: [
         {
             find: "{isSidebarVisible:",
-            replacement: {
-                match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-                replace: ":[$1?.startsWith('members')?$self.render():null,$2"
-            },
+            replacement: [
+                {
+                    match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                    replace: ":[$1?.startsWith('members')?$self.render():null,$2",
+                },
+            ],
             predicate: () => settings.store.memberList
         },
         {
