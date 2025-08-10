@@ -149,7 +149,7 @@ export const TidalStore = proxyLazyWebpack(() => {
         public repeat: Repeat = 0;
         public shuffle = false;
         public volume = 100;
-        public playerElement: HTMLElement | null = null;
+        private playerElement: HTMLElement | null = null;
         public socket = new TidalSocket((message: Message) => {
             if (message.type === "update" && message.all && message.fields) {
                 const apiData = message.fields;
