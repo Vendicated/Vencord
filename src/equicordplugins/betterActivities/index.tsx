@@ -60,6 +60,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.userPopout
         },
+        // DM Sidebar
         {
             find: ".SIDEBAR}),nicknameIcons",
             replacement: {
@@ -68,6 +69,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.userPopout
         },
+        // User Panel
         {
             find: "#{intl::STATUS_MENU_LABEL}",
             replacement: {

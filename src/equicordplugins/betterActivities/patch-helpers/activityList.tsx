@@ -6,7 +6,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
-import { Tooltip } from "@webpack/common";
+import { React, Tooltip } from "@webpack/common";
 import { JSX } from "react";
 
 import { ActivityTooltip } from "../components/ActivityTooltip";
