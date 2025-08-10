@@ -306,10 +306,11 @@ function getMemberListProfilesReactionsVoiceNameElement(props: memberListProfile
 function getMessageName(props: messageProps): [string | null, JSX.Element | null, string | null] {
     const { hideDefaultAtSign, replies } = settings.use();
     const { message, userOverride, isRepliedMessage, withMentionPrefix } = props;
+    const isWebhook = !!message.webhookId && !message.interaction;
     const channel = ChannelStore.getChannel(message.channel_id) || {};
     const target = userOverride || message.author;
-    const user = UserStore.getUser(target.id);
-    const member = GuildMemberStore.getMember(channel.guild_id, target.id);
+    const user = isWebhook ? target : UserStore.getUser(target.id);
+    const member = isWebhook ? null : GuildMemberStore.getMember(channel.guild_id, target.id);
     const author = user && member ? { ...user, ...member } : user || member || null;
     const mentionSymbol = hideDefaultAtSign && (!isRepliedMessage || replies) ? "" : withMentionPrefix ? "@" : "";
     return renderUsername(author, channel.id, message.id, isRepliedMessage ? "replies" : "messages", mentionSymbol);
