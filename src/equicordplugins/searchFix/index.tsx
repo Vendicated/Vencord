@@ -43,7 +43,7 @@ export default definePlugin({
     authors: [EquicordDevs.Jaxx],
     patches: [
         {
-            find: '"SearchStore");',
+            find: '"SearchQueryStore");',
             replacement: {
                 match: /\i\.searchResultsQuery=(\i)/,
                 replace: "$&,$self.main($1)"
