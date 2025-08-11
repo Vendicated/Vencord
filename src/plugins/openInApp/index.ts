@@ -100,9 +100,8 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(!)?\(0,\i\.isDesktop\)\(\)/,
-                    replace: (_, not) => not ? "false" : "true"
+                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    replace: "true"
                 }
             ]
         },

@@ -17,7 +17,6 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
-import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -89,14 +88,6 @@ export default definePlugin({
     settings,
 
     async start() {
-        // TODO(OptionType.CUSTOM Related): Remove DataStore tags migration once enough time has passed
-        const oldTags = await DataStore.get<Tag[]>(DATA_KEY);
-        if (oldTags != null) {
-            // @ts-expect-error
-            settings.store.tagsList = Object.fromEntries(oldTags.map(oldTag => (delete oldTag.enabled, [oldTag.name, oldTag])));
-            await DataStore.del(DATA_KEY);
-        }
-
         const tags = getTags();
         for (const tagName in tags) {
             createTagCommand(tags[tagName]);
