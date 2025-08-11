@@ -106,6 +106,7 @@ export interface Quest {
         };
     },
     userStatus: null | {
+        userId: string;
         claimedAt: string | null;
         completedAt: string | null;
         enrolledAt: string | null;

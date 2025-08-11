@@ -11,6 +11,7 @@ import { ErrorBoundary, openPluginModal } from "@components/index";
 import { EquicordDevs } from "@utils/constants";
 import { getIntlMessage } from "@utils/index";
 import definePlugin, { StartAt } from "@utils/types";
+import { onceReady } from "@webpack";
 import { ContextMenuApi, Menu, NavigationRouter } from "@webpack/common";
 import { JSX } from "react";
 
@@ -1122,6 +1123,17 @@ export default definePlugin({
                 rerenderQuests();
             }
         },
+
+        LOGOUT(data) {
+            settings.store.unclaimedUnignoredQuests = 0;
+            settings.store.onQuestsPage = false;
+        },
+
+        LOGIN_SUCCESS(data) {
+            onceReady.then(() => {
+                fetchAndDispatchQuests("Questify", QuestifyLogger);
+            });
+        }
     },
 
     renderQuestifyButton: ErrorBoundary.wrap(QuestButton, { noop: true }),

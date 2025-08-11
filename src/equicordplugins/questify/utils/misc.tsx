@@ -25,15 +25,17 @@ export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;
 
-export function setIgnoredQuestIDs(questIDs: string[]): void {
-    const currentUserID = UserStore.getCurrentUser().id;
+export function setIgnoredQuestIDs(questIDs: string[], userId?: string): void {
+    const currentUserID = userId ?? UserStore.getCurrentUser()?.id;
+    if (!currentUserID) return;
     const { ignoredQuestProfile } = settings.store;
     const key = ignoredQuestProfile === "shared" ? "shared" : currentUserID;
     settings.store.ignoredQuestIDs[key] = questIDs;
 }
 
-export function getIgnoredQuestIDs(): string[] {
-    const currentUserID = UserStore.getCurrentUser().id;
+export function getIgnoredQuestIDs(userId?: string): string[] {
+    const currentUserID = userId ?? UserStore.getCurrentUser()?.id;
+    if (!currentUserID) return [];
     const { ignoredQuestIDs, ignoredQuestProfile } = settings.store;
     const key = ignoredQuestProfile === "shared" ? "shared" : currentUserID;
     ignoredQuestIDs[key] ??= [];
