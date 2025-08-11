@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import {findGroupChildrenByChildId, NavContextMenuPatchCallback} from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -129,29 +129,20 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
 
-        const lastChild = children.at(-1);
-        let sliceIndex = -1;
-        if (lastChild?.props?.children?.length>0) {
-            if (lastChild?.props.children[0]?.key?.startsWith("devmode-copy-id")) {
-                children = lastChild?.props.children;
-                sliceIndex = 0;
-            }
-        } else if (lastChild?.props?.children?.key?.startsWith("devmode-copy-id")) {
-            const p = lastChild.props;
-            if (!Array.isArray(p.children))
-                p.children = [p.children];
-
-            children = p.children;
-            sliceIndex = 0;
-        }
-
         let messageContent = undefined;
         if (name === "Message") {
             value = cleanMessage(value as Message);
             messageContent = value.content;
         }
 
-        children.splice(sliceIndex, 0,
+        let group = findGroupChildrenByChildId("devmode-copy-id", children, true);
+        let sliceIndex = 0;
+        if (group === null) { // not in dev mode
+            group = children;
+            sliceIndex = -1;
+        }
+
+        group.splice(sliceIndex, 0,
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
