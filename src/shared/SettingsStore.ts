@@ -44,6 +44,7 @@ export class SettingsStore<T extends object> {
     private pathListeners = new Map<string, Set<(newData: any) => void>>();
     private globalListeners = new Set<(newData: T, path: string) => void>();
     private readonly proxyContexts = new WeakMap<any, ProxyContext<T>>();
+    private readonly proxyCache = new WeakMap<any, any>();
 
     private readonly proxyHandler: ProxyHandler<any> = (() => {
         const self = this;
@@ -77,8 +78,13 @@ export class SettingsStore<T extends object> {
                 }
 
                 if (typeof v === "object" && v !== null && !v[SYM_IS_PROXY]) {
-                    const getPath = `${path}${path && "."}${key}`;
-                    return self.makeProxy(v, root, getPath);
+                    let cachedProxy = self.proxyCache.get(v);
+                    if (!cachedProxy) {
+                        const getPath = `${path}${path && "."}${key}`;
+                        cachedProxy = self.makeProxy(v, root, getPath);
+                        self.proxyCache.set(v, cachedProxy);
+                    }
+                    return cachedProxy;
                 }
 
                 return v;

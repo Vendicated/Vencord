@@ -111,12 +111,14 @@ const DefaultSettings: Settings = {
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
+const pluginDefaultsCache = new Map<string, any>();
+
 const saveSettingsOnFrequentAction = debounce(async () => {
     if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
         await putCloudSettings();
         delete localStorage.Vencord_settingsDirty;
     }
-}, 60_000);
+}, 120_000);
 
 
 export const SettingsStore = new SettingsStoreClass(settings, {
@@ -147,7 +149,12 @@ export const SettingsStore = new SettingsStoreClass(settings, {
                     return (target[key] = setting.default);
 
                 if (setting.type === OptionType.SELECT) {
-                    const def = setting.options.find(o => o.default);
+                    const cacheKey = `${plugin}.${key}`;
+                    let def = pluginDefaultsCache?.get(cacheKey);
+                    if (def === undefined) {
+                        def = setting.options.find(o => o.default);
+                        if (pluginDefaultsCache) pluginDefaultsCache.set(cacheKey, def);
+                    }
                     if (def)
                         target[key] = def.value;
                     return def?.value;

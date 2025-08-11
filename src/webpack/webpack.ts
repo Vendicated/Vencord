@@ -370,6 +370,7 @@ export function findModuleFactory(...code: CodeFilter) {
     return wreq.m[id];
 }
 
+const MAX_SEARCH_HISTORY = 100;
 export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
 
 /**
@@ -385,7 +386,12 @@ export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "f
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
 export function proxyLazyWebpack<T = any>(factory: () => T, attempts?: number) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return proxyLazy<T>(factory, attempts);
 }
@@ -399,7 +405,12 @@ export function proxyLazyWebpack<T = any>(factory: () => T, attempts?: number) {
  * @returns Result of factory function
  */
 export function LazyComponentWebpack<T extends object = any>(factory: () => any, attempts?: number) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return LazyComponent<T>(factory, attempts);
 }
@@ -408,7 +419,12 @@ export function LazyComponentWebpack<T extends object = any>(factory: () => any,
  * Find the first module that matches the filter, lazily
  */
 export function findLazy(filter: FilterFn) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["find", [filter]]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["find", [filter]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return proxyLazy(() => find(filter));
 }
@@ -427,7 +443,12 @@ export function findByProps(...props: PropsFilter) {
  * Find the first module that has the specified properties, lazily
  */
 export function findByPropsLazy(...props: PropsFilter) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findByProps", props]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["findByProps", props]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return proxyLazy(() => findByProps(...props));
 }
@@ -446,7 +467,12 @@ export function findByCode(...code: CodeFilter) {
  * Find the first function that includes all the given code, lazily
  */
 export function findByCodeLazy(...code: CodeFilter) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findByCode", code]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["findByCode", code]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return proxyLazy(() => findByCode(...code));
 }
@@ -506,7 +532,12 @@ export function findStore(name: StoreNameFilter) {
  * Find a store by its displayName, lazily
  */
 export function findStoreLazy(name: StoreNameFilter) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findStore", [name]]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["findStore", [name]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return proxyLazy(() => findStore(name));
 }
@@ -525,8 +556,12 @@ export function findComponentByCode(...code: CodeFilter) {
  * Finds the first component that matches the filter, lazily.
  */
 export function findComponentLazy<T extends object = any>(filter: FilterFn) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
-
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["findComponent", [filter]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return LazyComponent<T>(() => {
         const res = find(filter, { isIndirect: true });
@@ -540,7 +575,12 @@ export function findComponentLazy<T extends object = any>(filter: FilterFn) {
  * Finds the first component that includes all the given code, lazily
  */
 export function findComponentByCodeLazy<T extends object = any>(...code: CodeFilter) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findComponentByCode", code]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["findComponentByCode", code]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return LazyComponent<T>(() => {
         const res = find(filters.componentByCode(...code), { isIndirect: true });
@@ -554,7 +594,12 @@ export function findComponentByCodeLazy<T extends object = any>(...code: CodeFil
  * Finds the first component that is exported by the first prop name, lazily
  */
 export function findExportedComponentLazy<T extends object = any>(...props: PropsFilter) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findExportedComponent", props]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["findExportedComponent", props]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return LazyComponent<T>(() => {
         const res = find(filters.byProps(...props), { isIndirect: true });
@@ -620,7 +665,12 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
   * @see {@link mapMangledModule}
  */
 export function mapMangledModuleLazy<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["mapMangledModule", [code, mappers, includeBlacklistedExports]]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["mapMangledModule", [code, mappers, includeBlacklistedExports]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return proxyLazy(() => mapMangledModule(code, mappers, includeBlacklistedExports));
 }
@@ -708,7 +758,12 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultEx
  * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
  */
 export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtractAndLoadChunksRegex) {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
+    if (IS_REPORTER) {
+        lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     return makeLazy(() => extractAndLoadChunks(code, matcher));
 }
@@ -718,7 +773,12 @@ export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtr
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | PropsFilter | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
-    if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
+    if (IS_REPORTER && !isIndirect) {
+        lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
+        if (lazyWebpackSearchHistory.length > MAX_SEARCH_HISTORY) {
+            lazyWebpackSearchHistory.shift();
+        }
+    }
 
     if (typeof filter === "string")
         filter = filters.byProps(filter);

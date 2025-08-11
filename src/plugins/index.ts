@@ -51,6 +51,8 @@ const subscribedFluxEventsPlugins = new Set<string>();
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
+const pluginDefaultsCache = new Map<string, any>();
+
 export function isPluginEnabled(p: string) {
     return (
         Plugins[p]?.required ||
@@ -243,6 +245,7 @@ export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Fl
         logger.debug("Unsubscribing from flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
             fluxDispatcher.unsubscribe(event as FluxEvents, handler);
+            delete p.flux[event];
         }
     }
 }
