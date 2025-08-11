@@ -38,7 +38,7 @@
 }
 
 .vc-gp-tab-bar {
-    border-bottom: 2px solid var(--background-modifier-accent);
+    border-bottom: 1px solid var(--border-subtle);
     margin: 20px 12px 0;
     display: flex;
     gap: 40px;
