@@ -31,8 +31,6 @@ export let MessageStore: Omit<t.MessageStore, "getMessages"> & GenericStore & {
     getMessages(chanId: string): any;
 };
 
-// TODO: The correct name for this is ChannelActionCreators and it has already been exported again from utils. Remove this export once enough time has passed
-export const PrivateChannelsStore = findByPropsLazy("openPrivateChannel");
 export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
@@ -42,16 +40,19 @@ export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
 export let GuildMemberStore: t.GuildMemberStore;
 export let UserStore: t.UserStore;
+export let AuthenticationStore: t.AuthenticationStore;
 export let UserProfileStore: t.UserProfileStore;
 export let SelectedChannelStore: t.SelectedChannelStore;
 export let SelectedGuildStore: t.SelectedGuildStore;
 export let ChannelStore: t.ChannelStore;
+export let TypingStore: t.TypingStore;
 export let RelationshipStore: t.RelationshipStore;
 
 export let EmojiStore: t.EmojiStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+
 export let StreamerModeStore: t.StreamerModeStore;
 export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 
@@ -60,6 +61,7 @@ export let ApplicationStreamingStore: t.ApplicationStreamingStore;
  */
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
+waitForStore("AuthenticationStore", s => AuthenticationStore = s);
 waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
 waitForStore("DraftStore", s => DraftStore = s);
@@ -79,6 +81,7 @@ waitForStore("GuildRoleStore", m => GuildRoleStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
