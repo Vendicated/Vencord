@@ -207,20 +207,12 @@ export default definePlugin({
                     const { data } = ctx.getImageData(0, 0, resolution, resolution);
                     const index = applyPaletteTransparent(data, palette, cache, 1);
 
-                    if (i === 0) {
-                        gif.writeFrame(index, resolution, resolution, {
-                            transparent: true,
-                            transparentIndex: 255,
-                            palette,
-                            delay,
-                        });
-                    } else {
-                        gif.writeFrame(index, resolution, resolution, {
-                            transparent: true,
-                            transparentIndex: 255,
-                            delay,
-                        });
-                    }
+                    gif.writeFrame(index, resolution, resolution, {
+                        transparent: true,
+                        transparentIndex: 255,
+                        delay,
+                        palette: i === 0 ? palette : null,
+                    });
                 }
 
                 gif.finish();
