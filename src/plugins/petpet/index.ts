@@ -120,7 +120,7 @@ export default definePlugin({
             options: [
                 {
                     name: "delay",
-                    description: "The delay between each frame. Defaults to 20.",
+                    description: "The delay between each frame in ms. Rounded to nearest 10ms. Defaults to the minimum value of 20.",
                     type: ApplicationCommandOptionType.INTEGER
                 },
                 {
@@ -168,7 +168,7 @@ export default definePlugin({
 
                 let delay = findOption(opts, "delay", DEFAULT_DELAY);
                 // Frame delays < 20ms don't function correctly on chromium and firefox
-                if (delay < 20) delay = 20;
+                if (delay < 20) return sendBotMessage(cmdCtx.channel.id, { content: "Delay must be at least 20." });
 
                 const resolution = findOption(opts, "resolution", DEFAULT_RESOLUTION);
 
