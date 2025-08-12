@@ -20,9 +20,6 @@ on:
 
 env:
     FORCE_COLOR: true
-    GITHUB_TOKEN: ${{ secrets.ETOKEN }}
-    REPO: Equicord/Equibored
-    USERNAME: GitHub-Actions
 
 jobs:
     TestPlugins:
@@ -95,27 +92,6 @@ jobs:
                   done
 
                   cat "$stable_output_file" "$canary_output_file" >> $GITHUB_STEP_SUMMARY
-
-                  git config --global user.name "GitHub-Actions"
-                  git config --global user.email actions@github.com
-                  git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git report
-                  cd report
-
-                  cp ../dist/reporter*.json .
-                  git add -A
-
-                  if git diff --cached --quiet; then
-                    echo "Nothing to commit"
-                    if [[ $exit_code -eq 0 ]]; then
-                        exit 0
-                    else
-                        exit 1
-                    fi
-                  else
-                    git commit -m "Reporter Results"
-                    git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git
-                  fi
-
                   exit $exit_code
               env:
                   WEBHOOK_URL: ${{ inputs.webhook_url || secrets.WEBHOOK_URL }}
