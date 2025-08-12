@@ -178,6 +178,7 @@ export default definePlugin({
 
                 const canvas = document.createElement("canvas");
                 canvas.width = resolution;
+                // Ensure there is sufficient space for the palette generation image
                 canvas.height = Math.max(resolution, 2 * paletteImageSize);
 
                 const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
