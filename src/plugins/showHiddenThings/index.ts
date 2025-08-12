@@ -72,8 +72,8 @@ export default definePlugin({
             find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}),allowOverflow:",
             predicate: () => settings.store.showModView,
             replacement: {
-                match: /(role:)\i(?<=\i\.roles,\i\.highestRoleId,(\i)\].+)/,
-                replace: "$1$self.findHighestRole(arguments[0],$2)",
+                match: /(?<=\.highestRole\),)role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+)/,
+                replace: "role:$self.getHighestRole(arguments[0],$1)",
             }
         },
         // allows you to open mod view on yourself
@@ -87,7 +87,7 @@ export default definePlugin({
         }
     ],
 
-    findHighestRole({ member }: { member: GuildMember; }, roles: Role[]): Role | undefined {
+    getHighestRole({ member }: { member: GuildMember; }, roles: Role[]): Role | undefined {
         try {
             return roles.find(role => role.id === member.highestRoleId);
         } catch (e) {
