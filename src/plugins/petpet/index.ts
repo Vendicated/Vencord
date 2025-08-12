@@ -92,7 +92,7 @@ function rgb888_to_rgb565(r: number, g: number, b: number) {
 function applyPaletteTransparent(data: Uint8Array | Uint8ClampedArray, palette: number[][], cache: number[], threshold: number): Uint8Array {
     const index = new Uint8Array(Math.floor(data.length / 4));
 
-    for (let i = 0; i < data.length; i += 1) {
+    for (let i = 0; i < index.length; i += 1) {
         const r = data[4 * i];
         const g = data[4 * i + 1];
         const b = data[4 * i + 2];
