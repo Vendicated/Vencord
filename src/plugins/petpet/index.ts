@@ -85,7 +85,7 @@ async function resolveImage(options: CommandArgument[], ctx: CommandContext, noS
     return null;
 }
 
-function rgb888_to_rgb565(r: number, g: number, b: number) {
+function rgb888_to_rgb565(r: number, g: number, b: number): number {
     return ((r << 8) & 0xf800) | ((g << 3) & 0x07e0) | (b >> 3);
 }
 
