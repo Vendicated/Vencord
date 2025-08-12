@@ -153,7 +153,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             ?.firstElementChild?.scrollTo(0, 0);
 
 
-        const encodedQuery = encodeURI(searchQuery).toLowerCase();
+        const encodedQuery = encodeURI(searchQuery).replace(/(%20|[_-])/g, " ").toLowerCase();
         const result =
             props.favCopy
                 .map(gif => ({
