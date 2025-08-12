@@ -47,7 +47,7 @@ export const settings = definePluginSettings({
             <div style={{
                 width: "100%",
                 height: 1,
-                borderTop: "thin solid var(--background-modifier-accent)",
+                borderTop: "thin solid var(--input-border)",
                 paddingTop: 5,
                 paddingBottom: 5
             }} />
@@ -58,6 +58,11 @@ export const settings = definePluginSettings({
         description: "Show all activities in the profile popout/sidebar",
         default: true,
         restartNeeded: true,
+    },
+    hideTooltip: {
+        type: OptionType.BOOLEAN,
+        description: "Hides activities in various places",
+        default: true,
     },
     allActivitiesStyle: {
         type: OptionType.SELECT,

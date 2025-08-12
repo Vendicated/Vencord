@@ -62,7 +62,7 @@
 }
 
 .vc-bactivities-controls [class^="vc-activities-caret-"]:hover:not(.disabled) {
-    background: var(--background-modifier-accent);
+    background: var(--input-border);
 }
 
 .vc-bactivities-controls .carousel {

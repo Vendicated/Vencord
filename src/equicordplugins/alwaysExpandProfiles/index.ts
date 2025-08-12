@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { User } from "@vencord/discord-types";
 
+migratePluginSettings("AlwaysExpandProfiles", "AlwaysExpandProfile");
 export default definePlugin({
-    name: "AlwaysExpandProfile",
+    name: "AlwaysExpandProfiles",
     description: "Always display a user's full popout",
     authors: [EquicordDevs.thororen],
     patches: [

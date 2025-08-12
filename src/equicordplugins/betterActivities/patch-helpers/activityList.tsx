@@ -6,7 +6,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
-import { Tooltip } from "@webpack/common";
+import { React, Tooltip } from "@webpack/common";
 import { JSX } from "react";
 
 import { ActivityTooltip } from "../components/ActivityTooltip";
@@ -21,7 +21,7 @@ const DefaultActivityIcon = findComponentByCodeLazy("M5 2a3 3 0 0 0-3 3v14a3 3 0
 export function patchActivityList({ activities, user, hideTooltip }: ActivityListProps): JSX.Element | null {
     const icons: ActivityListIcon[] = [];
 
-    if (user.bot || hideTooltip) return null;
+    if (user.bot || settings.store.hideTooltip && hideTooltip) return null;
 
     const applicationIcons = getApplicationIcons(activities);
     if (applicationIcons.length) {

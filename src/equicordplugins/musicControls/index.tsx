@@ -33,7 +33,7 @@ import { TidalPlayer } from "./tidal/TidalPlayer";
 export default definePlugin({
     name: "MusicControls",
     description: "Music Controls and Lyrics for multiple services ",
-    authors: [EquicordDevs.thororen, EquicordDevs.vmohammad, Devs.Joona],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev, EquicordDevs.thororen, EquicordDevs.vmohammad, Devs.Joona],
     settings,
     patches: [
         {

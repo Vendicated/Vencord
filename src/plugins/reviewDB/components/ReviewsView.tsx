@@ -29,8 +29,8 @@ import ReviewComponent from "./ReviewComponent";
 
 const Transforms = findByPropsLazy("insertNodes", "textToText");
 const Editor = findByPropsLazy("start", "end", "toSlateRange");
-const ChatInputTypes = findByPropsLazy("FORM");
-const InputComponent = findComponentByCodeLazy("disableThemedBackground", "CHANNEL_TEXT_AREA");
+const ChatInputTypes = findByPropsLazy("FORM", "USER_PROFILE");
+const InputComponent = findComponentByCodeLazy("editorClassName", "CHANNEL_TEXT_AREA");
 const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
 
 interface UserProps {
@@ -127,7 +127,7 @@ export function ReviewsInputComponent(
 ) {
     const { token } = Auth;
     const editorRef = useRef<any>(null);
-    const inputType = ChatInputTypes.FORM;
+    const inputType = ChatInputTypes.USER_PROFILE_REPLY;
     inputType.disableAutoFocus = true;
 
     const channel = createChannelRecordFromServer({ id: "0", type: 1 });
