@@ -80,7 +80,7 @@ export default definePlugin({
                 },
                 {
                     match: /#{intl::SET_STATUS}\)(?<=innerRef:(\i),style:.+?)/,
-                    replace: "$&,innerRef:$self.grabRef($1),onContextMenu:$self.openAccountPanelContextMenu"
+                    replace: "$&,onContextMenu:($self.grabRef($1),$self.openAccountPanelContextMenu)"
                 }
             ]
         }
