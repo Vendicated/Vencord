@@ -89,7 +89,7 @@ function rgb888_to_rgb565(r: number, g: number, b: number) {
     return ((r << 8) & 0xf800) | ((g << 3) & 0x07e0) | (b >> 3);
 }
 
-function applyPaletteTransparent(data: Uint8Array | Uint8ClampedArray, palette: number[][], cache: Uint8Array, threshold: number): Uint8Array {
+function applyPaletteTransparent(data: Uint8Array | Uint8ClampedArray, palette: number[][], cache: number[], threshold: number): Uint8Array {
     const index = new Uint8Array(Math.floor(data.length / 4));
 
     for (let i = 0; i < index.length; i += 1) {
@@ -190,7 +190,7 @@ export default definePlugin({
                 const { data } = ctx.getImageData(0, 0, paletteImageSize, 2 * paletteImageSize);
                 const palette = quantize(data, 255);
 
-                const cache = new Uint8Array(2 ** 16);
+                const cache = new Array(65536);
 
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
