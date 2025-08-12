@@ -68,7 +68,7 @@
 .vc-channeltabs-separator {
     width: 98%;
     height: 1px;
-    background: var(--background-modifier-accent);
+    background: var(--input-border);
     margin: 4px auto;
 }
 
@@ -283,7 +283,7 @@
     padding: 0.125rem 0;
     min-width: 0;
     border-radius: 0.25rem;
-    border: 1px solid var(--background-modifier-accent);
+    border: 1px solid var(--input-border);
 }
 
 .vc-channeltabs-preview-tab-compact {

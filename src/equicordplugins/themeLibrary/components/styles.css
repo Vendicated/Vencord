@@ -85,14 +85,14 @@
 }
 
 .vce-overwrite-modal {
-  border: 1px solid var(--background-modifier-accent);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   padding: 0.5em;
 }
 
 .vce-image-paste {
   border-radius: 8px;
-  border: 3px dashed var(--background-modifier-accent);
+  border: 3px dashed var(--input-border);
   background-color: var(--background-secondary);
   padding: 20px;
   text-align: center;
@@ -115,7 +115,7 @@
 
 .vce-styled-list li {
   padding: 10px 0;
-  border-bottom: thin solid var(--background-modifier-accent);
+  border-bottom: thin solid var(--input-border);
 }
 
 .vce-styled-list li:last-child {
@@ -123,7 +123,7 @@
 }
 
 .vce-divider-border {
-  border-bottom: thin solid var(--background-modifier-accent);
+  border-bottom: thin solid var(--input-border);
   padding: 10px 0;
   width: 100%;
 }

@@ -23,19 +23,19 @@
     justify-content: center;
     margin-top: 2px;
     padding-top: 12px;
-    border-top: 1px solid var(--profile-body-divider-color, var(--background-modifier-accent));
+    border-top: 1px solid var(--profile-body-divider-color, var(--input-border));
 }
 
 .vc-github-repos-button,
 .vc-github-repos-show-more {
     width: 100%;
-    border: 1px solid var(--profile-body-divider-color, var(--background-modifier-accent)) !important;
+    border: 1px solid var(--profile-body-divider-color, var(--input-border)) !important;
 }
 
 .vc-github-repo-card {
     padding: 8px;
     border-radius: var(--radius-xs);
-    border: 1px solid var(--profile-body-divider-color, var(--background-modifier-accent));
+    border: 1px solid var(--profile-body-divider-color, var(--input-border));
 }
 
 .vc-github-repo-header {
@@ -103,7 +103,7 @@
 }
 
 .vc-github-repos-table thead {
-    border-bottom: 2px solid var(--background-modifier-accent);
+    border-bottom: 2px solid var(--input-border);
 }
 
 .vc-github-repos-table th {
@@ -111,7 +111,7 @@
     padding: 10px 16px;
     font-weight: 600;
     color: var(--header-primary);
-    border-bottom: 2px solid var(--background-modifier-accent);
+    border-bottom: 2px solid var(--input-border);
 }
 
 .vc-github-repos-table th:last-child {
@@ -119,7 +119,7 @@
 }
 
 .vc-github-repos-table tbody tr {
-    border-bottom: 1px solid var(--background-modifier-accent);
+    border-bottom: 1px solid var(--input-border);
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
@@ -131,7 +131,7 @@
 .vc-github-repos-table td {
     padding: 12px 16px;
     vertical-align: middle;
-    border-bottom: 1px solid var(--background-modifier-accent);
+    border-bottom: 1px solid var(--input-border);
     overflow: hidden;
     text-overflow: ellipsis;
 }
