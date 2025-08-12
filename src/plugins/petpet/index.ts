@@ -190,7 +190,7 @@ export default definePlugin({
                 const { data } = ctx.getImageData(0, 0, paletteImageSize, 2 * paletteImageSize);
                 const palette = quantize(data, 255);
 
-                const cache = new Array(65536);
+                const cache = new Array(2 ** 16);
 
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
