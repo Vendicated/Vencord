@@ -79,12 +79,8 @@ export default definePlugin({
                     replace: "$&$self.onPopoutClose();"
                 },
                 {
-                    match: /(?<=#{intl::SET_STATUS}\),)/,
-                    replace: "onContextMenu:$self.openAccountPanelContextMenu,"
-                },
-                {
-                    match: /(?<=innerRef:)\i(?=,style:\i(?:,|\}))/,
-                    replace: "$self.grabRef($&)"
+                    match: /#{intl::SET_STATUS}\),(?<=innerRef:(\i),style:.+?)/,
+                    replace: "$&onContextMenu:($self.grabRef($1),$self.openAccountPanelContextMenu),"
                 }
             ]
         }
