@@ -211,7 +211,7 @@ export default definePlugin({
                         transparent: true,
                         transparentIndex: 255,
                         delay,
-                        palette: i === 0 ? palette : null,
+                        palette: i === 0 ? palette : undefined,
                     });
                 }
 
