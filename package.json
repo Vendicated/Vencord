@@ -40,7 +40,6 @@
         "@ffmpeg/ffmpeg": "^0.12.10",
         "@ffmpeg/util": "^0.12.1",
         "@intrnl/xxhash64": "^0.1.2",
-        "@sapphi-red/web-noise-suppressor": "0.3.5",
         "@types/less": "^3.0.6",
         "@types/stylus": "^0.48.42",
         "@types/tinycolor2": "^1.4.6",
@@ -52,8 +51,6 @@
         "jsqr": "1.4.0",
         "monaco-editor": "^0.52.2",
         "nanoid": "^5.1.5",
-        "openai": "^4.30.0",
-        "socket.io": "^4.8.1",
         "usercss-meta": "^0.12.0",
         "virtual-merge": "^1.0.1"
     },
@@ -87,12 +84,10 @@
         "ts-pattern": "^5.6.0",
         "tsx": "^4.19.3",
         "type-fest": "^4.38.0",
-        "typed-emitter": "^2.1.0",
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.28.0",
         "typescript-transform-paths": "^3.5.5",
-        "zip-local": "^0.3.5",
-        "zustand": "^3.7.2"
+        "zip-local": "^0.3.5"
     },
     "packageManager": "pnpm@10.14.0",
     "pnpm": {
