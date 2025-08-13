@@ -110,7 +110,7 @@ export function insertTextIntoChatInputBox(text: string) {
     });
 }
 
-interface MessageExtra {
+interface MessageOptions {
     messageReference: Message["messageReference"];
     allowedMentions: {
         parse: string[];
@@ -122,8 +122,8 @@ interface MessageExtra {
 export function sendMessage(
     channelId: string,
     data: Partial<MessageObject>,
-    waitForChannelReady?: boolean,
-    extra?: Partial<MessageExtra>
+    waitForChannelReady = true,
+    options: Partial<MessageOptions> = {}
 ) {
     const messageData = {
         content: "",
@@ -133,7 +133,7 @@ export function sendMessage(
         ...data
     };
 
-    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
+    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, options);
 }
 
 /**

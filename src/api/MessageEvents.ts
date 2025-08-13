@@ -62,7 +62,7 @@ export interface MessageReplyOptions {
     };
 }
 
-export interface MessageExtra {
+export interface MessageOptions {
     stickers?: string[];
     uploads?: Upload[];
     replyOptions: MessageReplyOptions;
@@ -72,17 +72,17 @@ export interface MessageExtra {
     openWarningPopout: (props: any) => any;
 }
 
-export type MessageSendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
+export type MessageSendListener = (channelId: string, messageObj: MessageObject, options: MessageOptions) => Promisable<void | { cancel: boolean; }>;
 export type MessageEditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
 
 const sendListeners = new Set<MessageSendListener>();
 const editListeners = new Set<MessageEditListener>();
 
-export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
-    extra.replyOptions = replyOptions;
+export async function _handlePreSend(channelId: string, messageObj: MessageObject, options: MessageOptions, replyOptions: MessageReplyOptions) {
+    options.replyOptions = replyOptions;
     for (const listener of sendListeners) {
         try {
-            const result = await listener(channelId, messageObj, extra);
+            const result = await listener(channelId, messageObj, options);
             if (result?.cancel) {
                 return true;
             }
