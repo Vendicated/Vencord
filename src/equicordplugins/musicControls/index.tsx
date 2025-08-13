@@ -30,12 +30,29 @@ import { SpotifyPlayer } from "./spotify/PlayerComponent";
 import { TidalLyrics } from "./tidal/lyrics/components/lyrics";
 import { TidalPlayer } from "./tidal/TidalPlayer";
 
+const tags = [
+    // Spotify
+    "Spotify",
+    "SpotifyControls",
+    "SpotifyLyrics",
+    // Tidal
+    "Tidal",
+    "TidalControls",
+    "TidalLyrics",
+    // Youtube
+    /* Deprecated RN
+    "Youtube",
+    "YoutubeMusic",
+    "YoutubeMusicControls"
+    */
+];
+
 export default definePlugin({
     name: "MusicControls",
     description: "Music Controls and Lyrics for multiple services ",
-    tags: ["Spotify", "SpotifyControls", "SpotifyLyrics"],
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev, EquicordDevs.thororen, EquicordDevs.vmohammad, Devs.Joona],
     settings,
+    tags,
     patches: [
         {
             find: "this.isCopiedStreakGodlike",
