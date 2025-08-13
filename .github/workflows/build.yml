@@ -3,6 +3,7 @@ on:
     push:
         branches:
             - main
+
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
@@ -65,9 +66,13 @@ jobs:
                   rm release/*.map
 
             - name: Upload Equicord Stable
-              if: ${{ github.ref_name == 'main' }}
               run: |
                   gh release upload latest --clobber dist/release/*
+
+            - name: Create Tag
+              uses: butlerlogic/action-autotag@1.1.2
+              env:
+                GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
             - name: Upload Plugin JSONs to Equibored repo
               run: |
