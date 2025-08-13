@@ -102,7 +102,15 @@ export default definePlugin({
     },
 
     async start() {
+        if (Settings.plugins?.SpotifyControls?.enabled) {
+            settings.store.showSpotifyControls = true;
+            Settings.plugins.SpotifyControls.enabled = false;
+        }
+        if (Settings.plugins?.SpotifyLyrics?.enabled) {
+            settings.store.showSpotifyLyrics = true;
+            Settings.plugins.SpotifyLyrics.enabled = false;
+        }
         await migrateOldLyrics();
-        toggleHoverControls(Settings.plugins.MusicControls.hoverControls);
+        toggleHoverControls(settings.store.hoverControls);
     },
 });
