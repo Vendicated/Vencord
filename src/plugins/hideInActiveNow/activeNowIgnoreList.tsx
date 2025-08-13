@@ -6,8 +6,8 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import * as DataStore from "@api/DataStore";
+import { Guild, User } from "@vencord/discord-types";
 import { Button, Menu, showToast, Toasts } from "@webpack/common";
-import { Guild, User } from "discord-types/general";
 
 import { settings } from "./index";
 
