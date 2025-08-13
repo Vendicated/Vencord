@@ -35,6 +35,23 @@ export default definePlugin({
     description: "Music Controls and Lyrics for multiple services ",
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev, EquicordDevs.thororen, EquicordDevs.vmohammad, Devs.Joona],
     settings,
+    tags: [
+        // Spotify
+        "Spotify",
+        "SpotifyControls",
+        "SpotifyLyrics",
+        // Tidal
+        "Tidal",
+        "TidalControls",
+        "TidalLyrics",
+        // Youtube
+        /* Deprecated RN
+        "Youtube",
+        "YoutubeMusic",
+        "YoutubeMusicControls"
+        */
+    ],
+
     patches: [
         {
             find: "this.isCopiedStreakGodlike",
@@ -102,7 +119,15 @@ export default definePlugin({
     },
 
     async start() {
+        if (Settings.plugins?.SpotifyControls?.enabled) {
+            settings.store.showSpotifyControls = true;
+            Settings.plugins.SpotifyControls.enabled = false;
+        }
+        if (Settings.plugins?.SpotifyLyrics?.enabled) {
+            settings.store.showSpotifyLyrics = true;
+            Settings.plugins.SpotifyLyrics.enabled = false;
+        }
         await migrateOldLyrics();
-        toggleHoverControls(Settings.plugins.MusicControls.hoverControls);
+        toggleHoverControls(settings.store.hoverControls);
     },
 });
