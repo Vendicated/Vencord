@@ -60,7 +60,7 @@ const AllowLevelSettings = ErrorBoundary.wrap(() => {
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Always allow loggers of these types</Forms.FormText>
+            <Forms.FormText className={Margins.bottom8}>Always allow loggers of these types</Forms.FormText>
             <Flex flexDirection="row">
                 {Object.keys(settings.store.allowLevel).map(key => (
                     <AllowLevelSetting key={key} settingKey={key as keyof AllowLevels} />
