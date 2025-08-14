@@ -83,7 +83,8 @@ const enum TimestampMode {
 const settings = definePluginSettings({
     appID: {
         type: OptionType.STRING,
-        description: "Application ID (required)",
+        displayName: "Application ID (required)",
+        description: "Application ID from the Discord Developer Portal",
         onChange: onChange,
         isValid: (value: string) => {
             if (!value) return "Application ID is required.";
@@ -230,7 +231,8 @@ const settings = definePluginSettings({
     },
     buttonOneText: {
         type: OptionType.STRING,
-        description: "Button 1 text",
+        displayName: "Button 1 Text",
+        description: "The text to display on button 1",
         onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 31) return "Button 1 text must be not longer than 31 characters.";
@@ -239,12 +241,14 @@ const settings = definePluginSettings({
     },
     buttonOneURL: {
         type: OptionType.STRING,
-        description: "Button 1 URL",
+        displayName: "Button 1 URL",
+        description: "The URL to open when clicking button 1",
         onChange: onChange
     },
     buttonTwoText: {
         type: OptionType.STRING,
-        description: "Button 2 text",
+        displayName: "Button 2 Text",
+        description: "The text to display on button 2",
         onChange: onChange,
         isValid: (value: string) => {
             if (value && value.length > 31) return "Button 2 text must be not longer than 31 characters.";
@@ -253,7 +257,8 @@ const settings = definePluginSettings({
     },
     buttonTwoURL: {
         type: OptionType.STRING,
-        description: "Button 2 URL",
+        displayName: "Button 2 URL",
+        description: "The URL to open when clicking button 2",
         onChange: onChange
     }
 });
