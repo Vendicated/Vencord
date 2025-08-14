@@ -259,6 +259,11 @@ export default definePlugin({
                 const msg = cache.get(id);
                 if (!msg) return;
 
+                if (!msg.content || msg.content.trim() === "") {
+                    cache = cache.remove(id);
+                    return;
+                }
+
                 const EPHEMERAL = 64;
                 const shouldIgnore = data.mlDeleted ||
                     (msg.flags & EPHEMERAL) === EPHEMERAL ||
