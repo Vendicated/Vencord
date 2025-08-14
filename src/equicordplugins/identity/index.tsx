@@ -86,7 +86,7 @@ function ResetCard() {
                                 <Forms.FormText>
                                     Saving your base profile will allow you to have a backup of your actual profile
                                 </Forms.FormText>
-                                <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                                <Forms.FormText>
                                     If you save, it will overwrite your previous data.
                                 </Forms.FormText>
                             </div>,
@@ -107,7 +107,7 @@ function ResetCard() {
                                 <Forms.FormText>
                                     Loading your base profile will restore your actual profile settings
                                 </Forms.FormText>
-                                <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                                <Forms.FormText>
                                     If you load, it will overwrite your current profile configuration.
                                 </Forms.FormText>
                             </div>,

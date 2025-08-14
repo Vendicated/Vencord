@@ -23,7 +23,7 @@ function warningEmbedNotice(trigger) {
                 <Forms.FormText>
                     Your message contains a term on the automod preset list. (Term "{trigger}")
                 </Forms.FormText>
-                <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                <Forms.FormText>
                     There is a high chance your message will be blocked and potentially moderated by a server moderator.
                 </Forms.FormText>
             </div>,

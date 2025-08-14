@@ -153,7 +153,7 @@ export default definePlugin({
                     replace: "false"
                 },
                 {
-                    match: /return\s*?\[.{0,50}?(?=\?\(0,\i\.jsxs?.{0,100}?id:"copy-image")/,
+                    match: /return\s*?\[.{0,100}?(?=\?\(0,\i\.jsxs?.{0,100}?id:"copy-image")/,
                     replace: "return [true"
                 },
                 {
