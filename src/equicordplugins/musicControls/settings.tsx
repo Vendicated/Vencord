@@ -10,7 +10,8 @@ import { makeRange, OptionType } from "@utils/types";
 import { Button, Forms, MaskedLink, showToast, Toasts } from "@webpack/common";
 
 import hoverOnlyStyle from "./hoverOnly.css?managed";
-import { clearLyricsCache } from "./spotify/lyrics/api";
+import { clearLyricsCache, removeTranslations } from "./spotify/lyrics/api";
+import languages from "./spotify/lyrics/providers/translator/languages";
 import { Provider } from "./spotify/lyrics/providers/types";
 
 const sliderOptions = {
@@ -60,6 +61,15 @@ export const settings = definePluginSettings({
             { value: Provider.Spotify, label: "Spotify (Musixmatch)", default: true },
             { value: Provider.Lrclib, label: "LRCLIB" },
         ],
+    },
+    TranslateTo: {
+        description: "Translate lyrics to - Changing this will clear existing translations",
+        type: OptionType.SELECT,
+        options: languages,
+        onChange: async () => {
+            await removeTranslations();
+            showToast("Translations cleared", Toasts.Type.SUCCESS);
+        }
     },
     LyricsConversion: {
         description: "Automatically translate or romanize lyrics",

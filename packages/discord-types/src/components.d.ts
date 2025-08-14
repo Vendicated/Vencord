@@ -44,12 +44,7 @@ export type FormDivider = ComponentType<{
 }>;
 
 
-export type FormText = ComponentType<PropsWithChildren<{
-    disabled?: boolean;
-    selectable?: boolean;
-    /** defaults to FormText.Types.DEFAULT */
-    type?: string;
-}> & TextProps> & { Types: FormTextTypes; };
+export type FormText = ComponentType<TextProps>;
 
 export type Tooltip = ComponentType<{
     text: ReactNode | ComponentType;

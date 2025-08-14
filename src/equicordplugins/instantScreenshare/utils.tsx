@@ -95,7 +95,7 @@ function SettingSection() {
     return (
         <Forms.FormSection>
             <Forms.FormTitle>Media source to stream</Forms.FormTitle>
-            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Resets to main screen if not found</Forms.FormText>
+            <Forms.FormText>Resets to main screen if not found</Forms.FormText>
             <ScreenSetting />
         </Forms.FormSection>
     );

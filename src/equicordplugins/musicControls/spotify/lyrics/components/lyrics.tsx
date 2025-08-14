@@ -14,51 +14,45 @@ import { LyricsContextMenu } from "./ctxMenu";
 import { LyricsModal } from "./modal";
 import { cl, NoteSvg, useLyrics } from "./util";
 
+const prevCl = cl("prev");
+const nextCl = cl("next");
+const currentCl = cl("current");
+
 function LyricsDisplay({ scroll = true }: { scroll?: boolean; }) {
     const { ShowMusicNoteOnNoLyrics } = settings.use(["ShowMusicNoteOnNoLyrics"]);
     const { lyricsInfo, lyricRefs, currLrcIndex } = useLyrics({ scroll });
 
     const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric] || null;
 
-    const NoteElement = NoteSvg(cl("music-note"));
-
     const makeClassName = (index: number): string => {
-        if (currLrcIndex === null) return "";
+        if (currLrcIndex == null) return prevCl;
 
         const diff = index - currLrcIndex;
 
-        if (diff === 0) return cl("current");
-        return cl(diff > 0 ? "next" : "prev");
+        if (diff === 0) return currentCl;
+        return diff > 0 ? nextCl : prevCl;
     };
-
-    if (!lyricsInfo) {
-        return ShowMusicNoteOnNoLyrics ? (
-            <div className="vc-spotify-lyrics"
-                onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <LyricsContextMenu />)}
-            >
-                <TooltipContainer text="No synced lyrics found">
-                    {NoteElement}
-                </TooltipContainer>
-            </div>
-        ) : null;
-    }
 
     return (
         <div
             className="vc-spotify-lyrics"
-            onClick={() => openModal(props => <LyricsModal rootProps={props} />)}
+            onClick={() => openModal(props => <LyricsModal props={props} />)}
             onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <LyricsContextMenu />)}
         >
-            {currentLyrics?.map((line, i) => (
+            {currentLyrics ? currentLyrics.map((line, i) => (
                 <div ref={lyricRefs[i]} key={i}>
                     <Text
                         variant={currLrcIndex === i ? "text-sm/normal" : "text-xs/normal"}
                         className={makeClassName(i)}
                     >
-                        {line.text || NoteElement}
+                        {line.text || NoteSvg()}
                     </Text>
                 </div>
-            ))}
+            )) : ShowMusicNoteOnNoLyrics ? (
+                <TooltipContainer text="No synced lyrics found">
+                    <NoteSvg />
+                </TooltipContainer>
+            ) : null}
         </div>
     );
 }

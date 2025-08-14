@@ -17,7 +17,14 @@ const formatTime = (time: number) => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
-function ModalHeaderContent({ track }: { track: Track; }) {
+function ModalHeaderContent({ track }: { track: Track | null; }) {
+    if (!track) {
+        return (
+            <ModalHeader>
+                <Text variant="text-sm/semibold">No track playing</Text>
+            </ModalHeader>
+        );
+    }
     return (
         <ModalHeader>
             <div className={cl("header-content")}>
@@ -43,27 +50,30 @@ function ModalHeaderContent({ track }: { track: Track; }) {
     );
 }
 
-export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
+const modalCurrentLine = cl("modal-line-current");
+const modalLine = cl("modal-line");
+
+export function LyricsModal({ props }: { props: ModalProps; }) {
     const { track, lyricsInfo, currLrcIndex } = useLyrics({ scroll: false });
-    const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric] || null;
+    const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric];
 
     return (
-        <ModalRoot {...rootProps}>
-            <ModalHeaderContent track={track!} />
+        <ModalRoot {...props}>
+            <ModalHeaderContent track={track} />
             <ModalContent>
-                <div className={cl("lyrics-modal-container") + ` ${scrollClasses.auto}`}>
+                <div className={`${cl("lyrics-modal-container")} ${scrollClasses.auto}`}>
                     {currentLyrics ? (
                         currentLyrics.map((line, i) => (
                             <Text
                                 key={i}
                                 variant={currLrcIndex === i ? "text-md/semibold" : "text-sm/normal"}
                                 selectable
-                                className={currLrcIndex === i ? cl("modal-line-current") : cl("modal-line")}
+                                className={currLrcIndex === i ? modalCurrentLine : modalLine}
                             >
                                 <span className={cl("modal-timestamp")} onClick={() => SpotifyStore.seek(line.time * 1000)}>
                                     {formatTime(line.time)}
                                 </span>
-                                {line.text || NoteSvg(cl("modal-note"))}
+                                {line.text || NoteSvg()}
                             </Text>
                         ))
                     ) : (
