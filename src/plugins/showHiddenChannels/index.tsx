@@ -200,7 +200,7 @@ export default definePlugin({
         },
         {
             // Hide the new version of unreads box for hidden channels
-            find: '="ChannelListUnreadsStore",',
+            find: '"ChannelListUnreadsStore",',
             replacement: {
                 match: /(?<=\.id\)\))(?=&&\(0,\i\.\i\)\((\i)\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`

@@ -82,7 +82,7 @@ function recalculateActivities() {
 function ImportCustomRPCComponent() {
     return (
         <Flex flexDirection="column">
-            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Import the application id of the CustomRPC plugin to the filter list</Forms.FormText>
+            <Forms.FormText>Import the application id of the CustomRPC plugin to the filter list</Forms.FormText>
             <div>
                 <Button
                     onClick={() => {
@@ -133,7 +133,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
     return (
         <Forms.FormSection>
             <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
+            <Forms.FormText className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
             <TextInput
                 type="text"
                 value={idsList}

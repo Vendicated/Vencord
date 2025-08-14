@@ -97,7 +97,7 @@ function CreateDecorationModal(props: ModalProps) {
                                 filters={[{ name: "Decoration file", extensions: ["png", "apng"] }]}
                                 onFileSelect={setFile}
                             />
-                            <Forms.FormText type="description" className={Margins.top8}>
+                            <Forms.FormText className={Margins.top8}>
                                 File should be APNG or PNG.
                             </Forms.FormText>
                         </Forms.FormSection>
@@ -107,7 +107,7 @@ function CreateDecorationModal(props: ModalProps) {
                                 value={name}
                                 onChange={setName}
                             />
-                            <Forms.FormText type="description" className={Margins.top8}>
+                            <Forms.FormText className={Margins.top8}>
                                 This name will be used when referring to this decoration.
                             </Forms.FormText>
                         </Forms.FormSection>

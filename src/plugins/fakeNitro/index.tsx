@@ -800,7 +800,7 @@ export default definePlugin({
                             however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
-                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                        <Forms.FormText>
                             You can disable this notice in the plugin settings.
                         </Forms.FormText>
                     </div>,
