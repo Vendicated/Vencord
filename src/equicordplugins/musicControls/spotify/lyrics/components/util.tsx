@@ -12,23 +12,51 @@ import { settings } from "../../../settings";
 import { SpotifyStore } from "../../SpotifyStore";
 import { SpotifyLrcStore } from "../providers/store";
 import { SyncedLyric } from "../providers/types";
+
 export const scrollClasses = findByPropsLazy("auto", "customTheme");
 
 export const cl = classNameFactory("vc-spotify-lyrics-");
 
-export function NoteSvg(className: string) {
+export function NoteSvg() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 480 720" fill="currentColor" className={className} >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 480 720" fill="currentColor" className={cl("music-note")}>
             <path d="m160,-240 q -66,0 -113,-47 -47,-47 -47,-113 0,-66 47,-113 47,-47 113,-47 23,0 42.5,5.5 19.5,5.5 37.5,16.5 v -422 h 240 v 160 H 320 v 400 q 0,66 -47,113 -47,47 -113,47 z" />
         </svg>
     );
 }
 
-const calculateIndexes = (lyrics: SyncedLyric[], position: number, delay: number) => {
-    const posInSec = position / 1000;
-    const currentIndex = lyrics.findIndex(l => l.time - (delay / 1000) > posInSec && l.time < posInSec + 8) - 1;
-    const nextLyric = lyrics.findIndex(l => l.time >= posInSec);
-    return [currentIndex, nextLyric];
+
+const getIndexes = (lyrics: SyncedLyric[], position: number, delay: number) => {
+    const posInSec = (position + delay) / 1000;
+
+    let left = 0, right = lyrics.length - 1;
+    let currentIndex: number | null = null;
+
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        const curr = lyrics[mid];
+        const next = lyrics[mid + 1];
+
+        if (curr.time <= posInSec && (!next || next.time > posInSec)) {
+            currentIndex = mid;
+            break;
+        }
+
+        if (curr.time > posInSec) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+
+    const nextIdx = currentIndex !== null ? currentIndex + 1 : left;
+    const nextLyricIdx = nextIdx < lyrics.length ? nextIdx : null;
+
+    if (currentIndex !== null && posInSec - lyrics[currentIndex].time > 8) {
+        return [null, nextLyricIdx];
+    }
+
+    return [currentIndex, nextLyricIdx];
 };
 
 export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
@@ -47,7 +75,7 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
     const [position, setPosition] = useState(storePosition);
     const [lyricRefs, setLyricRefs] = useState<React.RefObject<HTMLDivElement | null>[]>([]);
 
-    const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric] || null;
+    const currentLyrics = lyricsInfo?.lyricsVersions[lyricsInfo.useLyric];
 
     useEffect(() => {
         if (currentLyrics) {
@@ -57,12 +85,15 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
 
 
     useEffect(() => {
-        if (currentLyrics && position) {
-            const [currentIndex, nextLyric] = calculateIndexes(currentLyrics, position, LyricDelay);
+        if (currentLyrics && position != null) {
+            const [currentIndex, nextLyricIndex] = getIndexes(currentLyrics, position, LyricDelay);
             setCurrLrcIndex(currentIndex);
-            setNextLyric(nextLyric);
+            setNextLyric(nextLyricIndex);
+        } else {
+            setCurrLrcIndex(null);
+            setNextLyric(null);
         }
-    }, [currentLyrics, position]);
+    }, [currentLyrics, position, LyricDelay]);
 
     useEffect(() => {
         if (scroll && currLrcIndex !== null) {
@@ -73,17 +104,15 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
                 lyricRefs[nextLyric]?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
-    }, [currLrcIndex, nextLyric, scroll]);
+    }, [currLrcIndex, nextLyric, scroll, lyricRefs]);
 
     useEffect(() => {
-        if (isPlaying) {
-            setPosition(SpotifyStore.position);
-            const interval = setInterval(() => {
-                setPosition(p => p + 1000);
-            }, 1000);
+        if (!isPlaying) return;
 
-            return () => clearInterval(interval);
-        }
+        setPosition(SpotifyStore.position);
+        const interval = setInterval(() => setPosition(p => p + 1000), 1000);
+
+        return () => clearInterval(interval);
     }, [storePosition, isPlaying]);
 
     return { track, lyricsInfo, lyricRefs, currLrcIndex, nextLyric };
