@@ -61,6 +61,11 @@ export const settings = definePluginSettings({
         type: OptionType.CUSTOM,
         default: {} as Record<string, Category[]>,
         description: "",
+    },
+    disableCreateDMButton: {
+        type: OptionType.BOOLEAN,
+        description: "Disabled the create dm button",
+        default: true
     }
 });
 
@@ -153,6 +158,14 @@ export default definePlugin({
                 match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
+        },
+        {
+            find: ".createDMButtonContainer",
+            replacement: {
+                match: /"full-width"===\i/,
+                replace: "$&&&false"
+            },
+            predicate: () => settings.store.disableCreateDMButton
         },
     ],
 

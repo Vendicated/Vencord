@@ -84,7 +84,7 @@ export default definePlugin({
         {
             find: "this.renderEmbeddedActivity()",
             replacement: {
-                match: /(?<=render\(\).{0,500}children.{0,50})"div"(?=.{0,500}this\.renderEmbeddedActivity\(\))/,
+                match: /"div"(?=.{0,100}this.renderActions)/,
                 replace: "$self.WrapperComponent"
             }
         }

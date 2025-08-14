@@ -24,7 +24,7 @@ import { waitForComponent } from "./internal";
 
 
 const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat', '="h5"'));
-const FormText = waitForComponent<t.FormText>("FormText", filters.componentByCode(".SELECTABLE),", ".DISABLED:"));
+const FormText = waitForComponent<t.FormText>("FormText", filters.componentByCode(".Text,", /\i=\i:\i&&\(\i=\i\)/));
 const FormSection = waitForComponent<t.FormSection>("FormSection", filters.componentByCode(".titleId)"));
 const FormDivider = waitForComponent<t.FormDivider>("FormDivider", filters.componentByCode(".divider,", ",style:", '"div"', /\.divider,\i\),style:/));
 
