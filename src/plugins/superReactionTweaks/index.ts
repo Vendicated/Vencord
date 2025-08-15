@@ -42,8 +42,8 @@ export default definePlugin({
         {
             find: ",BURST_REACTION_EFFECT_PLAY",
             replacement: {
-                match: /(?<=(\i)=\i=>{.+?)(\i\(\i,\i\))>=\i(?=\).+BURST_REACTION_EFFECT_PLAY:\1)/,
-                replace: "!$self.shouldPlayBurstReaction($2)"
+                match: /(?<=BURST_REACTION_EFFECT_PLAY:\i=>{.+?)(\i\(\i,\i\))>=\i(?=\))/,
+                replace: "!$self.shouldPlayBurstReaction($1)"
             }
         },
         {
