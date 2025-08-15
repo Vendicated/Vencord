@@ -384,7 +384,7 @@ export default definePlugin({
             find: 'Error("could not play audio")',
             replacement: [
                 {
-                    match: /(?<=new Audio;\i\.src=).{0,50}.concat\(this\.name,"\.mp3"\)\)/,
+                    match: /(?<=new Audio;\i\.src=).{0,75}.concat\(this\.name,"\.mp3"\)\)/,
                     replace: "$self.getSoundUrl(this.name,$&)"
                 },
                 {
