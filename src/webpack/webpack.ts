@@ -25,6 +25,7 @@ import { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
+import { wrapComponentName } from "./common/internal";
 import { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
@@ -524,16 +525,16 @@ export function findComponentByCode(...code: CodeFilter) {
 /**
  * Finds the first component that matches the filter, lazily.
  */
-export function findComponentLazy<T extends object = any>(filter: FilterFn) {
+export function findComponentLazy<T extends object = any>(filter: FilterFn, opts?: { name?: string; }) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
 
 
-    return LazyComponent<T>(() => {
+    return LazyComponent<T>(() => wrapComponentName(() => {
         const res = find(filter, { isIndirect: true });
         if (!res)
             handleModuleNotFound("findComponent", filter);
         return res;
-    });
+    }, opts?.name));
 }
 
 /**

@@ -18,6 +18,7 @@
 
 import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
+import { wrapDiscordComponentName } from "webpack/common/internal";
 
 import { LazyComponent } from "./react";
 
@@ -109,11 +110,11 @@ export const Modals: Modals = mapMangledModuleLazy(':"thin")', {
     ModalCloseButton: filters.componentByCode(".close]:")
 });
 
-export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
-export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
-export const ModalContent = LazyComponent(() => Modals.ModalContent);
-export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
-export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
+export const ModalRoot = LazyComponent(() => wrapDiscordComponentName(Modals.ModalRoot, "Modals.ModalRoot"));
+export const ModalHeader = LazyComponent(() => wrapDiscordComponentName(Modals.ModalHeader, "Modals.ModalHeader"));
+export const ModalContent = LazyComponent(() => wrapDiscordComponentName(Modals.ModalContent, "Modals.ModalContent"));
+export const ModalFooter = LazyComponent(() => wrapDiscordComponentName(Modals.ModalFooter, "Modals.ModalFooter"));
+export const ModalCloseButton = LazyComponent(() => wrapDiscordComponentName(Modals.ModalCloseButton, "Modals.ModalCloseButton"));
 
 export type MediaModalItem = {
     url: string;

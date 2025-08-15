@@ -124,6 +124,12 @@ export interface PluginDef {
      */
     enabledByDefault?: boolean;
     /**
+     * Whether this plugin requires a restart when enabled or disabled to function
+     *
+     * Default: true if it contains {@link patches}, false otherwise
+     */
+    requiresRestart?: boolean;
+    /**
      * When to call the start() method
      * @default StartAt.WebpackReady
      */
