@@ -24,7 +24,7 @@ export const settings = definePluginSettings({
 
             return <div>
                 <DecorSection hideTitle hideDivider noMargin />
-                <Forms.FormText type="description" className={classes(Margins.top8, Margins.bottom8)}>
+                <Forms.FormText className={classes(Margins.top8, Margins.bottom8)}>
                     You can also access Decor decorations from the <Link
                         href="/settings/profile-customization"
                         onClick={e => {
