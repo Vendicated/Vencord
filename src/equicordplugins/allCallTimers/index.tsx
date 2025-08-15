@@ -119,7 +119,7 @@ export default definePlugin({
             predicate: () => settings.store.showWithoutHover,
             replacement: [
                 {
-                    match: /function \i\(\)\{.+:""(?=.*?userId:(\i))/,
+                    match: /function\(\)\{.+:""(?=.*?userId:(\i))/,
                     replace: "$&,$self.renderTimer($1.id),"
                 }
             ]
