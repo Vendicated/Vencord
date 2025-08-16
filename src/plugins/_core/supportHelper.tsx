@@ -322,12 +322,15 @@ export default definePlugin({
             && ((props.channel.id === SUPPORT_CHANNEL_ID && equicordSupport))
             && props.message.content?.includes("update");
 
-        const contentWords = (props.message.content?.toLowerCase().match(/`\w+`/g) ?? []).map(e => e.slice(1, -1));
+        const msg = props.message.content?.toLowerCase() ?? "";
+
+        const contentWords = (msg.match(/`\w+`/g) ?? []).map(e => e.slice(1, -1));
         const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => contentWords.includes(name.toLowerCase()));
         const matchedPlugin = matchedPlugins.sort((a, b) => b.length - a.length)[0];
         const pluginData = matchedPlugin && Vencord.Plugins.plugins[matchedPlugin];
         const equicordGuild = ChannelStore.getChannel(props.channel.id)?.guild_id === GUILD_ID;
-        const shouldAddPluginButtons = equicordGuild && equicordSupport && matchedPlugin;
+        const ableCheck = msg.startsWith("enable") || msg.startsWith("disable");
+        const shouldAddPluginButtons = equicordGuild && equicordSupport && matchedPlugin && pluginData && ableCheck;
 
         if (shouldAddUpdateButton) {
             buttons.push(
@@ -351,7 +354,7 @@ export default definePlugin({
             );
         }
 
-        if (shouldAddPluginButtons && matchedPlugin && pluginData) {
+        if (shouldAddPluginButtons) {
             if (pluginData.required || pluginData.name.endsWith("API")) return;
             const isEnabled = Vencord.Plugins.isPluginEnabled(matchedPlugin);
             buttons.push(
