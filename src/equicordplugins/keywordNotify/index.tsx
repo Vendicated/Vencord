@@ -323,7 +323,7 @@ export default definePlugin({
             find: "location:\"RecentsPopout\"});",
             replacement: {
                 match: /(?<=setTab:(\i),badgeState:\i,closePopout:(\i).{0,50}):(\i)===\i\.\i\.MENTIONS\?\(0,.+?onJump:(\i)/,
-                replace: ": $3 === 8 ? $self.tryKeywordMenu($1, $2, $4) $&"
+                replace: ": $3 === 8 ? $self.tryKeywordMenu($1, $4, $2) $&"
             }
         },
         {
