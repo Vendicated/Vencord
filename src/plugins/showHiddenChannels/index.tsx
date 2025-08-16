@@ -306,7 +306,7 @@ export default definePlugin({
                 },
                 {
                     // Export the channel for the users allowed component patch
-                    match: /maxUsers:\i,users:\i(?<=channel:(\i).+?)/,
+                    match: /maxUsers:\d+?,users:\i(?<=channel:(\i).+?)/,
                     replace: (m, channel) => `${m},shcChannel:${channel}`
                 },
                 {
