@@ -233,8 +233,8 @@ export default definePlugin({
         {
             find: 'backgroundColor:"COMPLETE"',
             replacement: {
-                match: /(?<=backgroundImage.+?)children:\[/,
-                replace: "$&$self.renderProfileTimezone(arguments[0]),"
+                match: /(?<=backgroundImage.+?children:)!\i.{0,100}gifTag\}\)/,
+                replace: "[$self.renderProfileTimezone(arguments[0]),$&]"
             }
         },
         {
