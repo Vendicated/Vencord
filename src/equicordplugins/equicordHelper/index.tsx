@@ -18,7 +18,7 @@
 
 import "@equicordplugins/_misc/styles.css";
 
-import { EQUCORD_HELPERS, EquicordDevs, GUILD_ID } from "@utils/constants";
+import { EQUICORD_HELPERS, EquicordDevs, GUILD_ID } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Button, ChannelStore, Flex, Forms, GuildMemberStore, showToast, Toasts } from "@webpack/common";
@@ -63,7 +63,7 @@ export default definePlugin({
     renderMessageAccessory(props) {
         const buttons = [] as JSX.Element[];
 
-        const equicordSupport = GuildMemberStore.getMember(GUILD_ID, props.message.author.id)?.roles?.includes(EQUCORD_HELPERS);
+        const equicordSupport = GuildMemberStore.getMember(GUILD_ID, props.message.author.id)?.roles?.includes(EQUICORD_HELPERS);
 
         const msg = props.message.content?.toLowerCase() ?? "";
 
