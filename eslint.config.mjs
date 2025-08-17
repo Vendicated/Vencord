@@ -114,7 +114,13 @@ export default tseslint.config(
             "no-invalid-regexp": "error",
             "no-constant-condition": ["error", { checkLoops: false }],
             "no-duplicate-imports": "error",
-            "dot-notation": "error",
+            "@typescript-eslint/dot-notation": [
+                "error",
+                {
+                    "allowPrivateClassPropertyAccess": true,
+                    "allowProtectedClassPropertyAccess": true
+                }
+            ],
             "no-useless-escape": [
                 "error",
                 {
@@ -137,7 +143,7 @@ export default tseslint.config(
             "no-unsafe-optional-chaining": "error",
             "no-useless-backreference": "error",
             "use-isnan": "error",
-            "prefer-const": "error",
+            "prefer-const": ["error", { destructuring: "all" }],
             "prefer-spread": "error",
 
             // Plugin Rules

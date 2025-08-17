@@ -22,12 +22,10 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
-import { Message, ReactionEmoji, User } from "discord-types/general";
+import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
 const queue = new Queue();
@@ -66,7 +64,7 @@ function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
 
 function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     const key = `${msg.id}:${e.name}:${e.id ?? ""}:${type}`;
-    const cache = reactions[key] ??= { fetched: false, users: {} };
+    const cache = reactions[key] ??= { fetched: false, users: new Map() };
     if (!cache.fetched) {
         queue.unshift(() => fetchReactions(msg, e, type));
         cache.fetched = true;
@@ -93,7 +91,7 @@ function makeRenderMoreUsers(users: User[]) {
     };
 }
 
-function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
+function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
 
@@ -159,13 +157,13 @@ export default definePlugin({
         }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = Object.values(reactions).filter(Boolean) as User[];
+        const users = [...reactions.values()].filter(Boolean);
 
         return (
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                <div onClick={handleClickAvatar}>
+                <div onClick={handleClickAvatar} onKeyPress={handleClickAvatar}>
                     <UserSummaryItem
                         users={users}
                         guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
@@ -187,7 +185,7 @@ export default definePlugin({
 
 interface ReactionCacheEntry {
     fetched: boolean;
-    users: Record<string, User>;
+    users: Map<string, User>;
 }
 
 interface RootObject {

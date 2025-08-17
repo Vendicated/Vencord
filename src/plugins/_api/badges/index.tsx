@@ -19,35 +19,33 @@
 import "./fixDiscordBadgePadding.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
-import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
-import { openContributorModal } from "@components/PluginSettings/ContributorModal";
+import DonateButton from "@components/settings/DonateButton";
+import { openContributorModal } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { isPluginDev } from "@utils/misc";
-import { closeModal, Modals, openModal } from "@utils/modal";
+import { shouldShowContributorBadge } from "@utils/misc";
+import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
-const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
 const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    shouldShow: ({ userId }) => isPluginDev(userId),
+    shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
 async function loadBadges(noCache = false) {
-    DonorBadges = {};
-
     const init = {} as RequestInit;
     if (noCache)
         init.cache = "no-cache";
@@ -56,6 +54,8 @@ async function loadBadges(noCache = false) {
         .then(r => r.json());
 }
 
+let intervalId: any;
+
 export default definePlugin({
     name: "BadgeAPI",
     description: "API to add badges to users.",
@@ -63,33 +63,36 @@ export default definePlugin({
     required: true,
     patches: [
         {
-            find: ".FULL_SIZE]:26",
+            find: ".MODAL]:26",
             replacement: {
-                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\);)return 0===\i.length\?/,
-                replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
+                match: /(?=;return 0===(\i)\.length\?)(?<=(\i)\.useMemo.+?)/,
+                replace: ";$1=$2.useMemo(()=>[...$self.getBadges(arguments[0].displayProfile),...$1],[$1])"
             }
         },
         {
-            find: ".description,delay:",
+            find: "#{intl::PROFILE_USER_BADGES}",
             replacement: [
                 {
-                    // alt: "", aria-hidden: false, src: originalSrc
-                    match: /alt:" ","aria-hidden":!0,src:(?=.{0,20}(\i)\.icon)/,
-                    // ...badge.props, ..., src: badge.image ?? ...
-                    replace: "...$1.props,$& $1.image??"
+                    match: /(alt:" ","aria-hidden":!0,src:)(.+?)(?=,)(?<=href:(\i)\.link.+?)/,
+                    replace: (_, rest, originalSrc, badge) => `...${badge}.props,${rest}${badge}.image??(${originalSrc})`
                 },
                 {
-                    match: /(?<=text:(\i)\.description,.{0,200})children:/,
-                    replace: "children:$1.component ? $self.renderBadgeComponent({ ...$1 }) :"
+                    match: /(?<="aria-label":(\i)\.description,.{0,200})children:/,
+                    replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
                 // conditionally override their onClick with badge.onClick if it exists
                 {
                     match: /href:(\i)\.link/,
-                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, $1) }),$&"
+                    replace: "...($1.onClick&&{onClick:vcE=>$1.onClick(vcE,$1)}),$&"
                 }
             ]
         }
     ],
+
+    // for access from the console or other plugins
+    get DonorBadges() {
+        return DonorBadges;
+    },
 
     toolboxActions: {
         async "Refetch Badges"() {
@@ -102,9 +105,17 @@ export default definePlugin({
         }
     },
 
+    userProfileBadge: ContributorBadge,
+
     async start() {
-        Vencord.Api.Badges.addBadge(ContributorBadge);
         await loadBadges();
+
+        clearInterval(intervalId);
+        intervalId = setInterval(loadBadges, 1000 * 60 * 30); // 30 minutes
+    },
+
+    async stop() {
+        clearInterval(intervalId);
     },
 
     getBadges(props: { userId: string; user?: User; guildId: string; }) {
@@ -143,8 +154,8 @@ export default definePlugin({
                         closeModal(modalKey);
                         VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
-                        <Modals.ModalRoot {...props}>
-                            <Modals.ModalHeader>
+                        <ModalRoot {...props}>
+                            <ModalHeader>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
                                     <Forms.FormTitle
                                         tag="h2"
@@ -158,8 +169,8 @@ export default definePlugin({
                                         Vencord Donor
                                     </Forms.FormTitle>
                                 </Flex>
-                            </Modals.ModalHeader>
-                            <Modals.ModalContent>
+                            </ModalHeader>
+                            <ModalContent>
                                 <Flex>
                                     <img
                                         role="presentation"
@@ -182,13 +193,13 @@ export default definePlugin({
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
-                            </Modals.ModalContent>
-                            <Modals.ModalFooter>
+                            </ModalContent>
+                            <ModalFooter>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
                                     <DonateButton />
                                 </Flex>
-                            </Modals.ModalFooter>
-                        </Modals.ModalRoot>
+                            </ModalFooter>
+                        </ModalRoot>
                     </ErrorBoundary>
                 ));
             },
