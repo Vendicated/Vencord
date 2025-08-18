@@ -1,0 +1,11 @@
+.vc-keybind-input {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5em;
+}
+
+.vc-keybind-input > div > div {
+    position: relative;
+}
