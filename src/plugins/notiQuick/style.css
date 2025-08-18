@@ -1,0 +1,32 @@
+@keyframes bell {
+
+    0%,
+    100% {
+        transform-origin: 50% 5%;
+        transform: rotate(0deg);
+    }
+
+    18% {
+        transform: rotate(-18deg);
+    }
+
+    34% {
+        transform: rotate(14deg);
+    }
+
+    48% {
+        transform: rotate(-10deg);
+    }
+
+    60% {
+        transform: rotate(6deg);
+    }
+
+    72% {
+        transform: rotate(-3deg);
+    }
+
+    85% {
+        transform: rotate(2deg);
+    }
+}
