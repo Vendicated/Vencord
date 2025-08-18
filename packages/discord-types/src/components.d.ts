@@ -513,3 +513,29 @@ export type ColorPicker = ComponentType<{
     label?: ReactNode;
     onChange(value: number | null): void;
 }>;
+
+export enum GlobalShortcutKeyOS {
+    WINDOWS = 1,
+    MACOS = 2,
+    LINUX = 3,
+    BROWSER = 4
+}
+export enum GlobalShortcutKeyType {
+    KEYBOARD_KEY = 0,
+    MOUSE_BUTTON = 1,
+    KEYBOARD_MODIFIER_KEY = 2,
+    GAMEPAD_BUTTON = 3
+}
+export type GlobalShortcutKey = [GlobalShortcutKeyOS, number] | [GlobalShortcutKeyOS, number, GlobalShortcutKeyType | "0:0"];
+export type GlobalShortcut = GlobalShortcutKey[];
+export type GlobalShortcutOptions = {
+    blurred: boolean;
+    focused: boolean;
+    keydown: boolean;
+    keyup: boolean;
+};
+export type GlobalKeybind = ComponentType<{
+    defaultValue: GlobalShortcut;
+    onChange(value: GlobalShortcut): void;
+}>;
+

@@ -20,6 +20,7 @@ import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { enableKeybind, registerKeybind, unregisterKeybind } from "@api/Keybinds";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
@@ -177,7 +178,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, keybinds, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
     } = p;
@@ -205,6 +206,21 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
                 registerCommand(cmd, name);
             } catch (e) {
                 logger.error(`Failed to register command ${cmd.name}\n`, e);
+                return false;
+            }
+        }
+    }
+
+    if (keybinds && Object.keys(keybinds).length) {
+        logger.debug("Registering keybinds of plugin", name);
+        for (const keybind of keybinds) {
+            try {
+                const keys = settings[name]?.[keybind.name] ?? [];
+                if (registerKeybind(keybind, keys)) {
+                    enableKeybind(keybind.name);
+                }
+            } catch (e) {
+                logger.error(`Failed to register keybind ${keybind.name}\n`, e);
                 return false;
             }
         }
@@ -244,7 +260,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, keybinds, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
     } = p;
@@ -272,6 +288,18 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
                 unregisterCommand(cmd.name);
             } catch (e) {
                 logger.error(`Failed to unregister command ${cmd.name}\n`, e);
+                return false;
+            }
+        }
+    }
+
+    if (keybinds?.length) {
+        logger.debug("Unregistering keybinds of plugin", name);
+        for (const keybind of keybinds) {
+            try {
+                unregisterKeybind(keybind.name);
+            } catch (e) {
+                logger.error(`Failed to unregister keybind ${keybind.name}\n`, e);
                 return false;
             }
         }
