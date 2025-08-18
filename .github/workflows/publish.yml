@@ -43,6 +43,13 @@ jobs:
           echo "No new version to release (package.json ${{ steps.pkg.outputs.version }} <= latest tag ${{ steps.tag.outputs.latest }})"
           exit 0
 
+      - name: Create Tag
+        uses: butlerlogic/action-autotag@1.1.2
+        env:
+            GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+            tag_prefix: "v"
+
       - uses: pnpm/action-setup@v3
 
       - name: Use Node.js 20
