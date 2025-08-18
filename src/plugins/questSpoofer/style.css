@@ -1,0 +1,55 @@
+.vc-qs-spoof-btn {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
+}
+
+.vc-qs-spoof-btn.vc-qs-active {
+    background: linear-gradient(135deg, var(--green-360), var(--green-430));
+    color: white;
+}
+
+.vc-qs-spoof-btn.vc-qs-active:hover {
+    filter: brightness(1.05);
+}
+
+.vc-qs-spoof-btn.vc-qs-completed {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-660));
+    color: var(--white-500);
+    opacity: .9;
+}
+
+.vc-qs-spoof-btn.vc-qs-completed:hover {
+    opacity: 1;
+}
+
+.vc-qs-banner {
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-660));
+    color: var(--white-500);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
+}
+
+.vc-qs-floating {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 9999;
+}
+
+.vc-qs-fixed {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 10000;
+}
+
+.vc-qs-success {
+    background: linear-gradient(135deg, var(--green-360), var(--green-430));
+    color: white;
+}
