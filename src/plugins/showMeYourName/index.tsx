@@ -11,7 +11,7 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, MessageStore, RelationshipStore, StreamerModeStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, MessageStore, RelationshipStore, StreamerModeStore, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 const wrapEmojis = findByCodeLazy("lastIndex;return");
@@ -67,7 +67,7 @@ function validColor(color: string) {
     return isValid;
 }
 
-function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string): any {
+function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string, canUseGradient: boolean): any {
     const fallbackReturn = {
         normal: {
             original: {
@@ -119,7 +119,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         }
     }
 
-    gradient = !secondaryColor
+    gradient = !canUseGradient || !secondaryColor
         ? null
         : tertiaryColor
             ? "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-3),var(--custom-gradient-color-1))"
@@ -356,12 +356,13 @@ function renderUsername(
     const config = hookless ? settings.store : settings.use();
     const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, triggerNameRerender } = config;
 
+    const canUseGradient = ((author as GuildMember)?.guildId ? (GuildStore.getGuild((author as GuildMember).guildId) ?? {}).premiumFeatures?.features.includes("ENHANCED_ROLE_COLORS") : false);
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
     const options = splitTemplate(includedNames);
-    const resolvedUsernameColor = author ? resolveColor(author, usernameColor.trim(), "") : null;
-    const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "") : null;
-    const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "") : null;
-    const resolvedFriendNameColor = author ? resolveColor(author, friendNameColor.trim(), "") : null;
+    const resolvedUsernameColor = author ? resolveColor(author, usernameColor.trim(), "", canUseGradient) : null;
+    const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "", canUseGradient) : null;
+    const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "", canUseGradient) : null;
+    const resolvedFriendNameColor = author ? resolveColor(author, friendNameColor.trim(), "", canUseGradient) : null;
     const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate" };
     const [username, display, nick, friend] = getProcessedNames(author, truncateAllNamesWithStreamerMode, discriminators);
 
@@ -481,7 +482,7 @@ function renderUsername(
     third = remainingNames.shift();
     fourth = remainingNames.shift();
 
-    const topRoleStyle = isMention || isReactionsPopout ? resolveColor(author, "Role", "") : null;
+    const topRoleStyle = isMention || isReactionsPopout ? resolveColor(author, "Role", "", canUseGradient) : null;
     const hasGradient = !!topRoleStyle?.gradient && Object.keys(topRoleStyle.gradient).length > 0;
     const message = channelId && messageId ? MessageStore.getMessage(channelId, messageId) : null;
     const groupId = (message as any)?.showMeYourNameGroupId || null;

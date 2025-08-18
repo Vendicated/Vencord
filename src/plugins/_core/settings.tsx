@@ -22,9 +22,9 @@ import ThemesTab from "@components/ThemeSettings/ThemesTab";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import { shortGitHash } from "@utils/updater";
 import { React } from "@webpack/common";
 
-import gitHash from "~git-hash";
 
 type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
 type SectionTypes = Record<SectionType, SectionType>;
@@ -237,7 +237,7 @@ export default definePlugin({
     getInfoRows() {
         const { electronVersion, chromiumVersion, getVersionInfo } = this;
 
-        const rows = [`Equicord ${gitHash}${getVersionInfo()}`];
+        const rows = [`Equicord ${shortGitHash()}${getVersionInfo()}`];
 
         if (electronVersion) rows.push(`Electron ${electronVersion}`);
         if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);

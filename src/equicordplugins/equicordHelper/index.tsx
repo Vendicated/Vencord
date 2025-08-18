@@ -18,9 +18,13 @@
 
 import "@equicordplugins/_misc/styles.css";
 
-import { EquicordDevs } from "@utils/constants";
+import { EQUICORD_HELPERS, EquicordDevs, GUILD_ID } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { Forms } from "@webpack/common";
+import { Button, ChannelStore, Flex, Forms, GuildMemberStore, showToast, Toasts } from "@webpack/common";
+import { JSX } from "react";
+
+import { toggleEnabled } from "./utils";
 
 
 export default definePlugin({
@@ -55,5 +59,46 @@ export default definePlugin({
                 }
             ]
         }
-    ]
+    ],
+    renderMessageAccessory(props) {
+        const buttons = [] as JSX.Element[];
+
+        const equicordSupport = GuildMemberStore.getMember(GUILD_ID, props.message.author.id)?.roles?.includes(EQUICORD_HELPERS);
+
+        const msg = props.message.content?.toLowerCase() ?? "";
+
+        const contentWords = (msg.match(/`\w+`/g) ?? []).map(e => e.slice(1, -1));
+        const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => contentWords.includes(name.toLowerCase()));
+        const matchedPlugin = matchedPlugins.sort((a, b) => b.length - a.length)[0];
+        const pluginData = matchedPlugin && Vencord.Plugins.plugins[matchedPlugin];
+        const equicordGuild = ChannelStore.getChannel(props.channel.id)?.guild_id === GUILD_ID;
+        const ableCheck = msg.startsWith("enable") || msg.startsWith("disable");
+        const shouldAddPluginButtons = equicordGuild && equicordSupport && matchedPlugin && pluginData && ableCheck;
+
+        if (shouldAddPluginButtons) {
+            if (pluginData.required || pluginData.name.endsWith("API")) return;
+            const isEnabled = Vencord.Plugins.isPluginEnabled(matchedPlugin);
+            buttons.push(
+                <Button
+                    key="vc-plugin-toggle"
+                    color={isEnabled ? Button.Colors.RED : Button.Colors.GREEN}
+                    onClick={async () => {
+                        try {
+                            const success = await toggleEnabled(matchedPlugin);
+                            if (success) showToast(`${isEnabled ? "Disabled" : "Enabled"} ${matchedPlugin}`, Toasts.Type.SUCCESS);
+                        } catch (e) {
+                            new Logger(this.name).error("Error while toggling:", e);
+                            showToast(`Failed to toggle ${matchedPlugin}`, Toasts.Type.FAILURE);
+                        }
+                    }}
+                >
+                    {`${isEnabled ? "Disable" : "Enable"} ${matchedPlugin}`}
+                </Button>
+            );
+        }
+
+        return buttons.length
+            ? <Flex>{buttons}</Flex>
+            : null;
+    }
 });

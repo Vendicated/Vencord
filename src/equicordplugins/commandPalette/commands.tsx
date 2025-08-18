@@ -8,10 +8,9 @@ import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
 import { copyToClipboard } from "@utils/clipboard";
 import { relaunch, showItemInFolder } from "@utils/native";
-import { checkForUpdates, getRepo } from "@utils/updater";
+import { checkForUpdates, getRepo, shortGitHash } from "@utils/updater";
 import { GuildStore, NavigationRouter, SettingsRouter, Toasts } from "@webpack/common";
 
-import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 import Plugins from "~plugins";
 
@@ -116,7 +115,7 @@ export const actions: ButtonAction[] = [
 
     {
         id: "copyGitInfo", label: "Copy Git Info", callback: async () => {
-            copyToClipboard(`gitHash: ${gitHash}\ngitRemote: ${gitRemote}`);
+            copyToClipboard(`gitHash: ${shortGitHash()}\ngitRemote: ${gitRemote}`);
 
             Toasts.show({
                 message: "Copied git info to clipboard!",

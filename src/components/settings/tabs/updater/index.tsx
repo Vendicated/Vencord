@@ -26,7 +26,7 @@ import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
+import { changes, checkForUpdates, getRepo, isNewer, shortGitHash, update, updateError, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
@@ -76,8 +76,8 @@ interface CommonProps {
     repoPending: boolean;
 }
 
-function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) {
-    return <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
+function HashLink({ repo, hash, disabled = false, longHash = hash }: { repo: string, hash: string, disabled?: boolean; longHash?: string; }) {
+    return <Link href={`${repo}/commit/${longHash}`} disabled={disabled}>
         {hash}
     </Link>;
 }
@@ -233,7 +233,7 @@ function Updater() {
                             </Link>
                         )
                 }
-                {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
+                {" "}(<HashLink hash={shortGitHash()} repo={repo} disabled={repoPending} longHash={gitHash} />)
             </Forms.FormText>
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />

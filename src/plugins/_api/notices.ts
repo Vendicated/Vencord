@@ -33,8 +33,8 @@ export default definePlugin({
                     replace: "if(Vencord.Api.Notices.currentNotice)return false;$&"
                 },
                 {
-                    match: /(?<=function (\i)\(\i\){)return null!=(\i)(?=.+?NOTICE_DISMISS:\1)/,
-                    replace: (m, _, notice) => `if(${notice}?.id=="EquicordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
+                    match: /(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,
+                    replace: (m, notice) => `if(${notice}?.id=="EquicordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
                 }
             ]
         }

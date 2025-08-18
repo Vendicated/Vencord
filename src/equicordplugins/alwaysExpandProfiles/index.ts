@@ -13,7 +13,7 @@ import { User } from "@vencord/discord-types";
 migratePluginSettings("AlwaysExpandProfiles", "AlwaysExpandProfile");
 export default definePlugin({
     name: "AlwaysExpandProfiles",
-    description: "Always display a user's full popout",
+    description: "Always expands profile popouts to the full modal",
     authors: [EquicordDevs.thororen],
     patches: [
         {
