@@ -12,6 +12,7 @@ export * from "./MessageStore";
 export * from "./RelationshipStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
+export * from "./StickersStore";
 export * from "./StreamerModeStore";
 export * from "./ThemeStore";
 export * from "./TypingStore";

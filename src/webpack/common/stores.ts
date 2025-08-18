@@ -36,6 +36,8 @@ export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
 
+export let StreamerModeStore: t.StreamerModeStore;
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
 export let GuildMemberStore: t.GuildMemberStore;
@@ -49,12 +51,10 @@ export let TypingStore: t.TypingStore;
 export let RelationshipStore: t.RelationshipStore;
 
 export let EmojiStore: t.EmojiStore;
+export let StickersStore: t.StickersStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
-
-export let StreamerModeStore: t.StreamerModeStore;
-export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -81,6 +81,7 @@ waitForStore("GuildRoleStore", m => GuildRoleStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
