@@ -104,6 +104,5 @@
     },
     "engines": {
         "node": ">=18"
-    },
-    "main": "index.js"
+    }
 }
