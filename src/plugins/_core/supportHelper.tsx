@@ -122,10 +122,10 @@ async function generateDebugInfoMessage() {
         info["Last Crash Reason"] = (await tryOrElse(() => DiscordNative.processUtils.getLastCrash(), undefined))?.rendererCrashReason ?? "N/A";
     }
 
-    const potentiallyProblematicPlugins = [
+    const potentiallyProblematicPlugins = ([
         "NoRPC", "NoProfileThemes", "NoMosaic", "NoRoleHeaders", "NoSystemBadge", "NoDeleteSafety",
         "Moyai", "AlwaysAnimate", "ClientTheme", "Equissant", "Ingtoninator", "KeyboardSounds", "NeverPausePreviews",
-    ].filter(Vencord.Plugins.isPluginEnabled) ?? [];
+    ].filter(Vencord.Plugins.isPluginEnabled) ?? []).sort();
 
     if (Vencord.Plugins.isPluginEnabled("CustomIdle") && Vencord.Settings.plugins.CustomIdle.idleTimeout === 0) {
         potentiallyProblematicPlugins.push("CustomIdle");
