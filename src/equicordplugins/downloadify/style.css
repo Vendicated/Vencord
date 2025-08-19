@@ -1,0 +1,77 @@
+.downloadify-voice-message-container {
+    flex-shrink: 0;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    margin: 0 -2px;
+}
+
+.downloadify-voice-message-button {
+    cursor: pointer;
+    line-height: 0;
+    border: none;
+    width: auto;
+    background: transparent;
+    color: var(--interactive-normal);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
+    justify-content: center;
+    position: relative;
+    transition-duration: .2s;
+    user-select: none;
+}
+
+.downloadify-voice-message-button:hover {
+    color: var(--interactive-hover);
+}
+
+.downloadify-directory-container {
+    margin-top: 10px;
+}
+
+.downloadify-directory-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.downloadify-directory-button {
+    border-radius: 4px;
+    min-height: 34px;
+    color: white;
+    height: 34px;
+    flex: 1;
+}
+
+.downloadify-directory-button:not(.downloadify-disabled):hover {
+    filter: brightness(0.75);
+    transition: filter 0.15s ease-in-out;
+}
+
+.downloadify-clear-button {
+    background-color: rgb(180 71 78);
+}
+
+.downloadify-browse-button {
+    background-color: rgb(87 100 240);
+}
+
+.downloadify-directory-display {
+    background-color: var(--background-base-lower);
+    overflow-wrap: break-word;
+    font-family: monospace;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    border-radius: 4px;
+    user-select: text;
+    font-size: 14px;
+    padding: 8px;
+}
