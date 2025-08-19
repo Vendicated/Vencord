@@ -13,7 +13,7 @@ const GifHostRegex = /^(.+?\.)?(tenor|giphy|imgur)\.com$/i;
 
 const settings = definePluginSettings({
     showFullUrl: {
-        description: "Show the full URL of the image instead of just the filename. Always enabled for GIFs",
+        description: "Show the full URL of the image instead of just the file name. Always enabled for GIFs because they usually have no meaningful file name",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -22,7 +22,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ImageFilename",
     authors: [Devs.Ven],
-    description: "Display the filename of images on hover",
+    description: "Display the file name of images & GIFs as a tooltip when hovering over them",
     settings,
 
     patches: [
