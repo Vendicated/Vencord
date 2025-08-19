@@ -18,7 +18,7 @@ const Sizes = {
     lg: "1.25rem",
     xl: "1.5rem",
     xxl: "2rem"
-};
+} as const;
 
 const Weights = {
     thin: "100",
@@ -29,7 +29,7 @@ const Weights = {
     semibold: "600",
     bold: "700",
     extrabold: "800",
-};
+} as const;
 
 export type TextSize = keyof typeof Sizes;
 export type TextWeight = keyof typeof Weights;
