@@ -8,7 +8,8 @@ import "./BaseText.css";
 
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
-import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
+import { HeadingTag } from "@vencord/discord-types";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 const cl = classNameFactory("vc-text-");
 
@@ -36,7 +37,9 @@ const Weights = {
 export type TextSize = keyof typeof Sizes;
 export type TextWeight = keyof typeof Weights;
 
-export type BaseTextProps<Tag extends keyof JSX.IntrinsicElements = "div"> = ComponentPropsWithoutRef<Tag> & {
+export type TextTag = "div" | "span" | "p" | HeadingTag;
+
+export type BaseTextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRef<Tag> & {
     size?: TextSize;
     weight?: TextWeight;
     tag?: Tag;
@@ -56,16 +59,14 @@ export function generateTextCss() {
     return css;
 }
 
-export function BaseText<T extends keyof JSX.IntrinsicElements = "div">(props: BaseTextProps<T>): ReactNode {
+export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): ReactNode {
     const {
         size = "md",
         weight = "normal",
-        tag = "div",
+        tag: Tag = "div",
         className,
         ...rest
     } = props;
-
-    const Tag = tag as any; // Cast to any to avoid "Expression produces a union type that is too complex to represent"
 
     return (
         <Tag className={classes(cl("base", size, weight), className)} {...rest}>
