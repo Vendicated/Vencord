@@ -33,10 +33,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ImageFilename",
-    authors: [
-        { name: "Tiemen", id: 152164749868662784n },
-        Devs.fawn
-    ],
+    authors: [Devs.Tiemen, Devs.fawn],
     description: "Display filename of image attachments on hover",
     settings,
 
