@@ -16,20 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createAndAppendStyle } from "./css";
+// TODO: remove the duplicate of this file in utils and migrate code
 
-let styleStr = "";
+const Directions = ["top", "bottom", "left", "right"] as const;
+const Sizes = [8, 16, 20] as const;
 
-export const Margins: Record<`${"top" | "bottom" | "left" | "right"}${8 | 16 | 20}`, string> = {} as any;
+export type MarginDirection = (typeof Directions)[number];
+export type MarginSize = (typeof Sizes)[number];
 
-for (const dir of ["top", "bottom", "left", "right"] as const) {
-    for (const size of [8, 16, 20] as const) {
-        const cl = `vc-m-${dir}-${size}`;
-        Margins[`${dir}${size}`] = cl;
-        styleStr += `.${cl}{margin-${dir}:${size}px;}`;
+export const Margins: Record<`${MarginDirection}${MarginSize}`, string> = {} as any;
+
+
+export function generateMarginCss() {
+    let css = "";
+
+    for (const direction of Directions) {
+        for (const size of Sizes) {
+            const cl = `vc-m-${direction}-${size}`;
+            Margins[`${direction}${size}`] = cl;
+            css += `.${cl}{margin-${direction}:${size}px;}`;
+        }
     }
-}
 
-document.addEventListener("DOMContentLoaded", () => {
-    createAndAppendStyle("vencord-margins").textContent = styleStr;
-});
+    return css;
+}
