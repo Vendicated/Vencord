@@ -1,0 +1,8 @@
+.vc-text-base {
+    font-family: var(--font-primary);
+    color: var(--text-default);
+    line-height: normal;
+
+    /* Discord puts an insane default margin on p tags, so reset that here */
+    margin: 0;
+}

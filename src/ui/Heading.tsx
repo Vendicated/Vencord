@@ -16,3 +16,27 @@ export function Heading(props: HeadingProps) {
         </BaseText>
     );
 }
+
+export function HeadingPrimary(props: HeadingProps) {
+    return (
+        <BaseText tag="h2" size="xl" weight="bold" {...props}>
+            {props.children}
+        </BaseText>
+    );
+}
+
+export function HeadingSecondary(props: HeadingProps) {
+    return (
+        <BaseText tag="h3" size="lg" weight="semibold" {...props}>
+            {props.children}
+        </BaseText>
+    );
+}
+
+export function HeadingTertiary(props: HeadingProps) {
+    return (
+        <BaseText tag="h4" size="md" weight="semibold" {...props}>
+            {props.children}
+        </BaseText>
+    );
+}

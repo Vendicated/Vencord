@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./BaseText.css";
+
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
@@ -41,7 +43,7 @@ export type BaseTextProps<Tag extends keyof JSX.IntrinsicElements = "div"> = Com
 };
 
 export function generateTextCss() {
-    let css = `.${cl("base")}{font-family:var(--font-primary);}`;
+    let css = "";
 
     for (const [size, value] of Object.entries(Sizes)) {
         css += `.${cl(size)}{font-size:${value};}`;
