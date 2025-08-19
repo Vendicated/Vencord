@@ -123,9 +123,8 @@ async function generateDebugInfoMessage() {
     }
 
     const potentiallyProblematicPlugins = [
-        "NoRPC", "NoProfileThemes", "NoMosaic", "Moyai", "AlwaysAnimate", "ClientTheme",
-        "Equissant", "Ingtoninator", "KeyboardSounds", "NeverPausePreviews", "NoDeleteSafety",
-        "NoRoleHeaders", "NoSystemBadge"
+        "NoRPC", "NoProfileThemes", "NoMosaic", "NoRoleHeaders", "NoSystemBadge", "NoDeleteSafety",
+        "Moyai", "AlwaysAnimate", "ClientTheme", "Equissant", "Ingtoninator", "KeyboardSounds", "NeverPausePreviews",
     ].filter(Vencord.Plugins.isPluginEnabled) ?? [];
 
     if (Vencord.Plugins.isPluginEnabled("CustomIdle") && Vencord.Settings.plugins.CustomIdle.idleTimeout === 0) {
@@ -133,11 +132,11 @@ async function generateDebugInfoMessage() {
     }
 
     const commonIssues = {
-        "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
-        "Link embeds disabled": tryOrElse(() => !ShowEmbeds.getSetting(), false),
+        "Activity Sharing Disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
+        "Link Embeds Disabled": tryOrElse(() => !ShowEmbeds.getSetting(), false),
         "Equicord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
-        "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
+        ">2 Weeks Outdated": BUILD_TIMESTAMP < Date.now() - 12096e5,
         [`Potentially Problematic Plugins: ${potentiallyProblematicPlugins.join(", ")}`]: potentiallyProblematicPlugins.length
     };
 
