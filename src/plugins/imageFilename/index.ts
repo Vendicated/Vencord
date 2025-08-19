@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const ImageExtensionRe = /\.(png|jpg|jpeg|gif|webp|avif)$/i;
-const GifHostRegex = /(^|.+?\.)(tenor|giphy|imgur)\.com$/i;
+const GifHostRegex = /^(.+?\.)?(tenor|giphy|imgur)\.com$/i;
 
 const settings = definePluginSettings({
     showFullUrl: {
