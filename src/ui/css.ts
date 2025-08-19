@@ -9,7 +9,7 @@ import { createAndAppendStyle } from "@utils/css";
 import { generateTextCss } from "./BaseText";
 import { generateMarginCss } from "./margins";
 
-export function generateVencordUiStyles() {
+export function addVencordUiStyles() {
     createAndAppendStyle("vencord-margins").textContent = generateMarginCss();
     createAndAppendStyle("vencord-text").textContent = generateTextCss();
 }
