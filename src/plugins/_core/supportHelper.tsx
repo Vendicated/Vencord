@@ -56,6 +56,7 @@ const TrustedRolesIds = [
 const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+const ShowEmbeds = getUserSettingLazy<boolean>("textAndImages", "renderEmbeds")!;
 
 async function forceUpdate() {
     const outdated = await checkForUpdates();
@@ -121,12 +122,23 @@ async function generateDebugInfoMessage() {
         info["Last Crash Reason"] = (await tryOrElse(() => DiscordNative.processUtils.getLastCrash(), undefined))?.rendererCrashReason ?? "N/A";
     }
 
+    const potentiallyProblematicPlugins = [
+        "NoRPC", "NoProfileThemes", "NoMosaic", "Moyai", "AlwaysAnimate", "ClientTheme",
+        "Equissant", "Ingtoninator", "KeyboardSounds", "NeverPausePreviews", "NoDeleteSafety",
+        "NoRoleHeaders", "NoSystemBadge"
+    ].filter(Vencord.Plugins.isPluginEnabled) ?? [];
+
+    if (Vencord.Plugins.isPluginEnabled("CustomIdle") && Vencord.Settings.plugins.CustomIdle.idleTimeout === 0) {
+        potentiallyProblematicPlugins.push("CustomIdle");
+    }
+
     const commonIssues = {
-        "NoRPC enabled": Vencord.Plugins.isPluginEnabled("NoRPC"),
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
+        "Link embeds disabled": tryOrElse(() => !ShowEmbeds.getSetting(), false),
         "Equicord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
         "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
+        [`Potentially Problematic Plugins: ${potentiallyProblematicPlugins.join(", ")}`]: potentiallyProblematicPlugins.length
     };
 
     let content = `>>> ${Object.entries(info).map(([k, v]) => `**${k}**: ${v}`).join("\n")}`;
