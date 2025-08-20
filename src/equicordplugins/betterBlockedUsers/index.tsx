@@ -31,7 +31,7 @@ export default definePlugin({
                     replace: "$self.renderUser($1,$2)",
                 },
                 {
-                    match: /(?<=\}=(\i).{0,10}(\i).useState\(.{0,1}\);)/,
+                    match: /(?<=\}=(\i).{0,10}(\i).useState\(\i\).{0,25}\};)/,
                     replace: "let [searchResults,setSearchResults]=$2.useState([]);$self.setUpdateFunc($1,setSearchResults);"
                 },
                 {

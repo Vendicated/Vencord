@@ -36,8 +36,8 @@ export default definePlugin({
         {
             find: "renderLurkerModeUpsellPopout,position:",
             replacement: {
-                match: /200:300/g,
-                replace: "0:0",
+                match: /(\i)=(200|300)/g,
+                replace: "$1=0",
             },
         }
     ]
