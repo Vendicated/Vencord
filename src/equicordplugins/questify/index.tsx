@@ -974,14 +974,6 @@ export default definePlugin({
             ]
         },
         {
-            // Prevents default pinning of specific Quests to the top of the list.
-            find: "questTile,{[",
-            replacement: {
-                match: /\i.unshift\(\i\):(\i.push\(\i\))/,
-                replace: "$1:$1"
-            }
-        },
-        {
             // Sorts the "All Quests" tab quest tiles.
             // Also sets mobile-only Quests as desktop compatible if the setting is enabled.
             find: ".ALL);return(",
