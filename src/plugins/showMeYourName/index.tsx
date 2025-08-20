@@ -788,7 +788,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Replace names in messages and replies.
-                    match: /(onContextMenu:\i,children:)(.{0,100}?),"data-text":(\i\+\i)/,
+                    match: /(onContextMenu:\i,children:)(.{0,150}?),"data-text":(\i\+\i)/,
                     replace: "$1$self.getMessageNameElement(arguments[0])??($2),\"data-text\":$self.getMessageNameText(arguments[0])??($3)"
                 },
                 {
