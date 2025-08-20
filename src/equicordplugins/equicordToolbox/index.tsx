@@ -165,7 +165,7 @@ export default definePlugin({
         {
             find: ".controlButtonWrapper,",
             replacement: {
-                match: /(?<=toolbar:function\(.{0,100}\()\i.Fragment,/,
+                match: /(?<=function (\i).{0,100}\()\i.Fragment,(?=.+?toolbar:\1\(\))/,
                 replace: "$self.ToolboxFragmentWrapper,"
             }
         }
