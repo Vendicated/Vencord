@@ -11,7 +11,7 @@
 .vc-author-modal-name {
     text-transform: none;
     flex-grow: 0;
-    background: var(--background-tertiary);
+    background: var(--background-base-lowest);
     border-radius: 0 9999px 9999px 0;
     padding: 6px 0.8em 6px 0.5em;
     font-size: 20px;
@@ -26,7 +26,7 @@
     position: absolute;
     height: 100%;
     width: 32px;
-    background: var(--background-tertiary);
+    background: var(--background-base-lowest);
     z-index: -1;
     left: -32px;
     top: 0;
