@@ -27,7 +27,6 @@ import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendLi
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
@@ -59,20 +58,6 @@ export function isPluginEnabled(p: string) {
         settings[p]?.enabled
     ) ?? false;
 }
-
-export const getDepMap = makeLazy(() => {
-    const o = {} as Record<string, string[]>;
-    for (const plugin in Plugins) {
-        const deps = Plugins[plugin].dependencies;
-        if (deps) {
-            for (const dep of deps) {
-                o[dep] ??= [];
-                o[dep].push(plugin);
-            }
-        }
-    }
-    return o;
-});
 
 
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {

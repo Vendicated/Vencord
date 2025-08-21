@@ -19,7 +19,6 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { SettingsTab, wrapTab } from "@components/settings/tabs";
 import { ChangeList } from "@utils/ChangeList";
@@ -30,7 +29,6 @@ import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
-import { getDepMap } from "plugins";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
@@ -102,24 +100,32 @@ export const showRestartAlert = (body: React.ReactNode) => Alerts.show({
     onConfirm: () => location.reload()
 });
 
+const depMap: Record<string, string[]> = {};
+for (const plugin in Plugins) {
+    const deps = Plugins[plugin].dependencies;
+    if (deps) {
+        for (const dep of deps) {
+            depMap[dep] ??= [];
+            depMap[dep].push(plugin);
+        }
+    }
+}
+
 export function MakePluginCard({
     plugin,
     onRestartNeeded,
     update,
+    key,
     isNew,
     setIsRequired,
-    key,
 }: {
     plugin: Plugin;
     onRestartNeeded: (name: string, key: string) => void;
+    key: string;
     update?: () => void;
     isNew?: boolean;
     setIsRequired?: (v: boolean) => void;
-    key: string;
 }) {
-
-    const depMap = getDepMap();
-
     const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d)) ?? [];
     const isRequired = plugin.required || dependents.length > 0;
 
@@ -154,7 +160,6 @@ export function MakePluginCard({
 
 
 function PluginSettings() {
-    const settings = useSettings();
     const changes = useMemo(() => new ChangeList<string>(), []);
 
     useCleanupEffect(() => {
