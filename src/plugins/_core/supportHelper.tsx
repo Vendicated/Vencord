@@ -21,7 +21,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { MakePluginCard, showRestartAlert } from "@components/settings/tabs/plugins";
+import { isPluginRequired, MakePluginCard, showRestartAlert } from "@components/settings/tabs/plugins";
 import { UnavailablePluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
@@ -345,10 +345,13 @@ function EmbedPluginCards(props) {
             );
         }
 
+        const required = isPluginRequired(p);
+
         return MakePluginCard({
             plugin: p,
             onRestartNeeded,
             update,
+            required,
             key: pluginName
         });
     });

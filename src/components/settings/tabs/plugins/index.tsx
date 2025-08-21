@@ -111,28 +111,26 @@ for (const plugin in Plugins) {
     }
 }
 
-export function MakePluginCard({
-    plugin,
-    onRestartNeeded,
-    update,
-    key,
-    isNew,
-    setIsRequired,
-}: {
+export function isPluginRequired(plugin: Plugin) {
+    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d)) ?? [];
+    return {
+        status: plugin.required || dependents.length > 0,
+        dependents
+    };
+}
+
+interface PluginCardProps {
     plugin: Plugin;
     onRestartNeeded: (name: string, key: string) => void;
     key: string;
+    required: { status: boolean; dependents: string[]; };
     update?: () => void;
     isNew?: boolean;
-    setIsRequired?: (v: boolean) => void;
-}) {
-    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d)) ?? [];
-    const isRequired = plugin.required || dependents.length > 0;
+}
 
-    setIsRequired?.(isRequired);
-
-    return isRequired ? (
-        <Tooltip text={dependents.length ? makeDependencyList(dependents) : "This plugin is required for Vencord to function."} key={plugin.name}>
+export function MakePluginCard({ plugin, onRestartNeeded, update, key, isNew, required: required }: PluginCardProps) {
+    return required.status ? (
+        <Tooltip text={required.dependents.length ? makeDependencyList(required.dependents) : "This plugin is required for Vencord to function."} key={plugin.name}>
             {({ onMouseLeave, onMouseEnter }) =>
                 <PluginCard
                     onMouseLeave={onMouseLeave}
@@ -243,18 +241,17 @@ function PluginSettings() {
         if (!pluginFilter(p)) continue;
 
         const onRestartNeeded = (name: string, key: string) => changes.handleChange(`${name}.${key}`);
-        let isRequired = false;
-        const setIsRequired = (v: boolean) => isRequired = v;
+        const required = isPluginRequired(p);
 
         const card = MakePluginCard({
             plugin: p,
             onRestartNeeded,
             isNew: newPlugins?.includes(p.name),
-            setIsRequired,
+            required,
             key: p.name
         });
 
-        card.props(isRequired ? requiredPlugins : plugins).push(card);
+        (required.status ? requiredPlugins : plugins).push(card);
     }
 
     return (

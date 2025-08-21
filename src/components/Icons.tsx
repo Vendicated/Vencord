@@ -128,11 +128,12 @@ export function InfoIcon(props: IconProps) {
     );
 }
 
-export function WarningIcon(props: IconProps) {
+export function WarningIcon({ height = 32, width = 32, className }: IconProps) {
     return (
         <Icon
-            {...props}
-            className={classes(props.className, "vc-warning-icon")}
+            height={height}
+            width={width}
+            className={classes(className, "vc-warning-icon")}
             viewBox="0 0 24 24"
         >
             <path

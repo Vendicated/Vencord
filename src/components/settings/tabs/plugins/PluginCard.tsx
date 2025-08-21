@@ -11,7 +11,7 @@ import { proxyLazy } from "@utils/lazy";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { React, showToast, Toasts, TooltipContainer } from "@webpack/common";
+import { React, showToast, Toasts, Tooltip } from "@webpack/common";
 import { Settings } from "Vencord";
 
 import { ExcludedPlugins } from "~plugins";
@@ -124,19 +124,31 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 export function UnavailablePluginCard({ name, description, isMissing }: { name: string; description: string, isMissing: boolean; }) {
     const toolTipText = isMissing
         ? `${name} is only available on the ${ExcludedReasons[ExcludedPlugins[name]]}`
-        : "This plugin is not available. Try updating!";
-    return (
+        : "This plugin is not on this version of Vencord. Try updating!";
+
+    return description ? (
+        <Tooltip text={toolTipText} key={name}>
+            {({ onMouseLeave, onMouseEnter }) =>
+                <AddonCard
+                    name={name}
+                    description={description || toolTipText}
+                    enabled={false}
+                    setEnabled={() => { }}
+                    disabled={true}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                    infoButton={<WarningIcon />}
+                />
+            }
+        </Tooltip>
+    ) : (
         <AddonCard
             name={name}
             description={description || toolTipText}
             enabled={false}
             setEnabled={() => { }}
             disabled={true}
-            infoButton={!description ? null : (
-                <TooltipContainer text={toolTipText}>
-                    <WarningIcon />
-                </TooltipContainer>
-            )}
+            infoButton={<WarningIcon />}
         />
     );
 }
