@@ -430,7 +430,7 @@ function preprocessQuests(quests: Quest[]): Quest[] {
 
     const unclaimedSortFunction = createSortFunction(unclaimedSubsort || "Recent DESC");
 
-    // Divide unclaimed quests by completion status before applying subsort.
+    // Divide unclaimed Quests by completion status before applying subsort.
     questGroups.unclaimed.sort((a: Quest, b: Quest) => {
         const aCompleted = !!a.userStatus?.completedAt;
         const bCompleted = !!b.userStatus?.completedAt;
@@ -688,12 +688,12 @@ function processQuestForAutoComplete(quest: Quest): boolean {
     if (quest.userStatus?.completedAt || existingInterval) {
         return true;
     } else if (!playType && !watchType) {
-        QuestifyLogger.warn(`[${getFormattedNow()}] Could not recognize the quest type for ${questName}.`);
+        QuestifyLogger.warn(`[${getFormattedNow()}] Could not recognize the Quest type for ${questName}.`);
         return true;
     } else if ((watchType && !completeVideoQuestsInBackground) || (playType && (!completeGameQuestsInBackground || !IS_DISCORD_DESKTOP))) {
         return true;
     } else if (!questDuration) {
-        QuestifyLogger.warn(`[${getFormattedNow()}] Could not find duration for quest ${questName}.`);
+        QuestifyLogger.warn(`[${getFormattedNow()}] Could not find duration for Quest ${questName}.`);
         return true;
     } else if (watchType) {
         startVideoProgressTracking(quest, questDuration);
@@ -747,7 +747,7 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
     return null;
 }
 
-function getActiveQuestClosestToCompletion(): Quest | null {
+function getQuestPanelOverride(): Quest | null {
     let closestQuest: Quest | null = null;
     let closestTimeRemaining = Infinity;
 
@@ -765,6 +765,23 @@ function getActiveQuestClosestToCompletion(): Quest | null {
             closestQuest = quest;
         }
     });
+
+    if (!closestQuest) {
+        const completedQuests = Array.from(QuestsStore.quests.values() as Quest[]).filter(q => q.userStatus?.completedAt).sort((a, b) => {
+            const aTime = new Date(a.userStatus?.completedAt as string);
+            const bTime = new Date(b.userStatus?.completedAt as string);
+            return bTime.getTime() - aTime.getTime();
+        });
+
+        completedQuests.forEach(quest => {
+            const completedQuest = quest.userStatus?.completedAt;
+            const questStatus = getQuestStatus(quest);
+
+            if (completedQuest && questStatus === QuestStatus.Unclaimed) {
+                closestQuest = quest;
+            }
+        });
+    }
 
     return closestQuest;
 }
@@ -789,7 +806,7 @@ export default definePlugin({
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
     shouldDisableQuestAcceptedButton,
-    getActiveQuestClosestToCompletion,
+    getQuestPanelOverride,
     getQuestAcceptedButtonText,
     processQuestForAutoComplete,
     activeQuestIntervals,
@@ -858,7 +875,7 @@ export default definePlugin({
         },
         {
             // Hides the new Quest popup above the account panel.
-            // Allows in-progress quests to still show.
+            // Allows in-progress Quests to still show.
             find: "QUESTS_BAR,questId",
             replacement: {
                 match: /return null==(\i)\?null:\(/,
@@ -871,7 +888,7 @@ export default definePlugin({
             find: "questDeliveryOverride)?",
             replacement: {
                 match: /(\i=)(\i.\i.questDeliveryOverride)/,
-                replace: "$1$self.getActiveQuestClosestToCompletion()??$2"
+                replace: "$1$self.getQuestPanelOverride()??$2"
             }
         },
         {
@@ -957,7 +974,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    // Restyles quest tiles with colors.
+                    // Restyles Quest tiles with colors.
                     match: /className:(\i\(\)\(\i.container,\i\)),/,
                     replace: "className:$self.getQuestTileClasses($1,arguments[0].quest),style:$self.getQuestTileStyle(arguments[0].quest),"
                 },
@@ -974,7 +991,7 @@ export default definePlugin({
             ]
         },
         {
-            // Sorts the "All Quests" tab quest tiles.
+            // Sorts the "All Quests" tab Quest tiles.
             // Also sets mobile-only Quests as desktop compatible if the setting is enabled.
             find: ".ALL);return(",
             replacement: {
@@ -983,7 +1000,7 @@ export default definePlugin({
             }
         },
         {
-            // Sorts the "Claimed Quests" tab quest tiles.
+            // Sorts the "Claimed Quests" tab Quest tiles.
             find: ".ALL)}):(",
             replacement: {
                 match: /(claimedQuests:(\i).{0,50}?;)/,

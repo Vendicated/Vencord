@@ -18,7 +18,7 @@ export const QuestifyLogger = new Logger("Questify");
 export const PlayAudio = findByCodeLazy("Unable to find sound for pack name:");
 // Takes an audio name or URL, volume, and a callback function. Plays when play() is called.
 const AudioPlayerConstructor = findByCodeLazy("sound has no duration");
-export function AudioPlayer(name: string, volume: number = 1, callback?: () => void): any { return new AudioPlayerConstructor(name, null, volume, "default", callback || (() => { })); }
+export function AudioPlayer(name: string, volume: number = 1, callback?: () => void): any { return new AudioPlayerConstructor(name, null, volume, "default", callback ?? (() => { })); }
 export const QuestsStore = findStoreLazy("QuestsStore");
 export const questPath = "/discovery/quests";
 export const leftClick = 0;
@@ -267,7 +267,7 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
         const progress = progressPlayType?.value || 1;
 
         if (!questPlayType) {
-            logger?.warn(`[${getFormattedNow()}] Could not recognize the quest type for Quest ${questName}.`);
+            logger?.warn(`[${getFormattedNow()}] Could not recognize the Quest type for Quest ${questName}.`);
             return { progress: null };
         }
 
