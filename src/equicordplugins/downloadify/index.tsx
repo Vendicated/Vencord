@@ -33,7 +33,7 @@ export default definePlugin({
     patches: [
         {
             // Pass the guild ID to the profile modal context. Used by the next patch.
-            find: "animate}):null",
+            find: "clanTagChiplet}),",
             replacement: {
                 match: /("right",)(avatarUrl:null)/,
                 replace: "$1guildId:arguments[0]?.channel?.guild_id,$2"
