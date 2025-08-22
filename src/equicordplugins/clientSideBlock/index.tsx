@@ -36,14 +36,6 @@ const settings = definePluginSettings(
             restartNeeded: true,
             default: true
         },
-        /*
-            hideNewUsers: {
-                type: OptionType.BOOLEAN,
-                description: "Should content from users with the \"I'm new here, say hi!\" badge be blocked\"",
-                restartNeeded: true,
-                default: true
-            },
-        */
         blockedReplyDisplay: {
             type: OptionType.SELECT,
             description: "What should display instead of the message when someone replies to someone you have hidden",

@@ -50,10 +50,10 @@ export function fetchAndAlertQuests(source: string, logger: Logger): void {
                 const shouldAlert = settings.store.fetchingQuestsAlert;
 
                 if (shouldAlert) {
-                    logger.info(`[${getFormattedNow()}] New quests detected. Playing alert sound.`);
+                    logger.info(`[${getFormattedNow()}] New Quests detected. Playing alert sound.`);
                     AudioPlayer(shouldAlert, 1).play();
                 } else {
-                    logger.info(`[${getFormattedNow()}] New quests detected.`);
+                    logger.info(`[${getFormattedNow()}] New Quests detected.`);
                 }
             }
         }
@@ -75,13 +75,13 @@ export function startAutoFetchingQuests(seconds?: number): void {
     }
 
     const interval = seconds ? seconds * 1000 : settings.store.fetchingQuestsInterval * 1000;
-    QuestifyLogger.info(`[${getFormattedNow()}] Starting AutoFetch of quests every ${(interval / 60000).toFixed(2)} minutes.`);
+    QuestifyLogger.info(`[${getFormattedNow()}] Starting AutoFetch of Quests every ${(interval / 60000).toFixed(2)} minutes.`);
     autoFetchInterval = setInterval(() => { fetchAndAlertQuests("Questify-AutoFetch", QuestifyLogger); }, interval);
 }
 
 export function stopAutoFetchingQuests(): void {
     if (autoFetchInterval) {
-        QuestifyLogger.info(`[${getFormattedNow()}] Stopping AutoFetch of quests.`);
+        QuestifyLogger.info(`[${getFormattedNow()}] Stopping AutoFetch of Quests.`);
         clearInterval(autoFetchInterval);
         autoFetchInterval = null;
     }
@@ -712,8 +712,7 @@ function RestyleQuestsSetting() {
         restyleQuestsIgnored,
         restyleQuestsExpired,
         restyleQuestsGradient,
-        restyleQuestsPreload,
-        ignoredQuestProfile
+        restyleQuestsPreload
     } = settings.use([
         "restyleQuestsUnclaimed",
         "restyleQuestsClaimed",
@@ -721,7 +720,6 @@ function RestyleQuestsSetting() {
         "restyleQuestsExpired",
         "restyleQuestsGradient",
         "restyleQuestsPreload",
-        "ignoredQuestProfile"
     ]);
 
     const [unclaimedColor, setUnclaimedColor] = useState<number | null>(restyleQuestsUnclaimed);
@@ -871,26 +869,6 @@ function RestyleQuestsSetting() {
                             />
                         </div>
                     </div>
-                    <div className={q("main-inline-group")}>
-                        <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
-                                Ignored Quest Profile
-                            </Forms.FormTitle>
-                            <Select
-                                options={[
-                                    { label: "Shared: All accounts on this client share ignores.", value: "shared" },
-                                    { label: "Private: All accounts on this client have separate ignores.", value: "private" }
-                                ]}
-                                className={q("select")}
-                                popoutPosition="bottom"
-                                serialize={String}
-                                isSelected={(value: string) => value === ignoredQuestProfile}
-                                select={(value: string) => {
-                                    settings.store.ignoredQuestProfile = value;
-                                }}
-                            />
-                        </div>
-                    </div>
                     <div className={q("color-picker-container")}>
                         {colorPickers.map(({ label, idx, defaultValue, value }) => (
                             <div
@@ -942,12 +920,14 @@ function ReorderQuestsSetting(): JSX.Element {
         unclaimedSubsort,
         claimedSubsort,
         ignoredSubsort,
-        expiredSubsort
+        expiredSubsort,
+        ignoredQuestProfile
     } = settings.use([
         "unclaimedSubsort",
         "claimedSubsort",
         "ignoredSubsort",
-        "expiredSubsort"
+        "expiredSubsort",
+        "ignoredQuestProfile"
     ]);
 
     const getSubsortOptions = (source: string): SelectOption[] => {
@@ -1079,6 +1059,26 @@ function ReorderQuestsSetting(): JSX.Element {
                                 isSelected={(value: string) => value === expiredSubsort}
                                 select={(value: string) => {
                                     settings.store.expiredSubsort = value;
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div className={q("main-inline-group")}>
+                        <div className={q("inline-group-item")}>
+                            <Forms.FormTitle className={q("form-subtitle")}>
+                                Ignored Quest Profile
+                            </Forms.FormTitle>
+                            <Select
+                                options={[
+                                    { label: "Shared: All accounts on this client share ignores.", value: "shared" },
+                                    { label: "Private: All accounts on this client have separate ignores.", value: "private" }
+                                ]}
+                                className={q("select")}
+                                popoutPosition="bottom"
+                                serialize={String}
+                                isSelected={(value: string) => value === ignoredQuestProfile}
+                                select={(value: string) => {
+                                    settings.store.ignoredQuestProfile = value;
                                 }}
                             />
                         </div>
@@ -1314,7 +1314,7 @@ function FetchingQuestsSetting(): JSX.Element {
                         <Forms.FormText className={q("form-description")}>
                             Configure how often to fetch Quests from Discord and set up alerts for new Quests.
                             <br /><br />
-                            By default, Discord only fetches quests on load and when visiting the Quests page.
+                            By default, Discord only fetches Quests on load and when visiting the Quests page.
                             This means that without a fetch interval defined below, this plugin will become unaware
                             of new Quests added throughout the day.
                             <br /><br />
@@ -1609,25 +1609,25 @@ export const settings = definePluginSettings({
     },
     unclaimedSubsort: {
         type: OptionType.STRING,
-        description: "Subsort method for unclaimed quests.",
+        description: "Subsort method for unclaimed Quests.",
         default: "Expiring ASC", // "Recent ASC", "Recent DESC", "Expiring ASC", "Expiring DESC"
         hidden: true
     },
     claimedSubsort: {
         type: OptionType.STRING,
-        description: "Subsort method for claimed quests.",
+        description: "Subsort method for claimed Quests.",
         default: "Claimed DESC", // "Recent ASC", "Recent DESC", "Claimed ASC", "Claimed DESC"
         hidden: true
     },
     ignoredSubsort: {
         type: OptionType.STRING,
-        description: "Subsort method for ignored quests.",
+        description: "Subsort method for ignored Quests.",
         default: "Recent DESC", // "Recent ASC", "Recent DESC", "Expiring ASC", "Expiring DESC"
         hidden: true
     },
     expiredSubsort: {
         type: OptionType.STRING,
-        description: "Subsort method for expired quests.",
+        description: "Subsort method for expired Quests.",
         default: "Expiring DESC", // "Recent ASC", "Recent DESC", "Expiring ASC", "Expiring DESC"
         hidden: true
     },
@@ -1639,7 +1639,7 @@ export const settings = definePluginSettings({
     },
     onQuestsPage: {
         type: OptionType.BOOLEAN,
-        description: "Whether the user is currently on the quests page.",
+        description: "Whether the user is currently on the Quests page.",
         default: false,
         hidden: true
     },

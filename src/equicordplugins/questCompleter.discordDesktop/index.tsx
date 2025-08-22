@@ -262,14 +262,14 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "BkZhUF)}",
+            find: "BkZhUF),",
             replacement: {
-                match: /(?<=questId:(\i\.id).*?\.PRIMARY,)disabled:!0/,
+                match: /(?<=questId:(\i\.id).*?"secondary",)disabled:!0/,
                 replace: "onClick: () => $self.mobileQuestPatch($1)"
             },
         },
         {
-            find: "AppTitleBar",
+            find: '"BACK_FORWARD_NAVIGATION"',
             replacement: {
                 match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[)/,
                 replace: "$self.renderQuestButton(),"

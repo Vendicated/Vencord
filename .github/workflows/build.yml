@@ -69,13 +69,6 @@ jobs:
               run: |
                   gh release upload latest --clobber dist/release/*
 
-            - name: Create Tag
-              uses: butlerlogic/action-autotag@1.1.2
-              env:
-                GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-              with:
-                tag_prefix: "v"
-
             - name: Upload Plugin JSONs to Equibored repo
               run: |
                   git config --global user.name "GitHub-Actions"

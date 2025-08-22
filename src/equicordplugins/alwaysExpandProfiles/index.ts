@@ -17,18 +17,12 @@ export default definePlugin({
     authors: [EquicordDevs.thororen],
     patches: [
         {
-            find: '"UserProfilePopout"})',
+            find: '"view-profile"',
             replacement: {
-                match: /(?<=user:(\i).*?"PRESS_VIEW_PROFILE".{0,150})return/,
-                replace: "return $self.openUserProfile($1);"
-            }
-        },
-        {
-            find: '"BotUserProfilePopout"',
-            replacement: {
-                match: /(?<=user:(\i).*?"PRESS_VIEW_PROFILE".{0,100})return/,
-                replace: "return $self.openUserProfile($1);"
-            }
+                match: /(user:(\i).*?"PRESS_VIEW_PROFILE".{0,200})return/,
+                replace: "$1return $self.openUserProfile($2);"
+            },
+            all: true
         },
     ],
     openUserProfile(user: User) {
