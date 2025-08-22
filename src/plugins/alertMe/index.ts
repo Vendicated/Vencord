@@ -35,37 +35,37 @@ const settings = definePluginSettings({
     },
     soundUrl: {
         type: OptionType.STRING,
-        description: "URL of the sound to play when the target user messages you",
+        description: "URL of the sound to play when the target user messages you.",
         default: "https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg",
     },
     iconURL: {
         type: OptionType.STRING,
-        description: "URL of the icon to show in the notification",
+        description: "URL of the icon to show in the notification.",
         default: "https://vencord.dev/assets/cute-logo.avif",
     },
     showMessageContent: {
         type: OptionType.BOOLEAN,
-        description: "Show the message content in the notification",
+        description: "Show the message content in the notification.",
         default: true,
     },
     enableSound: {
         type: OptionType.BOOLEAN,
-        description: "Enable sound notification",
+        description: "Enable sound notification.",
         default: true,
     },
     persistNotification: {
         type: OptionType.BOOLEAN,
-        description: "Make the notification stay until dismissed",
+        description: "Make the notification stay until dismissed.",
         default: false,
     },
     enableDesktopNotification: {
         type: OptionType.BOOLEAN,
-        description: "Enable desktop notification",
+        description: "Enable desktop notifications.",
         default: true,
     },
     reNotifyInterval: {
         type: OptionType.NUMBER,
-        description: "Interval in seconds to ignore new incoming messages from the target user after an alert (0 to disable)",
+        description: "Interval in seconds to ignore new incoming messages from the target user after an alert (0 to disable).",
         default: 30,
         min: 0,
         max: 600,
@@ -76,7 +76,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "alertMe",
-    description: "Shows a notification whenever a specific user messages you in DMs regardless of all notification other settings. ",
+    description: "Shows a notification whenever a specific user messages you in DMs regardless of all notification other settings.",
     authors: [Devs.Qtpie],
     settings,
 
