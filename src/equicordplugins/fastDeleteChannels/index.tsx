@@ -78,6 +78,7 @@ export default definePlugin({
     settings,
     patches: [
         // TY TypingIndicator
+        // Normal Channels
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
@@ -85,6 +86,7 @@ export default definePlugin({
                 replace: "$&,$self.TrashIcon($1)"
             }
         },
+        // Threads
         {
             find: "spineWithGuildIcon]:",
             replacement: {
