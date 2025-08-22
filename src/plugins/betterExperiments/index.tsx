@@ -7,13 +7,20 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, GuildStore } from "@webpack/common";
+import { findByCodeLazy, findLazy, findStoreLazy } from "@webpack";
+import { Button, FluxDispatcher, GuildStore, IconUtils, RelationshipStore, Tooltip, UserStore } from "@webpack/common";
+
+import { Experiment, fetchExperiments } from "./api";
+
+// TODO: move this to utils package so consoleshortcuts dont have duplicate find
+const mm3 = findLazy(m => m?.toString?.().includes?.("0xcc9e2d51"));
 
 const ExperimentStore = findStoreLazy("ExperimentStore");
 // const GuildTooltip = findByCodeLazy("GuildTooltip");
 const GuildIcon = findByCodeLazy(".PureComponent){render(){return(0,");
+const API_URL = "https://experiments.mantikafasi.dev";
 
+const EXPERIMENTS: Map<string, Experiment> = new Map();
 // const GuildIcon = wreq(565138).Z;
 // .PureComponent){render(){return(0,
 export default definePlugin({
@@ -24,10 +31,13 @@ export default definePlugin({
     patches: [
         {
             find: "Guild Assignments",
-            replacement: {
+            replacement: [{
                 match: /Guild Assignments"}\),\(0,.\.jsx.+?}\)/,
                 replace: "Guild Assignments\"}),$self.getExperimentsComponent(e)"
-            },
+            }, {
+                match: /Server Descriptor"}\),\(0,.\.jsx.+?}\)/,
+                replace: "Server Descriptor\"}),$self.getExperimentsComponent(e)"
+            }],
         },
         // stole from experiments plugin troll
         {
@@ -39,6 +49,20 @@ export default definePlugin({
         },
     ],
     start: () => {
+        fetchExperiments().then(experiments => {
+            for (const experiment of experiments) {
+                EXPERIMENTS.set(experiment.data.id, experiment);
+            }
+        });
+
+        setInterval(() => {
+            fetchExperiments().then(experiments => {
+                for (const experiment of experiments) {
+                    EXPERIMENTS.set(experiment.data.id, experiment);
+                }
+            });
+        }, 25 * 60 * 1000); // every 25 minutes
+
     },
     settings: definePluginSettings({
         accountIds: {
@@ -79,7 +103,7 @@ export default definePlugin({
         const exp = experiments[e.experimentId];
         // bucket to description map
         const bucketMap = {};
-        if (!exp.buckets) return;
+        if (!exp?.buckets) return;
 
         for (const [i, v] of exp.buckets.entries()) {
             bucketMap[v] = exp.description[i];
@@ -89,41 +113,102 @@ export default definePlugin({
             <div key={e.experimentId} className="vc-guild-experiment">
                 {Object.keys(bucketMap).map(bucket => {
                     const description = bucketMap[bucket];
-                    const guildIcons = guildIds.map(guildId => {
-                        const descriptor = ExperimentStore.getGuildExperimentDescriptor(e.experimentId, guildId);
-                        const guild = guilds[guildId];
-                        if (!descriptor) return null;
-                        if (descriptor.bucket === parseInt(bucket)) return (
-                            <GuildIcon showTooltip={true} showBadge={true} guild={guild} key={guild.id} />
-                        );
-                    }).filter(Boolean);
 
-                    return <div key={bucket} className="vc-guild-experiment-bucket">
-                        <div className="vc-guild-experiment-bucket-name" style={{
-                            color: "var(--text-primary)",
-                            padding: "4px 0px 4px 0px",
-                            fontSize: "14px",
-                        }}>{description}</div>
+                    if (exp.type === "guild") {
+                        const guildIcons = guildIds.map(guildId => {
+                            const descriptor = ExperimentStore.getGuildExperimentDescriptor(e.experimentId, guildId);
+                            const guild = guilds[guildId];
+                            if (!descriptor) return null;
+                            if (descriptor.bucket === parseInt(bucket)) return (
+                                <GuildIcon showTooltip={true} showBadge={true} guild={guild} key={guild.id} />
+                            );
+                        }).filter(Boolean);
 
-                        <div style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            gap: "4px",
-                            marginTop: "4px",
-                            flexWrap: "wrap",
-                        }}>
-                            {
-                                guildIcons.length > 0 ? guildIcons : <div style={{
-                                    color: "var(--text-muted)",
-                                    fontSize: "12px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    height: "20px",
-                                }}>No guilds in this bucket</div>
-                            }
-                        </div>
-                    </div>;
+                        return <div key={bucket} className="vc-guild-experiment-bucket">
+                            <div className="vc-guild-experiment-bucket-name" style={{
+                                color: "var(--text-primary)",
+                                padding: "4px 0px 4px 0px",
+                                fontSize: "14px",
+                            }}>{description}</div>
+
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "4px",
+                                marginTop: "4px",
+                                flexWrap: "wrap",
+                            }}>
+                                {
+                                    guildIcons.length > 0 ? guildIcons : <div style={{
+                                        color: "var(--text-muted)",
+                                        fontSize: "12px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        height: "20px",
+                                    }}>No guilds in this bucket</div>
+                                }
+                            </div>
+                        </div>;
+                    } else if (exp.type === "user") {
+                        const friends = RelationshipStore.getFriendIDs().map(id => ({ id, user: UserStore.getUser(id) }));
+                        const expObject = EXPERIMENTS.get(e.experimentId);
+
+                        // #3 is populations
+                        const ranges = expObject?.rollout[3]?.map(population => {
+                            return population[0].filter(range => { return range[0] === parseInt(bucket); }).map(range => range[1]);
+                        });
+
+                        const userIcons = friends.map(friend => {
+                            const hash = mm3(e.experimentId + ":" + friend.id) % 10000;
+
+                            const inRange = ranges?.some(range =>
+                                range.some(r =>
+                                    r?.some(e => hash >= e.s && hash <= e.e)
+                                )
+                            ) ?? false;
+
+                            if (inRange) return (
+                                <Tooltip text={friend.user.username} key={friend.id}>
+                                    {(tooltipProps: any) => (
+                                        <img
+                                            {...tooltipProps}
+                                            src={IconUtils.getUserAvatarURL(friend.user)}
+                                            alt={friend.user.username}
+                                            style={{ borderRadius: "50%", width: "32px", height: "32px" }}
+                                        />
+                                    )}
+                                </Tooltip>
+                            );
+                        }).filter(Boolean);
+
+                        return <div key={bucket} className="vc-user-experiment-bucket">
+                            <div className="vc-user-experiment-bucket-name" style={{
+                                color: "var(--text-primary)",
+                                padding: "4px 0px 4px 0px",
+                                fontSize: "14px",
+                            }}>{description}</div>
+
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "4px",
+                                marginTop: "4px",
+                                flexWrap: "wrap",
+                            }}>
+                                {
+                                    userIcons.length > 0 ? userIcons : <div style={{
+                                        color: "var(--text-muted)",
+                                        fontSize: "12px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        height: "20px",
+                                    }}>No users in this bucket</div>
+                                }
+                            </div>
+                        </div>;
+                    }
                 })}
             </div>;
         </div>;
