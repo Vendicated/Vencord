@@ -17,8 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin, { ReporterTestable, StartAt } from "@utils/types";
-import { showToast } from "@webpack/common";
+import definePlugin from "@utils/types";
 
 import { settings } from "./settings";
 import { startStreaming, stopStreaming, toggleAudio, toggleGameOrScreen, toggleStream } from "./streamManager";
@@ -26,9 +25,7 @@ import { startStreaming, stopStreaming, toggleAudio, toggleGameOrScreen, toggleS
 export default definePlugin({
     name: "ShortcutScreenShare",
     description: "Screenshare screen from keyboard shortcut when no game is running.",
-    startAt: StartAt.WebpackReady,
     authors: [Devs.nicola02nb],
-    reporterTestable: ReporterTestable.Patches,
     settings,
     keybinds: [
         { name: "startStreaming", function: startStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
@@ -40,10 +37,5 @@ export default definePlugin({
     start: () => {
     },
     stop: () => {
-    },
-
-    showToast() {
-        if (!settings.store.showToast) return;
-        showToast("Stream toggled");
     }
 });

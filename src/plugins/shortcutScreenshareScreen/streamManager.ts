@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { showToast, ToastOptions, ToastPosition, ToastType } from "@webpack/common";
+import { showToast, ToastPosition, ToastType } from "@webpack/common";
 import { findByCodeLazy } from "webpack";
 
 import { settings } from "./settings";
