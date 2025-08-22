@@ -27,7 +27,7 @@ import { Channel } from "@vencord/discord-types";
 import { ChannelStore, FluxDispatcher, Menu, React } from "@webpack/common";
 
 const settings = definePluginSettings({
-    enabled: {
+    enabledGlobally: {
         type: OptionType.BOOLEAN,
         description: "Toggle functionality of your own typing indicator globally.",
         default: true,
@@ -51,7 +51,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "What to do when left clicking the chat icon.",
         options: [
-            { label: "Toggle Plugin Functionality", value: "global" },
+            { label: "Toggle Typing Globally", value: "global" },
             { label: "Toggle Typing in Channel", value: "channel", default: true },
             { label: "Toggle Typing in Guild", value: "guild" },
             { label: "Open Plugin Settings", value: "settings" }
@@ -61,7 +61,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "What to do when middle clicking the chat icon.",
         options: [
-            { label: "Toggle Plugin Functionality", value: "global" },
+            { label: "Toggle Typing Globally", value: "global" },
             { label: "Toggle Typing in Channel", value: "channel" },
             { label: "Toggle Typing in Guild", value: "guild" },
             { label: "Open Plugin Settings", value: "settings", default: true }
@@ -71,7 +71,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "What to do when right clicking the chat icon.",
         options: [
-            { label: "Toggle Plugin Functionality", value: "global", default: true },
+            { label: "Toggle Typing Globally", value: "global", default: true },
             { label: "Toggle Typing in Channel", value: "channel" },
             { label: "Toggle Typing in Guild", value: "guild" },
             { label: "Open Plugin Settings", value: "settings" }
@@ -100,7 +100,7 @@ const settings = definePluginSettings({
 });
 
 function toggleGlobal(): void {
-    settings.store.enabled = !settings.store.enabled;
+    settings.store.enabledGlobally = !settings.store.enabledGlobally;
 }
 
 function toggleLocation(locationId: string, effectiveList: string[], defaultHidden: boolean): void {
@@ -119,7 +119,7 @@ function toggleLocation(locationId: string, effectiveList: string[], defaultHidd
 
 const SilentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
     const {
-        enabled,
+        enabledGlobally,
         chatIcon,
         defaultHidden,
         enabledLocations,
@@ -128,7 +128,7 @@ const SilentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
         chatIconMiddleClickAction,
         chatIconRightClickAction,
     } = settings.use([
-        "enabled",
+        "enabledGlobally",
         "chatIcon",
         "defaultHidden",
         "enabledLocations",
@@ -143,10 +143,10 @@ const SilentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
     if (!validChat || !chatIcon) return null;
 
     const effectiveList = getEffectiveList();
-    const enabledLocally = enabled && checkEnabled(channel);
+    const enabledLocally = enabledGlobally && checkEnabled(channel);
     const location = channel.guild_id && effectiveList.includes(channel.guild_id) ? "Guild" : effectiveList.includes(channel.id) ? "Channel" : "Global";
 
-    const tooltip = enabled ? (
+    const tooltip = enabledGlobally ? (
         enabledLocally ? `Typing Hidden (${location})` : `Typing Visible (${location})`
     ) : "Typing Visible (Global)";
 
@@ -220,7 +220,7 @@ function getEffectiveList(): string[] {
 }
 
 function checkEnabled(channel: string | Channel): boolean {
-    if (!settings.store.enabled) return false;
+    if (!settings.store.enabledGlobally) return false;
 
     const channelId = typeof channel === "string" ? channel : channel.id;
     const guildId = typeof channel === "string" ? ChannelStore.getChannel(channelId)?.guild_id : channel.guild_id;
@@ -237,14 +237,14 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     const {
         chatIcon,
         chatContextMenu,
-        enabled,
+        enabledGlobally,
         defaultHidden,
         hideChatBoxTypingIndicators,
         hideMembersListTypingIndicators
     } = settings.use([
         "chatIcon",
         "chatContextMenu",
-        "enabled",
+        "enabledGlobally",
         "defaultHidden",
         "hideChatBoxTypingIndicators",
         "hideMembersListTypingIndicators"
@@ -260,8 +260,8 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
 
     group.splice(idx >= 0 ? idx : 0, 0,
         <Menu.MenuItem id="vc-silent-typing" label="Silent Typing">
-            <Menu.MenuCheckboxItem id="vc-silent-typing-enabled" label="Enabled" checked={enabled}
-                action={() => settings.store.enabled = !settings.store.enabled} />
+            <Menu.MenuCheckboxItem id="vc-silent-typing-enabled" label="Enabled" checked={enabledGlobally}
+                action={() => settings.store.enabledGlobally = !settings.store.enabledGlobally} />
             <Menu.MenuCheckboxItem id="vc-silent-typing-chat-bar-indicators" label="Chat Bar Indicators" checked={settings.store.hideChatBoxTypingIndicators}
                 action={() => settings.store.hideChatBoxTypingIndicators = !settings.store.hideChatBoxTypingIndicators} />
             <Menu.MenuCheckboxItem id="vc-silent-typing-members-list-indicators" label="Members List Indicators" checked={settings.store.hideMembersListTypingIndicators}
