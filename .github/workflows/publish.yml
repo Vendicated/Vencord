@@ -36,6 +36,7 @@ jobs:
             echo "release=true" >> $GITHUB_OUTPUT
           else
             echo "release=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Stop if not newer
         if: steps.check.outputs.release == 'false'
