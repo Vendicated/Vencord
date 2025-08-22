@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// https://github.com/Masterjoona/vc-betterplusreacts/blob/main/index.ts
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { MessageStore } from "@webpack/common";
