@@ -20,7 +20,7 @@ jobs:
       - name: Get latest Git tag
         id: tag
         run: |
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n 1 || echo "v0.0.0")
           echo "latest=$latest_tag" >> $GITHUB_OUTPUT
 
       - name: Check if package.json version is newer
