@@ -32,7 +32,7 @@ function renderBadge(id: number, title: string) {
 export default definePlugin({
     name: "ChannelBadges",
     description: "Adds badges to channels based on their type",
-    authors: [EquicordDevs.creations],
+    authors: [EquicordDevs.creations, EquicordDevs.thororen],
     settings,
     patches: [
         // TY TypingIndicator

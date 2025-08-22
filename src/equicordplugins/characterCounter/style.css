@@ -1,22 +1,13 @@
 .vc-char-counter {
     font-size: 12px;
     color: var(--text-muted);
-    text-align: right;
     position: absolute;
-    right: 0;
+    bottom: 4px;
+    right: 6px;
     pointer-events: none;
-    z-index: 1;
-    margin: 0;
-    padding: 6px;
-    background-color: var(--background-tertiary);
-    border-radius: var(--radius-sm);
-    transition: opacity 0.3s ease;
-}
-
-.vc-char-counter.left {
-    text-align: left;
-    right: auto;
-    left: 0;
+    z-index: 2;
+    background: transparent;
+    transition: color 0.3s ease;
 }
 
 .vc-char-counter .vc-char-count {
