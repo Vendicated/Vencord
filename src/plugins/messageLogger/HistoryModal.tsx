@@ -84,7 +84,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
                 </TabBar>
 
                 <div className={classes(CodeContainerClasses.markup, MiscClasses.messageContent, Margins.top20)}>
-                    {parseEditContent(contents[currentTab], message)}
+                    {parseEditContent(contents[currentTab], message, currentTab === contents.length - 1 ? undefined : contents[contents.length - 1])}
                 </div>
             </ModalContent>
         </ModalRoot>
