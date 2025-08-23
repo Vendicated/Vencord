@@ -1,3 +1,3 @@
 .messagelogger-deleted {
-    background-color: hsl(3deg 86% 68%) !important;
+    background-color: hsla(var(--red-430-hsl, 0 85% 61%) / 15%) !important;
 }
