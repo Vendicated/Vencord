@@ -33,7 +33,7 @@ export default definePlugin({
                     replace: "if(Vencord.Api.Notices.currentNotice)return false;$&"
                 },
 
-                // TODO: remove this compat eventually
+                // FIXME(Bundler minifier change related): Remove the non used compability once enough time has passed
                 {
                     match: /(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,
                     replace: (m, notice) => `if(${notice}?.id=="VencordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`,
