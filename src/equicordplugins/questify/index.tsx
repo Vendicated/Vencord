@@ -992,20 +992,20 @@ export default definePlugin({
         },
         {
             // Sorts the "All Quests" tab Quest tiles.
-            // Also sets mobile-only Quests as desktop compatible if the setting is enabled.
-            find: ".ALL);return(",
-            replacement: {
-                match: /(quests:(\i).{0,100}?quests:)\i/,
-                replace: "$1$self.preprocessQuests($2)"
-            }
-        },
-        {
             // Sorts the "Claimed Quests" tab Quest tiles.
+            // Also sets mobile-only Quests as desktop compatible if the setting is enabled.
             find: ".ALL)}):(",
-            replacement: {
-                match: /(claimedQuests:(\i).{0,50}?;)/,
-                replace: "$1$2=$self.preprocessQuests($2);"
-            }
+            group: true,
+            replacement: [
+                {
+                    match: /(claimedQuests:(\i).{0,50}?;)/,
+                    replace: "$1$2=$self.preprocessQuests($2);"
+                },
+                {
+                    match: /(quests:(\i).{0,50}?;)/,
+                    replace: "$1$2=$self.preprocessQuests($2);"
+                }
+            ]
         },
         {
             // Whether preloading assets is enabled or not, the placeholders loading
