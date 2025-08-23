@@ -42,8 +42,13 @@ export default definePlugin({
         {
             find: ",BURST_REACTION_EFFECT_PLAY",
             replacement: {
-                match: /(BURST_REACTION_EFFECT_PLAY:\i=>{.+?if\()(\(\(\i,\i\)=>.+?\(\i,\i\))>=\d+?(?=\))/,
-                replace: (_, rest, playingCount) => `${rest}!$self.shouldPlayBurstReaction(${playingCount})`
+                /*
+                 * var limit = 5
+                 * ...
+                 * if (calculatePlayingCount(a,b) >= limit) return;
+                 */
+                match: /(?<=(\i)=5.+?)if\((.{0,20}?)>=\1\)return;/,
+                replace: "if(!$self.shouldPlayBurstReaction($2))return;"
             }
         },
         {
@@ -58,8 +63,7 @@ export default definePlugin({
 
     shouldPlayBurstReaction(playingCount: number) {
         if (settings.store.unlimitedSuperReactionPlaying) return true;
-        if (settings.store.superReactionPlayingLimit === 0) return false;
-        if (playingCount <= settings.store.superReactionPlayingLimit) return true;
+        if (settings.store.superReactionPlayingLimit > playingCount) return true;
         return false;
     },
 
