@@ -198,7 +198,7 @@ enum ThemeTab {
 }
 
 function ThemesTab() {
-    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes", "themeNames"]);
+    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes"]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
