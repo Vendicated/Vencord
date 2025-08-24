@@ -48,8 +48,6 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => {
             const { stringRules, regexRules } = settings.use(["stringRules", "regexRules"]);
-            stringRules.forEach(rule => { if (!rule.scope) rule.scope = "myMessages"; });
-            regexRules.forEach(rule => { if (!rule.scope) rule.scope = "myMessages"; });
 
             return (
                 <>
@@ -277,6 +275,12 @@ export default definePlugin({
             }
         },
     ],
+
+    start() {
+        const { stringRules, regexRules } = settings.store;
+        stringRules.forEach(rule => { if (!rule.scope) rule.scope = "myMessages"; });
+        regexRules.forEach(rule => { if (!rule.scope) rule.scope = "myMessages"; });
+    },
 
     onBeforeMessageSend(channelId, msg) {
         // Channel used for sharing rules, applying rules here would be messy
