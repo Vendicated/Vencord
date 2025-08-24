@@ -22,12 +22,13 @@ import { DeleteIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, React, TextInput, useState } from "@webpack/common";
+import { Message } from "@vencord/discord-types";
+import { Button, Forms, React, Select, TextInput, UserStore, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
 
-type Rule = Record<"find" | "replace" | "onlyIfIncludes", string>;
+type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "scope", string>;
 
 interface TextReplaceProps {
     title: string;
@@ -37,7 +38,8 @@ interface TextReplaceProps {
 const makeEmptyRule: () => Rule = () => ({
     find: "",
     replace: "",
-    onlyIfIncludes: ""
+    onlyIfIncludes: "",
+    scope: "myMessages"
 });
 const makeEmptyRuleArray = () => [makeEmptyRule()];
 
@@ -46,6 +48,8 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => {
             const { stringRules, regexRules } = settings.use(["stringRules", "regexRules"]);
+            stringRules.forEach(rule => { if (!rule.scope) rule.scope = "myMessages"; });
+            regexRules.forEach(rule => { if (!rule.scope) rule.scope = "myMessages"; });
 
             return (
                 <>
@@ -136,6 +140,12 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
         }
     }
 
+    const scopeOptions = [
+        { label: "Apply to your messages (visible to everyone)", value: "myMessages" },
+        { label: "Apply to others' messages (only visible to you)", value: "othersMessages" },
+        { label: "Apply to all messages", value: "allMessages" }
+    ];
+
     return (
         <>
             <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
@@ -161,24 +171,30 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
                                         onChange={e => onChange(e, index, "onlyIfIncludes")}
                                     />
                                 </Flex>
+                            </Flex>
+                            {(index !== rulesArray.length - 1) && <Flex flexDirection="row" style={{
+                                gap: "0.5em",
+                                borderBottom: "4px solid var(--text-low-contrast)",
+                                borderRadius: "0 0 5px 5px",
+                                marginBottom: "0.75em",
+                                paddingBottom: "0.5em"
+                            }}>
+                                <div style={{ flex: 0.9 }}>
+                                    <Select
+                                        options={scopeOptions}
+                                        isSelected={e => e === rule.scope}
+                                        select={e => onChange(e, index, "scope")}
+                                        serialize={e => e}
+                                    />
+                                </div>
                                 <Button
                                     size={Button.Sizes.MIN}
                                     onClick={() => onClickRemove(index)}
-                                    style={{
-                                        background: "none",
-                                        color: "var(--status-danger)",
-                                        ...(index === rulesArray.length - 1
-                                            ? {
-                                                visibility: "hidden",
-                                                pointerEvents: "none"
-                                            }
-                                            : {}
-                                        )
-                                    }}
+                                    style={{ flex: 0.10, background: "none", color: "var(--status-danger)" }}
                                 >
-                                    <DeleteIcon />
+                                    <DeleteIcon style={{ verticalAlign: "middle" }} />
                                 </Button>
-                            </Flex>
+                            </Flex>}
                             {isRegexRules && renderFindError(rule.find)}
                         </React.Fragment>
                     )
@@ -194,12 +210,12 @@ function TextReplaceTesting() {
         <>
             <Forms.FormTitle tag="h4">Test Rules</Forms.FormTitle>
             <TextInput placeholder="Type a message" onChange={setValue} />
-            <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value)} />
+            <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value, "allMessages")} />
         </>
     );
 }
 
-function applyRules(content: string): string {
+function applyRules(content: string, scope: "myMessages" | "othersMessages" | "allMessages"): string {
     if (content.length === 0) {
         return content;
     }
@@ -207,6 +223,7 @@ function applyRules(content: string): string {
     for (const rule of settings.store.stringRules) {
         if (!rule.find) continue;
         if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+        if (rule.scope !== "allMessages" && rule.scope !== scope) continue;
 
         content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
     }
@@ -214,6 +231,7 @@ function applyRules(content: string): string {
     for (const rule of settings.store.regexRules) {
         if (!rule.find) continue;
         if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+        if (rule.scope !== "allMessages" && rule.scope !== scope) continue;
 
         try {
             const regex = stringToRegex(rule.find);
@@ -227,18 +245,42 @@ function applyRules(content: string): string {
     return content;
 }
 
+function modifyIncomingMessage(message: Message) {
+    const { stringRules, regexRules } = settings.use(["stringRules", "regexRules"]);
+    const currentUser = UserStore.getCurrentUser();
+
+    if (!currentUser || message.author.id === currentUser.id) {
+        return;
+    }
+
+    message.content = (message as any).originalContent ?? message.content;
+    (message as any).originalContent = message.content;
+    message.content = applyRules(message.content, "othersMessages");
+}
+
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
 
 export default definePlugin({
     name: "TextReplace",
-    description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
-    authors: [Devs.AutumnVN, Devs.TheKodeToad],
+    description: "Replace text in your or others' messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
+    authors: [Devs.AutumnVN, Devs.TheKodeToad, Devs.Etorix],
 
     settings,
+    modifyIncomingMessage,
+
+    patches: [
+        {
+            find: "ChatMessage\"),",
+            replacement: {
+                match: /(let \i,{id:\i,message:\i)/,
+                replace: "$self.modifyIncomingMessage(arguments[0].message);$1"
+            }
+        },
+    ],
 
     onBeforeMessageSend(channelId, msg) {
         // Channel used for sharing rules, applying rules here would be messy
         if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-        msg.content = applyRules(msg.content);
+        msg.content = applyRules(msg.content, "myMessages");
     }
 });
