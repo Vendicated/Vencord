@@ -35,6 +35,7 @@ export interface Settings {
     eagerPatches: boolean;
     enabledThemes: string[];
     enabledThemeLinks: string[];
+    themeNames: Record<string, string>;
     enableReactDevtools: boolean;
     themeLinks: string[];
     frameless: boolean;
@@ -94,6 +95,7 @@ const DefaultSettings: Settings = {
     eagerPatches: IS_REPORTER,
     enabledThemes: [],
     enabledThemeLinks: [],
+    themeNames: {},
     enableReactDevtools: false,
     frameless: false,
     transparent: false,

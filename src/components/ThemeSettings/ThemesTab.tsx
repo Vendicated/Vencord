@@ -25,6 +25,7 @@ import { Flex } from "@components/Flex";
 import { CogWheel, DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PluginIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { AddonCard, openPluginModal, QuickAction, QuickActionCard, SettingsTab, wrapTab } from "@components/settings";
+import { OnlineThemeCard } from "@components/settings/OnlineThemeCard";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -85,6 +86,7 @@ interface OtherThemeCardProps {
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
     showDeleteButton?: boolean;
+    onEditName?: (newName: string) => void;
 }
 
 interface UserCSSCardProps {
@@ -148,9 +150,10 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset 
     );
 }
 
-function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton }: OtherThemeCardProps) {
+function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, onEditName }: OtherThemeCardProps) {
     return (
-        <AddonCard
+        <OnlineThemeCard
+            customName={theme.customName}
             name={theme.name}
             description={theme.description}
             author={theme.author}
@@ -172,7 +175,10 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton }
                             href={`https://discord.gg/${theme.invite}`}
                             onClick={async e => {
                                 e.preventDefault();
-                                theme.invite != null && openInviteModal(theme.invite).catch(() => showToast("Invalid or expired invite"));
+                                theme.invite != null &&
+                                    openInviteModal(theme.invite).catch(() =>
+                                        showToast("Invalid or expired invite")
+                                    );
                             }}
                         >
                             Discord Server
@@ -180,6 +186,8 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton }
                     )}
                 </Flex>
             }
+
+            onEditName={onEditName}
         />
     );
 }
@@ -190,7 +198,7 @@ enum ThemeTab {
 }
 
 function ThemesTab() {
-    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes"]);
+    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes", "themeNames"]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
@@ -198,6 +206,9 @@ function ThemesTab() {
     const [themeLinkValid, setThemeLinkValid] = useState(false);
     const [userThemes, setUserThemes] = useState<ThemeHeader[] | null>(null);
     const [onlineThemes, setOnlineThemes] = useState<(UserThemeHeader & { link: string; })[] | null>(null);
+    const [themeNames, setThemeNames] = useState<Record<string, string>>(() => {
+        return settings.themeNames ?? {};
+    });
     const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
@@ -444,6 +455,12 @@ function ThemesTab() {
     }
 
     function OnlineThemes() {
+
+        const themes = (onlineThemes ?? []).map(theme => ({
+            ...theme,
+            customName: themeNames[theme.link] ?? null,
+        }));
+
         return (
             <>;
                 <Forms.FormSection title="Online Themes" tag="h5">
@@ -457,26 +474,36 @@ function ThemesTab() {
                     </Card>
 
                     <div className={cl("grid")}>
-                        {onlineThemes?.map(rawLink => {
+                        {themes.map(theme => {
                             const { label, link } = (() => {
-                                const match = /^@(light|dark) (.*)/.exec(rawLink.link);
-                                if (!match) return { label: rawLink, link: rawLink };
+                                const match = /^@(light|dark) (.*)/.exec(theme.link);
+                                if (!match) return { label: theme, link: theme };
 
                                 const [, mode, link] = match;
                                 return { label: `[${mode} mode only] ${link}`, link };
                             })();
 
-                            return <OtherThemeCard
-                                key={rawLink.fileName}
-                                enabled={settings.enabledThemeLinks.includes(rawLink.link)}
-                                onChange={enabled => onThemeLinkEnabledChange(rawLink.link, enabled)}
-                                onDelete={async () => {
-                                    onThemeLinkEnabledChange(rawLink.link, false);
-                                    deleteThemeLink(rawLink.link);
-                                }}
-                                showDeleteButton
-                                theme={rawLink}
-                            />;
+                            return (
+                                <OtherThemeCard
+                                    key={theme.fileName}
+                                    theme={theme}
+                                    enabled={settings.enabledThemeLinks.includes(theme.link)}
+                                    onChange={enabled => onThemeLinkEnabledChange(theme.link, enabled)}
+                                    onDelete={async () => {
+                                        onThemeLinkEnabledChange(theme.link, false);
+                                        deleteThemeLink(theme.link);
+                                    }}
+                                    showDeleteButton
+                                    onEditName={newName => {
+                                        const updatedNames = { ...themeNames, [theme.link]: newName };
+                                        setThemeNames(updatedNames);
+                                        settings.themeNames = {
+                                            ...settings.themeNames,
+                                            [theme.link]: newName,
+                                        };
+                                    }}
+                                />
+                            );
                         })}
                     </div>
                 </Forms.FormSection>

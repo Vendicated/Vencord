@@ -95,3 +95,10 @@
     overflow: visible;
     animation: vc-addon-title var(--duration) linear infinite;
 }
+
+.vc-addon-editable {
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+}
