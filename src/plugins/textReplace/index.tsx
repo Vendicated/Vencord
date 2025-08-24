@@ -221,7 +221,7 @@ function applyRules(content: string, scope: "myMessages" | "othersMessages" | "a
     for (const rule of settings.store.stringRules) {
         if (!rule.find) continue;
         if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
-        if (rule.scope !== "allMessages" && rule.scope !== scope) continue;
+        if (rule.scope !== "allMessages" && rule.scope !== scope && scope !== "allMessages") continue;
 
         content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
     }
