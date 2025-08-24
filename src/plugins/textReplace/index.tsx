@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, Forms, Menu, React, Select, TextInput, UserStore, useState } from "@webpack/common";
+import { Button, Forms, React, Select, TextInput, UserStore, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
