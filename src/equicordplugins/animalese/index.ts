@@ -7,14 +7,14 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { SelectedChannelStore, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     volume: {
         type: OptionType.SLIDER,
         description: "Volume of the animalese sound",
         default: 0.5,
-        markers: [0, 0.25, 0.5, 0.75, 1],
+        markers: [0, 0.1, 0.25, 0.5, 0.6, 0.75, 1],
     },
     speed: {
         type: OptionType.SLIDER,
@@ -22,10 +22,48 @@ const settings = definePluginSettings({
         default: 1,
         markers: [0.5, 0.75, 1, 1.25, 1.5],
     },
+    pitch: {
+        type: OptionType.SLIDER,
+        description: "Pitch multiplier",
+        default: 1,
+        markers: [0.75, 0.8, 0.85, 1, 1.15, 1.25, 1.35, 1.5],
+    },
+    messageLengthLimit: {
+        type: OptionType.NUMBER,
+        description: "Maximum length of message to process",
+        default: 50,
+    },
+    processOwnMessages: {
+        type: OptionType.BOOLEAN,
+        description: "Enable to yap your own messages too",
+        default: true,
+    },
+    soundQuality: {
+        type: OptionType.SELECT,
+        description: "Quality of sound to use",
+        options: [
+            {
+                label: "High",
+                value: "high",
+                default: true
+            },
+            {
+                label: "Medium",
+                value: "med"
+            },
+            {
+                label: "Low",
+                value: "low"
+            },
+            {
+                label: "Lowest",
+                value: "low"
+            }
+        ]
+    }
 });
 
 let audioContext: AudioContext | null = null;
-let currentChannelId: string | null = null;
 
 // better than my old hardcoded garbage
 const highSounds = Array.from(
@@ -34,16 +72,15 @@ const highSounds = Array.from(
 );
 const soundBuffers: Record<string, AudioBuffer> = {};
 
-// todo implement other pitch sounds but theoretically plugging this in from said repo should work, right?
-const BASE_URL_HIGH =
-    "https://github.com/Equicord/Equibored/raw/main/sounds/animalese/high";
+const BASE_URL_HIGH = "https://raw.githubusercontent.com/Equicord/Equibored/main/sounds/animalese";
 
 async function initSoundBuffers() {
     if (!audioContext) audioContext = new AudioContext();
+    const quality = settings.store.soundQuality;
     for (const file of highSounds) {
         const nameWithoutExt = file.replace(".wav", "");
         soundBuffers[nameWithoutExt] = await loadSound(
-            `${BASE_URL_HIGH}/${file}`
+            `${BASE_URL_HIGH}/${quality}/${file}`
         );
     }
 }
@@ -101,13 +138,15 @@ async function generateAnimalese(text: string): Promise<AudioBuffer | null> {
     const outputData = outputBuffer.getChannelData(0);
 
     let offset = 0;
+    const baseLetterDuration = audioContext.sampleRate * (0.09 / settings.store.speed);
+    // ~90ms per letter at 1x speed (tweakable!)
+
     for (let i = 0; i < soundIndices.length; i++) {
-        const soundIndex = soundIndices[i];
-        const buffer = soundBuffers[soundIndex];
+        const buffer = soundBuffers[soundIndices[i]];
         if (!buffer) continue;
 
         const variation = 0.15;
-        let pitchShift = 2.8 + Math.random() * variation;
+        let pitchShift = (2.8 * settings.store.pitch) + (Math.random() * variation);
 
         const isQuestion = text_lower.endsWith("?");
         if (isQuestion && i >= soundIndices.length * 0.8) {
@@ -120,18 +159,21 @@ async function generateAnimalese(text: string): Promise<AudioBuffer | null> {
         const inputLength = inputData.length;
         const outputLength = Math.floor(inputLength / pitchShift);
 
+        // copy sound into the slot
         for (let j = 0; j < outputLength; j++) {
             const inputIndex = Math.floor(j * pitchShift);
-            if (inputIndex < inputLength && offset + j < outputData.length) {
-                outputData[offset + j] = inputData[inputIndex];
+            const targetIndex = offset + j;
+            if (inputIndex < inputLength && targetIndex < outputData.length) {
+                outputData[targetIndex] = inputData[inputIndex];
             }
         }
-        offset += outputLength;
+
+        // instead of stacking lengths, jump forward a *fixed slot* per character
+        offset += Math.floor(baseLetterDuration);
     }
 
     return outputBuffer;
 }
-
 
 async function playSound(buffer: AudioBuffer, volume: number) {
     if (!audioContext) audioContext = new AudioContext();
@@ -139,6 +181,7 @@ async function playSound(buffer: AudioBuffer, volume: number) {
     const gainNode = audioContext.createGain();
 
     source.buffer = buffer;
+    source.playbackRate.value = settings.store.pitch;
     gainNode.gain.value = volume;
 
     source.connect(gainNode);
@@ -149,9 +192,35 @@ async function playSound(buffer: AudioBuffer, volume: number) {
 
 export default definePlugin({
     name: "Animalese",
-    description: "Plays animalese (they yap a lot) on message sent",
+    description: "Plays animal crossing animalese for every message sent (they yap a lot)",
     authors: [EquicordDevs.ryanamay, EquicordDevs.Mocha],
     settings,
+
+    flux: {
+        async MESSAGE_CREATE({ optimistic, type, message, channelId }) {
+            if (optimistic || type !== "MESSAGE_CREATE") return;
+            if (message.state === "SENDING") return;
+            if (!message.content || message.author?.bot || channelId !== SelectedChannelStore.getChannelId()) return;
+
+            const urlPattern = /https?:\/\/[^\s]+/;
+            const maxLength = settings.store.messageLengthLimit || 100;
+            const processOwnMessages = settings.store.processOwnMessages ?? true;
+
+            if (
+                urlPattern.test(message.content)
+                || message.content.length > maxLength
+                || !processOwnMessages
+                && String(message.author.id) === String(UserStore.getCurrentUser().id)
+            ) return;
+
+            try {
+                const buffer = await generateAnimalese(message.content);
+                if (buffer) await playSound(buffer, settings.store.volume);
+            } catch (err) {
+                console.error("[Animalese]", err);
+            }
+        }
+    },
 
     start() {
         // Only subscribe once!
@@ -160,50 +229,15 @@ export default definePlugin({
                 audioContext = new AudioContext();
                 await initSoundBuffers();
             }
-            document.removeEventListener("click", init);
+            init();
         };
-        document.addEventListener("click", init);
-
-        this.channelSelectListener = ({ channelId }) => {
-            currentChannelId = channelId;
-        };
-        FluxDispatcher.subscribe("CHANNEL_SELECT", this.channelSelectListener);
-
-        this.messageCreateListener = async ({ optimistic, type, message }) => {
-            // DO NOT REMOVE THIS OR EELSE IT WILL BE YAP CENTRAL
-            if (optimistic || type !== "MESSAGE_CREATE") return;
-
-            if (
-                !message?.content ||
-                message.author?.bot ||
-                message.channel_id !== currentChannelId
-            ) {
-                return;
-            }
-
-            try {
-                const buffer = await generateAnimalese(message.content);
-                if (buffer) await playSound(buffer, settings.store.volume);
-            } catch (err) {
-                console.error("[Animalese]", err);
-            }
-        };
-        FluxDispatcher.subscribe("MESSAGE_CREATE", this.messageCreateListener);
+        init();
     },
 
     stop() {
-        FluxDispatcher.unsubscribe(
-            "CHANNEL_SELECT",
-            this.channelSelectListener
-        );
-        FluxDispatcher.unsubscribe(
-            "MESSAGE_CREATE",
-            this.messageCreateListener
-        );
         if (audioContext) {
             audioContext.close();
             audioContext = null;
         }
-        currentChannelId = null;
     },
 });
