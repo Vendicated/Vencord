@@ -187,7 +187,7 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
                                     <DeleteIcon style={{ verticalAlign: "middle" }} />
                                 </Button>
                             </Flex>}
-                            {(index !== rulesArray.length - 1) && <Forms.FormDivider style={{ width: "unset", margin: "0.5em 2em" }}></Forms.FormDivider>}
+                            {(index !== rulesArray.length - 1) && <Forms.FormDivider style={{ width: "unset", margin: "0.5em 0" }}></Forms.FormDivider>}
                             {isRegexRules && renderFindError(rule.find)}
                         </React.Fragment>
                     )
