@@ -239,16 +239,13 @@ function applyRules(content: string, scope: "myMessages" | "othersMessages" | "a
 }
 
 function modifyIncomingMessage(message: Message) {
-    const { stringRules, regexRules } = settings.use(["stringRules", "regexRules"]);
     const currentUser = UserStore.getCurrentUser();
 
-    if (!currentUser || message.author.id === currentUser.id) {
-        return;
+    if (!currentUser || message.author.id === currentUser.id || !message.content) {
+        return message.content;
     }
 
-    message.content = (message as any).originalContent ?? message.content;
-    (message as any).originalContent = message.content;
-    message.content = applyRules(message.content, "othersMessages");
+    return applyRules(message.content, "othersMessages");
 }
 
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
@@ -263,10 +260,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "ChatMessage\"),",
+            find: "!1,hideSimpleEmbedContent",
             replacement: {
-                match: /(let \i,{id:\i,message:\i)/,
-                replace: "$self.modifyIncomingMessage(arguments[0].message);$1"
+                match: /(let{toAST:.{0,125}?)\(null!=\i\?\i:\i\).content/,
+                replace: "const textReplaceContent=$self.modifyIncomingMessage(arguments[2]?.contentMessage??arguments[1]);$1textReplaceContent"
             }
         },
     ],
