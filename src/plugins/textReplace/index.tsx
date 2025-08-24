@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, Forms, React, Select, TextInput, UserStore, useState } from "@webpack/common";
+import { Button, Forms, Menu, React, Select, TextInput, UserStore, useState } from "@webpack/common";
 
 const STRING_RULES_KEY = "TextReplace_rulesString";
 const REGEX_RULES_KEY = "TextReplace_rulesRegex";
@@ -147,7 +147,7 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
     return (
         <>
             <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
-            <Flex flexDirection="column" style={{ gap: "0.5em" }}>
+            <Flex flexDirection="column" style={{ gap: "0.5em", paddingBottom: "1.25em" }}>
                 {
                     rulesArray.map((rule, index) =>
                         <React.Fragment key={`${rule.find}-${index}`}>
@@ -170,13 +170,7 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
                                     />
                                 </Flex>
                             </Flex>
-                            {(index !== rulesArray.length - 1) && <Flex flexDirection="row" style={{
-                                gap: "0.5em",
-                                borderBottom: "4px solid var(--text-low-contrast)",
-                                borderRadius: "0 0 5px 5px",
-                                marginBottom: "0.75em",
-                                paddingBottom: "0.5em"
-                            }}>
+                            {(index !== rulesArray.length - 1) && <Flex flexDirection="row" style={{ gap: "0.5em" }}>
                                 <div style={{ flex: 0.9 }}>
                                     <Select
                                         options={scopeOptions}
@@ -188,11 +182,15 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
                                 <Button
                                     size={Button.Sizes.MIN}
                                     onClick={() => onClickRemove(index)}
-                                    style={{ flex: 0.10, background: "none", color: "var(--status-danger)" }}
+                                    style={{ flex: 0.10, backgroundColor: "var(--input-background)", border: "1px solid var(--input-border)", color: "var(--status-danger)" }}
                                 >
                                     <DeleteIcon style={{ verticalAlign: "middle" }} />
                                 </Button>
                             </Flex>}
+                            {(index !== rulesArray.length - 1) && <Forms.FormDivider style={{
+                                width: "unset",
+                                margin: "0.5em 2em",
+                            }}></Forms.FormDivider>}
                             {isRegexRules && renderFindError(rule.find)}
                         </React.Fragment>
                     )
