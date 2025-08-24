@@ -116,19 +116,7 @@ export default definePlugin({
         );
     },
 
-    async checkImageExists(url: string): Promise<boolean> {
-        return new Promise(resolve => {
-            const img = new Image();
-            img.onload = () => resolve(true);
-            img.onerror = () => resolve(false);
-            img.src = url;
-        });
-    },
-
     async gifToPng(url: string): Promise<string> {
-        const exists = await this.checkImageExists(url);
-        if (!exists) return "";
-
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.crossOrigin = "anonymous";
@@ -139,13 +127,12 @@ export default definePlugin({
                 const ctx = canvas.getContext("2d");
                 if (ctx) {
                     ctx.drawImage(img, 0, 0);
-                    const pngDataUrl = canvas.toDataURL("image/png");
-                    resolve(pngDataUrl);
+                    resolve(canvas.toDataURL("image/png"));
                 } else {
                     reject(new Error("Failed to get canvas context."));
                 }
             };
-            img.onerror = err => reject(err);
+            img.onerror = () => resolve("");
             img.src = url;
         });
     },

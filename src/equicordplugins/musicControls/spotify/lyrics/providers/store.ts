@@ -74,12 +74,25 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
             }
 
             if (provider === Provider.Translated || provider === Provider.Romanized) {
-                const originalLyrics = currentInfo?.lyricsVersions[settings.store.LyricsProvider] || providers
-                    .map(p => currentInfo?.lyricsVersions[p])
-                    .find(Boolean);
+                const originalLyrics = currentInfo?.lyricsVersions[settings.store.LyricsProvider] ||
+                    providers.map(p => currentInfo?.lyricsVersions[p]).find(Boolean);
 
                 if (!originalLyrics || !currentInfo) {
                     showNotif("No lyrics", `No lyrics to ${provider === Provider.Translated ? "translate" : "romanize"}`);
+                    return;
+                }
+
+                const lyricsCheckText = originalLyrics.map(line => line.text).join(" ");
+
+                if (provider === Provider.Romanized && !/[^\u0000-\u007F]/.test(lyricsCheckText)) {
+                    lyricsInfo = {
+                        ...currentInfo,
+                        useLyric: settings.store.LyricsProvider,
+                        lyricsVersions: {
+                            ...currentInfo.lyricsVersions,
+                        },
+                    };
+                    store.emitChange();
                     return;
                 }
 
