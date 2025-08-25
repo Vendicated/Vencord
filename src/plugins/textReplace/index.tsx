@@ -240,8 +240,9 @@ function applyRules(content: string, scope: "myMessages" | "othersMessages" | "a
 
 function modifyIncomingMessage(message: Message) {
     const currentUser = UserStore.getCurrentUser();
+    const messageAuthor = message.author;
 
-    if (!currentUser || message.author.id === currentUser.id || !message.content) {
+    if (!message.content || !currentUser || !messageAuthor || messageAuthor.id === currentUser.id) {
         return message.content;
     }
 
