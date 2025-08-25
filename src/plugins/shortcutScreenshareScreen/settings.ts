@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as keybindsManager from "@api/Keybinds/keybindsManager";
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
-import * as keybindsManager from "@api/Keybinds/keybindsManager";
 import { updateStream } from "./streamManager";
 
 
@@ -33,7 +33,6 @@ export const settings = definePluginSettings({
     toggleStream: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the stream.",
-        max: 1,
         clearable: true,
         onChange: value => {
             keybindsManager.updateKeybind("toggleStream", value);
@@ -42,7 +41,6 @@ export const settings = definePluginSettings({
     toggleGameOrScreen: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the game or screen.",
-        max: 1,
         clearable: true,
         onChange: value => {
             keybindsManager.updateKeybind("toggleGameOrScreen", value);
@@ -51,7 +49,6 @@ export const settings = definePluginSettings({
     toggleAudio: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the audio.",
-        max: 1,
         clearable: true,
         onChange: value => {
             keybindsManager.updateKeybind("toggleAudio", value);
@@ -60,7 +57,6 @@ export const settings = definePluginSettings({
     startStreaming: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to start the stream.",
-        max: 1,
         clearable: true,
         onChange: value => {
             keybindsManager.updateKeybind("startStreaming", value);
@@ -69,7 +65,6 @@ export const settings = definePluginSettings({
     stopStreaming: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to stop the stream.",
-        max: 1,
         clearable: true,
         onChange: value => {
             keybindsManager.updateKeybind("stopStreaming", value);

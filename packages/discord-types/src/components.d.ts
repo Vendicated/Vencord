@@ -582,7 +582,7 @@ export enum GlobalShortcutKeyType {
     KEYBOARD_MODIFIER_KEY = 2,
     GAMEPAD_BUTTON = 3
 }
-export type GlobalShortcutKey = [GlobalShortcutKeyOS, number] | [GlobalShortcutKeyOS, number, GlobalShortcutKeyType | "0:0"];
+export type GlobalShortcutKey = [GlobalShortcutKeyType, number] | [GlobalShortcutKeyType, number, GlobalShortcutKeyOS | "0:0"];
 export type GlobalShortcut = GlobalShortcutKey[];
 export type GlobalShortcutOptions = {
     blurred: boolean;
@@ -592,6 +592,7 @@ export type GlobalShortcutOptions = {
 };
 export type GlobalKeybind = ComponentType<{
     defaultValue: GlobalShortcut;
+    disabled: boolean;
     onChange(value: GlobalShortcut): void;
 }>;
 
