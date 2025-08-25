@@ -343,14 +343,18 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
+export type WindowShortcut = string[];
+export type KeybindShortcut = GlobalShortcut | WindowShortcut;
 export interface PluginSettingKeybindDef {
     type: OptionType.KEYBIND;
 
-    max?: number;
+    global?: boolean;
 
     clearable?: boolean;
 
-    default?: GlobalShortcut;
+    default?: KeybindShortcut;
+
+    disabled?: boolean;
 }
 
 export interface IPluginOptionComponentProps {
@@ -379,7 +383,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
-    O extends PluginSettingKeybindDef ? GlobalShortcut :
+    O extends PluginSettingKeybindDef ? KeybindShortcut :
     O extends PluginSettingComponentDef ? O extends { default: infer Default; } ? Default : any :
     O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
     never;
@@ -443,7 +447,7 @@ export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDe
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionKeybind = PluginSettingKeybindDef & PluginSettingCommon & IsDisabled & IsValid<GlobalShortcut>;
+export type PluginOptionKeybind = PluginSettingKeybindDef & PluginSettingCommon & IsDisabled & IsValid<KeybindShortcut>;
 export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
