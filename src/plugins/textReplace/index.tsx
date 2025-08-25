@@ -242,7 +242,7 @@ function modifyIncomingMessage(message: Message) {
     const currentUser = UserStore.getCurrentUser();
     const messageAuthor = message.author;
 
-    if (!message.content || !currentUser || !messageAuthor || messageAuthor.id === currentUser.id) {
+    if (!message.content || !currentUser?.id || !messageAuthor?.id || messageAuthor.id === currentUser.id) {
         return message.content;
     }
 
