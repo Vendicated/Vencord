@@ -34,6 +34,7 @@ export const settings = definePluginSettings({
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the stream.",
         clearable: true,
+        global: true,
         onChange: value => {
             keybindsManager.updateKeybind("toggleStream", value);
         }
@@ -42,6 +43,7 @@ export const settings = definePluginSettings({
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the game or screen.",
         clearable: true,
+        global: true,
         onChange: value => {
             keybindsManager.updateKeybind("toggleGameOrScreen", value);
         }
@@ -50,6 +52,7 @@ export const settings = definePluginSettings({
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the audio.",
         clearable: true,
+        global: true,
         onChange: value => {
             keybindsManager.updateKeybind("toggleAudio", value);
         }
@@ -58,6 +61,7 @@ export const settings = definePluginSettings({
         type: OptionType.KEYBIND,
         description: "Set the shortcut to start the stream.",
         clearable: true,
+        global: true,
         onChange: value => {
             keybindsManager.updateKeybind("startStreaming", value);
         }
@@ -66,6 +70,7 @@ export const settings = definePluginSettings({
         type: OptionType.KEYBIND,
         description: "Set the shortcut to stop the stream.",
         clearable: true,
+        global: true,
         onChange: value => {
             keybindsManager.updateKeybind("stopStreaming", value);
         }
