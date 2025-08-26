@@ -39,17 +39,34 @@ waitFor(m => m?.ctrl && m.ctrl === ctrl, (module, id) => {
     console.log("reversedKeybindModule:", reversedKeybindModule);
 }) as Record<string, number> | undefined;
 
+// Discord mapping from keycodes array to string (mouse, keyboard, gamepad)
+// const keycodesToString = findByCode(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON")
 
 function globalToWindow(keys: GlobalShortcut): WindowShortcut {
     if (!reversedKeybindModule) throw new Error("Keybind module not loaded");
-    const stringKeys = keys.map(key => reversedKeybindModule?.[key[1]] ?? "");
-    return stringKeys.map(key => globalToEventKey[key] ?? key);
+    return keys.map(key => {
+        switch (key[0]) {
+            case 0:
+                return globalToKeyboardKey[reversedKeybindModule?.[key[1]] ?? ""] ?? "";
+            case 1:
+                return globalToMouseKey[key[1]] ?? "";
+            case 2:
+                return globalToKeyboardKey[reversedKeybindModule?.[key[1]] ?? ""] ?? "";
+            case 3:
+                return globalToGamepadKey[key[1]] ?? "";
+            default:
+                return "";
+        }
+    });
 }
 
 function windowToGlobal(keys: WindowShortcut): GlobalShortcut {
     if (!keybindModule) throw new Error("Keybind module not loaded");
-    const codeKeys = keys.map(key => eventKeyToGlobal[key] ?? key) as string[];
-    return codeKeys.map(key => [0, keybindModule?.[key], "0:0"]) as GlobalShortcut;
+    return keys.map(key => {
+        if (key.startsWith("Gamepad")) return [3, reversedGlobalToGamepadKey[key] ?? -1];
+        if (key.startsWith("Mouse")) return [1, reversedGlobalToMouseKey[key] ?? -1];
+        return [0, keybindModule?.[reversedGlobalToKeyboardKey[key]] ?? -1];
+    });
 }
 
 function getGlobalKeys(keys: KeybindShortcut, global: boolean): GlobalShortcut {
@@ -77,12 +94,14 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     }
 
     function handleChange(newValue: GlobalShortcut) {
+        console.log("New keybind value:", newValue);
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
 
         if (option.type === OptionType.KEYBIND && newValue && isValid) {
             setState(newValue);
             setError(null);
             onChange(global ? newValue : globalToWindow(newValue));
+            console.log("Keybind changed:", globalToWindow(newValue));
         } else {
             setError("Invalid keybind format");
         }
@@ -104,7 +123,44 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     );
 }
 
-const globalToEventKey = {
+const globalToGamepadKey = {
+    0: "Gamepad0",
+    1: "Gamepad1",
+    2: "Gamepad2",
+    3: "Gamepad3",
+    4: "Gamepad4",
+    5: "Gamepad5",
+    6: "Gamepad6",
+    7: "Gamepad7",
+    8: "Gamepad8",
+    9: "Gamepad9",
+    10: "Gamepad10",
+    11: "Gamepad11",
+    12: "Gamepad12",
+    13: "Gamepad13",
+    14: "Gamepad14",
+    15: "Gamepad15",
+    16: "Gamepad16",
+    17: "Gamepad17"
+};
+const reversedGlobalToGamepadKey = Object.entries(globalToGamepadKey).reduce((acc, [key, value]) => {
+    acc[value] = Number(key);
+    return acc;
+}, {} as Record<string, number>);
+
+const globalToMouseKey = {
+    0: "Mouse0", // Cannot be triggered
+    1: "Mouse2",
+    2: "Mouse1",
+    3: "Mouse3", // Cannot be triggered
+    4: "Mouse4" // Cannot be triggered
+};
+const reversedGlobalToMouseKey = Object.entries(globalToMouseKey).reduce((acc, [key, value]) => {
+    acc[value] = Number(key);
+    return acc;
+}, {} as Record<string, number>);
+
+const globalToKeyboardKey = {
     "backspace": "Backspace",
     "tab": "Tab",
     "enter": "Enter",
@@ -222,7 +278,7 @@ const globalToEventKey = {
     "¬": "¬",
     "·": "·"
 };
-const eventKeyToGlobal = Object.entries(globalToEventKey).reduce((acc, [key, value]) => {
+const reversedGlobalToKeyboardKey = Object.entries(globalToKeyboardKey).reduce((acc, [key, value]) => {
     acc[value] = key;
     return acc;
 });

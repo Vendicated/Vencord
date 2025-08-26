@@ -25,6 +25,15 @@ import { updateStream } from "./streamManager";
 
 export type ShikiSettings = typeof settings.store;
 export const settings = definePluginSettings({
+    testKeybind: {
+        type: OptionType.KEYBIND,
+        description: "Set the shortcut to test the keybind.",
+        clearable: true,
+        global: false,
+        onChange: value => {
+            keybindsManager.updateKeybind("testKeybind", value, false);
+        }
+    },
     displayNumber: {
         type: OptionType.NUMBER,
         description: "Default themes",

@@ -6,10 +6,15 @@
 
 import { GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
 
-let discordUtils: undefined | {
+export type DiscordUtils = {
+    inputCaptureRegisterElement(elementId: string, callback: (keys: GlobalShortcut) => void): undefined;
+    inputGetRegisteredEvents(callback: (keys: GlobalShortcut) => void): undefined;
     inputEventRegister(id: number, keys: GlobalShortcut, callback: () => void, options: GlobalShortcutOptions): undefined;
     inputEventUnregister(id: number): undefined;
+    inputSetFocused(focused: boolean): undefined;
 };
+
+let discordUtils: undefined | DiscordUtils;
 
 function initDiscordUtils() {
     if (discordUtils || !DiscordNative) return;
