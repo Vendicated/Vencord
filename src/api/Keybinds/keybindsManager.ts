@@ -4,97 +4,112 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { WindowShortcut } from "@utils/types";
 import { GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
 
+import * as globalManager from "./globalManager";
+import * as windowManager from "./windowManager";
 
-export type Keybind = {
-    name: string;
+export type Keybind<GLOBAL extends boolean> = {
+    event: string;
     function: () => void;
-    options: GlobalShortcutOptions;
+    options: GLOBAL extends true ? GlobalShortcutOptions : WindowShortcutOptions;
+    global: GLOBAL;
 };
-type InternalKeybind = Keybind & {
-    id: number;
+export type WindowShortcutOptions = {
+    keydown: boolean;
+    keyup: boolean;
+};
+export type KeybindWindow = {
+    event: string;
+    function: () => void;
+    options: WindowShortcutOptions;
+};
+
+export type InternalKeybind<GLOBAL extends boolean> = Keybind<GLOBAL> & {
+    id: GLOBAL extends true ? number : undefined;
     enabled: boolean;
-    keys: GlobalShortcut;
+    keys: GLOBAL extends true ? GlobalShortcut : WindowShortcut;
+    global: GLOBAL;
 };
+type Shortcut<GLOBAL extends boolean> = GLOBAL extends true ? GlobalShortcut : WindowShortcut;
 
-let lastId = 1000;
-const keybinds: Map<string, InternalKeybind> = new Map();
+let globalLastId = 1000;
+const keybindsGlobal: Map<string, InternalKeybind<true>> = new Map();
+const keybindsWindow: Map<string, InternalKeybind<false>> = new Map();
 
-let discordUtils: undefined | {
-    inputEventRegister(id: number, keys: GlobalShortcut, callback: () => void, options: GlobalShortcutOptions): undefined;
-    inputEventUnregister(id: number): undefined;
-};
-
-export function initDiscordUtils() {
-    if (discordUtils || !DiscordNative) return;
-    discordUtils = DiscordNative.nativeModules.requireModule("discord_utils");
+// Overloads to ensure correct return type based on 'global'
+function getBinding<GLOBAL extends false>(event: string, global: false): InternalKeybind<false> | undefined;
+function getBinding<GLOBAL extends true>(event: string, global: true): InternalKeybind<true> | undefined;
+function getBinding(event: string, global: boolean): InternalKeybind<boolean> | undefined {
+    return global ? keybindsGlobal.get(event) : keybindsWindow.get(event);
 }
 
-export async function isAvailable(): Promise<boolean> {
-    if (!discordUtils) return false;
+export function isNameAvailable<GLOBAL extends boolean>(event: string, global: GLOBAL): boolean {
+    return global ? !keybindsGlobal.has(event) : !keybindsWindow.has(event);
+}
+
+export function registerKeybind<GLOBAL extends boolean>(binding: Keybind<GLOBAL>, keys: Shortcut<GLOBAL> = []) {
+    if (!isNameAvailable(binding.event, binding.global)) return false;
+    if (binding.global) {
+        const id = globalLastId++;
+        keybindsGlobal.set(binding.event, { id: id, keys: (keys as GlobalShortcut), enabled: false, ...(binding as Keybind<true>) });
+    } else {
+        keybindsWindow.set(binding.event, { id: undefined, keys: (keys as WindowShortcut), enabled: false, ...(binding as Keybind<false>) });
+    }
     return true;
 }
 
-export function isNameAvailable(name: string): boolean {
-    return !keybinds.has(name);
-}
-
-export function registerKeybind(binding: Keybind, keys: GlobalShortcut = []) {
-    if (!isNameAvailable(binding.name)) false;
-    const id = lastId++;
-    keybinds.set(binding.name, { id, keys, enabled: false, ...binding });
-    return true;
-}
-
-export function unregisterKeybind(name: string): boolean {
-    const binding = keybinds.get(name);
+export function unregisterKeybind<GLOBAL extends boolean>(event: string, global: GLOBAL): boolean {
+    const binding = global ? keybindsGlobal.get(event) : keybindsWindow.get(event);
     if (!binding) return false;
     if (binding.enabled) {
-        disableKeybind(name);
+        disableKeybind(event, global);
     }
-    return keybinds.delete(name);
+    return global ? keybindsGlobal.delete(event) : keybindsWindow.delete(event);
 }
 
-export function updateKeybind(name: string, keys: GlobalShortcut) {
-    const binding = keybinds.get(name);
+export function updateKeybind<GLOBAL extends boolean>(event: string, keys: Shortcut<GLOBAL>, global: GLOBAL) {
+    const binding = global ? keybindsGlobal.get(event) : keybindsWindow.get(event);
     if (!binding) return;
     binding.keys = keys;
     if (binding.enabled) {
-        disableKeybind(name);
+        disableKeybind(event, global);
     }
-    enableKeybind(name);
+    enableKeybind(event, global);
 }
 
-// From bd key registration
-function newKeysInstance(keys: GlobalShortcut): GlobalShortcut {
-    return keys.map(e => {
-        const [t, n, r] = e;
-        return typeof r === "string" ? [t, n, r] : [t, n];
-    });
-}
-
-export function isEnabled(name: string) {
-    const binding = keybinds.get(name);
+export function isEnabled<GLOBAL extends boolean>(event: string, global: GLOBAL) {
+    const binding = global ? keybindsGlobal.get(event) : keybindsWindow.get(event);
     return !!binding && binding.enabled;
 }
 
-export function enableKeybind(name: string) {
-    initDiscordUtils();
-    if (!discordUtils) return;
-    const binding = keybinds.get(name);
+export function enableKeybind<GLOBAL extends boolean>(event: string, global: GLOBAL) {
+    const binding = global ? getBinding<true>(event, true) : getBinding<false>(event, false);
     if (!binding) return;
     if (binding.enabled || !binding.keys.length) return;
-    discordUtils.inputEventRegister(binding.id, newKeysInstance(binding.keys), binding.function, binding.options);
+    if (global) {
+        if (!globalManager.isAvailable()) return;
+        globalManager.registerKeybind(binding.id as number, binding.keys as GlobalShortcut, binding.function, binding.options as GlobalShortcutOptions);
+    } else {
+        windowManager.registerKeybind(binding.event, binding.keys as WindowShortcut, binding.function, binding.options as WindowShortcutOptions);
+    }
     binding.enabled = true;
 }
 
-export function disableKeybind(name: string) {
-    initDiscordUtils();
-    if (!discordUtils) return;
-    const binding = keybinds.get(name);
-    if (!binding) return;
-    if (!binding.enabled) return;
-    discordUtils.inputEventUnregister(binding.id);
-    binding.enabled = false;
+export function disableKeybind<GLOBAL extends boolean>(name: string, global: GLOBAL) {
+    if (global) {
+        if (!globalManager.isAvailable()) return;
+        const binding = getBinding<true>(name, true);
+        if (!binding) return;
+        if (!binding.enabled) return;
+        globalManager.unregisterKeybind(binding.id);
+        binding.enabled = false;
+    } else {
+        const binding = getBinding<false>(name, false);
+        if (!binding) return;
+        if (!binding.enabled) return;
+        windowManager.unregisterKeybind(binding.event);
+        binding.enabled = false;
+    }
 }

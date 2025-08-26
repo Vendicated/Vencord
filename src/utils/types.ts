@@ -92,7 +92,7 @@ export interface PluginAuthor {
 
 export interface Plugin extends PluginDef {
     patches?: Patch[];
-    keybinds?: Keybind[];
+    keybinds?: Keybind<boolean>[];
     started: boolean;
     isDependency?: boolean;
 }
@@ -113,7 +113,7 @@ export interface PluginDef {
     /**
      * List of keybinds that your plugin wants to register
      */
-    keybinds?: Keybind[];
+    keybinds?: Keybind<boolean>[];
     /**
      * A list of other plugins that your plugin depends on.
      * These will automatically be enabled and loaded before your plugin

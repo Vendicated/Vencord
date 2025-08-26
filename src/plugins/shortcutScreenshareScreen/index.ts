@@ -28,11 +28,11 @@ export default definePlugin({
     authors: [Devs.nicola02nb],
     settings,
     keybinds: [
-        { name: "startStreaming", function: startStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
-        { name: "stopStreaming", function: stopStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
-        { name: "toggleAudio", function: toggleAudio, options: { blurred: false, focused: false, keydown: true, keyup: false } },
-        { name: "toggleStream", function: toggleStream, options: { blurred: false, focused: false, keydown: true, keyup: false } },
-        { name: "toggleGameOrScreen", function: toggleGameOrScreen, options: { blurred: false, focused: true, keydown: true, keyup: false } }
+        { event: "startStreaming", global: true, function: startStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
+        { event: "stopStreaming", global: true, function: stopStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
+        { event: "toggleAudio", global: true, function: toggleAudio, options: { blurred: false, focused: false, keydown: true, keyup: false } },
+        { event: "toggleStream", global: true, function: toggleStream, options: { blurred: false, focused: false, keydown: true, keyup: false } },
+        { event: "toggleGameOrScreen", global: true, function: toggleGameOrScreen, options: { blurred: false, focused: true, keydown: true, keyup: false } }
     ],
     start: () => {
     },
