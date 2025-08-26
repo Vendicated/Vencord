@@ -19,7 +19,7 @@
 import "./Keybind.css";
 
 import { disableKeybind, enableKeybind, updateKeybind } from "@api/Keybinds";
-import { DeleteIcon } from "@components/Icons";
+import { DeleteIcon, ScreenshareIcon, WebsiteIcon } from "@components/Icons";
 import { KeybindShortcut, OptionType, PluginOptionKeybind, WindowShortcut } from "@utils/types";
 import { GlobalShortcut } from "@vencord/discord-types";
 import { findByCodeLazy, waitFor } from "@webpack";
@@ -128,7 +128,17 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     return (
         <SettingsSection name={id} description={option.description} error={error} inlineSetting={true}>
             <div className="vc-keybind-input">
-                <Tooltip text={keycodesToString(state).toUpperCase() || "No Keybind set..."}>
+                <Tooltip text={global ? "Global Keybind" : "Window Keybind"}>
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <div className="vc-keybind-input-icon" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                            {global
+                                ? <WebsiteIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="var(--header-primary)" className={!enabled ? "disabled" : ""} />
+                                : <ScreenshareIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="var(--header-primary)" className={!enabled ? "disabled" : ""} />
+                            }
+                        </div>
+                    )}
+                </Tooltip>
+                <Tooltip text={keycodesToString(state).toUpperCase() || "No Keybind Set"}>
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div className="vc-keybind-input-discord" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
                             <Keybind defaultValue={state} onChange={handleChange} disabled={!enabled} />

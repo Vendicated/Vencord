@@ -6,6 +6,10 @@
     gap: .5em;
 }
 
+.vc-keybind-input .vc-keybind-input-icon > svg.disabled {
+    opacity: .3;
+}
+
 .vc-keybind-input .vc-keybind-input-switch > div {
     flex-direction: row;
     margin: 0;
