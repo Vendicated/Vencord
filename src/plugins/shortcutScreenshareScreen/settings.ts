@@ -36,7 +36,7 @@ export const settings = definePluginSettings({
         clearable: true,
         global: true,
         onChange: value => {
-            keybindsManager.updateKeybind("toggleStream", value);
+            keybindsManager.updateKeybind("toggleStream", value, true);
         }
     },
     toggleGameOrScreen: {
@@ -45,7 +45,7 @@ export const settings = definePluginSettings({
         clearable: true,
         global: true,
         onChange: value => {
-            keybindsManager.updateKeybind("toggleGameOrScreen", value);
+            keybindsManager.updateKeybind("toggleGameOrScreen", value, true);
         }
     },
     toggleAudio: {
@@ -54,7 +54,7 @@ export const settings = definePluginSettings({
         clearable: true,
         global: true,
         onChange: value => {
-            keybindsManager.updateKeybind("toggleAudio", value);
+            keybindsManager.updateKeybind("toggleAudio", value, true);
         }
     },
     startStreaming: {
@@ -63,7 +63,7 @@ export const settings = definePluginSettings({
         clearable: true,
         global: true,
         onChange: value => {
-            keybindsManager.updateKeybind("startStreaming", value);
+            keybindsManager.updateKeybind("startStreaming", value, true);
         }
     },
     stopStreaming: {
@@ -72,7 +72,7 @@ export const settings = definePluginSettings({
         clearable: true,
         global: true,
         onChange: value => {
-            keybindsManager.updateKeybind("stopStreaming", value);
+            keybindsManager.updateKeybind("stopStreaming", value, true);
         }
     },
     disablePreview: {

@@ -296,12 +296,12 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         logger.debug("Registering keybinds of plugin", name);
         for (const keybind of keybinds) {
             try {
-                const keys = settings[name]?.[keybind.name] ?? [];
+                const keys = settings[name]?.[keybind.event] ?? [];
                 if (registerKeybind(keybind, keys)) {
-                    enableKeybind(keybind.name);
+                    enableKeybind(keybind.event, keybind.global);
                 }
             } catch (e) {
-                logger.error(`Failed to register keybind ${keybind.name}\n`, e);
+                logger.error(`Failed to register keybind ${keybind.event}\n`, e);
                 return false;
             }
         }
@@ -374,9 +374,9 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         logger.debug("Unregistering keybinds of plugin", name);
         for (const keybind of keybinds) {
             try {
-                unregisterKeybind(keybind.name);
+                unregisterKeybind(keybind.event, keybind.global);
             } catch (e) {
-                logger.error(`Failed to unregister keybind ${keybind.name}\n`, e);
+                logger.error(`Failed to unregister keybind ${keybind.event}\n`, e);
                 return false;
             }
         }
