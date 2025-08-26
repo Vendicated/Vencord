@@ -32,9 +32,16 @@ export default definePlugin({
                     match: /(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,
                     replace: "if(Vencord.Api.Notices.currentNotice)return false;$&"
                 },
+
+                // TODO: remove this compat eventually
                 {
                     match: /(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,
-                    replace: (m, notice) => `if(${notice}?.id=="VencordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
+                    replace: (m, notice) => `if(${notice}?.id=="VencordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`,
+                    noWarn: true,
+                },
+                {
+                    match: /(?<=function (\i)\(\i\){)return null!=(\i)(?=.+?NOTICE_DISMISS:\1)/,
+                    replace: (m, _, notice) => `if(${notice}?.id=="VencordNotice")return(${notice}=null,Vencord.Api.Notices.nextNotice(),true);${m}`
                 }
             ]
         }
