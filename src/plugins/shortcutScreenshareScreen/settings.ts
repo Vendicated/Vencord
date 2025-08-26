@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as keybindsManager from "@api/Keybinds/keybindsManager";
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
@@ -28,11 +27,7 @@ export const settings = definePluginSettings({
     testKeybind: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to test the keybind.",
-        clearable: true,
-        global: false,
-        onChange: value => {
-            keybindsManager.updateKeybind("testKeybind", value, false);
-        }
+        global: false
     },
     displayNumber: {
         type: OptionType.NUMBER,
@@ -42,65 +37,39 @@ export const settings = definePluginSettings({
     toggleStream: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the stream.",
-        clearable: true,
-        global: true,
-        onChange: value => {
-            keybindsManager.updateKeybind("toggleStream", value, true);
-        }
+        global: true
     },
     toggleGameOrScreen: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the game or screen.",
-        clearable: true,
-        global: true,
-        onChange: value => {
-            keybindsManager.updateKeybind("toggleGameOrScreen", value, true);
-        }
+        global: true
     },
     toggleAudio: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the audio.",
-        clearable: true,
-        global: true,
-        onChange: value => {
-            keybindsManager.updateKeybind("toggleAudio", value, true);
-        }
+        global: true
     },
     startStreaming: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to start the stream.",
-        clearable: true,
-        global: true,
-        onChange: value => {
-            keybindsManager.updateKeybind("startStreaming", value, true);
-        }
+        global: true
     },
     stopStreaming: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to stop the stream.",
-        clearable: true,
-        global: true,
-        onChange: value => {
-            keybindsManager.updateKeybind("stopStreaming", value, true);
-        }
+        global: true
     },
     disablePreview: {
         type: OptionType.BOOLEAN,
         description: "If enabled, the preview will be disabled.",
         default: false,
-        onChange: (value: boolean) => {
-            settings.store.disablePreview = value;
-            updateStream();
-        }
+        onChange: updateStream
     },
     shareAudio: {
         type: OptionType.BOOLEAN,
         description: "If enabled, audio will be shared.",
         default: true,
-        onChange: (value: boolean) => {
-            settings.store.shareAudio = value;
-            updateStream();
-        }
+        onChange: updateStream
     },
     shareAlwaysScreen: {
         type: OptionType.BOOLEAN,

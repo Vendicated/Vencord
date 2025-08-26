@@ -18,11 +18,12 @@
 
 import "./Keybind.css";
 
+import { disableKeybind, enableKeybind, updateKeybind } from "@api/Keybinds";
 import { DeleteIcon } from "@components/Icons";
 import { KeybindShortcut, OptionType, PluginOptionKeybind, WindowShortcut } from "@utils/types";
 import { GlobalShortcut } from "@vencord/discord-types";
 import { findByCodeLazy, waitFor } from "@webpack";
-import { Button, Keybind, React, Tooltip, useState } from "@webpack/common";
+import { Button, Keybind, React, Switch, Tooltip, useState } from "@webpack/common";
 
 import { SettingProps, SettingsSection } from "./Common";
 
@@ -82,16 +83,12 @@ function getGlobalKeys(keys: KeybindShortcut, global: boolean): GlobalShortcut {
 
 export function KeybindSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionKeybind>) {
     const global = option.global ?? false;
-    const disabled = option.disabled ?? false;
-    const clearable = option.clearable ?? true;
+    const disabled = option.disabled || !Array.isArray(pluginSettings[id]) || pluginSettings[id].length === 0;
+    const clearable = option.clearable ?? false;
 
     const [state, setState] = useState<GlobalShortcut>(getGlobalKeys(pluginSettings[id] ?? option.default, global));
+    const [enabled, setEnabled] = useState<boolean>(!disabled);
     const [error, setError] = useState<string | null>(null);
-
-    function clearKeybind() {
-        setState([]);
-        onChange([]);
-    }
 
     function handleChange(newValue: GlobalShortcut) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
@@ -99,10 +96,33 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
         if (option.type === OptionType.KEYBIND && newValue && isValid) {
             setState(newValue);
             setError(null);
-            onChange(global ? newValue : globalToWindow(newValue));
+            const newKeys = global ? newValue : globalToWindow(newValue);
+            updateKeybind(id, newKeys, global);
+            toggleKeybind(enabled);
+            onChange(newKeys);
         } else {
             setError("Invalid keybind format");
         }
+    }
+
+    function clearKeybind() {
+        updateKeybind(id, [], global);
+        setState([]);
+        onChange([]);
+    }
+
+    function toggleKeybind(enable: boolean) {
+        if (enable) {
+            enableKeybind(id, global);
+        } else {
+            disableKeybind(id, global);
+            clearKeybind();
+        }
+    }
+
+    function handleEnabledChange(value: boolean) {
+        toggleKeybind(value);
+        setEnabled(value);
     }
 
     return (
@@ -111,17 +131,24 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
                 <Tooltip text={keycodesToString(state).toUpperCase() || "No keybind set"}>
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div className="vc-keybind-input-discord" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
-                            <Keybind defaultValue={state} onChange={handleChange} disabled={disabled} />
+                            <Keybind defaultValue={state} onChange={handleChange} disabled={!enabled} />
                         </div>
                     )}
                 </Tooltip>
                 {clearable && <Tooltip text="Clear keybind">
                     {({ onMouseEnter, onMouseLeave }) => (
-                        <Button size={Button.Sizes.ICON} look={Button.Looks.FILLED} color={Button.Colors.RED} onClick={clearKeybind} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                        <Button size={Button.Sizes.ICON} look={Button.Looks.FILLED} color={Button.Colors.RED} onClick={clearKeybind} disabled={!enabled} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                             <DeleteIcon />
                         </Button>
                     )}
                 </Tooltip>}
+                <Tooltip text={enabled ? "Disable keybind" : "Enable keybind"}>
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <div className="vc-keybind-input-switch" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                            <Switch value={enabled} onChange={handleEnabledChange} />
+                        </div>
+                    )}
+                </Tooltip>
             </div>
         </SettingsSection>
     );

@@ -6,6 +6,11 @@
     gap: .5em;
 }
 
-.vc-keybind-input > .vc-keybind-input-discord > div > div {
+.vc-keybind-input .vc-keybind-input-switch > div {
+    flex-direction: row;
+    margin: 0;
+}
+
+.vc-keybind-input .vc-keybind-input-discord > div > div {
     position: relative;
 }
