@@ -128,21 +128,21 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     return (
         <SettingsSection name={id} description={option.description} error={error} inlineSetting={true}>
             <div className="vc-keybind-input">
-                <Tooltip text={keycodesToString(state).toUpperCase() || "No keybind set"}>
+                <Tooltip text={keycodesToString(state).toUpperCase() || "No Keybind set..."}>
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div className="vc-keybind-input-discord" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
                             <Keybind defaultValue={state} onChange={handleChange} disabled={!enabled} />
                         </div>
                     )}
                 </Tooltip>
-                {clearable && <Tooltip text="Clear keybind">
+                {clearable && <Tooltip text="Clear Keybind">
                     {({ onMouseEnter, onMouseLeave }) => (
                         <Button size={Button.Sizes.ICON} look={Button.Looks.FILLED} color={Button.Colors.RED} onClick={clearKeybind} disabled={!enabled} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                             <DeleteIcon />
                         </Button>
                     )}
                 </Tooltip>}
-                <Tooltip text={enabled ? "Disable keybind" : "Enable keybind"}>
+                <Tooltip text={enabled ? "Disable/Clear Keybind" : "Enable Keybind"}>
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div className="vc-keybind-input-switch" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                             <Switch value={enabled} onChange={handleEnabledChange} />
