@@ -526,7 +526,7 @@ export enum GlobalShortcutKeyType {
     KEYBOARD_MODIFIER_KEY = 2,
     GAMEPAD_BUTTON = 3
 }
-export type GlobalShortcutKey = [GlobalShortcutKeyType, number] | [GlobalShortcutKeyType, number, GlobalShortcutKeyOS | "0:0"];
+export type GlobalShortcutKey = [GlobalShortcutKeyType, number] | [GlobalShortcutKeyType, number, GlobalShortcutKeyOS | `${number}:${number}`];
 export type GlobalShortcut = GlobalShortcutKey[];
 export type GlobalShortcutOptions = {
     blurred: boolean;

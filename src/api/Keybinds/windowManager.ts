@@ -11,6 +11,35 @@ import { WindowShortcutOptions } from "./keybindsManager";
 const keysDown = new Set<string>();
 const keysUp = new Set<string>();
 
+const gamepads = {};// TODO: find a way to dispatch keys click
+function gamepadHandler(event: Gamepad | GamepadEvent, connected: boolean) {
+    const gamepad = "gamepad" in event ? event.gamepad : event as Gamepad;
+    console.log("Gamepad event:", event, "Connected:", connected);
+
+    if (connected && gamepad) {
+        gamepads[gamepad.index] = gamepad;
+    } else if (gamepad) {
+        delete gamepads[gamepad.index];
+    }
+}
+window.addEventListener("gamepadconnected", (e: Gamepad | GamepadEvent) => {
+    console.log("Gamepad connected", e);
+    gamepadHandler(e, true);
+}, false);
+window.addEventListener("gamepaddisconnected", (e: Gamepad | GamepadEvent) => {
+    console.log("Gamepad disconnected", e);
+    gamepadHandler(e, false);
+});
+
+window.addEventListener("mousedown", (e: MouseEvent) => { // TODO: find a way to dispatch mouse3 and mouse4
+    keysDown.add("Mouse" + e.button);
+    keysUp.delete("Mouse" + e.button);
+});
+window.addEventListener("mouseup", (e: MouseEvent) => {
+    keysUp.add("Mouse" + e.button);
+    keysDown.delete("Mouse" + e.button);
+});
+
 window.addEventListener("keydown", (e: KeyboardEvent) => {
     keysDown.add(e.key.length === 1 ? e.key.toLowerCase() : e.key);
     keysUp.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key);
@@ -20,7 +49,7 @@ window.addEventListener("keyup", (e: KeyboardEvent) => {
     keysDown.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key);
 });
 
-const mapCallbacks: Map<string, (event: KeyboardEvent) => void> = new Map();
+const mapCallbacks: Map<string, (event: KeyboardEvent | MouseEvent) => void> = new Map();
 
 type EventKeyChecks = {
     ctrl: boolean;
@@ -43,7 +72,9 @@ function getKeyChecks(keys: WindowShortcut): EventKeyChecks {
 export function registerKeybind(name: string, keys: WindowShortcut, callback: () => void, options: WindowShortcutOptions): boolean {
     if (mapCallbacks.has(name)) return false;
     const keysToCheck = getKeyChecks(keys);
-    const checkKeys = (event: KeyboardEvent) => {
+    const last = keysToCheck.keys[keysToCheck.keys.length - 1];
+    const lastType = last.startsWith("Mouse") ? "mouse" : last.startsWith("Gamepad") ? "gamepad" : "keyboard";
+    const checkKeys = (event: KeyboardEvent | MouseEvent) => { // TODO: check for gamepad buttons
         let { keydown } = options;
         let { keyup } = options;
         if (keysToCheck.alt === event.altKey && keysToCheck.ctrl === event.ctrlKey && keysToCheck.shift === event.shiftKey && keysToCheck.meta === event.metaKey) {
@@ -55,8 +86,8 @@ export function registerKeybind(name: string, keys: WindowShortcut, callback: ()
             if (keyup) callback();
         }
     };
-    if (options.keydown) window.addEventListener("keydown", checkKeys);
-    if (options.keyup) window.addEventListener("keyup", checkKeys);
+    if (options.keydown) lastType === "mouse" ? window.addEventListener("mousedown", checkKeys) : window.addEventListener("keydown", checkKeys);
+    if (options.keyup) lastType === "mouse" ? window.addEventListener("mouseup", checkKeys) : window.addEventListener("keyup", checkKeys);
     mapCallbacks.set(name, checkKeys);
     return true;
 }
@@ -66,6 +97,8 @@ export function unregisterKeybind(name: string): boolean {
     const checkKeys = mapCallbacks.get(name)!;
     window.removeEventListener("keydown", checkKeys);
     window.removeEventListener("keyup", checkKeys);
+    window.removeEventListener("mousedown", checkKeys);
+    window.removeEventListener("mouseup", checkKeys);
     mapCallbacks.delete(name);
     return true;
 }

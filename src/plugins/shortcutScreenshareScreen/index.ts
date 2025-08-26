@@ -28,6 +28,7 @@ export default definePlugin({
     authors: [Devs.nicola02nb],
     settings,
     keybinds: [
+        { event: "testKeybind", global: false, function: () => console.log("Test keybind pressed!"), options: { keydown: true, keyup: false } },
         { event: "startStreaming", global: true, function: startStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
         { event: "stopStreaming", global: true, function: stopStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
         { event: "toggleAudio", global: true, function: toggleAudio, options: { blurred: false, focused: false, keydown: true, keyup: false } },
