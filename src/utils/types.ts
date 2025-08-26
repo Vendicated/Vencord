@@ -348,7 +348,7 @@ export type KeybindShortcut = GlobalShortcut | WindowShortcut;
 export interface PluginSettingKeybindDef {
     type: OptionType.KEYBIND;
 
-    global?: boolean;
+    global: boolean;
 
     clearable?: boolean;
 
