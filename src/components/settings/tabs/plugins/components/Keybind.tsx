@@ -94,14 +94,12 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     }
 
     function handleChange(newValue: GlobalShortcut) {
-        console.log("New keybind value:", newValue);
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
 
         if (option.type === OptionType.KEYBIND && newValue && isValid) {
             setState(newValue);
             setError(null);
             onChange(global ? newValue : globalToWindow(newValue));
-            console.log("Keybind changed:", globalToWindow(newValue));
         } else {
             setError("Invalid keybind format");
         }
