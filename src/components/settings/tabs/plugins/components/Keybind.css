@@ -6,6 +6,6 @@
     gap: .5em;
 }
 
-.vc-keybind-input > div > div {
+.vc-keybind-input > .vc-keybind-input-discord > div > div {
     position: relative;
 }

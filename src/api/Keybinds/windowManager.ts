@@ -11,25 +11,37 @@ import { WindowShortcutOptions } from "./keybindsManager";
 const keysDown = new Set<string>();
 const keysUp = new Set<string>();
 
-const gamepads = {};// TODO: find a way to dispatch keys click
-function gamepadHandler(event: Gamepad | GamepadEvent, connected: boolean) {
-    const gamepad = "gamepad" in event ? event.gamepad : event as Gamepad;
-    console.log("Gamepad event:", event, "Connected:", connected);
-
-    if (connected && gamepad) {
-        gamepads[gamepad.index] = gamepad;
-    } else if (gamepad) {
-        delete gamepads[gamepad.index];
+/* let gamepad: Gamepad | undefined;// TODO: find a way to dispatch gamepad clicks
+let polling = true;
+const buttonsStates: boolean[] = [];
+function pollGamepad() {
+    if (!polling || !gamepad) return;
+    for (let i = 0; i < gamepad.buttons.length; i++) {
+        if (buttonsStates[i] !== gamepad.buttons[i].pressed) {
+            buttonsStates[i] = gamepad.buttons[i].pressed;
+            document.dispatchEvent(new KeyboardEvent(buttonsStates[i] ? "keydown" : "keyup", {
+                key: "Gamepad" + i,
+                bubbles: false,
+            }));
+        }
     }
+    requestAnimationFrame(pollGamepad);
 }
-window.addEventListener("gamepadconnected", (e: Gamepad | GamepadEvent) => {
+window.addEventListener("gamepadconnected", (e: GamepadEvent) => {
     console.log("Gamepad connected", e);
-    gamepadHandler(e, true);
+    if (!gamepad) {
+        gamepad = e.gamepad;
+        for (let i = 0; i < gamepad.buttons.length; i++) {
+            buttonsStates[i] = gamepad.buttons[i].pressed;
+        }
+        pollGamepad();
+    }
 }, false);
-window.addEventListener("gamepaddisconnected", (e: Gamepad | GamepadEvent) => {
+window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => {
     console.log("Gamepad disconnected", e);
-    gamepadHandler(e, false);
-});
+    gamepad = undefined;
+    polling = false;
+}); */
 
 window.addEventListener("mousedown", (e: MouseEvent) => { // TODO: find a way to dispatch mouse3 and mouse4
     keysDown.add("Mouse" + e.button);

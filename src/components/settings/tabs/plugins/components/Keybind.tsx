@@ -21,7 +21,7 @@ import "./Keybind.css";
 import { DeleteIcon } from "@components/Icons";
 import { KeybindShortcut, OptionType, PluginOptionKeybind, WindowShortcut } from "@utils/types";
 import { GlobalShortcut } from "@vencord/discord-types";
-import { waitFor } from "@webpack";
+import { findByCodeLazy, waitFor } from "@webpack";
 import { Button, Keybind, React, Tooltip, useState } from "@webpack/common";
 
 import { SettingProps, SettingsSection } from "./Common";
@@ -40,7 +40,7 @@ waitFor(m => m?.ctrl && m.ctrl === ctrl, (module, id) => {
 }) as Record<string, number> | undefined;
 
 // Discord mapping from keycodes array to string (mouse, keyboard, gamepad)
-// const keycodesToString = findByCode(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON")
+const keycodesToString = findByCodeLazy(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON") as (keys: GlobalShortcut) => string;
 
 function globalToWindow(keys: GlobalShortcut): WindowShortcut {
     if (!reversedKeybindModule) throw new Error("Keybind module not loaded");
@@ -108,7 +108,13 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     return (
         <SettingsSection name={id} description={option.description} error={error} inlineSetting={true}>
             <div className="vc-keybind-input">
-                <Keybind defaultValue={state} onChange={handleChange} disabled={disabled} />
+                <Tooltip text={keycodesToString(state).toUpperCase() || "No keybind set"}>
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <div className="vc-keybind-input-discord" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
+                            <Keybind defaultValue={state} onChange={handleChange} disabled={disabled} />
+                        </div>
+                    )}
+                </Tooltip>
                 {clearable && <Tooltip text="Clear keybind">
                     {({ onMouseEnter, onMouseLeave }) => (
                         <Button size={Button.Sizes.ICON} look={Button.Looks.FILLED} color={Button.Colors.RED} onClick={clearKeybind} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
