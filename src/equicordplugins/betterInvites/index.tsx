@@ -40,7 +40,7 @@ export default definePlugin({
             find: "#{intl::HUB_INVITE_ANOTHER_SCHOOL_LINK}",
             replacement: [
                 {
-                    match: /,(\i)&&(\(.{0,50}\i\.tooltipContainer.+)(\i\.\i\.string\(\i\.\i#{intl::GUEST_MEMBERSHIP_EXPLANATION}\))/,
+                    match: /,(\i)&&(\(.{0,50}asContainer.+)(\i\.\i\.string\(\i\.\i#{intl::GUEST_MEMBERSHIP_EXPLANATION}\))/,
                     replace: ",($1||((!$1)&&arguments[0].invite.expires_at)) && $2$self.RenderTip($1, $3, arguments[0].invite.expires_at)"
                 },
                 {
