@@ -10,11 +10,11 @@
     opacity: .3;
 }
 
+.vc-keybind-input .vc-keybind-input-layout {
+    position: unset;
+}
+
 .vc-keybind-input .vc-keybind-input-switch > div {
     flex-direction: row;
     margin: 0;
-}
-
-.vc-keybind-input .vc-keybind-input-discord > div > div {
-    position: relative;
 }

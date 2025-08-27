@@ -4,17 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
-
-export type DiscordUtils = {
-    inputCaptureRegisterElement(elementId: string, callback: (keys: GlobalShortcut) => void): undefined;
-    inputGetRegisteredEvents(callback: (keys: GlobalShortcut) => void): undefined;
-    inputEventRegister(id: number, keys: GlobalShortcut, callback: () => void, options: GlobalShortcutOptions): undefined;
-    inputEventUnregister(id: number): undefined;
-    inputSetFocused(focused: boolean): undefined;
-};
+import { DiscordUtils, GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
 
 let discordUtils: undefined | DiscordUtils;
+
+export function getDiscordUtils() {
+    initDiscordUtils();
+    return discordUtils;
+}
 
 function initDiscordUtils() {
     if (discordUtils || !DiscordNative) return;

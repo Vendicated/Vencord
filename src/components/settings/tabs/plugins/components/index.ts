@@ -24,7 +24,7 @@ import { ComponentType } from "react";
 import { BooleanSetting } from "./BooleanSetting";
 import { ComponentSettingProps, SettingProps } from "./Common";
 import { ComponentSetting } from "./ComponentSetting";
-import { KeybindSetting } from "./Keybind";
+import { KeybindSetting } from "./KeybindSetting";
 import { NumberSetting } from "./NumberSetting";
 import { SelectSetting } from "./SelectSetting";
 import { SliderSetting } from "./SliderSetting";
