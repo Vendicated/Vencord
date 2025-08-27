@@ -224,7 +224,6 @@ function ThemeTab() {
                                     clearable={false}
                                     onChange={v => onStatusChange(v as SearchStatus)}
                                     closeOnSelect={true}
-                                    className={InputStyles.input}
                                 />
                             </div>
                         </div>
