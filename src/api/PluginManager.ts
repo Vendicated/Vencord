@@ -215,6 +215,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         logger.debug("Registering keybinds of plugin", name);
         for (const keybind of keybinds) {
             try {
+                if (IS_WEB) keybind.global = false; // Disable global keybinds on web
                 const keys = settings[name]?.[keybind.event] ?? [];
                 if (registerKeybind(keybind, keys)) {
                     enableKeybind(keybind.event, keybind.global);

@@ -1,4 +1,5 @@
 import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
+import { GlobalShortcut } from "./utils";
 
 
 // #region Old compability
@@ -514,29 +515,8 @@ export type ColorPicker = ComponentType<{
     onChange(value: number | null): void;
 }>;
 
-export enum GlobalShortcutKeyOS {
-    WINDOWS = 1,
-    MACOS = 2,
-    LINUX = 3,
-    BROWSER = 4
-}
-export enum GlobalShortcutKeyType {
-    KEYBOARD_KEY = 0,
-    MOUSE_BUTTON = 1,
-    KEYBOARD_MODIFIER_KEY = 2,
-    GAMEPAD_BUTTON = 3
-}
-export type GlobalShortcutKey = [GlobalShortcutKeyType, number] | [GlobalShortcutKeyType, number, GlobalShortcutKeyOS | `${number}:${number}`];
-export type GlobalShortcut = GlobalShortcutKey[];
-export type GlobalShortcutOptions = {
-    blurred: boolean;
-    focused: boolean;
-    keydown: boolean;
-    keyup: boolean;
-};
 export type GlobalKeybind = ComponentType<{
     defaultValue: GlobalShortcut;
     disabled: boolean;
     onChange(value: GlobalShortcut): void;
 }>;
-
