@@ -359,7 +359,7 @@ export type GlobalShortcutOptions = {
 };
 
 export type DiscordUtils = {
-    inputCaptureRegisterElement(elementId: string, callback: (keys: GlobalShortcut) => void): undefined;
+    inputCaptureRegisterElement(elementId: string, callback: (keys: GlobalShortcut) => void): () => void;
     inputGetRegisteredEvents(callback: (keys: GlobalShortcut) => void): undefined;
     inputEventRegister(id: number, keys: GlobalShortcut, callback: () => void, options: GlobalShortcutOptions): undefined;
     inputEventUnregister(id: number): undefined;

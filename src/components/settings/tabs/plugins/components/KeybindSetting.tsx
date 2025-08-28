@@ -25,7 +25,7 @@ import { Switch } from "@components/settings";
 import { KeybindShortcut, OptionType, PluginOptionKeybind, WindowShortcut } from "@utils/types";
 import { GlobalShortcut } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, React, Text, Tooltip, useEffect, useLayoutEffect, useRef, useState } from "@webpack/common";
+import { Button, React, Text, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
 import { SettingProps, SettingsSection } from "./Common";
 
@@ -42,14 +42,15 @@ function getText(keys: KeybindShortcut, isGlobal: boolean) {
 }
 
 export function KeybindSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionKeybind>) {
+    const inputId = "vc-key-recorder-" + id;
     const global = option.global ?? false;
     const disabled = option.disabled || !Array.isArray(pluginSettings[id]) || pluginSettings[id].length === 0;
     const clearable = option.clearable ?? false;
 
     const [state, setState] = useState<KeybindShortcut>(pluginSettings[id] ?? []);
 
-    const [enabled, setEnabled] = useState<boolean>(!disabled);
-    const [error, setError] = useState<string | null>(null);
+    const [enabled, setEnabled] = useState<boolean>(IS_WEB && global ? false : !disabled);
+    const [error, setError] = useState<string | null>(IS_WEB && global ? "Global keybinds are not supported on web" : null);
 
     function handleChange(newValue: KeybindShortcut) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
@@ -70,6 +71,8 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     }
 
     function toggleKeybind(enable: boolean) {
+        if (IS_WEB && global) return;
+
         if (enable) {
             enableKeybind(id, global);
         } else {
@@ -100,7 +103,8 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div className="vc-keybind-input-discord" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
                             <KeybindInput
-                                keys={state}
+                                id={inputId}
+                                defaultKeys={state}
                                 global={global}
                                 onChange={handleChange}
                                 disabled={!enabled}
@@ -127,69 +131,74 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     );
 }
 
-export function KeybindInput({ keys, global, onChange, disabled }: {
-    keys: KeybindShortcut;
+function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
+    id: string;
+    defaultKeys: KeybindShortcut;
     global: boolean;
     onChange: (value: KeybindShortcut) => void;
-    disabled?: boolean;
+    disabled: boolean;
 }) {
-    const id = "key-recorder-" + Math.random().toString(36).slice(2, 9);
-
     const [recording, setRecording] = useState(false);
-    const [state, setState] = useState<KeybindShortcut>(keys);
-
-    const globalListenerRef = useRef(getDiscordUtils()?.inputCaptureRegisterElement);
-    useEffect(() => {
-        inputRef.current?.focus();
-        return () => {
-            if (globalListenerRef.current) globalListenerRef.current = undefined;
-        };
-    }, []);
-
-    function updateRecording(e: React.MouseEvent<HTMLButtonElement>) {
-        setRecording(!recording);
-    }
-
     const inputRef = useRef<HTMLInputElement>(null);
-    useLayoutEffect(() => {
+    const stopCapture = useRef<() => void | undefined>(undefined);
+
+    useEffect(() => {
         if (recording) {
+            inputRef.current?.focus();
             startRecording();
         } else {
             stopRecording();
+            inputRef.current?.blur();
         }
     }, [recording]);
 
+    function handleOnblur() {
+        stopRecording();
+    }
+
+    function updateRecording(e: React.MouseEvent<HTMLButtonElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        setRecording(!recording);
+    }
+    useEffect(() => {
+        return () => {
+            if (stopCapture.current) {
+                stopCapture.current();
+                stopCapture.current = undefined;
+            }
+        };
+    }, []);
+
+    function handleKeybindCapture(keys: KeybindShortcut) {
+        if (disabled) onChange([]);
+        stopRecording();
+        if (keys.length > 0) {
+            onChange(keys);
+        }
+    }
+
     function startRecording() {
-        // inputRef.current?.focus(); //TODO: make autofocus work correctly
-        if (global) {
-            if (!globalListenerRef.current) return;
-            globalListenerRef.current(id, (keys: GlobalShortcut) => {
-                if (keys.length > 0) {
-                    setState(keys);
-                    onChange(keys);
-                }
-                stopRecording();
-            });
-        } else {
-            // Start recording window keybinds
+        setRecording(true);
+        if (!stopCapture.current) {
+            stopCapture.current = global ? getDiscordUtils()?.inputCaptureRegisterElement(id, handleKeybindCapture) : inputCaptureKeysWindow(id, handleKeybindCapture);
         }
     }
 
     function stopRecording() {
         setRecording(false);
-        // inputRef.current?.blur();
     }
 
     return (
         <div className={`vc-keybind-input-wrapper ${recording ? RecorderClasses.recording : ""} ${RecorderClasses.recorderContainer} ${disabled ? RecorderClasses.containerDisabled : ""}`}>
             <div className={`vc-keybind-input-layout ${RecorderClasses.recorderLayout} ${FlexClasses.flex} ${FlexClasses.horizontal}`}>
-                <input autoFocus ref={inputRef} className={`vc-keybind-input-text ${RecorderClasses.keybindInput}`} id={id} type="text" readOnly disabled={disabled} value={getText(state, global)} placeholder="No Keybind Set" />
+                <input id={id} ref={inputRef} onBlur={handleOnblur} type="text" readOnly disabled={!recording} value={getText(defaultKeys, global)} placeholder="No Keybind Set" className={`vc-keybind-input-text ${RecorderClasses.keybindInput}`} />
                 <div className={`vc-keybind-input-button-container ${ContainersClasses.buttonContainer}`}>
-                    <button className={`vc-keybind-input-button ${ButtonClasses.button} ${ButtonClasses.sm} ${recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary} ${ButtonClasses.hasText}`} onClick={updateRecording} >
+                    <button onClick={updateRecording} className={`vc-keybind-input-button ${ButtonClasses.button} ${ButtonClasses.sm} ${recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary} ${ButtonClasses.hasText}`} >
                         <div className={`vc-keybind-input-button-children-wrapper ${ButtonClasses.buttonChildrenWrapper}`}>
                             <div className={`vc-keybind-input-button-children ${ButtonClasses.buttonChildren}`}>
                                 <Text variant="text-sm/medium" color="inherit">
-                                    {!recording ? keys.length ? "Record Keybind" : "Edit Keybind" : "Stop Recording"}
+                                    {!recording ? defaultKeys.length ? "Record Keybind" : "Edit Keybind" : "Stop Recording"}
                                 </Text>
                             </div>
                         </div>
@@ -200,3 +209,81 @@ export function KeybindInput({ keys, global, onChange, disabled }: {
     );
 }
 
+function inputCaptureKeysWindow(
+    id: string,
+    callback: (keys: WindowShortcut) => void
+) {
+    const keys: string[] = [];
+
+    const inputElement = document.getElementById(id) as HTMLInputElement;
+
+    const stopRecording = () => {
+        recording = false;
+        clearTimeout(timeoutId);
+        inputElement.removeEventListener("keydown", keydownHandler, { capture: true });
+        inputElement.removeEventListener("keyup", keyupHandler, { capture: true });
+        inputElement.removeEventListener("mousedown", keydownHandler, { capture: true });
+        inputElement.removeEventListener("mouseup", keydownHandler, { capture: true });
+    };
+
+    const invokeCallback = (keys: WindowShortcut) => {
+        try {
+            callback(keys);
+        } catch (error) {
+            console.error("Error in callback:", error);
+        }
+    };
+
+    const keydownHandler = (event: KeyboardEvent | MouseEvent) => { // TODO: add gamepad detection
+        if (!recording) return;
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        event.preventDefault();
+
+        if (event.type === "keydown") {
+            const e = event as KeyboardEvent;
+            if (e.repeat || keys.includes(e.key)) return;
+            keys.push(e.key);
+        }
+        if (event.type === "mousedown") {
+            const e = event as MouseEvent;
+            keys.push("Mouse" + e.button);
+        }
+
+        if (keys.length === 4) { // Max 4 keys
+            invokeCallback([...keys]);
+            stopRecording();
+            keys.length = 0;
+        }
+    };
+
+    const keyupHandler = (event: KeyboardEvent | MouseEvent) => { // TODO: add gamepad detection
+        if (!recording) return;
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        event.preventDefault();
+        if (event.type === "keyup" && (event as KeyboardEvent).key === keys[keys.length - 1]) {
+            invokeCallback([...keys]);
+            stopRecording();
+        }
+        if (event.type === "mouseup" && "Mouse" + (event as MouseEvent).button === keys[keys.length - 1]) {
+            invokeCallback([...keys]);
+            stopRecording();
+        }
+    };
+
+    let recording = true;
+    inputElement.addEventListener("keydown", keydownHandler, { capture: true });
+    inputElement.addEventListener("keyup", keyupHandler, { capture: true });
+    inputElement.addEventListener("mousedown", keydownHandler, { capture: true });
+    inputElement.addEventListener("mouseup", keyupHandler, { capture: true });
+
+    const timeoutId = setTimeout(() => {
+        if (recording) {
+            invokeCallback([...keys]);
+            stopRecording();
+        }
+    }, 5 * 1000); // 5 seconds timeout
+
+    return stopRecording;
+}
