@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
@@ -44,9 +44,8 @@ export default definePlugin({
         {
             find: ".selectPreviousCommandOption(",
             replacement: {
-                // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                match: /(?<=(\i)\.which(?:!==|===)\i\.\i.ENTER(\|\||&&)).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=(?:\|\||&&)\(\i\.preventDefault)/,
-                replace: (_, event, condition, codeblock) => `${condition === "||" ? "!" : ""}$self.shouldSubmit(${event},${codeblock})`
+                match: /(?<=(\i)\.which!==\i\.\i.ENTER\|\|).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=\|\|\(\i\.preventDefault)/,
+                replace: "!$self.shouldSubmit($1,$2)"
             }
         },
         {
@@ -64,7 +63,7 @@ export default definePlugin({
                 result = event.shiftKey;
                 break;
             case "ctrl+enter":
-                result = navigator.platform.includes("Mac") ? event.metaKey : event.ctrlKey;
+                result = IS_MAC ? event.metaKey : event.ctrlKey;
                 break;
             case "enter":
                 result = !event.shiftKey && !event.ctrlKey;
