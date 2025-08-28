@@ -16,12 +16,9 @@ import { Experiment, fetchExperiments } from "./api";
 const mm3 = findLazy(m => m?.toString?.().includes?.("0xcc9e2d51"));
 
 const ExperimentStore = findStoreLazy("ExperimentStore");
-// const GuildTooltip = findByCodeLazy("GuildTooltip");
-const GuildIcon = findByCodeLazy(".PureComponent){render(){return(0,");
+// const GuildIcon = findByCodeLazy(".PureComponent){render(){return(0,");
 
 const EXPERIMENTS: Map<string, Experiment> = new Map();
-// const GuildIcon = wreq(565138).Z;
-// .PureComponent){render(){return(0,
 export default definePlugin({
     authors: [Devs.mantikafasi],
     name: "BetterExperiments",
@@ -122,7 +119,16 @@ export default definePlugin({
                             const guild = guilds[guildId];
                             if (!descriptor) return null;
                             if (descriptor.bucket === parseInt(bucket)) return (
-                                <GuildIcon showTooltip={true} showBadge={true} guild={guild} key={guild.id} />
+                                <Tooltip text={guild.name} key={guild.id}>
+                                    {(tooltipProps: any) => (
+                                        <img
+                                            {...tooltipProps}
+                                            src={IconUtils.getGuildIconURL(guild)}
+                                            alt={guild.name}
+                                            style={{ borderRadius: "50%", width: "32px", height: "32px" }}
+                                        />
+                                    )}
+                                </Tooltip>
                             );
                         }).filter(Boolean);
 
