@@ -53,12 +53,12 @@ window.addEventListener("mouseup", (e: MouseEvent) => {
 });
 
 window.addEventListener("keydown", (e: KeyboardEvent) => {
-    keysDown.add(e.key.length === 1 ? e.key.toLowerCase() : e.key);
-    keysUp.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key);
+    keysDown.add(e.key);
+    keysUp.delete(e.key);
 });
 window.addEventListener("keyup", (e: KeyboardEvent) => {
-    keysUp.add(e.key.length === 1 ? e.key.toLowerCase() : e.key);
-    keysDown.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key);
+    keysUp.add(e.key);
+    keysDown.delete(e.key);
 });
 
 const mapCallbacks: Map<string, (event: KeyboardEvent | MouseEvent) => void> = new Map();
@@ -81,11 +81,19 @@ function getKeyChecks(keys: WindowShortcut): EventKeyChecks {
     };
 }
 
-export function registerKeybind(name: string, keys: WindowShortcut, callback: () => void, options: WindowShortcutOptions): boolean {
+export function registerKeybind(name: string, keys: WindowShortcut, callback: (event: KeyboardEvent | MouseEvent) => void, options: WindowShortcutOptions): boolean {
     if (mapCallbacks.has(name)) return false;
     const keysToCheck = getKeyChecks(keys);
-    const last = keysToCheck.keys[keysToCheck.keys.length - 1];
-    const lastType = last.startsWith("Mouse") ? "mouse" : last.startsWith("Gamepad") ? "gamepad" : "keyboard";
+    const types: Set<string> = new Set();
+    for (const key of keys) {
+        if (key.startsWith("Mouse")) {
+            types.add("mouse");
+        } else if (key.startsWith("Gamepad")) {
+            types.add("gamepad");
+        } else {
+            types.add("keyboard");
+        }
+    }
     const checkKeys = (event: KeyboardEvent | MouseEvent) => { // TODO: check for gamepad buttons
         let { keydown } = options;
         let { keyup } = options;
@@ -94,12 +102,21 @@ export function registerKeybind(name: string, keys: WindowShortcut, callback: ()
                 if (options.keydown && !keysDown.has(key)) keydown = false;
                 if (options.keyup && !keysUp.has(key)) keyup = false;
             }
-            if (keydown) callback();
-            if (keyup) callback();
+            if (keydown) callback(event);
+            if (keyup) callback(event);
         }
     };
-    if (options.keydown) lastType === "mouse" ? window.addEventListener("mousedown", checkKeys) : window.addEventListener("keydown", checkKeys);
-    if (options.keyup) lastType === "mouse" ? window.addEventListener("mouseup", checkKeys) : window.addEventListener("keyup", checkKeys);
+    for (const type of types) {
+        if (type === "mouse") {
+            if (options.keydown) window.addEventListener("mousedown", checkKeys);
+            if (options.keyup) window.addEventListener("mouseup", checkKeys);
+        } else if (type === "gamepad") {
+            // TODO: implement gamepad support
+        } else {
+            if (options.keydown) window.addEventListener("keydown", checkKeys);
+            if (options.keyup) window.addEventListener("keyup", checkKeys);
+        }
+    }
     mapCallbacks.set(name, checkKeys);
     return true;
 }

@@ -27,7 +27,10 @@ export const settings = definePluginSettings({
     testKeybind: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to test the keybind.",
-        global: false
+        global: false,
+        onChange: keys => console.log(
+            "Test keybind changed to:", keys
+        )
     },
     displayNumber: {
         type: OptionType.NUMBER,
