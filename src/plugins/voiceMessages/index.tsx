@@ -28,7 +28,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -60,7 +60,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
                     <div className={OptionClasses.optionName}>Send voice message</div>
                 </div>
             }
-            action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
+            action={() => openModal(modalProps => <Modal modalProps={modalProps} channelId={props.channel.id} />)}
         />
     );
 };
@@ -84,8 +84,7 @@ const EMPTY_META: AudioMetadata = {
     duration: 1,
 };
 
-function sendAudio(blob: Blob, meta: AudioMetadata) {
-    const channelId = SelectedChannelStore.getChannelId();
+function sendAudio(blob: Blob, meta: AudioMetadata, channelId: string) {
     const reply = PendingReplyStore.getPendingReply(channelId);
     if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 
@@ -132,7 +131,7 @@ function useObjectUrl() {
     return [url, setWithFree] as const;
 }
 
-function Modal({ modalProps }: { modalProps: ModalProps; }) {
+function Modal({ modalProps, channelId }: { modalProps: ModalProps, channelId: string; }) {
     const [isRecording, setRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
@@ -234,7 +233,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 <Button
                     disabled={!blob}
                     onClick={() => {
-                        sendAudio(blob!, meta);
+                        sendAudio(blob!, meta, channelId);
                         modalProps.onClose();
                         showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
                     }}
