@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findLazy, findStoreLazy } from "@webpack";
+import { findLazy, findStoreLazy } from "@webpack";
 import { Button, FluxDispatcher, GuildStore, IconUtils, RelationshipStore, Tooltip, UserStore } from "@webpack/common";
 
 import { Experiment, fetchExperiments } from "./api";
