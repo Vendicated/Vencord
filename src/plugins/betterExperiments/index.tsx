@@ -18,7 +18,6 @@ const mm3 = findLazy(m => m?.toString?.().includes?.("0xcc9e2d51"));
 const ExperimentStore = findStoreLazy("ExperimentStore");
 // const GuildTooltip = findByCodeLazy("GuildTooltip");
 const GuildIcon = findByCodeLazy(".PureComponent){render(){return(0,");
-const API_URL = "https://experiments.mantikafasi.dev";
 
 const EXPERIMENTS: Map<string, Experiment> = new Map();
 // const GuildIcon = wreq(565138).Z;
@@ -66,12 +65,15 @@ export default definePlugin({
     },
     settings: definePluginSettings({
         accountIds: {
-            type: OptionType.CUSTOM,
-            description: "Account IDs to get hash for",
+            type: OptionType.STRING,
+            description: "Account IDs to get hash for, separated with commas",
+        },
+        apiProvider: {
+            type: OptionType.COMPONENT,
             component: () => {
                 return <div style={{ padding: "8px" }}>
                     <div style={{ color: "var(--text-muted)", fontSize: "14px" }}>
-
+                        API Provided by <a onClick={() => window.open("https://x.com/WumpusCentral")} href="https://x.com/WumpusCentral">WumpusCentral</a>
                     </div>
                 </div>;
             }
@@ -154,10 +156,11 @@ export default definePlugin({
                         const friends = RelationshipStore.getFriendIDs().map(id => ({ id, user: UserStore.getUser(id) }));
                         const expObject = EXPERIMENTS.get(e.experimentId);
 
-                        // #3 is populations
-                        const ranges = expObject?.rollout[3]?.map(population => {
-                            return population[0].filter(range => { return range[0] === parseInt(bucket); }).map(range => range[1]);
-                        });
+                        // rollout[7] is AA-Mode
+                        // rollout[3] is populations
+                        const ranges = expObject?.rollout[7] !== 1 ? expObject?.rollout[3]?.map(population => {
+                            return population[0].filter(range => range[0] === parseInt(bucket)).map(range => range[1]);
+                        }) : [];
 
                         const userIcons = friends.map(friend => {
                             const hash = mm3(e.experimentId + ":" + friend.id) % 10000;

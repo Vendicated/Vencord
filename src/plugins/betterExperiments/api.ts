@@ -27,43 +27,43 @@ export interface ExperimentData {
     /**
      * 32-bit unsigned Murmur3 hash of the experiment's name
      */
-    hash: number;
+    0: number; // hash
     /**
      * A human-readable experiment name (formatted as year-month_name ) to use for hashing calculations, prioritized over the client name
      */
-    hash_key: string;
+    1: string; // hash_key
     /**
      * Current version of the rollout
      */
-    revision: number;
+    2: number; // revision
     /**
      * The experiment rollout's populations
      */
-    populations: ExperimentPopulation[];
+    3: ExperimentPopulation[];
     /**
      * Specific bucket overrides for the experiment
      */
-    overrides: ExperimentBucketOverride[];
+    4: ExperimentBucketOverride[];
     /**
      * Populations of overrides for the experiment
      */
-    overrides_formatted: ExperimentPopulation[][];
+    5: ExperimentPopulation[][];
     /**
      * A human-readable experiment name (formatted as year-month_name ) that disables the experiment
      */
-    holdout_name: string;
+    6: string;
     /**
      * The holdout experiment bucket that disables the experiment
      */
-    holdout_bucket: number;
+    7: number;
     /**
      * The experiment's A/A testing mode, represented as an integer-casted boolean
      */
-    aa_mode: number;
+    8: number;
     /**
      * Whether the experiment's analytics trigger debugging is enabled, represented as an integer-casted boolean
      */
-    trigger_debugging: number;
+    9: number;
 }
 
 /**
@@ -73,11 +73,11 @@ export interface ExperimentPopulation {
     /**
      * The ranges for this population
      */
-    ranges: ExperimentPopulationRange[];
+    0: ExperimentPopulationRange[];
     /**
      * The filters that the resource must satisfy to be in this population
      */
-    filters: ExperimentPopulationFilters;
+    1: ExperimentPopulationFilters;
 }
 
 /**
@@ -87,11 +87,11 @@ export interface ExperimentPopulationRange {
     /**
      * The bucket this range grants
      */
-    bucket: number;
+    0: number;
     /**
      * The range rollout
      */
-    rollout: ExperimentPopulationRollout[];
+    1: ExperimentPopulationRollout[];
 }
 
 export interface ExperimentPopulationRollout {
