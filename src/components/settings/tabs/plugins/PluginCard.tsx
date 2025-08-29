@@ -55,8 +55,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             }
         }
 
-        // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches?.length) {
+        // if the plugin has requires a restart, don't use stopPlugin/startPlugin. Wait for restart to apply changes.
+        if (plugin.requiresRestart ?? plugin.patches?.length) {
             settings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name, "enabled");
             return;
