@@ -9,17 +9,17 @@ import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
+import { ButtonProps,User } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, FluxDispatcher, showToast, Text, UserStore } from "@webpack/common";
-import { ButtonProps } from "@webpack/types";
-import { User } from "discord-types/general";
 import { MouseEvent } from "react";
 
 const ChannelActions = findByPropsLazy("openPrivateChannel");
 const RelationshipTypes = findByPropsLazy("FRIEND", "BLOCKED", "PENDING_OUTGOING");
 
 const ButtonComponent = findComponentByCodeLazy('submittingStartedLabel","submittingFinishedLabel"]);');
-const ConfirmationModal = findByCodeLazy('"ConfirmModal")', "useLayoutEffect");
+const BlockButtonComponent = findComponentByCodeLazy("iconOpticalOffsetMargin", "buttonChildren", "hasReducedMotion");
+const ConfirmationModal = findByCodeLazy('"ConfirmModal"', "useLayoutEffect");
 
 const settings = definePluginSettings({
     addDmsButton: {
@@ -44,11 +44,6 @@ const settings = definePluginSettings({
         description: "Show a warning before unblocking a user anywhere on discord.",
         restartNeeded: true,
     },
-    unblockButtonDanger: {
-        default: false,
-        type: OptionType.BOOLEAN,
-        description: "Color the unblock button in the blocklist red instead of gray.",
-    },
     allowShiftUnblock: {
         default: true,
         type: OptionType.BOOLEAN,
@@ -72,7 +67,7 @@ export default definePlugin({
                 },
                 // Add an extra message button into the blocklist for easy access to past DMs, in case those are needed.
                 {
-                    match: /(?<=children:null!=(\i).globalName\?.+?}\),).*?(\{color:.{0,65}?string\((\i).+?"8wXU9P"]\)})\)/,
+                    match: /(?<=children:null!=(\i).globalName.+?}\),).*?(\{.{0,40}string\((\i).+?"8wXU9P"]\).*?})\)/,
                     replace: "$self.generateButtons({user:$1, originalProps:$2, isBlocked:$3})",
                 }
             ],
@@ -154,8 +149,6 @@ export default definePlugin({
     generateButtons(props: { user: User, originalProps: ButtonProps, isBlocked: boolean }) {
         const { user, originalProps, isBlocked } = props;
 
-        if (settings.store.unblockButtonDanger) originalProps.color = Button.Colors.RED;
-
         if (isBlocked && (settings.store.showUnblockConfirmation || settings.store.showUnblockConfirmationEverywhere)) {
             const originalOnClick = originalProps.onClick!;
             originalProps.onClick = e => {
@@ -164,12 +157,11 @@ export default definePlugin({
             };
         }
 
-        const unblockButton = <ButtonComponent {...originalProps} />;
+        const unblockButton = <BlockButtonComponent {...originalProps}/>;
 
         if (!settings.store.addDmsButton) return unblockButton;
 
         const dmButton = <ButtonComponent color={Button.Colors.BRAND_NEW} onClick={() => this.openDMChannel(user)}>Show DMs</ButtonComponent>;
-
         return <div style={{ display: "flex", gap: "8px" }} className="vc-bbc-button-container">
             {dmButton}
             {unblockButton}
