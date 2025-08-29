@@ -25,7 +25,8 @@ import { useMemo } from "@webpack/common";
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
     const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => id ? h64(id) : null, [id]);
+    const { seed } = settings.use(["seed"]);
+    const idHash = useMemo(() => id ? h64(id + seed) : null, [id, seed]);
 
     return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
 }
@@ -35,6 +36,13 @@ const settings = definePluginSettings({
         description: "Lightness, in %. Change if the colors are too light or too dark",
         type: OptionType.NUMBER,
         default: 70,
+    },
+    seed: {
+        // actually a pepper, but seed will make more sense to an end user
+        // also helps clarify that it can be reset to an old value to get the old colours
+        description: "Seed used to generate username colours",
+        type: OptionType.STRING,
+        default: "",
     },
     memberListColors: {
         description: "Replace role colors in the member list",
