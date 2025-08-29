@@ -1,4 +1,4 @@
-.vc-keybind-input {
+.vc-plugins-setting-keybind-layout {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -6,20 +6,20 @@
     gap: .5em;
 }
 
-.vc-keybind-input .vc-keybind-input-icon > svg.disabled {
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-icon > svg.disabled {
     opacity: .3;
 }
 
-.vc-keybind-input .vc-keybind-input-layout {
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord-layout {
     position: unset;
 }
 
-.vc-keybind-input .vc-keybind-input-layout > input:focus {
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-layout > input:focus {
     border-radius: var(--radius-sm);
     background-color: rgb(255 255 255 / 5%) !important;
 }
 
-.vc-keybind-input .vc-keybind-input-switch > div {
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-switch > div {
     flex-direction: row;
     margin: 0;
 }

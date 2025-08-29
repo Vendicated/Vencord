@@ -20,12 +20,13 @@ import "./KeybindSetting.css";
 
 import { disableKeybind, enableKeybind, updateKeybind } from "@api/Keybinds";
 import { getDiscordUtils } from "@api/Keybinds/globalManager";
-import { DeleteIcon, ScreenshareIcon, WebsiteIcon } from "@components/Icons";
+import { classNameFactory } from "@api/Styles";
+import { ScreenshareIcon, WebsiteIcon } from "@components/Icons";
 import { Switch } from "@components/settings";
 import { KeybindShortcut, OptionType, PluginOptionKeybind, WindowShortcut } from "@utils/types";
 import { GlobalShortcut } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, React, Text, Tooltip, useEffect, useRef, useState } from "@webpack/common";
+import { React, Text, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
 import { SettingProps, SettingsSection } from "./Common";
 
@@ -33,6 +34,8 @@ const ButtonClasses = findByPropsLazy("button", "sm", "secondary", "hasText", "b
 const FlexClasses = findByPropsLazy("flex", "horizontalReverse");
 const ContainersClasses = findByPropsLazy("buttonContainer", "recorderContainer");
 const RecorderClasses = findByPropsLazy("recorderContainer", "keybindInput");
+
+export const cl = classNameFactory("vc-plugins-setting-keybind");
 
 // Discord mapping from keycodes array to string (mouse, keyboard, gamepad)
 const keycodesToString = findByCodeLazy(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON") as (keys: GlobalShortcut) => string;
@@ -45,7 +48,7 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     const inputId = "vc-key-recorder-" + id;
     const global = option.global ?? false;
     const disabled = option.disabled || !Array.isArray(pluginSettings[id]) || pluginSettings[id].length === 0;
-    const clearable = option.clearable ?? false;
+    const clearable = option.clearable ?? true;
 
     const [state, setState] = useState<KeybindShortcut>(pluginSettings[id] ?? []);
 
@@ -66,6 +69,7 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
     }
 
     function clearKeybind() {
+        if (!clearable) return;
         updateKeybind(id, [], global);
         handleChange([]);
     }
@@ -88,10 +92,10 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
 
     return (
         <SettingsSection name={id} description={option.description} error={error} inlineSetting={true}>
-            <div className="vc-keybind-input">
+            <div className={cl("-layout")}>
                 <Tooltip text={global ? "Global Keybind" : "Window Keybind"}>
                     {({ onMouseEnter, onMouseLeave }) => (
-                        <div className="vc-keybind-input-icon" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                        <div className={cl("-icon")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                             {global
                                 ? <WebsiteIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="var(--header-primary)" className={!enabled ? "disabled" : ""} />
                                 : <ScreenshareIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="var(--header-primary)" className={!enabled ? "disabled" : ""} />
@@ -101,7 +105,7 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
                 </Tooltip>
                 <Tooltip text={getText(state, global) || "No Keybind Set"}>
                     {({ onMouseEnter, onMouseLeave }) => (
-                        <div className="vc-keybind-input-discord" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
+                        <div className={cl("-discord")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
                             <KeybindInput
                                 id={inputId}
                                 defaultKeys={state}
@@ -112,16 +116,9 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
                         </div>
                     )}
                 </Tooltip>
-                {clearable && <Tooltip text="Clear Keybind">
-                    {({ onMouseEnter, onMouseLeave }) => (
-                        <Button size={Button.Sizes.ICON} look={Button.Looks.FILLED} color={Button.Colors.RED} onClick={clearKeybind} disabled={!enabled} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                            <DeleteIcon />
-                        </Button>
-                    )}
-                </Tooltip>}
                 <Tooltip text={enabled ? "Disable/Clear Keybind" : "Enable Keybind"}>
                     {({ onMouseEnter, onMouseLeave }) => (
-                        <div className="vc-keybind-input-switch" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                        <div className={cl("-switch")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                             <Switch checked={enabled} onChange={handleEnabledChange} />
                         </div>
                     )}
@@ -190,13 +187,13 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
     }
 
     return (
-        <div className={`vc-keybind-input-wrapper ${recording ? RecorderClasses.recording : ""} ${RecorderClasses.recorderContainer} ${disabled ? RecorderClasses.containerDisabled : ""}`}>
-            <div className={`vc-keybind-input-layout ${RecorderClasses.recorderLayout} ${FlexClasses.flex} ${FlexClasses.horizontal}`}>
-                <input id={id} ref={inputRef} onBlur={handleOnblur} type="text" readOnly disabled={!recording} value={getText(defaultKeys, global)} placeholder="No Keybind Set" className={`vc-keybind-input-text ${RecorderClasses.keybindInput}`} />
-                <div className={`vc-keybind-input-button-container ${ContainersClasses.buttonContainer}`}>
-                    <button onClick={updateRecording} className={`vc-keybind-input-button ${ButtonClasses.button} ${ButtonClasses.sm} ${recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary} ${ButtonClasses.hasText}`} >
-                        <div className={`vc-keybind-input-button-children-wrapper ${ButtonClasses.buttonChildrenWrapper}`}>
-                            <div className={`vc-keybind-input-button-children ${ButtonClasses.buttonChildren}`}>
+        <div className={`${cl("-discord")} ${recording ? RecorderClasses.recording : ""} ${RecorderClasses.recorderContainer} ${disabled ? RecorderClasses.containerDisabled : ""}`}>
+            <div className={`${cl("-discord-layout")} ${RecorderClasses.recorderLayout} ${FlexClasses.flex} ${FlexClasses.horizontal}`}>
+                <input id={id} ref={inputRef} onBlur={handleOnblur} type="text" readOnly disabled={!recording} value={getText(defaultKeys, global)} placeholder="No Keybind Set" className={`${cl("discord-input")} ${RecorderClasses.keybindInput}`} />
+                <div className={`${cl("-discord-button-container")} ${ContainersClasses.buttonContainer}`}>
+                    <button onClick={updateRecording} className={`${cl("-discord-button")} ${ButtonClasses.button} ${ButtonClasses.sm} ${recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary} ${ButtonClasses.hasText}`} >
+                        <div className={`${cl("-discord-button-children-wrapper")} ${ButtonClasses.buttonChildrenWrapper}`}>
+                            <div className={`${cl("-discord-button-children")} ${ButtonClasses.buttonChildren}`}>
                                 <Text variant="text-sm/medium" color="inherit">
                                     {!recording ? defaultKeys.length ? "Record Keybind" : "Edit Keybind" : "Stop Recording"}
                                 </Text>
