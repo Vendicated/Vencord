@@ -677,7 +677,7 @@ export async function handleHoverDownloadButtonClicked(props: HoverDownloadProps
     if (!originalItem) {
         // Fallback to default behavior.
         DownloadifyLogger.info(`[${getFormattedNow()}] [UNRECOGNIZED HOVER DOWNLOAD ITEM]`, props.item);
-        displayStatus && showToast("File Opened in Browser", Toasts.Type.MESSAGE, { duration: statusDuration * 1000 });
+        displayStatus && showToast("Unknown Media Item. Falling Back to Default Behavior", Toasts.Type.MESSAGE, { duration: statusDuration * 1250 });
         window.open(downloadUrl, "_blank");
     } else {
         contentType ??= (await DownloadifyNative.queryURL(downloadUrl) || "");
@@ -700,15 +700,8 @@ export async function handleExpandedModalDownloadButtonClicked(props: ExpandedMo
     if (!url && !original) {
         // Fallback to default behavior.
         DownloadifyLogger.info(`[${getFormattedNow()}] [UNRECOGNIZED EXPANDED MODAL DOWNLOAD ITEM]`, props.item);
-        displayStatus && showToast("Download Started", Toasts.Type.MESSAGE, { duration: statusDuration * 1000 });
-
-        try {
-            await fallback();
-            displayStatus && showToast("Download Success", Toasts.Type.SUCCESS, { duration: statusDuration * 1000 });
-        } catch (error) {
-            DownloadifyLogger.info(`[${getFormattedNow()}] [FALLBACK DOWNLOAD FAILED]`, error);
-            displayStatus && showToast("Download Failed", Toasts.Type.FAILURE, { duration: statusDuration * 1000 });
-        }
+        displayStatus && showToast("Unknown Media Item. Falling Back to Default Behavior", Toasts.Type.MESSAGE, { duration: statusDuration * 1250 });
+        await fallback();
     } else {
         contentType ??= (await DownloadifyNative.queryURL(url) || "");
         let aliasBasename = sourceMetadata?.identifier.title ?? null;
