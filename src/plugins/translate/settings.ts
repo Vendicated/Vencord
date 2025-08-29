@@ -78,6 +78,30 @@ export const settings = definePluginSettings({
         description: "Show a tooltip on the ChatBar button whenever a message is automatically translated",
         default: true
     },
+    autoTranslateChannelId: {
+        type: OptionType.STRING,
+        default: "",
+        label: "Auto-Translate Channel ID",
+        description: "Channel ID in which all messages will be auto-translated"
+    },
+    autoTranslateServerId: {
+        type: OptionType.STRING,
+        default: "",
+        label: "Auto-Translate Server ID",
+        description: "Server ID in which all messages will be auto-translated"
+    },
+    excludedChannelsId: {
+        type: OptionType.STRING,
+        default: "",
+        label: "Excluded Channels",
+        description: "Channel IDs in which all messages won't be auto-translated (Separate with a comma)"
+    },
+    autoTranslateTargetLang: {
+        type: OptionType.STRING,
+        default: "en",
+        label: "Auto-Translate Target Language",
+        description: "Language to auto-translate to"
+    },
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
 }>();

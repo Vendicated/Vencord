@@ -40,8 +40,14 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
             label="Translate"
             icon={TranslateIcon}
             action={async () => {
-                const trans = await translate("received", message.content);
-                handleTranslate(message.id, trans);
+                console.log("[Translate Button] Context menu clicked. Message:", message.content);
+                try {
+                    const trans = await translate("received", message.content);
+                    console.log("[Translate Button] Translation result:", trans);
+                    handleTranslate(message.id, trans);
+                } catch (e) {
+                    console.error("[Translate Button] Translation failed:", e);
+                }
             }}
         />
     ));
@@ -73,8 +79,14 @@ export default definePlugin({
             message,
             channel: ChannelStore.getChannel(message.channel_id),
             onClick: async () => {
-                const trans = await translate("received", message.content);
-                handleTranslate(message.id, trans);
+                console.log("[Translate Button] Popover clicked. Message:", message.content);
+                try {
+                    const trans = await translate("received", message.content);
+                    console.log("[Translate Button] Translation result:", trans);
+                    handleTranslate(message.id, trans);
+                } catch (e) {
+                    console.error("[Translate Button] Translation failed:", e);
+                }
             }
         };
     },
