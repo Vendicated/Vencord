@@ -768,19 +768,19 @@ export default definePlugin({
     patches: [
         {
             find: '="SYSTEM_TAG"',
-            group: true,
-            replacement: [
-                {
-                    // Replace names in messages and replies.
-                    match: /(onContextMenu:\i,children:)(.{0,250}?),"data-text":(\i\+\i)/,
-                    replace: "$1$self.getMessageNameElement(arguments[0])??($2),\"data-text\":$self.getMessageNameText(arguments[0])??($3)"
-                },
-                {
-                    // Animate gradients for message authors.
-                    match: /(let{setAnimate:\i}=(\i);)/,
-                    replace: "$1if($2.animate){$self.addHoveringMessage(arguments[0].message.id)}else{$self.removeHoveringMessage(arguments[0].message.id)};"
-                }
-            ]
+            replacement: {
+                // Replace names in messages and replies.
+                match: /(onContextMenu:\i,children:)(.{0,250}?),"data-text":(\i\+\i)/,
+                replace: "$1$self.getMessageNameElement(arguments[0])??($2),\"data-text\":$self.getMessageNameText(arguments[0])??($3)"
+            }
+        },
+        {
+            find: /setAnimate.{0,50}\.ANIMATE_CHAT_AVATAR,/,
+            replacement: {
+                // Animate gradients for message authors.
+                match: /(let{setAnimate:\i}=(\i);)/,
+                replace: "$1if($2.animate){$self.addHoveringMessage(arguments[0].message.id)}else{$self.removeHoveringMessage(arguments[0].message.id)};"
+            }
         },
         {
             // Replace names in mentions.
