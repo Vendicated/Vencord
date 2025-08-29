@@ -157,10 +157,11 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             ?.firstElementChild?.scrollTo(0, 0);
 
 
+        const encodedQuery = encodeURI(searchQuery).replace(/(%20|[_-])/g, " ").toLowerCase();
         const result =
             props.favCopy
                 .map(gif => ({
-                    score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
+                    score: fuzzySearch(encodedQuery, getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
                     gif,
                 }))
                 .filter(m => m.score != null) as { score: number; gif: Gif; }[];
