@@ -45,13 +45,27 @@ interface Emoji {
     isAnimated: boolean;
 }
 
-type Data = Emoji | Sticker;
+interface SoundboardSound {
+    t: "SoundboardSound";
+    sound_id: string;
+    name: string;
+    volume?: number;
+    emoji_id?: string;
+    emoji_name?: string;
+    available?: boolean;
+    guild_id?: string;
+}
+
+type Data = Emoji | Sticker | SoundboardSound;
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
     if (data.t === "Emoji")
         return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
+
+    if (data.t === "SoundboardSound")
+        return `https://cdn.discordapp.com/soundboard-sounds/${data.sound_id}`;
 
     return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
@@ -110,6 +124,31 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
     });
 }
 
+async function cloneSoundboardSound(guildId: string, sound: SoundboardSound) {
+    const audioBlob = await fetchBlob(getUrl(sound));
+    const audioArrayBuffer = await audioBlob.arrayBuffer();
+    const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioArrayBuffer)));
+    const dataUri = `data:audio/ogg;base64,${audioBase64}`;
+
+    const payload: any = {
+        name: sound.name,
+        volume: sound.volume || 1.0,
+        sound: dataUri
+    };
+
+    // Only include Unicode emojis, not custom server emojis
+    if (sound.emoji_name && !sound.emoji_id) {
+        payload.emoji_name = sound.emoji_name;
+    }
+
+    const { body } = await RestAPI.post({
+        url: `/guilds/${guildId}/soundboard-sounds`,
+        body: payload
+    });
+
+    return body;
+}
+
 function getGuildCandidates(data: Data) {
     const meId = UserStore.getCurrentUser().id;
 
@@ -118,7 +157,7 @@ function getGuildCandidates(data: Data) {
             (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
         if (!canCreate) return false;
 
-        if (data.t === "Sticker") return true;
+        if (data.t === "Sticker" || data.t === "SoundboardSound") return true;
 
         const { isAnimated } = data as Emoji;
 
@@ -141,10 +180,12 @@ async function fetchBlob(url: string) {
     return res.blob();
 }
 
-async function doClone(guildId: string, data: Sticker | Emoji) {
+async function doClone(guildId: string, data: Data) {
     try {
         if (data.t === "Sticker")
             await cloneSticker(guildId, data);
+        else if (data.t === "SoundboardSound")
+            await cloneSoundboardSound(guildId, data);
         else
             await cloneEmoji(guildId, data);
 
@@ -176,13 +217,14 @@ const getFontSize = (s: string) => {
 
 const nameValidator = /^\w+$/i;
 
-function CloneModal({ data }: { data: Sticker | Emoji; }) {
+function CloneModal({ data }: { data: Data; }) {
     const [isCloning, setIsCloning] = React.useState(false);
     const [name, setName] = React.useState(data.name);
 
     const [x, invalidateMemo] = React.useReducer(x => x + 1, 0);
 
-    const guilds = React.useMemo(() => getGuildCandidates(data), [data.id, x]);
+    const dataId = data.t === "SoundboardSound" ? data.sound_id : (data as any).id;
+    const guilds = React.useMemo(() => getGuildCandidates(data), [dataId, x]);
 
     return (
         <>
@@ -196,6 +238,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 validate={v =>
                     (data.t === "Emoji" && v.length > 2 && v.length < 32 && nameValidator.test(v))
                     || (data.t === "Sticker" && v.length > 2 && v.length < 30)
+                    || (data.t === "SoundboardSound" && v.length > 2 && v.length < 32)
                     || "Name must be between 2 and 32 characters and only contain alphanumeric characters"
                 }
             />
@@ -274,30 +317,48 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
     );
 }
 
-function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Omit<Sticker | Emoji, "t">>) {
+function buildMenuItem(type: "Emoji" | "Sticker" | "SoundboardSound", fetchData: () => Promisable<Omit<Data, "t">>) {
     return (
         <Menu.MenuItem
-            id="emote-cloner"
-            key="emote-cloner"
-            label={`Clone ${type}`}
+            id="expression-cloner"
+            key="expression-cloner"
+            label={`Clone ${type === "SoundboardSound" ? "Sound" : type}`}
             action={() =>
                 openModalLazy(async () => {
                     const res = await fetchData();
-                    const data = { t: type, ...res } as Sticker | Emoji;
+                    const data = { t: type, ...res } as Data;
                     const url = getUrl(data);
 
                     return modalProps => (
                         <ModalRoot {...modalProps}>
                             <ModalHeader>
-                                <img
-                                    role="presentation"
-                                    aria-hidden
-                                    src={url}
-                                    alt=""
-                                    height={24}
-                                    width={24}
-                                    style={{ marginRight: "0.5em" }}
-                                />
+                                {type === "SoundboardSound" ? (
+                                    <div
+                                        style={{
+                                            width: 24,
+                                            height: 24,
+                                            backgroundColor: "var(--brand-experiment)",
+                                            borderRadius: "50%",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            marginRight: "0.5em",
+                                            fontSize: "12px"
+                                        }}
+                                    >
+                                        🎵
+                                    </div>
+                                ) : (
+                                    <img
+                                        role="presentation"
+                                        aria-hidden
+                                        src={url}
+                                        alt=""
+                                        height={24}
+                                        width={24}
+                                        style={{ marginRight: "0.5em" }}
+                                    />
+                                )}
                                 <Forms.FormText>Clone {data.name}</Forms.FormText>
                             </ModalHeader>
                             <ModalContent>
@@ -363,14 +424,49 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
+const soundButtonContextPatch: NavContextMenuPatchCallback = (children, props) => {
+    let sound: any = null;
+
+    // Try different ways to get sound data from props
+    if (props?.sound) {
+        sound = props.sound;
+    } else if (props?.soundboardSound) {
+        sound = props.soundboardSound;
+    } else {
+        // Search through all props for sound data
+        for (const [key, value] of Object.entries(props || {})) {
+            if (value && typeof value === "object" && (value as any).sound_id) {
+                sound = value;
+                break;
+            }
+        }
+    }
+
+    if (!sound || !(sound.sound_id || sound.soundId)) return;
+
+    // Normalize the sound object
+    const normalizedSound = {
+        sound_id: sound.sound_id || sound.soundId,
+        name: sound.name,
+        volume: sound.volume || 1.0,
+        emoji_id: sound.emoji_id || sound.emojiId,
+        emoji_name: sound.emoji_name || sound.emojiName,
+        available: sound.available !== false,
+        guild_id: sound.guild_id || sound.guildId
+    };
+
+    children.push(buildMenuItem("SoundboardSound", () => normalizedSound));
+};
+
 migratePluginSettings("ExpressionCloner", "EmoteCloner");
 export default definePlugin({
     name: "ExpressionCloner",
-    description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
-    tags: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    description: "Allows you to clone Emotes, Stickers & Soundboard Sounds to your own server (right click them)",
+    tags: ["StickerCloner", "EmoteCloner", "EmojiCloner", "SoundboardCloner"],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.mar],
     contextMenus: {
         "message": messageContextMenuPatch,
-        "expression-picker": expressionPickerPatch
+        "expression-picker": expressionPickerPatch,
+        "sound-button-context": soundButtonContextPatch
     }
 });
