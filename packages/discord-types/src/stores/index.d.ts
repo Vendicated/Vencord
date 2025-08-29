@@ -1,5 +1,6 @@
 // please keep in alphabetical order
 export * from "./AuthenticationStore";
+export * from "./ApplicationStreamingStore";
 export * from "./ChannelStore";
 export * from "./DraftStore";
 export * from "./EmojiStore";
@@ -12,6 +13,7 @@ export * from "./RelationshipStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
 export * from "./StickersStore";
+export * from "./StreamerModeStore";
 export * from "./ThemeStore";
 export * from "./TypingStore";
 export * from "./UserProfileStore";
