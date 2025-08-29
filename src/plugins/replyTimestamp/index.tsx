@@ -10,15 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Message } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
 import { DateUtils, Timestamp } from "@webpack/common";
-import type { HTMLAttributes } from "react";
-
-const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
-
-function Sep(props: HTMLAttributes<HTMLElement>) {
-    return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
-}
 
 const enum ReferencedMessageState {
     LOADED = 0,
@@ -44,14 +36,7 @@ function ReplyTimestamp({
             compact={DateUtils.isSameDay(refTimestamp, baseTimestamp)}
             timestamp={refTimestamp}
             isInline={false}
-        >
-            <Sep>[</Sep>
-            {DateUtils.isSameDay(refTimestamp, baseTimestamp)
-                ? DateUtils.dateFormat(refTimestamp, "LT")
-                : DateUtils.calendarFormat(refTimestamp)
-            }
-            <Sep>]</Sep>
-        </Timestamp>
+        />
     );
 }
 
