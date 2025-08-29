@@ -20,19 +20,16 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
-import { Forms, Text } from "@webpack/common";
+import { Forms } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
+import { HeadingSecondary } from "ui/Heading";
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
         <Forms.FormSection>
-            <Text
-                variant="heading-lg/semibold"
-                tag="h2"
-                className={Margins.bottom16}
-            >
+            <HeadingSecondary className={Margins.bottom16}>
                 {title}
-            </Text>
+            </HeadingSecondary>
 
             {children}
         </Forms.FormSection>
