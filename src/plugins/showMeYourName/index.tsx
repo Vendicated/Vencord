@@ -768,18 +768,27 @@ export default definePlugin({
     patches: [
         {
             find: '="SYSTEM_TAG"',
-            replacement: {
-                // Replace names in messages and replies.
-                match: /(onContextMenu:\i,children:)(.{0,250}?),"data-text":(\i\+\i)/,
-                replace: "$1$self.getMessageNameElement(arguments[0])??($2),\"data-text\":$self.getMessageNameText(arguments[0])??($3)"
-            }
+            group: true,
+            replacement: [
+                {
+                    // Replace names in messages and replies.
+                    match: /(onContextMenu:\i,children:)(.{0,250}?),"data-text":(\i\+\i)/,
+                    replace: "$1$self.getMessageNameElement(arguments[0])??($2),\"data-text\":$self.getMessageNameText(arguments[0])??($3)"
+                },
+                {
+                    // Pass the message object to the should-animate checker.
+                    match: /(\(\{)(shouldSubscribe)/,
+                    replace: "$1message:arguments[0].message,$2"
+                }
+            ]
         },
         {
             find: /setAnimate.{0,50}\.ANIMATE_CHAT_AVATAR,/,
             replacement: {
-                // Animate gradients for message authors.
+                // Track hovering on messages to animate names since Discord's
+                // built-in hover tracking is buggy. Used by a patch below.
                 match: /(let{setAnimate:\i}=(\i);)/,
-                replace: "$1if($2.animate){$self.addHoveringMessage(arguments[0].message.id)}else{$self.removeHoveringMessage(arguments[0].message.id)};"
+                replace: "$1if(arguments[0].message){if($2.animate){$self.addHoveringMessage(arguments[0].message.id)}else{$self.removeHoveringMessage(arguments[0].message.id)}};"
             }
         },
         {
@@ -810,9 +819,9 @@ export default definePlugin({
             // Track hovering over second-level messages to animate gradients.
             // Tack on the groupId, which is how the client groups messages from
             // the same author together, to the message temporarily so that mentions
-            // across a group can animate together. By default, Discord handles this
-            // by animating the second-level message if you are hovering the first-level
-            // message, but not the other way around. This patch allows both.
+            // across a group can animate together. By default, Discord handles this,
+            // but moving between messages can cause a race condition where the animation
+            // stops on one of the messages in the group. This patch fixes that.
             find: "CUSTOM_GIFT?\"\":",
             replacement: {
                 match: /(\(\i,\i,\i\);)(let \i=\i.id===\i(?:.{0,500}?)hovering:(\i))/,
