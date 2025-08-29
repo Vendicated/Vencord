@@ -92,11 +92,15 @@ export default definePlugin({
                 {
                     // Make use of the download function.
                     match: /(let{item:\i}=(\i).{0,450}?)(let \i=)(await \i.\i.saveImage\(\i,\i.contentType,\i.\i\))/,
-                    replace: "$1await $self.handleExpandedModalDownloadButtonClicked($2,async()=>{$4});$3$4",
+                    replace: "$1await $self.handleExpandedModalDownloadButtonClicked($2,async()=>{$4})",
+                },
+                {
+                    match: /if\(\i===.{0,100}\(\i\)\);/,
+                    replace: ""
                 },
                 {
                     // Disable default success toast.
-                    match: /(\(0,.{0,85}?ToastType.SUCCESS\)\))/,
+                    match: /\i===\i\.\i\.SAVED&&\(\(0,.{0,85}?ToastType.SUCCESS\)\)\)/,
                     replace: "",
                 },
                 {
