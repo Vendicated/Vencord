@@ -34,18 +34,19 @@ export function resolveError(isValidResult: boolean | string) {
 }
 
 interface SettingsSectionProps extends PropsWithChildren {
-    name: string;
+    name?: string;
+    id: string;
     description: string;
     error?: string | null;
     inlineSetting?: boolean;
 }
 
-export function SettingsSection({ name, description, error, inlineSetting, children }: SettingsSectionProps) {
+export function SettingsSection({ name, id, description, error, inlineSetting, children }: SettingsSectionProps) {
     return (
         <div className={cl("section")}>
             <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
                 <div className={cl("label")}>
-                    {name && <Text className={cl("title")} variant="text-md/medium">{wordsToTitle(wordsFromCamel(name))}</Text>}
+                    <Text className={cl("title")} variant="text-md/medium">{name ?? wordsToTitle(wordsFromCamel(id))}</Text>
                     {description && <Text className={cl("description")} variant="text-sm/normal">{description}</Text>}
                 </div>
                 {children}
