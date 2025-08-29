@@ -1,0 +1,59 @@
+.vc-tzonprofile-container {
+    position: relative;
+    display: inline-block;
+}
+
+.vc-tzonprofile-selector {
+    color: var(--header-primary);
+}
+
+.vc-tzonprofile-dropdown {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    z-index: 1000;
+    background-color: var(--background-floating);
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
+    width: 220px;
+}
+
+.vc-tzonprofile-search {
+    width: 100%;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-accent);
+    background-color: var(--background-secondary);
+    color: var(--header-primary);
+}
+
+.vc-tzonprofile-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.vc-tzonprofile-item {
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--header-primary);
+}
+
+.vc-tzonprofile-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-tzonprofile-empty {
+    color: var(--text-muted);
+    padding: 6px 0;
+}
+
+.vc-tzonprofile-badge {
+    color: var(--header-primary);
+}
+
+.vc-tzonprofile-time {
+    color: var(--header-primary);
+}
