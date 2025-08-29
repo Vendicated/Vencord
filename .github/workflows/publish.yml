@@ -4,6 +4,11 @@ on:
     branches:
       - main
 
+env:
+    FORCE_COLOR: true
+
+permissions: write-all
+
 jobs:
   release:
     runs-on: ubuntu-latest
