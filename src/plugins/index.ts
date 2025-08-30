@@ -125,6 +125,14 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
         dep.isDependency = true;
     });
 
+    if (p.userProfileBadge) {
+        if (!p.userProfileBadges) {
+            p.userProfileBadges = [p.userProfileBadge];
+        } else {
+            p.userProfileBadges = [p.userProfileBadge, ...p.userProfileBadges];
+        }
+    }
+
     if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
     if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
     if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
