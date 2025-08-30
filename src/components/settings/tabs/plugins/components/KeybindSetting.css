@@ -10,16 +10,11 @@
     opacity: .3;
 }
 
-.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord-layout {
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord > div > div {
     position: unset;
 }
 
-.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-layout > input:focus {
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord > div > div > input:focus {
     border-radius: var(--radius-sm);
     background-color: rgb(255 255 255 / 5%) !important;
-}
-
-.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-switch > div {
-    flex-direction: row;
-    margin: 0;
 }
