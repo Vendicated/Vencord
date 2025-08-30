@@ -43,12 +43,7 @@ export type FormDivider = ComponentType<{
 }>;
 
 
-export type FormText = ComponentType<PropsWithChildren<{
-    disabled?: boolean;
-    selectable?: boolean;
-    /** defaults to FormText.Types.DEFAULT */
-    type?: string;
-}> & TextProps> & { Types: FormTextTypes; };
+export type FormText = ComponentType<TextProps>;
 
 export type Tooltip = ComponentType<{
     text: ReactNode | ComponentType;
@@ -474,18 +469,65 @@ export type MaskedLink = ComponentType<PropsWithChildren<{
     channelId?: string;
 }>>;
 
-export type ScrollerThin = ComponentType<PropsWithChildren<{
+export interface ScrollerBaseProps {
     className?: string;
     style?: CSSProperties;
-
     dir?: "ltr";
-    orientation?: "horizontal" | "vertical" | "auto";
     paddingFix?: boolean;
-    fade?: boolean;
-
     onClose?(): void;
     onScroll?(): void;
+}
+
+export type ScrollerThin = ComponentType<PropsWithChildren<ScrollerBaseProps & {
+    orientation?: "horizontal" | "vertical" | "auto";
+    fade?: boolean;
 }>>;
+
+interface BaseListItem {
+    anchorId: any;
+    listIndex: number;
+    offsetTop: number;
+    section: number;
+}
+interface ListSection extends BaseListItem {
+    type: "section";
+}
+interface ListRow extends BaseListItem {
+    type: "row";
+    row: number;
+    rowIndex: number;
+}
+
+export type ListScrollerThin = ComponentType<ScrollerBaseProps & {
+    sections: number[];
+    renderSection?: (item: ListSection) => React.ReactNode;
+    renderRow: (item: ListRow) => React.ReactNode;
+    renderFooter?: (item: any) => React.ReactNode;
+    renderSidebar?: (listVisible: boolean, sidebarVisible: boolean) => React.ReactNode;
+    wrapSection?: (section: number, children: React.ReactNode) => React.ReactNode;
+
+    sectionHeight: number;
+    rowHeight: number;
+    footerHeight?: number;
+    sidebarHeight?: number;
+
+    chunkSize?: number;
+
+    paddingTop?: number;
+    paddingBottom?: number;
+    fade?: boolean;
+    onResize?: Function;
+    getAnchorId?: any;
+
+    innerTag?: string;
+    innerId?: string;
+    innerClassName?: string;
+    innerRole?: string;
+    innerAriaLabel?: string;
+    // Yes, Discord uses this casing
+    innerAriaMultiselectable?: boolean;
+    innerAriaOrientation?: "vertical" | "horizontal";
+}>;
 
 export type Clickable = <T extends "a" | "div" | "span" | "li" = "div">(props: PropsWithChildren<ComponentPropsWithRef<T>> & {
     tag?: T;
