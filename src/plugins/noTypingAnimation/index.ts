@@ -14,8 +14,8 @@ export default definePlugin({
     patches: [{
         find: "dotCycle",
         replacement: {
-            match: /document.hasFocus\(\)/,
-            replace: "false"
+            match: /focused(:\i)/,
+            replace: "_focused$1=false"
         }
     }]
 });
