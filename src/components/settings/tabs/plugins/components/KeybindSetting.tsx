@@ -23,6 +23,7 @@ import { getDiscordUtils } from "@api/Keybinds/globalManager";
 import { classNameFactory } from "@api/Styles";
 import { ScreenshareIcon, WebsiteIcon } from "@components/Icons";
 import { Switch } from "@components/settings";
+import { classes } from "@utils/index";
 import { KeybindShortcut, OptionType, PluginOptionKeybind, WindowShortcut } from "@utils/types";
 import { GlobalShortcut } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -187,13 +188,13 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
     }
 
     return (
-        <div className={`${cl("-discord")} ${recording ? RecorderClasses.recording : ""} ${RecorderClasses.recorderContainer} ${disabled ? RecorderClasses.containerDisabled : ""}`}>
-            <div className={`${cl("-discord-layout")} ${RecorderClasses.recorderLayout} ${FlexClasses.flex} ${FlexClasses.horizontal}`}>
-                <input id={id} ref={inputRef} onBlur={handleOnblur} type="text" readOnly disabled={!recording} value={getText(defaultKeys, global)} placeholder="No Keybind Set" className={`${cl("discord-input")} ${RecorderClasses.keybindInput}`} />
-                <div className={`${cl("-discord-button-container")} ${ContainersClasses.buttonContainer}`}>
-                    <button onClick={updateRecording} className={`${cl("-discord-button")} ${ButtonClasses.button} ${ButtonClasses.sm} ${recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary} ${ButtonClasses.hasText}`} >
-                        <div className={`${cl("-discord-button-children-wrapper")} ${ButtonClasses.buttonChildrenWrapper}`}>
-                            <div className={`${cl("-discord-button-children")} ${ButtonClasses.buttonChildren}`}>
+        <div className={classes(recording ? RecorderClasses.recording : "", RecorderClasses.recorderContainer, disabled ? RecorderClasses.containerDisabled : "")}>
+            <div className={classes(RecorderClasses.recorderLayout, FlexClasses.flex, FlexClasses.horizontal)}>
+                <input id={id} ref={inputRef} onBlur={handleOnblur} type="text" readOnly disabled={!recording} value={getText(defaultKeys, global)} placeholder="No Keybind Set" className={classes(RecorderClasses.keybindInput)} />
+                <div className={classes(ContainersClasses.buttonContainer)}>
+                    <button onClick={updateRecording} className={classes(ButtonClasses.button, ButtonClasses.sm, recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary, ButtonClasses.hasText)} >
+                        <div className={classes(ButtonClasses.buttonChildrenWrapper)}>
+                            <div className={classes(ButtonClasses.buttonChildren)}>
                                 <Text variant="text-sm/medium" color="inherit">
                                     {!recording ? defaultKeys.length ? "Record Keybind" : "Edit Keybind" : "Stop Recording"}
                                 </Text>
