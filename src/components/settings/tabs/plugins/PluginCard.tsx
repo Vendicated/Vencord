@@ -5,14 +5,16 @@
  */
 
 import { showNotice } from "@api/Notices";
-import { CogWheel, InfoIcon } from "@components/Icons";
+import { CogWheel, InfoIcon, WarningIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { proxyLazy } from "@utils/lazy";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { React, showToast, Toasts } from "@webpack/common";
+import { React, showToast, Toasts, Tooltip } from "@webpack/common";
 import { Settings } from "Vencord";
+
+import { ExcludedPlugins } from "~plugins";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
@@ -22,14 +24,23 @@ const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } =
 
 export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
+const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+    desktop: "Discord Desktop app or Vesktop",
+    discordDesktop: "Discord Desktop app",
+    vencordDesktop: "Vesktop app",
+    web: "Vesktop app and the Web version of Discord",
+    dev: "Developer version of Vencord"
+};
+
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
     disabled: boolean;
     onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
+    update?: () => void;
 }
 
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
+export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, update }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => isPluginEnabled(plugin.name);
@@ -50,7 +61,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
                 settings.enabled = true;
-                onRestartNeeded(plugin.name, "enabled");
+                onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
                 return;
             }
         }
@@ -58,7 +69,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (plugin.patches?.length) {
             settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name, "enabled");
+            onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
             return;
         }
 
@@ -82,6 +93,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         }
 
         settings.enabled = !wasEnabled;
+        update?.();
     }
 
     return (
@@ -106,5 +118,37 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                     }
                 </button>
             } />
+    );
+}
+
+export function UnavailablePluginCard({ name, description, isMissing }: { name: string; description: string, isMissing: boolean; }) {
+    const toolTipText = isMissing
+        ? `${name} is only available on the ${ExcludedReasons[ExcludedPlugins[name]]}`
+        : "This plugin is not on this version of Vencord. Try updating!";
+
+    return description ? (
+        <Tooltip text={toolTipText} key={name}>
+            {({ onMouseLeave, onMouseEnter }) =>
+                <AddonCard
+                    name={name}
+                    description={description || toolTipText}
+                    enabled={false}
+                    setEnabled={() => { }}
+                    disabled={true}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                    infoButton={<WarningIcon />}
+                />
+            }
+        </Tooltip>
+    ) : (
+        <AddonCard
+            name={name}
+            description={description || toolTipText}
+            enabled={false}
+            setEnabled={() => { }}
+            disabled={true}
+            infoButton={<WarningIcon />}
+        />
     );
 }

@@ -21,6 +21,8 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { isPluginRequired, MakePluginCard, showRestartAlert } from "@components/settings/tabs/plugins";
+import { UnavailablePluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -29,15 +31,16 @@ import { Margins } from "@utils/margins";
 import { isPluginDev, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
+import { useForceUpdater } from "@utils/react";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Channel } from "@vencord/discord-types";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Channel, Embed } from "@vencord/discord-types";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
-import plugins, { PluginMeta } from "~plugins";
+import plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
@@ -236,6 +239,23 @@ export default definePlugin({
     renderMessageAccessory(props) {
         const buttons = [] as JSX.Element[];
 
+        const createButton = (key: string, onClick: () => Promise<void>, label: string, color?: string) => {
+            const [disabled, setDisabled] = useState(false);
+            return (
+                <Button
+                    key={key}
+                    color={color}
+                    disabled={disabled}
+                    onClick={async () => {
+                        setDisabled(true);
+                        await onClick();
+                    }}
+                >
+                    {label}
+                </Button>
+            );
+        };
+
         const shouldAddUpdateButton =
             !IS_UPDATER_DISABLED
             && (
@@ -245,71 +265,47 @@ export default definePlugin({
             && props.message.content?.includes("update");
 
         if (shouldAddUpdateButton) {
-            buttons.push(
-                <Button
-                    key="vc-update"
-                    color={Button.Colors.GREEN}
-                    onClick={async () => {
-                        try {
-                            if (await forceUpdate())
-                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
-                            else
-                                showToast("Already up to date!", Toasts.Type.MESSAGE);
-                        } catch (e) {
-                            new Logger(this.name).error("Error while updating:", e);
-                            showToast("Failed to update :(", Toasts.Type.FAILURE);
-                        }
-                    }}
-                >
-                    Update Now
-                </Button>
-            );
+            buttons.push(createButton("vc-update", async () => {
+                try {
+                    const success = await forceUpdate();
+                    showToast(success ? "Success! Restarting..." : "Already up to date!", success ? Toasts.Type.SUCCESS : Toasts.Type.MESSAGE);
+                } catch (e) {
+                    new Logger(this.name).error("Error while updating:", e);
+                    showToast("Failed to update :(", Toasts.Type.FAILURE);
+                }
+            }, "Update Now", Button.Colors.GREEN));
         }
 
         if (props.channel.parent_id === SUPPORT_CATEGORY_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
-            if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
+            if (["/vencord-debug", "/vencord-plugins"].some(cmd => props.message.content.includes(cmd))) {
                 buttons.push(
-                    <Button
-                        key="vc-dbg"
-                        onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
-                    >
-                        Run /vencord-debug
-                    </Button>,
-                    <Button
-                        key="vc-plg-list"
-                        onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
-                    >
-                        Run /vencord-plugins
-                    </Button>
+                    createButton("vc-dbg", async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() }), "Run /vencord-debug"),
+                    createButton("vc-plg-list", async () => sendMessage(props.channel.id, { content: generatePluginList() }), "Run /vencord-plugins")
                 );
             }
 
             if (props.message.author.id === VENBOT_USER_ID) {
                 const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
                 if (match) {
-                    buttons.push(
-                        <Button
-                            key="vc-run-snippet"
-                            onClick={async () => {
-                                try {
-                                    await AsyncFunction(match[1])();
-                                    showToast("Success!", Toasts.Type.SUCCESS);
-                                } catch (e) {
-                                    new Logger(this.name).error("Error while running snippet:", e);
-                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                                }
-                            }}
-                        >
-                            Run Snippet
-                        </Button>
-                    );
+                    buttons.push(createButton("vc-run-snippet", async () => {
+                        try {
+                            await AsyncFunction(match[1])();
+                            showToast("Success!", Toasts.Type.SUCCESS);
+                        } catch (e) {
+                            new Logger(this.name).error("Error while running snippet:", e);
+                            showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                        }
+                    }, "Run Snippet"));
                 }
             }
         }
 
-        return buttons.length
-            ? <Flex>{buttons}</Flex>
-            : null;
+        return (
+            <>
+                <Flex>{buttons}</Flex>
+                <EmbedPluginCards {...props} />
+            </>
+        );
     },
 
     renderContributorDmWarningCard: ErrorBoundary.wrap(({ channel }) => {
@@ -327,3 +323,46 @@ export default definePlugin({
         );
     }, { noop: true }),
 });
+
+function EmbedPluginCards(props) {
+    const pluginCards: JSX.Element[] = props.message?.embeds?.map((embed: Embed) => {
+        if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
+        const pluginName = new URL(embed.url!).pathname.split("/")[2];
+        const p = plugins[pluginName];
+        const excludedPlugin = ExcludedPlugins[pluginName];
+
+        const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
+        const update = useForceUpdater();
+
+        if (excludedPlugin || !p) {
+            return (
+                <UnavailablePluginCard
+                    name={pluginName}
+                    description={embed.rawDescription}
+                    isMissing={!p}
+                    key={pluginName}
+                />
+            );
+        }
+
+        const required = isPluginRequired(p);
+
+        return MakePluginCard({
+            plugin: p,
+            onRestartNeeded,
+            update,
+            required,
+            key: pluginName
+        });
+    });
+
+    return (
+        <ErrorBoundary noop>
+            {!pluginCards.length ? null : (
+                <div className="vc-plugins-unavailable-grid">
+                    {pluginCards}
+                </div>
+            )}
+        </ErrorBoundary>
+    );
+}

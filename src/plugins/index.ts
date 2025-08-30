@@ -59,6 +59,7 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
+
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     const patch = newPatch as Patch;
     patch.plugin = pluginName;

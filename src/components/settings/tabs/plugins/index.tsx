@@ -19,21 +19,21 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { SettingsTab, wrapTab } from "@components/settings/tabs";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
+import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
-import { PluginCard } from "./PluginCard";
+import { PluginCard, UnavailablePluginCard } from "./PluginCard";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
@@ -73,46 +73,97 @@ const enum SearchStatus {
     NEW
 }
 
+
 function ExcludedPluginsList({ search }: { search: string; }) {
-    const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
-        .filter(([name]) => name.toLowerCase().includes(search));
+    const matchingExcludedPlugins = Object.keys(ExcludedPlugins)
+        .filter(name => name.toLowerCase().includes(search));
 
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
-        desktop: "Discord Desktop app or Vesktop",
-        discordDesktop: "Discord Desktop app",
-        vesktop: "Vesktop app",
-        web: "Vesktop app and the Web version of Discord",
-        dev: "Developer version of Vencord"
-    };
-
-    return (
+    return matchingExcludedPlugins.length ? matchingExcludedPlugins.map(name => (
+        <UnavailablePluginCard
+            name={name}
+            description=""
+            key={name}
+            isMissing={true}
+        />
+    )) : (
         <Text variant="text-md/normal" className={Margins.top16}>
-            {matchingExcludedPlugins.length
-                ? <>
-                    <Forms.FormText>Are you looking for:</Forms.FormText>
-                    <ul>
-                        {matchingExcludedPlugins.map(([name, reason]) => (
-                            <li key={name}>
-                                <b>{name}</b>: Only available on the {ExcludedReasons[reason]}
-                            </li>
-                        ))}
-                    </ul>
-                </>
-                : "No plugins meet the search criteria."
-            }
+            No plugins meet the search criteria.
         </Text>
     );
 }
 
+export const showRestartAlert = (body: React.ReactNode) => Alerts.show({
+    title: "Restart required",
+    body,
+    confirmText: "Restart now",
+    cancelText: "Later!",
+    onConfirm: () => location.reload()
+});
+
+const depMap: Record<string, string[]> = {};
+for (const plugin in Plugins) {
+    const deps = Plugins[plugin].dependencies;
+    if (deps) {
+        for (const dep of deps) {
+            depMap[dep] ??= [];
+            depMap[dep].push(plugin);
+        }
+    }
+}
+
+export function isPluginRequired(plugin: Plugin) {
+    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d)) ?? [];
+    return {
+        status: plugin.required || dependents.length > 0,
+        dependents
+    };
+}
+
+interface PluginCardProps {
+    plugin: Plugin;
+    onRestartNeeded: (name: string, key: string) => void;
+    key: string;
+    required: { status: boolean; dependents: string[]; };
+    update?: () => void;
+    isNew?: boolean;
+}
+
+export function MakePluginCard({ plugin, onRestartNeeded, update, key, isNew, required: required }: PluginCardProps) {
+    return required.status ? (
+        <Tooltip text={required.dependents.length ? makeDependencyList(required.dependents) : "This plugin is required for Vencord to function."} key={plugin.name}>
+            {({ onMouseLeave, onMouseEnter }) =>
+                <PluginCard
+                    onMouseLeave={onMouseLeave}
+                    onMouseEnter={onMouseEnter}
+                    onRestartNeeded={onRestartNeeded}
+                    disabled={true}
+                    update={update}
+                    plugin={plugin}
+                    isNew={isNew}
+                    key={key}
+                />
+            }
+        </Tooltip>
+    ) : (
+        <PluginCard
+            onRestartNeeded={onRestartNeeded}
+            disabled={false}
+            update={update}
+            plugin={plugin}
+            isNew={isNew}
+            key={key}
+        />
+    );
+}
+
+
 function PluginSettings() {
-    const settings = useSettings();
     const changes = useMemo(() => new ChangeList<string>(), []);
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
-            Alerts.show({
-                title: "Restart required",
-                body: (
+            showRestartAlert(
+                (
                     <>
                         <p>The following plugins require a restart:</p>
                         <div>{changes.map((s, i) => (
@@ -122,25 +173,8 @@ function PluginSettings() {
                             </>
                         ))}</div>
                     </>
-                ),
-                confirmText: "Restart now",
-                cancelText: "Later!",
-                onConfirm: () => location.reload()
-            });
-    }, []);
-
-    const depMap = useMemo(() => {
-        const o = {} as Record<string, string[]>;
-        for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
-            if (deps) {
-                for (const dep of deps) {
-                    o[dep] ??= [];
-                    o[dep].push(plugin);
-                }
-            }
-        }
-        return o;
+                )
+            );
     }, []);
 
     const sortedPlugins = useMemo(() =>
@@ -206,38 +240,18 @@ function PluginSettings() {
 
         if (!pluginFilter(p)) continue;
 
-        const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
+        const onRestartNeeded = (name: string, key: string) => changes.handleChange(`${name}.${key}`);
+        const required = isPluginRequired(p);
 
-        if (isRequired) {
-            const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for Vencord to function."
-                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+        const card = MakePluginCard({
+            plugin: p,
+            onRestartNeeded,
+            isNew: newPlugins?.includes(p.name),
+            required,
+            key: p.name
+        });
 
-            requiredPlugins.push(
-                <Tooltip text={tooltipText} key={p.name}>
-                    {({ onMouseLeave, onMouseEnter }) => (
-                        <PluginCard
-                            onMouseLeave={onMouseLeave}
-                            onMouseEnter={onMouseEnter}
-                            onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
-                            disabled={true}
-                            plugin={p}
-                            key={p.name}
-                        />
-                    )}
-                </Tooltip>
-            );
-        } else {
-            plugins.push(
-                <PluginCard
-                    onRestartNeeded={(name, key) => changes.handleChange(`${name}.${key}`)}
-                    disabled={false}
-                    plugin={p}
-                    isNew={newPlugins?.includes(p.name)}
-                    key={p.name}
-                />
-            );
-        }
+        (required.status ? requiredPlugins : plugins).push(card);
     }
 
     return (
@@ -277,7 +291,11 @@ function PluginSettings() {
                         }
                     </div>
                 )
-                : <ExcludedPluginsList search={search} />
+                : (
+                    <div className={cl("unavailable-grid")}>
+                        <ExcludedPluginsList search={search} />
+                    </div>
+                )
             }
 
 
