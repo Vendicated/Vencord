@@ -181,7 +181,7 @@ export default definePlugin({
             // This is the thread "spine" that shows in the left
             find: "M0 15H2c0 1.6569",
             replacement: {
-                match: /mentionsCount:\i.+?null(?<=channel:(\i).+?)/,
+                match: /mentionsCount:\i.{0,50}?null(?<=channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
             }
         }
