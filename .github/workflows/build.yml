@@ -42,6 +42,7 @@ jobs:
                 pnpm generatePluginJson dist/plugins.json
                 pnpm generateEquicordPluginJson dist/equicordplugins.json
                 pnpm generateVencordPluginJson dist/vencordplugins.json
+                pnpm generateDevsList dist/devs.json
 
             - name: Collect files to be released
               run: |
