@@ -178,8 +178,7 @@ function generatePluginList() {
                 <Forms.FormText>We do not handle support for users who use 100+ plugins</Forms.FormText>
                 <Forms.FormText>issue could be plugin confliction</Forms.FormText>
                 <Forms.FormText>try removing some plugins and see if it fixes!</Forms.FormText>
-            </div>,
-            cancelText: "Okay continue"
+            </div>
         });
     }
 
