@@ -13,12 +13,12 @@ export type WindowShortcutOptions = {
 };
 
 export type KeybindShortcut = GlobalShortcut | WindowShortcut;
-export type ShortcutOptions = GlobalShortcutOptions | WindowShortcutOptions;
+export type KeybindOptions = GlobalShortcutOptions | WindowShortcutOptions;
 
 export type Keybind = {
     event: string;
     function: () => void;
-    options: ShortcutOptions;
+    options: KeybindOptions;
     global: boolean;
 };
 
