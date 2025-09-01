@@ -123,8 +123,8 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                    replace: "$1$self.wrapMenu($2)"
+                    match: /(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
+                    replace: "$self.wrapMenu($1)"
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
@@ -139,11 +139,11 @@ export default definePlugin({
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
     //
-    // Thus, we sanity check webpack modules & do this really hacky try catch to hopefully prevent hard crashes if something goes wrong.
-    // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
-    // not in children
+    // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
-        if (!FocusLock || !ComponentDispatch || !Classes) {
+        try {
+            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch, Classes].forEach(e => e.test);
+        } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;
         }

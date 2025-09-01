@@ -27,6 +27,7 @@ import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
+import { SeekBar } from "./SeekBar";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = classNameFactory("vc-spotify-");
@@ -159,7 +160,7 @@ const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
 
-function SeekBar() {
+function SpotifySeekBar() {
     const { duration } = SpotifyStore.track!;
 
     const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
@@ -180,6 +181,12 @@ function SeekBar() {
         }
     }, [storePosition, isSettingPosition, isPlaying]);
 
+    const onChange = (v: number) => {
+        if (isSettingPosition) return;
+        setPosition(v);
+        seek(v);
+    };
+
     return (
         <div id={cl("progress-bar")}>
             <Forms.FormText
@@ -189,16 +196,13 @@ function SeekBar() {
             >
                 {msToHuman(position)}
             </Forms.FormText>
-            <Menu.MenuSliderControl
+            <SeekBar
+                initialValue={position}
                 minValue={0}
                 maxValue={duration}
-                value={position}
-                onChange={(v: number) => {
-                    if (isSettingPosition) return;
-                    setPosition(v);
-                    seek(v);
-                }}
-                renderValue={msToHuman}
+                onValueChange={onChange}
+                asValueChanges={onChange}
+                onValueRender={msToHuman}
             />
             <Forms.FormText
                 variant="text-xs/medium"
@@ -307,8 +311,8 @@ function Info({ track }: { track: Track; }) {
                     {track.name}
                 </Forms.FormText>
                 {track.artists.some(a => a.name) && (
-                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                        by&nbsp;
+                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                        <span className={cl("song-info-prefix")}>by&nbsp;</span>
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
                                 <span
@@ -325,8 +329,8 @@ function Info({ track }: { track: Track; }) {
                     </Forms.FormText>
                 )}
                 {track.album.name && (
-                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                        on&nbsp;
+                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                        <span className={cl("song-info-prefix")}>on&nbsp;</span>
                         <span
                             id={cl("album-title")}
                             className={cl("album")}
@@ -381,7 +385,7 @@ export function Player() {
     return (
         <div id={cl("player")} style={exportTrackImageStyle}>
             <Info track={track} />
-            <SeekBar />
+            <SpotifySeekBar />
             <Controls />
         </div>
     );

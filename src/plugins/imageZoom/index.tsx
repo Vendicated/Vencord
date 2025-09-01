@@ -18,11 +18,11 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { Menu, ReactDOM } from "@webpack/common";
+import { Logger } from "@utils/Logger";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
+import { createRoot, Menu } from "@webpack/common";
 import { JSX } from "react";
 import type { Root } from "react-dom/client";
 
@@ -163,10 +163,24 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".contain,SCALE_DOWN:",
+            find: ".dimensionlessImage,",
+            replacement: [
+                {
+                    match: /className:\i\.media,/,
+                    replace: `id:"${ELEMENT_ID}",$&`
+                },
+                {
+                    match: /(?<=null!=(\i)\?.{0,20})\i\.\i,{children:\1/,
+                    replace: "'div',{onClick:e=>e.stopPropagation(),children:$1"
+                }
+            ]
+        },
+        // Make media viewer options not hide when zoomed in with the default Discord feature
+        {
+            find: '="FOCUS_SENSITIVE",',
             replacement: {
-                match: /\.slide,\i\),/g,
-                replace: `$&id:"${ELEMENT_ID}",`
+                match: /(?<=\.hidden]:)\i/,
+                replace: "false"
             }
         },
 
@@ -218,12 +232,16 @@ export default definePlugin({
     },
 
     renderMagnifier(instance) {
-        if (instance.props.id === ELEMENT_ID) {
-            if (!this.currentMagnifierElement) {
-                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
-                this.root = ReactDOM.createRoot(this.element!);
-                this.root.render(this.currentMagnifierElement);
+        try {
+            if (instance.props.id === ELEMENT_ID) {
+                if (!this.currentMagnifierElement) {
+                    this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                    this.root = createRoot(this.element!);
+                    this.root.render(this.currentMagnifierElement);
+                }
             }
+        } catch (error) {
+            new Logger("ImageZoom").error("Failed to render magnifier:", error);
         }
     },
 
