@@ -13,8 +13,14 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "@vencord/discord-types";
 import { RelationshipStore } from "@webpack/common";
 
+export const enum ChannelType {
+    DM = 1,
+    GROUP_DM = 3
+}
+
 interface UsernameProps {
     author: { nick: string; authorId: string; };
+    channel: { type: number; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
@@ -31,15 +37,14 @@ const settings = definePluginSettings({
             { label: "Username only", value: "user" },
         ],
     },
-    friendNicknames: {
-        type: OptionType.BOOLEAN,
-        description: "Prefer friend nicknames over global display names",
-        default: false
-    },
-    friendNicknamesTakePriority: {
-        type: OptionType.BOOLEAN,
-        description: "Friend nicknames take priority over server nicknames",
-        default: false
+    nicknames: {
+        type: OptionType.SELECT,
+        description: "How should nickname sources be prioritized",
+        options: [
+            { label: "Show friend nicknames in direct messages only", value: "dms", default: true },
+            { label: "Always use friend nicknames in servers", value: "always" },
+            { label: "Prefer server nicknames over friend nicknames", value: "fallback" }
+        ]
     },
     displayNames: {
         type: OptionType.BOOLEAN,
@@ -69,7 +74,7 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
+    renderUsername: ErrorBoundary.wrap(({ author, channel, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
             const user = userOverride ?? message.author;
             let { username } = user;
@@ -77,9 +82,12 @@ export default definePlugin({
                 username = user.globalName || username;
 
             let { nick } = author;
-            if (settings.store.friendNicknames) {
-                const friend = RelationshipStore.getNickname(author.authorId);
-                nick = settings.store.friendNicknamesTakePriority ? (friend ?? nick) : (nick ?? friend);
+            const friendNickname = RelationshipStore.getNickname(author.authorId);
+
+            if (friendNickname) {
+                const isDM = channel.type === ChannelType.DM || channel.type === ChannelType.GROUP_DM;
+                if (settings.store.nicknames === "always" || (settings.store.nicknames === "dms" && isDM))
+                    nick = friendNickname;
             }
 
             const prefix = withMentionPrefix ? "@" : "";
