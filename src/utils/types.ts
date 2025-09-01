@@ -19,8 +19,7 @@
 import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonData } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { Keybind } from "@api/Keybinds/keybindsManager";
-import { WindowShortcut } from "@api/Keybinds/windowManager";
+import { Keybind, KeybindShortcut } from "@api/Keybinds/types";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
@@ -344,8 +343,6 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
-
-export type KeybindShortcut = GlobalShortcut | WindowShortcut;
 export interface PluginSettingKeybindDef {
     type: OptionType.KEYBIND;
     /**

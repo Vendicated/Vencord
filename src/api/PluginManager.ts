@@ -20,7 +20,7 @@ import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
-import { enableKeybind, registerKeybind, unregisterKeybind } from "@api/Keybinds";
+import keybindsManager from "@api/Keybinds/keybindsManager";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
@@ -224,8 +224,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
                     continue;
                 }
                 const keys = settings[name]?.[keybind.event] ?? [];
-                if (registerKeybind(keybind, keys)) {
-                    enableKeybind(keybind.event, keybind.global);
+                if (keybindsManager.registerKeybind(keybind, keys)) {
+                    keybindsManager.enableKeybind(keybind.event, keybind.global);
                 }
             } catch (e) {
                 logger.error(`Failed to register keybind ${keybind.event}\n`, e);
@@ -305,7 +305,10 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         logger.debug("Unregistering keybinds of plugin", name);
         for (const keybind of keybinds) {
             try {
-                unregisterKeybind(keybind.event, keybind.global);
+                if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
+                    continue;
+                }
+                keybindsManager.unregisterKeybind(keybind.event, keybind.global);
             } catch (e) {
                 logger.error(`Failed to unregister keybind ${keybind.event}\n`, e);
                 return false;

@@ -5,40 +5,75 @@
  */
 
 import { DiscordUtils, GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
+import { findByCodeLazy } from "webpack";
 
-let discordUtils: undefined | DiscordUtils; // TODO: Maybe check if IS_VESKTOP and use its global keybinds api
+import { KeybindManager } from "./types";
 
-function initDiscordUtils() {
-    if (!IS_DISCORD_DESKTOP || discordUtils || !DiscordNative) return;
-    discordUtils = DiscordNative.nativeModules.requireModule("discord_utils");
-}
+// Discord mapping from keycodes array to string (mouse, keyboard, gamepad)
+const keycodesToString = findByCodeLazy(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON") as (keys: GlobalShortcut) => string;
 
-export function isAvailable() {
-    initDiscordUtils();
-    return !!discordUtils;
-}
+export default new class GlobalManager implements KeybindManager {
+    private discordUtils: undefined | DiscordUtils; // TODO: Maybe check if IS_VESKTOP and use its global keybinds api
+    private lastGlobalId: number = 1000;
+    private mapIdToEvent: Map<string, number> = new Map();
 
-export function getDiscordUtils() {
-    initDiscordUtils();
-    return discordUtils;
-}
+    private initDiscordUtils() {
+        if (!IS_DISCORD_DESKTOP || this.discordUtils || !DiscordNative) return;
+        this.discordUtils = DiscordNative.nativeModules.requireModule("discord_utils");
+    }
 
-// From bd key registration
-function newKeysInstance(keys: GlobalShortcut): GlobalShortcut {
-    return keys.map(e => {
-        const [t, n, r] = e;
-        return typeof r === "string" ? [t, n, r] : [t, n];
-    });
-}
+    // From discord key registration
+    private newKeysInstance(keys: GlobalShortcut): GlobalShortcut {
+        return keys.map(e => {
+            const [t, n, r] = e;
+            return typeof r === "string" ? [t, n, r] : [t, n];
+        });
+    }
 
-export function registerKeybind(id: number, keys: GlobalShortcut, callback: () => void, options: GlobalShortcutOptions) {
-    initDiscordUtils();
-    if (!discordUtils) return;
-    discordUtils.inputEventRegister(id, newKeysInstance(keys), callback, options);
-}
+    private getIdForEvent(event: string): number {
+        const found = this.mapIdToEvent.get(event);
+        if (!found) {
+            const id = this.lastGlobalId++;
+            this.mapIdToEvent.set(event, id);
+            return id;
+        } else {
+            return found;
+        }
+    }
 
-export function unregisterKeybind(id: number) {
-    initDiscordUtils();
-    if (!discordUtils) return;
-    discordUtils.inputEventUnregister(id);
-}
+    public isAvailable() {
+        this.initDiscordUtils();
+        return !!this.discordUtils;
+    }
+
+    public getDiscordUtils() {
+        this.initDiscordUtils();
+        return this.discordUtils;
+    }
+
+    public registerKeybind(event: string, keys: GlobalShortcut, callback: () => void, options: GlobalShortcutOptions) {
+        this.initDiscordUtils();
+        if (!this.discordUtils) return;
+        const id = this.getIdForEvent(event);
+        if (!id) return;
+        this.discordUtils.inputEventRegister(id, this.newKeysInstance(keys), callback, options);
+    }
+
+    public unregisterKeybind(event: string) {
+        this.initDiscordUtils();
+        if (!this.discordUtils) return;
+        const id = this.mapIdToEvent.get(event);
+        if (!id) return;
+        this.discordUtils.inputEventUnregister(id);
+    }
+
+    public inputCaptureKeys(inputId: string, callback: (keys: GlobalShortcut) => void): () => void {
+        this.initDiscordUtils();
+        if (!this.discordUtils) return () => { };
+        return this.discordUtils.inputCaptureRegisterElement(inputId, callback);
+    }
+
+    public keysToString(keys: GlobalShortcut): string {
+        return keycodesToString(keys).toUpperCase();
+    }
+};
