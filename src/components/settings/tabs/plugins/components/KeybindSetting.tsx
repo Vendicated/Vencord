@@ -30,6 +30,7 @@ import { GlobalShortcut } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { React, Text, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
+import { logger } from "..";
 import { SettingProps, SettingsSection } from "./Common";
 
 const ButtonClasses = findByPropsLazy("button", "sm", "secondary", "hasText", "buttonChildrenWrapper");
@@ -43,7 +44,7 @@ export const cl = classNameFactory("vc-plugins-setting-keybind");
 const keycodesToString = findByCodeLazy(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON") as (keys: GlobalShortcut) => string;
 
 function getText(keys: KeybindShortcut, isGlobal: boolean) {
-    return isGlobal ? keycodesToString(keys as GlobalShortcut).toLocaleUpperCase() : (keys as WindowShortcut).join("+").toLocaleUpperCase();
+    return isGlobal ? keycodesToString(keys as GlobalShortcut).toLocaleUpperCase() : (keys as WindowShortcut).map(key => key === " " ? "SPACE" : key.toLocaleUpperCase()).join("+");
 }
 
 export function KeybindSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionKeybind>) {
@@ -134,28 +135,8 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
     disabled: boolean;
 }) {
     const [recording, setRecording] = useState(false);
-    const inputRef = useRef<HTMLInputElement>(null);
     const stopCapture = useRef<() => void | undefined>(undefined);
 
-    useEffect(() => {
-        if (recording) {
-            inputRef.current?.focus();
-            startRecording();
-        } else {
-            stopRecording();
-            inputRef.current?.blur();
-        }
-    }, [recording]);
-
-    function handleOnblur() {
-        stopRecording();
-    }
-
-    function updateRecording(e: React.MouseEvent<HTMLButtonElement>) {
-        e.preventDefault();
-        e.stopPropagation();
-        setRecording(!recording);
-    }
     useEffect(() => {
         return () => {
             if (stopCapture.current) {
@@ -165,12 +146,19 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
         };
     }, []);
 
-    function handleKeybindCapture(keys: KeybindShortcut) {
-        if (disabled) onChange([]);
-        stopRecording();
-        if (keys.length > 0) {
-            onChange(keys);
+    function updateRecording(e: React.MouseEvent<HTMLButtonElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!recording) {
+            startRecording();
+        } else {
+            stopRecording();
         }
+    }
+
+    function handleKeybindCapture(keys: KeybindShortcut) {
+        stopRecording();
+        onChange(keys);
     }
 
     function startRecording() {
@@ -187,7 +175,7 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
     return (
         <div className={classes(recording ? RecorderClasses.recording : "", RecorderClasses.recorderContainer, disabled ? RecorderClasses.containerDisabled : "")}>
             <div className={classes(RecorderClasses.recorderLayout, FlexClasses.flex, FlexClasses.horizontal)}>
-                <FocusedInput id={id} onBlur={handleOnblur} recording={recording} disabled={disabled} value={getText(defaultKeys, global)} />
+                <FocusedInput id={id} onBlur={stopRecording} recording={recording} disabled={disabled} value={getText(defaultKeys, global)} />
                 <div className={classes(ContainersClasses.buttonContainer)}>
                     <button onClick={updateRecording} className={classes(ButtonClasses.button, ButtonClasses.sm, recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary, ButtonClasses.hasText)} >
                         <div className={classes(ButtonClasses.buttonChildrenWrapper)}>
@@ -219,33 +207,40 @@ function FocusedInput({ id, onBlur, recording, disabled, value }) {
     );
 }
 
-function inputCaptureKeysWindow( // TODO: fix keys detection
+function inputCaptureKeysWindow(
     id: string,
     callback: (keys: WindowShortcut) => void
 ) {
     const keys: string[] = [];
-
     const inputElement = document.getElementById(id) as HTMLInputElement;
+    let timeout: NodeJS.Timeout | undefined = undefined;
 
+    const startRecording = () => {
+        inputElement.addEventListener("keydown", keydownHandler, { capture: true });
+        inputElement.addEventListener("keyup", keyupHandler, { capture: true });
+        inputElement.addEventListener("mousedown", keydownHandler, { capture: true });
+        inputElement.addEventListener("mouseup", keyupHandler, { capture: true });
+    };
     const stopRecording = () => {
-        recording = false;
-        clearTimeout(timeoutId);
+        stopTimeout();
         inputElement.removeEventListener("keydown", keydownHandler, { capture: true });
         inputElement.removeEventListener("keyup", keyupHandler, { capture: true });
         inputElement.removeEventListener("mousedown", keydownHandler, { capture: true });
-        inputElement.removeEventListener("mouseup", keydownHandler, { capture: true });
+        inputElement.removeEventListener("mouseup", keyupHandler, { capture: true });
     };
 
-    const invokeCallback = (keys: WindowShortcut) => {
-        try {
-            callback(keys);
-        } catch (error) {
-            console.error("Error in callback:", error);
-        }
+    const startTimeout = () => {
+        timeout = setTimeout(() => {
+            invokeCallback([...keys]);
+            keys.length = 0;
+        }, 5 * 1000);
+    };
+    const stopTimeout = () => {
+        clearTimeout(timeout);
+        keys.length = 0;
     };
 
     const keydownHandler = (event: KeyboardEvent | MouseEvent) => { // TODO: add gamepad detection
-        if (!recording) return;
         event.stopImmediatePropagation();
         event.stopPropagation();
         event.preventDefault();
@@ -266,34 +261,28 @@ function inputCaptureKeysWindow( // TODO: fix keys detection
             keys.length = 0;
         }
     };
-
     const keyupHandler = (event: KeyboardEvent | MouseEvent) => { // TODO: add gamepad detection
-        if (!recording) return;
         event.stopImmediatePropagation();
         event.stopPropagation();
         event.preventDefault();
         if (event.type === "keyup" && (event as KeyboardEvent).key === keys[keys.length - 1]) {
             invokeCallback([...keys]);
-            stopRecording();
         }
         if (event.type === "mouseup" && "Mouse" + (event as MouseEvent).button === keys[keys.length - 1]) {
             invokeCallback([...keys]);
-            stopRecording();
+        }
+    };
+    const invokeCallback = (keys: WindowShortcut) => {
+        try {
+            callback(keys);
+        } catch (error) {
+            logger.error("Error in callback:", error);
         }
     };
 
-    let recording = true;
-    inputElement.addEventListener("keydown", keydownHandler, { capture: true });
-    inputElement.addEventListener("keyup", keyupHandler, { capture: true });
-    inputElement.addEventListener("mousedown", keydownHandler, { capture: true });
-    inputElement.addEventListener("mouseup", keyupHandler, { capture: true });
-
-    const timeoutId = setTimeout(() => {
-        if (recording) {
-            invokeCallback([...keys]);
-            stopRecording();
-        }
-    }, 5 * 1000); // 5 seconds timeout
+    inputElement.addEventListener("focus", () => startTimeout());
+    inputElement.addEventListener("blur", () => stopTimeout());
+    startRecording();
 
     return stopRecording;
 }

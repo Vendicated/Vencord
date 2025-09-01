@@ -13,47 +13,6 @@ export type WindowShortcutOptions = {
 const keysDown = new Set<string>();
 const keysUp = new Set<string>();
 
-/* let gamepad: Gamepad | undefined;// TODO: find a way to dispatch gamepad clicks
-let polling = true;
-const buttonsStates: boolean[] = [];
-function pollGamepad() {
-    if (!polling || !gamepad) return;
-    for (let i = 0; i < gamepad.buttons.length; i++) {
-        if (buttonsStates[i] !== gamepad.buttons[i].pressed) {
-            buttonsStates[i] = gamepad.buttons[i].pressed;
-            document.dispatchEvent(new KeyboardEvent(buttonsStates[i] ? "keydown" : "keyup", {
-                key: "Gamepad" + i,
-                bubbles: false,
-            }));
-        }
-    }
-    requestAnimationFrame(pollGamepad);
-}
-window.addEventListener("gamepadconnected", (e: GamepadEvent) => {
-    console.log("Gamepad connected", e);
-    if (!gamepad) {
-        gamepad = e.gamepad;
-        for (let i = 0; i < gamepad.buttons.length; i++) {
-            buttonsStates[i] = gamepad.buttons[i].pressed;
-        }
-        pollGamepad();
-    }
-}, false);
-window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => {
-    console.log("Gamepad disconnected", e);
-    gamepad = undefined;
-    polling = false;
-}); */
-
-window.addEventListener("mousedown", (e: MouseEvent) => { // TODO: find a way to dispatch mouse3 and mouse4
-    keysDown.add("Mouse" + e.button);
-    keysUp.delete("Mouse" + e.button);
-});
-window.addEventListener("mouseup", (e: MouseEvent) => {
-    keysUp.add("Mouse" + e.button);
-    keysDown.delete("Mouse" + e.button);
-});
-
 window.addEventListener("keydown", (e: KeyboardEvent) => {
     keysDown.add(e.key);
     keysUp.delete(e.key);
@@ -62,6 +21,71 @@ window.addEventListener("keyup", (e: KeyboardEvent) => {
     keysUp.add(e.key);
     keysDown.delete(e.key);
 });
+window.addEventListener("mousedown", (e: MouseEvent) => { // TODO: find a way to dispatch mouse3 and mouse4
+    keysDown.add("Mouse" + e.button);
+    keysUp.delete("Mouse" + e.button);
+});
+window.addEventListener("mouseup", (e: MouseEvent) => { // TODO: find a way to dispatch mouse3 and mouse4
+    keysUp.add("Mouse" + e.button);
+    keysDown.delete("Mouse" + e.button);
+});
+
+/* let gamepadIndex: number | null = null; // TODO: find a way to dispatch gamepad clicks, atm this not works
+let polling = false;
+const buttonStates: boolean[] = [];
+
+function pollGamepad() {
+    if (!polling || gamepadIndex === null) return;
+
+    const gamepads = navigator.getGamepads();
+    const gp = gamepads && gamepads[gamepadIndex];
+
+    if (!gp) {
+        requestAnimationFrame(pollGamepad);
+        return;
+    }
+
+    if (buttonStates.length !== gp.buttons.length) {
+        for (let i = 0; i < gp.buttons.length; i++) {
+            buttonStates[i] = gp.buttons[i].pressed;
+        }
+    }
+    for (let i = 0; i < gp.buttons.length; i++) {
+        if (gp.buttons[i].pressed !== buttonStates[i]) {
+            document.dispatchEvent(new KeyboardEvent(gp.buttons[i].pressed ? "keydown" : "keyup", {
+                key: "Gamepad" + i,
+                code: "Gamepad" + i,
+                bubbles: true,
+                cancelable: true,
+                repeat: false,
+            })
+            );
+            buttonStates[i] = gp.buttons[i].pressed;
+        }
+    }
+    requestAnimationFrame(pollGamepad);
+}
+
+window.addEventListener("gamepadconnected", (e: GamepadEvent) => {
+    if (gamepadIndex === null) {
+        gamepadIndex = e.gamepad.index;
+        const gp = navigator.getGamepads()[gamepadIndex];
+        if (gp) {
+            for (let i = 0; i < gp.buttons.length; i++) {
+                buttonStates[i] = gp.buttons[i].pressed;
+            }
+        }
+        polling = true;
+        requestAnimationFrame(pollGamepad);
+    }
+});
+
+window.addEventListener("gamepaddisconnected", e => {
+    if (e.gamepad.index === gamepadIndex) {
+        gamepadIndex = null;
+        polling = false;
+    }
+}, false); */
 
 const mapCallbacks: Map<string, (event: KeyboardEvent | MouseEvent) => void> = new Map();
 
