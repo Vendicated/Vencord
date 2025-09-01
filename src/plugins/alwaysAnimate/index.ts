@@ -54,6 +54,14 @@ export default definePlugin({
                 match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
                 replace: "$1!0"
             }
+        },
+        {
+            // Nameplates
+            find: ".MINI_PREVIEW,[",
+            replacement: {
+                match: /animate:\i,loop:/,
+                replace: "animate:true,loop:true,_loop:"
+            }
         }
     ]
 });
