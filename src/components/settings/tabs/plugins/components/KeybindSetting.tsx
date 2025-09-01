@@ -20,11 +20,12 @@ import "./KeybindSetting.css";
 
 import { disableKeybind, enableKeybind, updateKeybind } from "@api/Keybinds";
 import { getDiscordUtils } from "@api/Keybinds/globalManager";
+import { WindowShortcut } from "@api/Keybinds/windowManager";
 import { classNameFactory } from "@api/Styles";
 import { ScreenshareIcon, WebsiteIcon } from "@components/Icons";
 import { Switch } from "@components/settings";
 import { classes } from "@utils/index";
-import { KeybindShortcut, OptionType, PluginOptionKeybind, WindowShortcut } from "@utils/types";
+import { KeybindShortcut, OptionType, PluginOptionKeybind } from "@utils/types";
 import { GlobalShortcut } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { React, Text, Tooltip, useEffect, useRef, useState } from "@webpack/common";
@@ -47,21 +48,20 @@ function getText(keys: KeybindShortcut, isGlobal: boolean) {
 
 export function KeybindSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionKeybind>) {
     const inputId = "vc-key-recorder-" + id;
-    const global = option.global ?? false;
+    const global = IS_DISCORD_DESKTOP && option.global; // TODO: maybe check for IS_VESKTOP
     const disabled = option.disabled || !Array.isArray(pluginSettings[id]) || pluginSettings[id].length === 0;
-    const clearable = option.clearable ?? true;
+    const value = disabled ? [] : pluginSettings[id] ?? option.default ?? [];
 
-    const [state, setState] = useState<KeybindShortcut>(pluginSettings[id] ?? []);
+    const [state, setState] = useState<KeybindShortcut>(value);
 
-    const [enabled, setEnabled] = useState<boolean>(IS_WEB && global ? false : !disabled);
-    const [error, setError] = useState<string | null>(IS_WEB && global ? "Global keybinds are not supported on web" : null);
+    const [enabled, setEnabled] = useState<boolean>(!disabled);
+    const [error, setError] = useState<string | null>(!IS_DISCORD_DESKTOP && global ? "Global keybinds are not supported on web, using window keybinds instead." : null);
 
     function handleChange(newValue: KeybindShortcut) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (option.type === OptionType.KEYBIND && newValue && isValid) {
             setError(null);
             updateKeybind(id, newValue, global);
-            toggleKeybind(enabled);
             setState(newValue);
             onChange(newValue);
         } else {
@@ -69,16 +69,13 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
         }
     }
 
-    function clearKeybind() {
-        if (!clearable) return;
-        updateKeybind(id, [], global);
-        handleChange([]);
+    function toggleEnabled(enabled: boolean) {
+        toggleKeybind(enabled);
+        setEnabled(enabled);
     }
 
-    function toggleKeybind(enable: boolean) {
-        if (IS_WEB && global) return;
-
-        if (enable) {
+    function toggleKeybind(enabled: boolean) {
+        if (enabled) {
             enableKeybind(id, global);
         } else {
             disableKeybind(id, global);
@@ -86,9 +83,9 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
         }
     }
 
-    function handleEnabledChange(enabled: boolean) {
-        toggleKeybind(enabled);
-        setEnabled(enabled);
+    function clearKeybind() {
+        updateKeybind(id, [], global);
+        handleChange([]);
     }
 
     return (
@@ -120,7 +117,7 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
                 <Tooltip text={enabled ? "Disable/Clear Keybind" : "Enable Keybind"}>
                     {({ onMouseEnter, onMouseLeave }) => (
                         <div className={cl("-switch")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                            <Switch checked={enabled} onChange={handleEnabledChange} />
+                            <Switch checked={enabled} onChange={toggleEnabled} />
                         </div>
                     )}
                 </Tooltip>
@@ -190,7 +187,7 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
     return (
         <div className={classes(recording ? RecorderClasses.recording : "", RecorderClasses.recorderContainer, disabled ? RecorderClasses.containerDisabled : "")}>
             <div className={classes(RecorderClasses.recorderLayout, FlexClasses.flex, FlexClasses.horizontal)}>
-                <input id={id} ref={inputRef} onBlur={handleOnblur} type="text" readOnly disabled={!recording} value={getText(defaultKeys, global)} placeholder="No Keybind Set" className={classes(RecorderClasses.keybindInput)} />
+                <FocusedInput id={id} onBlur={handleOnblur} recording={recording} disabled={disabled} value={getText(defaultKeys, global)} />
                 <div className={classes(ContainersClasses.buttonContainer)}>
                     <button onClick={updateRecording} className={classes(ButtonClasses.button, ButtonClasses.sm, recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary, ButtonClasses.hasText)} >
                         <div className={classes(ButtonClasses.buttonChildrenWrapper)}>
@@ -207,7 +204,22 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
     );
 }
 
-function inputCaptureKeysWindow(
+function FocusedInput({ id, onBlur, recording, disabled, value }) {
+    const inputRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        if (recording) {
+            inputRef.current?.focus();
+        } else {
+            inputRef.current?.blur();
+        }
+    }, [recording]);
+
+    return (
+        <input id={id} onBlur={onBlur} type="text" readOnly disabled={disabled} value={value} placeholder="No Keybind Set" className={classes(RecorderClasses.keybindInput)} ref={inputRef} />
+    );
+}
+
+function inputCaptureKeysWindow( // TODO: fix keys detection
     id: string,
     callback: (keys: WindowShortcut) => void
 ) {

@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { KeybindShortcut, WindowShortcut } from "@utils/types";
+import { KeybindShortcut } from "@utils/types";
 import { GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
 
 import * as globalManager from "./globalManager";
+import { WindowShortcut, WindowShortcutOptions } from "./windowManager";
 import * as windowManager from "./windowManager";
 
 export type Keybind = {
@@ -15,15 +16,6 @@ export type Keybind = {
     function: () => void;
     options: GlobalShortcutOptions | WindowShortcutOptions;
     global: boolean;
-};
-export type WindowShortcutOptions = {
-    keydown: boolean;
-    keyup: boolean;
-};
-export type KeybindWindow = {
-    event: string;
-    function: () => void;
-    options: WindowShortcutOptions;
 };
 
 export type InternalKeybind = Keybind & {

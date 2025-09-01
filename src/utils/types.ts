@@ -20,6 +20,7 @@ import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Keybind } from "@api/Keybinds/keybindsManager";
+import { WindowShortcut } from "@api/Keybinds/windowManager";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
@@ -323,18 +324,18 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
-export type WindowShortcut = string[];
+
 export type KeybindShortcut = GlobalShortcut | WindowShortcut;
 export interface PluginSettingKeybindDef {
     type: OptionType.KEYBIND;
-
+    /**
+     * If true, this keybind will be global (works outside of the app window).
+     */
     global: boolean;
-
-    clearable?: boolean;
-
+    /**
+     * If true, this keybind can be cleared by the user when it is disabled.
+     */
     default?: KeybindShortcut;
-
-    disabled?: boolean;
 }
 
 export interface IPluginOptionComponentProps {

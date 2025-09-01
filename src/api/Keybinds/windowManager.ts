@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { WindowShortcut } from "@utils/types";
-
-import { WindowShortcutOptions } from "./keybindsManager";
+export type WindowShortcut = string[];
+export type WindowShortcutOptions = {
+    keydown: boolean;
+    keyup: boolean;
+};
 
 const keysDown = new Set<string>();
 const keysUp = new Set<string>();
