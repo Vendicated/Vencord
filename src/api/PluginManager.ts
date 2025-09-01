@@ -216,9 +216,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         let warned = false;
         for (const keybind of keybinds) {
             try {
-                if (IS_WEB && keybind.global) {
+                if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
                     if (!warned) {
-                        logger.warn(`${name}: Global keybinds are not supported on web`);
+                        logger.warn(`${name}: Global keybinds are only supported on desktop`);
                         warned = true;
                     }
                     continue;

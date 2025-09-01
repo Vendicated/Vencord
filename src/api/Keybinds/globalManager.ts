@@ -8,19 +8,19 @@ import { DiscordUtils, GlobalShortcut, GlobalShortcutOptions } from "@vencord/di
 
 let discordUtils: undefined | DiscordUtils;
 
-export function getDiscordUtils() {
-    initDiscordUtils();
-    return discordUtils;
-}
-
 function initDiscordUtils() {
-    if (discordUtils || !DiscordNative) return;
+    if (!IS_DISCORD_DESKTOP || discordUtils || !DiscordNative) return;
     discordUtils = DiscordNative.nativeModules.requireModule("discord_utils");
 }
 
 export function isAvailable() {
     initDiscordUtils();
     return !!discordUtils;
+}
+
+export function getDiscordUtils() {
+    initDiscordUtils();
+    return discordUtils;
 }
 
 // From bd key registration
