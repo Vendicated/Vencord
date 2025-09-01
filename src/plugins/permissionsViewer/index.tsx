@@ -25,13 +25,13 @@ import { SafetyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Guild, GuildMember } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, useRef, UserStore } from "@webpack/common";
-import type { Guild, GuildMember } from "discord-types/general";
+import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, useRef, UserStore } from "@webpack/common";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
-import { getSortedRoles, sortPermissionOverwrites } from "./utils";
+import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
 
 const PopoutClasses = findByPropsLazy("container", "scroller", "list");
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
@@ -71,9 +71,9 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                 const { permissions, header } = match(type)
                     .returnType<{ permissions: RoleOrUserPermission[], header: string; }>()
                     .with(MenuItemParentType.User, () => {
-                        const member = GuildMemberStore.getMember(guildId, id!);
+                        const member = GuildMemberStore.getMember(guildId, id!)!;
 
-                        const permissions: RoleOrUserPermission[] = getSortedRoles(guild, member)
+                        const permissions: RoleOrUserPermission[] = getSortedRolesForMember(guild, member)
                             .map(role => ({
                                 type: PermissionType.Role,
                                 ...role
@@ -107,7 +107,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         };
                     })
                     .otherwise(() => {
-                        const permissions = Object.values(GuildStore.getRoles(guild.id)).map(role => ({
+                        const permissions = GuildRoleStore.getSortedRoles(guild.id).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));

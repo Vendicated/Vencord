@@ -10,8 +10,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildStore, SelectedGuildStore, useState } from "@webpack/common";
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
+import { GuildRoleStore, SelectedGuildStore, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     showAtSymbol: {
@@ -89,7 +89,7 @@ export default definePlugin({
         // Discord uses Role Mentions for uncached users because .... idk
         if (!roleId) return null;
 
-        const role = GuildStore.getRole(guildId, roleId);
+        const role = GuildRoleStore.getRole(guildId, roleId);
 
         if (!role?.icon) return <DefaultRoleIcon />;
 
