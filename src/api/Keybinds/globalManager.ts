@@ -10,7 +10,7 @@ import { findByCodeLazy } from "webpack";
 import { KeybindManager } from "./types";
 
 // Discord mapping from keycodes array to string (mouse, keyboard, gamepad)
-const keycodesToString = findByCodeLazy(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON") as (keys: GlobalShortcut) => string;
+const keycodesToString = IS_DISCORD_DESKTOP ? findByCodeLazy(".map(", ".KEYBOARD_KEY", ".KEYBOARD_MODIFIER_KEY", ".MOUSE_BUTTON", ".GAMEPAD_BUTTON") as (keys: GlobalShortcut) => string : (keys: GlobalShortcut) => keys.join("+");
 
 export default new class GlobalManager implements KeybindManager {
     private discordUtils: undefined | DiscordUtils; // TODO: Maybe check if IS_VESKTOP and use its global keybinds api
