@@ -6,7 +6,7 @@
 
 import { DiscordUtils, GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
 
-let discordUtils: undefined | DiscordUtils;
+let discordUtils: undefined | DiscordUtils; // TODO: Maybe check if IS_VESKTOP and use its global keybinds api
 
 function initDiscordUtils() {
     if (!IS_DISCORD_DESKTOP || discordUtils || !DiscordNative) return;
