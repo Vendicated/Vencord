@@ -63,7 +63,7 @@ export function shouldPlayMessage(message: ExtendedMessageJSON) {
     const mutedChannels = UserGuildSettingsStore.getMutedChannels(messageGuildId);
     const mutedGuilds = UserGuildSettingsStore.isMuted(messageGuildId);
 
-    if (settings.store.ttsMutedUsers.includes(messageAuthorId)
+    if (settings.store.mutedUsers.includes(messageAuthorId)
         || settings.store.blockBlockedUsers && usersBlocked.has(messageAuthorId)
         || settings.store.blockIgnoredUsers && usersIgnored.has(messageAuthorId)
         || settings.store.blockNotFriendusers && !usersFriends.has(messageAuthorId)
