@@ -4,4 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export * from "./keybindsManager";
+import keybindsManager from "./keybindsManager";
+
+export { keybindsManager };

@@ -19,14 +19,13 @@
 import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { Keybind } from "@api/Keybinds/keybindsManager";
-import { WindowShortcut } from "@api/Keybinds/windowManager";
+import { Keybind, KeybindShortcut } from "@api/Keybinds/types";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
-import { Command, FluxEvents, GlobalShortcut } from "@vencord/discord-types";
+import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
 
 // exists to export default definePlugin({...})
@@ -324,8 +323,6 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
-
-export type KeybindShortcut = GlobalShortcut | WindowShortcut;
 export interface PluginSettingKeybindDef {
     type: OptionType.KEYBIND;
     /**

@@ -4,100 +4,91 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { KeybindShortcut } from "@utils/types";
 import { GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
 
-import * as globalManager from "./globalManager";
-import { WindowShortcut, WindowShortcutOptions } from "./windowManager";
-import * as windowManager from "./windowManager";
+import globalManager from "./globalManager";
+import { InternalKeybind, Keybind, KeybindShortcut, WindowShortcut } from "./types";
+import windowManager from "./windowManager";
 
-export type Keybind = {
-    event: string;
-    function: () => void;
-    options: GlobalShortcutOptions | WindowShortcutOptions;
-    global: boolean;
-};
+export default new class KeybindsManager {
+    private keybindsGlobal: Map<string, InternalKeybind> = new Map();
+    private keybindsWindow: Map<string, InternalKeybind> = new Map();
 
-export type InternalKeybind = Keybind & {
-    id: number | undefined;
-    enabled: boolean;
-    keys: GlobalShortcut | WindowShortcut;
-    global: boolean;
-};
-
-let globalLastId = 1000;
-const keybindsGlobal: Map<string, InternalKeybind> = new Map();
-const keybindsWindow: Map<string, InternalKeybind> = new Map();
-
-// Overloads to ensure correct return type based on 'global'
-function getBinding(event: string, global: boolean): InternalKeybind | undefined {
-    return global ? keybindsGlobal.get(event) : keybindsWindow.get(event);
-}
-
-export function isNameAvailable(event: string, global: boolean): boolean {
-    return global ? !keybindsGlobal.has(event) : !keybindsWindow.has(event);
-}
-
-export function registerKeybind(binding: Keybind, keys: KeybindShortcut = []) {
-    if (!isNameAvailable(binding.event, binding.global)) return false;
-    if (binding.global) {
-        const id = globalLastId++;
-        keybindsGlobal.set(binding.event, { id: id, keys: (keys as GlobalShortcut), enabled: false, ...(binding as Keybind) });
-    } else {
-        keybindsWindow.set(binding.event, { id: undefined, keys: (keys as WindowShortcut), enabled: false, ...(binding as Keybind) });
+    isAvailable(global: boolean) {
+        return global ? globalManager.isAvailable() : windowManager.isAvailable();
     }
-    return true;
-}
 
-export function unregisterKeybind(event: string, global: boolean): boolean {
-    const binding = getBinding(event, global);
-    if (!binding) return false;
-    if (binding.enabled) {
-        disableKeybind(event, global);
+    inputCaptureKeys(inputId: string, callback: (keys: KeybindShortcut) => void, global: boolean) {
+        return global ? globalManager.inputCaptureKeys(inputId, callback) : windowManager.inputCaptureKeys(inputId, callback);
     }
-    return global ? keybindsGlobal.delete(event) : keybindsWindow.delete(event);
-}
 
-export function updateKeybind(event: string, keys: KeybindShortcut, global: boolean) {
-    const binding = getBinding(event, global);
-    if (!binding) return;
-    binding.keys = keys;
-    if (binding.enabled) {
-        disableKeybind(event, global);
+    keysToString(keys: KeybindShortcut, global: boolean): string {
+        return global ? globalManager.keysToString(keys as GlobalShortcut) : windowManager.keysToString(keys as WindowShortcut);
     }
-    enableKeybind(event, global);
-}
 
-export function isEnabled(event: string, global: boolean) {
-    const binding = getBinding(event, global);
-    return !!binding && binding.enabled;
-}
-
-export function enableKeybind(event: string, global: boolean) {
-    const binding = getBinding(event, global);
-    if (!binding) return;
-    if (binding.enabled || !binding.keys.length) return;
-    if (global) {
-        globalManager.registerKeybind(binding.id as number, binding.keys as GlobalShortcut, binding.function, binding.options as GlobalShortcutOptions);
-    } else {
-        windowManager.registerKeybind(binding.event, binding.keys as WindowShortcut, binding.function, binding.options);
+    private getBinding(event: string, global: boolean): InternalKeybind | undefined {
+        return global ? this.keybindsGlobal.get(event) : this.keybindsWindow.get(event);
     }
-    binding.enabled = true;
-}
 
-export function disableKeybind(name: string, global: boolean) {
-    if (global) {
-        if (!globalManager.isAvailable()) return;
-        const binding = getBinding(name, true);
+    private isEventAvailable(event: string, global: boolean): boolean {
+        return global ? !this.keybindsGlobal.has(event) : !this.keybindsWindow.has(event);
+    }
+
+    registerKeybind(binding: Keybind, keys: KeybindShortcut = []) {
+        if (!this.isEventAvailable(binding.event, binding.global)) return false;
+        if (binding.global) {
+            this.keybindsGlobal.set(binding.event, { keys: (keys as GlobalShortcut), enabled: false, ...(binding as Keybind) });
+        } else {
+            this.keybindsWindow.set(binding.event, { keys: (keys as WindowShortcut), enabled: false, ...(binding as Keybind) });
+        }
+        return true;
+    }
+
+    unregisterKeybind(event: string, global: boolean): boolean {
+        const binding = this.getBinding(event, global);
+        if (!binding) return false;
+        if (binding.enabled) {
+            this.disableKeybind(event, global);
+        }
+        return global ? this.keybindsGlobal.delete(event) : this.keybindsWindow.delete(event);
+    }
+
+    updateKeybind(event: string, keys: KeybindShortcut, global: boolean) {
+        const binding = this.getBinding(event, global);
         if (!binding) return;
-        if (!binding.enabled || !binding.id) return;
-        globalManager.unregisterKeybind(binding.id);
-        binding.enabled = false;
-    } else {
-        const binding = getBinding(name, false);
-        if (!binding) return;
-        if (!binding.enabled) return;
-        windowManager.unregisterKeybind(binding.event);
-        binding.enabled = false;
+        binding.keys = keys;
+        if (binding.enabled) {
+            this.disableKeybind(event, global);
+        }
+        this.enableKeybind(event, global);
     }
-}
+
+    enableKeybind(event: string, global: boolean) {
+        const binding = this.getBinding(event, global);
+        if (!binding) return;
+        if (binding.enabled || !binding.keys.length) return;
+        if (global) {
+            globalManager.registerKeybind(binding.event, binding.keys as GlobalShortcut, binding.function, binding.options as GlobalShortcutOptions);
+        } else {
+            windowManager.registerKeybind(binding.event, binding.keys as WindowShortcut, binding.function, binding.options);
+        }
+        binding.enabled = true;
+    }
+
+    disableKeybind(event: string, global: boolean) {
+        if (global) {
+            if (!globalManager.isAvailable()) return;
+            const binding = this.getBinding(event, true);
+            if (!binding) return;
+            if (!binding.enabled) return;
+            globalManager.unregisterKeybind(binding.event);
+            binding.enabled = false;
+        } else {
+            const binding = this.getBinding(event, false);
+            if (!binding) return;
+            if (!binding.enabled) return;
+            windowManager.unregisterKeybind(binding.event);
+            binding.enabled = false;
+        }
+    }
+};
