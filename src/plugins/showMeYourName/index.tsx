@@ -11,9 +11,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "@vencord/discord-types";
+import { RelationshipStore } from "@webpack/common";
 
 interface UsernameProps {
-    author: { nick: string; };
+    author: { nick: string; authorId: string; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
@@ -30,6 +31,16 @@ const settings = definePluginSettings({
             { label: "Username only", value: "user" },
         ],
     },
+    friendNicknames: {
+        type: OptionType.BOOLEAN,
+        description: "Prefer friend nicknames over global display names",
+        default: false
+    },
+    friendNicknamesTakePriority: {
+        type: OptionType.BOOLEAN,
+        description: "Friend nicknames take priority over server nicknames",
+        default: false
+    },
     displayNames: {
         type: OptionType.BOOLEAN,
         description: "Use display names in place of usernames",
@@ -45,7 +56,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
-    authors: [Devs.Rini, Devs.TheKodeToad],
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.rae],
     patches: [
         {
             find: '="SYSTEM_TAG"',
@@ -65,7 +76,12 @@ export default definePlugin({
             if (settings.store.displayNames)
                 username = user.globalName || username;
 
-            const { nick } = author;
+            let { nick } = author;
+            if (settings.store.friendNicknames) {
+                const friend = RelationshipStore.getNickname(author.authorId);
+                nick = settings.store.friendNicknamesTakePriority ? (friend ?? nick) : (nick ?? friend);
+            }
+
             const prefix = withMentionPrefix ? "@" : "";
 
             if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
