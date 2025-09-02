@@ -26,7 +26,6 @@ import system from "./commands/system";
 import text from "./commands/text";
 import time from "./commands/time";
 
-
 migratePluginSettings("MoreCommands", "CuteAnimeBoys", "CuteNekos", "CutePats", "Slap");
 export default definePlugin({
     name: "MoreCommands",
