@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
-import { IPluginOptionComponentProps, OptionType } from "@utils/types";
+import { IPluginOptionComponentProps, OptionType, PluginSettingComponentDef } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { Button, Flex, Select, Text, TextInput } from "webpack/common/components";
 import { useEffect, useState } from "webpack/common/react";
@@ -39,6 +39,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Enables/Disables the User Announcement when join/leaves the channel.",
+    },
+    userAnnouncementText: {
+        type: OptionType.STRING,
+        default: "{{{USERNAME}}} {{{JOINED|LEFT}}}",
+        description: "The text that will be read when a user joins the channel.",
     },
     enableMessageReading: {
         type: OptionType.BOOLEAN,
@@ -282,7 +287,7 @@ function DropdownSourceAndVoices({ }) {
     );
 }
 
-function DropdownButtonGroup({ setValue, option }: IPluginOptionComponentProps) {
+function DropdownButtonGroup({ setValue, option }: IPluginOptionComponentProps & { option: PluginSettingComponentDef; }) {
     const [selectedOption, setSelectedOption] = useState("");
     const { id } = option.componentProps;
 
@@ -359,7 +364,7 @@ function PreviewTTS() {
             <Button
                 onClick={() => {
                     if (!isPlaying) {
-                        AudioPlayer.startTTS(text, true);
+                        AudioPlayer.enqueueTTSMessage(text, "preview");
                         AudioPlayer.stopCurrentTTS();
                     }
                     setIsPlaying(!isPlaying);

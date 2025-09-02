@@ -11,7 +11,7 @@ import { Menu, SelectedGuildStore } from "@webpack/common";
 
 import settings from "../settings";
 import AudioPlayer from "./AudioPlayer";
-import { getUserName } from "./utils";
+import { getPatchedAnnouncement } from "./utils";
 
 const TTSIcon = findByCodeLazy('"evenodd",', '"M12 22a10 10 0 1');
 
@@ -49,7 +49,7 @@ export const PatchChannelContextMenu: NavContextMenuPatchCallback = (children, {
     );
 };
 export const PatchUserContextMenu: NavContextMenuPatchCallback = (children, { user, channel }: { user: User; channel: Channel; }) => {
-    const groupUser = findGroupChildrenByChildId(["mute"], children);
+    const groupUser = findGroupChildrenByChildId(["mute"], children) ?? findGroupChildrenByChildId(["block"], children) ?? findGroupChildrenByChildId(["user-profile"], children);
     const groupChannel = findGroupChildrenByChildId(["mute-channel", "unmute-channel"], children);
 
     groupUser?.push(
@@ -62,7 +62,7 @@ export const PatchUserContextMenu: NavContextMenuPatchCallback = (children, { us
         <Menu.MenuItem
             id="bettertts-speak-announcement"
             label="Speak Announcement"
-            action={() => AudioPlayer.startTTS(`${getUserName(user.id, SelectedGuildStore.getGuildId())} joined`, true)}
+            action={() => AudioPlayer.enqueueTTSMessage(getPatchedAnnouncement(true, user.id, SelectedGuildStore.getGuildId()), "user")}
             icon={TTSIcon}
         />
     );

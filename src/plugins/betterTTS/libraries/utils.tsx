@@ -104,7 +104,7 @@ export function shouldPlayMessage(message: ExtendedMessageJSON) {
     return false;
 }
 
-export function getUserName(userId, guildId) {
+export function getUserName(userId: string, guildId?: string) {
     const user = UserStore.getUser(userId);
     switch (settings.store.messageNamesReading) {
         case "userName":
@@ -122,6 +122,12 @@ export function getUserName(userId, guildId) {
                 return RelationshipStore.getNickname(userId) ?? user.globalName ?? user.username;
             }
     }
+}
+
+export function getPatchedAnnouncement(joined: boolean, userId: string, guildId?: string) {
+    return settings.store.userAnnouncementText
+        .replace(/{{{USERNAME}}}/g, getUserName(userId, guildId))
+        .replace(/{{{(\w+)\|(\w+)}}}/g, (match, j, l) => joined ? j : l);
 }
 
 export function getPatchedContent(message: ExtendedMessageJSON, guildId: string | undefined) {
@@ -219,7 +225,7 @@ export function updateToggleKeys(keys: string[]) {
     }
 }
 
-export function onKeyDown(event) {
+export function onKeyDown(event: KeyboardEvent) {
     if (keyShortcut
         && event.ctrlKey === keyShortcut.ctrlKey
         && event.shiftKey === keyShortcut.shiftKey

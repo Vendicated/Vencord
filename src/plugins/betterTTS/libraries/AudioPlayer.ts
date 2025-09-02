@@ -49,13 +49,17 @@ export const nameToInterface: Record<string, TTSSourceInterface<any>> = {
 };
 
 export default new class AudioPlayer {
+    usersCache: Map<string, HTMLAudioElement> = new Map();
+
     sourceInterface: TTSSourceInterface<any> = DiscordTTS;
 
-    priorityMessages: string[] = [];
+    previewMessages: string[] = [];
+    userAnnouncements: string[] = [];
     normalMessages: string[] = [];
 
     isPlaying = false;
     isPriority = false;
+    usingCache = false;
     playingText = "";
     media: HTMLAudioElement | SpeechSynthesisUtterance | undefined;
 
@@ -76,6 +80,7 @@ export default new class AudioPlayer {
             voice = this.sourceInterface.getDefaultVoice();
         }
         this.sourceInterface.setVoice(voice);
+        this.usersCache.clear();
     }
 
     updateRate(rate: number) {
@@ -98,13 +103,12 @@ export default new class AudioPlayer {
             this.media.volume = clamp(volume, 0, 1);
     }
 
-    startTTS(text: string, priority: boolean = false) {
+    enqueueTTSMessage(text: string, type: "preview" | "user" | "message") {
         if (!text) return;
-        if (priority) {
-            this.priorityMessages.push(text);
-            /* if (!this.isPriority) {
-                this.stopCurrentTTS();
-            } */
+        if (type === "preview") {
+            this.previewMessages.push(text);
+        } else if (type === "user") {
+            this.userAnnouncements.push(text);
         } else {
             this.normalMessages.push(text);
         }
@@ -126,7 +130,8 @@ export default new class AudioPlayer {
 
     stopTTS() {
         this.isPlaying = false;
-        this.priorityMessages = [];
+        this.previewMessages = [];
+        this.userAnnouncements = [];
         this.normalMessages = [];
         this.stopCurrentTTS();
     }
@@ -135,7 +140,7 @@ export default new class AudioPlayer {
         setTimeout(() => {
             this.playingText = "";
             this.media = undefined;
-            if (this.priorityMessages.length > 0 || this.normalMessages.length > 0) {
+            if (this.previewMessages.length > 0 || this.userAnnouncements.length > 0 || this.normalMessages.length > 0) {
                 this.playTTS();
             } else {
                 this.isPlaying = false;
@@ -152,7 +157,7 @@ export default new class AudioPlayer {
         } else if (this.media instanceof SpeechSynthesisUtterance) {
             this.media.rate = this.rate;
             this.media.volume = clamp(this.volume, 0, 1);
-            this.media.onend = () => this.playNextTTS;
+            this.media.onend = () => this.playNextTTS();
             speechSynthesis.speak(this.media);
         } else {
             this.playNextTTS();
@@ -160,16 +165,28 @@ export default new class AudioPlayer {
     }
 
     playTTS() {
-        this.isPriority = this.priorityMessages.length > 0;
-        this.playingText = this.isPriority ? this.priorityMessages.shift() || "" : this.normalMessages.shift() || "";
+        this.isPriority = this.previewMessages.length > 0;
+        this.usingCache = this.userAnnouncements.length > 0;
+        this.playingText = this.isPriority ? this.previewMessages.shift() || "" : this.usingCache ? this.userAnnouncements.shift() || "" : this.normalMessages.shift() || "";
         if (this.playingText) {
+            if (this.usingCache) {
+                const cachedAudio = this.usersCache.get(this.playingText);
+                if (cachedAudio) {
+                    this.media = cachedAudio;
+                    this.playAudio();
+                    return;
+                }
+            }
             this.sourceInterface.getMedia(this.playingText).then(media => {
+                if (this.usingCache) this.usersCache.set(this.playingText, media);
                 this.media = media;
                 this.playAudio();
             }).catch(error => {
                 console.error("Error getting media:", error);
                 this.playNextTTS();
             });
+        } else {
+            this.stopCurrentTTS();
         }
     }
 };
