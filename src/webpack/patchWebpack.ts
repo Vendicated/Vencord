@@ -10,10 +10,11 @@ import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
 import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
+import { WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
+import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
 import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
-import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory, WebpackRequire } from "./wreq.d";
 
 export const patches = [] as Patch[];
 
@@ -106,7 +107,7 @@ define(Function.prototype, "m", {
 
         const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
 
-        // Currently, sentry and libDiscore Webpack instances are not meant to be patched.
+        // Currently, sentry and libdiscore Webpack instances are not meant to be patched.
         // As an extra measure, take advatange of the fact their files include the names and return early if it's one of them.
         // Later down we also include other measures to avoid patching them.
         if (["sentry", "libdiscore"].some(name => fileName?.toLowerCase()?.includes(name))) {
@@ -123,7 +124,7 @@ define(Function.prototype, "m", {
                 define(this, "p", { value: bundlePath });
                 clearTimeout(bundlePathTimeout);
 
-                // libDiscore init Webpack instance always returns a constanst string for the js filename of a chunk.
+                // libdiscore init Webpack instance always returns a constant string for the js filename of a chunk.
                 // In that case, avoid patching this instance,
                 // as it runs before the main Webpack instance and will make the WebpackRequire fallback not work properly, or init an wrongful main WebpackRequire.
                 if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]/.exec(String(this.u))) {

@@ -20,11 +20,12 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { FluxStore } from "@webpack/types";
+import { FluxStore } from "@vencord/discord-types";
+import { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
-import { AnyModuleFactory, AnyWebpackRequire, ModuleExports, WebpackRequire } from "./wreq";
+import { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
 
@@ -467,6 +468,29 @@ export function findStore(name: StoreNameFilter) {
                 fluxStores[storeName] = store;
             }
         }
+
+        try {
+            const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
+            const libdiscoreExports = getLibdiscore();
+
+            for (const libdiscoreExportName in libdiscoreExports) {
+                if (!libdiscoreExportName.endsWith("Store")) {
+                    continue;
+                }
+
+                const storeName = libdiscoreExportName;
+                const store = libdiscoreExports[storeName];
+
+                if (storeName === name) {
+                    res = store;
+                }
+
+                if (fluxStores[storeName] == null) {
+                    fluxStores[storeName] = store;
+                }
+            }
+
+        } catch { }
 
         if (res == null) {
             res = find(filters.byStoreName(name), { isIndirect: true });

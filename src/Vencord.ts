@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
+import "~plugins";
+
 export * as Api from "./api";
 export * as Components from "./components";
 export * as Plugins from "./plugins";
@@ -29,7 +32,8 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
-import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
+import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { IS_WINDOWS } from "@utils/constants";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";
@@ -134,7 +138,11 @@ async function init() {
 
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
         runUpdateCheck();
-        setInterval(runUpdateCheck, 1000 * 60 * 30); // 30 minutes
+
+        // this tends to get really annoying, so only do this if the user has auto-update without notification enabled
+        if (Settings.autoUpdate && !Settings.autoUpdateNotification) {
+            setInterval(runUpdateCheck, 1000 * 60 * 30); // 30 minutes
+        }
     }
 
     if (IS_DEV) {
@@ -157,7 +165,7 @@ init();
 document.addEventListener("DOMContentLoaded", () => {
     startAllPlugins(StartAt.DOMContentLoaded);
 
-    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
+    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
         document.head.append(Object.assign(document.createElement("style"), {
             id: "vencord-native-titlebar-style",
             textContent: "[class*=titleBar]{display: none!important}"

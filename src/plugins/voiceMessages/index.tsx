@@ -219,7 +219,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 />
 
                 {isUnsupportedFormat && (
-                    <Card className={`vc-plugins-restart-card ${Margins.top16}`}>
+                    <Card className={`vc-warning-card ${Margins.top16}`}>
                         <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
 
                         <Forms.FormText className={Margins.top8}>

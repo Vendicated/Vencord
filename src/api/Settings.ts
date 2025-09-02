@@ -268,7 +268,7 @@ type ResolveUseSettings<T extends object> = {
     [Key in keyof T]:
     Key extends string
     ? T[Key] extends Record<string, unknown>
-    // @ts-ignore "Type instantiation is excessively deep and possibly infinite"
+    // @ts-expect-error "Type instantiation is excessively deep and possibly infinite"
     ? UseSettings<T[Key]> extends string ? `${Key}.${UseSettings<T[Key]>}` : never
     : Key
     : never;
