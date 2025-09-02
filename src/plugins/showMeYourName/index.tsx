@@ -37,7 +37,7 @@ const settings = definePluginSettings({
             { label: "Username only", value: "user" },
         ],
     },
-    nicknames: {
+    friendNicknames: {
         type: OptionType.SELECT,
         description: "How should nickname sources be prioritized",
         options: [
@@ -86,7 +86,7 @@ export default definePlugin({
 
             if (friendNickname) {
                 const isDM = channel.type === ChannelType.DM || channel.type === ChannelType.GROUP_DM;
-                if (settings.store.nicknames === "always" || (settings.store.nicknames === "dms" && isDM))
+                if (settings.store.friendNicknames === "always" || (settings.store.friendNicknames === "dms" && isDM))
                     nick = friendNickname;
             }
 
