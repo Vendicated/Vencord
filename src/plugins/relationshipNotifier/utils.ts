@@ -24,7 +24,8 @@ import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
-import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
+import { RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
+import { ChannelType } from "@vencord/discord-types/enums";
 
 export const GuildAvailabilityStore = findStoreLazy("GuildAvailabilityStore") as FluxStore & {
     totalGuilds: number;
