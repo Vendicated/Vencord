@@ -11,16 +11,12 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, User } from "@vencord/discord-types";
+import { ChannelType } from "@vencord/discord-types/enums";
 import { RelationshipStore } from "@webpack/common";
-
-export const enum ChannelType {
-    DM = 1,
-    GROUP_DM = 3
-}
 
 interface UsernameProps {
     author: { nick: string; authorId: string; };
-    channel: { type: number; };
+    channel: { type: ChannelType; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
@@ -43,7 +39,8 @@ const settings = definePluginSettings({
         options: [
             { label: "Show friend nicknames in direct messages only", value: "dms", default: true },
             { label: "Always use friend nicknames in servers", value: "always" },
-            { label: "Prefer server nicknames over friend nicknames", value: "fallback" }
+            { label: "Prefer server nicknames over friend nicknames", value: "fallback" },
+            { label: "Never use friend nicknames", value: "never" }
         ]
     },
     displayNames: {
@@ -82,12 +79,11 @@ export default definePlugin({
                 username = user.globalName || username;
 
             let { nick } = author;
-            const friendNickname = RelationshipStore.getNickname(author.authorId);
 
-            if (friendNickname) {
+            if (settings.store.friendNicknames !== "never") {
                 const isDM = channel.type === ChannelType.DM || channel.type === ChannelType.GROUP_DM;
                 if (settings.store.friendNicknames === "always" || (settings.store.friendNicknames === "dms" && isDM))
-                    nick = friendNickname;
+                    nick = RelationshipStore.getNickname(author.authorId) || nick;
             }
 
             const prefix = withMentionPrefix ? "@" : "";
