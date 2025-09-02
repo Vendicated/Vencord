@@ -21,21 +21,15 @@ import "./styles.css";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { ChannelStore, Menu } from "@webpack/common";
-import { MessageSnapshot } from "@webpack/types";
-import { Message } from "discord-types/general";
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
-// discord-types is outdated.
-type ExtendedMessage = Message & {
-    messageSnapshots?: MessageSnapshot[];
-};
-
-const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: ExtendedMessage; }) => {
+const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     const content = getMessageContent(message);
     if (!content) return;
 
@@ -56,8 +50,8 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { m
 };
 
 
-function getMessageContent(message: ExtendedMessage) {
-    // Message snapshots is an array, which allows for nested snapshots, yet Discord does not do yet.
+function getMessageContent(message: Message) {
+    // Message snapshots is an array, which allows for nested snapshots, which Discord does not do yet.
     // no point collecting content or rewriting this to render in a certain way that makes sense
     // for something currently impossible.
     return message.content
@@ -82,7 +76,7 @@ export default definePlugin({
 
     renderChatBarButton: TranslateChatBarIcon,
 
-    renderMessagePopoverButton(message: ExtendedMessage) {
+    renderMessagePopoverButton(message: Message) {
         const content = getMessageContent(message);
         if (!content) return null;
 
