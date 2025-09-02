@@ -68,6 +68,14 @@ export default definePlugin({
                     return m;
                 }
             }
+        },
+        {
+            // Nameplates
+            find: ".MINI_PREVIEW,[",
+            replacement: {
+                match: /animate:\i,loop:/,
+                replace: "animate:true,loop:true,_loop:"
+            }
         }
     ]
 });
