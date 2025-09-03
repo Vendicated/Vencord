@@ -34,12 +34,11 @@ const settings = definePluginSettings({
     },
     friendNicknames: {
         type: OptionType.SELECT,
-        description: "Choose how friend nicknames are prioritised",
+        description: "How to prioritise friend nicknames over server nicknames",
         options: [
             { label: "Show friend nicknames only in direct messages", value: "dms", default: true },
             { label: "Prefer friend nicknames over server nicknames", value: "always" },
-            { label: "Prefer server nicknames over friend nicknames", value: "fallback" },
-            { label: "Never use friend nicknames", value: "never" }
+            { label: "Prefer server nicknames over friend nicknames", value: "fallback" }
         ]
     },
     displayNames: {
@@ -84,7 +83,7 @@ export default definePlugin({
 
             const friendNickname = RelationshipStore.getNickname(author.authorId);
 
-            if (friendNickname && friendNicknames !== "never") {
+            if (friendNickname) {
                 const shouldUseFriendNickname =
                     friendNicknames === "always" ||
                     (friendNicknames === "dms" && channel.isPrivate()) ||
