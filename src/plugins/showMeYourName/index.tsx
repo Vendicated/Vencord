@@ -10,13 +10,12 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, User } from "@vencord/discord-types";
-import { ChannelType } from "@vencord/discord-types/enums";
+import { Channel, Message, User } from "@vencord/discord-types";
 import { RelationshipStore } from "@webpack/common";
 
 interface UsernameProps {
     author: { nick: string; authorId: string; };
-    channel: { type: ChannelType; };
+    channel: Channel;
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
@@ -73,28 +72,37 @@ export default definePlugin({
 
     renderUsername: ErrorBoundary.wrap(({ author, channel, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
+            const { mode, friendNicknames, displayNames, inReplies } = settings.store;
+
             const user = userOverride ?? message.author;
             let { username } = user;
-            if (settings.store.displayNames)
+
+            if (displayNames)
                 username = user.globalName || username;
 
             let { nick } = author;
 
-            if (settings.store.friendNicknames !== "never") {
-                const isDM = channel.type === ChannelType.DM || channel.type === ChannelType.GROUP_DM;
-                if (settings.store.friendNicknames === "always" || (settings.store.friendNicknames === "dms" && isDM))
-                    nick = RelationshipStore.getNickname(author.authorId) || nick;
+            const friendNickname = RelationshipStore.getNickname(author.authorId);
+
+            if (friendNickname && friendNicknames !== "never") {
+                const shouldUseFriendNickname =
+                    friendNicknames === "always" ||
+                    (friendNicknames === "dms" && channel.isPrivate()) ||
+                    (friendNicknames === "fallback" && !nick);
+
+                if (shouldUseFriendNickname)
+                    nick = friendNickname;
             }
 
             const prefix = withMentionPrefix ? "@" : "";
 
-            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
+            if (isRepliedMessage && !inReplies || username.toLowerCase() === nick.toLowerCase())
                 return <>{prefix}{nick}</>;
 
-            if (settings.store.mode === "user-nick")
+            if (mode === "user-nick")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
 
-            if (settings.store.mode === "nick-user")
+            if (mode === "nick-user")
                 return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
 
             return <>{prefix}{username}</>;
