@@ -35,10 +35,10 @@ const settings = definePluginSettings({
     },
     friendNicknames: {
         type: OptionType.SELECT,
-        description: "How should nickname sources be prioritized",
+        description: "Choose how friend nicknames are prioritised",
         options: [
-            { label: "Show friend nicknames in direct messages only", value: "dms", default: true },
-            { label: "Always use friend nicknames in servers", value: "always" },
+            { label: "Show friend nicknames only in direct messages", value: "dms", default: true },
+            { label: "Prefer friend nicknames over server nicknames", value: "always" },
             { label: "Prefer server nicknames over friend nicknames", value: "fallback" },
             { label: "Never use friend nicknames", value: "never" }
         ]
