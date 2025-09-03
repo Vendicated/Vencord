@@ -37,7 +37,7 @@ function SpeakerIcon(props: IconProps) {
         <div
             {...props}
             role={props.onClick != null ? "button" : undefined}
-            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined, props.className)}
+            className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
         >
             <svg
                 className={props.iconClassName}
@@ -60,7 +60,7 @@ function LockedSpeakerIcon(props: IconProps) {
         <div
             {...props}
             role={props.onClick != null ? "button" : undefined}
-            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined, props.className)}
+            className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
         >
             <svg
                 width={props.size}
