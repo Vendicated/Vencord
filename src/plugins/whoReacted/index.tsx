@@ -73,18 +73,6 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     return cache.users;
 }
 
-function makeRenderMoreUsers(users: User[]) {
-    return function renderMoreUsers(_label: string, _count: number) {
-        return (
-            <div
-                className={AvatarStyles.moreUsers}
-            >
-                +{users.length - 4}
-            </div>
-        );
-    };
-}
-
 function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
@@ -157,7 +145,7 @@ export default definePlugin({
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                <div onClick={handleClickAvatar} onKeyPress={handleClickAvatar}>
+                <div onClick={handleClickAvatar} onKeyDown={handleClickAvatar}>
                     <UserSummaryItem
                         users={users}
                         guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
@@ -165,7 +153,6 @@ export default definePlugin({
                         max={5}
                         showDefaultAvatarsForNullUsers
                         showUserPopout
-                        renderMoreUsers={makeRenderMoreUsers(users)}
                     />
                 </div>
             </div>
