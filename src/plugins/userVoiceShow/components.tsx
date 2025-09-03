@@ -36,8 +36,7 @@ function SpeakerIcon(props: IconProps) {
     return (
         <div
             {...props}
-            role={props.onClick && "button"}
-            className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
+            className={classes(cl("speaker"), props.className)}
         >
             <svg
                 className={props.iconClassName}
@@ -59,8 +58,7 @@ function LockedSpeakerIcon(props: IconProps) {
     return (
         <div
             {...props}
-            role={props.onClick && "button"}
-            className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
+            className={classes(cl("speaker"), props.className)}
         >
             <svg
                 width={props.size}
@@ -81,8 +79,7 @@ function DeafIcon(props: IconProps) {
     return (
         <div
             {...props}
-            role={props.onClick && "button"}
-            className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
+            className={classes(cl("speaker"), props.className)}
         >
             <svg
                 className={props.iconClassName}
@@ -209,9 +206,10 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
             {props => {
                 const iconProps: IconProps = {
                     ...props,
-                    className: classes(isActionButton && ActionButtonClasses.actionButton, isActionButton && shouldHighlight && ActionButtonClasses.highlight),
-                    iconClassName: classes(isProfile && cl("profile-speaker")),
+                    className: classes(cl("clickable"), isActionButton && ActionButtonClasses.actionButton, isActionButton && shouldHighlight && ActionButtonClasses.highlight),
+                    iconClassName: classes(cl(isProfile && "profile-speaker")),
                     size: isActionButton ? 20 : 16,
+                    role: "button",
                     onClick
                 };
 
