@@ -1,0 +1,52 @@
+.chatButtonsPlus-card {
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+}
+
+.chatButtonsPlus-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.chatButtonsPlus-title {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.chatButtonsPlus-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+
+.chatButtonsPlus-toggle div[class*="divider"] {
+    display: none;
+}
+
+.chatButtonsPlus-toggle div[class*="labelRow"] {
+    display: flex;
+    gap: 5px;
+}
+
+.chatButtonsPlus-toggle {
+    margin: 0;
+}
+
+.chatButtonsPlus-field {
+    margin-bottom: 10px;
+}
+
+.chatButtonsPlus-label {
+    margin-bottom: 5px;
+}
+
+.chatButtonsPlus-description {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}

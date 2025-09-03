@@ -24,10 +24,36 @@ import { formatDurationMs } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
+import alignedChatInputFix from "./alignedChatInputFix.css?managed";
+
+function formatDuration(ms: number) {
+    // here be dragons (moment fucking sucks)
+    const human = Settings.plugins.CallTimer.format === "human";
+
+    const format = (n: number) => human ? n : n.toString().padStart(2, "0");
+    const unit = (s: string) => human ? s : "";
+    const delim = human ? " " : ":";
+
+    // thx copilot
+    const d = Math.floor(ms / 86400000);
+    const h = Math.floor((ms % 86400000) / 3600000);
+    const m = Math.floor(((ms % 86400000) % 3600000) / 60000);
+    const s = Math.floor((((ms % 86400000) % 3600000) % 60000) / 1000);
+
+    let res = "";
+    if (d) res += `${d}d `;
+    if (h || res) res += `${format(h)}${unit("h")}${delim}`;
+    if (m || res || !human) res += `${format(m)}${unit("m")}${delim}`;
+    res += `${format(s)}${unit("s")}`;
+
+    return res;
+}
+
 export default definePlugin({
     name: "CallTimer",
     description: "Adds a timer to vcs",
     authors: [Devs.Ven],
+    managedStyle: alignedChatInputFix,
 
     startTime: 0,
     interval: void 0 as NodeJS.Timeout | undefined,

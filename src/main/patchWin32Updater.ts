@@ -37,11 +37,9 @@ function patchLatest() {
         const currentVersion = basename(currentAppPath);
         const discordPath = join(currentAppPath, "..");
 
-        const latestVersion = readdirSync(discordPath).reduce((prev, curr) => {
-            return (curr.startsWith("app-") && isNewer(curr, prev))
-                ? curr
-                : prev;
-        }, currentVersion as string);
+        const latestVersion = readdirSync(discordPath)
+            .filter(name => name.startsWith("app-") && statSync(join(discordPath, name)).isDirectory())
+            .reduce((prev, curr) => isNewer(curr, prev) ? curr : prev, currentVersion as string);
 
         if (latestVersion === currentVersion) return;
 
