@@ -173,7 +173,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
 
     const isDeaf = useStateFromStores([VoiceStateStore], () => {
         const voiceState = VoiceStateStore.getVoiceStateForUser(userId);
-        return (voiceState?.deaf || voiceState?.selfDeaf) as boolean | undefined;
+        return voiceState?.deaf || voiceState?.selfDeaf || false;
     });
 
     function onClick(e: React.MouseEvent) {
@@ -215,10 +215,10 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
                     onClick
                 };
 
-                return isDeaf ?
-                    <DeafIcon {...iconProps} /> :
-                    isLocked ?
-                        <LockedSpeakerIcon {...iconProps} />
+                return isDeaf
+                    ? <DeafIcon {...iconProps} />
+                    : isLocked
+                        ? <LockedSpeakerIcon {...iconProps} />
                         : <SpeakerIcon {...iconProps} />;
             }}
         </Tooltip>
