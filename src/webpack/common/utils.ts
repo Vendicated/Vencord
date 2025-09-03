@@ -203,6 +203,7 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
 export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
     dateFormat: filters.byCode('":'),
-    isSameDay: filters.byCode("Math.abs(+"),
+    // TODO: the +? are for compat with the old version - Remove them once no longer needed
+    isSameDay: filters.byCode(/Math\.abs\(\+?\i-\+?\i\)/),
     diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });

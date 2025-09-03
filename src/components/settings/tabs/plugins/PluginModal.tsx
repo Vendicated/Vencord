@@ -27,7 +27,7 @@ import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { isObjectEmpty } from "@utils/misc";
+import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
@@ -116,7 +116,11 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             );
         });
 
-        return <Flex flexDirection="column" style={{ gap: 12, marginBottom: 16 }}>{options}</Flex>;
+        return (
+            <div className="vc-plugins-settings">
+                {options}
+            </div>
+        );
     }
 
     function renderMoreUsers(_label: string, count: number) {
@@ -143,11 +147,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader separator={false}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
+            <ModalHeader separator={false} className={Margins.bottom8}>
+                <Text variant="heading-xl/bold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
-            <ModalContent>
+
+            <ModalContent className={Margins.bottom16}>
                 <Forms.FormSection>
                     <Flex className={cl("info")}>
                         <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>
@@ -164,8 +169,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             </div>
                         )}
                     </Flex>
-                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0 }}>Authors</Forms.FormTitle>
-                    <div style={{ width: "fit-content", marginBottom: 8 }}>
+                    <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
+                    <div style={{ width: "fit-content" }}>
                         <UserSummaryItem
                             users={authors}
                             guildId={undefined}
@@ -191,7 +196,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 </Forms.FormSection>
 
                 {!!plugin.settingsAboutComponent && (
-                    <div className={Margins.bottom8}>
+                    <div className={Margins.top16}>
                         <Forms.FormSection>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
                                 <plugin.settingsAboutComponent />
@@ -200,8 +205,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </div>
                 )}
 
-                <Forms.FormSection className={Margins.bottom16}>
-                    <Forms.FormTitle tag="h3">Settings</Forms.FormTitle>
+                <Forms.FormSection>
+                    <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>

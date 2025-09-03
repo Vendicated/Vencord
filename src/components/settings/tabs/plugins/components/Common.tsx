@@ -4,11 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Margins } from "@utils/margins";
+import { classNameFactory } from "@api/Styles";
+import { classes } from "@utils/misc";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { DefinedSettings, PluginOptionBase } from "@utils/types";
-import { Forms } from "@webpack/common";
+import { Text } from "@webpack/common";
 import { PropsWithChildren } from "react";
+
+export const cl = classNameFactory("vc-plugins-setting-");
 
 interface SettingBaseProps<T> {
     option: T;
@@ -33,16 +36,21 @@ export function resolveError(isValidResult: boolean | string) {
 interface SettingsSectionProps extends PropsWithChildren {
     name: string;
     description: string;
-    error: string | null;
+    error?: string | null;
+    inlineSetting?: boolean;
 }
 
-export function SettingsSection({ name, description, error, children }: SettingsSectionProps) {
+export function SettingsSection({ name, description, error, inlineSetting, children }: SettingsSectionProps) {
     return (
-        <Forms.FormSection>
-            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(name))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom20} type="description">{description}</Forms.FormText>
-            {children}
-            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
-        </Forms.FormSection>
+        <div className={cl("section")}>
+            <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
+                <div className={cl("label")}>
+                    {name && <Text className={cl("title")} variant="text-md/medium">{wordsToTitle(wordsFromCamel(name))}</Text>}
+                    {description && <Text className={cl("description")} variant="text-sm/normal">{description}</Text>}
+                </div>
+                {children}
+            </div>
+            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+        </div>
     );
 }

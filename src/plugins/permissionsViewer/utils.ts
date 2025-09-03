@@ -28,12 +28,11 @@ export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermission
 
 export const cl = classNameFactory("vc-permviewer-");
 
-export function getSortedRoles({ id }: Guild, member: GuildMember) {
-    const roles = GuildRoleStore.getRoles(id);
-
-    return [...member.roles, id]
-        .map(id => roles[id])
-        .sort((a, b) => b.position - a.position);
+export function getSortedRolesForMember({ id: guildId }: Guild, member: GuildMember) {
+    // The guild id is the @everyone role
+    return GuildRoleStore
+        .getSortedRoles(guildId)
+        .filter(role => role.id === guildId || member.roles.includes(role.id));
 }
 
 export function sortUserRoles(roles: Role[]) {
@@ -48,7 +47,7 @@ export function sortUserRoles(roles: Role[]) {
 }
 
 export function sortPermissionOverwrites<T extends { id: string; type: number; }>(overwrites: T[], guildId: string) {
-    const roles = GuildRoleStore.getRoles(guildId);
+    const roles = GuildRoleStore.getRolesSnapshot(guildId);
 
     return overwrites.sort((a, b) => {
         if (a.type !== PermissionType.Role || b.type !== PermissionType.Role) return 0;
