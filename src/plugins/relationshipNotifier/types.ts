@@ -52,10 +52,6 @@ export interface SimpleGuild {
     iconURL?: string;
 }
 
-export const enum ChannelType {
-    GROUP_DM = 3,
-}
-
 export const enum RelationshipType {
     FRIEND = 1,
     BLOCKED = 2,
