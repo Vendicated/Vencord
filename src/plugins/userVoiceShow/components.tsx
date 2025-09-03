@@ -36,7 +36,7 @@ function SpeakerIcon(props: IconProps) {
     return (
         <div
             {...props}
-            role={props.onClick != null ? "button" : undefined}
+            role={props.onClick && "button"}
             className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
         >
             <svg
@@ -59,7 +59,7 @@ function LockedSpeakerIcon(props: IconProps) {
     return (
         <div
             {...props}
-            role={props.onClick != null ? "button" : undefined}
+            role={props.onClick && "button"}
             className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
         >
             <svg
@@ -81,8 +81,8 @@ function DeafIcon(props: IconProps) {
     return (
         <div
             {...props}
-            role={props.onClick != null ? "button" : undefined}
-            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined, props.className)}
+            role={props.onClick && "button"}
+            className={classes(cl("speaker", props.onClick && "clickable"), props.className)}
         >
             <svg
                 className={props.iconClassName}
