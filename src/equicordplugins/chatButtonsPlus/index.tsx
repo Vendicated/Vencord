@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { ChatBarButton } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
@@ -223,6 +223,7 @@ const settings = definePluginSettings({
     }
 });
 
+migratePluginSettings("ChatButtonsPlus", "Meow", "Woof");
 export default definePlugin({
     name: "ChatButtonsPlus",
     description: "Add custom chat buttons with personalized + messages and SVG icons",
