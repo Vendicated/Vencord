@@ -20,12 +20,12 @@ import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { FluxStore } from "@vencord/discord-types";
+import { ChannelType } from "@vencord/discord-types/enums";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
 import { RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
-import { ChannelType } from "@vencord/discord-types/enums";
 
 export const GuildAvailabilityStore = findStoreLazy("GuildAvailabilityStore") as FluxStore & {
     totalGuilds: number;
