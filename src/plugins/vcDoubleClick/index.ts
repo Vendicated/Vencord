@@ -17,6 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { ChannelRouter, ChannelStore, SelectedChannelStore } from "@webpack/common";
 
@@ -24,6 +25,8 @@ const timers = {} as Record<string, {
     timeout?: NodeJS.Timeout;
     i: number;
 }>;
+
+const logger = new Logger("VoiceChatDoubleClick");
 
 export default definePlugin({
     name: "VoiceChatDoubleClick",
@@ -69,7 +72,7 @@ export default definePlugin({
 
     goToChannel(props: { id?: string; } | undefined) {
         const { id } = props ?? {};
-        if (!id) return console.error("No channel id found");
+        if (!id) return logger.error("No channel id found");
         ChannelRouter.transitionToChannel(id);
     },
 
