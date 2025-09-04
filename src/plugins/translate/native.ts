@@ -27,3 +27,28 @@ export async function makeDeeplTranslateRequest(_: IpcMainInvokeEvent, pro: bool
         return { status: -1, data: String(e) };
     }
 }
+
+export async function makeKagiTranslateRequest(_: IpcMainInvokeEvent, token: string, text: string, sourceLang: string, targetLang: string) {
+    const url = "https://translate.kagi.com/api/translate";
+
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Cookie": `kagi_session=${token}`
+            },
+            body: JSON.stringify({
+                text,
+                from: sourceLang,
+                to: targetLang,
+                model: "standard"
+            }),
+        });
+
+        const data = await res.json();
+        return { status: res.status, data };
+    } catch (e) {
+        return { status: -1, data: String(e) };
+    }
+}
