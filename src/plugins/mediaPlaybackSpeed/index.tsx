@@ -11,7 +11,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { ContextMenuApi, FluxDispatcher, Heading, Menu, React, Tooltip, useEffect } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, React, Tooltip, useEffect } from "@webpack/common";
 import { RefObject } from "react";
 
 import SpeedIcon from "./components/SpeedIcon";
