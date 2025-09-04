@@ -35,7 +35,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
     },
     hideRepliesToBlockedMessages: {
-        description: "Hides replies to blocked messages.",
+        description: "Hides replies to blocked messages",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: false,
