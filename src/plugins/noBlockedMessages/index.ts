@@ -72,7 +72,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                    replace: (_, props) => `if($self.isBlocked(${props}.message)||$self.isReplyToBlocked(${props}.message))return;`
+                    replace: (_, props) => `if($self.isBlocked(${props}?.message)||$self.isReplyToBlocked(${props}?.message))return;`
                 }
             ]
         })),
