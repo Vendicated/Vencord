@@ -68,7 +68,7 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => settings.store.ignoreBlockedMessages === true,
+            predicate: () => settings.store.ignoreBlockedMessages,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
