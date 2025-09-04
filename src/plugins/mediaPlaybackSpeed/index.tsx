@@ -23,15 +23,6 @@ const max = 3.5;
 const speeds = makeRange(min, max, 0.25);
 
 const settings = definePluginSettings({
-    test: {
-        type: OptionType.COMPONENT,
-        description: "",
-        component() {
-            return <Heading variant="heading-lg/bold" selectable={false}>
-                Default playback speeds
-            </Heading>;
-        }
-    },
     defaultVoiceMessageSpeed: {
         type: OptionType.SLIDER,
         default: 1,
