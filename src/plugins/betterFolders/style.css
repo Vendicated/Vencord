@@ -3,7 +3,7 @@
 }
 
 /* These area names need to be hardcoded. Only betterFoldersSidebar is added by the plugin. */
-.visual-refresh .vc-betterFolders-sidebar-grid {
+.vc-betterFolders-sidebar-grid {
     /* stylelint-disable-next-line value-keyword-case */
     grid-template-columns: [start] min-content [guildsEnd] min-content [sidebarEnd] min-content [channelsEnd] 1fr [end];
     grid-template-areas:
