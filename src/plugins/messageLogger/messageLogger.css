@@ -54,8 +54,45 @@
     color: #F47068;
 }
 
+.messagelogger-diff-added [class*="emojiContainer"],
+.messagelogger-diff-added img.emoji {
+    position: relative;
+}
+
+.messagelogger-diff-added [class*="emojiContainer"]::after,
+.messagelogger-diff-added img.emoji::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgb(133 232 157 / 60%);
+    border-radius: 3px;
+    pointer-events: none;
+}
+
+.messagelogger-diff-removed [class*="emojiContainer"],
+.messagelogger-diff-removed img.emoji {
+    position: relative;
+}
+
+.messagelogger-diff-removed [class*="emojiContainer"]::after,
+.messagelogger-diff-removed img.emoji::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgb(244 112 104 / 60%);
+    border-radius: 3px;
+    pointer-events: none;
+}
+
 /* when diffs are disabled for a specific message, remove diff colors */
 .messagelogger-diff-disabled .messagelogger-diff-added,
 .messagelogger-diff-disabled .messagelogger-diff-removed {
     color: inherit;
+}
+
+.messagelogger-diff-disabled .messagelogger-diff-added [class*="emojiContainer"]::after,
+.messagelogger-diff-disabled .messagelogger-diff-added img.emoji::after,
+.messagelogger-diff-disabled .messagelogger-diff-removed [class*="emojiContainer"]::after,
+.messagelogger-diff-disabled .messagelogger-diff-removed img.emoji::after {
+    display: none !important;
 }
