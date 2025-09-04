@@ -1,4 +1,4 @@
-# Send And Forget
+# No Follow Forwards
 
 Don't follow forwarded messages after sending them.
 
