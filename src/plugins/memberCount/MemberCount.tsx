@@ -12,10 +12,11 @@ import {
     SelectedChannelStore,
     Tooltip,
     useEffect,
-    useStateFromStores
+    useStateFromStores,
+    VoiceStateStore,
 } from "@webpack/common";
 
-import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore, VoiceStateStore } from ".";
+import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 import { VoiceIcon } from "./VoiceIcon";
 
