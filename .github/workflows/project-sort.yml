@@ -1,0 +1,40 @@
+on:
+    pull_request_review:
+        types:
+            - submitted
+
+jobs:
+    sort:
+        runs-on: ubuntu-latest
+        steps:
+            - name: run
+              run: |
+                  pr_num=${{ github.event.pull_request.number }}
+                  reviewer=${{ github.event.sender.login }}
+
+                  echo "Pull request #$pr_num reviewed by $reviewer"
+                  pr_project_entry_json=$(gh pr view $pr_num --json projectItems -q ".projectItems[0]")
+                  cur_status_name=$(echo "$pr_project_entry_json" | jq -r ".status.name")
+                  if [[ "$cur_status_name" == "In Review" ]]; then
+                    echo "Pull request #$pr_num is currently in review.";
+                    exit 0;
+                  fi
+                  project_title=$(echo "$pr_project_entry_json" | jq -r ".title")
+                  if [[ -z $project_title ]]; then
+                    echo "No project item found for PR #$pr_num"
+                    exit 0
+                  fi
+                  echo "Project item title: $project_title"
+                  project_json=$(gh project list --owner Vendicated --format json -q ".projects[] | select(.title == \"${project_title}\")")
+                  project_number=$(echo "$project_json" | jq -r ".number")
+                  project_id=$(echo "$project_json" | jq -r ".id")
+
+                  status_field_json=$(gh project field-list ${project_number} --owner Vendicated --format json -q ".fields[] | select(.name == \"Status\")")
+                  status_field_id=$(echo "$status_field_json" | jq -r ".id")
+
+                  in_progress_id=$(echo "$status_field_json" | jq -r ".options[] | select(.name == \"In Progress\") | .id")
+
+                  item_json=$(gh project item-list ${project_number} --owner Vendicated --format json -q ".items[] | select(.content.number == ${pr_num})")
+                  item_id=$(echo "$item_json" | jq -r ".id")
+
+                  gh project item-edit --id ${item_id} --project_id ${project_id} --field-id ${status_field_id} --single-select-option-id ${in_progress_id}
