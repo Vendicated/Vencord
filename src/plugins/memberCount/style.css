@@ -19,10 +19,10 @@
     padding-inline: 1em;
 }
 
-.vc-membercount-block {
-    gap: 5px 10px;
+.vc-membercount-container {
     display: flex;
     align-items: center;
+    gap: 5px 10px;
 }
 
 .vc-membercount-online {
