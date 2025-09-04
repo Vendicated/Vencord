@@ -18,7 +18,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
+import { FluxDispatcher, useLayoutEffect, useMemo, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
@@ -55,7 +55,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
     const imageRef = useRef<HTMLImageElement | null>(null);
 
     // since we accessing document im gonna use useLayoutEffect
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Shift") {
                 isShiftDown.current = true;
@@ -135,12 +135,14 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
 
             setReady(true);
         });
+
         document.addEventListener("keydown", onKeyDown);
         document.addEventListener("keyup", onKeyUp);
         document.addEventListener("mousemove", updateMousePosition);
         document.addEventListener("mousedown", onMouseDown);
         document.addEventListener("mouseup", onMouseUp);
         document.addEventListener("wheel", onWheel);
+
         return () => {
             document.removeEventListener("keydown", onKeyDown);
             document.removeEventListener("keyup", onKeyUp);
@@ -148,13 +150,25 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             document.removeEventListener("mousedown", onMouseDown);
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("wheel", onWheel);
-
-            if (settings.store.saveZoomValues) {
-                settings.store.zoom = zoom.current;
-                settings.store.size = size.current;
-            }
         };
     }, []);
+
+    useLayoutEffect(() => () => {
+        if (settings.store.saveZoomValues) {
+            settings.store.zoom = zoom.current;
+            settings.store.size = size.current;
+        }
+    });
+
+    const imageSrc = useMemo(() => {
+        try {
+            const imageUrl = new URL(instance.props.src);
+            imageUrl.searchParams.set("animated", "true");
+            return imageUrl.toString();
+        } catch {
+            return instance.props.src;
+        }
+    }, [instance.props.src]);
 
     if (!ready) return null;
 
@@ -191,6 +205,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                     />
                 ) : (
                     <img
+                        className={cl("image")}
                         ref={imageRef}
                         style={{
                             position: "absolute",
@@ -198,7 +213,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                         }}
                         width={`${box.width * zoom.current}px`}
                         height={`${box.height * zoom.current}px`}
-                        src={instance.props.src}
+                        src={imageSrc}
                         alt=""
                     />
                 )}
