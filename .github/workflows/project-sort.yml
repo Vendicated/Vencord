@@ -9,8 +9,9 @@ jobs:
         steps:
             - name: run
               env:
-                  GH_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.gh_token }}
               run: |
+                  set -e
                   pr_num=${{ github.event.pull_request.number }}
                   reviewer=${{ github.event.sender.login }}
                   repo=${{ github.event.repository.name }}
@@ -41,4 +42,4 @@ jobs:
                   item_json=$(gh project item-list ${project_number} --owner $owner --format json -q ".items[] | select(.content.number == ${pr_num})")
                   item_id=$(echo "$item_json" | jq -r ".id")
 
-                  gh project item-edit --id ${item_id} --project_id ${project_id} --field-id ${status_field_id} --single-select-option-id ${in_progress_id}
+                  gh project item-edit --id ${item_id} --project-id ${project_id} --field-id ${status_field_id} --single-select-option-id ${in_progress_id}
