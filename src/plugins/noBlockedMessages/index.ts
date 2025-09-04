@@ -29,7 +29,7 @@ const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 const settings = definePluginSettings({
     ignoreBlockedMessages: {
-        description: "Completely ignores (recent) incoming messages from blocked users (locally).",
+        description: "Completely ignores (recent) incoming messages from blocked users (locally)",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true,
