@@ -9,15 +9,14 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { ContextMenuApi, FluxDispatcher, Heading, Menu, React, Tooltip, useEffect } from "@webpack/common";
 import { RefObject } from "react";
 
 import SpeedIcon from "./components/SpeedIcon";
 
-const cl = classNameFactory("vc-media-playback-speed-");
+const cl = classNameFactory("vc-mediaPlaybackSpeed-");
 
 const min = 0.25;
 const max = 3.5;
@@ -62,7 +61,7 @@ export default definePlugin({
 
     settings,
 
-    PlaybackSpeedComponent({ mediaRef }: { mediaRef: MediaRef }) {
+    renderPlaybackSpeedComponent: ErrorBoundary.wrap(({ mediaRef }: { mediaRef: MediaRef })=> {
         const changeSpeed = (speed: number) => {
             const media = mediaRef?.current;
             if (media) {
@@ -71,8 +70,8 @@ export default definePlugin({
         };
 
         useEffect(() => {
-            if (!mediaRef?.current) return;
-            const media = mediaRef.current;
+            const media = mediaRef?.current;
+            if (!media) return;
             if (media.tagName === "AUDIO") {
                 const isVoiceMessage = media.className.includes("audioElement_");
                 changeSpeed(isVoiceMessage ? settings.store.defaultVoiceMessageSpeed : settings.store.defaultAudioSpeed);
@@ -114,21 +113,15 @@ export default definePlugin({
                 )}
             </Tooltip>
         );
-    },
-
-    renderComponent(mediaRef: MediaRef) {
-        return <ErrorBoundary noop>
-            <this.PlaybackSpeedComponent mediaRef={mediaRef} />
-        </ErrorBoundary>;
-    },
+    }),
 
     patches: [
-        // voice message embeds
+        // replace voice message embed speed control because ours provides more speeds
         {
             find: "\"--:--\"",
             replacement: {
-                match: /onVolumeShow:\i,onVolumeHide:\i\}\)(?<=useCallback\(\(\)=>\{let \i=(\i).current;.+?)/,
-                replace: "$&,$self.renderComponent($1)"
+                match: /\(0,\i\.jsx\)\(\i\.\i,{className:\i\.playbackRateContainer[\s\S]*?\}\),\(0,/,
+                replace: "$self.renderPlaybackSpeedComponent({mediaRef:this?.props?.mediaRef}), (0,"
             }
         },
         // audio & video embeds
@@ -144,7 +137,7 @@ export default definePlugin({
             find: "AUDIO:\"AUDIO\"",
             replacement: {
                 match: /onVolumeHide:\i,iconClassName:\i.controlIcon,iconColor:"currentColor",sliderWrapperClassName:\i.volumeSliderWrapper\}\)\}\),/,
-                replace: "$&$self.renderComponent(this.props.mediaRef),"
+                replace: "$&$self.renderPlaybackSpeedComponent({mediaRef:this?.props?.mediaRef}),"
             }
         }
     ]

@@ -1,10 +1,10 @@
-.vc-media-playback-speed-icon {
+.vc-mediaPlaybackSpeed-icon {
     background-color: transparent;
     height: 100%;
     z-index: 2;
     color: var(--interactive-normal);
 }
 
-.vc-media-playback-speed-icon:hover {
+.vc-mediaPlaybackSpeed-icon:hover {
     color: var(--interactive-active);
 }
