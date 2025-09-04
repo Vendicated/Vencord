@@ -116,8 +116,8 @@ export default definePlugin({
         {
             find: "\"--:--\"",
             replacement: {
-                match: /(playbackCacheKey:\i\}=\i,(\i)=\i\.useRef\(null\),[\s\S]*?)\(0,\i\.jsx\)\(\i\.\i,{className:\i\.playbackRateContainer[\s\S]*?\}\),\(0,/,
-                replace: "$1$self.renderPlaybackSpeedComponent({mediaRef:$2}),(0,"
+                match: /(playbackCacheKey:\i\}=\i,(\i).*?)\(0,.{0,50}playbackRateContainer.*?\}\)\}\)/,
+                replace: "$1$self.renderPlaybackSpeedComponent({mediaRef:$2})"
             }
         },
         // audio & video embeds
