@@ -40,10 +40,6 @@ export default definePlugin({
     },
 
     setShift(event: KeyboardEvent | undefined) {
-        if (event?.shiftKey) {
-            ignore = true;
-        } else {
-            ignore = false;
-        }
+        ignore = !!event?.shiftKey;
     }
 });
