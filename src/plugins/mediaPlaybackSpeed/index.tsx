@@ -132,7 +132,7 @@ export default definePlugin({
         {
             find: "AUDIO:\"AUDIO\"",
             replacement: {
-                match: /onVolumeHide:\i,iconClassName:\i.controlIcon,iconColor:"currentColor",sliderWrapperClassName:\i.volumeSliderWrapper\}\)\}\),/,
+                match: /\i.volumeSliderWrapper\}\)\}\),/,
                 replace: "$&$self.renderPlaybackSpeedComponent({mediaRef:this?.props?.mediaRef}),"
             }
         }
