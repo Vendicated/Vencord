@@ -152,9 +152,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"TITLEBAR_FAST_TRAVEL"',
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /focusSectionProps:"HELP".{0,20},className:(\i)\}\),/,
+                // TODO: (?:\.button) is for stable compat and should be removed soon:tm:
+                match: /focusSectionProps:"HELP".{0,20},className:(\i(?:\.button)?)\}\),/,
                 replace: "$& $self.renderVencordPopoutButton($1),"
             }
         }
