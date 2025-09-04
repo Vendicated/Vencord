@@ -197,9 +197,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "sunnie",
         id: 406028027768733696n
     },
-    axyie: {
-        name: "'ax",
-        id: 929877747151548487n,
+    rae: {
+        name: "rae",
+        id: 1398136199503282277n
     },
     pointy: {
         name: "pointy",
