@@ -116,8 +116,8 @@ export default definePlugin({
         {
             find: "\"--:--\"",
             replacement: {
-                match: /(ref:(\i),className.*?)\(0,.{0,50}playbackRateContainer.*?\}\)\}\)/,
-                replace: "$1$self.renderPlaybackSpeedComponent({mediaRef:$2})"
+                match: /\(0,\i\.jsxs?\)\(.{0,50}\.playbackRateContainer.+?}\)}\)(?<=playbackCacheKey:\i\}=\i,(\i).+?)/,
+                replace: "$self.renderPlaybackSpeedComponent({mediaRef:$1})"
             }
         },
         // audio & video embeds
@@ -132,7 +132,7 @@ export default definePlugin({
         {
             find: "AUDIO:\"AUDIO\"",
             replacement: {
-                match: /onVolumeHide:\i,iconClassName:\i.controlIcon,iconColor:"currentColor",sliderWrapperClassName:\i.volumeSliderWrapper\}\)\}\),/,
+                match: /\i.volumeSliderWrapper\}\)\}\),/,
                 replace: "$&$self.renderPlaybackSpeedComponent({mediaRef:this?.props?.mediaRef}),"
             }
         }
