@@ -40,11 +40,11 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         options: [
             {
-                label: "Do not ping the listed users/roles",
+                label: "Do not ping the listed users / roles",
                 value: false,
             },
             {
-                label: "Only ping the listed users/roles",
+                label: "Only ping the listed users / roles",
                 value: true,
                 default: true,
             },
