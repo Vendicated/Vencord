@@ -18,12 +18,18 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getIntlMessage, hasGuildFeature } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
+import { Constants, GuildStore, PermissionStore, RestAPI } from "@webpack/common";
 
 function showDisableInvites(guildId: string) {
-    // @ts-ignore
-    return !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
+    const guild = GuildStore.getGuild(guildId);
+    if (!guild) return false;
+
+    return (
+        !hasGuildFeature(guild, "INVITES_DISABLED") &&
+        PermissionStore.getGuildPermissionProps(guild).canManageRoles
+    );
 }
 
 function disableInvites(guildId: string) {
@@ -43,15 +49,15 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION",
+            find: "#{intl::GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}",
             group: true,
             replacement: [
                 {
-                    match: /children:\i\.\i\.\i\.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION/,
+                    match: /children:\i\.\i\.string\(\i\.\i#{intl::GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}\)/,
                     replace: "children: $self.renderInvitesLabel({guildId:arguments[0].guildId,setChecked})",
                 },
                 {
-                    match: /\.INVITES_DISABLED\)(?=.+?\.Messages\.INVITES_PERMANENTLY_DISABLED_TIP.+?checked:(\i)).+?\[\1,(\i)\]=\i.useState\(\i\)/,
+                    match: /\.INVITES_DISABLED\)(?=.+?#{intl::INVITES_PERMANENTLY_DISABLED_TIP}.+?checked:(\i)).+?\[\1,(\i)\]=\i.useState\(\i\)/,
                     replace: "$&,setChecked=$2"
                 }
             ]
@@ -61,12 +67,12 @@ export default definePlugin({
     renderInvitesLabel: ErrorBoundary.wrap(({ guildId, setChecked }) => {
         return (
             <div>
-                {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
+                {getIntlMessage("GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION")}
                 {showDisableInvites(guildId) && <a role="button" onClick={() => {
                     setChecked(true);
                     disableInvites(guildId);
                 }}> Pause Indefinitely.</a>}
             </div>
         );
-    })
+    }, { noop: true })
 });

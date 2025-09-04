@@ -17,13 +17,17 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findByPropsLazy } from "@webpack";
-import { Clipboard, ComponentDispatch } from "@webpack/common";
+import { filters, mapMangledModuleLazy } from "@webpack";
+import { ComponentDispatch } from "@webpack/common";
 
-const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
+const ctxMenuCallbacks = mapMangledModuleLazy('.tagName)==="TEXTAREA"||', {
+    contextMenuCallbackWeb: filters.byCode('.tagName)==="INPUT"||'),
+    contextMenuCallbackNative: filters.byCode('.tagName)==="TEXTAREA"||')
+});
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -39,12 +43,15 @@ const settings = definePluginSettings({
     addBack: {
         type: OptionType.BOOLEAN,
         description: "Add back the Discord context menus for images, links and the chat input bar",
+        default: false,
+        restartNeeded: true,
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
-        // so disable this by default. Vesktop just doesn't, so enable by default
-        default: IS_VESKTOP,
-        restartNeeded: true
+        // so disable this by default. Vesktop just doesn't, so we force enable it there
+        hidden: IS_VESKTOP,
     }
 });
+
+const shouldAddBackMenus = () => IS_VESKTOP || settings.store.addBack;
 
 const MEDIA_PROXY_URL = "https://media.discordapp.net";
 const CDN_URL = "cdn.discordapp.com";
@@ -78,7 +85,7 @@ export default definePlugin({
     settings,
 
     start() {
-        if (settings.store.addBack) {
+        if (shouldAddBackMenus()) {
             window.removeEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackWeb);
             window.addEventListener("contextmenu", ctxMenuCallbacks.contextMenuCallbackNative);
             this.changedListeners = true;
@@ -108,11 +115,24 @@ export default definePlugin({
                 // Fix silly Discord calling the non web support copy
                 {
                     match: /\i\.\i\.copy/,
-                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                    replace: "Vencord.Util.copyToClipboard"
                 }
             ]
         },
 
+        {
+            find: "Copy image not supported",
+            replacement: [
+                {
+                    match: /(?<=(?:canSaveImage|canCopyImage)\(.{0,120}?)!\i\.isPlatformEmbedded/g,
+                    replace: "false"
+                },
+                {
+                    match: /canCopyImage\(.+?(?=return"function"==typeof \i\.clipboard\.copyImage)/,
+                    replace: "$&return true;"
+                }
+            ]
+        },
         // Add back Copy & Save Image
         {
             find: 'id:"copy-image"',
@@ -123,15 +143,11 @@ export default definePlugin({
                     replace: "false"
                 },
                 {
-                    match: /return\s*?\[\i\.\i\.canCopyImage\(\)/,
-                    replace: "return [true"
-                },
-                {
-                    match: /(?<=COPY_IMAGE_MENU_ITEM,)action:/,
+                    match: /(?<=#{intl::COPY_IMAGE_MENU_ITEM}\),)action:/,
                     replace: "action:()=>$self.copyImage(arguments[0]),oldAction:"
                 },
                 {
-                    match: /(?<=SAVE_IMAGE_MENU_ITEM,)action:/,
+                    match: /(?<=#{intl::SAVE_IMAGE_MENU_ITEM}\),)action:/,
                     replace: "action:()=>$self.saveImage(arguments[0]),oldAction:"
                 },
             ]
@@ -141,7 +157,7 @@ export default definePlugin({
         {
             find: 'navId:"image-context"',
             all: true,
-            predicate: () => settings.store.addBack,
+            predicate: shouldAddBackMenus,
             replacement: {
                 // return IS_DESKTOP ? React.createElement(Menu, ...)
                 match: /return \i\.\i(?=\?|&&)/,
@@ -152,7 +168,7 @@ export default definePlugin({
         // Add back link context menu
         {
             find: '"interactionUsernameProfile"',
-            predicate: () => settings.store.addBack,
+            predicate: shouldAddBackMenus,
             replacement: {
                 match: /if\((?="A"===\i\.tagName&&""!==\i\.textContent)/,
                 replace: "if(false&&"
@@ -162,15 +178,15 @@ export default definePlugin({
         // Add back slate / text input context menu
         {
             find: 'getElementById("slate-toolbar"',
-            predicate: () => settings.store.addBack,
+            predicate: shouldAddBackMenus,
             replacement: {
-                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\?/,
-                replace: "||true?"
+                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\)/,
+                replace: "||true)"
             }
         },
         {
             find: ".SLASH_COMMAND_SUGGESTIONS_TOGGLED,{",
-            predicate: () => settings.store.addBack,
+            predicate: shouldAddBackMenus,
             replacement: [
                 {
                     // if (!IS_DESKTOP) return null;
@@ -186,7 +202,7 @@ export default definePlugin({
         },
         {
             find: '"add-to-dictionary"',
-            predicate: () => settings.store.addBack,
+            predicate: shouldAddBackMenus,
             replacement: {
                 match: /let\{text:\i=""/,
                 replace: "return [null,null];$&"
@@ -202,32 +218,35 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.SEARCH_WITH_GOOGLE",
+            find: "#{intl::SEARCH_WITH_GOOGLE}",
             replacement: {
                 match: /\i\.isPlatformEmbedded/,
                 replace: "true"
             }
         },
         {
-            find: ".Messages.COPY,hint:",
+            find: "#{intl::COPY}),hint:",
             replacement: [
                 {
                     match: /\i\.isPlatformEmbedded/,
                     replace: "true"
                 },
                 {
-                    match: /\i\.\i\.copy/,
-                    replace: "Vencord.Webpack.Common.Clipboard.copy"
-                }]
+                    match: /\i\.\i\.copy(?=\(\i)/,
+                    replace: "Vencord.Util.copyToClipboard"
+                }
+            ],
+            all: true,
+            noWarn: true
         },
         // Automod add filter words
         {
             find: '("interactionUsernameProfile',
             replacement:
-                {
-                    match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
-                    replace: "true"
-                },
+            {
+                match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
+                replace: "true"
+            },
         }
     ],
 
@@ -279,7 +298,7 @@ export default definePlugin({
         const selection = document.getSelection();
         if (!selection) return;
 
-        Clipboard.copy(selection.toString());
+        copyToClipboard(selection.toString());
     },
 
     cut() {

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ComponentDispatch, FluxDispatcher, NavigationRouter, SelectedGuildStore, SettingsRouter } from "@webpack/common";
@@ -25,12 +25,12 @@ const KeyBinds = findByPropsLazy("JUMP_TO_GUILD", "SERVER_NEXT");
 
 export default definePlugin({
     name: "WebKeybinds",
-    description: "Re-adds keybinds missing in the web version of Discord: ctrl+t, ctrl+shift+t, ctrl+tab, ctrl+shift+tab, ctrl+1-9, ctrl+,. Only works fully on Vesktop/ArmCord, not inside your browser",
+    description: "Re-adds keybinds missing in the web version of Discord: ctrl+t, ctrl+shift+t, ctrl+tab, ctrl+shift+tab, ctrl+1-9, ctrl+,. Only works fully on Vesktop/Legcord, not inside your browser",
     authors: [Devs.Ven],
     enabledByDefault: true,
 
     onKey(e: KeyboardEvent) {
-        const hasCtrl = e.ctrlKey || (e.metaKey && navigator.platform.includes("Mac"));
+        const hasCtrl = e.ctrlKey || (e.metaKey && IS_MAC);
 
         if (hasCtrl) switch (e.key) {
             case "t":

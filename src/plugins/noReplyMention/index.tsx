@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Message } from "discord-types/general";
+import type { Message } from "@vencord/discord-types";
 
 const settings = definePluginSettings({
     userList: {
@@ -53,7 +53,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47, Devs.axyie, Devs.pylix, Devs.outfoxxed],
+    authors: [Devs.DustyAngel47, Devs.rae, Devs.pylix, Devs.outfoxxed],
     settings,
 
     shouldMention(message: Message, isHoldingShift: boolean) {
