@@ -12,9 +12,9 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { findComponentLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, Text, Tooltip } from "@webpack/common";
-import { Message } from "discord-types/general";
 import { FunctionComponent, ReactNode } from "react";
 
 const countDownFilter = canonicalizeMatch("#{intl::MAX_AGE_NEVER}");
@@ -76,8 +76,8 @@ export default definePlugin({
             find: "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",
             replacement: [
                 {
-                    match: /(\i)\.Tooltip,{(text:.{0,30}#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}\))/,
-                    replace: "$self.TooltipWrapper,{message:arguments[0].message,$2"
+                    match: /\i\.\i,{(text:.{0,30}#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}\))/,
+                    replace: "$self.TooltipWrapper,{message:arguments[0].message,$1"
                 }
             ]
         }

@@ -160,13 +160,15 @@ export class SettingsStore<T extends object> {
         // So, we need to extract the top-level setting path (plugins.pluginName.settingName),
         // to be able to notify globalListeners and top-level setting name listeners (let { settingName } = settings.use(["settingName"]),
         // with the new value
-        if (paths.length > 2 && paths[0] === "plugins") {
+        if (paths.length > 3 && paths[0] === "plugins") {
             const settingPath = paths.slice(0, 3);
             const settingPathStr = settingPath.join(".");
             const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
 
             this.globalListeners.forEach(cb => cb(root, settingPathStr));
             this.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
+        } else {
+            this.globalListeners.forEach(cb => cb(root, pathStr));
         }
 
         this.pathListeners.get(pathStr)?.forEach(cb => cb(value));

@@ -55,7 +55,7 @@ export default definePlugin({
     settings,
 
     patches: [
-        // User Popout, Full Size Profile, Direct Messages Side Profile
+        // User Popout, User Profile Modal, Direct Messages Side Profile
         {
             find: "#{intl::USER_PROFILE_LOAD_ERROR}",
             replacement: {
@@ -99,7 +99,7 @@ export default definePlugin({
             addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
         }
         if (settings.store.showInMessages) {
-            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} isMessageIndicator />);
+            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} />);
         }
     },
 

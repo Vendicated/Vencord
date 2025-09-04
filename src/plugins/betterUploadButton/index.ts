@@ -25,11 +25,22 @@ export default definePlugin({
     description: "Upload with a single click, open menu with right click",
     patches: [
         {
-            find: '"ChannelAttachButton"',
-            replacement: {
-                match: /\.attachButtonInner,"aria-label":.{0,50},onDoubleClick:(.+?:void 0),.{0,30}?\.\.\.(\i),/,
-                replace: "$&onClick:$1,onContextMenu:$2.onClick,",
-            },
+            find: ".CHAT_INPUT_BUTTON_NOTIFICATION,",
+            replacement: [
+                {
+                    match: /onClick:(\i\?void 0:\i)(?=,onDoubleClick:(\i\?void 0:\i),)/,
+                    replace: "$&,...$self.getOverrides(arguments[0],$1,$2)",
+                },
+            ]
         },
     ],
+
+    getOverrides(props: any, onClick: any, onDoubleClick: any) {
+        if (!props?.className?.includes("attachButton")) return {};
+
+        return {
+            onClick: onDoubleClick,
+            onContextMenu: onClick
+        };
+    }
 });
