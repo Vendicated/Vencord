@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 export default definePlugin({
@@ -42,10 +42,10 @@ export default definePlugin({
         // Only one of the two patches will be at effect; Discord often updates to switch between them.
         // See: https://discord.com/channels/1015060230222131221/1032770730703716362/1261398512017477673
         {
-            find: ".ENTER&&(!",
+            find: ".selectPreviousCommandOption(",
             replacement: {
-                match: /(?<=(\i)\.which===\i\.\i.ENTER&&).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=&&\(\i\.preventDefault)/,
-                replace: "$self.shouldSubmit($1, $2)"
+                match: /(?<=(\i)\.which!==\i\.\i.ENTER\|\|).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=\|\|\(\i\.preventDefault)/,
+                replace: "!$self.shouldSubmit($1,$2)"
             }
         },
         {
@@ -63,7 +63,7 @@ export default definePlugin({
                 result = event.shiftKey;
                 break;
             case "ctrl+enter":
-                result = navigator.platform.includes("Mac") ? event.metaKey : event.ctrlKey;
+                result = IS_MAC ? event.metaKey : event.ctrlKey;
                 break;
             case "enter":
                 result = !event.shiftKey && !event.ctrlKey;
