@@ -61,7 +61,7 @@ export default definePlugin({
 
     settings,
 
-    renderPlaybackSpeedComponent: ErrorBoundary.wrap(({ mediaRef }: { mediaRef: MediaRef })=> {
+    renderPlaybackSpeedComponent: ErrorBoundary.wrap(({ mediaRef }: { mediaRef: MediaRef; }) => {
         const changeSpeed = (speed: number) => {
             const media = mediaRef?.current;
             if (media) {
@@ -108,7 +108,7 @@ export default definePlugin({
                                 </Menu.Menu>
                             );
                         }}>
-                        <SpeedIcon/>
+                        <SpeedIcon />
                     </button>
                 )}
             </Tooltip>
@@ -120,8 +120,8 @@ export default definePlugin({
         {
             find: "\"--:--\"",
             replacement: {
-                match: /\(0,\i\.jsx\)\(\i\.\i,{className:\i\.playbackRateContainer[\s\S]*?\}\),\(0,/,
-                replace: "$self.renderPlaybackSpeedComponent({mediaRef:this?.props?.mediaRef}), (0,"
+                match: /(playbackCacheKey:\i\}=\i,(\i)=\i\.useRef\(null\),[\s\S]*?)\(0,\i\.jsx\)\(\i\.\i,{className:\i\.playbackRateContainer[\s\S]*?\}\),\(0,/,
+                replace: "$1$self.renderPlaybackSpeedComponent({mediaRef:$2}),(0,"
             }
         },
         // audio & video embeds
