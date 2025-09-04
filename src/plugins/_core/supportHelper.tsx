@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
-import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -33,33 +32,32 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Channel } from "@vencord/discord-types";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { JSX } from "react";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
-const VENCORD_GUILD_ID = "1015060230222131221";
-const VENBOT_USER_ID = "1017176847865352332";
-const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
 const CodeBlockRe = /```js\n(.+?)```/s;
 
-const AllowedChannelIds = [
-    SUPPORT_CHANNEL_ID,
+const AdditionalAllowedChannelIds = [
     "1024286218801926184", // Vencord > #bot-spam
-    "1033680203433660458", // Vencord > #v
 ];
 
 const TrustedRolesIds = [
-    "1026534353167208489", // contributor
-    "1026504932959977532", // regular
-    "1042507929485586532", // donor
+    CONTRIB_ROLE_ID, // contributor
+    REGULAR_ROLE_ID, // regular
+    DONOR_ROLE_ID, // donor
 ];
 
 const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+
+const isSupportAllowedChannel = (channel: Channel) => channel.parent_id === SUPPORT_CATEGORY_ID || AdditionalAllowedChannelIds.includes(channel.id);
 
 async function forceUpdate() {
     const outdated = await checkForUpdates();
@@ -77,7 +75,7 @@ async function generateDebugInfoMessage() {
     const client = (() => {
         if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
         if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
-        if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
+        if ("legcord" in window) return `Legcord v${window.legcord.version}`;
 
         // @ts-expect-error
         const name = typeof unsafeWindow !== "undefined" ? "UserScript" : "Web";
@@ -89,7 +87,7 @@ async function generateDebugInfoMessage() {
             `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
-        Platform: window.navigator.platform
+        Platform: navigator.platform
     };
 
     if (IS_DISCORD_DESKTOP) {
@@ -142,15 +140,15 @@ export default definePlugin({
     required: true,
     description: "Helps us provide support to you",
     authors: [Devs.Ven],
-    dependencies: ["CommandsAPI", "UserSettingsAPI", "MessageAccessoriesAPI"],
+    dependencies: ["UserSettingsAPI"],
 
     settings,
 
     patches: [{
-        find: ".BEGINNING_DM.format",
+        find: "#{intl::BEGINNING_DM}",
         replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,100}userId:(\i\.getRecipientId\(\)))/,
-            replace: "$& $self.ContributorDmWarningCard({ userId: $1 }),"
+            match: /#{intl::BEGINNING_DM},{.+?}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+            replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
         }
     }],
 
@@ -158,20 +156,21 @@ export default definePlugin({
         {
             name: "vencord-debug",
             description: "Send Vencord debug info",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
             name: "vencord-plugins",
             description: "Send Vencord plugin list",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isSupportAllowedChannel(ctx.channel),
             execute: () => ({ content: generatePluginList() })
         }
     ],
 
     flux: {
         async CHANNEL_SELECT({ channelId }) {
-            if (channelId !== SUPPORT_CHANNEL_ID) return;
+            const isSupportChannel = channelId === SUPPORT_CHANNEL_ID || ChannelStore.getChannel(channelId)?.parent_id === SUPPORT_CATEGORY_ID;
+            if (!isSupportChannel) return;
 
             const selfId = UserStore.getCurrentUser()?.id;
             if (!selfId || isPluginDev(selfId)) return;
@@ -197,7 +196,6 @@ export default definePlugin({
                 }
             }
 
-            // @ts-ignore outdated type
             const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
@@ -235,12 +233,92 @@ export default definePlugin({
         }
     },
 
-    ContributorDmWarningCard: ErrorBoundary.wrap(({ userId }) => {
+    renderMessageAccessory(props) {
+        const buttons = [] as JSX.Element[];
+
+        const shouldAddUpdateButton =
+            !IS_UPDATER_DISABLED
+            && (
+                (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
+                (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)
+            )
+            && props.message.content?.includes("update");
+
+        if (shouldAddUpdateButton) {
+            buttons.push(
+                <Button
+                    key="vc-update"
+                    color={Button.Colors.GREEN}
+                    onClick={async () => {
+                        try {
+                            if (await forceUpdate())
+                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
+                            else
+                                showToast("Already up to date!", Toasts.Type.MESSAGE);
+                        } catch (e) {
+                            new Logger(this.name).error("Error while updating:", e);
+                            showToast("Failed to update :(", Toasts.Type.FAILURE);
+                        }
+                    }}
+                >
+                    Update Now
+                </Button>
+            );
+        }
+
+        if (props.channel.parent_id === SUPPORT_CATEGORY_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
+            if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
+                buttons.push(
+                    <Button
+                        key="vc-dbg"
+                        onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
+                    >
+                        Run /vencord-debug
+                    </Button>,
+                    <Button
+                        key="vc-plg-list"
+                        onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
+                    >
+                        Run /vencord-plugins
+                    </Button>
+                );
+            }
+
+            if (props.message.author.id === VENBOT_USER_ID) {
+                const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
+                if (match) {
+                    buttons.push(
+                        <Button
+                            key="vc-run-snippet"
+                            onClick={async () => {
+                                try {
+                                    await AsyncFunction(match[1])();
+                                    showToast("Success!", Toasts.Type.SUCCESS);
+                                } catch (e) {
+                                    new Logger(this.name).error("Error while running snippet:", e);
+                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                                }
+                            }}
+                        >
+                            Run Snippet
+                        </Button>
+                    );
+                }
+            }
+        }
+
+        return buttons.length
+            ? <Flex>{buttons}</Flex>
+            : null;
+    },
+
+    renderContributorDmWarningCard: ErrorBoundary.wrap(({ channel }) => {
+        const userId = channel.getRecipientId();
         if (!isPluginDev(userId)) return null;
         if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id)) return null;
 
         return (
-            <Card className={`vc-plugins-restart-card ${Margins.top8}`}>
+            <Card className={`vc-warning-card ${Margins.top8}`}>
                 Please do not private message Vencord plugin developers for support!
                 <br />
                 Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
@@ -248,85 +326,4 @@ export default definePlugin({
             </Card>
         );
     }, { noop: true }),
-
-    start() {
-        addAccessory("vencord-debug", props => {
-            const buttons = [] as JSX.Element[];
-
-            const shouldAddUpdateButton =
-                !IS_UPDATER_DISABLED
-                && (
-                    (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
-                    (props.channel.id === SUPPORT_CHANNEL_ID && props.message.author.id === VENBOT_USER_ID)
-                )
-                && props.message.content?.includes("update");
-
-            if (shouldAddUpdateButton) {
-                buttons.push(
-                    <Button
-                        key="vc-update"
-                        color={Button.Colors.GREEN}
-                        onClick={async () => {
-                            try {
-                                if (await forceUpdate())
-                                    showToast("Success! Restarting...", Toasts.Type.SUCCESS);
-                                else
-                                    showToast("Already up to date!", Toasts.Type.MESSAGE);
-                            } catch (e) {
-                                new Logger(this.name).error("Error while updating:", e);
-                                showToast("Failed to update :(", Toasts.Type.FAILURE);
-                            }
-                        }}
-                    >
-                        Update Now
-                    </Button>
-                );
-            }
-
-            if (props.channel.id === SUPPORT_CHANNEL_ID) {
-                if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
-                    buttons.push(
-                        <Button
-                            key="vc-dbg"
-                            onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
-                        >
-                            Run /vencord-debug
-                        </Button>,
-                        <Button
-                            key="vc-plg-list"
-                            onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
-                        >
-                            Run /vencord-plugins
-                        </Button>
-                    );
-                }
-
-                if (props.message.author.id === VENBOT_USER_ID) {
-                    const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-                    if (match) {
-                        buttons.push(
-                            <Button
-                                key="vc-run-snippet"
-                                onClick={async () => {
-                                    try {
-                                        await AsyncFunction(match[1])();
-                                        showToast("Success!", Toasts.Type.SUCCESS);
-                                    } catch (e) {
-                                        new Logger(this.name).error("Error while running snippet:", e);
-                                        showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                                    }
-                                }}
-                            >
-                                Run Snippet
-                            </Button>
-                        );
-                    }
-                }
-            }
-
-            return buttons.length
-                ? <Flex>{buttons}</Flex>
-                : null;
-        });
-    },
 });

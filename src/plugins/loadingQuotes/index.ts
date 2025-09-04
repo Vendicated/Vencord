@@ -62,7 +62,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".LOADING_DID_YOU_KNOW",
+            find: "#{intl::LOADING_DID_YOU_KNOW}",
             replacement: [
                 {
                     match: /"_loadingText".+?(?=(\i)\[.{0,10}\.random)/,

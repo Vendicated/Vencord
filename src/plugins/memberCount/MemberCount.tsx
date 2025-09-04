@@ -14,7 +14,7 @@ import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
     const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
 
-    const guildId = isTooltip ? tooltipGuildId! : currentChannel.guild_id;
+    const guildId = isTooltip ? tooltipGuildId! : currentChannel?.guild_id;
 
     const totalCount = useStateFromStores(
         [GuildMemberCountStore],
@@ -33,7 +33,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
     const threadGroups = useStateFromStores(
         [ThreadMemberListStore],
-        () => ThreadMemberListStore.getMemberListSections(currentChannel.id)
+        () => ThreadMemberListStore.getMemberListSections(currentChannel?.id)
     );
 
     if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {

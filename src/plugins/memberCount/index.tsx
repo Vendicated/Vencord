@@ -23,17 +23,17 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
-import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
 
-export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
+export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId?: string): number | null; };
 export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
-    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
+    getProps(guildId?: string, channelId?: string): { groups: { count: number; id: string; }[]; };
 };
 export const ThreadMemberListStore = findStoreLazy("ThreadMemberListStore") as FluxStore & {
-    getMemberListSections(channelId: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
+    getMemberListSections(channelId?: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
 };
 
 
@@ -65,16 +65,18 @@ export default definePlugin({
     patches: [
         {
             find: "{isSidebarVisible:",
-            replacement: {
-                match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-                replace: ":[$1?.startsWith('members')?$self.render():null,$2"
-            },
+            replacement: [
+                {
+                    match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                    replace: ":[$1?.startsWith('members')?$self.render():null,$2",
+                },
+            ],
             predicate: () => settings.store.memberList
         },
         {
             find: ".invitesDisabledTooltip",
             replacement: {
-                match: /\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100}(?=])/,
+                match: /#{intl::VIEW_AS_ROLES_MENTIONS_WARNING}.{0,100}(?=])/,
                 replace: "$&,$self.renderTooltip(arguments[0].guild)"
             },
             predicate: () => settings.store.toolTip

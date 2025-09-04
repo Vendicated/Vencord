@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel } from "discord-types/general";
+import { Channel } from "@vencord/discord-types";
 
 export interface ChannelDelete {
     type: "CHANNEL_DELETE";
@@ -50,10 +50,6 @@ export interface SimpleGuild {
     id: string;
     name: string;
     iconURL?: string;
-}
-
-export const enum ChannelType {
-    GROUP_DM = 3,
 }
 
 export const enum RelationshipType {
