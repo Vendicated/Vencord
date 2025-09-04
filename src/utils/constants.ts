@@ -546,10 +546,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Lumap",
         id: 585278686291427338n,
     },
-    unionizing: {
-        name: "unionizing",
-        id: 974119318235271228n
-    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
