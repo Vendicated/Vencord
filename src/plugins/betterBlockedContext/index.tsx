@@ -9,9 +9,9 @@ import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { ButtonProps,User } from "@vencord/discord-types";
+import { ButtonProps, User } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, FluxDispatcher, showToast, Text, UserStore } from "@webpack/common";
+import { Button, FluxDispatcher, React, showToast, Text, UserStore } from "@webpack/common";
 import { MouseEvent } from "react";
 
 const ChannelActions = findByPropsLazy("openPrivateChannel");
@@ -73,10 +73,12 @@ export default definePlugin({
             ],
         },
         // Allow opening DMs from the popout even if a user is blocked, so you can read the chat logs if needed.
+        // TODO insert message button & context menu instead of changing the types around
+        //  discord unfortunately fucked the simple solution of changing the type so now we gotta patch more harshly
         {
             find: /if\(\i===\i.\i.BLOCKED\)/,
             group: true,
-            replacement:  [
+            replacement: [
                 {
                     match: /if\((?=\i===\i.\i.BLOCKED\))/,
                     replace: "if (false&&",
@@ -86,9 +88,22 @@ export default definePlugin({
                     replace: (_, type) => `||${type}===${RelationshipTypes.BLOCKED})`,
                 },
                 // fix settings not closing when clicking the Message button
+                // todo check if we wanna patch this into the activity panel too
                 {
                     match: /(?<=\i.bot.{0,65}children:.*?onClose:)(.*?),/,
                     replace: "() => {$1();$self.closeSettingsWindow();},",
+                }
+            ],
+        },
+        {
+            find: /.FRIEND\|\|\i===\i.\i.PENDING_OUTGOING/,
+            replacement: [
+                {
+                    // Add a message button and a context menu into the profile popout of blocked users
+                    // thanks to discord being discord, we need to steal those
+                    // i think its quite stupid to make the profile popout be a completely dead end, hence this patch
+                    match: /(?<=\i.\i.BLOCKED\?)null(?=:.{0,680}.PENDING_OUTGOING.+?jsx\)\((\i.\i),(\{.*?\})\),.*?\}\),.+?jsx\)\((\i.\i),(\{.*?\})\))/,
+                    replace: (_, messageButton, messageButtonProps, contextMenu, contextMenuProps) => `$self.generateFragment(${messageButton}, ${messageButtonProps}, ${contextMenu}, ${contextMenuProps})`,
                 }
             ],
         },
@@ -130,7 +145,14 @@ export default definePlugin({
         }
     ],
 
-    closeSettingsWindow(){
+    generateFragment(buttonFn, buttonProps, menuFn, menuProps) {
+        return <React.Fragment>
+            {buttonFn(buttonProps)}
+            {menuFn(menuProps)}
+        </React.Fragment>;
+    },
+
+    closeSettingsWindow() {
         Promise.resolve(FluxDispatcher.dispatch({ type: "LAYER_POP" })).catch(
             e => {
                 showToast("Failed to close settings window! Check the console for more info");
@@ -140,13 +162,13 @@ export default definePlugin({
     },
 
     openUserProfile(user: User) {
-        Promise.resolve(openUserProfile(user.id)).catch(e =>{
+        Promise.resolve(openUserProfile(user.id)).catch(e => {
             showToast("Failed to open profile for user '" + user.username + "'! Check the console for more info");
             console.error(e);
         });
     },
 
-    generateButtons(props: { user: User, originalProps: ButtonProps, isBlocked: boolean }) {
+    generateButtons(props: { user: User, originalProps: ButtonProps, isBlocked: boolean; }) {
         const { user, originalProps, isBlocked } = props;
 
         if (isBlocked && (settings.store.showUnblockConfirmation || settings.store.showUnblockConfirmationEverywhere)) {
@@ -157,7 +179,7 @@ export default definePlugin({
             };
         }
 
-        const unblockButton = <BlockButtonComponent {...originalProps}/>;
+        const unblockButton = <BlockButtonComponent {...originalProps} />;
 
         if (!settings.store.addDmsButton) return unblockButton;
 
@@ -180,7 +202,7 @@ export default definePlugin({
         this.closeSettingsWindow();
     },
 
-    openConfirmationModal(event: MouseEvent, callback: () => any, user: User|string, isSettingsOrigin: boolean = false) {
+    openConfirmationModal(event: MouseEvent, callback: () => any, user: User | string, isSettingsOrigin: boolean = false) {
         if (event.shiftKey && settings.store.allowShiftUnblock) return callback();
 
         if (typeof user === "string") {
