@@ -40,3 +40,9 @@
 [submodule "src/userplugins/betterForwardMeta"]
 	path = src/userplugins/betterForwardMeta
 	url = https://git.nin0.dev/userplugins/betterForwardMeta.git
+[submodule "src/userplugins/HolyNotes-VC"]
+	path = src/userplugins/HolyNotes-VC
+	url = https://github.com/WolfPlugs/HolyNotes-VC.git
+[submodule "src/userplugins/vc-showMessageEmbeds"]
+	path = src/userplugins/vc-showMessageEmbeds
+	url = https://github.com/lolsuffocate/vc-showMessageEmbeds.git
