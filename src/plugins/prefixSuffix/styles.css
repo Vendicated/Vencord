@@ -1,0 +1,24 @@
+.vc-prefixSuffix-modal-content {
+    padding: 1em;
+}
+
+.vc-prefixSuffix-modal-header {
+    place-content: center space-between;
+}
+
+.vc-prefixSuffix-modal-title {
+    margin: 0;
+}
+
+.vc-prefixSuffix-chat-button {
+    scale: 1.085;
+    text-wrap: nowrap;
+}
+
+.vc-prefixSuffix-chat-button-on {
+    color: rgb(67 162 90);
+}
+
+.vc-prefixSuffix-chat-button-off {
+    color: inherit;
+}
