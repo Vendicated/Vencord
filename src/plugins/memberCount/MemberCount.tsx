@@ -22,7 +22,7 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
             if (!voiceEnabled) return 0;
 
             const voiceStates = VoiceStateStore.getVoiceStates(guildId);
-            if (!voiceStates || isObjectEmpty(voiceStates)) return 0;
+            if (!voiceStates) return 0;
 
             return Object.values(voiceStates)
                 .filter(({ channelId }) => {
