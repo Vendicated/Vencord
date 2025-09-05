@@ -22,17 +22,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import {
-    Button,
-    ChannelStore,
-    Forms,
-    GuildMemberStore,
-    SelectedChannelStore,
-    SelectedGuildStore,
-    useMemo,
-    UserStore,
-    VoiceStateStore
-} from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { getCurrentVoice, settings } from "./settings";

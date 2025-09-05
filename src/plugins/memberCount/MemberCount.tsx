@@ -6,15 +6,7 @@
 
 import { getCurrentChannel } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
-import {
-    ChannelStore, PermissionsBits,
-    PermissionStore,
-    SelectedChannelStore,
-    Tooltip,
-    useEffect,
-    useStateFromStores,
-    VoiceStateStore,
-} from "@webpack/common";
+import { ChannelStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
 import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
@@ -104,7 +96,7 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
                 <Tooltip text={`${formattedVoiceCount} members in voice`} position="bottom">
                     {props => (
                         <div {...props} className={cl("container")}>
-                            <VoiceIcon/>
+                            <VoiceIcon />
                             <span className={cl("total")}>{formattedVoiceCount}</span>
                         </div>
                     )}
