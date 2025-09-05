@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import ErrorBoundary from "@components/ErrorBoundary";
+import ErrorBoundary, { doesntNeedErrorBoundary } from "@components/ErrorBoundary";
 import { waitFor } from "@webpack";
 import { ReactNode } from "react";
 
@@ -39,7 +39,7 @@ export function nextNotice() {
 }
 
 export function showNotice(message: ReactNode, buttonText: string, onOkClick: () => void) {
-    const notice = <ErrorBoundary fallback={() => "Error Showing Notice"}>{message}</ErrorBoundary>;
+    const notice = doesntNeedErrorBoundary(message) ? message : <ErrorBoundary fallback={() => "Error Showing Notice"}>{message}</ErrorBoundary>;
     noticesQueue.push(["GENERIC", notice, buttonText, onOkClick]);
     if (!currentNotice) nextNotice();
 }

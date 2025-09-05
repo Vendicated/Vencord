@@ -20,6 +20,7 @@ import { LazyComponent, LazyComponentWrapper } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import type { React } from "@webpack/common";
+import { ReactNode } from "react";
 
 import { ErrorCard } from "./ErrorCard";
 
@@ -123,5 +124,15 @@ ErrorBoundary.wrap = (Component, errorBoundaryProps) => props => (
         <Component {...props} />
     </ErrorBoundary>
 );
+
+/**
+ * Can {@link node} be safely rendered without an {@link ErrorBoundary}
+ *
+ * @returns true if it can
+ */
+export function doesntNeedErrorBoundary(node: ReactNode): boolean {
+    const t = typeof node;
+    return t === "string" || t === "number" || t === "bigint" || t === "boolean" || t === "undefined";
+}
 
 export default ErrorBoundary;
