@@ -37,7 +37,7 @@ export const ThreadMemberListStore = findStoreLazy("ThreadMemberListStore") as F
 };
 
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     toolTip: {
         type: OptionType.BOOLEAN,
         description: "Show member count on the server tooltip",
@@ -53,8 +53,7 @@ const settings = definePluginSettings({
     voiceActivity: {
         type: OptionType.BOOLEAN,
         description: "Show voice activity with member count in the member list",
-        default: false,
-        restartNeeded: true
+        default: true
     }
 });
 
@@ -88,6 +87,6 @@ export default definePlugin({
             predicate: () => settings.store.toolTip
         }
     ],
-    render: ErrorBoundary.wrap(() => <MemberCount voiceEnabled={settings.store.voiceActivity} />, { noop: true }),
+    render: ErrorBoundary.wrap(() => <MemberCount />, { noop: true }),
     renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });

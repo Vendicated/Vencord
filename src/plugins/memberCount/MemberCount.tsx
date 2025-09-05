@@ -8,18 +8,20 @@ import { getCurrentChannel } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
 import { ChannelStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
-import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore } from ".";
+import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, settings, ThreadMemberListStore } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 import { VoiceIcon } from "./VoiceIcon";
 
-export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isTooltip?: true; tooltipGuildId?: string; voiceEnabled?: boolean; }) {
+export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
+    const { voiceActivity } = settings.use(["voiceActivity"]);
+
     const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
     const guildId = isTooltip ? tooltipGuildId! : currentChannel?.guild_id;
 
     const voiceActivityCount = useStateFromStores(
         [VoiceStateStore],
         () => {
-            if (!voiceEnabled) return 0;
+            if (!voiceActivity) return 0;
 
             const voiceStates = VoiceStateStore.getVoiceStates(guildId);
             if (!voiceStates) return 0;
@@ -90,12 +92,12 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
                     </div>
                 )}
             </Tooltip>
-            {voiceEnabled &&
+            {voiceActivity &&
                 <Tooltip text={`${formattedVoiceCount} members in voice`} position="bottom">
                     {props => (
                         <div {...props} className={cl("container")}>
-                            <VoiceIcon />
-                            <span className={cl("total")}>{formattedVoiceCount}</span>
+                            <VoiceIcon className={cl("voice-icon")} />
+                            <span className={cl("voice")}>{formattedVoiceCount}</span>
                         </div>
                     )}
                 </Tooltip>

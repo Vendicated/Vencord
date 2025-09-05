@@ -5,6 +5,7 @@
 
     --color-online: var(--green-360);
     --color-total: var(--primary-400);
+    --color-voice: var(--primary-400);
 }
 
 .vc-membercount-tooltip {
@@ -33,6 +34,10 @@
     color: var(--color-total);
 }
 
+.vc-membercount-voice {
+    color: var(--color-voice);
+}
+
 .vc-membercount-online-dot {
     background-color: var(--color-online);
     display: inline-block;
@@ -50,6 +55,7 @@
 }
 
 .vc-membercount-voice-icon {
-    width: 18px;
-    height: 18px;
+    color: var(--color-voice);
+    width: 15px;
+    height: 15px;
 }
