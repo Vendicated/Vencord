@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@shared/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, Menu, nativeTheme } from "electron";
+import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -38,7 +38,7 @@ const asarPath = join(dirname(injectorPath), "..", asarName);
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
 
-// @ts-ignore Untyped method? Dies from cringe
+// @ts-expect-error Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
 if (!IS_VANILLA) {
@@ -87,6 +87,11 @@ if (!IS_VANILLA) {
                     options.backgroundColor = "#00000000";
                 }
 
+                if (settings.disableMinSize) {
+                    options.minWidth = 0;
+                    options.minHeight = 0;
+                }
+
                 const needsVibrancy = process.platform === "darwin" && settings.macosVibrancyStyle;
 
                 if (needsVibrancy) {
@@ -99,20 +104,13 @@ if (!IS_VANILLA) {
                 process.env.DISCORD_PRELOAD = original;
 
                 super(options);
-                initIpc(this);
 
-                // Workaround for https://github.com/electron/electron/issues/43367. Vesktop also has its own workaround
-                // @TODO: Remove this when the issue is fixed
-                if (IS_DISCORD_DESKTOP) {
-                    this.webContents.on("devtools-opened", () => {
-                        if (!nativeTheme.shouldUseDarkColors) return;
-
-                        nativeTheme.themeSource = "light";
-                        setTimeout(() => {
-                            nativeTheme.themeSource = "dark";
-                        }, 100);
-                    });
+                if (settings.disableMinSize) {
+                    // Disable the Electron call entirely so that Discord can't dynamically change the size
+                    this.setMinimumSize = (width: number, height: number) => { };
                 }
+
+                initIpc(this);
             } else super(options);
         }
     }
@@ -130,16 +128,9 @@ if (!IS_VANILLA) {
         BrowserWindow
     };
 
-    // Patch appSettings to force enable devtools and optionally disable min size
+    // Patch appSettings to force enable devtools
     onceDefined(global, "appSettings", s => {
         s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true);
-        if (settings.disableMinSize) {
-            s.set("MIN_WIDTH", 0);
-            s.set("MIN_HEIGHT", 0);
-        } else {
-            s.set("MIN_WIDTH", 940);
-            s.set("MIN_HEIGHT", 500);
-        }
     });
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");

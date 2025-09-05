@@ -1,0 +1,5 @@
+/* the profile popout badge container(s) */
+[class*="biteSize_"] [class*="tags_"] [class*="container_"] {
+    /* Discord has padding set to 2px instead of 1px, which causes the 12th badge to wrap to a new line. */
+    padding: 0 1px;
+}
