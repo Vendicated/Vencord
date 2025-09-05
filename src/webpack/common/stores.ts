@@ -47,6 +47,7 @@ export let SelectedGuildStore: t.SelectedGuildStore;
 export let ChannelStore: t.ChannelStore;
 export let TypingStore: t.TypingStore;
 export let RelationshipStore: t.RelationshipStore;
+export let VoiceStateStore: t.VoiceStateStore;
 
 export let EmojiStore: t.EmojiStore;
 export let StickersStore: t.StickersStore;
@@ -79,6 +80,7 @@ waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
+waitForStore("VoiceStateStore", m => VoiceStateStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
