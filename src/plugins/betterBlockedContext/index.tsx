@@ -72,41 +72,6 @@ export default definePlugin({
                 }
             ],
         },
-        // Allow opening DMs from the popout even if a user is blocked, so you can read the chat logs if needed.
-        // TODO insert message button & context menu instead of changing the types around
-        //  discord unfortunately fucked the simple solution of changing the type so now we gotta patch more harshly
-        {
-            find: /if\(\i===\i.\i.BLOCKED\)/,
-            group: true,
-            replacement: [
-                {
-                    match: /if\((?=\i===\i.\i.BLOCKED\))/,
-                    replace: "if (false&&",
-                },
-                {
-                    match: /(?<=if\((\i)===\i.\i.FRIEND\|\|\i.bot)\)/,
-                    replace: (_, type) => `||${type}===${RelationshipTypes.BLOCKED})`,
-                },
-                // fix settings not closing when clicking the Message button
-                // todo check if we wanna patch this into the activity panel too
-                {
-                    match: /(?<=\i.bot.{0,65}children:.*?onClose:)(.*?),/,
-                    replace: "() => {$1();$self.closeSettingsWindow();},",
-                }
-            ],
-        },
-        {
-            find: /.FRIEND\|\|\i===\i.\i.PENDING_OUTGOING/,
-            replacement: [
-                {
-                    // Add a message button and a context menu into the profile popout of blocked users
-                    // thanks to discord being discord, we need to steal those
-                    // i think its quite stupid to make the profile popout be a completely dead end, hence this patch
-                    match: /(?<=\i.\i.BLOCKED\?)null(?=:.{0,680}.PENDING_OUTGOING.+?jsx\)\((\i.\i),(\{.*?\})\),.*?\}\),.+?jsx\)\((\i.\i),(\{.*?\})\))/,
-                    replace: (_, messageButton, messageButtonProps, contextMenu, contextMenuProps) => `$self.generateFragment(${messageButton}, ${messageButtonProps}, ${contextMenu}, ${contextMenuProps})`,
-                }
-            ],
-        },
         // Allows users to skip the warning about blocked users when opening their profile.
         {
             find: ".useSetting(),{isBlocked:",
