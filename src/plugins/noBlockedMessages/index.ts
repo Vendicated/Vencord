@@ -22,32 +22,17 @@ import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { i18n, RelationshipStore } from "@webpack/common";
-
-const settings = definePluginSettings({
-    ignoreBlockedMessages: {
-        description: "Completely ignores (recent) incoming messages from blocked users (locally)",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true,
-    },
-    applyToIgnoredUsers: {
-        description: "Additionally apply to 'ignored' users",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: false
-    },
-    hideRepliesToBlockedMessages: {
-        description: "Hides replies to blocked messages",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: false,
-    },
-});
+import { i18n, MessageStore, RelationshipStore } from "@webpack/common";
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
     collapsedReason: () => any;
+}
+
+interface ChannelStreamProps {
+    // this is incomplete but we only need content and type
+    type: string,
+    content: Message,
 }
 
 // Remove this migration once enough time has passed
@@ -58,6 +43,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
+    },
+    hideRepliesToBlockedMessages: {
+        description: "Hides replies to blocked messages",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false,
     },
     applyToIgnoredUsers: {
         description: "Additionally apply to 'ignored' users",
@@ -96,25 +87,33 @@ export default definePlugin({
             ]
         })),
         {
-            find: ".messageListItem",
+            find: '"forum-post-action-bar-"',
             replacement: [
                 {
-                    match: /CUSTOM_GIFT.*?=(?=\(0,\i.jsx\)\(\i.FocusRing)/,
-                    replace: "$&!$self.isReplyToBlocked(arguments[0].message)&&",
+                    // There is only one occurrence of .map in this module.
+                    match: /(\i).map\(/,
+                    replace: "$1.filter(el => !$self.isReplyToBlocked(el)).map(",
                 }
-            ],
+            ]
         },
     ],
 
-    isReplyToBlocked(message: Message) {
+
+    isReplyToBlocked(elem: ChannelStreamProps) {
         if (!settings.store.hideRepliesToBlockedMessages) return false;
+        // if we don't check for MESSAGE_GROUP_BLOCKED there will be gaps in the chat.
+        if (elem.type === "MESSAGE_GROUP_BLOCKED") return true;
+        if (elem.type !== "MESSAGE") return false;
+
+        const message: Message = elem.content;
         try {
             const { messageReference } = message;
             if (!messageReference) return false;
 
             const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
+            if (!replyMessage) return false; // For some reason in some instances this will be undefined.
 
-            return replyMessage ? this.isBlocked(replyMessage) : false;
+            return replyMessage ? this.shouldIgnoreMessage(replyMessage) : false;
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked:", e);
         }
