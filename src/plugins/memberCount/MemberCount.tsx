@@ -92,7 +92,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                     </div>
                 )}
             </Tooltip>
-            {voiceActivity &&
+            {voiceActivity && voiceActivityCount > 0 &&
                 <Tooltip text={`${formattedVoiceCount} members in voice`} position="bottom">
                     {props => (
                         <div {...props} className={cl("container")}>
