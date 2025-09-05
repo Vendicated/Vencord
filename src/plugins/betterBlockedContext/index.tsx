@@ -11,11 +11,10 @@ import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { ButtonProps, User } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, FluxDispatcher, React, showToast, Text, UserStore } from "@webpack/common";
+import { Button, FluxDispatcher, showToast, Text, UserStore } from "@webpack/common";
 import { MouseEvent } from "react";
 
 const ChannelActions = findByPropsLazy("openPrivateChannel");
-const RelationshipTypes = findByPropsLazy("FRIEND", "BLOCKED", "PENDING_OUTGOING");
 
 const ButtonComponent = findComponentByCodeLazy('submittingStartedLabel","submittingFinishedLabel"]);');
 const BlockButtonComponent = findComponentByCodeLazy("iconOpticalOffsetMargin", "buttonChildren", "hasReducedMotion");
@@ -109,13 +108,6 @@ export default definePlugin({
             predicate: () => settings.store.showUnblockConfirmationEverywhere,
         }
     ],
-
-    generateFragment(buttonFn, buttonProps, menuFn, menuProps) {
-        return <React.Fragment>
-            {buttonFn(buttonProps)}
-            {menuFn(menuProps)}
-        </React.Fragment>;
-    },
 
     closeSettingsWindow() {
         Promise.resolve(FluxDispatcher.dispatch({ type: "LAYER_POP" })).catch(
