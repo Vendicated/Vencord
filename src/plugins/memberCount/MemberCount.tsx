@@ -26,6 +26,7 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
 
             return Object.values(voiceStates)
                 .filter(({ channelId }) => {
+                    if (!channelId) return false;
                     const channel = ChannelStore.getChannel(channelId);
                     return channel && PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel);
                 })

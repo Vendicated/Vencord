@@ -1,12 +1,13 @@
+import { DiscordRecord } from "../common";
 import { FluxStore } from "./FluxStore";
 
 export type UserVoiceStateRecords = Record<string, VoiceState>;
 export type VoiceStates = Record<string, UserVoiceStateRecords>;
 
-export interface VoiceState {
+export interface VoiceState extends DiscordRecord {
     userId: string;
-    channelId: string;
-    sessionId: string | undefined;
+    channelId: string | null | undefined;
+    sessionId: string | null | undefined;
     mute: boolean;
     deaf: boolean;
     selfMute: boolean;
@@ -14,7 +15,7 @@ export interface VoiceState {
     selfVideo: boolean;
     selfStream: boolean | undefined;
     suppress: boolean;
-    requestToSpeakTimestamp: number | undefined;
+    requestToSpeakTimestamp: string | null | undefined;
     discoverable: boolean;
 
     isVoiceMuted(): boolean;
