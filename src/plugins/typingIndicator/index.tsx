@@ -24,14 +24,12 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
 const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
-const TypingStore = findStoreLazy("TypingStore");
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
 const enum IndicatorMode {
@@ -47,7 +45,7 @@ function getDisplayName(guildId: string, userId: string) {
 function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: string; }) {
     const typingUsers: Record<string, number> = useStateFromStores(
         [TypingStore],
-        () => ({ ...TypingStore.getTypingUsers(channelId) as Record<string, number> }),
+        () => ({ ...TypingStore.getTypingUsers(channelId) }),
         null,
         (old, current) => {
             const oldKeys = Object.keys(old);
@@ -91,7 +89,7 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
         }
         default: {
             tooltipText = Settings.plugins.TypingTweaks.enabled
-                ? buildSeveralUsers({ a: UserStore.getUser(a), b: UserStore.getUser(b), count: typingUsersArray.length - 2, guildId })
+                ? buildSeveralUsers({ users: [a, b].map(UserStore.getUser), count: typingUsersArray.length - 2, guildId })
                 : getIntlMessage("SEVERAL_USERS_TYPING");
             break;
         }
@@ -174,7 +172,7 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
+                match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
             }
         },

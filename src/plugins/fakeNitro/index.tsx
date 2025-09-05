@@ -24,16 +24,11 @@ import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
 import type { Emoji, Message } from "@vencord/discord-types";
+import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
-
-const StickerStore = findStoreLazy("StickersStore") as {
-    getPremiumPacks(): StickerPack[];
-    getAllGuildStickers(): Map<string, Sticker[]>;
-    getStickerById(id: string): Sticker | undefined;
-};
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
@@ -69,41 +64,6 @@ const enum EmojiIntentions {
 }
 
 const IS_BYPASSEABLE_INTENTION = `[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`;
-
-const enum StickerType {
-    PNG = 1,
-    APNG = 2,
-    LOTTIE = 3,
-    // don't think you can even have gif stickers but the docs have it
-    GIF = 4
-}
-
-interface BaseSticker {
-    available: boolean;
-    description: string;
-    format_type: number;
-    id: string;
-    name: string;
-    tags: string;
-    type: number;
-}
-interface GuildSticker extends BaseSticker {
-    guild_id: string;
-}
-interface DiscordSticker extends BaseSticker {
-    pack_id: string;
-}
-type Sticker = GuildSticker | DiscordSticker;
-
-interface StickerPack {
-    id: string;
-    name: string;
-    sku_id: string;
-    description: string;
-    cover_sticker_id: string;
-    banner_asset_id: string;
-    stickers: Sticker[];
-}
 
 const enum FakeNoticeType {
     Sticker,
@@ -255,11 +215,8 @@ export default definePlugin({
                 },
                 {
                     // Disallow the emoji for premium locked if the intention doesn't allow it
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(!)?(\i\.\i\.canUseEmojisEverywhere\(\i\))/,
-                    replace: (m, not) => not
-                        ? `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
-                        : `(${m}||${IS_BYPASSEABLE_INTENTION})`
+                    match: /!(\i\.\i\.canUseEmojisEverywhere\(\i\))/,
+                    replace: m => `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
                 },
                 {
                     // Allow animated emojis to be used if the intention allows it
@@ -552,8 +509,8 @@ export default definePlugin({
 
                 const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
-                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                    if (StickerStore.getStickerById(gifMatch[1])) return null;
+                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
+                    if (StickersStore.getStickerById(gifMatch[1])) return null;
                 }
             }
 
@@ -641,7 +598,7 @@ export default definePlugin({
                     url = new URL(item);
                 } catch { }
 
-                const stickerName = StickerStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
+                const stickerName = StickersStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 1,
                     id: imgMatch[1],
@@ -654,9 +611,9 @@ export default definePlugin({
 
             const gifMatch = item.match(fakeNitroGifStickerRegex);
             if (gifMatch) {
-                if (!StickerStore.getStickerById(gifMatch[1])) continue;
+                if (!StickersStore.getStickerById(gifMatch[1])) continue;
 
-                const stickerName = StickerStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
+                const stickerName = StickersStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 2,
                     id: gifMatch[1],
@@ -692,8 +649,8 @@ export default definePlugin({
 
                         const gifMatch = url.match(fakeNitroGifStickerRegex);
                         if (gifMatch) {
-                            // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                            if (StickerStore.getStickerById(gifMatch[1])) return true;
+                            // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
+                            if (StickersStore.getStickerById(gifMatch[1])) return true;
                         }
                     }
 
@@ -713,8 +670,8 @@ export default definePlugin({
 
             const match = attachment.url.match(fakeNitroGifStickerRegex);
             if (match) {
-                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
-                if (StickerStore.getStickerById(match[1])) return false;
+                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
+                if (StickersStore.getStickerById(match[1])) return false;
             }
 
             return true;
@@ -843,7 +800,7 @@ export default definePlugin({
                             however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
-                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
+                        <Forms.FormText>
                             You can disable this notice in the plugin settings.
                         </Forms.FormText>
                     </div>,
@@ -869,7 +826,7 @@ export default definePlugin({
                 if (!s.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
+                const sticker = StickersStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -886,11 +843,11 @@ export default definePlugin({
                 // but will give us a normal non animated png for no reason
                 // TODO: Remove this workaround when it's not needed anymore
                 let link = this.getStickerLink(sticker.id);
-                if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
+                if (sticker.format_type === StickerFormatType.GIF && link.includes(".png")) {
                     link = link.replace(".png", ".gif");
                 }
 
-                if (sticker.format_type === StickerType.APNG) {
+                if (sticker.format_type === StickerFormatType.APNG) {
                     if (!hasAttachmentPerms(channelId)) {
                         Alerts.show({
                             title: "Hold on!",
