@@ -92,20 +92,27 @@ export default definePlugin({
                 {
                     // There is only one occurrence of .map in this module.
                     match: /(\i).map\(/,
-                    replace: "$1.filter(el => !$self.isReplyToBlocked(el)).map(",
+                    replace: "$self.filterStream($1).map("
                 }
             ]
         },
     ],
 
+    filterStream(channelStream: ChannelStreamProps[]) {
+        return channelStream.filter(
+            elem => {
+                // if we don't check for MESSAGE_GROUP_BLOCKED there will be gaps in the chat.
+                if (elem.type === "MESSAGE_GROUP_BLOCKED") return false;
+                if (elem.type !== "MESSAGE") return true;
+                return !this.isReplyToBlocked(elem.content);
+            }
+        );
+    },
 
-    isReplyToBlocked(elem: ChannelStreamProps) {
+
+    isReplyToBlocked(message: Message) {
         if (!settings.store.hideRepliesToBlockedMessages) return false;
-        // if we don't check for MESSAGE_GROUP_BLOCKED there will be gaps in the chat.
-        if (elem.type === "MESSAGE_GROUP_BLOCKED") return true;
-        if (elem.type !== "MESSAGE") return false;
 
-        const message: Message = elem.content;
         try {
             const { messageReference } = message;
             if (!messageReference) return false;
