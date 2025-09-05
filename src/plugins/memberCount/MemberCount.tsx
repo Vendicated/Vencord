@@ -21,17 +21,13 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
         () => {
             if (!voiceEnabled) return 0;
 
-            const voiceStates = VoiceStateStore.getAllVoiceStates()[guildId!];
+            const voiceStates = VoiceStateStore.getVoiceStates(guildId);
             if (!voiceStates || isObjectEmpty(voiceStates)) return 0;
 
             return Object.values(voiceStates)
                 .filter(({ channelId }) => {
-                    if (!channelId) return false;
-
                     const channel = ChannelStore.getChannel(channelId);
-                    if (!channel) return false;
-
-                    return PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel);
+                    return channel && PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel);
                 })
                 .length;
         }
