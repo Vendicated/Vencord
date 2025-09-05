@@ -54,6 +54,7 @@ export let StickersStore: t.StickersStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+export let StreamerModeStore: t.StreamerModeStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -81,6 +82,7 @@ waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("VoiceStateStore", m => VoiceStateStore = m);
+waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
