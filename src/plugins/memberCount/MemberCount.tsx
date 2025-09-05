@@ -54,7 +54,7 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
         () => ThreadMemberListStore.getMemberListSections(currentChannel?.id)
     );
 
-    if (!isTooltip && groups.length > 0 && groups[0].id !== "unknown") {
+    if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {
         onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
     }
 
@@ -66,7 +66,8 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
         OnlineMemberCountStore.ensureCount(guildId);
     }, [guildId]);
 
-    if (totalCount == null) return null;
+    if (totalCount == null)
+        return null;
 
     const formattedVoiceCount = numberFormat(voiceActivityCount ?? 0);
     const formattedOnlineCount = onlineCount != null ? numberFormat(onlineCount) : "?";
