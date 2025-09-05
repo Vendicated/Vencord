@@ -133,7 +133,7 @@ const MessagePreview = findComponentByCodeLazy<{
     hideSimpleEmbedContent: boolean
 }>(/previewGuildId:\i,preview:\i,/);
 const createMessage = findByCodeLazy(/channelId:\i,content:\i,tts:\i=!1,/);
-const populateMessagePrototype = findByCodeLazy(/PREMIUM_REFERRAL\?\(\i=\i.default.isProbablyAValidSnowflake\(/);
+const populateMessagePrototype = findByCodeLazy(/PREMIUM_REFERRAL&&\(\i=\i.default.isProbablyAValidSnowflake\(/);
 
 const DemoMessage = (props: { msgId, compact, message, date: Date | undefined, isGroupStart?: boolean }) => {
     const message = createMessage({
