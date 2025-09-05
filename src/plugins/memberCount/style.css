@@ -1,5 +1,5 @@
 .vc-membercount-widget {
-    gap: 10px;
+    gap: 0.85em;
     display: flex;
     align-content: center;
 
@@ -23,7 +23,7 @@
 .vc-membercount-container {
     display: flex;
     align-items: center;
-    gap: 5px 10px;
+    gap: 0.5em;
 }
 
 .vc-membercount-online {
