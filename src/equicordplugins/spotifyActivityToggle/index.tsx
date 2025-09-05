@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Constants, React, RestAPI } from "@webpack/common";
+import { Constants, React, RestAPI, useEffect, useState } from "@webpack/common";
 
 const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
 
@@ -35,55 +34,54 @@ function makeSpotifyIcon(enabled: boolean) {
     );
 }
 
-async function setSpotifyActivity(value: boolean) {
-    const { body } = await RestAPI.get({
-        url: Constants.Endpoints.CONNECTIONS
-    });
-
-    if (!body) return;
-    const spotifyId = body.find(conn => conn.type === "spotify")?.id;
-
-    await RestAPI.patch({
-        url: Constants.Endpoints.CONNECTION("spotify", spotifyId),
-        body: {
-            show_activity: value,
-        },
-    });
-}
-
 function SpotifyActivityToggleButton() {
-    const { spotifyConnection } = settings.store;
+    const [loading, setLoading] = useState(true);
+    const [id, setId] = useState<string | null>(null);
+    const [showActivity, setShowActivity] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const { body } = await RestAPI.get({
+                url: Constants.Endpoints.CONNECTIONS,
+            });
+            if (!body) return;
+
+            const spotifyConn = body.find(c => c.type === "spotify");
+            if (spotifyConn) {
+                setId(spotifyConn.id);
+                setShowActivity(spotifyConn.show_activity);
+            }
+            setLoading(false);
+        })();
+    }, []);
+
+    if (loading || !id || showActivity === null) return null;
 
     return (
         <Button
-            tooltipText={spotifyConnection ? "Turn off Spotify activity" : "Turn on Spotify activity"}
-            icon={makeSpotifyIcon(spotifyConnection)}
+            tooltipText={showActivity ? "Turn off Spotify activity" : "Turn on Spotify activity"}
+            icon={makeSpotifyIcon(showActivity)}
             role="switch"
-            aria-checked={spotifyConnection}
-            redGlow={!spotifyConnection}
+            aria-checked={showActivity}
+            redGlow={!showActivity}
             onClick={async () => {
-                const newValue = !spotifyConnection;
-                settings.store.spotifyConnection = newValue;
-                setSpotifyActivity(newValue);
+                const newValue = !showActivity;
+                setShowActivity(newValue);
+                await RestAPI.patch({
+                    url: Constants.Endpoints.CONNECTION("spotify", id),
+                    body: {
+                        show_activity: newValue,
+                    },
+                });
             }}
         />
     );
 }
 
-const settings = definePluginSettings({
-    spotifyConnection: {
-        type: OptionType.BOOLEAN,
-        description: "Show Spotify activity",
-        default: false,
-        onChange: async value => setSpotifyActivity(value),
-    }
-});
-
 export default definePlugin({
     name: "SpotifyActivityToggle",
     description: "Adds a toggle button for Spotify activity visibility.",
     authors: [EquicordDevs.thororen],
-    settings,
     patches: [
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
