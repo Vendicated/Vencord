@@ -8,8 +8,8 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
-import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
+import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
+import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
 const cl = classNameFactory("vc-uvs-");
 
@@ -18,7 +18,6 @@ const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
     useChannelName: filters.byCode("()=>null==")
 });
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 const Avatar = findComponentByCodeLazy(".status)/2):0");
 const GroupDMAvatars = findComponentByCodeLazy("frontSrc:", "getAvatarURL");
@@ -84,7 +83,7 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     const voiceStates = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStatesForChannel(channel.id));
 
     const users = useMemo(
-        () => Object.values<any>(voiceStates).map(voiceState => UserStore.getUser(voiceState.userId)).filter(user => user != null),
+        () => Object.values(voiceStates).map(voiceState => UserStore.getUser(voiceState.userId)).filter(user => user != null),
         [voiceStates]
     );
 
@@ -139,7 +138,7 @@ export interface VoiceChannelIndicatorProps {
 const clickTimers = {} as Record<string, any>;
 
 export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
-    const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
+    const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId);
 
     const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
     if (channel == null) return null;
