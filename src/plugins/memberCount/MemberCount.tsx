@@ -14,6 +14,7 @@ import { VoiceIcon } from "./VoiceIcon";
 
 export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
     const { voiceActivity } = settings.use(["voiceActivity"]);
+    const includeVoice = voiceActivity && !isTooltip;
 
     const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
     const guildId = isTooltip ? tooltipGuildId! : currentChannel?.guild_id;
@@ -21,7 +22,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
     const voiceActivityCount = useStateFromStores(
         [VoiceStateStore],
         () => {
-            if (!voiceActivity) return 0;
+            if (!includeVoice) return 0;
 
             const voiceStates = VoiceStateStore.getVoiceStates(guildId);
             if (!voiceStates) return 0;
@@ -92,7 +93,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                     </div>
                 )}
             </Tooltip>
-            {voiceActivity && voiceActivityCount > 0 &&
+            {includeVoice && voiceActivityCount > 0 &&
                 <Tooltip text={`${formattedVoiceCount} members in voice`} position="bottom">
                     {props => (
                         <div {...props} className={cl("container")}>
