@@ -6,7 +6,12 @@
     margin: 10px 0;
 }
 
-.vc-cmt-preview-text {
-    color: yellow;
-    margin: 8px 0;
+.vc-cmt-demo-message-container{
+    position: sticky;
+    background: var(--background-base-lowest);
+    padding: 10px 0;
+    cursor: pointer;
+    top: -8px;
+    border: solid grey 1px;
+    border-radius: 5px;
 }
