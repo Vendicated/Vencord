@@ -200,7 +200,7 @@ export default definePlugin({
         },
         {
             // Hide the new version of unreads box for hidden channels
-            find: '="ChannelListUnreadsStore",',
+            find: '"ChannelListUnreadsStore",',
             replacement: {
                 match: /(?<=\.id\)\))(?=&&\(0,\i\.\i\)\((\i)\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
@@ -239,7 +239,7 @@ export default definePlugin({
                     replace: (m, channel) => `${m}if($self.isHiddenChannel(${channel}))break;`
                 },
                 {
-                    match: /(?<="renderHeaderBar",\i=>{.+?hideSearch:(\i)\.isDirectory\(\))/,
+                    match: /(?<="renderHeaderBar",\(\)=>{.+?hideSearch:(\i)\.isDirectory\(\))/,
                     replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
@@ -306,7 +306,7 @@ export default definePlugin({
                 },
                 {
                     // Export the channel for the users allowed component patch
-                    match: /maxUsers:\i,users:\i(?<=channel:(\i).+?)/,
+                    match: /maxUsers:\d+?,users:\i(?<=channel:(\i).+?)/,
                     replace: (m, channel) => `${m},shcChannel:${channel}`
                 },
                 {
