@@ -18,6 +18,7 @@ export * from "./ThemeStore";
 export * from "./TypingStore";
 export * from "./UserProfileStore";
 export * from "./UserStore";
+export * from "./VoiceStateStore";
 export * from "./WindowStore";
 
 /**

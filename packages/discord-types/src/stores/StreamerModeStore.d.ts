@@ -1,11 +1,11 @@
-import { FluxStore } from "..";
+import { FluxStore } from "@vencord/discord-types";
 
 export class StreamerModeStore extends FluxStore {
-    autoToggle: boolean;
-    disableNotifications: boolean;
-    disableSounds: boolean;
-    enableContentProtection: boolean;
-    enabled: boolean;
-    hideInstantInvites: boolean;
-    hidePersonalInformation: boolean;
+    get autoToggle(): boolean;
+    get disableNotifications(): boolean;
+    get disableSounds(): boolean;
+    get enableContentProtection(): boolean;
+    get enabled(): boolean;
+    get hideInstantInvites(): boolean;
+    get hidePersonalInformation(): boolean;
 }
