@@ -6,7 +6,7 @@
 
 import "./style.css";
 
-import { definePluginSettings, PlainSettings, useSettings } from "@api/Settings";
+import { definePluginSettings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -80,19 +80,17 @@ const timeFormats: Record<string, TimeFormat> = {
     }
 };
 
-const format = (date: Date, formatTemplate: string, isPreview: boolean): string => {
+const format = (date: Date, formatTemplate: string): string => {
     const mmt = moment(date);
 
     moment.relativeTimeThreshold("s", 60);
     moment.relativeTimeThreshold("ss", -1);
     moment.relativeTimeThreshold("m", 60);
 
-    const formats = isPreview ? settings.store?.instantFormats : settings.store?.formats;
-
-    const sameDayFormat = formats?.sameDayFormat || timeFormats.sameDayFormat.default;
-    const lastDayFormat = formats?.lastDayFormat || timeFormats.lastDayFormat.default;
-    const lastWeekFormat = formats?.lastWeekFormat || timeFormats.lastWeekFormat.default;
-    const sameElseFormat = formats?.sameElseFormat || timeFormats.sameElseFormat.default;
+    const sameDayFormat = settings.store?.formats?.sameDayFormat || timeFormats.sameDayFormat.default;
+    const lastDayFormat = settings.store?.formats?.lastDayFormat || timeFormats.lastDayFormat.default;
+    const lastWeekFormat = settings.store?.formats?.lastWeekFormat || timeFormats.lastWeekFormat.default;
+    const sameElseFormat = settings.store?.formats?.sameElseFormat || timeFormats.sameElseFormat.default;
 
     return mmt.format(formatTemplate)
         .replace("calendar", () => mmt.calendar(null, {
@@ -109,9 +107,6 @@ const TimeRow = (props: TimeRowProps) => {
 
     const handleChange = (value: string) => {
         setState(value);
-        // update an instantly changing setting for previews to use
-        PlainSettings.plugins.CustomMessageTimestamps.instantFormats ??= {};
-        PlainSettings.plugins.CustomMessageTimestamps.instantFormats[props.id] = value;
         props.onChange(props.id, value);
     };
 
@@ -193,10 +188,6 @@ const settings = definePluginSettings({
         component: componentProps => {
             const [settingsState, setSettingsState] = useState(useSettings().plugins?.CustomMessageTimestamps?.formats ?? {});
 
-            useEffect(() => {
-                PlainSettings.plugins.CustomMessageTimestamps.instantFormats = { ...settingsState };
-            }, [settingsState]);
-
             const setNewValue = (key: string, value: string) => {
                 const newSettings = { ...settingsState, [key]: value };
                 setSettingsState(newSettings);
@@ -230,16 +221,6 @@ const settings = definePluginSettings({
     }
 }).withPrivateSettings<{
     formats: {
-        cozyFormat: string;
-        compactFormat: string;
-        tooltipFormat: string;
-        ariaLabelFormat: string;
-        sameDayFormat: string;
-        lastDayFormat: string;
-        lastWeekFormat: string;
-        sameElseFormat: string;
-    };
-    instantFormats: {
         cozyFormat: string;
         compactFormat: string;
         tooltipFormat: string;
@@ -282,18 +263,18 @@ export default definePlugin({
                 {
                     // Aria label on timestamps
                     // lookbehind grabs the message ID so we can differentiate between real and demo messages
-                    match: /\i.useMemo\(\(\)=>\(0,\i\.\i\)\((\i)\),\[\i]\),(?<=isInline:\i=!0,id:(\i),.{0,130})/,
-                    replace: "$self.renderTimestamp($1,'ariaLabel',$2),"
+                    match: /\i.useMemo\(\(\)=>\(0,\i\.\i\)\((\i)\),\[\i]\),/,
+                    replace: "$self.renderTimestamp($1,'ariaLabel'),"
                 },
                 {
                     // Timestamps on messages
-                    match: /\i\.useMemo\(\(\)=>null!=\i\?\(0,\i\.\i\)\(\i,\i\):(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\),\[\i,\i,\i]\)(?<=isInline:\i=!0,id:(\i),.{0,210})/,
-                    replace: "$self.renderTimestamp($2,$1?'compact':'cozy', $3)",
+                    match: /\i\.useMemo\(\(\)=>null!=\i\?\(0,\i\.\i\)\(\i,\i\):(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\),\[\i,\i,\i]\)/,
+                    replace: "$self.renderTimestamp($2,$1?'compact':'cozy')",
                 },
                 {
                     // Tooltips when hovering over message timestamps
-                    match: /\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)(?=,.{0,160},id:(\i),)/,
-                    replace: "$self.renderTimestamp($1,'tooltip', $2)",
+                    match: /(?<=text:)\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)/,
+                    replace: "$self.renderTimestamp($1,'tooltip')",
                 },
             ]
         },
@@ -307,28 +288,22 @@ export default definePlugin({
         }
     ],
 
-    renderTimestamp: (date: Date, type: "cozy" | "compact" | "tooltip" | "ariaLabel", timestampId) => {
-        const msgId = timestampId && timestampId.substring(timestampId.length - 5);
-        const isPreview = msgId === "-1337" || msgId === "-1338" || msgId === "-1339" || msgId === "-1340";
+    renderTimestamp: (date: Date, type: "cozy" | "compact" | "tooltip" | "ariaLabel") => {
         const forceUpdater = useForceUpdater();
         let formatTemplate: string;
 
-        // if this is a preview, use the settings that are updated as they're typed for previewing
-        const formats = { formats: settings.store.formats, instantFormats: settings.store.instantFormats };
-        const pluginSettings = isPreview ? formats.instantFormats : formats.formats;
-
         switch (type) {
             case "cozy":
-                formatTemplate = pluginSettings?.cozyFormat || timeFormats.cozyFormat.default;
+                formatTemplate = settings.store.formats?.cozyFormat || timeFormats.cozyFormat.default;
                 break;
             case "compact":
-                formatTemplate = pluginSettings?.compactFormat || timeFormats.compactFormat.default;
+                formatTemplate = settings.store.formats?.compactFormat || timeFormats.compactFormat.default;
                 break;
             case "tooltip":
-                formatTemplate = pluginSettings?.tooltipFormat || timeFormats.tooltipFormat.default;
+                formatTemplate = settings.store.formats?.tooltipFormat || timeFormats.tooltipFormat.default;
                 break;
             case "ariaLabel":
-                formatTemplate = pluginSettings?.ariaLabelFormat || timeFormats.ariaLabelFormat.default;
+                formatTemplate = settings.store.formats?.ariaLabelFormat || timeFormats.ariaLabelFormat.default;
         }
 
         useEffect(() => {
@@ -338,6 +313,6 @@ export default definePlugin({
             }
         }, []);
 
-        return format(date, formatTemplate, isPreview);
+        return format(date, formatTemplate);
     }
 });
