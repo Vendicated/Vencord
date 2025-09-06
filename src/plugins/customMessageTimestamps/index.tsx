@@ -70,7 +70,7 @@ const timeFormats: Record<string, TimeFormat> = {
         name: "Last week",
         description: "[calendar] format for last week",
         default: "ddd DD.MM.YYYY HH:mm:ss",
-        offset: -1000 * 60 * 60 * 24 * 5,
+        offset: -1000 * 60 * 60 * 24 * 7,
     },
     sameElseFormat: {
         name: "Older date",
