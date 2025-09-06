@@ -14,7 +14,7 @@ import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, moment, React, TextInput, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { Forms, moment, TextInput, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 type TimeFormat = {
     name: string;
@@ -68,9 +68,9 @@ const timeFormats: Record<string, TimeFormat> = {
     },
     lastWeekFormat: {
         name: "Last week",
-        description: "[calendar] format for last week",
+        description: "[calendar] format for within the last week",
         default: "ddd DD.MM.YYYY HH:mm:ss",
-        offset: -1000 * 60 * 60 * 24 * 7,
+        offset: -1000 * 60 * 60 * 24 * 6, // setting an offset of a week exactly pushes it into "older date" territory as soon as a second passes
     },
     sameElseFormat: {
         name: "Older date",
@@ -171,7 +171,7 @@ const DemoMessageContainer = ErrorBoundary.wrap(() => {
             <DemoMessage compact={isCompact} msgId={"1337"}
                          message={`Click me to switch to ${isCompact ? "cozy" : "compact"} mode`} isGroupStart={true}
                          date={aMonthAgo.current}/>
-            <DemoMessage compact={isCompact} msgId={"1338"} message={"This message was sent last week"}
+            <DemoMessage compact={isCompact} msgId={"1338"} message={"This message was sent in the last week"}
                          isGroupStart={true} date={lastWeek.current}/>
             <DemoMessage compact={isCompact} msgId={"1339"} message={"Hover over timestamps to see tooltip formats"}
                          isGroupStart={true} date={yesterday.current}/>
@@ -262,7 +262,6 @@ export default definePlugin({
             replacement: [
                 {
                     // Aria label on timestamps
-                    // lookbehind grabs the message ID so we can differentiate between real and demo messages
                     match: /\i.useMemo\(\(\)=>\(0,\i\.\i\)\((\i)\),\[\i]\),/,
                     replace: "$self.renderTimestamp($1,'ariaLabel'),"
                 },
@@ -273,7 +272,7 @@ export default definePlugin({
                 },
                 {
                     // Tooltips when hovering over message timestamps
-                    match: /(?<=text:)\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)/,
+                    match: /(?<=text:)\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)(?=,)/,
                     replace: "$self.renderTimestamp($1,'tooltip')",
                 },
             ]
@@ -283,7 +282,7 @@ export default definePlugin({
             replacement: {
                 // Tooltips for timestamp markdown (e.g. <t:1234567890>)
                 match: /text:(\i).full,/,
-                replace: "text: $self.renderTimestamp(new Date($1.timestamp*1000),'tooltip', 'tt'),"
+                replace: "text: $self.renderTimestamp(new Date($1.timestamp*1000),'tooltip'),"
             }
         }
     ],
