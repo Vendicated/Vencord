@@ -11,7 +11,7 @@
     background: var(--background-base-lowest);
     padding: 10px 0;
     cursor: pointer;
-    top: 0;
+    top: -8px;
     border: solid grey 1px;
     border-radius: 5px;
 }
