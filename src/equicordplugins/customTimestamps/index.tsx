@@ -114,7 +114,7 @@ const TimeRow = (props: TimeRowProps) => {
         <>
             <Forms.FormTitle tag="h5">{props.format.name}</Forms.FormTitle>
             <Forms.FormText>{props.format.description}</Forms.FormText>
-            <TextInput value={state} onChange={handleChange}/>
+            <TextInput value={state} onChange={handleChange} />
         </>
     );
 };
@@ -125,17 +125,14 @@ const MessagePreview = findComponentByCodeLazy<{
     compact: boolean,
     isGroupStart: boolean,
     className: string,
-    hideSimpleEmbedContent: boolean
+    hideSimpleEmbedContent: boolean;
 }>(/previewGuildId:\i,preview:\i,/);
-const createMessage = findByCodeLazy(/channelId:\i,content:\i,tts:\i=!1,/);
-const populateMessagePrototype = findByCodeLazy(/PREMIUM_REFERRAL&&\(\i=\i.default.isProbablyAValidSnowflake\(/);
+const createBotMessage = findByCodeLazy('username:"Clyde"');
+const populateMessagePrototype = findByCodeLazy("isProbablyAValidSnowflake", "messageReference:");
 
-const DemoMessage = (props: { msgId, compact, message, date: Date | undefined, isGroupStart?: boolean }) => {
-    const message = createMessage({
-        content: props.message || "This is a demo message to preview the custom timestamps.",
-        channelId: "1337",
-        state: "SENT"
-    });
+const DemoMessage = (props: { msgId, compact, message, date: Date | undefined, isGroupStart?: boolean; }) => {
+    const message = createBotMessage({ content: props.message, channelId: "1337", embeds: [] });
+    message.author = UserStore.getCurrentUser();
     message.id = props.msgId;
     message.timestamp = moment(props.date ?? new Date());
     const user = UserStore.getCurrentUser();
@@ -169,14 +166,14 @@ const DemoMessageContainer = ErrorBoundary.wrap(() => {
     return (
         <div className={"vc-cmt-demo-message-container"} onClick={() => setIsCompact(!isCompact)}>
             <DemoMessage compact={isCompact} msgId={"1337"}
-                         message={`Click me to switch to ${isCompact ? "cozy" : "compact"} mode`} isGroupStart={true}
-                         date={aMonthAgo.current}/>
+                message={`Click me to switch to ${isCompact ? "cozy" : "compact"} mode`} isGroupStart={true}
+                date={aMonthAgo.current} />
             <DemoMessage compact={isCompact} msgId={"1338"} message={"This message was sent in the last week"}
-                         isGroupStart={true} date={lastWeek.current}/>
+                isGroupStart={true} date={lastWeek.current} />
             <DemoMessage compact={isCompact} msgId={"1339"} message={"Hover over timestamps to see tooltip formats"}
-                         isGroupStart={true} date={yesterday.current}/>
+                isGroupStart={true} date={yesterday.current} />
             <DemoMessage compact={isCompact} msgId={"1340"} message={"Edit the formats below to see them live update here"} isGroupStart={true}
-                         date={today.current}/>
+                date={today.current} />
         </div>
     );
 }, { noop: true });
@@ -196,12 +193,12 @@ const settings = definePluginSettings({
 
             return (
                 <>
-                    <DemoMessageContainer/>
+                    <DemoMessageContainer />
                     {Object.entries(timeFormats).map(([key, value]) => (
                         <Forms.FormSection key={key}>
                             {key === "sameDayFormat" && (
                                 <div className={Margins.bottom20}>
-                                    <Forms.FormDivider style={{ marginBottom: "10px" }}/>
+                                    <Forms.FormDivider style={{ marginBottom: "10px" }} />
                                     <Forms.FormTitle tag="h1">Calendar formats</Forms.FormTitle>
                                     <Forms.FormText>
                                         How to format the [calendar] value if used in the above timestamps.
@@ -229,7 +226,7 @@ const settings = definePluginSettings({
         lastDayFormat: string;
         lastWeekFormat: string;
         sameElseFormat: string;
-    }
+    };
 }>();
 
 export default definePlugin({
