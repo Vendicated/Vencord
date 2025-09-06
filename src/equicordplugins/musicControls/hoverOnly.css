@@ -14,8 +14,17 @@
     transition-property: height;
 }
 
+.vc-ytm-button-row {
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s;
+    transition-property: height;
+}
+
 #eq-tdl-player:hover .eq-tdl-button-row,
-#vc-spotify-player:hover .vc-spotify-button-row {
+#vc-spotify-player:hover .vc-spotify-button-row,
+#vc-ytm-player:hover .vc-ytm-button-row {
     opacity: 1;
     height: 32px;
     pointer-events: auto;
