@@ -68,7 +68,7 @@ export default definePlugin({
         },
         // Change top right chat toolbar button from the help one to the dev one
         {
-            find: '"M9 3v18"',
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"

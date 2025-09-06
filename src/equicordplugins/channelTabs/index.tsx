@@ -80,8 +80,8 @@ export default definePlugin({
         {
             find: "(this,\"handleMessageClick\"",
             replacement: {
-                match: /(?<=(\i)\.isSearchHit\));(?=null!=(\i))/,
-                replace: ";if ($1.ctrlKey) return $self.open($2);"
+                match: /(\i)\.stopPropagation.{0,50}(?=null!=(\i))/,
+                replace: "$&if ($1.ctrlKey) return $self.open($2);"
             }
         },
         // prevent issues with the pins/inbox popouts being too tall

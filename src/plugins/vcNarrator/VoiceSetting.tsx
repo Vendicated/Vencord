@@ -101,7 +101,6 @@ function ComplexPicker({ voice, voices }: PickerProps) {
     );
 }
 
-
 function VoiceSetting() {
     const voices = useMemo(() => window.speechSynthesis?.getVoices() ?? [], []);
     const { voice } = settings.use(["voice"]);

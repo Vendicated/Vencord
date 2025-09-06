@@ -52,7 +52,7 @@ export default definePlugin({
             find: ".GUILD_CREATE_INVITE_SUGGESTION,defaultMaxAge",
             replacement: [
                 {
-                    match: /(?<=maxAge:)null!=\(\i=null!=\i\?\i:\i\)\?\i:\i.value/,
+                    match: /(?<=maxAge:)null!=\(\i=null!=\i\?\i:\i\)\?\i:\i.\i/,
                     replace: "$self.settings.store.inviteDuration"
                 },
                 {
