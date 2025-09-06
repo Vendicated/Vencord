@@ -40,16 +40,16 @@
 
 .vc-membercount-online-count {
     fill: var(--status-online);
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
 }
 
 .vc-membercount-total-count {
     fill: none;
     stroke: var(--status-offline);
     stroke-width: 4px;
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
 }
 
 .vc-membercount-voice-icon {
