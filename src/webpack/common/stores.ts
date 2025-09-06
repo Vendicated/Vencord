@@ -36,7 +36,6 @@ export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
 
-export let StreamerModeStore: t.StreamerModeStore;
 export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
@@ -64,7 +63,6 @@ export let StreamerModeStore: t.StreamerModeStore;
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
 waitForStore("AuthenticationStore", s => AuthenticationStore = s);
-waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
