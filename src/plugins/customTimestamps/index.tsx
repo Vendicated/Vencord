@@ -127,15 +127,12 @@ const MessagePreview = findComponentByCodeLazy<{
     className: string,
     hideSimpleEmbedContent: boolean
 }>(/previewGuildId:\i,preview:\i,/);
-const createMessage = findByCodeLazy(/channelId:\i,content:\i,tts:\i=!1,/);
-const populateMessagePrototype = findByCodeLazy(/PREMIUM_REFERRAL&&\(\i=\i.default.isProbablyAValidSnowflake\(/);
+const createBotMessage = findByCodeLazy('username:"Clyde"');
+const populateMessagePrototype = findByCodeLazy("isProbablyAValidSnowflake", "messageReference:");
 
-const DemoMessage = (props: { msgId, compact, message, date: Date | undefined, isGroupStart?: boolean }) => {
-    const message = createMessage({
-        content: props.message || "This is a demo message to preview the custom timestamps.",
-        channelId: "1337",
-        state: "SENT"
-    });
+const DemoMessage = (props: { msgId, compact, message, date: Date | undefined, isGroupStart?: boolean; }) => {
+    const message = createBotMessage({ content: props.message, channelId: "1337", embeds: [] });
+    message.author = UserStore.getCurrentUser();
     message.id = props.msgId;
     message.timestamp = moment(props.date ?? new Date());
     const user = UserStore.getCurrentUser();
@@ -154,7 +151,7 @@ const DemoMessage = (props: { msgId, compact, message, date: Date | undefined, i
     ) : <div className="vc-cmt-demo-message">
         <Forms.FormText>
             {/* @ts-ignore */}
-            <b>Preview:</b> {Vencord.Plugins.plugins.CustomMessageTimestamps.renderTimestamp(date, "cozy")}
+            <b>Preview:</b> {Vencord.Plugins.plugins.CustomTimestamps.renderTimestamp(date, "cozy")}
         </Forms.FormText>
     </div>;
 };
@@ -186,7 +183,7 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Customize the timestamp formats",
         component: componentProps => {
-            const [settingsState, setSettingsState] = useState(useSettings().plugins?.CustomMessageTimestamps?.formats ?? {});
+            const [settingsState, setSettingsState] = useState(useSettings().plugins?.CustomTimestamps?.formats ?? {});
 
             const setNewValue = (key: string, value: string) => {
                 const newSettings = { ...settingsState, [key]: value };
@@ -233,7 +230,7 @@ const settings = definePluginSettings({
 }>();
 
 export default definePlugin({
-    name: "CustomMessageTimestamps",
+    name: "CustomTimestamps",
     description: "Custom timestamps on messages and tooltips",
     authors: [
         Devs.Rini,
