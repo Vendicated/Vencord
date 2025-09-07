@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { VoiceState } from "@vencord/discord-types";
 import { ChannelStore, FluxDispatcher, GuildMemberStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
 
 interface ChannelState {
@@ -78,7 +79,7 @@ const settings = definePluginSettings({
 });
 
 let ws: WebSocket | null = null;
-let currentChannel = null;
+let currentChannel: string | null = null;
 
 async function waitForPopulate(fn) {
     while (true) {
@@ -88,7 +89,7 @@ async function waitForPopulate(fn) {
     }
 }
 
-function stateToPayload(guildId: string, state: ChannelState) {
+function stateToPayload(guildId: string, state: VoiceState) {
     const user = UserStore.getUser(state.userId);
     const nickname = GuildMemberStore.getNick(guildId, state.userId);
     return {
@@ -130,9 +131,9 @@ const incoming = payload => {
         case "STOP_STREAM": {
             const userId = UserStore.getCurrentUser().id;
             const voiceState = VoiceStateStore.getVoiceStateForUser(userId);
+            if (!voiceState?.channelId) return;
             const channel = ChannelStore.getChannel(voiceState.channelId);
-
-            if (!userId || !voiceState || !channel) return;
+            if (!channel) return;
 
             FluxDispatcher.dispatch({
                 type: "STREAM_STOP",
@@ -188,8 +189,14 @@ const createWebsocket = () => {
 
         ws?.send(JSON.stringify({ cmd: "REGISTER_CONFIG", ...config }));
 
+        if (!config.userId) return;
         const userVoiceState = VoiceStateStore.getVoiceStateForUser(config.userId);
-        const guildId = ChannelStore.getChannel(userVoiceState.channelId).guild_id;
+        if (!userVoiceState || !userVoiceState.channelId) return;
+
+        const channel = ChannelStore.getChannel(userVoiceState.channelId);
+        if (!channel) return;
+
+        const guildId = channel.guild_id;
         const channelState = VoiceStateStore.getVoiceStatesForChannel(userVoiceState.channelId);
 
         if (!guildId || !channelState) return;
@@ -197,7 +204,7 @@ const createWebsocket = () => {
         ws?.send(
             JSON.stringify({
                 cmd: "CHANNEL_JOINED",
-                states: Object.values(channelState).map(s => stateToPayload(guildId, s as ChannelState)),
+                states: Object.values(channelState).map(s => stateToPayload(guildId, s)),
             })
         );
 
@@ -236,7 +243,7 @@ export default definePlugin({
                         ws?.send(
                             JSON.stringify({
                                 cmd: "CHANNEL_JOINED",
-                                states: Object.values(voiceStates).map(s => stateToPayload(guildId, s as ChannelState)),
+                                states: Object.values(voiceStates).map(s => stateToPayload(guildId, s as VoiceState)),
                             })
                         );
 
@@ -258,7 +265,7 @@ export default definePlugin({
                     ws?.send(
                         JSON.stringify({
                             cmd: "VOICE_STATE_UPDATE",
-                            state: stateToPayload(guildId, state as ChannelState),
+                            state: stateToPayload(guildId, state),
                         })
                     );
                 }

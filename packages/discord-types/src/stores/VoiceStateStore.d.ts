@@ -14,12 +14,16 @@ export interface VoiceState extends DiscordRecord {
     selfDeaf: boolean;
     selfVideo: boolean;
     selfStream: boolean | undefined;
+    sessionId: string;
     suppress: boolean;
     requestToSpeakTimestamp: string | null | undefined;
     discoverable: boolean;
 
     isVoiceMuted(): boolean;
     isVoiceDeafened(): boolean;
+
+    oldChannelId?: string;
+    guildId?: string;
 }
 
 export class VoiceStateStore extends FluxStore {

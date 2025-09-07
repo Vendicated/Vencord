@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { VoiceState } from "./voicestate";
+import { VoiceState } from "./stores";
 
 export interface PassiveUpdateState {
     type: string;

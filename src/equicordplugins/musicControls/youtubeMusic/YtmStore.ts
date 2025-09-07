@@ -29,7 +29,7 @@ enum MediaType {
     OtherVideo = "OTHER_VIDEO",
 }
 
-export type RepeatMode = 'NONE' | 'ONE' | 'ALL';
+export type RepeatMode = "NONE" | "ONE" | "ALL";
 
 
 export interface Song {
@@ -49,13 +49,13 @@ export interface Song {
 }
 
 enum DataTypes {
-    PlayerInfo = 'PLAYER_INFO',
-    VideoChanged = 'VIDEO_CHANGED',
-    PlayerStateChanged = 'PLAYER_STATE_CHANGED',
-    PositionChanged = 'POSITION_CHANGED',
-    VolumeChanged = 'VOLUME_CHANGED',
-    RepeatChanged = 'REPEAT_CHANGED',
-    ShuffleChanged = 'SHUFFLE_CHANGED',
+    PlayerInfo = "PLAYER_INFO",
+    VideoChanged = "VIDEO_CHANGED",
+    PlayerStateChanged = "PLAYER_STATE_CHANGED",
+    PositionChanged = "POSITION_CHANGED",
+    VolumeChanged = "VOLUME_CHANGED",
+    RepeatChanged = "REPEAT_CHANGED",
+    ShuffleChanged = "SHUFFLE_CHANGED",
 }
 
 type PlayerInfo = {
@@ -200,7 +200,7 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
             if (message.song) {
                 store.song = message.song;
                 store.isPlaying = !(message.song?.isPaused ?? false);
-            };
+            }
             if (message.isPlaying != null && !message.song) store.isPlaying = message.isPlaying;
             if (message.shuffle != null) store.isShuffled = message.shuffle;
             if (message.position && message.position !== store.position) store.position = message.position ?? 0;
