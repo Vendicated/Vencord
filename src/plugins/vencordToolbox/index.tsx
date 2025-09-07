@@ -94,7 +94,7 @@ function VencordPopoutIcon(isShown: boolean) {
     );
 }
 
-function VencordPopoutButton() {
+function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 
@@ -111,7 +111,7 @@ function VencordPopoutButton() {
             {(_, { isShown }) => (
                 <HeaderBarIcon
                     ref={buttonRef}
-                    className="vc-toolbox-btn"
+                    className={`vc-toolbox-btn ${buttonClass}`}
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : "Vencord Toolbox"}
                     icon={() => VencordPopoutIcon(isShown)}
@@ -122,33 +122,24 @@ function VencordPopoutButton() {
     );
 }
 
-function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
-    children.splice(
-        children.length - 1, 0,
-        <ErrorBoundary noop>
-            <VencordPopoutButton />
-        </ErrorBoundary>
-    );
-
-    return <>{children}</>;
-}
-
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
+    description: "Adds a button to the titlebar that houses Vencord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
 
     patches: [
         {
-            find: ".controlButtonWrapper,",
+            find: '"M9 3v18"',
             replacement: {
-                match: /(?<=toolbar:function\(.{0,100}\()\i.Fragment,/,
-                replace: "$self.ToolboxFragmentWrapper,"
+                match: /focusSectionProps:"HELP".{0,20},className:(\i\.button)\}\),/,
+                replace: "$& $self.renderVencordPopoutButton($1),"
             }
         }
     ],
 
-    ToolboxFragmentWrapper: ErrorBoundary.wrap(ToolboxFragmentWrapper, {
-        fallback: () => <p style={{ color: "red" }}>Failed to render :(</p>
-    })
+    renderVencordPopoutButton: (buttonClass: string) => (
+        <ErrorBoundary noop>
+            <VencordPopoutButton buttonClass={buttonClass} />
+        </ErrorBoundary>
+    )
 });
