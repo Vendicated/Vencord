@@ -35,7 +35,7 @@ import { useForceUpdater } from "@utils/react";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Channel, Embed } from "@vencord/discord-types";
+import { Channel, Message } from "@vencord/discord-types";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -303,7 +303,7 @@ export default definePlugin({
         return (
             <>
                 <Flex>{buttons}</Flex>
-                <EmbedPluginCards {...props} />
+                <PluginCards message={props.message} />
             </>
         );
     },
@@ -324,42 +324,58 @@ export default definePlugin({
     }, { noop: true }),
 });
 
-function EmbedPluginCards(props) {
-    const pluginCards: JSX.Element[] = props.message?.embeds?.map((embed: Embed) => {
-        if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
-        const pluginName = new URL(embed.url!).pathname.split("/")[2];
-        const p = plugins[pluginName];
-        const excludedPlugin = ExcludedPlugins[pluginName];
+function resolveUrlToPlugin(url: string, description: string) {
+    const pluginName = new URL(url).pathname.split("/")[2];
+    const p = plugins[pluginName];
+    const excludedPlugin = ExcludedPlugins[pluginName];
 
-        const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
-        const update = useForceUpdater();
+    const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
+    const update = useForceUpdater();
 
-        if (excludedPlugin || !p) {
-            return (
-                <UnavailablePluginCard
-                    name={pluginName}
-                    description={embed.rawDescription}
-                    isMissing={!p}
-                    key={pluginName}
-                />
-            );
-        }
+    if (excludedPlugin || !p) {
+        return (
+            <UnavailablePluginCard
+                name={pluginName}
+                description={description}
+                isMissing={!p}
+                key={pluginName}
+            />
+        );
+    }
 
-        const required = isPluginRequired(p);
+    const required = isPluginRequired(p);
 
-        return MakePluginCard({
-            plugin: p,
-            onRestartNeeded,
-            update,
-            required,
-            key: pluginName
-        });
+    return MakePluginCard({
+        plugin: p,
+        onRestartNeeded,
+        update,
+        required,
+        key: pluginName
     });
+}
+
+function PluginCards({ message }: { message: Message; }) {
+    const embedPlugins = message?.embeds?.map(embed => {
+        if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
+        return resolveUrlToPlugin(embed.url!, embed.rawDescription);
+    });
+
+    const pluginCards = embedPlugins.filter(Boolean);
+
+    const components = (message?.components?.[0] as any)?.components ?? [];
+
+    if (message.author.id === VENBOT_USER_ID && components.length >= 5) {
+        const description = components[1].content;
+        const pluginUrl = components.find(c => c?.components)?.components[0]?.url;
+        if (pluginUrl?.startsWith("https://vencord.dev/plugins/")) {
+            pluginCards.push(resolveUrlToPlugin(pluginUrl, description));
+        }
+    }
 
     return (
         <ErrorBoundary noop>
             {!pluginCards.length ? null : (
-                <div className="vc-plugins-unavailable-grid">
+                <div className="vc-plugins-grid">
                     {pluginCards}
                 </div>
             )}
