@@ -149,7 +149,7 @@ export default definePlugin({
                 let { oldChannelId } = state;
                 if (isMe && channelId !== myLastChannelId) {
                     oldChannelId = myLastChannelId;
-                    myLastChannelId = channelId;
+                    myLastChannelId = channelId ?? undefined;
                 }
 
                 if (channelId !== oldChannelId) {

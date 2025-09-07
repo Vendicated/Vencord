@@ -27,7 +27,7 @@ import { ReactElement } from "react";
 
 import { getCurrentVoice, settings } from "./settings";
 
-interface VoiceState {
+interface VoiceStateChangeEvent {
     userId: string;
     channelId?: string;
     oldChannelId?: string;
@@ -78,7 +78,7 @@ function formatText(str: string, user: string, channel: string, displayName: str
 // for some ungodly reason
 let myLastChannelId: string | undefined;
 
-function getTypeAndChannelId({ channelId, oldChannelId }: VoiceState, isMe: boolean) {
+function getTypeAndChannelId({ channelId, oldChannelId }: VoiceStateChangeEvent, isMe: boolean) {
     if (isMe && channelId !== myLastChannelId) {
         oldChannelId = myLastChannelId;
         myLastChannelId = channelId;
@@ -145,7 +145,7 @@ export default definePlugin({
     settings,
 
     flux: {
-        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
+        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceStateChangeEvent[]; }) {
             const myGuildId = SelectedGuildStore.getGuildId();
             const myChanId = SelectedChannelStore.getVoiceChannelId();
             const myId = UserStore.getCurrentUser().id;
@@ -177,7 +177,7 @@ export default definePlugin({
 
         AUDIO_TOGGLE_SELF_MUTE() {
             const chanId = SelectedChannelStore.getVoiceChannelId()!;
-            const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
+            const s = VoiceStateStore.getVoiceStateForChannel(chanId);
             if (!s) return;
 
             const event = s.mute || s.selfMute ? "unmute" : "mute";
@@ -186,7 +186,7 @@ export default definePlugin({
 
         AUDIO_TOGGLE_SELF_DEAF() {
             const chanId = SelectedChannelStore.getVoiceChannelId()!;
-            const s = VoiceStateStore.getVoiceStateForChannel(chanId) as VoiceState;
+            const s = VoiceStateStore.getVoiceStateForChannel(chanId);
             if (!s) return;
 
             const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";

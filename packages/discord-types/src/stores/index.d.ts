@@ -15,10 +15,12 @@ export * from "./SpellCheckStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
 export * from "./StickersStore";
+export * from "./StreamerModeStore";
 export * from "./ThemeStore";
 export * from "./TypingStore";
 export * from "./UserProfileStore";
 export * from "./UserStore";
+export * from "./VoiceStateStore";
 export * from "./WindowStore";
 
 /**

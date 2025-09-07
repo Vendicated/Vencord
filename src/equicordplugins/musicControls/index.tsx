@@ -29,6 +29,7 @@ import { SpotifyLyrics } from "./spotify/lyrics/components/lyrics";
 import { SpotifyPlayer } from "./spotify/PlayerComponent";
 import { TidalLyrics } from "./tidal/lyrics/components/lyrics";
 import { TidalPlayer } from "./tidal/TidalPlayer";
+import { YtmPlayer } from "./youtubeMusic/PlayerComponent";
 
 export default definePlugin({
     name: "MusicControls",
@@ -45,11 +46,9 @@ export default definePlugin({
         "TidalControls",
         "TidalLyrics",
         // Youtube
-        /* Deprecated RN
         "Youtube",
         "YoutubeMusic",
         "YoutubeMusicControls"
-        */
     ],
 
     patches: [
@@ -94,7 +93,7 @@ export default definePlugin({
 
 
     PanelWrapper({ VencordOriginal, ...props }) {
-        const { showTidalControls, showTidalLyrics, showSpotifyLyrics, showSpotifyControls, LyricsPosition } = settings.store;
+        const { showTidalControls, showTidalLyrics, showSpotifyLyrics, showSpotifyControls, LyricsPosition, showYoutubeMusicControls } = settings.store;
         return (
             <>
                 <ErrorBoundary
@@ -111,6 +110,7 @@ export default definePlugin({
                     {showSpotifyLyrics && LyricsPosition === "above" && <SpotifyLyrics />}
                     {showSpotifyControls && <SpotifyPlayer />}
                     {showSpotifyLyrics && LyricsPosition === "below" && <SpotifyLyrics />}
+                    {showYoutubeMusicControls && <YtmPlayer />}
                 </ErrorBoundary>
 
                 <VencordOriginal {...props} />

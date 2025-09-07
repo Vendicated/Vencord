@@ -83,7 +83,7 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     const voiceStates = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStatesForChannel(channel.id));
 
     const users = useMemo(
-        () => Object.values<any>(voiceStates).map(voiceState => UserStore.getUser(voiceState.userId)).filter(user => user != null),
+        () => Object.values(voiceStates).map(voiceState => UserStore.getUser(voiceState.userId)).filter(user => user != null),
         [voiceStates]
     );
 
@@ -167,7 +167,7 @@ export type VoiceChannelIndicatorProps = {
 const clickTimers = {} as Record<string, any>;
 
 export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
-    const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
+    const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId);
 
     const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
     if (channel == null) return null;

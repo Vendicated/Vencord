@@ -189,4 +189,33 @@ export const settings = definePluginSettings({
         ],
         default: "line",
     },
+
+    YtmSectionTitle: {
+        type: OptionType.COMPONENT,
+        component: () => (
+            <Forms.FormSection>
+                <Forms.FormTitle tag="h3">Youtube Music</Forms.FormTitle>
+            </Forms.FormSection>
+        )
+    },
+    showYoutubeMusicControls: {
+        description: "Show Youtube Music Controls",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    YoutubeMusicApiUrl: {
+        description: "Custom URL for the Api Server plugin",
+        type: OptionType.STRING,
+        default: "http://localhost:26538",
+        placeholder: "http://localhost:26538",
+        onChange: (value: string) => {
+            if (URL.canParse(value)) {
+                settings.store.YoutubeMusicApiUrl = value;
+            } else {
+                showToast("Invalid URL format for Custom Api Server URL: " + value, Toasts.Type.FAILURE);
+                settings.store.YoutubeMusicApiUrl = settings.def.YoutubeMusicApiUrl.default;
+            }
+        }
+    }
+
 });
