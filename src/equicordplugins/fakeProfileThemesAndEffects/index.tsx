@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
+import { showToast, Toasts, useMemo } from "@webpack/common";
 
 import { Builder, type BuilderProps, setProfileEffectModal, settingsAboutComponent } from "./components";
 import { ProfileEffectRecord, ProfileEffectStore } from "./lib/profileEffects";
@@ -163,6 +163,12 @@ export default definePlugin({
         }
     ],
 
+    start: () => {
+        const { FakeProfileThemesAndEffects, FakeProfileThemes } = Settings.plugins;
+        if (FakeProfileThemes.enabled && FakeProfileThemesAndEffects.enabled) FakeProfileThemes.enabled = false;
+        showToast("Disabled FakeProfileThemes as FakeProfileThemesAndEffects is enabled", Toasts.Type.SUCCESS);
+    },
+
     addFPTEBuilder: (guild?: BuilderProps["guild"]) => settings.store.hideBuilder ? null : <Builder guild={guild} />,
 
     onApply(_effectId?: string) { },
@@ -178,23 +184,24 @@ export default definePlugin({
 
     ProfileEffectSelection: () => null,
 
-    usePurchases: () => useMemo(
-        () => new Map(ProfileEffectStore.profileEffects.map(effect => [
-            effect.id,
-            { items: new ProfileEffectRecord(effect) }
-        ])),
-        [ProfileEffectStore.profileEffects]
-    ),
+    usePurchases: () => useMemo(() => {
+        return new Map(
+            ProfileEffectStore.getAllProfileEffects().map(effect => [
+                effect.id,
+                { items: new ProfileEffectRecord(effect) }
+            ])
+        );
+    }, [ProfileEffectStore.getAllProfileEffects()]),
 
     useProfileEffectSections: (origSections: Record<string, any>[]) => useMemo(
         () => {
             origSections.splice(1);
             origSections[0].items.splice(1);
-            for (const effect of ProfileEffectStore.profileEffects)
+            for (const effect of ProfileEffectStore.getAllProfileEffects())
                 origSections[0].items.push(new ProfileEffectRecord(effect));
             return origSections;
         },
-        [ProfileEffectStore.profileEffects]
+        [ProfileEffectStore.getAllProfileEffects()]
     ),
 
     settings,
