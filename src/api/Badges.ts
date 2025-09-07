@@ -34,7 +34,9 @@ export interface ProfileBadge {
     image?: string;
     link?: string;
     /** Action to perform when you click the badge */
-    onClick?(event: React.MouseEvent<HTMLButtonElement, MouseEvent>, props: BadgeUserArgs): void;
+    onClick?(event: React.MouseEvent, props: ProfileBadge & BadgeUserArgs): void;
+    /** Action to perform when you right click the badge */
+    onContextMenu?(event: React.MouseEvent, props: BadgeUserArgs & BadgeUserArgs): void;
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
     /** Optional props (e.g. style) for the badge, ignored for component badges */
@@ -76,21 +78,34 @@ export function removeProfileBadge(badge: ProfileBadge) {
 export function _getBadges(args: BadgeUserArgs) {
     const badges = [] as ProfileBadge[];
     for (const badge of Badges) {
-        if (!badge.shouldShow || badge.shouldShow(args)) {
-            const b = badge.getBadges
-                ? badge.getBadges(args).map(b => {
-                    b.component &&= ErrorBoundary.wrap(b.component, { noop: true });
-                    return b;
-                })
-                : [{ ...badge, ...args }];
+        if (badge.shouldShow && !badge.shouldShow(args)) {
+            continue;
+        }
 
-            badge.position === BadgePosition.START
-                ? badges.unshift(...b)
-                : badges.push(...b);
+        const b = badge.getBadges
+            ? badge.getBadges(args).map(badge => ({
+                ...args,
+                ...badge,
+                component: badge.component && ErrorBoundary.wrap(badge.component, { noop: true })
+            }))
+            : [{ ...args, ...badge }];
+
+        if (badge.position === BadgePosition.START) {
+            badges.unshift(...b);
+        } else {
+            badges.push(...b);
         }
     }
+
     const donorBadges = BadgeAPIPlugin.getDonorBadges(args.userId);
-    if (donorBadges) badges.unshift(...donorBadges);
+    if (donorBadges) {
+        badges.unshift(
+            ...donorBadges.map(badge => ({
+                ...args,
+                ...badge,
+            }))
+        );
+    }
 
     return badges;
 }

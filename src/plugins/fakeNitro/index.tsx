@@ -159,7 +159,6 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
         { func: "canUseHighVideoUploadQuality", predicate: () => settings.store.enableStreamQualityBypass },
         { func: "canStreamQuality", predicate: () => settings.store.enableStreamQualityBypass },
         { func: "canUseClientThemes" },
-        { func: "canUseCustomNotificationSounds" },
         { func: "canUsePremiumAppIcons" }
     ];
 
@@ -176,7 +175,7 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
 export default definePlugin({
     name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
-    description: "Allows you to stream in nitro quality, send fake emojis/stickers, use client themes and custom Discord notifications.",
+    description: "Allows you to stream in nitro quality, send fake emojis/stickers, and use client themes.",
     dependencies: ["MessageEventsAPI"],
 
     settings,

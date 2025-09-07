@@ -109,14 +109,14 @@ export default definePlugin({
         },
         // User Profile Modal v2
         {
-            find: ".tabBarPanel,children:",
+            find: ".WIDGETS?",
             replacement: [
                 {
                     match: /items:(\i),.+?(?=return\(0,\i\.jsxs?\)\("div)/,
                     replace: "$&$self.pushSection($1,arguments[0].user);"
                 },
                 {
-                    match: /\.tabBarPanel,children:(?=.+?section:(\i))/,
+                    match: /\.tabBarPanel,.*?children:(?=.+?section:(\i))/,
                     replace: "$&$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):"
                 },
                 // Make the gap between each item smaller so our tab can fit.

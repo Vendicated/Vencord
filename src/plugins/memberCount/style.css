@@ -1,9 +1,11 @@
 .vc-membercount-widget {
+    gap: 0.85em;
     display: flex;
     align-content: center;
 
     --color-online: var(--green-360);
     --color-total: var(--primary-400);
+    --color-voice: var(--primary-400);
 }
 
 .vc-membercount-tooltip {
@@ -13,8 +15,15 @@
 
 .vc-membercount-member-list {
     justify-content: center;
+    flex-wrap: wrap;
     margin-top: 1em;
     padding-inline: 1em;
+}
+
+.vc-membercount-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
 }
 
 .vc-membercount-online {
@@ -25,13 +34,16 @@
     color: var(--color-total);
 }
 
+.vc-membercount-voice {
+    color: var(--color-voice);
+}
+
 .vc-membercount-online-dot {
     background-color: var(--color-online);
     display: inline-block;
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    margin-right: 0.5em;
 }
 
 .vc-membercount-total-dot {
@@ -40,5 +52,10 @@
     height: 6px;
     border-radius: 50%;
     border: 3px solid var(--color-total);
-    margin: 0 0.5em 0 1em;
+}
+
+.vc-membercount-voice-icon {
+    color: var(--color-voice);
+    width: 15px;
+    height: 15px;
 }
