@@ -6,11 +6,13 @@
 
 import { settings } from "..";
 import { decodeColor, decodeColorsLegacy, decodeEffect, extractFPTE } from "./fpte";
+import { ProfileEffectStore } from "./profileEffects";
 
 export interface UserProfile {
     bio: string;
     premiumType: number | null | undefined;
     profileEffectId: string | undefined;
+    profileEffect: any;
     themeColors: [primaryColor: number, accentColor: number] | undefined;
 }
 
@@ -26,6 +28,7 @@ function updateProfileThemeColors(profile: UserProfile, primary: number, accent:
 
 function updateProfileEffectId(profile: UserProfile, id: bigint) {
     if (id > -1n) {
+        profile.profileEffect = ProfileEffectStore.getProfileEffectById(id.toString());
         profile.profileEffectId = id.toString();
         profile.premiumType = 2;
     }
