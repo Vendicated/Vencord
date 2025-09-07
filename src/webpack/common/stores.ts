@@ -35,7 +35,6 @@ export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
-export let VoiceStateStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
@@ -49,14 +48,15 @@ export let ChannelStore: t.ChannelStore;
 export let TypingStore: t.TypingStore;
 export let RelationshipStore: t.RelationshipStore;
 export let MediaEngineStore: t.MediaEngineStore;
-export let StreamerModeStore: t.StreamerModeStore;
 export let SpellCheckStore: t.SpellCheckStore;
+export let VoiceStateStore: t.VoiceStateStore;
 
 export let EmojiStore: t.EmojiStore;
 export let StickersStore: t.StickersStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+export let StreamerModeStore: t.StreamerModeStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -75,7 +75,6 @@ waitForStore("GuildRoleStore", m => GuildRoleStore = m);
 waitForStore("GuildMemberStore", m => GuildMemberStore = m);
 waitForStore("RelationshipStore", m => RelationshipStore = m);
 waitForStore("MediaEngineStore", m => MediaEngineStore = m);
-waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("SpellcheckStore", m => SpellCheckStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
@@ -87,9 +86,10 @@ waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
+waitForStore("VoiceStateStore", m => VoiceStateStore = m);
+waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
     Vencord.QuickCss.initQuickCssThemeStore();
 });
-waitForStore("VoiceStateStore", m => VoiceStateStore = m);
