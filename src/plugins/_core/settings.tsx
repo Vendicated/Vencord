@@ -39,9 +39,9 @@ export default definePlugin({
             find: ".versionHash",
             replacement: [
                 {
-                    match: /\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
-                    replace: (m, component, props) => {
-                        props = props.replace(/children:\[.+\]/, "");
+                    match: /\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}(\i\.versionHash),.+?\})\)," "/,
+                    replace: (m, component, props, versionHash) => {
+                        props = props.replace(/children:\[.+\]/, "").replace(/className:/, `$&${versionHash}+" "+`);
                         return `${m},$self.makeInfoElements(${component}, ${props})`;
                     }
                 },
