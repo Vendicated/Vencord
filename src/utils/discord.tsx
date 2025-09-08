@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MessageObject } from "@api/MessageEvents";
+import { MessageObject, Upload } from "@api/MessageEvents";
 import { Channel, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
@@ -117,6 +117,7 @@ interface MessageOptions {
         replied_user: boolean;
     };
     stickerIds: string[];
+    attachmentsToUpload: Upload[];
 }
 
 export function sendMessage(
