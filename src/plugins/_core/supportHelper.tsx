@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, useSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { isPluginRequired, makeDependencyList } from "@components/settings/tabs/plugins";
+import { depMap, makeDependencyList } from "@components/settings/tabs/plugins";
 import { PluginCard, UnavailablePluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
@@ -324,7 +324,10 @@ export default definePlugin({
     }, { noop: true }),
 });
 
-function resolveUrlToPlugin(url: string, description: string) {
+function UrlToPluginCard(url: string, description: string) {
+    const settings = useSettings();
+    const update = useForceUpdater();
+
     const pluginName = new URL(url).pathname.split("/")[2];
     const p = plugins[pluginName];
     const excludedPlugin = ExcludedPlugins[pluginName];
@@ -336,7 +339,6 @@ function resolveUrlToPlugin(url: string, description: string) {
         cancelText: "Later!",
         onConfirm: () => location.reload()
     });
-    const update = useForceUpdater();
 
     if (excludedPlugin || !p) {
         return (
@@ -349,23 +351,31 @@ function resolveUrlToPlugin(url: string, description: string) {
         );
     }
 
-    const { required, dependents } = isPluginRequired(p);
+    const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
 
-    return required ? (
-        <Tooltip text={dependents.length ? makeDependencyList(dependents) : "This plugin is required for Vencord to function."} key={p.name}>
-            {({ onMouseLeave, onMouseEnter }) =>
-                <PluginCard
-                    onMouseLeave={onMouseLeave}
-                    onMouseEnter={onMouseEnter}
-                    onRestartNeeded={onRestartNeeded}
-                    disabled={true}
-                    update={update}
-                    plugin={p}
-                    key={p.name}
-                />
-            }
-        </Tooltip>
-    ) : (
+    if (isRequired) {
+        const tooltipText = p.required || !depMap[p.name]
+            ? "This plugin is required for Vencord to function."
+            : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+
+        return (
+            <Tooltip text={tooltipText} key={p.name}>
+                {({ onMouseLeave, onMouseEnter }) =>
+                    <PluginCard
+                        onMouseLeave={onMouseLeave}
+                        onMouseEnter={onMouseEnter}
+                        onRestartNeeded={onRestartNeeded}
+                        disabled={true}
+                        update={update}
+                        plugin={p}
+                        key={p.name}
+                    />
+                }
+            </Tooltip>
+        );
+    }
+
+    return (
         <PluginCard
             onRestartNeeded={onRestartNeeded}
             disabled={false}
@@ -379,7 +389,7 @@ function resolveUrlToPlugin(url: string, description: string) {
 function PluginCards({ message }: { message: Message; }) {
     const embedPlugins = message.embeds?.map(embed => {
         if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
-        return resolveUrlToPlugin(embed.url!, embed.rawDescription);
+        return UrlToPluginCard(embed.url!, embed.rawDescription);
     });
 
     const pluginCards = embedPlugins.filter(Boolean);
@@ -390,14 +400,14 @@ function PluginCards({ message }: { message: Message; }) {
         const description = components[1]?.content;
         const pluginUrl = components.find(c => c?.components)?.components[0]?.url;
         if (pluginUrl?.startsWith("https://vencord.dev/plugins/")) {
-            pluginCards.push(resolveUrlToPlugin(pluginUrl, description));
+            pluginCards.push(UrlToPluginCard(pluginUrl, description));
         }
     }
 
     return (
         <ErrorBoundary noop>
             {!pluginCards.length ? null : (
-                <div className="vc-plugins-grid">
+                <div className="vc-plugins-grid" style={{ marginTop: "0px" }}>
                     {pluginCards}
                 </div>
             )}

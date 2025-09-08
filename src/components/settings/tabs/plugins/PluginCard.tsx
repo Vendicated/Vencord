@@ -24,7 +24,7 @@ const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } =
 
 export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+export const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
     desktop: "Discord Desktop app or Vesktop",
     discordDesktop: "Discord Desktop app",
     vencordDesktop: "Vesktop app",
