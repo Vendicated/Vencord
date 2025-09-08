@@ -134,7 +134,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         if (m.deleted) return false;
         if (!isReply && m.author.id !== meId) return false; // editing only own messages
         if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
-        if (RelationshipStore.isBlocked(m.author.id)) return false;
+        if (RelationshipStore.isBlockedOrIgnored(m.author.id)) return false;
 
         return true;
     });
