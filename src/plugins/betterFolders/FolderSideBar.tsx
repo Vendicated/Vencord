@@ -42,7 +42,7 @@ function getGuildIdsInExpandedFolders() {
 
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
-    const expandedFolderGuilds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getGuildIdsInExpandedFolders());
+    const guildIds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getGuildIdsInExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
@@ -53,7 +53,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         />
     );
 
-    const visible = !!expandedFolderGuilds.length;
+    const visible = !!guildIds.length;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
