@@ -21,8 +21,8 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { isPluginRequired, MakePluginCard, showRestartAlert } from "@components/settings/tabs/plugins";
-import { UnavailablePluginCard } from "@components/settings/tabs/plugins/PluginCard";
+import { isPluginRequired, makeDependencyList } from "@components/settings/tabs/plugins";
+import { PluginCard, UnavailablePluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -36,7 +36,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, Message } from "@vencord/discord-types";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore, useState } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -329,7 +329,13 @@ function resolveUrlToPlugin(url: string, description: string) {
     const p = plugins[pluginName];
     const excludedPlugin = ExcludedPlugins[pluginName];
 
-    const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
+    const onRestartNeeded = () => Alerts.show({
+        title: "Restart required",
+        body: <p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>,
+        confirmText: "Restart now",
+        cancelText: "Later!",
+        onConfirm: () => location.reload()
+    });
     const update = useForceUpdater();
 
     if (excludedPlugin || !p) {
@@ -343,29 +349,45 @@ function resolveUrlToPlugin(url: string, description: string) {
         );
     }
 
-    const required = isPluginRequired(p);
+    const { required, dependents } = isPluginRequired(p);
 
-    return MakePluginCard({
-        plugin: p,
-        onRestartNeeded,
-        update,
-        required,
-        key: pluginName
-    });
+    return required ? (
+        <Tooltip text={dependents.length ? makeDependencyList(dependents) : "This plugin is required for Vencord to function."} key={p.name}>
+            {({ onMouseLeave, onMouseEnter }) =>
+                <PluginCard
+                    onMouseLeave={onMouseLeave}
+                    onMouseEnter={onMouseEnter}
+                    onRestartNeeded={onRestartNeeded}
+                    disabled={true}
+                    update={update}
+                    plugin={p}
+                    key={p.name}
+                />
+            }
+        </Tooltip>
+    ) : (
+        <PluginCard
+            onRestartNeeded={onRestartNeeded}
+            disabled={false}
+            plugin={p}
+            update={update}
+            key={p.name}
+        />
+    );
 }
 
 function PluginCards({ message }: { message: Message; }) {
-    const embedPlugins = message?.embeds?.map(embed => {
+    const embedPlugins = message.embeds?.map(embed => {
         if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
         return resolveUrlToPlugin(embed.url!, embed.rawDescription);
     });
 
     const pluginCards = embedPlugins.filter(Boolean);
 
-    const components = (message?.components?.[0] as any)?.components ?? [];
+    const components = (message.components?.[0] as any)?.components ?? [];
 
     if (message.author.id === VENBOT_USER_ID && components.length >= 5) {
-        const description = components[1].content;
+        const description = components[1]?.content;
         const pluginUrl = components.find(c => c?.components)?.components[0]?.url;
         if (pluginUrl?.startsWith("https://vencord.dev/plugins/")) {
             pluginCards.push(resolveUrlToPlugin(pluginUrl, description));

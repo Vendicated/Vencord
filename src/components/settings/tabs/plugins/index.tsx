@@ -92,14 +92,6 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     );
 }
 
-export const showRestartAlert = (body: React.ReactNode) => Alerts.show({
-    title: "Restart required",
-    body,
-    confirmText: "Restart now",
-    cancelText: "Later!",
-    onConfirm: () => location.reload()
-});
-
 const depMap: Record<string, string[]> = {};
 for (const plugin in Plugins) {
     const deps = Plugins[plugin].dependencies;
@@ -114,46 +106,9 @@ for (const plugin in Plugins) {
 export function isPluginRequired(plugin: Plugin) {
     const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d)) ?? [];
     return {
-        status: plugin.required || dependents.length > 0,
+        required: plugin.required || plugin.isDependency || dependents.length > 0,
         dependents
     };
-}
-
-interface PluginCardProps {
-    plugin: Plugin;
-    onRestartNeeded: (name: string, key: string) => void;
-    key: string;
-    required: { status: boolean; dependents: string[]; };
-    update?: () => void;
-    isNew?: boolean;
-}
-
-export function MakePluginCard({ plugin, onRestartNeeded, update, key, isNew, required: required }: PluginCardProps) {
-    return required.status ? (
-        <Tooltip text={required.dependents.length ? makeDependencyList(required.dependents) : "This plugin is required for Vencord to function."} key={plugin.name}>
-            {({ onMouseLeave, onMouseEnter }) =>
-                <PluginCard
-                    onMouseLeave={onMouseLeave}
-                    onMouseEnter={onMouseEnter}
-                    onRestartNeeded={onRestartNeeded}
-                    disabled={true}
-                    update={update}
-                    plugin={plugin}
-                    isNew={isNew}
-                    key={key}
-                />
-            }
-        </Tooltip>
-    ) : (
-        <PluginCard
-            onRestartNeeded={onRestartNeeded}
-            disabled={false}
-            update={update}
-            plugin={plugin}
-            isNew={isNew}
-            key={key}
-        />
-    );
 }
 
 
@@ -162,8 +117,9 @@ function PluginSettings() {
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
-            showRestartAlert(
-                (
+            Alerts.show({
+                title: "Restart required",
+                body: (
                     <>
                         <p>The following plugins require a restart:</p>
                         <div>{changes.map((s, i) => (
@@ -173,8 +129,11 @@ function PluginSettings() {
                             </>
                         ))}</div>
                     </>
-                )
-            );
+                ),
+                confirmText: "Restart now",
+                cancelText: "Later!",
+                onConfirm: () => location.reload()
+            });
     }, []);
 
     const sortedPlugins = useMemo(() =>
@@ -241,17 +200,32 @@ function PluginSettings() {
         if (!pluginFilter(p)) continue;
 
         const onRestartNeeded = (name: string, key: string) => changes.handleChange(`${name}.${key}`);
-        const required = isPluginRequired(p);
+        const { required, dependents } = isPluginRequired(p);
+        const isNew = newPlugins?.includes(p.name);
 
-        const card = MakePluginCard({
-            plugin: p,
-            onRestartNeeded,
-            isNew: newPlugins?.includes(p.name),
-            required,
-            key: p.name
-        });
-
-        (required.status ? requiredPlugins : plugins).push(card);
+        required ? requiredPlugins.push(
+            <Tooltip text={dependents.length ? makeDependencyList(dependents) : "This plugin is required for Vencord to function."} key={p.name}>
+                {({ onMouseLeave, onMouseEnter }) =>
+                    <PluginCard
+                        onMouseLeave={onMouseLeave}
+                        onMouseEnter={onMouseEnter}
+                        onRestartNeeded={onRestartNeeded}
+                        disabled={true}
+                        plugin={p}
+                        isNew={isNew}
+                        key={p.name}
+                    />
+                }
+            </Tooltip>
+        ) : plugins.push(
+            <PluginCard
+                onRestartNeeded={onRestartNeeded}
+                disabled={false}
+                plugin={p}
+                isNew={isNew}
+                key={p.name}
+            />
+        );
     }
 
     return (
@@ -314,7 +288,7 @@ function PluginSettings() {
     );
 }
 
-function makeDependencyList(deps: string[]) {
+export function makeDependencyList(deps: string[]) {
     return (
         <>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
