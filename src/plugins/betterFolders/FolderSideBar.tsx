@@ -26,7 +26,7 @@ import { ExpandedGuildFolderStore, settings } from ".";
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
-export default ErrorBoundary.wrap(guildsBarProps => {
+export default ErrorBoundary.wrap(function FolderSideBar(guildsBarProps) {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 

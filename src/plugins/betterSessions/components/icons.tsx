@@ -19,6 +19,7 @@
 import { LazyComponent } from "@utils/react";
 import { findByCode } from "@webpack";
 import { SVGProps } from "react";
+import { wrapDiscordComponentName } from "webpack/common/internal";
 
 export const DiscordIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
@@ -103,4 +104,4 @@ export const UnknownIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElemen
     </svg>
 );
 
-export const MobileIcon = LazyComponent(() => findByCode("M15.5 1h-8C6.12 1 5 2.12 5 3.5v17C5 21.88 6.12 23 7.5 23h8c1.38"));
+export const MobileIcon = LazyComponent(() => wrapDiscordComponentName(findByCode("M15.5 1h-8C6.12 1 5 2.12 5 3.5v17C5 21.88 6.12 23 7.5 23h8c1.38"), "MobileIcon"));

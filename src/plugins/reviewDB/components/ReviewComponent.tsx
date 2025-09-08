@@ -31,7 +31,7 @@ import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
-export default LazyComponent(() => {
+export default LazyComponent(function ReviewComponent() {
     // this is terrible, blame mantika
     const p = filters.byProps;
     const [

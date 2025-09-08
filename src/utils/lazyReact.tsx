@@ -27,5 +27,19 @@ export function LazyComponent<T extends object = any>(factory: () => ComponentTy
 
     LazyComponent.$$vencordGetWrappedComponent = get;
 
+    Object.defineProperty(LazyComponent, "name", {
+        enumerable: false,
+        get() {
+            try {
+                const got = get();
+                const name: string | undefined = "displayName" in got ? got.displayName : got.name;
+                return `LazyComponent${name ? `(${name})` : ""}`;
+            } catch (e) {
+                (IS_DEV ? console.warn : console.debug)("Failed to get name from LazyComponent", e);
+                return "LazyComponent";
+            }
+        }
+    });
+
     return LazyComponent;
 }
