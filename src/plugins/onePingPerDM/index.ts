@@ -38,17 +38,21 @@ export default definePlugin({
     description: "If unread messages are sent by a user in DMs multiple times, you'll only receive one audio ping. Read the messages to reset the limit",
     authors: [Devs.ProffDea],
     settings,
-    patches: [{
-        find: ".getDesktopType()===",
-        replacement: [{
-            match: /(\i\.\i\.getDesktopType\(\)===\i\.\i\.NEVER)\)/,
-            replace: "$&if(!$self.isPrivateChannelRead(arguments[0]?.message))return;else "
-        },
+    patches: [
         {
-            match: /sound:(\i\?\i:void 0,soundpack:\i,volume:\i,onClick)/,
-            replace: "sound:!$self.isPrivateChannelRead(arguments[0]?.message)?undefined:$1"
-        }]
-    }],
+            find: ".getDesktopType()===",
+            replacement: [
+                {
+                    match: /(\i\.\i\.getDesktopType\(\)===\i\.\i\.NEVER)\)/,
+                    replace: "$&if(!$self.isPrivateChannelRead(arguments[0]?.message))return;else "
+                },
+                {
+                    match: /sound:(\i\?\i:void 0,volume:\i,onClick)/,
+                    replace: "sound:!$self.isPrivateChannelRead(arguments[0]?.message)?undefined:$1"
+                }
+            ]
+        }
+    ],
     isPrivateChannelRead(message: MessageJSON) {
         const channelType = ChannelStore.getChannel(message.channel_id)?.type;
         if (
