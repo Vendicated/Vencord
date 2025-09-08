@@ -22,8 +22,6 @@ import {
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { defaultRules } from "./defaultRules";
-
 // From lodash
 const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 const reHasRegExpChar = RegExp(reRegExpChar.source);
@@ -33,8 +31,8 @@ export default definePlugin({
     description: "Removes tracking garbage from URLs",
     authors: [Devs.adryd],
 
-    start() {
-        this.createRules();
+    async start() {
+        await this.createRules();
     },
 
     onBeforeMessageSend(_, msg) {
@@ -51,42 +49,28 @@ export default definePlugin({
             : (str || "");
     },
 
-    createRules() {
-        // Can be extended upon once user configs are available
-        // Eg. (useDefaultRules: boolean, customRules: Array[string])
-        const rules = defaultRules;
+    async createRules() {
+        const url = "https://raw.githubusercontent.com/ClearURLs/Rules/refs/heads/master/data.min.json";
 
-        this.universalRules = new Set();
-        this.rulesByHost = new Map();
-        this.hostRules = new Map();
+        const response = await fetch(url);
+        const data = await response.json();
 
-        for (const rule of rules) {
-            const splitRule = rule.split("@");
-            const paramRule = new RegExp(
-                "^" +
-                this.escapeRegExp(splitRule[0]).replace(/\\\*/, ".+?") +
-                "$"
-            );
+        this.providers = [];
 
-            if (!splitRule[1]) {
-                this.universalRules.add(paramRule);
-                continue;
-            }
-            const hostRule = new RegExp(
-                "^(www\\.)?" +
-                this.escapeRegExp(splitRule[1])
-                    .replace(/\\\./, "\\.")
-                    .replace(/^\\\*\\\./, "(.+?\\.)?")
-                    .replace(/\\\*/, ".+?") +
-                "$"
-            );
-            const hostRuleIndex = hostRule.toString();
+        for (const [name, provider] of Object.entries<any>(data.providers)) {
+            const urlPattern = new RegExp(provider.urlPattern, "i");
 
-            this.hostRules.set(hostRuleIndex, hostRule);
-            if (this.rulesByHost.get(hostRuleIndex) == null) {
-                this.rulesByHost.set(hostRuleIndex, new Set());
-            }
-            this.rulesByHost.get(hostRuleIndex).add(paramRule);
+            const rules = provider.rules.map((rule: string) => new RegExp(rule, "i"));
+            const rawRules = provider.rawRules.map((rule: string) => new RegExp(rule, "i")) ?? [];
+            const exceptions = provider.exceptions.map((ex: string) => new RegExp(ex, "i")) ?? [];
+
+            this.providers.push({
+                name,
+                urlPattern,
+                rules,
+                rawRules,
+                exceptions,
+            });
         }
     },
 
@@ -106,25 +90,26 @@ export default definePlugin({
         }
 
         // Cheap way to check if there are any search params
-        if (url.searchParams.entries().next().done) {
-            // If there are none, we don't need to modify anything
-            return match;
-        }
+        if (url.searchParams.entries().next().done) return match;
 
-        // Check all universal rules
-        this.universalRules.forEach(rule => {
-            url.searchParams.forEach((_value, param, parent) => {
-                this.removeParam(rule, param, parent);
+        // Check rules for each provider that matches
+        this.providers.forEach(provider => {
+            if (!provider.urlPattern.test(url.href) || provider.exceptions.some(ex => ex.test(url.href))) return;
+
+            // Add matched params to delete list
+            const toDelete: string[] = [];
+            url.searchParams.forEach((_value, param) => {
+                if (provider.rules.some(rule => rule.test(param))) {
+                    toDelete.push(param);
+                }
             });
-        });
 
-        // Check rules for each hosts that match
-        this.hostRules.forEach((regex, hostRuleName) => {
-            if (!regex.test(url.hostname)) return;
-            this.rulesByHost.get(hostRuleName).forEach(rule => {
-                url.searchParams.forEach((_value, param, parent) => {
-                    this.removeParam(rule, param, parent);
-                });
+            // Delete matched params from list
+            toDelete.forEach(param => url.searchParams.delete(param));
+
+            // Match and remove any raw rules
+            provider.rawRules.forEach(rawRule => {
+                url = new URL(url.href.replace(rawRule, ""));
             });
         });
 
