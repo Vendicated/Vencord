@@ -16,17 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel } from "@vencord/discord-types";
+
+const logger = new Logger("BlurMedia");
 
 let style: HTMLStyleElement;
+
+
+const settings = definePluginSettings({
+    blurAmount: {
+        type: OptionType.NUMBER,
+        description: "Blur Amount (in pixels)",
+        default: 10,
+        onChange: setCss
+    },
+    onlyNSFW: {
+        type: OptionType.BOOLEAN,
+        description: "Only blur media in NSFW channels",
+        default: true,
+    }
+});
 
 function setCss() {
     style.textContent = `
         .vc-nsfw-img [class^=imageContainer],
         .vc-nsfw-img [class^=wrapperPaused] {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            filter: blur(${settings.store.blurAmount}px);
             transition: filter 0.2s;
 
             &:hover {
@@ -36,6 +55,7 @@ function setCss() {
         `;
 }
 
+migratePluginSettings("BlurMedia", "BlurNSFW");
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
@@ -46,17 +66,20 @@ export default definePlugin({
             find: "}renderEmbeds(",
             replacement: [{
                 match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
+                replace: "$&+$self.getClassName(this?.props?.channel)"
             }]
         }
     ],
 
-    options: {
-        blurAmount: {
-            type: OptionType.NUMBER,
-            description: "Blur Amount (in pixels)",
-            default: 10,
-            onChange: setCss
+    getClassName(channel: Channel | undefined): string {
+        try {
+            if (settings.store.onlyNSFW) {
+                return channel?.nsfw ? " vc-nsfw-img" : "";
+            }
+            return " vc-nsfw-img";
+        } catch (e) {
+            logger.error("Failed to get class name", e);
+            return "";
         }
     },
 
