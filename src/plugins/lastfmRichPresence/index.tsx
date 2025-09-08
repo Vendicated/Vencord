@@ -140,7 +140,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         options: [
             {
-                label: "Show generic message",
+                label: "Don't show (shows generic listening message)",
                 value: "off",
                 default: true
             },
