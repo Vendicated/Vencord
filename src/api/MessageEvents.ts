@@ -69,6 +69,7 @@ export interface MessageOptions {
     content: string;
     channel: Channel;
     type?: any;
+    attachmentsToUpload: Upload[];
     openWarningPopout: (props: any) => any;
 }
 
