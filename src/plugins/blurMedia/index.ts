@@ -54,7 +54,7 @@ function setCss() {
 
 migratePluginSettings("BlurMedia", "BlurNSFW");
 export default definePlugin({
-    name: "BlurNSFW",
+    name: "BlurMedia",
     description: "Blur attachments in NSFW channels until hovered",
     authors: [Devs.Ven],
 
