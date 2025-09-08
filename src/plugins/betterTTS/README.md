@@ -36,9 +36,9 @@ You can select:
 
 Sources Available:
 
--   Discord Default TTS
--   Streamelements API (About 206 Voices)
--   Some TikTok voices
+-   Discord Default TTS https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis
+-   Streamelements API (About 206 Voices) https://api.streamelements.com/kappa/v2/speech
+-   Some TikTok voices https://tiktok-tts.weilnet.workers.dev/api/generation
 
 ### Block Filters:
 
