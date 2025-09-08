@@ -50,7 +50,7 @@ export default definePlugin({
     },
 
     async createRules() {
-        const url = "https://rules2.clearurls.xyz/data.minify.json";
+        const url = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
 
         const response = await fetch(url);
         const data = await response.json();
