@@ -42,7 +42,7 @@ function getExpandedGuildIds() {
 
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
-    const expandedGuilds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], getExpandedGuildIds);
+    const expandedGuilds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getExpandedGuildIds());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
