@@ -21,7 +21,8 @@ import { moment } from "@webpack/common";
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
 
 // Case style to words
-export const wordsFromCamel = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
+export const wordsFromCamel = (text: string) =>
+    text.split(/(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])/).map(w => /^[A-Z]{2,}$/.test(w) ? w : w.toLowerCase());
 export const wordsFromSnake = (text: string) => text.toLowerCase().split("_");
 export const wordsFromKebab = (text: string) => text.toLowerCase().split("-");
 export const wordsFromPascal = (text: string) => text.split(/(?=[A-Z])/).map(w => w.toLowerCase());
