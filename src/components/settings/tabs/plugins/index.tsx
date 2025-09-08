@@ -27,7 +27,6 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -107,14 +106,6 @@ for (const plugin in Plugins) {
             depMap[dep].push(plugin);
         }
     }
-}
-
-export function isPluginRequired(plugin: Plugin) {
-    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d)) ?? [];
-    return {
-        required: plugin.required || plugin.isDependency || dependents.length > 0,
-        dependents
-    };
 }
 
 
@@ -277,11 +268,7 @@ function PluginSettings() {
                         }
                     </div>
                 )
-                : (
-                    <div className={cl("unavailable-grid")}>
-                        <ExcludedPluginsList search={search} />
-                    </div>
-                )
+                : <ExcludedPluginsList search={search} />
             }
 
 

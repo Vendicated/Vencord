@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-.vc-plugins-grid,
-.vc-plugins-unavailable-grid {
+.vc-plugins-grid {
     margin-top: 16px;
     display: grid;
     grid-gap: 16px;
