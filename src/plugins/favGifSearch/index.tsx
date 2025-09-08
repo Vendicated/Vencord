@@ -60,7 +60,7 @@ interface Instance {
 }
 
 
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchBarFullRow");
+const containerClasses: { searchBar: string; } = findByPropsLazy(".tCauZW)");
 
 export const settings = definePluginSettings({
     searchOption: {
