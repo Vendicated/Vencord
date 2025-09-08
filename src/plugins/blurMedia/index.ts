@@ -57,6 +57,7 @@ export default definePlugin({
     name: "BlurMedia",
     description: "Blur attachments in NSFW channels until hovered",
     authors: [Devs.Ven],
+    settings,
 
     patches: [
         {
