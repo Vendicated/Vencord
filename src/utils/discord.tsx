@@ -17,7 +17,7 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { Channel, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
+import { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
@@ -117,6 +117,20 @@ interface MessageOptions {
         replied_user: boolean;
     };
     stickerIds: string[];
+    attachmentsToUpload: CloudUpload[];
+    poll: {
+        allow_multiselect: boolean;
+        answers: Array<{
+            poll_media: {
+                text: string;
+                attachment_ids?: unknown;
+                emoji?: { name: string; id?: string; };
+            };
+        }>;
+        duration: number;
+        layout_type: number;
+        question: { text: string; };
+    };
 }
 
 export function sendMessage(
