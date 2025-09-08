@@ -26,34 +26,36 @@ import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
-function getGuildIdsInExpandedFolders() {
+function getExpandedFoldersData() {
     const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
-    const guildFolders = SortedGuildStore.getGuildFolders();
-    const guildIdsInExpandedFolders: string[] = [];
+    const folders = SortedGuildStore.getGuildFolders();
 
-    for (const folder of guildFolders) {
+    const folderIds = new Set<string>();
+    const guildIds = new Set<string>();
+
+    for (const folder of folders) {
         if (expandedFolders.has(folder.folderId) && folder.guildIds?.length) {
-            for (const id of folder.guildIds) guildIdsInExpandedFolders.push(id);
+            folderIds.add(folder.folderId);
+            for (const id of folder.guildIds) guildIds.add(id);
         }
     }
 
-    return guildIdsInExpandedFolders;
+    return { folderIds, guildIds };
 }
 
 export default ErrorBoundary.wrap(guildsBarProps => {
-    const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
-    const guildIds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getGuildIdsInExpandedFolders());
+    const { folderIds, guildIds } = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getExpandedFoldersData());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
         <GuildsBar
             {...guildsBarProps}
             isBetterFolders={true}
-            betterFoldersExpandedIds={expandedFolders}
+            betterFoldersExpandedIds={folderIds}
         />
     );
 
-    const visible = !!guildIds.length;
+    const visible = !!guildIds.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
