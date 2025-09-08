@@ -26,7 +26,7 @@ import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
-export function getExpandedGuildIds() {
+function getExpandedGuildIds() {
     const expanded = ExpandedGuildFolderStore.getExpandedFolders();
     const folders = SortedGuildStore.getGuildFolders();
     const expandedGuilds = new Set<string>();
