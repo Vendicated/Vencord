@@ -136,7 +136,7 @@ const settings = definePluginSettings({
         default: "some music",
     },
     statusDisplayType: {
-        description: "Show the track/artist name in the member list while retaining the status name in the profile page (similarly to how Discord behaves with Spotify)",
+        description: "Show the track / artist name in the member list",
         type: OptionType.SELECT,
         options: [
             {
