@@ -50,7 +50,7 @@ export default definePlugin({
     },
 
     async createRules() {
-        const url = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
+        const url = "https://rules2.clearurls.xyz/data.minify.json";
 
         const response = await fetch(url);
         const data = await response.json();
@@ -108,9 +108,11 @@ export default definePlugin({
             toDelete.forEach(param => url.searchParams.delete(param));
 
             // Match and remove any raw rules
+            let cleanedUrl = url.href;
             provider.rawRules.forEach(rawRule => {
-                url = new URL(url.href.replace(rawRule, ""));
+                cleanedUrl = cleanedUrl.replace(rawRule, "");
             });
+            url = new URL(cleanedUrl);
         });
 
         return url.toString();
