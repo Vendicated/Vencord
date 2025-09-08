@@ -95,10 +95,10 @@ export default definePlugin({
         // Check rules for each provider that matches
         this.providers.forEach(provider => {
             if (!provider.urlPattern.test(url.href) || provider.exceptions.some(ex => ex.test(url.href))) return;
+            const toDelete: string[] = [];
 
             // Add matched params to delete list
-            const toDelete: string[] = [];
-            url.searchParams.forEach((_value, param) => {
+            url.searchParams.forEach((_, param) => {
                 if (provider.rules.some(rule => rule.test(param))) {
                     toDelete.push(param);
                 }
