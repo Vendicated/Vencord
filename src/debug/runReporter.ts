@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { initWs } from "@plugins/devCompanion.dev/initWs";
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { initWs } from "plugins/devCompanion.dev/initWs";
 import { getBuildNumber, patchTimings } from "webpack/patchWebpack";
 
 import { addPatch, patches } from "../plugins";

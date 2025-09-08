@@ -62,7 +62,7 @@ export type FindData = {
     args: FindNode[];
 };
 
-export type IncomingMessage = DisablePlugin | RawId | DiffPatch | Reload | ExtractModule | TestPatch | TestFind | AllModules | I18nLookup;
+export type IncomingMessage = DisablePlugin | RawId | DiffPatch | Reload | ExtractModule | TestPatch | TestFind | AllModules | I18nLookup | Version;
 export type FullIncomingMessage = IncomingMessage & { nonce: number; };
 
 export type DisablePlugin = {
@@ -107,6 +107,14 @@ export type ExtractModule = {
     type: "extract";
     // FIXME: update client code so you can just pass FindData here
     data: FindOrSearchData;
+};
+
+export type Version = {
+    type: "version";
+    data: {
+        // major minor patch
+        server_version: [number, number, number];
+    };
 };
 
 export type TestPatch = {
