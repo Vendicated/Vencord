@@ -21,13 +21,28 @@ import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Animations, useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { ExpandedGuildFolderStore, settings } from ".";
+import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
 
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
+export function getExpandedGuildIds() {
+    const expanded = ExpandedGuildFolderStore.getExpandedFolders();
+    const folders = SortedGuildStore.getGuildFolders();
+    const expandedGuilds = new Set<string>();
+
+    for (const folder of folders) {
+        if (expanded.has(folder.folderId) && folder.guildIds?.length) {
+            for (const id of folder.guildIds) expandedGuilds.add(id);
+        }
+    }
+
+    return expandedGuilds;
+}
+
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
+    const expandedGuilds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], getExpandedGuildIds);
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
@@ -38,7 +53,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         />
     );
 
-    const visible = !!expandedFolders.size;
+    const visible = !!expandedGuilds.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
