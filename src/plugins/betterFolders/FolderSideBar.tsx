@@ -27,22 +27,22 @@ const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
 function getGuildIdsInExpandedFolders() {
-    const expanded = ExpandedGuildFolderStore.getExpandedFolders();
-    const folders = SortedGuildStore.getGuildFolders();
-    const expandedGuilds: string[] = [];
+    const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
+    const guildFolders = SortedGuildStore.getGuildFolders();
+    const guildIdsInExpandedFolders: string[] = [];
 
-    for (const folder of folders) {
-        if (expanded.has(folder.folderId) && folder.guildIds?.length) {
-            for (const id of folder.guildIds) expandedGuilds.push(id);
+    for (const folder of guildFolders) {
+        if (expandedFolders.has(folder.folderId) && folder.guildIds?.length) {
+            for (const id of folder.guildIds) guildIdsInExpandedFolders.push(id);
         }
     }
 
-    return expandedGuilds;
+    return guildIdsInExpandedFolders;
 }
 
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
-    const guildIdsInExpandedFolders = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getGuildIdsInExpandedFolders());
+    const expandedFolderGuilds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getGuildIdsInExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
@@ -53,7 +53,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         />
     );
 
-    const visible = !!guildIdsInExpandedFolders.length;
+    const visible = !!expandedFolderGuilds.length;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
