@@ -26,14 +26,14 @@ import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
-function getExpandedGuildIds() {
+function getGuildIdsInExpandedFolders() {
     const expanded = ExpandedGuildFolderStore.getExpandedFolders();
     const folders = SortedGuildStore.getGuildFolders();
-    const expandedGuilds = new Set<string>();
+    const expandedGuilds: string[] = [];
 
     for (const folder of folders) {
         if (expanded.has(folder.folderId) && folder.guildIds?.length) {
-            for (const id of folder.guildIds) expandedGuilds.add(id);
+            for (const id of folder.guildIds) expandedGuilds.push(id);
         }
     }
 
@@ -42,7 +42,7 @@ function getExpandedGuildIds() {
 
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
-    const expandedGuilds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getExpandedGuildIds());
+    const guildIdsInExpandedFolders = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getGuildIdsInExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
@@ -53,7 +53,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         />
     );
 
-    const visible = !!expandedGuilds.size;
+    const visible = !!guildIdsInExpandedFolders.length;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
