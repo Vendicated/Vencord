@@ -18,6 +18,7 @@
     flex-wrap: wrap;
     margin-top: 1em;
     padding-inline: 1em;
+    line-height: 1.2em;
 }
 
 .vc-membercount-container {
@@ -40,16 +41,16 @@
 
 .vc-membercount-online-count {
     fill: var(--status-online);
-    width: 15px;
-    height: 15px;
+    width: 18px;
+    height: 18px;
 }
 
 .vc-membercount-total-count {
     fill: none;
     stroke: var(--status-offline);
     stroke-width: 4px;
-    width: 13px;
-    height: 13px;
+    width: 15px;
+    height: 15px;
 }
 
 .vc-membercount-voice-icon {
