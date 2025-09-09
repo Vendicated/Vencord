@@ -371,7 +371,7 @@ export default definePlugin({
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
             }
-        },
+        }
     ],
 
     get guildId() {
@@ -395,40 +395,15 @@ export default definePlugin({
             if (premiumType !== 2) {
                 proto.appearance ??= AppearanceSettingsActionCreators.create();
 
-                if (UserSettingsProtoStore.settings.appearance?.theme != null) {
-                    const appearanceSettingsDummy = AppearanceSettingsActionCreators.create({
-                        theme: UserSettingsProtoStore.settings.appearance.theme
-                    });
+                const protoStoreAppearenceSettings = UserSettingsProtoStore.settings.appearance;
 
-                    proto.appearance.theme = appearanceSettingsDummy.theme;
-                }
+                const appearanceSettingsOverwrite = AppearanceSettingsActionCreators.create({
+                    ...proto.appearance,
+                    theme: protoStoreAppearenceSettings?.theme,
+                    clientThemeSettings: protoStoreAppearenceSettings?.clientThemeSettings
+                });
 
-                const maybeClientThemeSettings = UserSettingsProtoStore.settings.appearance?.clientThemeSettings;
-                const hasGradientTheme = maybeClientThemeSettings?.backgroundGradientPresetId?.value != null;
-                const hasCustomTheme = maybeClientThemeSettings?.customUserThemeSettings != null;
-
-                if (hasGradientTheme || hasCustomTheme) {
-                    const clientThemeSettingsObj: Record<PropertyKey, any> = {};
-
-                    if (hasGradientTheme) {
-                        clientThemeSettingsObj.backgroundGradientPresetId = {
-                            value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
-                        };
-                    }
-                    if (hasCustomTheme) {
-                        clientThemeSettingsObj.customUserThemeSettings = {};
-                        for (const [k, v] of Object.entries(maybeClientThemeSettings.customUserThemeSettings)) {
-                            clientThemeSettingsObj.customUserThemeSettings[k] = v;
-                        }
-                    }
-                    const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create(clientThemeSettingsObj);
-
-                    proto.appearance.clientThemeSettings ??= clientThemeSettingsDummy;
-                    if (hasGradientTheme)
-                        proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
-                    if (hasCustomTheme)
-                        proto.appearance.clientThemeSettings.customUserThemeSettings = clientThemeSettingsDummy.customUserThemeSettings;
-                }
+                proto.appearance = appearanceSettingsOverwrite;
             }
         } catch (err) {
             new Logger("FakeNitro").error(err);
