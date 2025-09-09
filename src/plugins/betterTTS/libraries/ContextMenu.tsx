@@ -61,7 +61,7 @@ export const PatchUserContextMenu: NavContextMenuPatchCallback = (children, { us
         />,
         <Menu.MenuItem
             id="bettertts-speak-user"
-            label="Speak Announcement"
+            label="Speak User"
             action={() => AudioPlayer.enqueueTTSMessage(getUserName(user.id, SelectedGuildStore.getGuildId()), "preview")}
             icon={TTSIcon}
         />
