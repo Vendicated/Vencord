@@ -42,7 +42,7 @@ const settings = definePluginSettings({
     },
     userAnnouncementText: {
         type: OptionType.STRING,
-        default: "{{{USERNAME}}} {{{JOINED|LEFT}}}",
+        default: "{{{USERNAME}}} {{{JOINED|MOVED|LEFT}}}",
         description: "The text that will be read when a user joins the channel.",
     },
     enableMessageReading: {

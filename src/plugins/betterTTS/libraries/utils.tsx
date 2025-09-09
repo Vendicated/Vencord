@@ -104,7 +104,7 @@ export function shouldPlayMessage(message: ExtendedMessageJSON) {
     return false;
 }
 
-export function getUserName(userId: string, guildId?: string) {
+export function getUserName(userId: string, guildId?: string | null) {
     const user = UserStore.getUser(userId);
     switch (settings.store.messageNamesReading) {
         case "userName":
@@ -124,10 +124,10 @@ export function getUserName(userId: string, guildId?: string) {
     }
 }
 
-export function getPatchedAnnouncement(joined: boolean, userId: string, guildId?: string) {
+export function getPatchedAnnouncement(action: "joined" | "moved" | "left", userId: string, guildId?: string) {
     return settings.store.userAnnouncementText
         .replace(/{{{USERNAME}}}/g, getUserName(userId, guildId))
-        .replace(/{{{(\w+)\|(\w+)}}}/g, (match, j, l) => joined ? j : l);
+        .replace(/{{{(\w+)\|(\w+)\|(\w+)}}}/g, (match, j, m, l) => action === "joined" ? j : action === "moved" ? m : l);
 }
 
 export function getPatchedContent(message: ExtendedMessageJSON, guildId: string | undefined) {

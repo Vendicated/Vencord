@@ -9,7 +9,7 @@ import { FluxEvent, MessageJSON } from "@vencord/discord-types";
 import settings from "../settings";
 import { MediaEngineStore, RTCConnectionStore, UserStore } from "../stores";
 import AudioPlayer from "./AudioPlayer";
-import { getPatchedAnnouncement, getPatchedContent, getUserName, shouldPlayMessage } from "./utils";
+import { getPatchedAnnouncement, getPatchedContent, shouldPlayMessage } from "./utils";
 
 export function messageRecieved(event: FluxEvent) {
     if (!settings.store.enableTts) return;
@@ -27,11 +27,11 @@ export function annouceUser(event: FluxEvent) {
     for (const userStatus of event.voiceStates) {
         if (connectedChannelId && userStatus.userId !== userId) {
             if (userStatus.channelId !== userStatus.oldChannelId) {
-                const username = getUserName(userStatus.userId, userStatus.guildId);
-                if (userStatus.channelId === connectedChannelId) {
-                    AudioPlayer.enqueueTTSMessage(getPatchedAnnouncement(true, userStatus.userId, userStatus.guildId), "user");
-                } else if (userStatus.oldChannelId === connectedChannelId) {
-                    AudioPlayer.enqueueTTSMessage(getPatchedAnnouncement(false, userStatus.userId, userStatus.guildId), "user");
+                const action = userStatus.channelId === connectedChannelId ? "joined" :
+                    userStatus.channelId && userStatus.oldChannelId === connectedChannelId ? "moved" :
+                        userStatus.oldChannelId === connectedChannelId ? "left" : undefined;
+                if (action) {
+                    AudioPlayer.enqueueTTSMessage(getPatchedAnnouncement(action, userStatus.userId, userStatus.guildId), "user");
                 }
             }
         }
