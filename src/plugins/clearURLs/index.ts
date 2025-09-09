@@ -28,14 +28,11 @@ const reHasRegExpChar = RegExp(reRegExpChar.source);
 const CLEAR_URLS_JSON_URL = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
 
 interface Provider {
-    urlPattern: string;
-    completeProvider: boolean;
-    rules?: string[];
-    rawRules?: string[];
-    referralMarketing?: string[];
-    exceptions?: string[];
-    redirections?: string[];
-    forceRedirection?: boolean;
+    name: string;
+    urlPattern: RegExp;
+    rules: RegExp[];
+    rawRules: RegExp[];
+    exceptions: RegExp[];
 }
 
 type Providers = Record<string, Provider>;
@@ -44,6 +41,7 @@ export default definePlugin({
     name: "ClearURLs",
     description: "Removes tracking garbage from URLs",
     authors: [Devs.adryd, Devs.thororen],
+    providers: [] as Provider[],
 
     async start() {
         await this.createRules();
@@ -68,12 +66,12 @@ export default definePlugin({
 
         this.providers = [];
 
-        for (const [name, provider] of Object.entries(res.providers) as [string, Provider][]) {
+        for (const [name, provider] of Object.entries(res.providers)) {
             const urlPattern = new RegExp(provider.urlPattern, "i");
 
-            const rules = (provider.rules ?? []).map(rule => new RegExp(rule, "i"));
-            const rawRules = (provider.rawRules ?? []).map(rule => new RegExp(rule, "i"));
-            const exceptions = (provider.exceptions ?? []).map(ex => new RegExp(ex, "i"));
+            const rules = provider.rules.map(rule => new RegExp(rule, "i"));
+            const rawRules = provider.rawRules.map(rule => new RegExp(rule, "i"));
+            const exceptions = provider.exceptions.map(ex => new RegExp(ex, "i"));
 
             this.providers.push({
                 name,
