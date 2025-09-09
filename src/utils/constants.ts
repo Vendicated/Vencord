@@ -48,6 +48,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "V",
         id: 343383572805058560n
     },
+    Apexo: {
+        name: "Apexo",
+        id: 228548952687902720n
+    },
     Arjix: {
         name: "ArjixWasTaken",
         id: 674710789138939916n,
@@ -93,9 +97,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Mai",
         id: 722647978577363026n
     },
-    echo: {
-        name: "ECHO",
-        id: 712639419785412668n
+    amy: {
+        name: "Amy",
+        id: 603229858612510720n
     },
     katlyn: {
         name: "katlyn",
@@ -197,9 +201,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "sunnie",
         id: 406028027768733696n
     },
-    axyie: {
-        name: "'ax",
-        id: 929877747151548487n,
+    rae: {
+        name: "rae",
+        id: 1398136199503282277n
     },
     pointy: {
         name: "pointy",
@@ -482,7 +486,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Sqaaakoi",
         id: 259558259491340288n
     },
-    Byron: {
+    Byeoon: {
         name: "byeoon",
         id: 1167275288036655133n
     },
@@ -597,6 +601,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Cootshk: {
         name: "Cootshk",
         id: 921605971577548820n
+    },
+    thororen: {
+        name: "thororen",
+        id: 848339671629299742n
     },
     u32: {
         name: "u32",
