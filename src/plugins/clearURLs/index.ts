@@ -22,9 +22,6 @@ import {
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-// From lodash
-const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
-const reHasRegExpChar = RegExp(reRegExpChar.source);
 const CLEAR_URLS_JSON_URL = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
 
 interface Provider {
