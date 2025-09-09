@@ -20,13 +20,11 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
 
 interface SearchBarComponentProps {
-    ref?: React.MutableRefObject<any>;
+    ref?: React.RefObject<any>;
     autoFocus: boolean;
-    className: string;
     size: string;
     onChange: (query: string) => void;
     onClear: () => void;
@@ -58,9 +56,6 @@ interface Instance {
     },
     forceUpdate: () => void;
 }
-
-
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchBarFullRow");
 
 export const settings = definePluginSettings({
     searchOption: {
@@ -181,7 +176,6 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         <SearchBarComponent
             ref={ref}
             autoFocus={true}
-            className={containerClasses.searchBar}
             size="md"
             onChange={onChange}
             onClear={() => {
