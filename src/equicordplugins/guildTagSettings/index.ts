@@ -20,7 +20,7 @@ import "@equicordplugins/_misc/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import clanBadges from "../_misc/clanBadges.css?managed";
@@ -46,7 +46,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "GuildTagSettings",
     description: "Settings for Guild Tags",
-    authors: [EquicordDevs.thororen],
+    authors: [Devs.thororen],
     settings,
     patches: [
         {

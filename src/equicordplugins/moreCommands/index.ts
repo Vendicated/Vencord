@@ -30,7 +30,7 @@ migratePluginSettings("MoreCommands", "CuteAnimeBoys", "CuteNekos", "CutePats", 
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",
-    authors: [Devs.Arjix, Devs.amy, Devs.Samu, EquicordDevs.zyqunix, EquicordDevs.ShadyGoat, EquicordDevs.thororen, Devs.Korbo],
+    authors: [Devs.Arjix, Devs.amy, Devs.Samu, EquicordDevs.zyqunix, EquicordDevs.ShadyGoat, Devs.thororen, Devs.Korbo],
     commands: [
         ...choice,
         ...system,

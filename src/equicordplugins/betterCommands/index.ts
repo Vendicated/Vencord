@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
@@ -19,7 +19,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "BetterCommands",
     description: "Enhances the command system with miscellaneous improvements.",
-    authors: [EquicordDevs.thororen],
+    authors: [Devs.thororen],
     settings,
     patches: [
         {

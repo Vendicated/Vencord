@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { EquicordDevs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 let clickCount = 0;
@@ -33,7 +33,7 @@ function play() {
 export default definePlugin({
     name: "Equissant",
     description: "Crossant every 10 clicks :trolley:",
-    authors: [EquicordDevs.SomeAspy, EquicordDevs.thororen],
+    authors: [EquicordDevs.SomeAspy, Devs.thororen],
     start() {
         document.addEventListener("click", play);
     },

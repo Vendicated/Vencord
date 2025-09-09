@@ -48,6 +48,7 @@ interface Activity {
     buttons?: Array<string>;
     name: string;
     application_id: string;
+    status_display_type?: number;
     metadata?: {
         button_urls?: Array<string>;
     };
@@ -136,6 +137,25 @@ const settings = definePluginSettings({
         description: "custom status text",
         type: OptionType.STRING,
         default: "some music",
+    },
+    statusDisplayType: {
+        description: "Show the track / artist name in the member list",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Don't show (shows generic listening message)",
+                value: "off",
+                default: true
+            },
+            {
+                label: "Show artist name",
+                value: "artist"
+            },
+            {
+                label: "Show track name",
+                value: "track"
+            }
+        ]
     },
     nameFormat: {
         description: "Show name of song and artist in status name",
@@ -354,6 +374,11 @@ export default definePlugin({
 
             details: trackData.name,
             state: trackData.artist,
+            status_display_type: {
+                "off": 0,
+                "artist": 1,
+                "track": 2
+            }[settings.store.statusDisplayType],
             assets,
 
             buttons: buttons.length ? buttons.map(v => v.label) : undefined,
