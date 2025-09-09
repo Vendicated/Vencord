@@ -57,7 +57,6 @@ async function loadBadges(noCache = false) {
 let intervalId: any;
 
 function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
-    console.log(badge);
     return (
         <Menu.Menu
             navId="vc-badge-context"
