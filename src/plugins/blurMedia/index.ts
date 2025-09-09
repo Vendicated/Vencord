@@ -40,8 +40,8 @@ const settings = definePluginSettings({
 
 function setCss() {
     style.textContent = `
-        .vc-nsfw-img [class^=imageContainer],
-        .vc-nsfw-img [class^=wrapperPaused] {
+        .vc-blurMedia-blur [class^=imageContainer],
+        .vc-blurMedia-blur [class^=wrapperPaused] {
             filter: blur(${settings.store.blurAmount}px);
             transition: filter 0.2s;
 
@@ -55,7 +55,7 @@ function setCss() {
 migratePluginSettings("BlurMedia", "BlurNSFW");
 export default definePlugin({
     name: "BlurMedia",
-    description: "Blur attachments in NSFW channels until hovered",
+    description: "Blur attachments in channels until hovered",
     authors: [Devs.Ven],
     settings,
 
@@ -71,9 +71,9 @@ export default definePlugin({
 
     getClassName(channel: Channel | undefined): string {
         if (settings.store.onlyNSFW) {
-            return channel?.nsfw ? " vc-nsfw-img" : "";
+            return channel?.nsfw ? " vc-blurMedia-blur" : "";
         }
-        return " vc-nsfw-img";
+        return " vc-blurMedia-blur";
     },
 
     start() {
