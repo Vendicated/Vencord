@@ -15,7 +15,7 @@ I have read the code of conduct:
 
 https://github.com/user-attachments/assets/fa02ff46-4a46-470b-a71d-e58ddadc79d5
 
-### How this works
+### How This Works
 
 The main idea behind it is similar to ARRPC.
 1. The game client (e.g. Minecraft) starts a websocket server at `ws://127.0.0.1:25560/api/subscriptions`
@@ -26,7 +26,7 @@ The main idea behind it is similar to ARRPC.
 
 The plugin resets all use volumes to their original volumes when the game closes, or when the user leaves the VC.
 
-### The protocol
+### The Protocol
 
 Messages are JSON formatted
 ```json
@@ -55,8 +55,50 @@ Plugin -> WS server when you join a VC, or someone new joined a VC.
 
 ```json
 {
-  "t": "connected",
+  "t": "sub",
   "c": [ "12345678910", "list of discord ids..."]
 }
 ```
 
+#### unsub
+
+Plugin -> WS server when someone leaves a VC.
+
+```json
+{
+  "t": "unsub",
+  "c": [ "12345678910", "list of discord ids..."]
+}
+```
+
+#### clear
+
+Plugin -> WS server when a connection is opened, to clear all previous subscription info.
+
+```json
+{
+  "t": "clear",
+  "c": null
+}
+```
+
+#### set
+
+WS server -> plugin to set a user volume by giving a volume multiplier, the multiplier is typically between 0 and 1.
+
+```json
+{
+  "t": "set",
+  "c": 0.456
+}
+```
+
+All other stuff not specified above are up to client implementation.
+
+### Example Implementation
+
+[DiscordProximity for Minecraft Forge 1.8.9](https://github.com/Siriusmart/DiscordProximity).
+
+Unless your game has a Discord linking feature, you might want a **nameserver** to map Discord IDs to in-game names in your implementaiton.
+
+For the Forge mod, I used [this single-source-file nameserver](https://github.com/Siriusmart/proximity-nameserver) and a [Discord bot](https://github.com/siriusmart/merlin) to allow users to set their IGN.
