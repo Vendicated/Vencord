@@ -5,6 +5,7 @@
  */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, SelectedChannelStore, UserStore } from "@webpack/common";
@@ -16,7 +17,7 @@ let originalVolumes = {};
 // connection to game
 // undefined if not connected or closed
 // Websocket otherwise
-let ws;
+let ws : WebSocket | undefined;
 // bindWS() is called with a generation
 // generation is incremented when a connection closes
 // if the global generation != the generation bindWS() is ran with
@@ -44,7 +45,7 @@ function restore(): void {
         generation++;
     }
 
-    console.log("Restored user volumes");
+    new Logger("DiscordProximity").log("Restored user volumes");
 }
 
 // runs after connection opened
@@ -60,10 +61,10 @@ function bindWS(localGen: number): void {
 
     try {
         ws = new WebSocket("ws://127.0.0.1:25560/api/subscription");
-        ws.onopen = () => {
-            console.log("Connected to proximity websocket.");
+        ws.onopen = function () {
+            new Logger("DiscordProximity").log("Connected to proximity websocket.");
             connect();
-            ws.send(JSON.stringify({
+            this.send(JSON.stringify({
                 t: "clear",
                 c: 0
             }));
@@ -71,7 +72,7 @@ function bindWS(localGen: number): void {
             const targets = Object.keys(whosThere[whosThereReverse[myId]]).filter(id => id !== myId);
 
             if (targets.length !== 0) {
-                ws.send(JSON.stringify({
+                this.send(JSON.stringify({
                     t: "sub",
                     c: targets
                 }));
@@ -135,7 +136,7 @@ interface VoiceState {
 export default definePlugin({
     name: "DiscordProximity",
     description: "Proximity voice chat plugin for Discord.",
-    authors: [Devs.Siriusmart],
+        authors: [Devs.Siriusmart],
 
     start: () => {
         generation++;
@@ -182,7 +183,7 @@ export default definePlugin({
                             }
                         }
                     } catch (e) {
-                        console.error(e);
+                        new Logger("DiscordProximity").error(e);
                     }
 
                     if (ws !== undefined && myChanId === state.oldChannelId && state.userId !== myId) {
@@ -212,7 +213,7 @@ export default definePlugin({
                                 ws.send(JSON.stringify({ t: "unsub", c: [state.userId] }));
                             }
                         } catch (e) {
-                            console.error(e);
+                            new Logger("DiscordProximity").error(e);
                         }
                     }
                     whosThereReverse[state.userId] = state.channelId;
