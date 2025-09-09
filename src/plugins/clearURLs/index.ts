@@ -25,7 +25,7 @@ import definePlugin from "@utils/types";
 // From lodash
 const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 const reHasRegExpChar = RegExp(reRegExpChar.source);
-const url = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
+const CLEAR_URLS_JSON_URL = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
 
 interface Provider {
     urlPattern: string;
@@ -64,7 +64,7 @@ export default definePlugin({
     },
 
     async createRules() {
-        const res = await fetch(url).then(res => res.json()) as { providers: Providers; };
+        const res = await fetch(CLEAR_URLS_JSON_URL).then(res => res.json()) as { providers: Providers; };
 
         this.providers = [];
 
