@@ -52,7 +52,7 @@ interface RuleSet {
 
 export default definePlugin({
     name: "ClearURLs",
-    description: "Removes tracking garbage from URLs",
+    description: "Automatically removes tracking elements from URLs you send",
     authors: [Devs.adryd, Devs.thororen],
 
     rules: [] as RuleSet[],
