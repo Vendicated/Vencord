@@ -11,8 +11,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message, User } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
-import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
     author: { nick: string; };
@@ -95,11 +95,11 @@ export default definePlugin({
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.sadan],
     patches: [
         {
-            find: '"BaseUsername"',
+            find: '="SYSTEM_TAG"',
             replacement: {
-                /* TODO: remove \i+\i once change makes it to stable */
-                match: /(?<=onContextMenu:\i,children:)(?:\i\+\i|\i)/,
-                replace: "$self.renderUsername(arguments[0])"
+                // The field is named "userName", but as this is unusual casing, the regex also matches username, in case they change it
+                match: /(?<=onContextMenu:\i,children:)\i\?(?=.{0,100}?user[Nn]ame:)/,
+                replace: "$self.renderUsername(arguments[0]),_oldChildren:$&"
             }
         },
         {
@@ -128,7 +128,7 @@ export default definePlugin({
                 <FullName
                     nickname={nick}
                     username={username}
-                    displayName={(user as any).globalName || username}
+                    displayName={user.globalName || username}
                     prefix={prefix}
                     colorSuffix
                 />

@@ -46,9 +46,9 @@ export default definePlugin({
             find: "#{intl::ONBOARDING_CHANNEL_THRESHOLD_WARNING}",
             replacement: [
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /{(?:\i:(?:function\(\){return |\(\)=>)\i}?,?){2}}/,
-                    replace: m => m.replaceAll(canonicalizeMatch(/(function\(\){return |\(\)=>)\i/g), "$1()=>Promise.resolve(true)")
+                    // replace export getters with functions that always resolve to true
+                    match: /{(?:\i:\(\)=>\i,?){2}}/,
+                    replace: m => m.replaceAll(canonicalizeMatch(/\(\)=>\i/g), "()=>()=>Promise.resolve(true)")
                 }
             ],
             predicate: () => settings.store.onboarding

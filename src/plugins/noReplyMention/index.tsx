@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Message } from "discord-types/general";
+import type { Message } from "@vencord/discord-types";
 
 const settings = definePluginSettings({
     userList: {
