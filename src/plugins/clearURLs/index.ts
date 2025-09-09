@@ -25,11 +25,25 @@ import definePlugin from "@utils/types";
 // From lodash
 const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 const reHasRegExpChar = RegExp(reRegExpChar.source);
+const url = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
+
+interface Provider {
+    urlPattern: string;
+    completeProvider: boolean;
+    rules?: string[];
+    rawRules?: string[];
+    referralMarketing?: string[];
+    exceptions?: string[];
+    redirections?: string[];
+    forceRedirection?: boolean;
+}
+
+type Providers = Record<string, Provider>;
 
 export default definePlugin({
     name: "ClearURLs",
     description: "Removes tracking garbage from URLs",
-    authors: [Devs.adryd],
+    authors: [Devs.adryd, Devs.thororen],
 
     async start() {
         await this.createRules();
@@ -50,19 +64,16 @@ export default definePlugin({
     },
 
     async createRules() {
-        const url = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
-
-        const response = await fetch(url);
-        const data = await response.json();
+        const res = await fetch(url).then(res => res.json()) as { providers: Providers; };
 
         this.providers = [];
 
-        for (const [name, provider] of Object.entries<any>(data.providers)) {
+        for (const [name, provider] of Object.entries(res.providers) as [string, Provider][]) {
             const urlPattern = new RegExp(provider.urlPattern, "i");
 
-            const rules = provider.rules.map((rule: string) => new RegExp(rule, "i"));
-            const rawRules = provider.rawRules.map((rule: string) => new RegExp(rule, "i")) ?? [];
-            const exceptions = provider.exceptions.map((ex: string) => new RegExp(ex, "i")) ?? [];
+            const rules = (provider.rules ?? []).map(rule => new RegExp(rule, "i"));
+            const rawRules = (provider.rawRules ?? []).map(rule => new RegExp(rule, "i"));
+            const exceptions = (provider.exceptions ?? []).map(ex => new RegExp(ex, "i"));
 
             this.providers.push({
                 name,
