@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Upload } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { CloudUpload } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
 
@@ -89,7 +89,7 @@ export default definePlugin({
         },
     ],
 
-    AnonymiseUploadButton: ErrorBoundary.wrap(({ upload }: { upload: Upload; }) => {
+    AnonymiseUploadButton: ErrorBoundary.wrap(({ upload }: { upload: CloudUpload; }) => {
         const [anonymise, setAnonymise] = useState(upload[ANONYMISE_UPLOAD_SYMBOL] ?? settings.store.anonymiseByDefault);
 
         function onToggleAnonymise() {
@@ -110,7 +110,7 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    anonymise(upload: Upload) {
+    anonymise(upload: CloudUpload) {
         if ((upload[ANONYMISE_UPLOAD_SYMBOL] ?? settings.store.anonymiseByDefault) === false) {
             return;
         }
