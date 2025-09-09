@@ -131,7 +131,7 @@ export default definePlugin({
 
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
-    const ref = useRef<{ containerRef?: React.MutableRefObject<HTMLDivElement>; } | null>(null);
+    const ref = useRef<{ containerRef?: React.RefObject<HTMLDivElement>; } | null>(null);
 
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
