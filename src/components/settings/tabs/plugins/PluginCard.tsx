@@ -5,16 +5,14 @@
  */
 
 import { showNotice } from "@api/Notices";
-import { CogWheel, InfoIcon, WarningIcon } from "@components/Icons";
+import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { proxyLazy } from "@utils/lazy";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { React, showToast, Toasts, Tooltip } from "@webpack/common";
+import { React, showToast, Toasts } from "@webpack/common";
 import { Settings } from "Vencord";
-
-import { ExcludedPlugins } from "~plugins";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
@@ -118,37 +116,5 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                     }
                 </button>
             } />
-    );
-}
-
-export function UnavailablePluginCard({ name, description, isMissing }: { name: string; description: string, isMissing: boolean; }) {
-    const toolTipText = isMissing
-        ? `${name} is only available on the ${ExcludedReasons[ExcludedPlugins[name]]}`
-        : "This plugin is not on this version of Vencord. Try updating!";
-
-    return description ? (
-        <Tooltip text={toolTipText} key={name}>
-            {({ onMouseLeave, onMouseEnter }) =>
-                <AddonCard
-                    name={name}
-                    description={description || toolTipText}
-                    enabled={false}
-                    setEnabled={() => { }}
-                    disabled={true}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    infoButton={<WarningIcon />}
-                />
-            }
-        </Tooltip>
-    ) : (
-        <AddonCard
-            name={name}
-            description={description || toolTipText}
-            enabled={false}
-            setEnabled={() => { }}
-            disabled={true}
-            infoButton={<WarningIcon />}
-        />
     );
 }

@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, useSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { WarningIcon } from "@components/Icons";
 import { Link } from "@components/Link";
-import { depMap, makeDependencyList } from "@components/settings/tabs/plugins";
-import { PluginCard, UnavailablePluginCard } from "@components/settings/tabs/plugins/PluginCard";
+import { AddonCard } from "@components/settings";
+import { isPluginRequired, makeDependencyList } from "@components/settings/tabs/plugins";
+import { ExcludedReasons, PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
+import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { isPluginDev, tryOrElse } from "@utils/misc";
@@ -36,7 +39,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, Message } from "@vencord/discord-types";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore, useState } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -239,23 +242,6 @@ export default definePlugin({
     renderMessageAccessory(props) {
         const buttons = [] as JSX.Element[];
 
-        const createButton = (key: string, onClick: () => Promise<void>, label: string, color?: string) => {
-            const [disabled, setDisabled] = useState(false);
-            return (
-                <Button
-                    key={key}
-                    color={color}
-                    disabled={disabled}
-                    onClick={async () => {
-                        setDisabled(true);
-                        await onClick();
-                    }}
-                >
-                    {label}
-                </Button>
-            );
-        };
-
         const shouldAddUpdateButton =
             !IS_UPDATER_DISABLED
             && (
@@ -265,44 +251,72 @@ export default definePlugin({
             && props.message.content?.includes("update");
 
         if (shouldAddUpdateButton) {
-            buttons.push(createButton("vc-update", async () => {
-                try {
-                    const success = await forceUpdate();
-                    showToast(success ? "Success! Restarting..." : "Already up to date!", success ? Toasts.Type.SUCCESS : Toasts.Type.MESSAGE);
-                } catch (e) {
-                    new Logger(this.name).error("Error while updating:", e);
-                    showToast("Failed to update :(", Toasts.Type.FAILURE);
-                }
-            }, "Update Now", Button.Colors.GREEN));
+            buttons.push(
+                <Button
+                    key="vc-update"
+                    color={Button.Colors.GREEN}
+                    onClick={async () => {
+                        try {
+                            if (await forceUpdate())
+                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
+                            else
+                                showToast("Already up to date!", Toasts.Type.MESSAGE);
+                        } catch (e) {
+                            new Logger(this.name).error("Error while updating:", e);
+                            showToast("Failed to update :(", Toasts.Type.FAILURE);
+                        }
+                    }}
+                >
+                    Update Now
+                </Button>
+            );
         }
 
         if (props.channel.parent_id === SUPPORT_CATEGORY_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
-            if (["/vencord-debug", "/vencord-plugins"].some(cmd => props.message.content.includes(cmd))) {
+            if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
                 buttons.push(
-                    createButton("vc-dbg", async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() }), "Run /vencord-debug"),
-                    createButton("vc-plg-list", async () => sendMessage(props.channel.id, { content: generatePluginList() }), "Run /vencord-plugins")
+                    <Button
+                        key="vc-dbg"
+                        onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
+                    >
+                        Run /vencord-debug
+                    </Button>,
+                    <Button
+                        key="vc-plg-list"
+                        onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
+                    >
+                        Run /vencord-plugins
+                    </Button>
                 );
             }
 
             if (props.message.author.id === VENBOT_USER_ID) {
                 const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
                 if (match) {
-                    buttons.push(createButton("vc-run-snippet", async () => {
-                        try {
-                            await AsyncFunction(match[1])();
-                            showToast("Success!", Toasts.Type.SUCCESS);
-                        } catch (e) {
-                            new Logger(this.name).error("Error while running snippet:", e);
-                            showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                        }
-                    }, "Run Snippet"));
+                    buttons.push(
+                        <Button
+                            key="vc-run-snippet"
+                            onClick={async () => {
+                                try {
+                                    await AsyncFunction(match[1])();
+                                    showToast("Success!", Toasts.Type.SUCCESS);
+                                } catch (e) {
+                                    new Logger(this.name).error("Error while running snippet:", e);
+                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                                }
+                            }}
+                        >
+                            Run Snippet
+                        </Button>
+                    );
                 }
             }
         }
 
+
         return (
             <>
-                <Flex>{buttons}</Flex>
+                {buttons.length > 0 && <Flex>{buttons}</Flex>}
                 <PluginCards message={props.message} />
             </>
         );
@@ -324,13 +338,44 @@ export default definePlugin({
     }, { noop: true }),
 });
 
-function UrlToPluginCard(url: string, description: string) {
-    const settings = useSettings();
+function UrlToPluginCard({ url, description }: { url: string, description: string; }) {
     const update = useForceUpdater();
 
     const pluginName = new URL(url).pathname.split("/")[2];
     const p = plugins[pluginName];
     const excludedPlugin = ExcludedPlugins[pluginName];
+
+    if (excludedPlugin || !p) {
+        const toolTipText = !p
+            ? `${pluginName} is only available on the ${ExcludedReasons[ExcludedPlugins[pluginName]]}`
+            : "This plugin is not on this version of Vencord. Try updating!";
+
+        return description ? (
+            <Tooltip text={toolTipText} key={pluginName}>
+                {({ onMouseLeave, onMouseEnter }) =>
+                    <AddonCard
+                        name={pluginName}
+                        description={description || toolTipText}
+                        enabled={false}
+                        setEnabled={() => { }}
+                        disabled={true}
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                        infoButton={<WarningIcon />}
+                    />
+                }
+            </Tooltip>
+        ) : (
+            <AddonCard
+                name={pluginName}
+                description={description || toolTipText}
+                enabled={false}
+                setEnabled={() => { }}
+                disabled={true}
+                infoButton={<WarningIcon />}
+            />
+        );
+    }
 
     const onRestartNeeded = () => Alerts.show({
         title: "Restart required",
@@ -340,23 +385,12 @@ function UrlToPluginCard(url: string, description: string) {
         onConfirm: () => location.reload()
     });
 
-    if (excludedPlugin || !p) {
-        return (
-            <UnavailablePluginCard
-                name={pluginName}
-                description={description}
-                isMissing={!p}
-                key={pluginName}
-            />
-        );
-    }
+    const { required, dependents } = isPluginRequired(p);
 
-    const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
-
-    if (isRequired) {
-        const tooltipText = p.required || !depMap[p.name]
+    if (required) {
+        const tooltipText = p.required || !dependents.includes(p.name)
             ? "This plugin is required for Vencord to function."
-            : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+            : makeDependencyList(dependents);
 
         return (
             <Tooltip text={tooltipText} key={p.name}>
@@ -386,13 +420,13 @@ function UrlToPluginCard(url: string, description: string) {
     );
 }
 
-function PluginCards({ message }: { message: Message; }) {
-    const embedPlugins = message.embeds?.map(embed => {
-        if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
-        return UrlToPluginCard(embed.url!, embed.rawDescription);
-    });
+const PluginCards = ErrorBoundary.wrap(function PluginCards({ message }: { message: Message; }) {
+    const pluginCards = message.embeds
+        ?.map(embed => {
+            if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
+            return <UrlToPluginCard url={embed.url} description={embed.rawDescription} key={embed.url} />;
+        }).filter(isNonNullish);
 
-    const pluginCards = embedPlugins.filter(Boolean);
 
     const components = (message.components?.[0] as any)?.components ?? [];
 
@@ -400,7 +434,7 @@ function PluginCards({ message }: { message: Message; }) {
         const description = components[1]?.content;
         const pluginUrl = components.find(c => c?.components)?.components[0]?.url;
         if (pluginUrl?.startsWith("https://vencord.dev/plugins/")) {
-            pluginCards.push(UrlToPluginCard(pluginUrl, description));
+            pluginCards.push(<UrlToPluginCard url={pluginUrl} description={description} key={pluginUrl} />);
         }
     }
 
@@ -413,4 +447,4 @@ function PluginCards({ message }: { message: Message; }) {
             )}
         </ErrorBoundary>
     );
-}
+});

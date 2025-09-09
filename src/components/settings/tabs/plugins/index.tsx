@@ -27,6 +27,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
+import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -97,7 +98,15 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     );
 }
 
-export const depMap: Record<string, string[]> = {};
+export function isPluginRequired(plugin: Plugin) {
+    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d));
+    return {
+        required: plugin.required || plugin.isDependency || dependents.length > 0,
+        dependents
+    };
+}
+
+const depMap: Record<string, string[]> = {};
 for (const plugin in Plugins) {
     const deps = Plugins[plugin].dependencies;
     if (deps) {
