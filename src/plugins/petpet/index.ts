@@ -166,7 +166,7 @@ export default definePlugin({
 
                 const avatar = await loadImage(url);
 
-                let delay = findOption(opts, "delay", DEFAULT_DELAY);
+                const delay = findOption(opts, "delay", DEFAULT_DELAY);
                 // Frame delays < 20ms don't function correctly on chromium and firefox
                 if (delay < 20) return sendBotMessage(cmdCtx.channel.id, { content: "Delay must be at least 20." });
 
