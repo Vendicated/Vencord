@@ -28,64 +28,71 @@ const reHasRegExpChar = RegExp(reRegExpChar.source);
 const CLEAR_URLS_JSON_URL = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
 
 interface Provider {
-    name: string;
-    urlPattern: RegExp;
-    rules: RegExp[];
-    rawRules: RegExp[];
-    exceptions: RegExp[];
+    urlPattern: string;
+    completeProvider: boolean;
+    rules?: string[];
+    rawRules?: string[];
+    referralMarketing?: string[];
+    exceptions?: string[];
+    redirections?: string[];
+    forceRedirection?: boolean;
 }
 
-type Providers = Record<string, Provider>;
+interface ClearUrlsData {
+    providers: Record<string, Provider>;
+}
+
+interface RuleSet {
+    name: string;
+    urlPattern: RegExp;
+    rules?: RegExp[];
+    rawRules?: RegExp[];
+    exceptions?: RegExp[];
+}
 
 export default definePlugin({
     name: "ClearURLs",
     description: "Removes tracking garbage from URLs",
     authors: [Devs.adryd, Devs.thororen],
-    providers: [] as Provider[],
+
+    rules: [] as RuleSet[],
 
     async start() {
         await this.createRules();
     },
 
+    stop() {
+        this.rules = [];
+    },
+
     onBeforeMessageSend(_, msg) {
-        return this.onSend(msg);
+        return this.cleanMessage(msg);
     },
 
     onBeforeMessageEdit(_cid, _mid, msg) {
-        return this.onSend(msg);
-    },
-
-    escapeRegExp(str: string) {
-        return (str && reHasRegExpChar.test(str))
-            ? str.replace(reRegExpChar, "\\$&")
-            : (str || "");
+        return this.cleanMessage(msg);
     },
 
     async createRules() {
-        const res = await fetch(CLEAR_URLS_JSON_URL).then(res => res.json()) as { providers: Providers; };
+        const res = await fetch(CLEAR_URLS_JSON_URL)
+            .then(res => res.json()) as ClearUrlsData;
 
-        this.providers = [];
+        this.rules = [];
 
         for (const [name, provider] of Object.entries(res.providers)) {
             const urlPattern = new RegExp(provider.urlPattern, "i");
 
-            const rules = provider.rules.map(rule => new RegExp(rule, "i"));
-            const rawRules = provider.rawRules.map(rule => new RegExp(rule, "i"));
-            const exceptions = provider.exceptions.map(ex => new RegExp(ex, "i"));
+            const rules = provider.rules?.map(rule => new RegExp(rule, "i"));
+            const rawRules = provider.rawRules?.map(rule => new RegExp(rule, "i"));
+            const exceptions = provider.exceptions?.map(ex => new RegExp(ex, "i"));
 
-            this.providers.push({
+            this.rules.push({
                 name,
                 urlPattern,
                 rules,
                 rawRules,
                 exceptions,
             });
-        }
-    },
-
-    removeParam(rule: string | RegExp, param: string, parent: URLSearchParams) {
-        if (param === rule || rule instanceof RegExp && rule.test(param)) {
-            parent.delete(param);
         }
     },
 
@@ -102,23 +109,26 @@ export default definePlugin({
         if (url.searchParams.entries().next().done) return match;
 
         // Check rules for each provider that matches
-        this.providers.forEach(provider => {
-            if (!provider.urlPattern.test(url.href) || provider.exceptions.some(ex => ex.test(url.href))) return;
+        this.rules.forEach(({ urlPattern, exceptions, rawRules, rules }) => {
+            if (!urlPattern.test(url.href) || exceptions?.some(ex => ex.test(url.href))) return;
+
             const toDelete: string[] = [];
 
-            // Add matched params to delete list
-            url.searchParams.forEach((_, param) => {
-                if (provider.rules.some(rule => rule.test(param))) {
-                    toDelete.push(param);
-                }
-            });
+            if (rules) {
+                // Add matched params to delete list
+                url.searchParams.forEach((_, param) => {
+                    if (rules.some(rule => rule.test(param))) {
+                        toDelete.push(param);
+                    }
+                });
+            }
 
             // Delete matched params from list
             toDelete.forEach(param => url.searchParams.delete(param));
 
             // Match and remove any raw rules
             let cleanedUrl = url.href;
-            provider.rawRules.forEach(rawRule => {
+            rawRules?.forEach(rawRule => {
                 cleanedUrl = cleanedUrl.replace(rawRule, "");
             });
             url = new URL(cleanedUrl);
@@ -127,9 +137,9 @@ export default definePlugin({
         return url.toString();
     },
 
-    onSend(msg: MessageObject) {
+    cleanMessage(msg: MessageObject) {
         // Only run on messages that contain URLs
-        if (msg.content.match(/http(s)?:\/\//)) {
+        if (/http(s)?:\/\//.test(msg.content)) {
             msg.content = msg.content.replace(
                 /(https?:\/\/[^\s<]+[^<.,:;"'>)|\]\s])/g,
                 match => this.replacer(match)
