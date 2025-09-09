@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Upload } from "@api/MessageEvents";
 import { Settings } from "@api/Settings";
 import { tarExtMatcher } from "@plugins/anonymiseFileNames";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
+import { CloudUpload } from "@vencord/discord-types";
 
 const extensionMap = {
     "ogg": [".ogv", ".oga", ".ogx", ".ogm", ".spx", ".opus"],
@@ -42,7 +42,7 @@ export default definePlugin({
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
         },
     ],
-    fixExt(upload: Upload) {
+    fixExt(upload: CloudUpload) {
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
