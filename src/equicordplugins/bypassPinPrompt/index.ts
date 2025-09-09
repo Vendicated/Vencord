@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "BypassPinPrompt",
     description: "Bypass the pin prompt when using the pin functions",
-    authors: [EquicordDevs.thororen],
+    authors: [Devs.thororen],
     patches: [
         {
             find: '"Channel Pins"',

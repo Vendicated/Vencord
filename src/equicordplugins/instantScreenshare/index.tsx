@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Devs, EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { VoiceState } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
@@ -38,7 +38,7 @@ async function autoStartStream() {
 export default definePlugin({
     name: "InstantScreenshare",
     description: "Instantly screenshare when joining a voice channel",
-    authors: [Devs.HAHALOSAH, EquicordDevs.thororen],
+    authors: [Devs.HAHALOSAH, Devs.thororen],
     settings,
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {

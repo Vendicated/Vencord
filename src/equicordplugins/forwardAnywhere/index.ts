@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
@@ -25,7 +25,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ForwardAnywhere",
     description: "If a forward fails send it as a normal message also allows nsfw forwards",
-    authors: [EquicordDevs.thororen],
+    authors: [Devs.thororen],
     settings,
     patches: [
         {

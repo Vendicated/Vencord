@@ -67,7 +67,7 @@ migratePluginSettings("GuildPickerDumper", "EmojiDumper");
 export default definePlugin({
     name: "GuildPickerDumper",
     description: "Context menu to dump and download a server's emojis and stickers.",
-    authors: [EquicordDevs.Cortex, Devs.Samwich, EquicordDevs.Synth, EquicordDevs.thororen],
+    authors: [EquicordDevs.Cortex, Devs.Samwich, EquicordDevs.Synth, Devs.thororen],
     contextMenus: {
         "guild-context": Patch,
         "guild-header-popout": Patch

@@ -18,7 +18,7 @@
 
 import "@equicordplugins/_misc/styles.css";
 
-import { EQUICORD_HELPERS, EquicordDevs, GUILD_ID } from "@utils/constants";
+import { Devs, EQUICORD_HELPERS, EquicordDevs, GUILD_ID } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Button, ChannelStore, Flex, Forms, GuildMemberStore, showToast, Toasts } from "@webpack/common";
@@ -30,7 +30,7 @@ import { toggleEnabled } from "./utils";
 export default definePlugin({
     name: "EquicordHelper",
     description: "Fixes some misc issues with discord",
-    authors: [EquicordDevs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu],
+    authors: [Devs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu],
     settingsAboutComponent: () => <>
         <Forms.FormText className="plugin-warning" style={{ textAlign: "left" }}>
             This plugin was created to allow us as the Equicord Team & Contributors

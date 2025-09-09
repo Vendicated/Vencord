@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { EquicordDevs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import { makeDevBanner, settings } from "./components";
@@ -14,7 +14,7 @@ import { makeDevBanner, settings } from "./components";
 export default definePlugin({
     name: "DiscordDevBanner",
     description: "Enables the Discord developer banner, in which displays the build-ID",
-    authors: [EquicordDevs.KrystalSkull, EquicordDevs.thororen],
+    authors: [EquicordDevs.KrystalSkull, Devs.thororen],
     settings,
     patches: [
         {

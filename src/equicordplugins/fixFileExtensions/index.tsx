@@ -7,7 +7,7 @@
 import { Upload } from "@api/MessageEvents";
 import { Settings } from "@api/Settings";
 import { tarExtMatcher } from "@plugins/anonymiseFileNames";
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
 
 const extensionMap = {
@@ -26,7 +26,7 @@ export const reverseExtensionMap = Object.entries(extensionMap).reduce((acc, [ta
 
 export default definePlugin({
     name: "FixFileExtensions",
-    authors: [EquicordDevs.thororen],
+    authors: [Devs.thororen],
     description: "Fixes file extensions by renaming them to a compatible supported format if possible",
     reporterTestable: ReporterTestable.None,
     patches: [

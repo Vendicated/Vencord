@@ -6,7 +6,7 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { showNotification } from "@api/Notifications";
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { saveFile } from "@utils/web";
 import { findComponentByCodeLazy } from "@webpack";
@@ -56,6 +56,6 @@ const button: ChatBarButtonFactory = ({ isMainChat }) => {
 export default definePlugin({
     name: "SaveFavoriteGIFs",
     description: "Save favorite GIF urls to a file",
-    authors: [EquicordDevs.thororen],
+    authors: [Devs.thororen],
     renderChatBarButton: button,
 });
