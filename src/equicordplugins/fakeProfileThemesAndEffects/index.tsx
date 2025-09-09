@@ -165,8 +165,10 @@ export default definePlugin({
 
     start: () => {
         const { FakeProfileThemesAndEffects, FakeProfileThemes } = Settings.plugins;
-        if (FakeProfileThemes.enabled && FakeProfileThemesAndEffects.enabled) FakeProfileThemes.enabled = false;
-        showToast("Disabled FakeProfileThemes as FakeProfileThemesAndEffects is enabled", Toasts.Type.SUCCESS);
+        if (FakeProfileThemes.enabled && FakeProfileThemesAndEffects.enabled) {
+            FakeProfileThemes.enabled = false;
+            showToast("Disabled FakeProfileThemes as FakeProfileThemesAndEffects is enabled", Toasts.Type.SUCCESS);
+        }
     },
 
     addFPTEBuilder: (guild?: BuilderProps["guild"]) => settings.store.hideBuilder ? null : <Builder guild={guild} />,
