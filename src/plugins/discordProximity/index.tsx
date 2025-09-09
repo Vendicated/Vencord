@@ -170,6 +170,10 @@ export default definePlugin({
 
                         delete whosThereReverse[state.userId];
 
+                        if (ws !== undefined && myChanId === state.oldChannelId && state.userId !== myId) {
+                            ws.send(JSON.stringify({ t: "unsub", c: [state.userId] }));
+                        }
+
                         // remove user from the vc he left
                         if (state.oldChannelId != null) {
                             delete whosThere[state.oldChannelId][state.userId];
@@ -179,6 +183,10 @@ export default definePlugin({
                         }
                     } catch (e) {
                         console.error(e);
+                    }
+
+                    if (ws !== undefined && myChanId === state.oldChannelId && state.userId !== myId) {
+                        ws.send(JSON.stringify({ t: "unsub", c: [state.userId] }));
                     }
 
                     // if you left the vc, close the connection and restore everything
@@ -199,6 +207,10 @@ export default definePlugin({
                         try {
                             delete whosThereReverse[state.userId];
                             delete whosThere[state.oldChannelId][state.userId];
+
+                            if (ws !== undefined && myChanId === state.oldChannelId && state.userId !== myId) {
+                                ws.send(JSON.stringify({ t: "unsub", c: [state.userId] }));
+                            }
                         } catch (e) {
                             console.error(e);
                         }
@@ -206,6 +218,10 @@ export default definePlugin({
                     whosThereReverse[state.userId] = state.channelId;
                     whosThere[state.channelId] ??= {};
                     whosThere[state.channelId][state.userId] = true;
+
+                    if (ws !== undefined && myChanId === state.channelId && state.userId !== myId) {
+                        ws.send(JSON.stringify({ t: "sub", c: [state.userId] }));
+                    }
 
                     // if you joined a vc, start the connection
                     if (ws === undefined && state.userId === myId) {
