@@ -17,12 +17,12 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Upload } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { reverseExtensionMap } from "@equicordplugins/fixFileExtensions";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { CloudUpload } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
 
@@ -96,7 +96,7 @@ export default definePlugin({
         },
     ],
 
-    AnonymiseUploadButton: ErrorBoundary.wrap(({ upload }: { upload: Upload; }) => {
+    AnonymiseUploadButton: ErrorBoundary.wrap(({ upload }: { upload: CloudUpload; }) => {
         const [anonymise, setAnonymise] = useState(upload[ANONYMISE_UPLOAD_SYMBOL] ?? settings.store.anonymiseByDefault);
 
         function onToggleAnonymise() {
@@ -117,8 +117,7 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    anonymise(upload: Upload) {
-
+    anonymise(upload: CloudUpload) {
         const originalFileName = upload.filename;
         const tarMatch = tarExtMatcher.exec(originalFileName);
         const extIdx = tarMatch?.index ?? originalFileName.lastIndexOf(".");

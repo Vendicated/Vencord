@@ -27,6 +27,8 @@ import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModa
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
+import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
+import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
@@ -38,7 +40,7 @@ import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
-const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
+const CloudUpload: typeof TCloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
@@ -93,8 +95,8 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
     const upload = new CloudUpload({
         file: new File([blob], "voice-message.ogg", { type: "audio/ogg; codecs=opus" }),
         isThumbnail: false,
-        platform: 1,
-    }, channelId, false, 0);
+        platform: CloudUploadPlatform.WEB,
+    }, channelId);
 
     upload.on("complete", () => {
         RestAPI.post({
