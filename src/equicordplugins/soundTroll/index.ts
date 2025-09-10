@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Settings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
+import { generateAnimalese, init, kill,playSound } from "./animalese";
 import { croissant } from "./equissant";
+import { keydown } from "./keyboardSounds";
 import { boom, getMoyaiCount, MOYAI } from "./moyai";
 import { settings } from "./settings";
 import { IMessageCreate, IReactionAdd, IVoiceChannelEffectSendEvent } from "./types";
-import { generateAnimalese, playSound, init, kill } from "./animalese";
-import { keydown } from "./keyboardSounds";
-import { Settings } from "@api/Settings";
 
 export let click1, click2, click3, backspace;
 export let sounds = {

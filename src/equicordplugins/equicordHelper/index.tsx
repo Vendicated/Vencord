@@ -39,6 +39,7 @@ export default definePlugin({
     name: "EquicordHelper",
     description: "Fixes some misc issues with discord",
     authors: [Devs.thororen, Devs.nyx, EquicordDevs.Naibuu],
+    settings,
     settingsAboutComponent: () => <>
         <Forms.FormText className="plugin-warning" style={{ textAlign: "left" }}>
             This plugin was created to allow us as the Equicord Team & Contributors
