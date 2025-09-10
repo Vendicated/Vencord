@@ -22,14 +22,23 @@ const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } =
 
 export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
+export const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+    desktop: "Discord Desktop app or Vesktop",
+    discordDesktop: "Discord Desktop app",
+    vencordDesktop: "Vesktop app",
+    web: "Vesktop app and the Web version of Discord",
+    dev: "Developer version of Vencord"
+};
+
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
     disabled: boolean;
     onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
+    update?: () => void;
 }
 
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
+export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, update }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => isPluginEnabled(plugin.name);
@@ -50,7 +59,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
                 settings.enabled = true;
-                onRestartNeeded(plugin.name, "enabled");
+                onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
                 return;
             }
         }
@@ -58,7 +67,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (plugin.patches?.length) {
             settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name, "enabled");
+            onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
             return;
         }
 
@@ -82,6 +91,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         }
 
         settings.enabled = !wasEnabled;
+        update?.();
     }
 
     return (

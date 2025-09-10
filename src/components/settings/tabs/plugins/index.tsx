@@ -21,19 +21,20 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { SettingsTab, wrapTab } from "@components/settings/tabs";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
+import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
-import { PluginCard } from "./PluginCard";
+import { ExcludedReasons, PluginCard } from "./PluginCard";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
@@ -73,17 +74,10 @@ const enum SearchStatus {
     NEW
 }
 
+
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
-
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
-        desktop: "Discord Desktop app or Vesktop",
-        discordDesktop: "Discord Desktop app",
-        vesktop: "Vesktop app",
-        web: "Vesktop app and the Web version of Discord",
-        dev: "Developer version of Vencord"
-    };
 
     return (
         <Text variant="text-md/normal" className={Margins.top16}>
@@ -103,6 +97,26 @@ function ExcludedPluginsList({ search }: { search: string; }) {
         </Text>
     );
 }
+
+export function isPluginRequired(plugin: Plugin) {
+    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d));
+    return {
+        required: plugin.required || plugin.isDependency || dependents.length > 0,
+        dependents
+    };
+}
+
+const depMap: Record<string, string[]> = {};
+for (const plugin in Plugins) {
+    const deps = Plugins[plugin].dependencies;
+    if (deps) {
+        for (const dep of deps) {
+            depMap[dep] ??= [];
+            depMap[dep].push(plugin);
+        }
+    }
+}
+
 
 function PluginSettings() {
     const settings = useSettings();
@@ -127,20 +141,6 @@ function PluginSettings() {
                 cancelText: "Later!",
                 onConfirm: () => location.reload()
             });
-    }, []);
-
-    const depMap = useMemo(() => {
-        const o = {} as Record<string, string[]>;
-        for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
-            if (deps) {
-                for (const dep of deps) {
-                    o[dep] ??= [];
-                    o[dep].push(plugin);
-                }
-            }
-        }
-        return o;
     }, []);
 
     const sortedPlugins = useMemo(() =>
@@ -296,7 +296,7 @@ function PluginSettings() {
     );
 }
 
-function makeDependencyList(deps: string[]) {
+export function makeDependencyList(deps: string[]) {
     return (
         <>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
