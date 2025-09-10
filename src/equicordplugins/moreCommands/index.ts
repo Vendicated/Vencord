@@ -44,7 +44,7 @@ export default definePlugin({
     patches: [
         {
             find: ".isPureReactComponent=!0;",
-            predicate: () => settings.store.uwuEverything && settings.store.uwuify,
+            predicate: () => settings.store.uwuEverything,
             replacement: {
                 match: /(?<=.defaultProps\)void 0.{0,60})(\i)\)/,
                 replace: "$self.uwuifyProps($1))"
@@ -60,7 +60,7 @@ export default definePlugin({
 
     onSend(msg: MessageObject) {
         // Only run when it's enabled
-        if (settings.store.uwuEveryMessage && settings.store.uwuify) {
+        if (settings.store.uwuEveryMessage) {
             msg.content = uwuify(msg.content);
         }
     },
