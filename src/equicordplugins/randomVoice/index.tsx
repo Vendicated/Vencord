@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { findByCode, findByProps, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
 
 import style from "./styles.css?managed";
@@ -18,6 +18,8 @@ import style from "./styles.css?managed";
 const ChatVoiceIcon = findComponentByCodeLazy("0l1.8-1.8c.17");
 const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
 const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
+const startStream = findByCodeLazy('type:"STREAM_START"');
+const getDesktopSources = findByCodeLazy("desktop sources");
 
 const valueOperation = [
     { label: "More than", value: "<", default: false },
@@ -770,9 +772,7 @@ function JoinVc(channelID) {
 }
 
 async function autoStream() {
-    const startStream = findByCode('type:"STREAM_START"');
-    const mediaEngine = findByProps("getMediaEngine").getMediaEngine();
-    const getDesktopSources = findByCode("desktop sources");
+    const mediaEngine = MediaEngineStore.getMediaEngine();
     const selected = SelectedChannelStore.getVoiceChannelId();
     if (!selected) return;
     const channel = ChannelStore.getChannel(selected);
