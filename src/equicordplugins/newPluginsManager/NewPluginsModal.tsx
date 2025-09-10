@@ -184,7 +184,7 @@ function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText key={cl("dep-text")} className={cl("dep-text")}>{dep}</Forms.FormText>)}
+            {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
 }
