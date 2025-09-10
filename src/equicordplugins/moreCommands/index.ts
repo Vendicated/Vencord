@@ -25,12 +25,14 @@ import misc from "./commands/misc";
 import system from "./commands/system";
 import text from "./commands/text";
 import time from "./commands/time";
+import { settings } from "./utils";
 
 migratePluginSettings("MoreCommands", "CuteAnimeBoys", "CuteNekos", "CutePats", "Slap");
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",
     authors: [Devs.Arjix, Devs.amy, Devs.Samu, EquicordDevs.zyqunix, EquicordDevs.ShadyGoat, Devs.thororen, Devs.Korbo],
+    settings,
     commands: [
         ...choice,
         ...system,

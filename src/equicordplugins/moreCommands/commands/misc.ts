@@ -7,7 +7,8 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
 import { UserStore } from "@webpack/common";
 
-import { getCuteAnimeBoys, getCuteNeko, getCutePats, mock } from "../utils";
+import { fromMorse, getCuteAnimeBoys, getCuteNeko, getCutePats, isMorse, makeFreaky, mock, toMorse } from "../utils";
+import { sendMessage } from "@utils/discord";
 
 export default [
     {
@@ -95,5 +96,39 @@ export default [
             const victim = findOption(opts, "victim") as string;
             return { content: `<@${UserStore.getCurrentUser().id}> slaps ${victim} around a bit with a large trout` };
         }
+    },
+    {
+        name: "freaky",
+        description: "it's freaky.",
+        inputType: ApplicationCommandInputType.BUILT_IN,
+        options: [{
+            name: "message",
+            description: "yoooo freaky",
+            type: ApplicationCommandOptionType.STRING,
+            required: true
+        }],
+        execute: (opts, ctx) => {
+            sendMessage(ctx.channel.id, { content: makeFreaky(findOption(opts, "message", "")) });
+        }
+    },
+    {
+        inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
+        name: "morse",
+        description: "Translate to or from Morse code",
+        options: [
+            {
+                name: "text",
+                description: "Text to convert",
+                type: ApplicationCommandOptionType.STRING,
+                required: true
+            }
+        ],
+        execute: opts => {
+            const input = opts.find(o => o.name === "text")?.value as string;
+            const output = isMorse(input) ? fromMorse(input) : toMorse(input);
+            return {
+                content: `${output}`
+            };
+        },
     }
 ];

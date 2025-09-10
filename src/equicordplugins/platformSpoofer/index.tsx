@@ -23,18 +23,6 @@ const settings = definePluginSettings({
                 default: true,
             },
             {
-                label: "Web",
-                value: "web",
-            },
-            {
-                label: "Android",
-                value: "android"
-            },
-            {
-                label: "iOS",
-                value: "ios"
-            },
-            {
                 label: "Xbox",
                 value: "xbox",
             },
@@ -81,10 +69,6 @@ export default definePlugin({
                     return { browser: "Discord Client", vcIcon: 0 };
                 case "web":
                     return { browser: "Discord Web", vcIcon: 0 };
-                case "ios":
-                    return { browser: "Discord iOS", vcIcon: 1 };
-                case "android":
-                    return { browser: "Discord Android", vcIcon: 1 };
                 case "xbox":
                     return { browser: "Discord Embedded", vcIcon: 2 };
                 case "playstation":
