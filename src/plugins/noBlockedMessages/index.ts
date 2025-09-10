@@ -182,7 +182,7 @@ export default definePlugin({
 
             return repliedMessage && this.isBlocked(repliedMessage) ? repliedMessage : false;
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked:", e);
+            new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked or ignored:", e);
         }
     },
 
@@ -194,7 +194,7 @@ export default definePlugin({
 
             return settings.store.alsoHideIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to filter whitelisted messages:", e);
+            new Logger("NoBlockedMessages").error("Failed to check if message is blocked or ignored:", e);
         }
     },
 });
