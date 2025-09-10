@@ -18,16 +18,10 @@
 
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { i18n, MessageStore, RelationshipStore } from "@webpack/common";
-
-interface MessageDeleteProps {
-    // Internal intl message for BLOCKED_MESSAGE_COUNT
-    collapsedReason: () => any;
-}
+import { ChannelStore, MessageStore, RelationshipStore } from "@webpack/common";
 
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreMessages", "ignoreBlockedMessages");
@@ -49,13 +43,31 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: false
+    },
+    whitelistedUsers: {
+        type: OptionType.STRING,
+        description: "User IDs seperated by a comma and a space",
+        restartNeeded: true,
+        default: ""
+    },
+    whitelistedServers: {
+        type: OptionType.STRING,
+        description: "Server IDs seperated by a comma and a space",
+        restartNeeded: true,
+        default: ""
+    },
+    whitelistedChannels: {
+        type: OptionType.STRING,
+        description: "Channel IDs seperated by a comma and a space",
+        restartNeeded: true,
+        default: ""
     }
 });
 
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely",
-    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365, Devs.Elvyra],
     settings,
 
     patches: [
@@ -63,8 +75,8 @@ export default definePlugin({
             find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /let{expanded:\i,[^}]*?collapsedReason[^}]*}/,
-                    replace: "if($self.shouldHide(arguments[0]))return null;$&"
+                    match: /(?<=messages:(\i).*?\1\.content\.length;)/,
+                    replace: "$self.keepWhitelisted($1);"
                 }
             ]
         },
@@ -92,11 +104,23 @@ export default definePlugin({
         },
     ],
 
+    keepWhitelisted(messages: any) {
+        try {
+            messages.content = messages.content.filter((msg: any) => {
+                const authorId = msg.content?.author?.id;
+                const channelId = msg.content?.channel_id;
+                const isWhitelisted = this.checkWhitelist(authorId, channelId);
+                return isWhitelisted;
+            });
+        } catch (e) {
+            new Logger("NoBlockedMessages").error("Failed to filter whitelisted messages:", e);
+        }
+    },
+
     shouldIgnoreMessage(message: Message) {
         try {
-            if (RelationshipStore.isBlocked(message.author.id)) {
-                return true;
-            }
+            if (this.checkWhitelist(message.author.id, message.channel_id)) return false;
+            if (RelationshipStore.isBlocked(message.author.id)) return true;
             return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
@@ -104,32 +128,36 @@ export default definePlugin({
         }
     },
 
-    shouldHide(props: MessageDeleteProps): boolean {
-        try {
-            const collapsedReason = props.collapsedReason();
-            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
-            const ignoredReason = settings.store.applyToIgnoredUsers
-                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
-                : null;
-
-            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    },
-
     isReplyToBlocked(message: Message) {
         if (!settings.store.hideRepliesToBlockedMessages) return false;
         try {
-            const { messageReference } = message;
+            const { messageReference, author, channel_id } = message;
             if (!messageReference) return false;
+            if (this.checkWhitelist(author.id, channel_id)) return false;
 
             const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
+            if (!replyMessage) return false;
 
             return replyMessage ? this.shouldIgnoreMessage(replyMessage) : false;
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked:", e);
+        }
+    },
+
+    checkWhitelist(userId: string, channelId: string) {
+        try {
+            const channel = ChannelStore.getChannel(channelId);
+            const users = settings.store.whitelistedUsers.split(",").map(s => s.trim());
+            const channels = settings.store.whitelistedChannels.split(",").map(s => s.trim());
+            const servers = settings.store.whitelistedServers.split(",").map(s => s.trim());
+
+            if (users.includes(userId)) return true;
+            if (channels.includes(channelId)) return true;
+            if (servers.includes(channel?.guild_id)) return true;
+            return false;
+        } catch (e) {
+            new Logger("NoBlockedMessages").error("Failed to check whitelist:", e);
+            return false;
         }
     }
 });

@@ -153,7 +153,11 @@ export default definePlugin({
             const myId = useStateFromStores([AuthenticationStore], () => AuthenticationStore.getId());
 
             return Object.keys(typingUsers)
-                .filter(id => id && id !== myId && !RelationshipStore.isBlockedOrIgnored(id))
+                .filter(id => {
+                    if (!id || RelationshipStore.isBlockedOrIgnored(id)) return false;
+                    if (id === myId) return Settings.plugins.AmITyping?.enabled;
+                    return true;
+                })
                 .map(id => UserStore.getUser(id))
                 .filter(isNonNullish);
         } catch (e) {
