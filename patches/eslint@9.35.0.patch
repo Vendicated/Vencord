@@ -1,0 +1,105 @@
+diff --git a/lib/rules/no-useless-escape.js b/lib/rules/no-useless-escape.js
+index 480b51597..3e8cdbaf1 100644
+--- a/lib/rules/no-useless-escape.js
++++ b/lib/rules/no-useless-escape.js
+@@ -95,6 +95,14 @@ module.exports = {
+ 						},
+ 						uniqueItems: true,
+ 					},
++					extra: {
++						type: "string",
++						default: ""
++					},
++					extraCharClass: {
++						type: "string",
++						default: ""
++					}
+ 				},
+ 				additionalProperties: false,
+ 			},
+@@ -102,10 +110,15 @@ module.exports = {
+ 	},
+
+ 	create(context) {
++		const options = context.options[0] || {};
++		const { extra, extraCharClass } = options;
+ 		const sourceCode = context.sourceCode;
+ 		const [{ allowRegexCharacters }] = context.options;
+ 		const parser = new RegExpParser();
+
++		const NON_CHARCLASS_ESCAPES = union(REGEX_NON_CHARCLASS_ESCAPES, new Set(extra));
++		const CHARCLASS_ESCAPES = union(REGEX_GENERAL_ESCAPES, new Set(extraCharClass));
++
+ 		/**
+ 		 * Reports a node
+ 		 * @param {ASTNode} node The node to report
+@@ -145,16 +158,16 @@ module.exports = {
+ 					...(disableEscapeBackslashSuggest
+ 						? []
+ 						: [
+-								{
+-									messageId: "escapeBackslash",
+-									fix(fixer) {
+-										return fixer.insertTextBeforeRange(
+-											range,
+-											"\\",
+-										);
+-									},
++							{
++								messageId: "escapeBackslash",
++								fix(fixer) {
++									return fixer.insertTextBeforeRange(
++										range,
++										"\\",
++									);
+ 								},
+-							]),
++							},
++						]),
+ 				],
+ 			});
+ 		}
+@@ -238,7 +251,7 @@ module.exports = {
+
+ 					if (
+ 						escapedChar !==
+-							String.fromCodePoint(characterNode.value) ||
++						String.fromCodePoint(characterNode.value) ||
+ 						allowRegexCharacters.includes(escapedChar)
+ 					) {
+ 						// It's a valid escape.
+@@ -247,11 +260,9 @@ module.exports = {
+ 					let allowedEscapes;
+
+ 					if (characterClassStack.length) {
+-						allowedEscapes = unicodeSets
+-							? REGEX_CLASSSET_CHARACTER_ESCAPES
+-							: REGEX_GENERAL_ESCAPES;
++						allowedEscapes = unicodeSets ? REGEX_CLASSSET_CHARACTER_ESCAPES : CHARCLASS_ESCAPES;
+ 					} else {
+-						allowedEscapes = REGEX_NON_CHARCLASS_ESCAPES;
++						allowedEscapes = NON_CHARCLASS_ESCAPES;
+ 					}
+ 					if (allowedEscapes.has(escapedChar)) {
+ 						return;
+@@ -287,9 +298,9 @@ module.exports = {
+ 								 */
+ 								if (
+ 									characterClassNode.start + 1 !==
+-										characterNode.start &&
++									characterNode.start &&
+ 									characterNode.end !==
+-										characterClassNode.end - 1
++									characterClassNode.end - 1
+ 								) {
+ 									return;
+ 								}
+@@ -334,7 +345,7 @@ module.exports = {
+
+ 							if (
+ 								characterNode.parent.type ===
+-									"ClassIntersection" ||
++								"ClassIntersection" ||
+ 								characterNode.parent.type === "ClassSubtraction"
+ 							) {
+ 								disableEscapeBackslashSuggest = true;
