@@ -88,8 +88,7 @@
         "type-fest": "^4.41.0",
         "typescript": "^5.9.2",
         "typescript-eslint": "^8.43.0",
-        "typescript-transform-paths": "^3.5.5",
-        "zip-local": "^0.3.5"
+        "typescript-transform-paths": "^3.5.5"
     },
     "packageManager": "pnpm@10.14.0",
     "pnpm": {
@@ -112,10 +111,7 @@
         },
         "onlyBuiltDependencies": [
             "esbuild"
-        ],
-        "overrides": {
-            "jszip@<3.8.0": ">=3.8.0"
-        }
+        ]
     },
     "engines": {
         "node": ">=18"
