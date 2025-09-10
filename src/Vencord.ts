@@ -129,7 +129,7 @@ async function runUpdateCheck() {
 
         if (Settings.autoUpdate) {
             await update();
-            if (Settings.autoUpdateNotification) {
+            if (Settings.autoUpdateNotification && !IS_DEV) {
                 notify({
                     title: "Equicord has been updated!",
                     body: "Click here to restart",
