@@ -276,7 +276,7 @@ export default definePlugin({
         // Allow users to use custom client themes
         {
             find: "customUserThemeSettings:{",
-            // discord has two separate modules for treatments 1 and 2
+            // Discord has two separate modules for treatments 1 and 2
             all: true,
             replacement: {
                 match: /(?<=\i=)\(0,\i\.\i\)\(\i\.\i\.TIER_2\)(?=,|;)/g,
