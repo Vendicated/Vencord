@@ -26,6 +26,7 @@ interface ActivityButton {
 interface Activity {
     state?: string;
     details?: string;
+    status_display_type?: number;
     timestamps?: {
         start?: number;
         end?: number;
@@ -89,6 +90,25 @@ const settings = definePluginSettings({
             { label: "Playing", value: ActivityType.PLAYING, default: true },
             { label: "Listening", value: ActivityType.LISTENING }
         ],
+    },
+    statusDisplayType: {
+        description: "Show the track / artist name in the member list",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Don't show (shows generic listening message)",
+                value: "off",
+                default: true
+            },
+            {
+                label: "Show artist name",
+                value: "artist"
+            },
+            {
+                label: "Show track name",
+                value: "track"
+            }
+        ]
     },
     refreshInterval: {
         type: OptionType.SLIDER,
@@ -258,6 +278,11 @@ export default definePlugin({
             metadata: !isRadio && buttons.length ? { button_urls: buttons.map(v => v.url) } : undefined,
 
             type: settings.store.activityType,
+            status_display_type: {
+                "off": 0,
+                "artist": 1,
+                "track": 2
+            }[settings.store.statusDisplayType],
             flags: ActivityFlag.INSTANCE,
         };
     }
