@@ -22,10 +22,10 @@ import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { authorizeCloud, checkCloudUrlCsp, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
+import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
+import { Alerts, Button, Forms, Switch, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -37,8 +37,6 @@ function validateUrl(url: string) {
 }
 
 async function eraseAllData() {
-    if (!await checkCloudUrlCsp()) return;
-
     const res = await fetch(new URL("/v1/", getCloudUrl()), {
         method: "DELETE",
         headers: { Authorization: await getCloudAuth() }
@@ -119,15 +117,31 @@ function SettingsSyncSection() {
 
 function CloudTab() {
     const settings = useSettings(["cloud.authenticated", "cloud.url"]);
+    const [inputKey, setInputKey] = useState(0);
+
+    async function changeUrl(url: string) {
+        settings.cloud.url = url;
+        settings.cloud.authenticated = false;
+
+        await deauthorizeCloud();
+        await authorizeCloud();
+
+        setInputKey(prev => prev + 1);
+    }
 
     return (
         <SettingsTab title="Equicord Cloud">
             <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
-                    Equicord comes with a cloud integration that adds goodies like settings sync across devices.
-                    It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
-                    the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
-                    can host it yourself.
+                    Equicord comes with a cloud integration allowing settings to be synced across apps and devices.
+                    <br />
+                    We use Vencord's <Link href="https://github.com/Vencord/Backend">cloud source code</Link> to provide our cloud instance which has a 32MB backup cap.
+                    <br />
+                    Our <Link href="https://vencord.dev/cloud/privacy">privacy policy</Link> allows you to see what information we store, how we use it, and data retention.
+                    <br />
+                    The Vencord Cloud repository is AGPL 3.0 licensed so you can host it yourself it you would like.
+                    <br />
+                    You can swap between Equicord and Vencord's different cloud instances below if needed.
                 </Forms.FormText>
                 <Switch
                     key="backend"
@@ -147,12 +161,12 @@ function CloudTab() {
                     Which backend to use when using cloud integrations.
                 </Forms.FormText>
                 <CheckedTextInput
-                    key="backendUrl"
+                    key={`backendUrl-${inputKey}`}
                     value={settings.cloud.url}
                     onChange={async v => {
                         settings.cloud.url = v;
                         settings.cloud.authenticated = false;
-                        deauthorizeCloud();
+                        await deauthorizeCloud();
                     }}
                     validate={validateUrl}
                 />
@@ -162,8 +176,8 @@ function CloudTab() {
                         size={Button.Sizes.MEDIUM}
                         disabled={!settings.cloud.authenticated}
                         onClick={async () => {
-                            await deauthorizeCloud();
                             settings.cloud.authenticated = false;
+                            await deauthorizeCloud();
                             await authorizeCloud();
                         }}
                     >
@@ -183,6 +197,12 @@ function CloudTab() {
                         })}
                     >
                         Erase All Data
+                    </Button>
+                    <Button size={Button.Sizes.MEDIUM} onClick={() => changeUrl("https://cloud.equicord.org/")}>
+                        Use Equicord's Cloud
+                    </Button>
+                    <Button size={Button.Sizes.MEDIUM} onClick={() => changeUrl("https://api.vencord.dev/")}>
+                        Use Vencord's Cloud
                     </Button>
                 </Grid>
 
