@@ -212,7 +212,6 @@ if (!process.argv.includes("--skip-extension")) {
     firefoxZip.addLocalFolder("dist/browser/firefox-unpacked");
     firefoxZip.writeZip(path.resolve("dist/extension-firefox.zip"));
     console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
-
 } else {
     await appendCssRuntime;
 }
