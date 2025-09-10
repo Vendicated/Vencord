@@ -111,6 +111,13 @@ export default definePlugin({
                     replace: "...$self.getBadgeMouseEventHandlers($1),$&"
                 }
             ]
+        },
+        {
+            find: "profileCardUsernameRow,children",
+            replacement: {
+                match: /(?<=displayProfile:(\i).+?badges:)(\i)/,
+                replace: "[...$self.getBadges($1),...$2]"
+            }
         }
     ],
 
