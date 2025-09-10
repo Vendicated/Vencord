@@ -18,10 +18,16 @@
 
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, MessageStore, RelationshipStore } from "@webpack/common";
+import { ChannelStore, i18n, MessageStore, RelationshipStore } from "@webpack/common";
+
+interface MessageDeleteProps {
+    // Internal intl message for BLOCKED_MESSAGE_COUNT
+    collapsedReason: () => any;
+}
 
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreMessages", "ignoreBlockedMessages");
@@ -75,8 +81,16 @@ export default definePlugin({
             find: ".__invalid_blocked,",
             replacement: [
                 {
-                    match: /(?<=messages:(\i).*?\1\.content\.length;)/,
-                    replace: "$self.keepWhitelisted($1);"
+                    match: /let{expanded:\i,[^}]*?collapsedReason[^}]*}/,
+                    replace: "if($self.shouldHide(arguments[0]))return null;$&"
+                },
+                {
+                    match: /(?<=messages:(\i).*?=\i),/,
+                    replace: ";$self.keepWhitelisted($1);let"
+                },
+                {
+                    match: /(?<=messages:(\i).*?onClick:\i,collapsedReason:\i)/,
+                    replace: ",messages:$1"
                 }
             ]
         },
@@ -114,6 +128,32 @@ export default definePlugin({
             });
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to filter whitelisted messages:", e);
+        }
+    },
+
+    shouldHide(props: any): boolean {
+        try {
+            const { messages, collapsedReason: collapsedReasonFn } = props;
+            if (!messages.content || messages.content.length === 0) return true;
+
+            const collapsedReason = collapsedReasonFn();
+
+            const hasWhitelisted = messages.content?.some((msg: any) => {
+                const authorId = msg.content.author.id;
+                const channelId = msg.content.channel_id;
+                return this.checkWhitelist(authorId, channelId);
+            });
+            if (hasWhitelisted) return false;
+
+            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+            const ignoredReason = settings.store.applyToIgnoredUsers
+                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
+                : null;
+
+            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
+        } catch (e) {
+            console.error(e);
+            return false;
         }
     },
 
