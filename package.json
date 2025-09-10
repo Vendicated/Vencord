@@ -41,7 +41,7 @@
         "@ffmpeg/ffmpeg": "^0.12.10",
         "@ffmpeg/util": "^0.12.1",
         "@intrnl/xxhash64": "^0.1.2",
-        "@types/less": "^3.0.6",
+        "@types/less": "^3.0.8",
         "@types/stylus": "^0.48.42",
         "@types/tinycolor2": "^1.4.6",
         "@vap/core": "0.0.12",
@@ -79,7 +79,7 @@
         "highlight.js": "11.11.1",
         "html-minifier-terser": "^7.2.0",
         "moment": "^2.22.2",
-        "puppeteer-core": "^24.4.0",
+        "puppeteer-core": "^24.19.0",
         "standalone-electron-types": "^34.2.0",
         "stylelint": "^16.17.0",
         "stylelint-config-standard": "^37.0.0",
@@ -89,14 +89,13 @@
         "type-fest": "^4.38.0",
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.28.0",
-        "typescript-transform-paths": "^3.5.5",
-        "zip-local": "^0.3.5"
+        "typescript-transform-paths": "^3.5.5"
     },
     "packageManager": "pnpm@10.14.0",
     "pnpm": {
         "patchedDependencies": {
             "eslint@9.20.1": "patches/eslint@9.20.1.patch",
-            "@types/less@3.0.6": "patches/@types__less@3.0.6.patch"
+            "@types/less@3.0.8": "patches/@types__less@3.0.8.patch"
         },
         "peerDependencyRules": {
             "ignoreMissing": [
@@ -113,7 +112,10 @@
         },
         "onlyBuiltDependencies": [
             "esbuild"
-        ]
+        ],
+        "overrides": {
+            "@eslint/plugin-kit@<0.3.4": ">=0.3.4"
+        }
     },
     "engines": {
         "node": ">=18"
