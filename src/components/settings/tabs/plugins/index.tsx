@@ -28,7 +28,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
@@ -106,7 +106,8 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
 function PluginSettings() {
     const settings = useSettings();
-    const changes = useMemo(() => new ChangeList<string>(), []);
+    const changeRef = useRef<ChangeList<string>>(null);
+    const changes = changeRef.current ??= new ChangeList<string>();
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
@@ -175,7 +176,7 @@ function PluginSettings() {
         return (
             plugin.name.toLowerCase().includes(search) ||
             plugin.description.toLowerCase().includes(search) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(search))
+            plugin.keywords?.some(t => t.toLowerCase().includes(search))
         );
     };
 
@@ -248,8 +249,9 @@ function PluginSettings() {
                 Filters
             </Forms.FormTitle>
 
-            <div className={classes(Margins.bottom20, cl("filter-controls"))}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
+            <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
+
+            <div className={classes(Margins.bottom20, Margins.top8, cl("filter-controls"))}>
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         options={[
