@@ -1,80 +1,38 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { SelectedChannelStore, UserStore } from "@webpack/common";
+import { settings } from "./settings";
 
-const settings = definePluginSettings({
-    volume: {
-        type: OptionType.SLIDER,
-        description: "Volume of the animalese sound",
-        default: 0.5,
-        markers: [0, 0.1, 0.25, 0.5, 0.6, 0.75, 1],
-    },
-    speed: {
-        type: OptionType.SLIDER,
-        description: "Speed of the animalese sound",
-        default: 1,
-        markers: [0.5, 0.75, 1, 1.25, 1.5],
-    },
-    pitch: {
-        type: OptionType.SLIDER,
-        description: "Pitch multiplier",
-        default: 1,
-        markers: [0.75, 0.8, 0.85, 1, 1.15, 1.25, 1.35, 1.5],
-    },
-    messageLengthLimit: {
-        type: OptionType.NUMBER,
-        description: "Maximum length of message to process",
-        default: 50,
-    },
-    processOwnMessages: {
-        type: OptionType.BOOLEAN,
-        description: "Enable to yap your own messages too",
-        default: true,
-    },
-    soundQuality: {
-        type: OptionType.SELECT,
-        description: "Quality of sound to use",
-        options: [
-            {
-                label: "High",
-                value: "high",
-                default: true
-            },
-            {
-                label: "Medium",
-                value: "med"
-            },
-            {
-                label: "Low",
-                value: "low"
-            },
-            {
-                label: "Lowest",
-                value: "low"
-            }
-        ]
+export let audioContext: AudioContext | null = null;
+
+export async function init() {
+    if (!audioContext) {
+        audioContext = new AudioContext();
+        await initSoundBuffers();
     }
-});
+    init();
+}
 
-let audioContext: AudioContext | null = null;
+export async function kill() {
+    if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+    }
+}
 
 // better than my old hardcoded garbage
-const highSounds = Array.from(
+export const highSounds = Array.from(
     { length: 30 },
     (_, i) => `sound${String(i + 1).padStart(2, "0")}.wav`
 );
-const soundBuffers: Record<string, AudioBuffer> = {};
+export const soundBuffers: Record<string, AudioBuffer> = {};
 
-const BASE_URL_HIGH = "https://raw.githubusercontent.com/Equicord/Equibored/main/sounds/animalese";
+export const BASE_URL_HIGH = "https://raw.githubusercontent.com/Equicord/Equibored/main/sounds/animalese";
 
-async function initSoundBuffers() {
+export async function initSoundBuffers() {
     if (!audioContext) audioContext = new AudioContext();
     const quality = settings.store.soundQuality;
     for (const file of highSounds) {
@@ -85,7 +43,7 @@ async function initSoundBuffers() {
     }
 }
 
-async function loadSound(url: string): Promise<AudioBuffer> {
+export async function loadSound(url: string): Promise<AudioBuffer> {
     if (!audioContext) audioContext = new AudioContext();
     const response = await fetch(url);
     if (!response.ok) throw new Error("Network response was not OK");
@@ -93,7 +51,7 @@ async function loadSound(url: string): Promise<AudioBuffer> {
     return audioContext.decodeAudioData(arrayBuffer);
 }
 
-async function generateAnimalese(text: string): Promise<AudioBuffer | null> {
+export async function generateAnimalese(text: string): Promise<AudioBuffer | null> {
     if (!audioContext) audioContext = new AudioContext();
 
     const soundIndices: string[] = [];
@@ -175,7 +133,7 @@ async function generateAnimalese(text: string): Promise<AudioBuffer | null> {
     return outputBuffer;
 }
 
-async function playSound(buffer: AudioBuffer, volume: number) {
+export async function playSound(buffer: AudioBuffer, volume: number) {
     if (!audioContext) audioContext = new AudioContext();
     const source = audioContext.createBufferSource();
     const gainNode = audioContext.createGain();
@@ -189,55 +147,3 @@ async function playSound(buffer: AudioBuffer, volume: number) {
 
     source.start();
 }
-
-export default definePlugin({
-    name: "Animalese",
-    description: "Plays animal crossing animalese for every message sent (they yap a lot)",
-    authors: [EquicordDevs.ryanamay, EquicordDevs.Mocha],
-    settings,
-
-    flux: {
-        async MESSAGE_CREATE({ optimistic, type, message, channelId }) {
-            if (optimistic || type !== "MESSAGE_CREATE") return;
-            if (message.state === "SENDING") return;
-            if (!message.content || message.author?.bot || channelId !== SelectedChannelStore.getChannelId()) return;
-
-            const urlPattern = /https?:\/\/[^\s]+/;
-            const maxLength = settings.store.messageLengthLimit || 100;
-            const processOwnMessages = settings.store.processOwnMessages ?? true;
-
-            if (
-                urlPattern.test(message.content)
-                || message.content.length > maxLength
-                || !processOwnMessages
-                && String(message.author.id) === String(UserStore.getCurrentUser().id)
-            ) return;
-
-            try {
-                const buffer = await generateAnimalese(message.content);
-                if (buffer) await playSound(buffer, settings.store.volume);
-            } catch (err) {
-                console.error("[Animalese]", err);
-            }
-        }
-    },
-
-    start() {
-        // Only subscribe once!
-        const init = async () => {
-            if (!audioContext) {
-                audioContext = new AudioContext();
-                await initSoundBuffers();
-            }
-            init();
-        };
-        init();
-    },
-
-    stop() {
-        if (audioContext) {
-            audioContext.close();
-            audioContext = null;
-        }
-    },
-});

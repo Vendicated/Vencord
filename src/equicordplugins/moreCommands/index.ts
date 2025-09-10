@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addMessagePreEditListener, addMessagePreSendListener, MessageObject, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -25,13 +26,13 @@ import misc from "./commands/misc";
 import system from "./commands/system";
 import text from "./commands/text";
 import time from "./commands/time";
-import { settings } from "./utils";
+import { settings, uwuify, uwuifyArray } from "./utils";
 
 migratePluginSettings("MoreCommands", "CuteAnimeBoys", "CuteNekos", "CutePats", "Slap");
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",
-    authors: [Devs.Arjix, Devs.amy, Devs.Samu, EquicordDevs.zyqunix, EquicordDevs.ShadyGoat, Devs.thororen, Devs.Korbo],
+    authors: [Devs.Arjix, Devs.amy, Devs.Samu, EquicordDevs.zyqunix, EquicordDevs.ShadyGoat, Devs.thororen, Devs.Korbo, Devs.nyx, Devs.amy],
     settings,
     commands: [
         ...choice,
@@ -39,5 +40,40 @@ export default definePlugin({
         ...text,
         ...time,
         ...misc,
-    ]
+    ],
+    patches: [
+        {
+            find: ".isPureReactComponent=!0;",
+            predicate: () => settings.store.uwuEverything && settings.store.uwuify,
+            replacement: {
+                match: /(?<=.defaultProps\)void 0.{0,60})(\i)\)/,
+                replace: "$self.uwuifyProps($1))"
+            }
+        }
+    ],
+    uwuifyProps(props: any) {
+        if (!props.children) return props;
+        if (typeof props.children === "string") props.children = uwuify(props.children);
+        else if (Array.isArray(props.children)) props.children = uwuifyArray(props.children);
+        return props;
+    },
+
+    onSend(msg: MessageObject) {
+        // Only run when it's enabled
+        if (settings.store.uwuEveryMessage && settings.store.uwuify) {
+            msg.content = uwuify(msg.content);
+        }
+    },
+
+    start() {
+        this.preSend = addMessagePreSendListener((_, msg) => this.onSend(msg));
+        this.preEdit = addMessagePreEditListener((_cid, _mid, msg) =>
+            this.onSend(msg)
+        );
+    },
+
+    stop() {
+        removeMessagePreSendListener(this.preSend);
+        removeMessagePreEditListener(this.preEdit);
+    },
 });

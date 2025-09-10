@@ -5,10 +5,10 @@
  */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
+import { sendMessage } from "@utils/discord";
 import { UserStore } from "@webpack/common";
 
-import { fromMorse, getCuteAnimeBoys, getCuteNeko, getCutePats, isMorse, makeFreaky, mock, toMorse } from "../utils";
-import { sendMessage } from "@utils/discord";
+import { fromMorse, getCuteAnimeBoys, getCuteNeko, getCutePats, isMorse, makeFreaky, mock, toMorse, uwuify } from "../utils";
 
 export default [
     {
@@ -130,5 +130,14 @@ export default [
                 content: `${output}`
             };
         },
-    }
+    },
+    {
+        name: "uwuify",
+        description: "uwuifies your messages",
+        options: [RequiredMessageOption],
+
+        execute: opts => ({
+            content: uwuify(findOption(opts, "message", "")),
+        }),
+    },
 ];

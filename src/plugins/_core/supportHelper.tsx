@@ -123,8 +123,8 @@ async function generateDebugInfoMessage() {
     }
 
     const potentiallyProblematicPlugins = ([
-        "NoRPC", "NoProfileThemes", "NoMosaic", "NoRoleHeaders", "NoSystemBadge", "NoDeleteSafety",
-        "Moyai", "AlwaysAnimate", "ClientTheme", "Equissant", "Ingtoninator", "KeyboardSounds", "NeverPausePreviews",
+        "NoRPC", "NoProfileThemes", "NoMosaic", "NoRoleHeaders", "NoSystemBadge",
+        "AlwaysAnimate", "ClientTheme", "SoundTroll", "Ingtoninator", "NeverPausePreviews",
     ].filter(Vencord.Plugins.isPluginEnabled) ?? []).sort();
 
     if (Vencord.Plugins.isPluginEnabled("CustomIdle") && Vencord.Settings.plugins.CustomIdle.idleTimeout === 0) {

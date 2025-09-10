@@ -18,19 +18,27 @@
 
 import "@equicordplugins/_misc/styles.css";
 
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs, EQUICORD_HELPERS, EquicordDevs, GUILD_ID } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Button, ChannelStore, Flex, Forms, GuildMemberStore, showToast, Toasts } from "@webpack/common";
 import { JSX } from "react";
 
 import { toggleEnabled } from "./utils";
 
+export const settings = definePluginSettings({
+    noMirroredCamera: {
+        type: OptionType.BOOLEAN,
+        description: "Prevents the camera from being mirrored on your screen",
+        default: false,
+    },
+});
 
 export default definePlugin({
     name: "EquicordHelper",
     description: "Fixes some misc issues with discord",
-    authors: [Devs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu],
+    authors: [Devs.thororen, Devs.nyx, EquicordDevs.Naibuu],
     settingsAboutComponent: () => <>
         <Forms.FormText className="plugin-warning" style={{ textAlign: "left" }}>
             This plugin was created to allow us as the Equicord Team & Contributors
@@ -58,8 +66,41 @@ export default definePlugin({
                     replace: "return $1;"
                 }
             ]
+        },
+        // When focused on voice channel or group chat voice call
+        {
+            find: /\i\?\i.\i.SELF_VIDEO/,
+            replacement: {
+                match: /mirror:\i/,
+                replace: "mirror:!1"
+            },
+            predicate: () => settings.store.noMirroredCamera
+        },
+        // Popout camera when not focused on voice channel
+        {
+            find: ".mirror]:",
+            replacement: {
+                match: /\[(\i).mirror]:\i/,
+                replace: "[$1.mirror]:!1"
+            },
+            predicate: () => settings.store.noMirroredCamera
+        },
+        // Overriding css on Preview Camera/Change Video Background popup
+        {
+            find: ".cameraPreview,",
+            replacement: {
+                match: /className:\i.camera,/,
+                replace: "$&style:{transform: \"scalex(1)\"},"
+            },
+            predicate: () => settings.store.noMirroredCamera
         }
     ],
+    start() {
+        if (Settings.plugins?.NoMirroredCamera?.enabled) {
+            Settings.plugins.NoMirroredCamera.enabled = false;
+            settings.store.noMirroredCamera = true;
+        }
+    },
     renderMessageAccessory(props) {
         const buttons = [] as JSX.Element[];
 

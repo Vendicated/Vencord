@@ -5,7 +5,8 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/Settings";
+import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { PaintbrushIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
@@ -106,12 +107,20 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    remixMe: {
+        description: "Turns every single message with attachment to have remix tag",
+        type: OptionType.BOOLEAN,
+        default: false,
+    }
 });
+
+const handleMessage: MessageSendListener = (_, __, ex) => ex.uploads && ex.uploads.forEach(att => att.isRemix = true);
+
 
 export default definePlugin({
     name: "Remix",
     description: "Adds Remix to Desktop",
-    authors: [EquicordDevs.MrDiamond],
+    authors: [EquicordDevs.MrDiamond, EquicordDevs.meowabyte],
     settings,
     contextMenus: {
         "channel-attach": UploadContextMenuPatch,
@@ -124,9 +133,19 @@ export default definePlugin({
         await requireSettingsMenu();
 
         enableStyle(css);
+        if (Settings.plugins?.RemixMe?.enabled) {
+            Settings.plugins.RemixMe.enabled = false;
+            settings.store.remixMe = true;
+        }
+        if (settings.store.remixMe) {
+            addMessagePreSendListener(handleMessage);
+        }
     },
 
     stop() {
         disableStyle(css);
+        if (settings.store.remixMe) {
+            removeMessagePreSendListener(handleMessage);
+        }
     },
 });
