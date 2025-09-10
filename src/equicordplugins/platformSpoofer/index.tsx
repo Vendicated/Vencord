@@ -23,6 +23,10 @@ const settings = definePluginSettings({
                 default: true,
             },
             {
+                label: "Web",
+                value: "web",
+            },
+            {
                 label: "Xbox",
                 value: "xbox",
             },
