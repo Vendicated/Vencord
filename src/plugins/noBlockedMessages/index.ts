@@ -22,11 +22,17 @@ import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { i18n, RelationshipStore } from "@webpack/common";
+import { i18n, MessageStore, RelationshipStore } from "@webpack/common";
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
     collapsedReason: () => any;
+}
+
+interface ChannelStreamProps {
+    // this is incomplete but we only need content and type
+    type: string,
+    content: Message,
 }
 
 // Remove this migration once enough time has passed
@@ -37,6 +43,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
+    },
+    hideRepliesToBlockedMessages: {
+        description: "Hides replies to blocked messages",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false,
     },
     applyToIgnoredUsers: {
         description: "Additionally apply to 'ignored' users",
@@ -49,9 +61,8 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely",
-    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365, Devs.Elvyra],
     settings,
-
     patches: [
         {
             find: ".__invalid_blocked,",
@@ -71,11 +82,49 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}?.message)||$self.isReplyToBlocked(${props}?.message))return;`
                 }
             ]
-        }))
+        })),
+        {
+            find: '"forum-post-action-bar-"',
+            replacement: [
+                {
+                    // There is only one occurrence of .map in this module.
+                    match: /(\i).map\(/,
+                    replace: "$self.filterStream($1).map("
+                }
+            ]
+        },
     ],
+
+    filterStream(channelStream: ChannelStreamProps[]) {
+        return channelStream.filter(
+            elem => {
+                // if we don't check for MESSAGE_GROUP_BLOCKED there will be gaps in the chat.
+                if (elem.type === "MESSAGE_GROUP_BLOCKED") return false;
+                if (elem.type !== "MESSAGE") return true;
+                return !this.isReplyToBlocked(elem.content);
+            }
+        );
+    },
+
+
+    isReplyToBlocked(message: Message) {
+        if (!settings.store.hideRepliesToBlockedMessages) return false;
+
+        try {
+            const { messageReference } = message;
+            if (!messageReference) return false;
+
+            const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
+            if (!replyMessage) return false; // For some reason in some instances this will be undefined.
+
+            return replyMessage ? this.shouldIgnoreMessage(replyMessage) : false;
+        } catch (e) {
+            new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked:", e);
+        }
+    },
 
     shouldIgnoreMessage(message: Message) {
         try {
@@ -99,7 +148,7 @@ export default definePlugin({
 
             return collapsedReason === blockedReason || collapsedReason === ignoredReason;
         } catch (e) {
-            console.error(e);
+            new Logger("NoBlockedMessages").error("Failed to hide blocked message:", e);
             return false;
         }
     }
