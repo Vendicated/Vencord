@@ -24,10 +24,9 @@ import { ChannelStore, GuildMemberStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     userList: {
-        description:
-            "List of users to allow or exempt pings for (separated by commas or spaces)",
-        type: OptionType.STRING,
-        default: "1234567890123445,1234567890123445",
+        description: "List of users to allow or exempt pings for",
+        type: OptionType.USERS,
+        oldStringSeparator: s => s.split(/[\s,]+/).filter(v => v !== "1234567890123445")
     },
     roleList: {
         description:

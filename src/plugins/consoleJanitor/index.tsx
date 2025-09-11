@@ -81,12 +81,13 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     whitelistedLoggers: {
-        type: OptionType.STRING,
-        description: "Semi colon separated list of loggers to allow even if others are hidden",
-        default: "GatewaySocket; Routing/Utils",
-        onChange(newVal: string) {
+        type: OptionType.ARRAY,
+        description: "List of loggers to allow even if others are hidden",
+        default: ["GatewaySocket", "Routing/Utils"],
+        oldStringSeparator: s => s.split(";").map(x => x.trim()),
+        onChange(newVal: string[]) {
             logAllow.clear();
-            newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
+            newVal.forEach(logAllow.add.bind(logAllow));
         }
     },
     allowLevel: {
@@ -112,7 +113,7 @@ export default definePlugin({
     startAt: StartAt.Init,
     start() {
         logAllow.clear();
-        this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
+        settings.store.whitelistedLoggers.forEach(logAllow.add.bind(logAllow));
     },
 
     Noop,
