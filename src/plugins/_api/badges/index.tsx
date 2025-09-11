@@ -142,10 +142,10 @@ export default definePlugin({
             ]
         },
         {
-            find: "profileCardUsernameRow,children",
+            find: "profileCardUsernameRow,children:",
             replacement: {
-                match: /(?<=displayProfile:(\i).+?badges:)(\i)/,
-                replace: "[...$self.getBadges($1),...$2]"
+                match: /badges:(\i)(?<=displayProfile:(\i).+?)/,
+                replace: "badges:[...$self.getBadges($2),...$1]"
             }
         }
     ],
