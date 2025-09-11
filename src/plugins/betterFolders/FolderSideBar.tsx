@@ -26,34 +26,34 @@ import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
-function getExpandedFoldersData() {
+function getExpandedFolderIds() {
     const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
     const folders = SortedGuildStore.getGuildFolders();
 
-    const folderIds = new Set<string>();
+    const expandedFolderIds = new Set<string>();
 
     for (const folder of folders) {
         if (expandedFolders.has(folder.folderId) && folder.guildIds?.length) {
-            folderIds.add(folder.folderId);
+            expandedFolderIds.add(folder.folderId);
         }
     }
 
-    return folderIds;
+    return expandedFolderIds;
 }
 
 export default ErrorBoundary.wrap(guildsBarProps => {
-    const folderIds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getExpandedFoldersData());
+    const expandedFolderIds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getExpandedFolderIds());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
         <GuildsBar
             {...guildsBarProps}
             isBetterFolders={true}
-            betterFoldersExpandedIds={folderIds}
+            betterFoldersExpandedIds={expandedFolderIds}
         />
     );
 
-    const visible = !!folderIds.size;
+    const visible = !!expandedFolderIds.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
