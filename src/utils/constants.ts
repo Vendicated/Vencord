@@ -48,6 +48,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "V",
         id: 343383572805058560n
     },
+    Apexo: {
+        name: "Apexo",
+        id: 228548952687902720n
+    },
     Arjix: {
         name: "ArjixWasTaken",
         id: 674710789138939916n,
@@ -597,6 +601,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Cootshk: {
         name: "Cootshk",
         id: 921605971577548820n
+    },
+    thororen: {
+        name: "thororen",
+        id: 848339671629299742n
     },
 } satisfies Record<string, Dev>);
 
