@@ -24,5 +24,8 @@ export default definePlugin({
     openNewPluginsModal,
     KNOWN_PLUGINS_LEGACY_DATA_KEY,
     KNOWN_SETTINGS_DATA_KEY,
-    KnownSettings
+    KnownSettings,
+    start: () => {
+        KnownSettings.debugWipeSomeData();
+    }
 });
