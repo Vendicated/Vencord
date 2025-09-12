@@ -16,7 +16,7 @@ export const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip
 export const GuildedServerListItemPillComponent = findComponentByCodeLazy('"pill":"empty"');
 export const ServerListItemLowerBadgeComponent = findComponentByCodeLazy("STATUS_DANGER,disableColor:");
 export const ServerListItemUpperBadgeComponent = findComponentByCodeLazy("STATUS_DANGER,shape:", "iconBadge,");
-export const RadioGroup = findComponentByCodeLazy("radioItemIconClassName,");
+export const RadioGroup = findComponentByCodeLazy("\"label\",\"description\"]);");
 export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannelMetadata");
 
 export enum QuestStatus {

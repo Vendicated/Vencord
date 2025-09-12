@@ -41,7 +41,7 @@
         "@ffmpeg/ffmpeg": "^0.12.10",
         "@ffmpeg/util": "^0.12.1",
         "@intrnl/xxhash64": "^0.1.2",
-        "@types/less": "^3.0.6",
+        "@types/less": "^3.0.8",
         "@types/stylus": "^0.48.42",
         "@types/tinycolor2": "^1.4.6",
         "@vap/core": "0.0.12",
@@ -56,8 +56,9 @@
         "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
-        "@electron/asar": "^3.2.10",
+        "@electron/asar": "^4.0.1",
         "@stylistic/eslint-plugin": "^4.2.0",
+        "@types/adm-zip": "^0.5.7",
         "@types/chrome": "^0.0.312",
         "@types/diff": "^7.0.2",
         "@types/lodash": "^4.17.14",
@@ -66,6 +67,7 @@
         "@types/react-dom": "^19.0.4",
         "@types/yazl": "^2.4.5",
         "@vencord/discord-types": "link:packages/discord-types",
+        "adm-zip": "^0.5.16",
         "diff": "^7.0.0",
         "esbuild": "^0.25.1",
         "eslint": "9.20.1",
@@ -77,7 +79,7 @@
         "highlight.js": "11.11.1",
         "html-minifier-terser": "^7.2.0",
         "moment": "^2.22.2",
-        "puppeteer-core": "^24.4.0",
+        "puppeteer-core": "^24.19.0",
         "standalone-electron-types": "^34.2.0",
         "stylelint": "^16.17.0",
         "stylelint-config-standard": "^37.0.0",
@@ -87,14 +89,13 @@
         "type-fest": "^4.38.0",
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.28.0",
-        "typescript-transform-paths": "^3.5.5",
-        "zip-local": "^0.3.5"
+        "typescript-transform-paths": "^3.5.5"
     },
     "packageManager": "pnpm@10.14.0",
     "pnpm": {
         "patchedDependencies": {
             "eslint@9.20.1": "patches/eslint@9.20.1.patch",
-            "@types/less@3.0.6": "patches/@types__less@3.0.6.patch"
+            "@types/less@3.0.8": "patches/@types__less@3.0.8.patch"
         },
         "peerDependencyRules": {
             "ignoreMissing": [
@@ -111,7 +112,10 @@
         },
         "onlyBuiltDependencies": [
             "esbuild"
-        ]
+        ],
+        "overrides": {
+            "@eslint/plugin-kit@<0.3.4": ">=0.3.4"
+        }
     },
     "engines": {
         "node": ">=18"

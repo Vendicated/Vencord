@@ -7,15 +7,14 @@
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Forms, SearchableSelect, useEffect, useState } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
+import { Forms, MediaEngineStore, SearchableSelect, useEffect, useState } from "@webpack/common";
 
 interface PickerProps {
     streamMediaSelection: any[];
     streamMedia: any[];
 }
 
-const mediaEngine = findByPropsLazy("getMediaEngine");
 const getDesktopSources = findByCodeLazy("desktop sources");
 
 export const settings = definePluginSettings({
@@ -26,7 +25,7 @@ export const settings = definePluginSettings({
 });
 
 export async function getCurrentMedia() {
-    const media = mediaEngine.getMediaEngine();
+    const media = MediaEngineStore.getMediaEngine();
     const sources = [
         ...(await getDesktopSources(media, ["screen"], null) ?? []),
         ...(await getDesktopSources(media, ["window", "application"], null) ?? [])
@@ -63,7 +62,7 @@ function StreamSimplePicker({ streamMediaSelection, streamMedia }: PickerProps) 
 
 function ScreenSetting() {
     const { streamMedia } = settings.use(["streamMedia"]);
-    const media = mediaEngine.getMediaEngine();
+    const media = MediaEngineStore.getMediaEngine();
     const [streamMediaSelection, setStreamMediaSelection] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 

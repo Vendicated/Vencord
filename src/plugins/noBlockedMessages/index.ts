@@ -17,119 +17,184 @@
 */
 
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import { runtimeHashMessageKey } from "@utils/intlHash";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { i18n, MessageStore, RelationshipStore } from "@webpack/common";
+import { MessageStore, RelationshipStore } from "@webpack/common";
 
-interface MessageDeleteProps {
-    // Internal intl message for BLOCKED_MESSAGE_COUNT
-    collapsedReason: () => any;
+interface ChannelStreamDividerProps {
+    type: "DIVIDER",
+    content?: string,
+    contentKey?: string,
+    unreadId?: string,
 }
 
-// Remove this migration once enough time has passed
-migratePluginSetting("NoBlockedMessages", "ignoreMessages", "ignoreBlockedMessages");
+interface ChannelStreamMessageProps {
+    type: "MESSAGE",
+    content: Message,
+}
+
+interface ChannelStreamGroupProps {
+    type: "MESSAGE_GROUP_BLOCKED" | "MESSAGE_GROUP_IGNORED",
+    content: ChannelStreamMessageProps[] | any,
+}
+
+migratePluginSetting("NoBlockedMessages", "disableNotifications", "ignoreMessages");
+migratePluginSetting("NoBlockedMessages", "alsoHideIgnoredUsers", "applyToIgnoredUsers");
+
 const settings = definePluginSettings({
-    ignoreMessages: {
-        description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
+    alsoHideIgnoredUsers: {
+        description: "Also hide messages from ignored users.",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false
+    },
+    disableNotifications: {
+        description: "Hide new message notifications for blocked/ignored users. Always true if \"Default Hide Users\" is enabled below and the user triggering the notification is not exempted in \"Override Users\".",
         type: OptionType.BOOLEAN,
         default: false,
-        restartNeeded: true
+        restartNeeded: false
     },
-    hideRepliesToBlockedMessages: {
-        description: "Hides replies to blocked messages.",
+    hideBlockedUserReplies: {
+        description: "Hide replies to blocked/ignored users.",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: false,
     },
-    applyToIgnoredUsers: {
-        description: "Additionally apply to 'ignored' users",
+    defaultHideUsers: {
         type: OptionType.BOOLEAN,
+        description: "If enabled, messages from blocked/ignored users will be completely hidden and any messages from user IDs in the override list will be collapsed (default Discord behavior) instead. If disabled, messages from blocked/ignored users will be collapsed and any messages from user IDs in the override list will be completely hidden instead.",
         default: true,
-        restartNeeded: false
-    }
+        restartNeeded: false,
+    },
+    overrideUsers: {
+        type: OptionType.STRING,
+        description: "Comma separated list of user IDs which will be hidden or collapsed instead of the default behavior selected above.",
+        restartNeeded: false,
+        default: ""
+    },
 });
 
 export default definePlugin({
     name: "NoBlockedMessages",
-    description: "Hides all blocked/ignored messages from chat completely",
-    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    description: "Hide all blocked/ignored messages from chat completely.",
+    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365, Devs.Elvyra, EquicordDevs.Etorix],
     settings,
-
     patches: [
-        {
-            find: ".__invalid_blocked,",
-            replacement: [
-                {
-                    match: /let{expanded:\i,[^}]*?collapsedReason[^}]*}/,
-                    replace: "if($self.shouldHide(arguments[0]))return null;$&"
-                }
-            ]
-        },
         ...[
             '"MessageStore"',
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message)||$self.isReplyToBlocked(${props}.message))return;`
+                    replace: (_, _funcName, props) => `if($self.disableNotification(${props}.message)){return;};`
                 }
             ]
         })),
         {
-            find: "referencedUsernameProfile,referencedAvatarProfile",
+            find: '"forum-post-action-bar-"',
             replacement: [
                 {
-                    match: /(?=\(0,\i.jsx\)\(\i.\i,\{offset)/,
-                    replace: "$&!$self.isReplyToBlocked(arguments[0].message)&&",
+                    match: /(\i).map\(/,
+                    replace: "$self.filterStream($1).map("
                 }
-            ],
+            ]
         },
     ],
 
-    shouldIgnoreMessage(message: Message) {
+    hideBlockedMessage(userId: string) {
+        const overrideUsers = settings.store.overrideUsers.split(",").map(id => id.trim()).filter(id => id.length > 0);
+
+        if (settings.store.defaultHideUsers) {
+            // If hidden by default, overriding shows messages as collapsed.
+            return overrideUsers.includes(userId);
+        } else {
+            // If collapsed by default, overriding hides messages.
+            return !overrideUsers.includes(userId);
+        }
+    },
+
+    shouldKeepMessage(message: Message) {
+        const blocked = this.isBlocked(message);
+        const replyToBlocked = this.isReplyToBlocked(message);
+
+        if (blocked) return [this.hideBlockedMessage(message.author.id), true];
+        if (replyToBlocked) return [this.hideBlockedMessage(replyToBlocked.author.id), true];
+
+        // [Message Visible, Author Blocked/Ignored]
+        return [true, false];
+    },
+
+    disableNotification(message: Message) {
+        if (!message) return false;
+        const messageFilteredData = this.shouldKeepMessage(message);
+        const messageHidden = !messageFilteredData[0];
+        const messageBlocked = messageFilteredData[1];
+        // Always disable notifications for completely hidden messages as not doing so will
+        // cause the client to scroll up into the loaded messages in search of an
+        // unread message which it can't find because it was filtered.
+        return messageHidden || (messageBlocked && settings.store.disableNotifications);
+    },
+
+    filterStream(channelStream: [ChannelStreamGroupProps | ChannelStreamMessageProps | ChannelStreamDividerProps]) {
+        const { alsoHideIgnoredUsers, disableNotifications, hideBlockedUserReplies, defaultHideUsers, overrideUsers } = settings.use();
+
+        const newChannelStream = channelStream.map(item => {
+            if (item.type === "MESSAGE_GROUP_BLOCKED" || (item.type === "MESSAGE_GROUP_IGNORED" && alsoHideIgnoredUsers)) {
+                const groupItem = item as ChannelStreamGroupProps;
+
+                const filteredContent = groupItem.content.filter((item: ChannelStreamMessageProps) => {
+                    return item.type !== "MESSAGE" || this.shouldKeepMessage(item.content)[0];
+                });
+
+                return filteredContent.some(item => item.type === "MESSAGE") ? { ...groupItem, content: filteredContent } : null;
+            }
+
+            return (item.type !== "MESSAGE" || this.shouldKeepMessage((item as ChannelStreamMessageProps).content)[0]) ? item : null;
+        }).filter(item => item !== null);
+
+        let lastItem = newChannelStream[newChannelStream.length - 1];
+
+        // Remove the NEW Message divider if it is the last item,
+        // implying the messages it was announcing got filtered.
+        while (lastItem && lastItem.type === "DIVIDER" && lastItem.unreadId !== undefined) {
+            newChannelStream.pop();
+            lastItem = newChannelStream[newChannelStream.length - 1];
+        }
+
+        return newChannelStream;
+    },
+
+    isReplyToBlocked(message: Message) {
+        if (!settings.store.hideBlockedUserReplies) return false;
+
+        try {
+            // Messages received from the non-focused channel may have a referenced_message property.
+            let repliedMessage: Message | null = (message as any).referenced_message || null;
+
+            if (!repliedMessage) {
+                const messageReference = message.messageReference || (message as any).message_reference;
+                repliedMessage = messageReference ? MessageStore.getMessage(messageReference.channel_id, messageReference.message_id) : null;
+            }
+
+            return repliedMessage && this.isBlocked(repliedMessage) ? repliedMessage : false;
+        } catch (e) {
+            new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked or ignored:", e);
+        }
+    },
+
+    isBlocked(message: Message) {
         try {
             if (RelationshipStore.isBlocked(message.author.id)) {
                 return true;
             }
-            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
+
+            return settings.store.alsoHideIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
-            return false;
+            new Logger("NoBlockedMessages").error("Failed to check if message is blocked or ignored:", e);
         }
     },
-
-    shouldHide(props: MessageDeleteProps): boolean {
-        try {
-            const collapsedReason = props.collapsedReason();
-            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
-            const ignoredReason = settings.store.applyToIgnoredUsers
-                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
-                : null;
-
-            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    },
-
-    isReplyToBlocked(message: Message) {
-        if (!settings.store.hideRepliesToBlockedMessages) return false;
-        try {
-            const { messageReference } = message;
-            if (!messageReference) return false;
-
-            const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
-
-            return replyMessage ? this.shouldIgnoreMessage(replyMessage) : false;
-        } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked:", e);
-        }
-    }
 });

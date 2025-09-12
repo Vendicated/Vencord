@@ -64,7 +64,7 @@ export const settings = definePluginSettings({
     },
     disableCreateDMButton: {
         type: OptionType.BOOLEAN,
-        description: "Disabled the create dm button",
+        description: "Disables the create dm button",
         default: true
     }
 });
@@ -160,9 +160,9 @@ export default definePlugin({
             }
         },
         {
-            find: ".createDMButtonContainer",
+            find: ".createDMButtonContainer,",
             replacement: {
-                match: /"full-width"===\i/,
+                match: /"create-dm"\)/,
                 replace: "$&&&false"
             },
             predicate: () => settings.store.disableCreateDMButton

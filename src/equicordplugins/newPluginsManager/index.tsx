@@ -7,18 +7,22 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { KNOWN_PLUGINS_DATA_KEY } from "./knownPlugins";
+import * as KnownSettings from "./knownSettings";
+import { KNOWN_PLUGINS_LEGACY_DATA_KEY, KNOWN_SETTINGS_DATA_KEY } from "./knownSettings";
 import { openNewPluginsModal } from "./NewPluginsModal";
 
 export default definePlugin({
     name: "NewPluginsManager",
-    description: "Utility that notifies you when new plugins are added to Equicord",
+    description: "Utility that notifies you when new plugins are added to Vencord",
     authors: [Devs.Sqaaakoi],
+    enabledByDefault: true,
     flux: {
         async POST_CONNECTION_OPEN() {
             openNewPluginsModal();
         }
     },
     openNewPluginsModal,
-    KNOWN_PLUGINS_DATA_KEY
+    KNOWN_PLUGINS_LEGACY_DATA_KEY,
+    KNOWN_SETTINGS_DATA_KEY,
+    KnownSettings
 });

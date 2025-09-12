@@ -155,7 +155,7 @@ async function init() {
 
     syncSettings();
 
-    if (!IS_WEB && !IS_UPDATER_DISABLED) {
+    if (!IS_WEB && !IS_UPDATER_DISABLED || !IS_DEV) {
         runUpdateCheck();
 
         // this tends to get really annoying, so only do this if the user has auto-update without notification enabled

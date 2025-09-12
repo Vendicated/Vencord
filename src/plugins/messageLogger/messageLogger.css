@@ -2,7 +2,7 @@
     display: none;
 }
 
-.messagelogger-deleted:is(.messagelogger-deleted-attachment,
+.messagelogger-deleted :is(.messagelogger-deleted-attachment,
     .emoji,
     [data-type="sticker"],
     [class*="embedIframe"],

@@ -22,7 +22,7 @@ import { PlainSettings, Settings } from "@api/Settings";
 import { moment, SettingsRouter, Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
-import { checkCloudUrlCsp, getCloudAuth, getCloudUrl } from "./cloud";
+import { getCloudAuth, getCloudUrl } from "./cloud";
 import { Logger } from "./Logger";
 import { relaunch } from "./native";
 import { chooseFile, saveFile } from "./web";
@@ -118,8 +118,6 @@ const cloudSettingsLogger = new Logger("Cloud:Settings", "#39b7e0");
 export async function putCloudSettings(manual?: boolean) {
     const settings = await exportSettings({ minify: true });
 
-    if (!await checkCloudUrlCsp()) return;
-
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "PUT",
@@ -164,8 +162,6 @@ export async function putCloudSettings(manual?: boolean) {
 }
 
 export async function getCloudSettings(shouldNotify = true, force = false) {
-    if (!await checkCloudUrlCsp()) return;
-
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "GET",
@@ -268,8 +264,6 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
 }
 
 export async function deleteCloudSettings() {
-    if (!await checkCloudUrlCsp()) return;
-
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "DELETE",
