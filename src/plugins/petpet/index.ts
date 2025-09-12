@@ -150,6 +150,8 @@ export default definePlugin({
                 }
             ],
             execute: async (opts, cmdCtx) => {
+                if (IS_USERSCRIPT) return sendBotMessage(cmdCtx.channel.id, { content: "petpet is not supported when Vencord is installed as a Userscript." });
+
                 const frames = await getFrames();
 
                 const noServerPfp = findOption(opts, "no-server-pfp", false);
