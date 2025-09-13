@@ -42,9 +42,9 @@ const settings = definePluginSettings({
     ignoreTimeout: {
         type: OptionType.SLIDER,
         description: "Timeout to click ignore",
-        markers: [0, 1000, 2000, 2500, 5000, 10000],
+        markers: [0, 1000, 2500, 5000, 10000],
         default: 2500,
-        stickToMarkers: false,
+        stickToMarkers: true,
     }
 });
 
