@@ -214,7 +214,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             <Tooltip text="Reset to default settings" shouldShow={!isObjectEmpty(pluginSettings)}>
                                 {({ onMouseEnter, onMouseLeave }) => (
                                     <Button
-                                        className="button-danger-background"
+                                        className={cl("disable-warning")}
                                         size={Button.Sizes.SMALL}
                                         color={Button.Colors.BRAND}
                                         onClick={handleResetClick}
@@ -312,10 +312,6 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
             <ModalContent>
                 <Forms.FormSection>
                     <Flex className="vc-warning-info">
-                        <img
-                            src="https://media.tenor.com/hapjxf8y50YAAAAi/stop-sign.gif"
-                            alt="Warning"
-                        />
                         <Text className="text-normal">
                             You are about to reset all settings for <strong>{plugin.name}</strong> to their default values.
                         </Text>
@@ -330,19 +326,19 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
             </ModalContent>
             <ModalFooter className="modal-footer">
                 <Flex className="button-container">
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        color={Button.Colors.PRIMARY}
-                        onClick={warningModalProps.onClose}
-                        look={Button.Looks.LINK}
-                    >
-                        Cancel
-                    </Button>
                     <Flex className="button-group">
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.PRIMARY}
+                            onClick={warningModalProps.onClose}
+                            look={Button.Looks.FILLED}
+                        >
+                            Cancel
+                        </Button>
                         {!Settings.ignoreResetWarning && (
                             <Button
                                 size={Button.Sizes.SMALL}
-                                className="button-danger-background"
+                                className={cl("disable-warning")}
                                 onClick={() => {
                                     Settings.ignoreResetWarning = true;
                                 }}
@@ -350,21 +346,15 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                                 Disable Warning Forever
                             </Button>
                         )}
-                        <Tooltip text="This action cannot be undone. Are you sure?" shouldShow={true}>
-                            {({ onMouseEnter, onMouseLeave }) => (
-                                <Button
-                                    size={Button.Sizes.SMALL}
-                                    onClick={() => {
-                                        resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
-                                    }}
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    className="button-danger-background-no-margin"
-                                >
-                                    Confirm Reset
-                                </Button>
-                            )}
-                        </Tooltip>
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            onClick={() => {
+                                resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
+                            }}
+                            className={cl("confirm-reset")}
+                        >
+                            Confirm Reset
+                        </Button>
                     </Flex>
                 </Flex>
             </ModalFooter>

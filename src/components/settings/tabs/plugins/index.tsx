@@ -82,7 +82,7 @@ function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal,
             {enabledPlugins.length > 0 && !required && (
                 <Button
                     size={Button.Sizes.SMALL}
-                    className="button-danger-background disable-all-button"
+                    className={cl("disable-warning")}
                     onClick={() => {
                         if (Settings.ignoreResetWarning) return resetCheckAndDo();
 
@@ -337,19 +337,18 @@ export default function PluginSettings() {
                 </ModalContent>
                 <ModalFooter className="modal-footer">
                     <Flex className="button-container">
-                        <Button
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            onClick={warningModalProps.onClose}
-                            look={Button.Looks.LINK}
-                        >
-                            Cancel
-                        </Button>
                         <Flex className="button-group">
+                            <Button
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.PRIMARY}
+                                onClick={warningModalProps.onClose}
+                            >
+                                Cancel
+                            </Button>
                             {!Settings.ignoreResetWarning && (
                                 <Button
                                     size={Button.Sizes.SMALL}
-                                    className="button-danger-background"
+                                    className={cl("disable-warning")}
                                     onClick={() => {
                                         Settings.ignoreResetWarning = true;
                                     }}
@@ -357,19 +356,14 @@ export default function PluginSettings() {
                                     Disable Warning Forever
                                 </Button>
                             )}
-                            <Tooltip text="This action cannot be undone. Are you sure?" shouldShow={true}>
-                                {({ onMouseEnter, onMouseLeave }) => (
-                                    <Button
-                                        size={Button.Sizes.SMALL}
-                                        className="button-danger-background-no-margin"
-                                        onClick={resetCheckAndDo}
-                                        onMouseEnter={onMouseEnter}
-                                        onMouseLeave={onMouseLeave}
-                                    >
-                                        Disable All
-                                    </Button>
-                                )}
-                            </Tooltip>
+
+                            <Button
+                                size={Button.Sizes.SMALL}
+                                className={cl("confirm-reset")}
+                                onClick={resetCheckAndDo}
+                            >
+                                Disable All
+                            </Button>
                         </Flex>
                     </Flex>
                 </ModalFooter>
