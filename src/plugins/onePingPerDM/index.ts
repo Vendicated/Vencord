@@ -36,6 +36,12 @@ const settings = definePluginSettings({
         description: "User IDs (comma + space) whose pings should NEVER be throttled",
         restartNeeded: true,
         default: ""
+    },
+    alwaysPlaySound: {
+        type: OptionType.BOOLEAN,
+        description: "Play message sound even when message sound is disabled",
+        restartNeeded: true,
+        default: false
     }
 });
 
@@ -49,16 +55,19 @@ export default definePlugin({
             find: ".getDesktopType()===",
             replacement: [
                 {
-                    match: /(\i\.\i\.getDesktopType\(\)===\i\.\i\.NEVER)\)/,
-                    replace: "$&if(!$self.isPrivateChannelRead(arguments[0]?.message))return;else "
+                    match: /(\i\.\i\.getDesktopType\(\)===\i\.\i\.NEVER)\)(?=.*?(\i\.\i\.playNotificationSound\(.{0,5}\)))/,
+                    replace: "$&if(!$self.isPrivateChannelRead(arguments[0]?.message))return;else if($self.playSound())return $2;else "
                 },
                 {
-                    match: /sound:(\i\?\i:void 0,volume:\i,onClick)/,
-                    replace: "sound:!$self.isPrivateChannelRead(arguments[0]?.message)?undefined:$1"
+                    match: /sound:(\i\?(\i):void 0,volume:\i,onClick)/,
+                    replace: "sound:!$self.isPrivateChannelRead(arguments[0]?.message)?undefined:$self.playSound()?$2:$1"
                 }
             ]
         }
     ],
+    playSound() {
+        return settings.store.alwaysPlaySound;
+    },
     isPrivateChannelRead(message: MessageJSON) {
         const ignoreList = settings.store.ignoreUsers.split(", ").filter(Boolean);
         if (ignoreList.includes(message.author.id)) return true;
