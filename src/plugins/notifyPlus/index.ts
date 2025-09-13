@@ -15,6 +15,14 @@ interface PluginStats {
     alertsTriggered: number;
     lastAlert: string | null;
     status: string;
+    textFiltersTriggered: number;
+}
+
+interface TextFilter {
+    keyword: string;
+    soundType: string;
+    caseSensitive: boolean;
+    wholeWord: boolean;
 }
 
 let stats: PluginStats = {
@@ -22,7 +30,8 @@ let stats: PluginStats = {
     messagesProcessed: 0,
     alertsTriggered: 0,
     lastAlert: null,
-    status: "Active"
+    status: "Active",
+    textFiltersTriggered: 0
 };
 
 const settings = definePluginSettings({
@@ -89,6 +98,104 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show plugin statistics",
         default: true
+    },
+    enableTextFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Enable text-based sound filters",
+        default: false
+    },
+    // Text Filter 1
+    textFilter1Keyword: {
+        type: OptionType.STRING,
+        description: "Text filter 1: Keyword to detect",
+        default: "urgent",
+        placeholder: "urgent, emergency, help..."
+    },
+    textFilter1Sound: {
+        type: OptionType.SELECT,
+        description: "Text filter 1: Sound to play",
+        options: [
+            { label: "Simple beep", value: "beep" },
+            { label: "Double alert", value: "double" },
+            { label: "Urgent sound", value: "urgent" }
+        ],
+        default: "urgent"
+    },
+    textFilter1CaseSensitive: {
+        type: OptionType.BOOLEAN,
+        description: "Text filter 1: Case sensitive matching",
+        default: false
+    },
+    textFilter1WholeWord: {
+        type: OptionType.BOOLEAN,
+        description: "Text filter 1: Match whole words only",
+        default: false
+    },
+    
+    // Text Filter 2
+    textFilter2Keyword: {
+        type: OptionType.STRING,
+        description: "Text filter 2: Keyword to detect",
+        default: "emergency",
+        placeholder: "emergency, critical, asap..."
+    },
+    textFilter2Sound: {
+        type: OptionType.SELECT,
+        description: "Text filter 2: Sound to play",
+        options: [
+            { label: "Simple beep", value: "beep" },
+            { label: "Double alert", value: "double" },
+            { label: "Urgent sound", value: "urgent" }
+        ],
+        default: "double"
+    },
+    textFilter2CaseSensitive: {
+        type: OptionType.BOOLEAN,
+        description: "Text filter 2: Case sensitive matching",
+        default: false
+    },
+    textFilter2WholeWord: {
+        type: OptionType.BOOLEAN,
+        description: "Text filter 2: Match whole words only",
+        default: true
+    },
+    
+    // Text Filter 3
+    textFilter3Keyword: {
+        type: OptionType.STRING,
+        description: "Text filter 3: Keyword to detect",
+        default: "",
+        placeholder: "Leave empty to disable"
+    },
+    textFilter3Sound: {
+        type: OptionType.SELECT,
+        description: "Text filter 3: Sound to play",
+        options: [
+            { label: "Simple beep", value: "beep" },
+            { label: "Double alert", value: "double" },
+            { label: "Urgent sound", value: "urgent" }
+        ],
+        default: "beep"
+    },
+    textFilter3CaseSensitive: {
+        type: OptionType.BOOLEAN,
+        description: "Text filter 3: Case sensitive matching",
+        default: false
+    },
+    textFilter3WholeWord: {
+        type: OptionType.BOOLEAN,
+        description: "Text filter 3: Match whole words only",
+        default: false
+    },
+    textFilterPriority: {
+        type: OptionType.SELECT,
+        description: "Text filter priority over channel alerts",
+        options: [
+            { label: "Channel priority (text filters only in priority channels)", value: "channel" },
+            { label: "Text priority (text filters work in any channel)", value: "text" },
+            { label: "Both (text filters work everywhere, priority channels use default sound)", value: "both" }
+        ],
+        default: "channel"
     }
 });
 
@@ -109,6 +216,7 @@ function showStats() {
 │ Started: ${new Date(stats.started).toLocaleString()}
 │ Messages processed: ${stats.messagesProcessed}
 │ Alerts triggered: ${stats.alertsTriggered}
+│ Text filters triggered: ${stats.textFiltersTriggered}
 │ Last alert: ${stats.lastAlert || "None"}
 ╰───────────────────────────────────╯
     `);
@@ -226,7 +334,74 @@ function createFlash() {
     }
 }
 
-function createPopup(message: any) {
+function parseTextFilters(): TextFilter[] {
+    if (!settings.store.enableTextFilters) {
+        return [];
+    }
+    
+    const filters: TextFilter[] = [];
+    
+    // Filter 1
+    if (settings.store.textFilter1Keyword?.trim()) {
+        filters.push({
+            keyword: settings.store.textFilter1Keyword.trim(),
+            soundType: settings.store.textFilter1Sound || "urgent",
+            caseSensitive: settings.store.textFilter1CaseSensitive || false,
+            wholeWord: settings.store.textFilter1WholeWord || false
+        });
+    }
+    
+    // Filter 2
+    if (settings.store.textFilter2Keyword?.trim()) {
+        filters.push({
+            keyword: settings.store.textFilter2Keyword.trim(),
+            soundType: settings.store.textFilter2Sound || "double",
+            caseSensitive: settings.store.textFilter2CaseSensitive || false,
+            wholeWord: settings.store.textFilter2WholeWord || false
+        });
+    }
+    
+    // Filter 3
+    if (settings.store.textFilter3Keyword?.trim()) {
+        filters.push({
+            keyword: settings.store.textFilter3Keyword.trim(),
+            soundType: settings.store.textFilter3Sound || "beep",
+            caseSensitive: settings.store.textFilter3CaseSensitive || false,
+            wholeWord: settings.store.textFilter3WholeWord || false
+        });
+    }
+    
+    return filters;
+}
+
+function checkTextFilters(content: string): TextFilter | null {
+    const filters = parseTextFilters();
+    if (filters.length === 0) return null;
+    
+    for (const filter of filters) {
+        let searchText = filter.caseSensitive ? content : content.toLowerCase();
+        let keyword = filter.caseSensitive ? filter.keyword : filter.keyword.toLowerCase();
+        
+        let found = false;
+        if (filter.wholeWord) {
+            // Match whole words only
+            const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
+            found = regex.test(searchText);
+        } else {
+            // Match anywhere in text
+            found = searchText.includes(keyword);
+        }
+        
+        if (found) {
+            log("info", `Text filter triggered: "${filter.keyword}" -> ${filter.soundType}`);
+            return filter;
+        }
+    }
+    
+    return null;
+}
+
+function createPopup(message: any, filterInfo?: { type: string; keyword?: string }) {
     try {
         const channel = ChannelStore.getChannel(message.channel_id);
         const guild = channel?.guild_id ? GuildStore.getGuild(channel.guild_id) : null;
@@ -252,14 +427,19 @@ function createPopup(message: any) {
             border: 2px solid rgba(255, 255, 255, 0.2);
         `;
 
+        const alertTitle = filterInfo?.type === 'text' ? 'TEXT FILTER ALERT' : 'PRIORITY ALERT';
+        const alertIcon = filterInfo?.type === 'text' ? '🎯' : '🚨';
+        const keywordInfo = filterInfo?.keyword ? `<div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">Keyword: "${filterInfo.keyword}"</div>` : '';
+        
         popup.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <div style="font-size: 18px;">🚨</div>
-                <div style="font-weight: 600; font-size: 14px;">PRIORITY ALERT</div>
+                <div style="font-size: 18px;">${alertIcon}</div>
+                <div style="font-weight: 600; font-size: 14px;">${alertTitle}</div>
             </div>
             <div style="font-size: 13px; opacity: 0.9;">
                 <strong>${authorName}</strong> in <strong>#${channelName}</strong>
                 ${guild ? `<br><span style="opacity: 0.7;">${guildName}</span>` : ""}
+                ${keywordInfo}
             </div>
         `;
 
@@ -282,19 +462,29 @@ function createPopup(message: any) {
     }
 }
 
-function triggerAlert(message: any) {
+function triggerAlert(message: any, textFilter?: TextFilter) {
     try {
         stats.alertsTriggered++;
         stats.lastAlert = new Date().toLocaleString();
         stats.status = "Processing Alert";
 
         const { alertType, soundType, customSoundUrl, volume } = settings.store;
+        
+        // Use text filter sound if available, otherwise use default settings
+        const effectiveSoundType = textFilter?.soundType || soundType;
+        const isTextFilter = !!textFilter;
+        
+        if (isTextFilter) {
+            stats.textFiltersTriggered++;
+            log("info", `Using text filter sound: ${effectiveSoundType}`);
+        }
 
         if (alertType === "sound" || alertType === "all") {
-            if (soundType === "custom" && customSoundUrl) {
+            if (effectiveSoundType === "custom" && customSoundUrl && !isTextFilter) {
+                // Only use custom URL for non-text filters
                 playCustomSound(customSoundUrl, volume);
             } else {
-                generateSound(soundType || "urgent", volume);
+                generateSound(effectiveSoundType || "urgent", volume);
             }
         }
 
@@ -303,7 +493,7 @@ function triggerAlert(message: any) {
         }
 
         if (alertType === "popup" || alertType === "all") {
-            createPopup(message);
+            createPopup(message, textFilter ? { type: 'text', keyword: textFilter.keyword } : { type: 'priority' });
         }
 
         setTimeout(() => {
@@ -333,11 +523,47 @@ function handleMessage(data: any) {
             .map(id => id.trim())
             .filter(id => id.length > 0);
 
-        if (priorityChannels.length === 0) return;
-
-        if (priorityChannels.includes(message.channel_id)) {
-            log("info", `Priority message detected in channel: ${message.channel_id}`);
-            triggerAlert(message);
+        const isPriorityChannel = priorityChannels.length > 0 && priorityChannels.includes(message.channel_id);
+        const textFilterPriority = settings.store.textFilterPriority;
+        
+        // Check for text filters
+        const textFilter = settings.store.enableTextFilters ? checkTextFilters(message.content || "") : null;
+        
+        let shouldTriggerAlert = false;
+        let alertTextFilter: TextFilter | undefined = undefined;
+        
+        // Determine if we should trigger an alert based on priority settings
+        if (textFilterPriority === "text" && textFilter) {
+            // Text filters work everywhere
+            shouldTriggerAlert = true;
+            alertTextFilter = textFilter;
+            log("info", `Text filter triggered globally: "${textFilter.keyword}" in channel ${message.channel_id}`);
+        } else if (textFilterPriority === "both") {
+            // Text filters work everywhere, priority channels use default sound
+            if (textFilter && !isPriorityChannel) {
+                shouldTriggerAlert = true;
+                alertTextFilter = textFilter;
+                log("info", `Text filter triggered: "${textFilter.keyword}" in channel ${message.channel_id}`);
+            } else if (isPriorityChannel) {
+                shouldTriggerAlert = true;
+                // Use default sound for priority channels in "both" mode
+                log("info", `Priority channel message (default sound): ${message.channel_id}`);
+            }
+        } else if (textFilterPriority === "channel" || !textFilterPriority) {
+            // Default behavior: text filters only work in priority channels
+            if (isPriorityChannel) {
+                shouldTriggerAlert = true;
+                if (textFilter) {
+                    alertTextFilter = textFilter;
+                    log("info", `Text filter triggered in priority channel: "${textFilter.keyword}" in ${message.channel_id}`);
+                } else {
+                    log("info", `Priority channel message (default sound): ${message.channel_id}`);
+                }
+            }
+        }
+        
+        if (shouldTriggerAlert) {
+            triggerAlert(message, alertTextFilter);
         }
     } catch (error) {
         log("error", "Message handler error", error);
@@ -364,7 +590,8 @@ export default definePlugin({
                 messagesProcessed: 0,
                 alertsTriggered: 0,
                 lastAlert: null,
-                status: "Active"
+                status: "Active",
+                textFiltersTriggered: 0
             };
 
             log("info", "notifyPlus started successfully");
