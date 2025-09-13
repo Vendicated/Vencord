@@ -21,6 +21,7 @@ interface PluginStats {
 interface TextFilter {
     keyword: string;
     soundType: string;
+    customUrl?: string;
     caseSensitive: boolean;
     wholeWord: boolean;
 }
@@ -65,7 +66,7 @@ const settings = definePluginSettings({
     },
     customSoundUrl: {
         type: OptionType.STRING,
-        description: "Custom sound URL (trusted domains only)",
+        description: "Custom sound URL (for priority channels when not using text filters)",
         default: "",
         placeholder: "https://cdn.discordapp.com/attachments/.../sound.mp3"
     },
@@ -104,88 +105,11 @@ const settings = definePluginSettings({
         description: "Enable text-based sound filters",
         default: false
     },
-    // Text Filter 1
-    textFilter1Keyword: {
+    textFilters: {
         type: OptionType.STRING,
-        description: "Text filter 1: Keyword to detect",
-        default: "urgent",
-        placeholder: "urgent, emergency, help..."
-    },
-    textFilter1Sound: {
-        type: OptionType.SELECT,
-        description: "Text filter 1: Sound to play",
-        options: [
-            { label: "Simple beep", value: "beep" },
-            { label: "Double alert", value: "double" },
-            { label: "Urgent sound", value: "urgent" }
-        ],
-        default: "urgent"
-    },
-    textFilter1CaseSensitive: {
-        type: OptionType.BOOLEAN,
-        description: "Text filter 1: Case sensitive matching",
-        default: false
-    },
-    textFilter1WholeWord: {
-        type: OptionType.BOOLEAN,
-        description: "Text filter 1: Match whole words only",
-        default: false
-    },
-    
-    // Text Filter 2
-    textFilter2Keyword: {
-        type: OptionType.STRING,
-        description: "Text filter 2: Keyword to detect",
-        default: "emergency",
-        placeholder: "emergency, critical, asap..."
-    },
-    textFilter2Sound: {
-        type: OptionType.SELECT,
-        description: "Text filter 2: Sound to play",
-        options: [
-            { label: "Simple beep", value: "beep" },
-            { label: "Double alert", value: "double" },
-            { label: "Urgent sound", value: "urgent" }
-        ],
-        default: "double"
-    },
-    textFilter2CaseSensitive: {
-        type: OptionType.BOOLEAN,
-        description: "Text filter 2: Case sensitive matching",
-        default: false
-    },
-    textFilter2WholeWord: {
-        type: OptionType.BOOLEAN,
-        description: "Text filter 2: Match whole words only",
-        default: true
-    },
-    
-    // Text Filter 3
-    textFilter3Keyword: {
-        type: OptionType.STRING,
-        description: "Text filter 3: Keyword to detect",
-        default: "",
-        placeholder: "Leave empty to disable"
-    },
-    textFilter3Sound: {
-        type: OptionType.SELECT,
-        description: "Text filter 3: Sound to play",
-        options: [
-            { label: "Simple beep", value: "beep" },
-            { label: "Double alert", value: "double" },
-            { label: "Urgent sound", value: "urgent" }
-        ],
-        default: "beep"
-    },
-    textFilter3CaseSensitive: {
-        type: OptionType.BOOLEAN,
-        description: "Text filter 3: Case sensitive matching",
-        default: false
-    },
-    textFilter3WholeWord: {
-        type: OptionType.BOOLEAN,
-        description: "Text filter 3: Match whole words only",
-        default: false
+        description: "Text filters - Format: keyword:audio_url,keyword:audio_url (e.g., urgent:https://example.com/urgent.mp3,help:https://example.com/help.wav)",
+        default: "urgent:https://cdn.discordapp.com/attachments/123456789/urgent.mp3,emergency:https://cdn.discordapp.com/attachments/123456789/emergency.wav",
+        placeholder: "urgent:https://example.com/urgent.mp3,help:https://example.com/help.wav"
     },
     textFilterPriority: {
         type: OptionType.SELECT,
@@ -196,6 +120,21 @@ const settings = definePluginSettings({
             { label: "Both (text filters work everywhere, priority channels use default sound)", value: "both" }
         ],
         default: "channel"
+    },
+    advancedTextFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Enable advanced text filter options (case sensitivity, whole word matching)",
+        default: false
+    },
+    textFilterCaseSensitive: {
+        type: OptionType.BOOLEAN,
+        description: "Make text filters case sensitive",
+        default: false
+    },
+    textFilterWholeWord: {
+        type: OptionType.BOOLEAN,
+        description: "Match whole words only",
+        default: false
     }
 });
 
@@ -282,17 +221,20 @@ function generateSound(type: string, volume: number) {
 
 function playCustomSound(url: string, volume: number) {
     try {
-        if (!isSafeUrl(url)) {
-            log("warn", "Unsafe URL blocked, using fallback sound");
-            generateSound("urgent", volume);
-            return;
-        }
-
+        log("info", `Playing custom sound from: ${url}`);
+        
         const audio = new Audio(url);
         audio.volume = volume / 100;
         
-        audio.onerror = () => generateSound("urgent", volume);
-        audio.play().catch(() => generateSound("urgent", volume));
+        audio.onerror = (error) => {
+            log("warn", `Custom sound failed to load: ${url}`, error);
+            generateSound("urgent", volume);
+        };
+        
+        audio.play().catch((error) => {
+            log("warn", `Custom sound failed to play: ${url}`, error);
+            generateSound("urgent", volume);
+        });
     } catch (error) {
         log("error", "Custom sound failed", error);
         generateSound("urgent", volume);
@@ -335,69 +277,116 @@ function createFlash() {
 }
 
 function parseTextFilters(): TextFilter[] {
-    if (!settings.store.enableTextFilters) {
+    try {
+        if (!settings.store.enableTextFilters || !settings.store.textFilters) {
+            return [];
+        }
+        
+        const filtersString = settings.store.textFilters.trim();
+        
+        // Handle legacy JSON format for backward compatibility
+        if (filtersString.startsWith('[')) {
+            try {
+                const filters = JSON.parse(filtersString);
+                if (!Array.isArray(filters)) {
+                    log("warn", "Text filters must be an array");
+                    return [];
+                }
+                
+                return filters.filter((filter: any) => {
+                    if (typeof filter !== 'object' || !filter.keyword || !filter.soundType) {
+                        log("warn", "Invalid text filter format", filter);
+                        return false;
+                    }
+                    return true;
+                });
+            } catch (error) {
+                log("error", "Failed to parse legacy JSON text filters", error);
+                return [];
+            }
+        }
+        
+        // Parse new URL format: keyword:url,keyword:url
+        const filterPairs = filtersString.split(',').map(pair => pair.trim()).filter(pair => pair);
+        const parsedFilters: TextFilter[] = [];
+        
+        for (const pair of filterPairs) {
+            const colonIndex = pair.indexOf(':');
+            if (colonIndex === -1) {
+                log("warn", `Invalid filter format: "${pair}". Expected format: keyword:url`);
+                continue;
+            }
+            
+            const keyword = pair.substring(0, colonIndex).trim();
+            const url = pair.substring(colonIndex + 1).trim();
+            
+            if (!keyword || !url) {
+                log("warn", `Invalid filter format: "${pair}". Both keyword and URL are required`);
+                continue;
+            }
+            
+            // Validate URL format
+            try {
+                new URL(url);
+            } catch {
+                log("warn", `Invalid URL in filter "${pair}": ${url}`);
+                continue;
+            }
+            
+            parsedFilters.push({
+                keyword: keyword,
+                soundType: "custom", // Always custom for URL-based filters
+                customUrl: url,
+                caseSensitive: settings.store.advancedTextFilters ? settings.store.textFilterCaseSensitive : false,
+                wholeWord: settings.store.advancedTextFilters ? settings.store.textFilterWholeWord : false
+            });
+        }
+        
+        if (parsedFilters.length > 0) {
+            log("info", `Loaded ${parsedFilters.length} text filters`);
+        }
+        
+        return parsedFilters;
+    } catch (error) {
+        log("error", "Failed to parse text filters", error);
         return [];
     }
-    
-    const filters: TextFilter[] = [];
-    
-    // Filter 1
-    if (settings.store.textFilter1Keyword?.trim()) {
-        filters.push({
-            keyword: settings.store.textFilter1Keyword.trim(),
-            soundType: settings.store.textFilter1Sound || "urgent",
-            caseSensitive: settings.store.textFilter1CaseSensitive || false,
-            wholeWord: settings.store.textFilter1WholeWord || false
-        });
-    }
-    
-    // Filter 2
-    if (settings.store.textFilter2Keyword?.trim()) {
-        filters.push({
-            keyword: settings.store.textFilter2Keyword.trim(),
-            soundType: settings.store.textFilter2Sound || "double",
-            caseSensitive: settings.store.textFilter2CaseSensitive || false,
-            wholeWord: settings.store.textFilter2WholeWord || false
-        });
-    }
-    
-    // Filter 3
-    if (settings.store.textFilter3Keyword?.trim()) {
-        filters.push({
-            keyword: settings.store.textFilter3Keyword.trim(),
-            soundType: settings.store.textFilter3Sound || "beep",
-            caseSensitive: settings.store.textFilter3CaseSensitive || false,
-            wholeWord: settings.store.textFilter3WholeWord || false
-        });
-    }
-    
-    return filters;
 }
 
 function checkTextFilters(content: string): TextFilter | null {
     const filters = parseTextFilters();
-    if (filters.length === 0) return null;
+    if (filters.length === 0) {
+        log("info", "No text filters configured");
+        return null;
+    }
+    
+    log("info", `Checking ${filters.length} text filters against content: "${content}"`);
     
     for (const filter of filters) {
         let searchText = filter.caseSensitive ? content : content.toLowerCase();
         let keyword = filter.caseSensitive ? filter.keyword : filter.keyword.toLowerCase();
+        
+        log("info", `Testing filter "${keyword}" (caseSensitive: ${filter.caseSensitive}, wholeWord: ${filter.wholeWord}) against "${searchText}"`);
         
         let found = false;
         if (filter.wholeWord) {
             // Match whole words only
             const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
             found = regex.test(searchText);
+            log("info", `Whole word regex test: ${found}`);
         } else {
             // Match anywhere in text
             found = searchText.includes(keyword);
+            log("info", `Substring test: ${found}`);
         }
         
         if (found) {
-            log("info", `Text filter triggered: "${filter.keyword}" -> ${filter.soundType}`);
+            log("info", `Text filter MATCHED: "${filter.keyword}" -> ${filter.soundType || 'custom URL'}`);
             return filter;
         }
     }
     
+    log("info", "No text filters matched");
     return null;
 }
 
@@ -472,17 +461,18 @@ function triggerAlert(message: any, textFilter?: TextFilter) {
         
         // Use text filter sound if available, otherwise use default settings
         const effectiveSoundType = textFilter?.soundType || soundType;
+        const effectiveCustomUrl = textFilter?.customUrl || customSoundUrl;
         const isTextFilter = !!textFilter;
         
         if (isTextFilter) {
             stats.textFiltersTriggered++;
-            log("info", `Using text filter sound: ${effectiveSoundType}`);
+            log("info", `Using text filter: "${textFilter.keyword}" with ${textFilter.customUrl ? 'custom URL' : 'sound type'}: ${effectiveSoundType}`);
         }
 
         if (alertType === "sound" || alertType === "all") {
-            if (effectiveSoundType === "custom" && customSoundUrl && !isTextFilter) {
-                // Only use custom URL for non-text filters
-                playCustomSound(customSoundUrl, volume);
+            if (effectiveSoundType === "custom" && effectiveCustomUrl) {
+                // Use custom URL from text filter or global setting
+                playCustomSound(effectiveCustomUrl, volume);
             } else {
                 generateSound(effectiveSoundType || "urgent", volume);
             }
@@ -527,7 +517,9 @@ function handleMessage(data: any) {
         const textFilterPriority = settings.store.textFilterPriority;
         
         // Check for text filters
-        const textFilter = settings.store.enableTextFilters ? checkTextFilters(message.content || "") : null;
+        const messageContent = message.content || "";
+        log("info", `Processing message: "${messageContent}" in channel ${message.channel_id}`);
+        const textFilter = settings.store.enableTextFilters ? checkTextFilters(messageContent) : null;
         
         let shouldTriggerAlert = false;
         let alertTextFilter: TextFilter | undefined = undefined;
@@ -539,14 +531,15 @@ function handleMessage(data: any) {
             alertTextFilter = textFilter;
             log("info", `Text filter triggered globally: "${textFilter.keyword}" in channel ${message.channel_id}`);
         } else if (textFilterPriority === "both") {
-            // Text filters work everywhere, priority channels use default sound
-            if (textFilter && !isPriorityChannel) {
+            // Text filters work everywhere AND priority channels always notify
+            if (textFilter) {
+                // Text filter found - use it regardless of channel
                 shouldTriggerAlert = true;
                 alertTextFilter = textFilter;
-                log("info", `Text filter triggered: "${textFilter.keyword}" in channel ${message.channel_id}`);
+                log("info", `Text filter triggered: "${textFilter.keyword}" in channel ${message.channel_id} ${isPriorityChannel ? '(priority channel)' : '(regular channel)'}`);
             } else if (isPriorityChannel) {
+                // No text filter but it's a priority channel - use default sound
                 shouldTriggerAlert = true;
-                // Use default sound for priority channels in "both" mode
                 log("info", `Priority channel message (default sound): ${message.channel_id}`);
             }
         } else if (textFilterPriority === "channel" || !textFilterPriority) {
