@@ -174,7 +174,6 @@
     border-color: color-mix(in srgb, var(--button-danger-background) 80%, transparent) !important;
     border-radius: 5px !important;
     color: color-mix(in srgb, var(--button-danger-background) 100%, transparent) !important;
-    align-self: flex-end !important;
 }
 
 .vc-plugins-disable-warning:hover,
@@ -198,15 +197,18 @@
     margin-left: auto !important;
 }
 
-.modal-footer {
+.vc-modal-align-reset {
+    align-self: end;
+}
+
+.vc-modal-footer {
     display: flex;
     flex-direction: column;
     width: 100%;
     box-sizing: border-box;
 }
 
-.modal-footer .button-container {
-    display: flex !important;
+.vc-modal-footer .vc-button-container {
     gap: 10px;
     align-items: center;
     justify-content: space-between !important;

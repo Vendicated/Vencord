@@ -295,8 +295,17 @@ function resetSettings(plugin: Plugin, warningModalProps?: ModalProps, pluginMod
     pluginModalProps?.onClose();
 }
 
-export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, onRestartNeeded?: (pluginName: string) => void) {
-    if (Settings.ignoreResetWarning) return resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
+export function openWarningModal(plugin?: Plugin | null, pluginModalProps?: ModalProps | null, onRestartNeeded?: (pluginName: string) => void, isPlugin = true, enabledPlugins?: number | null, reset?: any) {
+    if (Settings.ignoreResetWarning && isPlugin) {
+        if (plugin && pluginModalProps) return resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
+        return;
+    } else if (Settings.ignoreResetWarning && !isPlugin) {
+        return reset();
+    }
+
+    const text = isPlugin
+        ? `You are about to reset all settings for ${plugin?.name} to their default values.`
+        : `You are about to disable ${enabledPlugins} plugins!`;
 
     openModal(warningModalProps => (
         <ModalRoot
@@ -313,7 +322,7 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                 <Forms.FormSection>
                     <Flex className="vc-warning-info">
                         <Text className="text-normal">
-                            You are about to reset all settings for <strong>{plugin.name}</strong> to their default values.
+                            {text}
                         </Text>
                         <Text className="warning-text">
                             THIS ACTION IS IRREVERSIBLE!
@@ -324,8 +333,8 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                     </Flex>
                 </Forms.FormSection>
             </ModalContent>
-            <ModalFooter className="modal-footer">
-                <Flex className="button-container">
+            <ModalFooter className="vc-modal-footer">
+                <Flex className="vc-button-container">
                     <Flex className="button-group">
                         <Button
                             size={Button.Sizes.SMALL}
@@ -349,7 +358,12 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                         <Button
                             size={Button.Sizes.SMALL}
                             onClick={() => {
-                                resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
+                                if (isPlugin) {
+                                    if (plugin && pluginModalProps)
+                                        resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
+                                } else {
+                                    reset();
+                                }
                             }}
                             className={cl("confirm-reset")}
                         >

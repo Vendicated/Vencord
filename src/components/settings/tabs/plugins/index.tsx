@@ -19,7 +19,7 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { SettingsTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
@@ -28,15 +28,15 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter, useIntersection } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Flex, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
+import { openWarningModal } from "./PluginModal";
 import { StockPluginsCard, UserPluginsCard } from "./PluginStatCards";
 
 // Avoid circular dependency
@@ -59,7 +59,7 @@ function showErrorToast(message: string) {
     });
 }
 
-function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal, resetCheckAndDo }) {
+function ReloadRequiredCard({ required, enabledPlugins, openWarningModal, resetCheckAndDo }) {
     return (
         <Card className={classes(cl("info-card"), required && "vc-warning-card")}>
             {required ? (
@@ -82,11 +82,9 @@ function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal,
             {enabledPlugins.length > 0 && !required && (
                 <Button
                     size={Button.Sizes.SMALL}
-                    className={cl("disable-warning")}
+                    className={"vc-plugins-disable-warning vc-modal-align-reset"}
                     onClick={() => {
-                        if (Settings.ignoreResetWarning) return resetCheckAndDo();
-
-                        return openDisablePluginsModal(enabledPlugins, resetCheckAndDo);
+                        return openWarningModal(null, null, null, false, enabledPlugins.length, resetCheckAndDo);
                     }}
                 >
                     Disable All Plugins
@@ -302,75 +300,6 @@ export default function PluginSettings() {
         }
     }
 
-    function openDisablePluginsModal(enabledPlugins: String[], resetCheckAndDo: () => void) {
-        if (Settings.ignoreResetWarning) return resetCheckAndDo();
-
-        openModal(warningModalProps => (
-            <ModalRoot
-                {...warningModalProps}
-                size={ModalSize.SMALL}
-                className="vc-text-selectable"
-                transitionState={warningModalProps.transitionState}
-            >
-                <ModalHeader separator={false}>
-                    <Text className="text-danger">Dangerous Action</Text>
-                    <ModalCloseButton onClick={warningModalProps.onClose} className="vc-modal-close-button" />
-                </ModalHeader>
-                <ModalContent>
-                    <Forms.FormSection>
-                        <Flex className="vc-warning-info">
-                            <img
-                                src="https://media.tenor.com/hapjxf8y50YAAAAi/stop-sign.gif"
-                                alt="Warning"
-                            />
-                            <Text className="warning-text">
-                                WARNING: You are about to disable <span>{enabledPlugins.length}</span> plugins!
-                            </Text>
-                            <Text className="warning-text">
-                                THIS ACTION IS IRREVERSIBLE!
-                            </Text>
-                            <Text className="text-normal margin-bottom">
-                                Are you absolutely sure you want to proceed? You can always enable them back later.
-                            </Text>
-                        </Flex>
-                    </Forms.FormSection>
-                </ModalContent>
-                <ModalFooter className="modal-footer">
-                    <Flex className="button-container">
-                        <Flex className="button-group">
-                            <Button
-                                size={Button.Sizes.SMALL}
-                                color={Button.Colors.PRIMARY}
-                                onClick={warningModalProps.onClose}
-                            >
-                                Cancel
-                            </Button>
-                            {!Settings.ignoreResetWarning && (
-                                <Button
-                                    size={Button.Sizes.SMALL}
-                                    className={cl("disable-warning")}
-                                    onClick={() => {
-                                        Settings.ignoreResetWarning = true;
-                                    }}
-                                >
-                                    Disable Warning Forever
-                                </Button>
-                            )}
-
-                            <Button
-                                size={Button.Sizes.SMALL}
-                                className={cl("confirm-reset")}
-                                onClick={resetCheckAndDo}
-                            >
-                                Disable All
-                            </Button>
-                        </Flex>
-                    </Flex>
-                </ModalFooter>
-            </ModalRoot>
-        ));
-    }
-
 
     // Code directly taken from supportHelper.tsx
     const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin].required;
@@ -402,7 +331,7 @@ export default function PluginSettings() {
     return (
         <SettingsTab title="Plugins">
 
-            <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openDisablePluginsModal={openDisablePluginsModal} resetCheckAndDo={resetCheckAndDo} />
+            <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openWarningModal={openWarningModal} resetCheckAndDo={resetCheckAndDo} />
 
             <div className={cl("stats-container")} style={{
                 marginTop: "16px",
