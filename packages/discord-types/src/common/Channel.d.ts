@@ -71,6 +71,7 @@ export class Channel extends DiscordRecord {
     isGroupDM(): boolean;
     isGuildStageVoice(): boolean;
     isGuildVoice(): boolean;
+    isGuildVocal(): boolean;
     isListenModeCapable(): boolean;
     isManaged(): boolean;
     isMultiUserDM(): boolean;

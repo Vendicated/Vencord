@@ -25,8 +25,8 @@ import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Guild } from "@vencord/discord-types";
-import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, GuildChannelStore, Menu } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
+import { ChannelStore, Menu } from "@webpack/common";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
@@ -36,6 +36,8 @@ const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember("
     }
 });
 const isOptInEnabledForGuild = findByCodeLazy(".COMMUNITY)||", ".isOptInEnabled(");
+const CollapsedVoiceChannelStore = findStoreLazy("CollapsedVoiceChannelStore");
+const collapsedChannels = findByPropsLazy("toggleCollapseGuild");
 
 const settings = definePluginSettings({
     guild: {
@@ -108,18 +110,10 @@ function applyVoiceNameHidingToGuild(guildId: string) {
     if (!settings.store.voiceChannels) return;
 
     try {
-        const channels = GuildChannelStore.getChannels(guildId);
-        if (!channels?.VOCAL) return;
-
-        channels.VOCAL.forEach(({ channel }: { channel: { id: string; type: number; }; }) => {
-            if (channel.type === 2) {
-                FluxDispatcher.dispatch({
-                    type: "CHANNEL_COLLAPSE",
-                    channelId: channel.id,
-                    collapsed: true
-                });
-            }
-        });
+        ChannelStore.getChannelIds(guildId).filter(channelId => {
+            const channel = ChannelStore.getChannel(channelId);
+            return channel.isGuildVocal() && !CollapsedVoiceChannelStore.isCollapsed(channelId);
+        }).forEach(id => collapsedChannels.update(id));
     } catch (error) {
         console.warn("[NewGuildSettings] Error applying voice name hiding:", error);
     }
