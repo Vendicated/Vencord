@@ -39,7 +39,7 @@ const settings = definePluginSettings({
     },
     alwaysPlaySound: {
         type: OptionType.BOOLEAN,
-        description: "Play message sound even when message sound is disabled",
+        description: "Play the message notification sound even when its disabled",
         restartNeeded: true,
         default: false
     }
