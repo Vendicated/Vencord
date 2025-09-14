@@ -9,8 +9,8 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel, Guild, User } from "@vencord/discord-types";
 import { ChannelStore, Menu, UserStore } from "@webpack/common";
-import { Channel, Guild, User } from "discord-types/general";
 import { ReactNode, } from "react";
 
 import BypassManager from "./settings";
