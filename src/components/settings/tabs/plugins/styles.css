@@ -166,58 +166,52 @@
     margin-bottom: 10px;
 }
 
-.button-danger-background {
-    background-color: var(--background-color) !important;
+.vc-plugins-disable-warning,
+.vc-plugin-modal-disable-warning {
+    background-color: color-mix(in srgb, var(--button-danger-background) 10%, transparent) !important;
     border-style: solid !important;
     border-width: .1rem !important;
-    border-color: var(--button-outline-danger-border) !important;
+    border-color: color-mix(in srgb, var(--button-danger-background) 80%, transparent) !important;
     border-radius: 5px !important;
+    color: color-mix(in srgb, var(--button-danger-background) 100%, transparent) !important;
 }
 
-.button-danger-background.top-margin {
-    margin-top: 10px;
+.vc-plugins-disable-warning:hover,
+.vc-plugin-modal-disable-warning:hover {
+    background-color: color-mix(in srgb, var(--button-danger-background-hover) 40%, transparent) !important;
 }
 
-.button-danger-background:hover {
-    background-color: var(--button-outline-danger-background-hover) !important;
-    border-style: solid;
-    border-width: .1rem;
-    border-color: var(--button-outline-danger-border) !important;
-}
-
-.button-danger-background-no-margin {
+.vc-plugins-confirm-reset,
+.vc-plugin-modal-confirm-reset {
     background-color: var(--button-danger-background) !important;
     color: var(--header-primary);
 }
 
-.button-danger-background-no-margin:hover {
+.vc-plugins-confirm-reset:hover,
+.vc-plugin-modal-confirm-reset:hover {
     background-color: var(--button-danger-background-hover) !important;
-    filter: saturate(75%);
+    filter: saturate(80%);
 }
 
 .vc-modal-close-button {
     margin-left: auto !important;
 }
 
-.modal-footer {
+.vc-modal-align-reset {
+    align-self: end;
+}
+
+.vc-modal-footer {
     display: flex;
     flex-direction: column;
     width: 100%;
     box-sizing: border-box;
 }
 
-.modal-footer .button-container {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.button-group {
-    display: flex !important;
+.vc-modal-footer .vc-button-container {
     gap: 10px;
     align-items: center;
-    justify-content: end !important;
+    justify-content: space-between !important;
 }
 
 /* Specific to disable all modal */
@@ -232,13 +226,6 @@
     text-decoration: underline;
 }
 
-.disable-all-button {
-    color: var(--header-primary);
-    width: 150px;
-    margin-left: auto;
-    margin-right: 4.5px !important;
-}
-
 .visual-refresh .button-danger-background {
     font-size: 16px;
     background-color: rgb(240 71 71 / 10%) !important;
@@ -248,7 +235,6 @@
     font-weight: 500;
     padding: 6px 10px;
     text-align: center;
-    margin-top: 10px;
 }
 
 .visual-refresh .button-danger-background:hover {

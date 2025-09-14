@@ -19,27 +19,24 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { showNotice } from "@api/Notices";
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { CogWheel, InfoIcon } from "@components/Icons";
-import { openPluginModal, SettingsTab } from "@components/settings";
-import { AddonCard } from "@components/settings/AddonCard";
+import { SettingsTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { ChangeList } from "@utils/ChangeList";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { classes, isObjectEmpty } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { classes } from "@utils/misc";
 import { useAwaiter, useIntersection } from "@utils/react";
-import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Flex, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
+import { PluginCard } from "./PluginCard";
+import { openWarningModal } from "./PluginModal";
 import { StockPluginsCard, UserPluginsCard } from "./PluginStatCards";
 
 // Avoid circular dependency
@@ -62,7 +59,7 @@ function showErrorToast(message: string) {
     });
 }
 
-function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal, resetCheckAndDo }) {
+function ReloadRequiredCard({ required, enabledPlugins, openWarningModal, resetCheckAndDo }) {
     return (
         <Card className={classes(cl("info-card"), required && "vc-warning-card")}>
             {required ? (
@@ -85,99 +82,15 @@ function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal,
             {enabledPlugins.length > 0 && !required && (
                 <Button
                     size={Button.Sizes.SMALL}
-                    className="button-danger-background disable-all-button"
+                    className={"vc-plugins-disable-warning vc-modal-align-reset"}
                     onClick={() => {
-                        if (Settings.ignoreResetWarning) return resetCheckAndDo();
-
-                        return openDisablePluginsModal(enabledPlugins, resetCheckAndDo);
+                        return openWarningModal(null, null, null, false, enabledPlugins.length, resetCheckAndDo);
                     }}
                 >
                     Disable All Plugins
                 </Button>
             )}
         </Card>
-    );
-}
-
-interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
-    plugin: Plugin;
-    disabled: boolean;
-    onRestartNeeded(name: string): void;
-    isNew?: boolean;
-}
-
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = Settings.plugins[plugin.name];
-
-    const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
-
-    function toggleEnabled() {
-        const wasEnabled = isEnabled();
-
-        // If we're enabling a plugin, make sure all deps are enabled recursively.
-        if (!wasEnabled) {
-            const { restartNeeded, failures } = startDependenciesRecursive(plugin);
-            if (failures.length) {
-                logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
-                showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
-                return;
-            } else if (restartNeeded) {
-                // If any dependencies have patches, don't start the plugin yet.
-                settings.enabled = true;
-                onRestartNeeded(plugin.name);
-                return;
-            }
-        }
-
-        // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches?.length) {
-            settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name);
-            return;
-        }
-
-        // If the plugin is enabled, but hasn't been started, then we can just toggle it off.
-        if (wasEnabled && !plugin.started) {
-            settings.enabled = !wasEnabled;
-            return;
-        }
-
-        const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
-
-        if (!result) {
-            settings.enabled = false;
-
-            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
-            logger.error(msg);
-            showErrorToast(msg);
-            return;
-        }
-
-        settings.enabled = !wasEnabled;
-    }
-
-    return (
-        <AddonCard
-            name={plugin.name}
-            description={plugin.description}
-            isNew={isNew}
-            enabled={isEnabled()}
-            setEnabled={toggleEnabled}
-            disabled={disabled}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-            infoButton={
-                <button
-                    role="switch"
-                    onClick={() => openPluginModal(plugin, onRestartNeeded)}
-                    className={classes(ButtonClasses.button, cl("info-button"))}
-                >
-                    {plugin.options && !isObjectEmpty(plugin.options)
-                        ? <CogWheel className={cl("info-icon")} />
-                        : <InfoIcon className={cl("info-icon")} />}
-                </button>
-            }
-        />
     );
 }
 
@@ -387,81 +300,6 @@ export default function PluginSettings() {
         }
     }
 
-    function openDisablePluginsModal(enabledPlugins: String[], resetCheckAndDo: () => void) {
-        if (Settings.ignoreResetWarning) return resetCheckAndDo();
-
-        openModal(warningModalProps => (
-            <ModalRoot
-                {...warningModalProps}
-                size={ModalSize.SMALL}
-                className="vc-text-selectable"
-                transitionState={warningModalProps.transitionState}
-            >
-                <ModalHeader separator={false}>
-                    <Text className="text-danger">Dangerous Action</Text>
-                    <ModalCloseButton onClick={warningModalProps.onClose} className="vc-modal-close-button" />
-                </ModalHeader>
-                <ModalContent>
-                    <Forms.FormSection>
-                        <Flex className="vc-warning-info">
-                            <img
-                                src="https://media.tenor.com/hapjxf8y50YAAAAi/stop-sign.gif"
-                                alt="Warning"
-                            />
-                            <Text className="warning-text">
-                                WARNING: You are about to disable <span>{enabledPlugins.length}</span> plugins!
-                            </Text>
-                            <Text className="warning-text">
-                                THIS ACTION IS IRREVERSIBLE!
-                            </Text>
-                            <Text className="text-normal margin-bottom">
-                                Are you absolutely sure you want to proceed? You can always enable them back later.
-                            </Text>
-                        </Flex>
-                    </Forms.FormSection>
-                </ModalContent>
-                <ModalFooter className="modal-footer">
-                    <Flex className="button-container">
-                        <Button
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            onClick={warningModalProps.onClose}
-                            look={Button.Looks.LINK}
-                        >
-                            Cancel
-                        </Button>
-                        <Flex className="button-group">
-                            {!Settings.ignoreResetWarning && (
-                                <Button
-                                    size={Button.Sizes.SMALL}
-                                    className="button-danger-background"
-                                    onClick={() => {
-                                        Settings.ignoreResetWarning = true;
-                                    }}
-                                >
-                                    Disable Warning Forever
-                                </Button>
-                            )}
-                            <Tooltip text="This action cannot be undone. Are you sure?" shouldShow={true}>
-                                {({ onMouseEnter, onMouseLeave }) => (
-                                    <Button
-                                        size={Button.Sizes.SMALL}
-                                        className="button-danger-background-no-margin"
-                                        onClick={resetCheckAndDo}
-                                        onMouseEnter={onMouseEnter}
-                                        onMouseLeave={onMouseLeave}
-                                    >
-                                        Disable All
-                                    </Button>
-                                )}
-                            </Tooltip>
-                        </Flex>
-                    </Flex>
-                </ModalFooter>
-            </ModalRoot>
-        ));
-    }
-
 
     // Code directly taken from supportHelper.tsx
     const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin].required;
@@ -493,7 +331,7 @@ export default function PluginSettings() {
     return (
         <SettingsTab title="Plugins">
 
-            <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openDisablePluginsModal={openDisablePluginsModal} resetCheckAndDo={resetCheckAndDo} />
+            <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openWarningModal={openWarningModal} resetCheckAndDo={resetCheckAndDo} />
 
             <div className={cl("stats-container")} style={{
                 marginTop: "16px",
