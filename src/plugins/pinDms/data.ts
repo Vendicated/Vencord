@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/Settings";
 import { useForceUpdater } from "@utils/react";
 import { UserStore } from "@webpack/common";
 
@@ -28,8 +26,6 @@ let forceUpdateDms: (() => void) | undefined = undefined;
 export let currentUserCategories: Category[] = [];
 
 export async function init() {
-    await migrateData();
-
     const userId = UserStore.getCurrentUser()?.id;
     if (userId == null) return;
 
@@ -153,29 +149,4 @@ export function moveChannel(channelId: string, direction: -1 | 1) {
     const b = a + direction;
 
     swapElementsInArray(category.channels, a, b);
-}
-
-// TODO(OptionType.CUSTOM Related): Remove DataStore PinnedDms migration once enough time has passed
-async function migrateData() {
-    if (Settings.plugins.PinDMs.dmSectioncollapsed != null) {
-        settings.store.dmSectionCollapsed = Settings.plugins.PinDMs.dmSectioncollapsed;
-        delete Settings.plugins.PinDMs.dmSectioncollapsed;
-    }
-
-    const dataStoreKeys = await DataStore.keys();
-    const pinDmsKeys = dataStoreKeys.map(key => String(key)).filter(key => key.startsWith(CATEGORY_BASE_KEY));
-
-    if (pinDmsKeys.length === 0) return;
-
-    for (const pinDmsKey of pinDmsKeys) {
-        const categories = await DataStore.get<Category[]>(pinDmsKey);
-        if (categories == null) continue;
-
-        const userId = pinDmsKey.replace(CATEGORY_BASE_KEY, "");
-        settings.store.userBasedCategoryList[userId] = categories;
-
-        await DataStore.del(pinDmsKey);
-    }
-
-    await Promise.all([DataStore.del(CATEGORY_MIGRATED_PINDMS_KEY), DataStore.del(CATEGORY_MIGRATED_KEY), DataStore.del(OLD_CATEGORY_KEY)]);
 }

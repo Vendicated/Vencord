@@ -19,8 +19,10 @@ export const ImageScriptsAndCssSrc = [...ImageAndCssSrc, "script-src", "worker-s
 // script and just adding to it. But generally, you should just edit this file instead
 
 export const CspPolicies: PolicyMap = {
-    "localhost": ImageAndCssSrc,
-    "127.0.0.1": ImageAndCssSrc,
+    "http://localhost:*": ImageAndCssSrc,
+    "http://127.0.0.1:*": ImageAndCssSrc,
+    "localhost:*": ImageAndCssSrc,
+    "127.0.0.1:*": ImageAndCssSrc,
 
     "*.github.io": ImageAndCssSrc, // GitHub pages, used by most themes
     "github.com": ImageAndCssSrc, // GitHub content (stuff uploaded to markdown forms), used by most themes
