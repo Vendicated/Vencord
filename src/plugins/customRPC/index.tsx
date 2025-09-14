@@ -456,7 +456,7 @@ export default definePlugin({
 
                 <Forms.FormDivider className={Margins.top8} />
 
-                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--bg-mod-faint)" }}>
+                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-faint)" }}>
                     {activity[0] && <ActivityView
                         activity={activity[0]}
                         user={UserStore.getCurrentUser()}

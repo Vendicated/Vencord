@@ -28,9 +28,9 @@ import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -464,19 +464,21 @@ export default definePlugin({
 
         {
             // Message content renderer
+            find: ".SEND_FAILED,",
+            replacement: {
+                // Render editHistory behind the message content
+                match: /\.isFailed]:.+?children:\[/,
+                replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
+            }
+        },
+
+        {
             find: "#{intl::MESSAGE_EDITED}",
-            replacement: [
-                {
-                    // Render editHistory in the deepest div for message content
-                    match: /(\)\("div",\{id:.+?children:\[)/,
-                    replace: "$1 (!!arguments[0].message.editHistory?.length && $self.renderEdits(arguments[0])),"
-                },
-                {
-                    // Make edit marker clickable
-                    match: /"span",\{(?=className:\i\.edited,)/,
-                    replace: "$self.EditMarker,{message:arguments[0].message,"
-                }
-            ]
+            replacement: {
+                // Make edit marker clickable
+                match: /"span",\{(?=className:\i\.edited,)/,
+                replace: "$self.EditMarker,{message:arguments[0].message,"
+            }
         },
 
         {

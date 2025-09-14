@@ -43,7 +43,7 @@ export default definePlugin({
             // Status emojis
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(\.CUSTOM_STATUS.+?animate:)\i/,
+                match: /(\.CUSTOM_STATUS.+?animateEmoji:)\i/,
                 replace: "$1!0"
             }
         },
@@ -53,6 +53,14 @@ export default definePlugin({
             replacement: {
                 match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
                 replace: "$1!0"
+            }
+        },
+        {
+            // Nameplates
+            find: ".MINI_PREVIEW,[",
+            replacement: {
+                match: /animate:\i,loop:/,
+                replace: "animate:true,loop:true,_loop:"
             }
         }
     ]

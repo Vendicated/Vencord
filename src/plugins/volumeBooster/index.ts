@@ -17,15 +17,14 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
     multiplier: {
         description: "Volume Multiplier",
         type: OptionType.SLIDER,
-        markers: makeRange(1, 5, 1),
+        markers: makeRange(1, 5, 0.5),
         default: 2,
         stickToMarkers: true,
     }

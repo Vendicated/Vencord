@@ -16,16 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Channel } from "discord-types/general";
-
-// eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
-import type * as t from "./types/utils";
+import type * as t from "@vencord/discord-types";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
 
 export let FluxDispatcher: t.FluxDispatcher;
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
-    // Non import call to avoid circular dependency
+    // Non import access to avoid circular dependency
     Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
 
     const cb = () => {
@@ -35,7 +32,7 @@ waitFor(["dispatch", "subscribe"], m => {
     m.subscribe("CONNECTION_OPEN", cb);
 });
 
-export let ComponentDispatch;
+export let ComponentDispatch: any;
 waitFor(["dispatchToLastSubscribed"], m => ComponentDispatch = m);
 
 export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
@@ -139,7 +136,7 @@ export const UserUtils = {
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
-    promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
+    promptToUpload: findByCodeLazy("=!0,showLargeMessageDialog:") as (files: File[], channel: t.Channel, draftType: Number) => void
 };
 
 export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
@@ -177,6 +174,7 @@ export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
 export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 export const InviteActions = findByPropsLazy("resolveInvite");
+export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
@@ -205,6 +203,7 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
 export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
     dateFormat: filters.byCode('":'),
-    isSameDay: filters.byCode("Math.abs(+"),
+    // TODO: the +? are for compat with the old version - Remove them once no longer needed
+    isSameDay: filters.byCode(/Math\.abs\(\+?\i-\+?\i\)/),
     diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });

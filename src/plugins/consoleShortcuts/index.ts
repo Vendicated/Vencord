@@ -74,6 +74,22 @@ function makeShortcuts() {
         };
     }
 
+    function findStoreWrapper(findStore: typeof Webpack.findStore) {
+        const cache = new Map<string, unknown>();
+
+        return function (storeName: string) {
+            const cacheKey = String(storeName);
+            if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+            let store: unknown;
+            try {
+                store = findStore(storeName);
+            } catch { }
+            if (store) cache.set(cacheKey, store);
+            return store;
+        };
+    }
+
     let fakeRenderWin: WeakRef<Window> | undefined;
     const find = newFindWrapper(f => f);
     const findByProps = newFindWrapper(filters.byProps);
@@ -98,7 +114,7 @@ function makeShortcuts() {
         findComponentByCode: newFindWrapper(filters.componentByCode),
         findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),
         findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
-        findStore: newFindWrapper(filters.byStoreName),
+        findStore: findStoreWrapper(Webpack.findStore),
         PluginsApi: { getter: () => Vencord.Plugins },
         plugins: { getter: () => Vencord.Plugins.plugins },
         Settings: { getter: () => Vencord.Settings },
