@@ -164,7 +164,9 @@ function generatePluginList() {
         content += `**Enabled UserPlugins (${enabledUserPlugins.length}):**\n${makeCodeblock(enabledUserPlugins.join(", "))}`;
     }
 
-    if (enabledPlugins.length > 100 && !(isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id))) {
+    const user = UserStore.getCurrentUser();
+
+    if (enabledPlugins.length > 100 && !(isPluginDev(user.id) || isEquicordPluginDev(user.id))) {
         Alerts.show({
             title: "You are attempting to get support!",
             body: <div>
@@ -181,7 +183,7 @@ function generatePluginList() {
             </div>
         });
 
-        return "You have more than 100 plugins enabled, please reduce the number of enabled plugins to get support.";
+        return `${user.username} have more than 100 plugins enabled, please reduce the number of enabled plugins to get support.`;
     }
 
     return content;
