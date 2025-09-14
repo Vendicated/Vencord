@@ -4,52 +4,73 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { ErrorBoundary } from "@components/index";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin, { makeRange, OptionType } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
 
-const ignoredChannelIds: string[] = [];
+const ignoredChannelIds = new Set<string>();
 const cl = classNameFactory("vc-ignore-calls-");
 
 const ContextMenuPatch: NavContextMenuPatchCallback = (children, { channel }: { channel: Channel; }) => {
     if (!channel || (!channel.isDM() && !channel.isGroupDM())) return;
 
-    const [checked, setChecked] = React.useState(ignoredChannelIds.includes(channel.id));
+    const permanentlyIgnoredUsers = settings.store.permanentlyIgnoredUsers.split(",").map(s => s.trim()).filter(Boolean);
+
+    const [tempChecked, setTempChecked] = React.useState(ignoredChannelIds.has(channel.id));
+    const [permChecked, setPermChecked] = React.useState(permanentlyIgnoredUsers.includes(channel.id));
 
     children.push(
-        <Menu.MenuSeparator />,
-        <Menu.MenuCheckboxItem
-            id="ic-ignore-calls"
-            label="Ignore Calls"
-            checked={checked}
-            action={() => {
-                if (checked)
-                    ignoredChannelIds.includes(channel.id);
-                else
-                    ignoredChannelIds.push(channel.id);
+        <>
+            <Menu.MenuSeparator />
+            <Menu.MenuCheckboxItem
+                id="vc-ignore-calls-temp"
+                label="Temporarily Ignore Calls"
+                checked={tempChecked}
+                action={() => {
+                    if (tempChecked)
+                        ignoredChannelIds.delete(channel.id);
+                    else
+                        ignoredChannelIds.add(channel.id);
 
+                    setTempChecked(!tempChecked);
+                }}
+            />
+            <Menu.MenuCheckboxItem
+                id="vc-ignore-calls-perm"
+                label="Permanently Ignore Calls"
+                checked={permChecked}
+                action={() => {
+                    let updated = permanentlyIgnoredUsers.slice();
+                    if (permChecked) {
+                        updated = updated.filter(id => id !== channel.id);
+                    } else {
+                        updated.push(channel.id);
+                    }
+                    settings.store.permanentlyIgnoredUsers = updated.join(", ");
 
-                setChecked(!checked);
-            }}
-        ></Menu.MenuCheckboxItem>
+                    setPermChecked(!permChecked);
+                }}
+            />
+        </>
     );
 };
 
-const settings = definePluginSettings({
-    ignoreTimeout: {
-        type: OptionType.SLIDER,
-        description: "Timeout to click ignore",
-        markers: makeRange(0, 10000, 1000),
-        default: 5000,
-        stickToMarkers: true,
-    }
-});
 
+const settings = definePluginSettings({
+    permanentlyIgnoredUsers: {
+        type: OptionType.STRING,
+        description: "User IDs (comma + space) who should be permanetly ignored",
+        restartNeeded: true,
+        default: "",
+    },
+});
 
 export default definePlugin({
     name: "IgnoreCalls",
@@ -71,8 +92,9 @@ export default definePlugin({
     },
     flux: {
         async CALL_UPDATE({ channelId, ringing, messageId, region }: { channelId: string; ringing: string[]; messageId: string; region: string; }) {
+            const permanentlyIgnoredUsers = settings.store.permanentlyIgnoredUsers.split(",").map(s => s.trim()).filter(Boolean);
             setTimeout(() => {
-                if (!ignoredChannelIds.includes(channelId)) return;
+                if (!ignoredChannelIds.has(channelId) && !permanentlyIgnoredUsers.includes(channelId)) return;
                 const currentUserId = UserStore.getCurrentUser().id;
                 if (ringing.includes(currentUserId)) {
                     return FluxDispatcher.dispatch({
@@ -83,7 +105,7 @@ export default definePlugin({
                         region
                     });
                 }
-            }, settings.store.ignoreTimeout);
+            }, 30000);
         }
     },
     renderIgnore(channel) {
@@ -91,7 +113,7 @@ export default definePlugin({
             <ErrorBoundary>
                 <span
                     className={cl("render")}
-                    onClick={() => ignoredChannelIds.push(channel.id)}
+                    onClick={() => ignoredChannelIds.add(channel.id)}
                 >
                     Ignore
                 </span>
