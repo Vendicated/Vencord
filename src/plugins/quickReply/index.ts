@@ -133,7 +133,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     messages = messages.filter(m => {
         if (m.deleted) return false;
         if (!isReply && m.author.id !== meId) return false; // editing only own messages
-        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
+        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.isBlocked(m)) return false;
 
         return true;
     });
