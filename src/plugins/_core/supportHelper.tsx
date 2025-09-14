@@ -183,7 +183,7 @@ function generatePluginList() {
             </div>
         });
 
-        return `${user.username} have more than 100 plugins enabled, please reduce the number of enabled plugins to get support.`;
+        return `${user.username} has more than 100 plugins enabled, please reduce the number of enabled plugins to get support.`;
     }
 
     return content;
