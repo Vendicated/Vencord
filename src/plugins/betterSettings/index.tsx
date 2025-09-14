@@ -131,7 +131,7 @@ export default definePlugin({
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
-                    replace: "$&case 'VencordPlugins':return $self.PluginsSubmenu();"
+                    replace: "$&case 'EquicordPlugins':return $self.PluginsSubmenu();"
                 }
             ]
         },
