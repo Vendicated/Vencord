@@ -15,12 +15,10 @@ import { DonateButton, InviteButton } from "@components/settings/DonateButton";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { DONOR_ROLE_ID, GUILD_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { identity, isEquicordPluginDev, isPluginDev } from "@utils/misc";
+import { identity, isEquicordDonor, isEquicordPluginDev, isPluginDev, isVencordDonor } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Button, Flex, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
-import BadgeAPI from "plugins/_api/badges";
+import { Button, Flex, Forms, React, Select, Switch, UserStore } from "@webpack/common";
 
 import { openNotificationSettingsModal } from "./NotificationSettings";
 
@@ -337,16 +335,6 @@ function DonateButtonComponent() {
                 style={{ marginTop: "1em" }} />
         </Flex>
     );
-}
-
-function isVencordDonor(userId: string): boolean {
-    const donorBadges = BadgeAPI.getDonorBadges(userId);
-    return GuildMemberStore.getMember(VC_GUILD_ID, userId)?.roles.includes(VC_DONOR_ROLE_ID) || !!donorBadges;
-}
-
-export function isEquicordDonor(userId: string): boolean {
-    const donorBadges = BadgeAPI.getEquicordDonorBadges(userId);
-    return GuildMemberStore.getMember(GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
 }
 
 export default wrapTab(EquicordSettings, "Equicord Settings");
