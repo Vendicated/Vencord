@@ -1,39 +1,40 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and Megumin
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 let clickCount = 0;
 
 function play() {
     clickCount++;
 
-    if (clickCount % 10 === 0) {
+    const triggerAmount = settings.store.amount;
+
+    if (clickCount % triggerAmount === 0) {
         const audio = new Audio("https://github.com/Equicord/Equibored/raw/main/sounds/equissant/croissant.mp3");
         audio.play();
+        clickCount = 0;
     }
 }
 
+const settings = definePluginSettings({
+    amount: {
+        type: OptionType.NUMBER,
+        description: "amount of clicks to trigger crossant",
+        default: 10,
+    }
+});
+
 export default definePlugin({
     name: "Equissant",
-    description: "Crossant every 10 clicks :trolley:",
+    description: "Crossant every specified amount of clicks :trolley:",
     authors: [EquicordDevs.SomeAspy, Devs.thororen],
+    settings,
     start() {
         document.addEventListener("click", play);
     },
