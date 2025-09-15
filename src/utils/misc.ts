@@ -17,10 +17,9 @@
 */
 
 import { ChannelStore, GuildMemberStore, Toasts } from "@webpack/common";
-import BadgeAPI from "plugins/_api/badges";
 
 import { copyToClipboard } from "./clipboard";
-import { DONOR_ROLE_ID, EQUICORD_HELPERS, EquicordDevsById, GUILD_ID, SUPPORT_CHANNEL_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VencordDevsById } from "./constants";
+import { EQUICORD_HELPERS, EquicordDevsById, GUILD_ID, SUPPORT_CHANNEL_ID, VencordDevsById } from "./constants";
 
 /**
  * Calls .join(" ") on the arguments
@@ -132,14 +131,4 @@ export function isSupportChannel(channelId: string): boolean {
 export function isEquicordSupport(userId: string): boolean {
     const member = GuildMemberStore.getMember(GUILD_ID, userId);
     return member?.roles?.includes(EQUICORD_HELPERS) || false;
-}
-
-export function isEquicordDonor(userId: string): boolean {
-    const donorBadges = BadgeAPI.getEquicordDonorBadges(userId);
-    return GuildMemberStore.getMember(GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
-}
-
-export function isVencordDonor(userId: string): boolean {
-    const donorBadges = BadgeAPI.getDonorBadges(userId);
-    return GuildMemberStore.getMember(VC_GUILD_ID, userId)?.roles.includes(VC_DONOR_ROLE_ID) || !!donorBadges;
 }
