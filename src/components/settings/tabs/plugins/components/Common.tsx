@@ -36,7 +36,7 @@ export function resolveError(isValidResult: boolean | string) {
 interface SettingsSectionProps extends PropsWithChildren {
     name: string;
     description: string;
-    error: string | null;
+    error?: string | null;
     inlineSetting?: boolean;
 }
 

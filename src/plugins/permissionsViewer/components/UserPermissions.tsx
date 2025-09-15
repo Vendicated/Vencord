@@ -24,7 +24,7 @@ import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 
 import { PermissionsSortOrder, settings } from "..";
-import { cl, getGuildPermissionSpecMap, getSortedRoles, sortUserRoles } from "../utils";
+import { cl, getGuildPermissionSpecMap, getSortedRolesForMember, sortUserRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
@@ -94,7 +94,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
     const [rolePermissions, userPermissions] = useMemo(() => {
         const userPermissions: UserPermissions = [];
 
-        const userRoles = getSortedRoles(guild, guildMember);
+        const userRoles = getSortedRolesForMember(guild, guildMember);
 
         const rolePermissions: Array<RoleOrUserPermission> = userRoles.map(role => ({
             type: PermissionType.Role,
