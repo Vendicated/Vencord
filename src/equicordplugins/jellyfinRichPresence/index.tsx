@@ -282,7 +282,7 @@ export default definePlugin({
 
         const getDetails = () => {
             if (mediaData.type === "Episode" && mediaData.seriesName) {
-                return mediaData.name;
+                return mediaData.seriesName;
             }
             return mediaData.name;
         };
@@ -291,7 +291,7 @@ export default definePlugin({
             if (mediaData.type === "Episode" && mediaData.seriesName) {
                 const season = mediaData.seasonNumber ? `S${mediaData.seasonNumber}` : "";
                 const episode = mediaData.episodeNumber ? `E${mediaData.episodeNumber}` : "";
-                return `${mediaData.seriesName} ${season}${episode}`.trim();
+                return `${mediaData.name} ${season} - ${episode}`.trim();
             }
             return mediaData.artist || (mediaData.year ? `(${mediaData.year})` : undefined);
         };
