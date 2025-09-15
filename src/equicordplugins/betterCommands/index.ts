@@ -15,6 +15,11 @@ const settings = definePluginSettings({
         description: "Automatically fill command with all arguements instead of just required ones",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    allowNewlinesInCommands: {
+        description: "Allow newlines in command inputs (Shift + Enter)",
+        type: OptionType.BOOLEAN,
+        default: true,
     }
 });
 
@@ -39,6 +44,26 @@ export default definePlugin({
                     match: /\(\i\.required.{0,20}\]\)/,
                     replace: "true"
                 },
+            ]
+        },
+        {
+            find: '"italics"),!0;',
+            predicate: () => settings.store.allowNewlinesInCommands,
+            replacement: [
+                {
+                    match: /case (\i\.\i)\.TAB:if\(null!=(\i).selection&&\i\((\i)(?=.{0,300}(\i\.\i\.insertText))/,
+                    replace: (orig, keys, editor, event, insertText) => {
+                        return `case ${keys}.ENTER:
+                                    if(${event}.shiftKey){
+                                        ${event}.preventDefault();
+                                        ${event}.stopPropagation();
+                                        ${insertText}(${editor},'\\n');
+                                        return true;
+                                    }
+                                    break;
+                                ${orig}`;
+                    }
+                }
             ]
         }
     ],
