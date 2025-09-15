@@ -6,7 +6,7 @@
 
 // alot of the code is from LastFMRichPresence
 import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, showToast } from "@webpack/common";
@@ -126,7 +126,7 @@ function setActivity(activity: Activity | null) {
 export default definePlugin({
     name: "JellyfinRichPresence",
     description: "Rich presence for Jellyfin media server",
-    authors: [EquicordDevs.vmohammad, EquicordDevs.SerStars],
+    authors: [EquicordDevs.vmohammad, Devs.SerStars],
 
     settingsAboutComponent: () => (
         <>
@@ -241,38 +241,38 @@ export default definePlugin({
         }
 
         const templateReplace = (template: string) => {
-        return template
-            .replace(/\{name\}/g, mediaData.name || "")
-            .replace(/\{series\}/g, mediaData.seriesName || "")
-            .replace(/\{season\}/g, mediaData.seasonNumber?.toString() || "")
-            .replace(/\{episode\}/g, mediaData.episodeNumber?.toString() || "")
-            .replace(/\{artist\}/g, mediaData.artist || "")
-            .replace(/\{album\}/g, mediaData.album || "")
-            .replace(/\{year\}/g, mediaData.year?.toString() || "");
-    };
+            return template
+                .replace(/\{name\}/g, mediaData.name || "")
+                .replace(/\{series\}/g, mediaData.seriesName || "")
+                .replace(/\{season\}/g, mediaData.seasonNumber?.toString() || "")
+                .replace(/\{episode\}/g, mediaData.episodeNumber?.toString() || "")
+                .replace(/\{artist\}/g, mediaData.artist || "")
+                .replace(/\{album\}/g, mediaData.album || "")
+                .replace(/\{year\}/g, mediaData.year?.toString() || "");
+        };
 
-    switch (nameSetting) {
-        case "full":
-            if (mediaData.type === "Episode" && mediaData.seriesName) {
-                appName = `${mediaData.seriesName} - ${mediaData.name}`;
-            } else if (mediaData.type === "Audio") {
-                appName = `${mediaData.artist || "Unknown Artist"} - ${mediaData.name}`;
-            } else {
-                appName = mediaData.name || "Jellyfin";
-            }
-            break;
-        case "custom":
-            appName = templateReplace(settings.store.customName || "{name} on Jellyfish");
-            break;
-        case "default":
-        default:
-            if (mediaData.type === "Episode" && mediaData.seriesName) {
-                appName = mediaData.seriesName;
-            } else {
-                appName = mediaData.name || "Jellyfin";
-            }
-            break;
-    }
+        switch (nameSetting) {
+            case "full":
+                if (mediaData.type === "Episode" && mediaData.seriesName) {
+                    appName = `${mediaData.seriesName} - ${mediaData.name}`;
+                } else if (mediaData.type === "Audio") {
+                    appName = `${mediaData.artist || "Unknown Artist"} - ${mediaData.name}`;
+                } else {
+                    appName = mediaData.name || "Jellyfin";
+                }
+                break;
+            case "custom":
+                appName = templateReplace(settings.store.customName || "{name} on Jellyfish");
+                break;
+            case "default":
+            default:
+                if (mediaData.type === "Episode" && mediaData.seriesName) {
+                    appName = mediaData.seriesName;
+                } else {
+                    appName = mediaData.name || "Jellyfin";
+                }
+                break;
+        }
 
         const largeImage = mediaData.imageUrl;
         const assets: ActivityAssets = {
