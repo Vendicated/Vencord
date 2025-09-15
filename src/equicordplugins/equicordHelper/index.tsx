@@ -7,10 +7,11 @@
 import "@equicordplugins/_misc/styles.css";
 
 import { definePluginSettings, Settings } from "@api/Settings";
-import { Devs, EQUICORD_HELPERS, EquicordDevs, GUILD_ID } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { isEquicordGuild, isEquicordSupport } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Flex, GuildMemberStore, showToast, Toasts } from "@webpack/common";
+import { Button, Flex, showToast, Toasts } from "@webpack/common";
 import { JSX } from "react";
 
 import { toggleEnabled } from "./utils";
@@ -80,37 +81,48 @@ export default definePlugin({
 
 function pluginToggleButtons(props) {
     const buttons = [] as JSX.Element[];
-
-    const equicordSupport = GuildMemberStore.getMember(GUILD_ID, props.message.author.id)?.roles?.includes(EQUICORD_HELPERS);
-
     const msg = props.message.content?.toLowerCase() ?? "";
 
     const contentWords = (msg.match(/`\w+`/g) ?? []).map(e => e.slice(1, -1));
     const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => contentWords.includes(name.toLowerCase()));
     const matchedPlugin = matchedPlugins.sort((a, b) => b.length - a.length)[0];
-    const pluginData = matchedPlugin && Vencord.Plugins.plugins[matchedPlugin];
-    const equicordGuild = ChannelStore.getChannel(props.channel.id)?.guild_id === GUILD_ID;
-    const ableCheck = msg.startsWith("enable") || msg.startsWith("disable");
-    const shouldAddPluginButtons = equicordGuild && equicordSupport && matchedPlugin && pluginData && ableCheck;
+    const pluginData = matchedPlugin ? Vencord.Plugins.plugins[matchedPlugin] : null;
+
+    const isEquicord = isEquicordGuild(props.channel.id) && isEquicordSupport(props.message.author.id);
+    const startsWithEnabled = msg.startsWith("enable");
+    const startsWithDisabled = msg.startsWith("disable");
+
+    const shouldAddPluginButtons = pluginData && isEquicord && (startsWithEnabled || startsWithDisabled);
 
     if (shouldAddPluginButtons) {
         if (pluginData.required || pluginData.name.endsWith("API")) return;
         const isEnabled = Vencord.Plugins.isPluginEnabled(matchedPlugin);
+
+        let label = `${matchedPlugin} is already ${isEnabled ? "enabled" : "disabled"}`;
+        let disabled = true;
+
+        if ((startsWithDisabled && isEnabled) || (startsWithEnabled && !isEnabled)) {
+            label = `${isEnabled ? "Disable" : "Enable"} ${matchedPlugin}`;
+            disabled = false;
+        }
+
         buttons.push(
             <Button
                 key="vc-plugin-toggle"
-                color={isEnabled ? Button.Colors.RED : Button.Colors.GREEN}
+                color={disabled ? Button.Colors.PRIMARY : (isEnabled ? Button.Colors.RED : Button.Colors.GREEN)}
+                disabled={disabled}
+                size={Button.Sizes.SMALL}
                 onClick={async () => {
                     try {
                         const success = await toggleEnabled(matchedPlugin);
-                        if (success) showToast(`${isEnabled ? "Disabled" : "Enabled"} ${matchedPlugin}`, Toasts.Type.SUCCESS);
+                        if (success) showToast(`${label}`, Toasts.Type.SUCCESS);
                     } catch (e) {
                         new Logger("EquicordHelper").error("Error while toggling:", e);
-                        showToast(`Failed to toggle ${matchedPlugin}`, Toasts.Type.FAILURE);
+                        showToast(`Failed to ${label.toLowerCase()}`, Toasts.Type.FAILURE);
                     }
                 }}
             >
-                {`${isEnabled ? "Disable" : "Enable"} ${matchedPlugin}`}
+                {label}
             </Button>
         );
     }

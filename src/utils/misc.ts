@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Toasts } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, Toasts } from "@webpack/common";
 
 import { copyToClipboard } from "./clipboard";
-import { EquicordDevsById, VencordDevsById } from "./constants";
+import { EQUICORD_HELPERS, EquicordDevsById, GUILD_ID, VencordDevsById } from "./constants";
 
 /**
  * Calls .join(" ") on the arguments
@@ -116,3 +116,15 @@ export function tryOrElse<T>(func: () => T, fallback: T): T {
         return fallback;
     }
 }
+
+export const isEquicordGuild = (id: string, isGuildId: boolean = false) => {
+    if (isGuildId) return id === GUILD_ID;
+
+    const channel = ChannelStore.getChannel(id);
+    return channel.guild_id === GUILD_ID;
+};
+
+export const isEquicordSupport = (id: string) => {
+    const member = GuildMemberStore.getMember(GUILD_ID, id);
+    return member?.roles?.includes(EQUICORD_HELPERS);
+};
