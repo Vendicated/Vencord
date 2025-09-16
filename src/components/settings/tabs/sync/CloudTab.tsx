@@ -135,7 +135,7 @@ function CloudTab() {
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                     Equicord comes with a cloud integration allowing settings to be synced across apps and devices.
                     <br />
-                    We use Vencord's <Link href="https://github.com/Vencord/Backend">cloud source code</Link> to provide our cloud instance which has a 32MB backup cap.
+                    We use Vencord's <Link href="https://github.com/Vencord/Backend">cloud source code</Link> to provide our cloud instance which has a 60MB backup cap.
                     <br />
                     Our <Link href="https://vencord.dev/cloud/privacy">privacy policy</Link> allows you to see what information we store, how we use it, and data retention.
                     <br />
