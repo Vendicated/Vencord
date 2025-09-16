@@ -57,7 +57,7 @@ function splitTextWithIndicators(text: string): ReactNode[] {
     const nodes: ReactNode[] = [];
     let lastIndex = 0;
     let count = 0;
-    const regex = /\/([a-z]{1,20})(?=\s|$|[^\w])/gi;
+    const regex = /(?:^|\s)\/([^/\s]+)(?:$|\s|\p{P})/giu;
     let match: RegExpExecArray | null;
 
     while ((match = regex.exec(text)) && count < settings.store.maxIndicators) {
