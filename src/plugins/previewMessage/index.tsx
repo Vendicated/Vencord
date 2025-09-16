@@ -20,7 +20,7 @@ import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { MessageAttachment } from "@vencord/discord-types";
+import { CloudUpload, MessageAttachment } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 
@@ -45,7 +45,7 @@ const getImageBox = (url: string): Promise<{ width: number, height: number; } | 
 const getAttachments = async (channelId: string) =>
     await Promise.all(
         UploadStore.getUploads(channelId, DraftType.ChannelMessage)
-            .map(async (upload: any) => {
+            .map(async (upload: CloudUpload) => {
                 const { isImage, filename, spoiler, item: { file } } = upload;
                 const url = URL.createObjectURL(file);
                 const attachment: MessageAttachment = {
@@ -53,7 +53,7 @@ const getAttachments = async (channelId: string) =>
                     filename: spoiler ? "SPOILER_" + filename : filename,
                     // weird eh? if i give it the normal content type the preview doenst work
                     content_type: undefined,
-                    size: await upload.getSize(),
+                    size: upload.getSize(),
                     spoiler,
                     // discord adds query params to the url, so we need to add a hash to prevent that
                     url: url + "#",

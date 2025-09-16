@@ -174,8 +174,8 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
-    description: "Allows you to stream in nitro quality, send fake emojis/stickers, and use client themes.",
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan],
+    description: "Allows you to send fake emojis/stickers, use nitro themes, and stream in nitro quality",
     dependencies: ["MessageEventsAPI"],
 
     settings,
@@ -271,6 +271,16 @@ export default definePlugin({
             replacement: {
                 match: /(function \i\(\i\){let{backgroundGradientPresetId:(\i).+?)(\i\.\i\.updateAsync.+?theme=(.+?),.+?},\i\))/,
                 replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
+            }
+        },
+        // Allow users to use custom client themes
+        {
+            find: "customUserThemeSettings:{",
+            // Discord has two separate modules for treatments 1 and 2
+            all: true,
+            replacement: {
+                match: /(?<=\i=)\(0,\i\.\i\)\(\i\.\i\.TIER_2\)(?=,|;)/g,
+                replace: "true"
             }
         },
         {
@@ -386,24 +396,15 @@ export default definePlugin({
             if (premiumType !== 2) {
                 proto.appearance ??= AppearanceSettingsActionCreators.create();
 
-                if (UserSettingsProtoStore.settings.appearance?.theme != null) {
-                    const appearanceSettingsDummy = AppearanceSettingsActionCreators.create({
-                        theme: UserSettingsProtoStore.settings.appearance.theme
-                    });
+                const protoStoreAppearenceSettings = UserSettingsProtoStore.settings.appearance;
 
-                    proto.appearance.theme = appearanceSettingsDummy.theme;
-                }
+                const appearanceSettingsOverwrite = AppearanceSettingsActionCreators.create({
+                    ...proto.appearance,
+                    theme: protoStoreAppearenceSettings?.theme,
+                    clientThemeSettings: protoStoreAppearenceSettings?.clientThemeSettings
+                });
 
-                if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
-                    const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
-                        backgroundGradientPresetId: {
-                            value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
-                        }
-                    });
-
-                    proto.appearance.clientThemeSettings ??= clientThemeSettingsDummy;
-                    proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
-                }
+                proto.appearance = appearanceSettingsOverwrite;
             }
         } catch (err) {
             new Logger("FakeNitro").error(err);

@@ -87,8 +87,8 @@ export default definePlugin({
             replacement: {
                 // The two groups inside the first group grab the minified names of the variables,
                 // they are then referenced later to find unviewedTrialCount + unviewedDiscountCount.
-                match: /(?<=\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.{0,300}\i=)\1\+\2/,
-                replace: "0"
+                match: /(\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.+?)\2\+\3/,
+                replace: (_, rest) => `${rest}0`
             }
         }
     ],

@@ -17,13 +17,21 @@
 */
 
 import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
-import { ActionDispatch } from "react";
+import { ActionDispatch, ReactNode } from "react";
 
 import { checkIntersecting } from "./misc";
 
 export * from "./lazyReact";
 
 export const NoopComponent = () => null;
+
+/**
+ * Check if a React node is a primitive (string, number, bigint, boolean, undefined)
+ */
+export function isPrimitiveReactNode(node: ReactNode): boolean {
+    const t = typeof node;
+    return t === "string" || t === "number" || t === "bigint" || t === "boolean" || t === "undefined";
+}
 
 /**
  * Check if an element is on screen
