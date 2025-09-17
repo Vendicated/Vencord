@@ -6,7 +6,7 @@
 
 import "@equicordplugins/_misc/styles.css";
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { isEquicordGuild, isEquicordSupport } from "@utils/misc";
@@ -69,11 +69,6 @@ export default definePlugin({
             predicate: () => settings.store.disableDMContextMenu
         },
     ],
-    start() {
-        if (Settings.plugins?.PinDMs?.disableCreateDMButton) {
-            settings.store.disableCreateDMButton = true;
-        }
-    },
     renderMessageAccessory(props) {
         return pluginToggleButtons(props);
     }
