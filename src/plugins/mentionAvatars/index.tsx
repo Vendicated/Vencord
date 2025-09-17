@@ -17,35 +17,35 @@ import { PropsWithChildren } from "react";
 const settings = definePluginSettings({
     showAtSymbol: {
         type: OptionType.BOOLEAN,
-        description: "Whether the the @ symbol should be displayed on mentions",
+        description: "Whether the the @ symbol should be displayed in mentions",
         default: true
     },
+    avatars: {
+        description: "Show icons in user mentions",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    roles: {
+        description: "Show icons in role mentions",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
     useDefaultSymbol: {
-        description: "Wether to use a default role icon or nothing",
+        description: "If a role has no icon, display a default icon instead of nothing",
         type: OptionType.BOOLEAN,
         default: false
     },
-    roles: {
-        description: "Enable the plugin for roles",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
-    },
-    avatars: {
-        description: "Enable the plugin for avatars",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
-    }
 });
 
 function DefaultRoleIcon() {
-    if (!settings.store.useDefaultSymbol) return "@";
+    const { showAtSymbol, useDefaultSymbol } = settings.use(["useDefaultSymbol", "showAtSymbol"]);
+    if (!useDefaultSymbol) return "@";
     return (
         <>
             <svg
                 className="vc-mentionAvatars-icon vc-mentionAvatars-role-icon"
-                xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
             >
@@ -59,7 +59,7 @@ function DefaultRoleIcon() {
                     d="M14.8834 11.9077C16.6657 11.5044 18.0001 9.9077 18.0001 8.00598C18.0001 5.96916 16.4693 4.28218 14.4971 4.0367C15.4322 5.09511 16.0001 6.48524 16.0001 8.00598C16.0001 9.44888 15.4889 10.7742 14.6378 11.8102C14.7203 11.8418 14.8022 11.8743 14.8834 11.9077Z"
                 />
             </svg>
-            {settings.store.showAtSymbol && "@"}
+            {showAtSymbol && "@"}
         </>
     );
 }
@@ -75,21 +75,23 @@ export default definePlugin({
     description: "Shows user avatars and role icons inside mentions",
     authors: [Devs.Ven, Devs.SerStars, Devs.sadan],
 
-    patches: [{
-        find: ".USER_MENTION)",
-        predicate: () => settings.store.avatars,
-        replacement: {
-            match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
-            replace: "children:$self.renderUsername({username:$1,user:$2})"
+    patches: [
+        {
+            find: ".USER_MENTION)",
+            predicate: () => settings.store.avatars,
+            replacement: {
+                match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
+                replace: "children:$self.renderUsername({username:$1,user:$2})"
+            }
+        },
+        {
+            find: ".ROLE_MENTION)",
+            predicate: () => settings.store.roles,
+            replacement: {
+                match: /(children:\[\i&&.{0,100}className:\i.roleDot,.{0,200},)\i(?=\])/,
+                replace: "$1$self.renderRoleIcon(arguments[0])"
+            }
         }
-    },
-    {
-        find: ".ROLE_MENTION)",
-        replacement: {
-            match: /(children:\[\i&&.{0,50}\.RoleDot.{0,70})\i]/,
-            replace: "$1$self.renderRoleIcon(arguments[0])]"
-        }
-    }
     ],
 
     settings,
@@ -98,7 +100,9 @@ export default definePlugin({
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
-        if (!user) return <>{getUsernameString(username)}</>;
+        const usernameString = useUsernameString(username);
+
+        if (!user) return <>{usernameString}</>;
 
         return (
             <span
@@ -110,7 +114,7 @@ export default definePlugin({
                     className="vc-mentionAvatars-icon"
                     style={{ borderRadius: "50%" }}
                 />
-                {getUsernameString(username)}
+                {usernameString}
             </span>
         );
     }, { noop: true }),
@@ -121,27 +125,29 @@ export default definePlugin({
 
         const role = GuildRoleStore.getRole(guildId, roleId);
 
-        if (!role?.icon) return <>
+        const { showAtSymbol } = settings.use(["showAtSymbol"]);
+        console.log(role, roleName);
+
+        if (!role?.icon) return <span className="vc-mentionAvatars-role">
             <DefaultRoleIcon />
+            {/* the @ symbol is added in <DefaultRoleIcon /> */}
             {roleName.substring(1)}
-        </>;
+        </span>;
 
         return (
-            <>
+            <span className="vc-mentionAvatars-role">
                 <img
                     className="vc-mentionAvatars-icon vc-mentionAvatars-role-icon"
                     src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${roleId}/${role.icon}.webp?size=24&quality=lossless`}
                 />
-                {settings.store.showAtSymbol && "@"}
+                {showAtSymbol && "@"}
                 {roleName.substring(1)}
-            </>
+            </span>
         );
     }, { noop: true }),
 });
 
-function getUsernameString(username: string) {
-    return settings.store.showAtSymbol
-        ? `@${username}`
-        : username;
+function useUsernameString(username: string): string {
+    const { showAtSymbol } = settings.use(["showAtSymbol"]);
+    return showAtSymbol ? `@${username}` : username;
 }
-
