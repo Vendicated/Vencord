@@ -98,7 +98,9 @@ const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED,
-    NEW
+    NEW,
+    EQUICORD,
+    VENCORD
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -187,9 +189,14 @@ export default function PluginSettings() {
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { status } = searchValue;
         const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+        const pluginMeta = PluginMeta[plugin.name];
+        const isEquicordPlugin = pluginMeta?.folderName?.startsWith("src/equicordplugins/") ?? false;
+
         if (enabled && status === SearchStatus.DISABLED) return false;
         if (!enabled && status === SearchStatus.ENABLED) return false;
         if (status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
+        if (status === SearchStatus.EQUICORD && !isEquicordPlugin) return false;
+        if (status === SearchStatus.VENCORD && isEquicordPlugin) return false;
         if (!search.length) return true;
 
         return (
@@ -362,7 +369,9 @@ export default function PluginSettings() {
                             { label: "Show All", value: SearchStatus.ALL, default: true },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
-                            { label: "Show New", value: SearchStatus.NEW }
+                            { label: "Show New", value: SearchStatus.NEW },
+                            { label: "Show Equicord", value: SearchStatus.EQUICORD },
+                            { label: "Show Vencord", value: SearchStatus.VENCORD }
                         ]}
                         serialize={String}
                         select={onStatusChange}

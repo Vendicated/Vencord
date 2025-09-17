@@ -16,6 +16,8 @@ import { findByPropsLazy } from "@webpack";
 import { React, showToast, Toasts } from "@webpack/common";
 import { Settings } from "Vencord";
 
+import { PluginMeta } from "~plugins";
+
 import { openPluginModal } from "./PluginModal";
 
 const logger = new Logger("PluginCard");
@@ -35,6 +37,8 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
+    const pluginMeta = PluginMeta[plugin.name];
+    const isEquicordPlugin = pluginMeta?.folderName?.startsWith("src/equicordplugins/") ?? false;
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -88,9 +92,36 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         settings.enabled = !wasEnabled;
     }
 
+    const sourceBadge = isEquicordPlugin ? (
+        <img
+            src="https://equicord.org/assets/favicon.png"
+            alt="Equicord"
+            title="Equicord Plugin"
+            style={{
+                width: "20px",
+                height: "20px",
+                marginLeft: "8px",
+                borderRadius: "2px"
+            }}
+        />
+    ) : (
+        <img
+            src="https://vencord.dev/assets/favicon-dark.png"
+            alt="Vencord"
+            title="Vencord Plugin"
+            style={{
+                width: "20px",
+                height: "20px",
+                marginLeft: "8px",
+                borderRadius: "2px"
+            }}
+        />
+    );
+
     return (
         <AddonCard
             name={plugin.name}
+            sourceBadge={sourceBadge}
             description={plugin.description}
             isNew={isNew}
             enabled={isEnabled()}
