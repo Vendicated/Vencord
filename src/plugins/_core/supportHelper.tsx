@@ -420,9 +420,9 @@ const PluginCards = ErrorBoundary.wrap(function PluginCards({ message }: { messa
         .filter(isNonNullish);
 
 
-    const components = (message.components?.[0] as any)?.components ?? [];
+    const components = (message.components?.[0] as any)?.components;
 
-    if (message.author.id === VENBOT_USER_ID && components.length >= 5) {
+    if (message.author.id === VENBOT_USER_ID && components?.length >= 5) {
         const description = components[1]?.content;
         const pluginUrl = components.find(c => c?.components)?.components[0]?.url;
         if (pluginUrl?.startsWith("https://vencord.dev/plugins/")) {
@@ -443,4 +443,4 @@ const PluginCards = ErrorBoundary.wrap(function PluginCards({ message }: { messa
             {pluginCards}
         </div>
     );
-});
+}, { noop: true });
