@@ -21,7 +21,7 @@ const settings = definePluginSettings({
         default: true
     },
     avatars: {
-        description: "Show icons in user mentions",
+        description: "Show avatars in user mentions",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
