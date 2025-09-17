@@ -236,12 +236,12 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
                     onClick
                 };
 
-                return isDeaf
-                    ? <DeafIcon {...iconProps} />
-                    : isMute
-                        ? <MuteIcon {...iconProps} />
-                        : isLocked
-                            ? <LockedSpeakerIcon {...iconProps} />
+                return isLocked
+                    ? <LockedSpeakerIcon {...iconProps} />
+                    : isDeaf
+                        ? <DeafIcon {...iconProps} />
+                        : isMute
+                            ? <MuteIcon {...iconProps} />
                             : <SpeakerIcon {...iconProps} />;
             }}
         </Tooltip>
