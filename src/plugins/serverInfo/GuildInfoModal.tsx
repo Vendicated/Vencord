@@ -94,6 +94,7 @@ function GuildInfoModal({ guild }: GuildProps) {
             <div className={cl("header")}>
                 {iconUrl
                     ? <img
+                        className={cl("icon")}
                         src={iconUrl}
                         alt=""
                         onClick={() => openImageModal({
@@ -170,6 +171,7 @@ function Owner(guildId: string, owner: User) {
     return (
         <div className={cl("owner")}>
             <img
+                className={cl("owner-avatar")}
                 src={ownerAvatarUrl}
                 alt=""
                 onClick={() => openImageModal({

@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,16 @@ export default definePlugin({
     patches: [
         {
             find: ".nsfwAllowed=null",
-            replacement: {
-                match: /(?<=\.nsfwAllowed=)null!==.+?(?=[,;])/,
-                replace: "!0",
-            },
-        },
+            replacement: [
+                {
+                    match: /(?<=\.nsfwAllowed=)null!=.+?(?=[,;])/,
+                    replace: "true",
+                },
+                {
+                    match: /(?<=\.ageVerificationStatus=)null!=.+?(?=[,;])/,
+                    replace: "3", // VERIFIED_ADULT
+                }
+            ],
+        }
     ],
 });

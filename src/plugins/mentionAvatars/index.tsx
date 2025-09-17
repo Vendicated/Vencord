@@ -57,7 +57,7 @@ export default definePlugin({
     {
         find: ".ROLE_MENTION)",
         replacement: {
-            match: /children:\[\i&&.{0,50}\.RoleDot.{0,300},\i(?=\])/,
+            match: /children:\[\i&&.{0,100}className:\i.roleDot,.{0,200},\i(?=\])/,
             replace: "$&,$self.renderRoleIcon(arguments[0])"
         }
     }],

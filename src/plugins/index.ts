@@ -27,10 +27,12 @@ import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecor
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings, SettingsStore } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
-import { canonicalizeFind } from "@utils/patches";
+import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
+import { patches } from "@webpack/patcher";
 import { FluxEvents } from "@webpack/types";
 
 import Plugins from "~plugins";
@@ -41,7 +43,7 @@ const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
 export const plugins = Plugins;
-export const patches = [] as Patch[];
+export { patches };
 
 /** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
 let enabledPluginsSubscribedFlux = false;
@@ -58,7 +60,7 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
-export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
+export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
 
@@ -74,10 +76,12 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
         patch.replacement = [patch.replacement];
     }
 
-    if (IS_REPORTER) {
-        patch.replacement.forEach(r => {
-            delete r.predicate;
-        });
+    for (const replacement of patch.replacement) {
+        canonicalizeReplacement(replacement, pluginPath);
+
+        if (IS_REPORTER) {
+            delete replacement.predicate;
+        }
     }
 
     patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
@@ -255,7 +259,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, userProfileBadge,
+        name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton,
         expressionPickerTabs
@@ -300,6 +304,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
+    if (managedStyle) enableStyle(managedStyle);
+
     if (userProfileBadge) addProfileBadge(userProfileBadge);
 
     if (onBeforeMessageEdit) addMessagePreEditListener(onBeforeMessageEdit);
@@ -328,7 +334,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, userProfileBadge,
+        name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton,
         expressionPickerTabs
@@ -370,6 +376,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
             removeContextMenuPatch(navId, contextMenus[navId]);
         }
     }
+
+    if (managedStyle) disableStyle(managedStyle);
 
     if (userProfileBadge) removeProfileBadge(userProfileBadge);
 

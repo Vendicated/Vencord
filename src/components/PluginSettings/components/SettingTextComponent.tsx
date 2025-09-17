@@ -51,6 +51,7 @@ export function SettingTextComponent({ option, pluginSettings, definedSettings, 
                 onChange={handleChange}
                 placeholder={option.placeholder ?? "Enter a value"}
                 disabled={option.disabled?.call(definedSettings) ?? false}
+                maxLength={null}
                 {...option.componentProps}
             />
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}

@@ -1,0 +1,77 @@
+/* TODO: merge with spotifyStyles.css and remove when old UI is discontinued */
+.visual-refresh {
+    #vc-spotify-player {
+        padding: 12px;
+        background: var(--bg-overlay-floating, var(--background-base-low, var(--background-secondary-alt)));
+        margin: 0;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .vc-spotify-song-info-prefix {
+        display: none;
+    }
+
+    .vc-spotify-artist, .vc-spotify-album {
+        color: var(--header-primary);
+    }
+
+    .vc-spotify-secondary-song-info {
+        font-size: 12px;
+    }
+
+    #vc-spotify-progress-bar {
+        position: relative;
+        color: var(--text-normal);
+        width: 100%;
+    }
+
+    #vc-spotify-progress-bar > [class^="slider"] {
+        flex-grow: 1;
+        width: 100%;
+        padding: 0 !important;
+    }
+
+    #vc-spotify-progress-bar > [class^="slider"] [class^="bar"] {
+        height: 3px !important;
+        top: calc(12px - 4px / 2 + var(--bar-offset));
+    }
+
+    #vc-spotify-progress-bar > [class^="slider"] [class^="barFill"] {
+        background-color: var(--interactive-active);
+    }
+
+    #vc-spotify-progress-bar > [class^="slider"]:hover [class^="barFill"] {
+        background-color: var(--vc-spotify-green);
+    }
+
+    #vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
+        background-color: var(--interactive-active);
+        width: 16px !important;
+        height: 16px !important;
+        margin-top: calc(17px/-2 + var(--bar-offset)/2);
+        margin-left: -0.5px;
+    }
+
+    .vc-spotify-progress-time {
+        margin-top: 8px;
+        font-family: var(--font-code);
+    }
+
+    .vc-spotify-button-row {
+        margin-top: 14px;
+    }
+
+    .vc-spotify-button {
+        margin: 0 2px;
+        border-radius: var(--radius-sm);
+    }
+
+    .vc-spotify-repeat-context, .vc-spotify-repeat-track, .vc-spotify-shuffle-on {
+        background-color: var(--vc-spotify-green-90);
+    }
+
+    .vc-spotify-repeat-context:hover, .vc-spotify-repeat-track:hover, .vc-spotify-shuffle-on:hover {
+        background-color: var(--vc-spotify-green-80);
+    }
+}

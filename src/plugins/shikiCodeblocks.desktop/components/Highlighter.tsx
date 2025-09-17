@@ -102,7 +102,7 @@ export const Highlighter = ({
                 color: themeBase.plainColor,
             }}
         >
-            <code>
+            <code className={cl("code")}>
                 <Header
                     langName={langName}
                     useDevIcon={useDevIcon}

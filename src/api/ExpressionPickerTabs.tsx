@@ -5,7 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Channel } from "discord-types/general";
+import type { Channel } from "@vencord/discord-types";
 import { JSX } from "react";
 
 export interface ExpressionPickerButtonProps {

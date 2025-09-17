@@ -155,7 +155,7 @@ export function moveChannel(channelId: string, direction: -1 | 1) {
     swapElementsInArray(category.channels, a, b);
 }
 
-// TODO: Remove DataStore PinnedDms migration once enough time has passed
+// TODO(OptionType.CUSTOM Related): Remove DataStore PinnedDms migration once enough time has passed
 async function migrateData() {
     if (Settings.plugins.PinDMs.dmSectioncollapsed != null) {
         settings.store.dmSectionCollapsed = Settings.plugins.PinDMs.dmSectioncollapsed;

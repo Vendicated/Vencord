@@ -160,7 +160,7 @@ function initWs(isManual = false) {
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
                 const mod = candidates[keys[0]];
-                let src = String(mod.original ?? mod).replaceAll("\n", "");
+                let src = String(mod).replaceAll("\n", "");
 
                 if (src.startsWith("function(")) {
                     src = "0," + src;
@@ -173,7 +173,7 @@ function initWs(isManual = false) {
 
                     try {
                         const matcher = canonicalizeMatch(parseNode(match));
-                        const replacement = canonicalizeReplace(parseNode(replace), "PlaceHolderPluginName");
+                        const replacement = canonicalizeReplace(parseNode(replace), 'Vencord.Plugins.plugins["PlaceHolderPluginName"]');
 
                         const newSource = src.replace(matcher, replacement as string);
 

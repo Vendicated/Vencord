@@ -13,16 +13,6 @@
     color: var(--interactive-hover);
 }
 
-.vc-uvs-speaker-margin {
-    margin-left: 4px;
-}
-
-.vc-uvs-message-indicator {
-    display: inline-flex;
-    top: 2.5px;
-    position: relative;
-}
-
 .vc-uvs-tooltip-container {
     max-width: 300px;
 }

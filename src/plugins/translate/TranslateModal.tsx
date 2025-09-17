@@ -76,7 +76,7 @@ export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
+                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
                     Translate
                 </Forms.FormTitle>
                 <ModalCloseButton onClick={rootProps.onClose} />

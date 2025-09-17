@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { WebpackRequire } from "@webpack/wreq.d";
 
 const settings = definePluginSettings({
     disableAnalytics: {
@@ -81,9 +82,9 @@ export default definePlugin({
         Object.defineProperty(Function.prototype, "g", {
             configurable: true,
 
-            set(v: any) {
+            set(this: WebpackRequire, globalObj: WebpackRequire["g"]) {
                 Object.defineProperty(this, "g", {
-                    value: v,
+                    value: globalObj,
                     configurable: true,
                     enumerable: true,
                     writable: true
@@ -92,11 +93,11 @@ export default definePlugin({
                 // Ensure this is most likely the Sentry WebpackInstance.
                 // Function.g is a very generic property and is not uncommon for another WebpackInstance (or even a React component: <g></g>) to include it
                 const { stack } = new Error();
-                if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || !String(this).includes("exports:{}") || this.c != null) {
+                if (this.c != null || !stack?.includes("http") || !String(this).includes("exports:{}")) {
                     return;
                 }
 
-                const assetPath = stack?.match(/\/assets\/.+?\.js/)?.[0];
+                const assetPath = stack.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];
                 if (!assetPath) {
                     return;
                 }
@@ -106,7 +107,8 @@ export default definePlugin({
                 srcRequest.send();
 
                 // Final condition to see if this is the Sentry WebpackInstance
-                if (!srcRequest.responseText.includes("window.DiscordSentry=")) {
+                // This is matching window.DiscordSentry=, but without `window` to avoid issues on some proxies
+                if (!srcRequest.responseText.includes(".DiscordSentry=")) {
                     return;
                 }
 

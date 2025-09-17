@@ -22,11 +22,11 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { NoopComponent } from "@utils/react";
 import definePlugin from "@utils/types";
-import { filters, findByPropsLazy, waitFor } from "@webpack";
+import { filters, findByCodeLazy, waitFor } from "@webpack";
 import { ChannelStore, ContextMenuApi, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-const { useMessageMenu } = findByPropsLazy("useMessageMenu");
+const useMessageMenu = findByCodeLazy(".MESSAGE,commandTargetId:");
 
 interface CopyIdMenuItemProps {
     id: string;
