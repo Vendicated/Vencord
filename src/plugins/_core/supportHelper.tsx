@@ -23,7 +23,7 @@ import { Flex } from "@components/Flex";
 import { WarningIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { AddonCard } from "@components/settings";
-import { isPluginRequired, makeDependencyList } from "@components/settings/tabs/plugins";
+import { PluginDependencyList } from "@components/settings/tabs/plugins";
 import { ExcludedReasons, PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
@@ -40,6 +40,7 @@ import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, Message } from "@vencord/discord-types";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { isPluginRequired } from "plugins";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -385,12 +386,13 @@ function UrlToPluginCard({ url, description }: { url: string, description: strin
         onConfirm: () => location.reload()
     });
 
-    const { required, dependents } = isPluginRequired(p);
+    const required = isPluginRequired(pluginName);
+    const dependents = Vencord.Plugins.calculatePluginDependencyMap()[p.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d));
 
     if (required) {
-        const tooltipText = p.required || !dependents.includes(p.name)
+        const tooltipText = p.required || !dependents.length
             ? "This plugin is required for Vencord to function."
-            : makeDependencyList(dependents);
+            : <PluginDependencyList deps={dependents} />;
 
         return (
             <Tooltip text={tooltipText} key={p.name}>

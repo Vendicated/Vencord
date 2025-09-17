@@ -59,7 +59,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
                 settings.enabled = true;
-                onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
+                onRestartNeeded(plugin.name, "enabled");
                 return;
             }
         }

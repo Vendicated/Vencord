@@ -21,13 +21,12 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { SettingsTab, wrapTab } from "@components/settings/tabs";
+import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -98,24 +97,6 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     );
 }
 
-export function isPluginRequired(plugin: Plugin) {
-    const dependents = depMap[plugin.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d));
-    return {
-        required: plugin.required || plugin.isDependency || dependents.length > 0,
-        dependents
-    };
-}
-
-const depMap: Record<string, string[]> = {};
-for (const plugin in Plugins) {
-    const deps = Plugins[plugin].dependencies;
-    if (deps) {
-        for (const dep of deps) {
-            depMap[dep] ??= [];
-            depMap[dep].push(plugin);
-        }
-    }
-}
 
 
 function PluginSettings() {
@@ -142,6 +123,8 @@ function PluginSettings() {
                 onConfirm: () => location.reload()
             });
     }, []);
+
+    const depMap = Vencord.Plugins.calculatePluginDependencyMap();
 
     const sortedPlugins = useMemo(() =>
         Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)),
@@ -211,7 +194,7 @@ function PluginSettings() {
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
                 ? "This plugin is required for Vencord to function."
-                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+                : <PluginDependencyList deps={depMap[p.name]?.filter(d => settings.plugins[d].enabled)} />;
 
             requiredPlugins.push(
                 <Tooltip text={tooltipText} key={p.name}>
@@ -296,7 +279,7 @@ function PluginSettings() {
     );
 }
 
-export function makeDependencyList(deps: string[]) {
+export function PluginDependencyList({ deps }: { deps: string[]; }) {
     return (
         <>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
