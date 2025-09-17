@@ -23,11 +23,11 @@ import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findExportedComponentLazy } from "@webpack";
-import { Menu, Popout, useState } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { Menu, Popout, useRef, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
-const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
 function VencordPopout(onClose: () => void) {
     const { useQuickCss } = useSettings(["useQuickCss"]);
@@ -88,13 +88,14 @@ function VencordPopout(onClose: () => void) {
 
 function VencordPopoutIcon(isShown: boolean) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27" width={24} height={24}>
+        <svg viewBox="0 0 27 27" width={24} height={24} className="vc-toolbox-icon">
             <path fill="currentColor" d={isShown ? "M9 0h1v1h1v2h1v2h3V3h1V1h1V0h1v2h1v2h1v7h-1v-1h-3V9h1V6h-1v4h-3v1h1v-1h2v1h3v1h-1v1h-3v2h1v1h1v1h1v3h-1v4h-2v-1h-1v-4h-1v4h-1v1h-2v-4H9v-3h1v-1h1v-1h1v-2H9v-1H8v-1h3V6h-1v3h1v1H8v1H7V4h1V2h1M5 19h2v1h1v1h1v3H4v-1h2v-1H4v-2h1m15-1h2v1h1v2h-2v1h2v1h-5v-3h1v-1h1m4 3h4v1h-4" : "M0 0h7v1H6v1H5v1H4v1H3v1H2v1h5v1H0V6h1V5h1V4h1V3h1V2h1V1H0m13 2h5v1h-1v1h-1v1h-1v1h3v1h-5V7h1V6h1V5h1V4h-3m8 5h1v5h1v-1h1v1h-1v1h1v-1h1v1h-1v3h-1v1h-2v1h-1v1h1v-1h2v-1h1v2h-1v1h-2v1h-1v-1h-1v1h-6v-1h-1v-1h-1v-2h1v1h2v1h3v1h1v-1h-1v-1h-3v-1h-4v-4h1v-2h1v-1h1v-1h1v2h1v1h1v-1h1v1h-1v1h2v-2h1v-2h1v-1h1M8 14h2v1H9v4h1v2h1v1h1v1h1v1h4v1h-6v-1H5v-1H4v-5h1v-1h1v-2h2m17 3h1v3h-1v1h-1v1h-1v2h-2v-2h2v-1h1v-1h1m1 0h1v3h-1v1h-2v-1h1v-1h1"} />
         </svg>
     );
 }
 
-function VencordPopoutButton() {
+function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
+    const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 
     return (
@@ -104,11 +105,13 @@ function VencordPopoutButton() {
             animation={Popout.Animation.NONE}
             shouldShow={show}
             onRequestClose={() => setShow(false)}
+            targetElementRef={buttonRef}
             renderPopout={() => VencordPopout(() => setShow(false))}
         >
             {(_, { isShown }) => (
                 <HeaderBarIcon
-                    className="vc-toolbox-btn"
+                    ref={buttonRef}
+                    className={`vc-toolbox-btn ${buttonClass}`}
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : "Vencord Toolbox"}
                     icon={() => VencordPopoutIcon(isShown)}
@@ -119,33 +122,25 @@ function VencordPopoutButton() {
     );
 }
 
-function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
-    children.splice(
-        children.length - 1, 0,
-        <ErrorBoundary noop={true}>
-            <VencordPopoutButton />
-        </ErrorBoundary>
-    );
-
-    return <>{children}</>;
-}
-
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
+    description: "Adds a button to the titlebar that houses Vencord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
 
     patches: [
         {
-            find: "toolbar:function",
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
-                replace: "$self.ToolboxFragmentWrapper,"
+                // TODO: (?:\.button) is for stable compat and should be removed soon:tm:
+                match: /focusSectionProps:"HELP".{0,20},className:(\i(?:\.button)?)\}\),/,
+                replace: "$& $self.renderVencordPopoutButton($1),"
             }
         }
     ],
 
-    ToolboxFragmentWrapper: ErrorBoundary.wrap(ToolboxFragmentWrapper, {
-        fallback: () => <p style={{ color: "red" }}>Failed to render :(</p>
-    })
+    renderVencordPopoutButton: (buttonClass: string) => (
+        <ErrorBoundary noop>
+            <VencordPopoutButton buttonClass={buttonClass} />
+        </ErrorBoundary>
+    )
 });

@@ -22,12 +22,10 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
-import { Message, ReactionEmoji, User } from "discord-types/general";
+import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
 const queue = new Queue();
@@ -66,7 +64,7 @@ function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
 
 function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     const key = `${msg.id}:${e.name}:${e.id ?? ""}:${type}`;
-    const cache = reactions[key] ??= { fetched: false, users: {} };
+    const cache = reactions[key] ??= { fetched: false, users: new Map() };
     if (!cache.fetched) {
         queue.unshift(() => fetchReactions(msg, e, type));
         cache.fetched = true;
@@ -75,25 +73,7 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     return cache.users;
 }
 
-function makeRenderMoreUsers(users: User[]) {
-    return function renderMoreUsers(_label: string, _count: number) {
-        return (
-            <Tooltip text={users.slice(4).map(u => u.username).join(", ")} >
-                {({ onMouseEnter, onMouseLeave }) => (
-                    <div
-                        className={AvatarStyles.moreUsers}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                    >
-                        +{users.length - 4}
-                    </div>
-                )}
-            </Tooltip >
-        );
-    };
-}
-
-function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
+function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
 
@@ -109,11 +89,12 @@ export default definePlugin({
                 match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
                 replace: "$&$1?null:$self.renderUsers(this.props),"
             }
-        }, {
+        },
+        {
             find: '"MessageReactionsStore"',
             replacement: {
-                match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
-                replace: "$&;$self.reactions=$1"
+                match: /function (\i)\(\){(\i)={}(?=.*CONNECTION_OPEN:\1)/,
+                replace: "$&;$self.reactions=$2;"
             }
         },
         {
@@ -133,18 +114,21 @@ export default definePlugin({
     renderUsers(props: RootObject) {
         return props.message.reactions.length > 10 ? null : (
             <ErrorBoundary noop>
-                <this._renderUsers {...props} />
+                <this.UsersComponent {...props} />
             </ErrorBoundary>
         );
     },
-    _renderUsers({ message, emoji, type }: RootObject) {
+
+    UsersComponent({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
-        React.useLayoutEffect(() => { // bc need to prevent autoscrolling
+
+        useLayoutEffect(() => { // bc need to prevent autoscrolling
             if (Scroll?.scrollCounter > 0) {
                 Scroll.setAutomaticAnchor(null);
             }
         });
-        React.useEffect(() => {
+
+        useEffect(() => {
             const cb = (e: any) => {
                 if (e.messageId === message.id)
                     forceUpdate();
@@ -152,16 +136,16 @@ export default definePlugin({
             FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
 
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
-        }, [message.id]);
+        }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = Object.values(reactions).filter(Boolean) as User[];
+        const users = [...reactions.values()].filter(Boolean);
 
         return (
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                <div onClick={handleClickAvatar}>
+                <div onClick={handleClickAvatar} onKeyDown={handleClickAvatar}>
                     <UserSummaryItem
                         users={users}
                         guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
@@ -169,7 +153,6 @@ export default definePlugin({
                         max={5}
                         showDefaultAvatarsForNullUsers
                         showUserPopout
-                        renderMoreUsers={makeRenderMoreUsers(users)}
                     />
                 </div>
             </div>
@@ -183,7 +166,7 @@ export default definePlugin({
 
 interface ReactionCacheEntry {
     fetched: boolean;
-    users: Record<string, User>;
+    users: Map<string, User>;
 }
 
 interface RootObject {

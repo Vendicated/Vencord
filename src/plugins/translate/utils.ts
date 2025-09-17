@@ -29,11 +29,8 @@ export const cl = classNameFactory("vc-trans-");
 const Native = VencordNative.pluginHelpers.Translate as PluginNative<typeof import("./native")>;
 
 interface GoogleData {
-    src: string;
-    sentences: {
-        // 🏳️‍⚧️
-        trans: string;
-    }[];
+    translation: string;
+    sourceLanguage: string;
 }
 
 interface DeeplData {
@@ -77,21 +74,13 @@ export async function translate(kind: "received" | "sent", text: string): Promis
 }
 
 async function googleTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
-    const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
-        // see https://stackoverflow.com/a/29537590 for more params
-        // holy shidd nvidia
-        client: "gtx",
-        // source language
-        sl: sourceLang,
-        // target language
-        tl: targetLang,
-        // what to return, t = translation probably
-        dt: "t",
-        // Send json object response instead of weird array
-        dj: "1",
-        source: "input",
-        // query, duh
-        q: text
+    const url = "https://translate-pa.googleapis.com/v1/translate?" + new URLSearchParams({
+        "params.client": "gtx",
+        "dataTypes": "TRANSLATION",
+        "key": "AIzaSyDLEeFI5OtFBwYBIoK_jj5m32rZK5CkCXA", // some google API key
+        "query.sourceLanguage": sourceLang,
+        "query.targetLanguage": targetLang,
+        "query.text": text,
     });
 
     const res = await fetch(url);
@@ -101,14 +90,11 @@ async function googleTranslate(text: string, sourceLang: string, targetLang: str
             + `\n${res.status} ${res.statusText}`
         );
 
-    const { src, sentences }: GoogleData = await res.json();
+    const { sourceLanguage, translation }: GoogleData = await res.json();
 
     return {
-        sourceLanguage: GoogleLanguages[src] ?? src,
-        text: sentences.
-            map(s => s?.trans).
-            filter(Boolean).
-            join("")
+        sourceLanguage: GoogleLanguages[sourceLanguage] ?? sourceLanguage,
+        text: translation
     };
 }
 

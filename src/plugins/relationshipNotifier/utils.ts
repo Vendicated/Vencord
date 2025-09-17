@@ -19,12 +19,13 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
+import { FluxStore } from "@vencord/discord-types";
+import { ChannelType } from "@vencord/discord-types/enums";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
 
 import settings from "./settings";
-import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
+import { RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
 
 export const GuildAvailabilityStore = findStoreLazy("GuildAvailabilityStore") as FluxStore & {
     totalGuilds: number;
@@ -50,6 +51,8 @@ async function runMigrations() {
 
 export async function syncAndRunChecks() {
     await runMigrations();
+    if (UserStore.getCurrentUser() == null) return;
+
     const [oldGuilds, oldGroups, oldFriends] = await DataStore.getMany([
         guildsKey(),
         groupsKey(),
@@ -170,9 +173,9 @@ export async function syncFriends() {
     friends.friends = [];
     friends.requests = [];
 
-    const relationShips = RelationshipStore.getRelationships();
-    for (const id in relationShips) {
-        switch (relationShips[id]) {
+    const relationShips = RelationshipStore.getMutableRelationships();
+    for (const [id, type] of relationShips) {
+        switch (type) {
             case RelationshipType.FRIEND:
                 friends.friends.push(id);
                 break;

@@ -23,7 +23,7 @@ import definePlugin, { ReporterTestable } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
-const fetchApplicationsRPC = findByCodeLazy("APPLICATION_RPC(", "Client ID");
+const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
@@ -42,6 +42,7 @@ export default definePlugin({
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
     authors: [Devs.Ducko],
     reporterTestable: ReporterTestable.None,
+    hidden: IS_VESKTOP || "legcord" in window,
 
     settingsAboutComponent: () => (
         <>
@@ -73,9 +74,6 @@ export default definePlugin({
     },
 
     async start() {
-        // ArmCord comes with its own arRPC implementation, so this plugin just confuses users
-        if ("armcord" in window) return;
-
         if (ws) ws.close();
         ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
 

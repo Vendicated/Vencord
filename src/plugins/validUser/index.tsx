@@ -22,6 +22,7 @@ import { isNonNullish } from "@utils/guards";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
+import { ProfileBadge } from "@vencord/discord-types";
 import { Constants, FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
 import { type ComponentType, type ReactNode } from "react";
 
@@ -46,13 +47,6 @@ const badges: Record<string, ProfileBadge> = {
 
 const fetching = new Set<string>();
 const queue = new Queue(5);
-
-interface ProfileBadge {
-    id: string;
-    description: string;
-    icon: string;
-    link?: string;
-}
 
 interface MentionProps {
     data: {
@@ -102,10 +96,12 @@ async function getUser(id: string) {
 
     // Fill in what we can deduce
     const profile = UserProfileStore.getUserProfile(id);
-    profile.accentColor = user.accent_color;
-    profile.badges = fakeBadges;
-    profile.banner = user.banner;
-    profile.premiumType = user.premium_type;
+    if (profile) {
+        profile.accentColor = user.accent_color;
+        profile.badges = fakeBadges;
+        profile.banner = user.banner;
+        profile.premiumType = user.premium_type;
+    }
 
     return userObj;
 }

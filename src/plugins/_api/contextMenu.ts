@@ -34,12 +34,22 @@ export default definePlugin({
             }
         },
         {
-            find: ".Menu,{",
+            find: "navId:",
             all: true,
-            replacement: {
-                match: /Menu,{(?<=\.jsxs?\)\(\i\.Menu,{)/g,
-                replace: "$&contextMenuApiArguments:typeof arguments!=='undefined'?arguments:[],"
-            }
+            noWarn: true,
+            replacement: [
+                {
+                    match: /navId:(?=.+?([,}].*?\)))/g,
+                    replace: (m, rest) => {
+                        // Check if this navId: match is a destructuring statement, ignore it if it is
+                        const destructuringMatch = rest.match(/}=.+/);
+                        if (destructuringMatch == null) {
+                            return `contextMenuAPIArguments:typeof arguments!=='undefined'?arguments:[],${m}`;
+                        }
+                        return m;
+                    }
+                }
+            ]
         }
     ]
 });

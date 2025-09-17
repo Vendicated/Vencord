@@ -19,7 +19,7 @@
 import { ILanguageRegistration } from "@vap/shiki";
 
 export const VPC_REPO = "Vap0r1ze/vapcord";
-export const VPC_REPO_COMMIT = "88a7032a59cca40da170926651b08201ea3b965a";
+export const VPC_REPO_COMMIT = "4d0e4b420fb1e4358852bbd18c804a6f5e54c0d7";
 export const vpcRepoAssets = `https://raw.githubusercontent.com/${VPC_REPO}/${VPC_REPO_COMMIT}/assets/shiki-codeblocks`;
 export const vpcRepoGrammar = (fileName: string) => `${vpcRepoAssets}/${fileName}`;
 export const vpcRepoLanguages = `${vpcRepoAssets}/languages.json`;
@@ -46,7 +46,7 @@ export interface LanguageJson {
 export const languages: Record<string, Language> = {};
 
 export const loadLanguages = async () => {
-    const langsJson: LanguageJson[] = await fetch(vpcRepoLanguages).then(res => res.json());
+    const langsJson: LanguageJson[] = await fetch(vpcRepoLanguages).then(res => res.ok ? res.json() : []);
     const loadedLanguages = Object.fromEntries(
         langsJson.map(lang => [lang.id, {
             ...lang,

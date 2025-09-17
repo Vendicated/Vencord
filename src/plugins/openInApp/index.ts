@@ -33,7 +33,7 @@ interface URLReplacementRule {
 // Do not forget to add protocols to the ALLOWED_PROTOCOLS constant
 const UrlReplacementRules: Record<string, URLReplacementRule> = {
     spotify: {
-        match: /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/,
+        match: /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist|playlist|user|episode|prerelease)\/(.+)(?:\?.+?)?$/,
         replace: (_, type, id) => `spotify://${type}/${id}`,
         description: "Open Spotify links in the Spotify app",
         shortlinkMatch: /^https:\/\/spotify\.link\/.+$/,
@@ -57,7 +57,7 @@ const UrlReplacementRules: Record<string, URLReplacementRule> = {
         description: "Open Tidal links in the Tidal app",
     },
     itunes: {
-        match: /^https:\/\/music\.apple\.com\/([a-z]{2}\/)?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/,
+        match: /^https:\/\/(?:geo\.)?music\.apple\.com\/([a-z]{2}\/)?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/,
         replace: (_, lang, type, name, id) => id ? `itunes://music.apple.com/us/${type}/${name}/${id}` : `itunes://music.apple.com/us/${type}/${name}`,
         description: "Open Apple Music links in the iTunes app"
     },
@@ -87,26 +87,33 @@ export default definePlugin({
         {
             find: "trackAnnouncementMessageLinkClicked({",
             replacement: {
-                match: /function (\i\(\i,\i\)\{)(?=.{0,100}trusted:)/,
+                match: /function (\i\(\i,\i\)\{)(?=.{0,150}trusted:)/,
                 replace: "async function $1 if(await $self.handleLink(...arguments)) return;"
             }
         },
-        // Make Spotify profile activity links open in app on web
         {
-            find: "WEB_OPEN(",
+            find: "no artist ids in metadata",
             predicate: () => !IS_DISCORD_DESKTOP && pluginSettings.store.spotify,
-            replacement: {
-                match: /\i\.\i\.isProtocolRegistered\(\)(.{0,100})window.open/g,
-                replace: "true$1VencordNative.native.openExternal"
-            }
+            replacement: [
+                {
+                    match: /\i\.\i\.isProtocolRegistered\(\)/g,
+                    replace: "true"
+                },
+                {
+                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    replace: "true"
+                }
+            ]
         },
-        {
-            find: ".CONNECTED_ACCOUNT_VIEWED,",
+
+        // User Profile Modal & User Profile Modal v2
+        ...[".__invalid_connectedAccountOpenIconContainer", ".BLUESKY||"].map(find => ({
+            find,
             replacement: {
-                match: /(?<=href:\i,onClick:(\i)=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
+                match: /(?<=onClick:(\i)=>\{)(?=.{0,100}\.CONNECTED_ACCOUNT_VIEWED)(?<==(\i)\.metadata.+?)/,
                 replace: "if($self.handleAccountView($1,$2.type,$2.id)) return;"
             }
-        }
+        }))
     ],
 
     async handleLink(data: { href: string; }, event?: MouseEvent) {

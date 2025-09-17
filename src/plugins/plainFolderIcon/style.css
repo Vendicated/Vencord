@@ -1,0 +1,10 @@
+.vc-plainFolderIcon-plain {
+    /* Without this, they are a bit laggier */
+    transition: none !important;
+
+    /* Don't show the mini guild icons */
+    transform: translateZ(0);
+
+    /* The new icons are fully transparent. Add a sane default to match the old behavior */
+    background-color: color-mix(in oklab, var(--custom-folder-color, var(--bg-brand)) 40%, transparent);
+}

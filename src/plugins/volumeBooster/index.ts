@@ -17,15 +17,14 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
     multiplier: {
         description: "Volume Multiplier",
         type: OptionType.SLIDER,
-        markers: makeRange(1, 5, 1),
+        markers: makeRange(1, 5, 0.5),
         default: 2,
         stickToMarkers: true,
     }
@@ -39,7 +38,7 @@ interface StreamData {
     gainNode?: GainNode,
     id: string,
     levelNode: AudioWorkletNode,
-    sinkId: string,
+    sinkId: string | "default",
     stream: MediaStream,
     streamSourceNode?: MediaStreamAudioSourceNode,
     videoStreamId: string,
@@ -57,7 +56,7 @@ export default definePlugin({
     patches: [
         // Change the max volume for sliders to allow for values above 200
         ...[
-            ".Messages.USER_VOLUME",
+            "#{intl::USER_VOLUME}",
             "currentVolume:"
         ].map(find => ({
             find,
@@ -69,13 +68,18 @@ export default definePlugin({
         // Patches needed for web/vesktop
         {
             find: "streamSourceNode",
-            predicate: () => IS_WEB,
+            predicate: () => !IS_DISCORD_DESKTOP,
             group: true,
             replacement: [
                 // Remove rounding algorithm
                 {
                     match: /Math\.max.{0,30}\)\)/,
                     replace: "arguments[0]"
+                },
+                // Fix streams not playing audio until you update them
+                {
+                    match: /\}return"video"/,
+                    replace: "this.updateAudioElement();$&"
                 },
                 // Patch the volume
                 {
@@ -89,7 +93,7 @@ export default definePlugin({
             find: "AudioContextSettingsMigrated",
             replacement: [
                 {
-                    match: /(?<=isLocalMute\(\i,\i\),volume:.+?volume:)\i(?=})/,
+                    match: /(?<=isLocalMute\(\i,\i\),volume:(\i).+?\i\(\i,\i,)\1(?=\))/,
                     replace: "$&>200?200:$&"
                 },
                 {
@@ -126,6 +130,12 @@ export default definePlugin({
             const gain = data.gainNode = data.audioContext.createGain();
             data.streamSourceNode.connect(gain);
             gain.connect(data.audioContext.destination);
+        }
+
+        // @ts-expect-error
+        if (data.sinkId != null && data.sinkId !== data.audioContext.sinkId && "setSinkId" in AudioContext.prototype) {
+            // @ts-expect-error https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/setSinkId
+            data.audioContext.setSinkId(data.sinkId === "default" ? "" : data.sinkId);
         }
 
         data.gainNode.gain.value = data._mute

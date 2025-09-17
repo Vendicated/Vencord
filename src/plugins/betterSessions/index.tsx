@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
@@ -34,7 +34,7 @@ const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
-const BlobMask = findExportedComponentLazy("BlobMask");
+const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
 
 const settings = definePluginSettings({
     backgroundCheck: {
@@ -60,7 +60,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.AUTH_SESSIONS_SESSION_LOG_OUT",
+            find: "#{intl::AUTH_SESSIONS_SESSION_LOG_OUT}",
             replacement: [
                 // Replace children with a single label with state
                 {
@@ -92,7 +92,7 @@ export default definePlugin({
                 <span>{title}</span>
                 {(savedSession == null || savedSession.isNew) && (
                     <div
-                        className="vc-plugins-badge"
+                        className="vc-addon-badge"
                         style={{
                             backgroundColor: "#ED4245",
                             marginLeft: "2px"
@@ -123,6 +123,7 @@ export default definePlugin({
 
         return (
             <BlobMask
+                isFolder
                 style={{ cursor: "unset" }}
                 selected={false}
                 lowerBadge={
@@ -138,7 +139,7 @@ export default definePlugin({
 
                             borderRadius: "50%",
                             backgroundColor: "var(--interactive-normal)",
-                            color: "var(--background-secondary)",
+                            color: "var(--background-base-lower)",
                         }}
                     >
                         <PlatformIcon width={14} height={14} />
@@ -153,7 +154,7 @@ export default definePlugin({
                     className={SessionIconClasses.sessionIcon}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
-                    <DeviceIcon width={28} height={28} color="currentColor" />
+                    <DeviceIcon size="md" color="currentColor" />
                 </div>
             </BlobMask>
         );

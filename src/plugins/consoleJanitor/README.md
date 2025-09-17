@@ -1,5 +1,5 @@
 # ConsoleJanitor
 
-Disables annoying console messages/errors. This plugin mainly removes errors/warnings that happen all the time and noisy/spammy logging messages.
+Disables annoying console messages/errors. This plugin mainly removes errors/warnings that happen all the time and Discord logger messages.
 
-Some of the disabled messages include the "notosans-400-normalitalic" error and MessageActionCreators, Routing/Utils loggers.
+One of the disabled messages is the "Window state not initialized" warning, for example.

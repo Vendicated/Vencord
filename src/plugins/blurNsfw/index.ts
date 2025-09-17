@@ -24,14 +24,14 @@ let style: HTMLStyleElement;
 
 function setCss() {
     style.textContent = `
-        .vc-nsfw-img [class^=imageWrapper] img,
-        .vc-nsfw-img [class^=wrapperPaused] video {
+        .vc-nsfw-img [class^=imageContainer],
+        .vc-nsfw-img [class^=wrapperPaused] {
             filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
             transition: filter 0.2s;
-        }
-        .vc-nsfw-img [class^=imageWrapper]:hover img,
-        .vc-nsfw-img [class^=wrapperPaused]:hover video {
-            filter: unset;
+
+            &:hover {
+                filter: blur(0);
+            }
         }
         `;
 }
@@ -43,10 +43,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".embedWrapper,embed",
+            find: "}renderEmbeds(",
             replacement: [{
-                match: /\.embedWrapper(?=.+?channel_id:(\i)\.id)/g,
-                replace: "$&+($1.nsfw?' vc-nsfw-img':'')"
+                match: /\.container/,
+                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
             }]
         }
     ],
@@ -54,7 +54,7 @@ export default definePlugin({
     options: {
         blurAmount: {
             type: OptionType.NUMBER,
-            description: "Blur Amount",
+            description: "Blur Amount (in pixels)",
             default: 10,
             onChange: setCss
         }

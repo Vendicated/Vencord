@@ -24,13 +24,13 @@ import type { ReactElement } from "react";
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
  */
-export type NavContextMenuPatchCallback = (children: Array<ReactElement | null>, ...args: Array<any>) => void;
+export type NavContextMenuPatchCallback = (children: Array<ReactElement<any> | null>, ...args: Array<any>) => void;
 /**
  * @param navId The navId of the context menu being patched
  * @param children The rendered context menu elements
  * @param args Any arguments passed into making the context menu, like the guild, channel, user or message for example
  */
-export type GlobalContextMenuPatchCallback = (navId: string, children: Array<ReactElement | null>, ...args: Array<any>) => void;
+export type GlobalContextMenuPatchCallback = (navId: string, children: Array<ReactElement<any> | null>, ...args: Array<any>) => void;
 
 const ContextMenuLogger = new Logger("ContextMenu");
 
@@ -70,7 +70,7 @@ export function addGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback)
  * @returns Whether the patch was successfully removed from the context menu(s)
  */
 export function removeContextMenuPatch<T extends string | Array<string>>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : Array<boolean> {
-    const navIds = Array.isArray(navId) ? navId : [navId as string];
+    const navIds: string[] = Array.isArray(navId) ? navId : [navId];
 
     const results = navIds.map(id => navPatches.get(id)?.delete(patch) ?? false);
 
@@ -90,19 +90,20 @@ export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallba
  * A helper function for finding the children array of a group nested inside a context menu based on the id(s) of its children
  * @param id The id of the child. If an array is specified, all ids will be tried
  * @param children The context menu children
+ * @param matchSubstring Whether to check if the id is a substring of the child id
  */
-export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>): Array<ReactElement | null> | null {
+export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement<any> | null | undefined>, matchSubstring = false): Array<ReactElement<any> | null | undefined> | null {
     for (const child of children) {
         if (child == null) continue;
 
         if (Array.isArray(child)) {
-            const found = findGroupChildrenByChildId(id, child);
+            const found = findGroupChildrenByChildId(id, child, matchSubstring);
             if (found !== null) return found;
         }
 
         if (
-            (Array.isArray(id) && id.some(id => child.props?.id === id))
-            || child.props?.id === id
+            (Array.isArray(id) && id.some(id => matchSubstring ? child.props?.id?.includes(id) : child.props?.id === id))
+            || (matchSubstring ? child.props?.id?.includes(id) : child.props?.id === id)
         ) return children;
 
         let nextChildren = child.props?.children;
@@ -112,7 +113,7 @@ export function findGroupChildrenByChildId(id: string | string[], children: Arra
                 child.props.children = nextChildren;
             }
 
-            const found = findGroupChildrenByChildId(id, nextChildren);
+            const found = findGroupChildrenByChildId(id, nextChildren, matchSubstring);
             if (found !== null) return found;
         }
     }
@@ -121,9 +122,9 @@ export function findGroupChildrenByChildId(id: string | string[], children: Arra
 }
 
 interface ContextMenuProps {
-    contextMenuApiArguments?: Array<any>;
+    contextMenuAPIArguments?: Array<any>;
     navId: string;
-    children: Array<ReactElement | null>;
+    children: Array<ReactElement<any> | null>;
     "aria-label": string;
     onSelect: (() => void) | undefined;
     onClose: (callback: (...args: Array<any>) => any) => void;
@@ -135,7 +136,7 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
         children: cloneMenuChildren(props.children),
     };
 
-    props.contextMenuApiArguments ??= [];
+    props.contextMenuAPIArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 
     if (!Array.isArray(props.children)) props.children = [props.children];
@@ -143,7 +144,7 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
     if (contextMenuPatches) {
         for (const patch of contextMenuPatches) {
             try {
-                patch(props.children, ...props.contextMenuApiArguments);
+                patch(props.children, ...props.contextMenuAPIArguments);
             } catch (err) {
                 ContextMenuLogger.error(`Patch for ${props.navId} errored,`, err);
             }
@@ -152,7 +153,7 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
 
     for (const patch of globalPatches) {
         try {
-            patch(props.navId, props.children, ...props.contextMenuApiArguments);
+            patch(props.navId, props.children, ...props.contextMenuAPIArguments);
         } catch (err) {
             ContextMenuLogger.error("Global patch errored,", err);
         }
@@ -161,7 +162,7 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
     return props;
 }
 
-function cloneMenuChildren(obj: ReactElement | Array<ReactElement | null> | null) {
+function cloneMenuChildren(obj: ReactElement<any> | Array<ReactElement<any> | null> | null) {
     if (Array.isArray(obj)) {
         return obj.map(cloneMenuChildren);
     }
