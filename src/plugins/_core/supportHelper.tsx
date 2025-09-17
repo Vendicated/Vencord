@@ -40,7 +40,6 @@ import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, Message } from "@vencord/discord-types";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
-import { isPluginRequired } from "plugins";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -386,7 +385,7 @@ function UrlToPluginCard({ url, description }: { url: string, description: strin
         onConfirm: () => location.reload()
     });
 
-    const required = isPluginRequired(pluginName);
+    const required = Vencord.Plugins.isPluginRequired(pluginName);
     const dependents = Vencord.Plugins.calculatePluginDependencyMap()[p.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d));
 
     if (required) {
