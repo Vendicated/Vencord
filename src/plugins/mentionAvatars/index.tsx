@@ -10,9 +10,9 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { PropsWithChildren } from "react";
 import { User } from "@vencord/discord-types";
 import { GuildRoleStore, SelectedGuildStore, useState } from "@webpack/common";
+import { PropsWithChildren } from "react";
 
 const settings = definePluginSettings({
     showAtSymbol: {
