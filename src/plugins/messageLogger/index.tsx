@@ -401,7 +401,7 @@ export default definePlugin({
 
         {
             // Updated message transformer(?)
-            find: "THREAD_STARTER_MESSAGE?null===",
+            find: "THREAD_STARTER_MESSAGE?null==",
             replacement: [
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
@@ -442,15 +442,10 @@ export default definePlugin({
         {
             // Attachment renderer
             find: ".removeMosaicItemHoverButton",
-            group: true,
             replacement: [
                 {
-                    match: /(className:\i,item:\i),/,
-                    replace: "$1,item: deleted,"
-                },
-                {
-                    match: /\[\i\.obscured\]:.+?,/,
-                    replace: "$& 'messagelogger-deleted-attachment': deleted,"
+                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
+                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
                 }
             ]
         },
@@ -501,7 +496,7 @@ export default definePlugin({
 
         {
             // Message context base menu
-            find: "useMessageMenu:",
+            find: ".MESSAGE,commandTargetId:",
             replacement: [
                 {
                     // Remove the first section if message is deleted

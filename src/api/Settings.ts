@@ -32,9 +32,10 @@ export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean,
     useQuickCss: boolean;
+    eagerPatches: boolean;
+    enabledThemes: string[];
     enableReactDevtools: boolean;
     themeLinks: string[];
-    enabledThemes: string[];
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
@@ -81,6 +82,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
+    eagerPatches: IS_REPORTER,
     enabledThemes: [],
     enableReactDevtools: false,
     frameless: false,
@@ -218,6 +220,17 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
             break;
         }
     }
+}
+
+export function migratePluginSetting(pluginName: string, oldSetting: string, newSetting: string) {
+    const settings = SettingsStore.plain.plugins[pluginName];
+    if (!settings) return;
+
+    if (!Object.hasOwn(settings, oldSetting) || Object.hasOwn(settings, newSetting)) return;
+
+    settings[newSetting] = settings[oldSetting];
+    delete settings[oldSetting];
+    SettingsStore.markAsChanged();
 }
 
 export function definePluginSettings<

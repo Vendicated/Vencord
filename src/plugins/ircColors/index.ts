@@ -17,33 +17,22 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-// Compute a 64-bit FNV-1a hash of the passed data
-function hash(id: bigint) {
-    const fnvPrime = 1099511628211n;
-    const offsetBasis = 14695981039346656037n;
-
-    let result = offsetBasis;
-    for (let i = 7n; i >= 0n; i--) {
-        result ^= (id >> (8n * i)) & 0xffn;
-        result = (result * fnvPrime) % 2n ** 32n;
-    }
-
-    return result;
-}
+import { useMemo } from "@webpack/common";
 
 // Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id: bigint) {
-    const idHash = hash(id);
+function calculateNameColorForUser(id?: string) {
+    const { lightness } = settings.use(["lightness"]);
+    const idHash = useMemo(() => id ? h64(id) : null, [id]);
 
-    return `hsl(${idHash % 360n}, 100%, ${settings.store.lightness}%)`;
+    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
 }
 
 const settings = definePluginSettings({
     lightness: {
-        description: "Lightness, in %. Change if the colors are too light or too dark. Reopen the chat to apply.",
+        description: "Lightness, in %. Change if the colors are too light or too dark",
         type: OptionType.NUMBER,
         default: 70,
     },
@@ -51,44 +40,74 @@ const settings = definePluginSettings({
         description: "Replace role colors in the member list",
         restartNeeded: true,
         type: OptionType.BOOLEAN,
-        default: true,
+        default: true
     },
+    applyColorOnlyToUsersWithoutColor: {
+        description: "Apply colors only to users who don't have a predefined color",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    applyColorOnlyInDms: {
+        description: "Apply colors only in direct messages; do not apply colors in servers.",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
+    }
 });
 
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [Devs.Grzesiek11],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365],
+    settings,
+
     patches: [
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},",
-            },
+                match: /\i.gradientClassName]\),style:/,
+                replace: "$&{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:"
+            }
         },
         {
-            find: ".NameWithRole,{roleName:",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=color:)null!=.{0,50}?(?=,)/,
-                replace: "$self.calculateNameColorForListContext(arguments[0])",
+                match: /(typingIndicatorRef:.+?},)(\i=.+?)color:null!=.{0,50}?(?=,)/,
+                replace: (_, rest1, rest2) => `${rest1}ircColor=$self.calculateNameColorForListContext(arguments[0]),${rest2}color:ircColor`
             },
-            predicate: () => settings.store.memberListColors,
-        },
-    ],
-    settings,
-    calculateNameColorForMessageContext(context: any) {
-        const id = context?.message?.author?.id;
-        if (id == null) {
-            return null;
+            predicate: () => settings.store.memberListColors
         }
-        return calculateNameColorForUser(BigInt(id));
+    ],
+
+    calculateNameColorForMessageContext(context: any) {
+        const userId: string | undefined = context?.message?.author?.id;
+        const colorString = context?.author?.colorString;
+        const color = calculateNameColorForUser(userId);
+
+        // Color preview in role settings
+        if (context?.message?.channel_id === "1337" && userId === "313337")
+            return colorString;
+
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
+        }
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
-        if (id == null) {
-            return null;
+        const colorString = context?.colorString;
+        const color = calculateNameColorForUser(id);
+
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
         }
-        return calculateNameColorForUser(BigInt(id));
-    },
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
+    }
 });

@@ -120,11 +120,11 @@ const settings = definePluginSettings({
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
-        description: "Clear the linked message cache",
-        component: () =>
+        component: () => (
             <Button onClick={() => messageCache.clear()}>
                 Clear the linked message cache
             </Button>
+        )
     }
 });
 

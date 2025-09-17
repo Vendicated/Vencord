@@ -11,6 +11,10 @@
     width: 100%;
 }
 
+.visual-refresh .vc-notification-root {
+    background-color: var(--bg-overlay-floating, var(--background-base-low));
+}
+
 .vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
     position: absolute;
     z-index: 2147483647;

@@ -84,9 +84,9 @@ export const Code = ({
     }
 
     const codeTableRows = lines.map((line, i) => (
-        <tr key={i}>
-            <td style={{ color: theme.plainColor }}>{i + 1}</td>
-            <td>{line}</td>
+        <tr className={cl("table-row")} key={i}>
+            <td className={cl("table-cell")} style={{ color: theme.plainColor }}>{i + 1}</td>
+            <td className={cl("table-cell")}>{line}</td>
         </tr>
     ));
 

@@ -19,10 +19,15 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+import managedStyle from "./style.css?managed";
+
 export default definePlugin({
     name: "MemberListDecoratorsAPI",
     description: "API to add decorators to member list (both in servers and DMs)",
     authors: [Devs.TheSun, Devs.Ven],
+
+    managedStyle,
+
     patches: [
         {
             find: ".lostPermission)",
@@ -32,7 +37,7 @@ export default definePlugin({
                     replace: "$&vencordProps=$1,"
                 }, {
                     match: /#{intl::GUILD_OWNER}(?=.+?decorators:(\i)\(\)).+?\1=?\(\)=>.+?children:\[/,
-                    replace: "$&...(typeof vencordProps=='undefined'?[]:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
+                    replace: "$&(typeof vencordProps=='undefined'?null:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
                 }
             ]
         },
@@ -40,8 +45,8 @@ export default definePlugin({
             find: "PrivateChannel.renderAvatar",
             replacement: {
                 match: /decorators:(\i\.isSystemDM\(\))\?(.+?):null/,
-                replace: "decorators:[...Vencord.Api.MemberListDecorators.__getDecorators(arguments[0]), $1?$2:null]"
+                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0]),$1?$2:null]"
             }
         }
-    ],
+    ]
 });

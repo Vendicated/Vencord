@@ -65,7 +65,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
         }
         const canonicalMatch = canonicalizeMatch(new RegExp(match));
         try {
-            const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
+            const canonicalReplace = canonicalizeReplace(replacement, 'Vencord.Plugins.plugins["YourPlugin"]');
             var patched = src.replace(canonicalMatch, canonicalReplace as string);
             setReplacementError(void 0);
         } catch (e) {

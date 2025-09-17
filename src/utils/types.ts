@@ -27,7 +27,7 @@ import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { FluxEvents } from "@webpack/types";
-import { JSX } from "react";
+import { ReactNode } from "react";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -42,8 +42,17 @@ export interface PatchReplacement {
     match: string | RegExp;
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
-    /** A function which returns whether this patch replacement should be applied */
+    /** Do not warn if this replacement did no changes */
+    noWarn?: boolean;
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
+    /** The minimum build number for this patch to be applied */
+    fromBuild?: number;
+    /** The maximum build number for this patch to be applied */
+    toBuild?: number;
 }
 
 export interface Patch {
@@ -58,8 +67,15 @@ export interface Patch {
     noWarn?: boolean;
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
-    /** A function which returns whether this patch should be applied */
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
+    /** The minimum build number for this patch to be applied */
+    fromBuild?: number;
+    /** The maximum build number for this patch to be applied */
+    toBuild?: number;
 }
 
 export interface PluginAuthor {
@@ -151,6 +167,11 @@ export interface PluginDef {
 
     tags?: string[];
 
+    /**
+     * Managed style to automatically enable and disable when the plugin is enabled or disabled
+     */
+    managedStyle?: string;
+
     userProfileBadge?: ProfileBadge;
 
     onMessageClick?: MessageClickListener;
@@ -184,6 +205,10 @@ export const enum ReporterTestable {
     FluxEvents = 1 << 4
 }
 
+export function defineDefault<T = any>(value: T) {
+    return value;
+}
+
 export const enum OptionType {
     STRING,
     NUMBER,
@@ -201,15 +226,16 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) | ((
-    | PluginSettingStringDef
-    | PluginSettingNumberDef
-    | PluginSettingBooleanDef
-    | PluginSettingSelectDef
-    | PluginSettingSliderDef
-    | PluginSettingComponentDef
-    | PluginSettingBigIntDef
-) & PluginSettingCommon);
+export type PluginSettingDef =
+    (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) |
+    (PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">) | ((
+        | PluginSettingStringDef
+        | PluginSettingNumberDef
+        | PluginSettingBooleanDef
+        | PluginSettingSelectDef
+        | PluginSettingSliderDef
+        | PluginSettingBigIntDef
+    ) & PluginSettingCommon);
 
 export interface PluginSettingCommon {
     description: string;
@@ -229,12 +255,14 @@ export interface PluginSettingCommon {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
+
 interface IsDisabled<D = unknown> {
     /**
      * Checks if this setting should be disabled
      */
     disabled?(this: D): boolean;
 }
+
 interface IsValid<T, D = unknown> {
     /**
      * Prevents the user from saving settings if this is false or a string
@@ -313,7 +341,8 @@ export interface IPluginOptionComponentProps {
 
 export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => JSX.Element;
+    component: (props: IPluginOptionComponentProps) => ReactNode | Promise<ReactNode>;
+    default?: any;
 }
 
 /** Maps a `PluginSettingDef` to its value type */
@@ -323,7 +352,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
-    O extends PluginSettingComponentDef ? any :
+    O extends PluginSettingComponentDef ? O extends { default: infer Default; } ? Default : any :
     O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
     never;
 
@@ -385,7 +414,7 @@ export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDe
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {

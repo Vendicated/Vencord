@@ -1,43 +1,31 @@
-.shc-lock-screen-outer-container {
-    overflow: hidden scroll;
-    flex: 1 1 auto;
-    height: 100%;
-    width: 100%;
-}
-
-.shc-lock-screen-container {
+.vc-shc-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+    gap: 0.65em;
+    margin: 0.5em 0;
     min-height: 100%;
 }
 
-.shc-lock-screen-container > * {
-    margin: 5px;
+.vc-shc-logo {
+    width: 12em;
+    height: 12em;
 }
 
-.shc-lock-screen-logo {
-    width: 180px;
-    height: 180px;
-}
-
-.shc-lock-screen-heading-container {
+.vc-shc-heading-container {
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: 0.5em;
 }
 
-.shc-lock-screen-heading-container > * {
-    margin: inherit;
-}
-
-.shc-lock-screen-heading-nsfw-icon {
+.vc-shc-heading-nsfw-icon {
     color: var(--text-normal);
 }
 
-.shc-lock-screen-topic-container {
+.vc-shc-topic-container {
     color: var(--text-normal);
     background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 5px;
@@ -45,91 +33,75 @@
     max-width: 70vw;
 }
 
-.shc-lock-screen-tags-container {
+.vc-shc-default-emoji-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: var(--bg-overlay-3, var(--background-secondary));
+    border-radius: 8px;
+    padding: 0.75em;
+    margin-left: 0.75em;
+}
+
+.vc-shc-tags-container {
+    display: flex;
+    flex-direction: column;
     background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 5px;
-    padding: 10px;
+    padding: 0.75em;
+    gap: 0.75em;
     max-width: 70vw;
 }
 
-.shc-lock-screen-tags-container > * {
-    margin: inherit;
-}
-
-.shc-lock-screen-tags {
+.vc-shc-tags {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0.35em;
 }
 
-.shc-evenodd-fill-current-color {
-    fill-rule: evenodd;
-    fill: currentcolor;
-}
-
-.shc-hidden-channel-icon {
-    margin-left: 6px;
-    z-index: 0;
-    cursor: not-allowed;
-}
-
-.shc-lock-screen-default-emoji-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.shc-lock-screen-default-emoji-container > [class^="emojiContainer"] {
-    background: var(--bg-overlay-3, var(--background-secondary));
-    border-radius: 8px;
-    padding: 5px 6px;
-    margin-left: 5px;
-}
-
-.shc-lock-screen-allowed-users-and-roles-container {
+.vc-shc-allowed-users-and-roles-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     background: var(--bg-overlay-3, var(--background-secondary));
     border-radius: 5px;
-    padding: 10px;
+    padding: 0.75em;
     max-width: 70vw;
 }
 
-.shc-lock-screen-allowed-users-and-roles-container-title {
+.vc-shc-allowed-users-and-roles-container-title {
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: 0.5em;
 }
 
-.shc-lock-screen-allowed-users-and-roles-container-toggle-btn {
+.vc-shc-allowed-users-and-roles-container-toggle-btn {
     all: unset;
-    margin-left: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
-}
-
-.shc-lock-screen-allowed-users-and-roles-container-toggle-btn > svg {
     color: var(--text-normal);
 }
 
-.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn {
+.vc-shc-allowed-users-and-roles-container-permdetails-btn {
     all: unset;
-    margin-right: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
-}
-
-.shc-lock-screen-allowed-users-and-roles-container-permdetails-btn > svg {
     color: var(--text-normal);
 }
 
-.shc-lock-screen-allowed-users-and-roles-container > [class^="members"] {
-    margin-left: 10px;
+.vc-shc-allowed-users-and-roles-container > [class^="members"] {
+    margin-left: 12px;
     flex-wrap: wrap;
     justify-content: center;
+}
+
+.vc-shc-hidden-channel-icon {
+    cursor: not-allowed;
+    margin-left: 6px;
+    z-index: 0;
 }
