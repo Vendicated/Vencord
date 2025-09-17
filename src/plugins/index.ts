@@ -52,12 +52,18 @@ const subscribedFluxEventsPlugins = new Set<string>();
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
+/**
+ * Whether a plugin is required (or dependency of another enabled plugin)
+ */
 export function isPluginRequired(name: string) {
     const p = Plugins[name];
     if (!p) return false;
     return p.required || p.isDependency;
 }
 
+/**
+ * A map of plugin names to the plugins that depend on them
+ */
 export const calculatePluginDependencyMap = makeLazy(() => {
     const dependencies: Record<string, string[]> = {};
     for (const plugin in Plugins) {
