@@ -1,9 +1,0 @@
-/* These area names need to be hardcoded. Only betterFoldersSidebar is added by the plugin. */
-
-.visual-refresh .vc-betterFolders-sidebar-grid {
-    grid-template-columns: [start] min-content [guildsEnd] min-content [sidebarEnd] min-content [channelsEnd] 1fr [end]; /* stylelint-disable-line value-keyword-case */
-    grid-template-areas:
-        "titleBar titleBar titleBar titleBar"
-        "guildsList betterFoldersSidebar notice notice"
-        "guildsList betterFoldersSidebar channelsList page";
-}

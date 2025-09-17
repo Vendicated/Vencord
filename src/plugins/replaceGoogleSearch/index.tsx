@@ -69,7 +69,7 @@ function makeSearchItem(src: string) {
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={`https://www.google.com/s2/favicons?domain=${Engines[engine]}&sz=64`}
+                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
                                 />
                                 {engine}
                             </Flex>
