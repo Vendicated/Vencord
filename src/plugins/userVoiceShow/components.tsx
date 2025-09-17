@@ -8,8 +8,8 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
-import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
+import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
+import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-uvs-");
@@ -18,10 +18,6 @@ const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChan
 const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
     useChannelName: filters.byCode("()=>null==")
 });
-const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
-
-const Avatar = findComponentByCodeLazy(".status)/2):0");
-const GroupDMAvatars = findComponentByCodeLazy("frontSrc:", "getAvatarURL");
 
 const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
 
@@ -103,36 +99,13 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
         [voiceStates]
     );
 
-    const guild = channel.getGuildId() == null ? undefined : GuildStore.getGuild(channel.getGuildId());
-    const guildIcon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
-        id: guild.id,
-        icon: guild.icon,
-        size: 30
-    });
-
-    const channelIcon = match(channel.type)
-        .with(P.union(1, 3), () => {
-            return channel.recipients.length >= 2 && channel.icon == null
-                ? <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
-                : <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />;
-        })
-        .otherwise(() => null);
-    const channelName = useChannelName(channel);
-
+    const Icon = isLocked ? LockedSpeakerIcon : SpeakerIcon;
     return (
         <>
-            {guild != null && (
-                <div className={cl("name")}>
-                    {guildIcon != null && <img className={cl("guild-icon")} src={guildIcon} alt="" />}
-                    <Text variant="text-sm/bold">{guild.name}</Text>
-                </div>
-            )}
-            <div className={cl("name")}>
-                {channelIcon}
-                <Text variant="text-sm/semibold">{channelName}</Text>
-            </div>
+            <Text variant="text-sm/bold">In Voice Chat</Text>
+            <Text variant="text-sm/bold">{Parser.parse(`<#${channel.id}>`)}</Text>
             <div className={cl("vc-members")}>
-                {isLocked ? <LockedSpeakerIcon size={18} /> : <SpeakerIcon size={18} />}
+                <Icon size={18} />
                 <UserSummaryItem
                     users={users}
                     renderIcon={false}
