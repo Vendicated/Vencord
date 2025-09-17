@@ -126,7 +126,6 @@ export default definePlugin({
         const role = GuildRoleStore.getRole(guildId, roleId);
 
         const { showAtSymbol } = settings.use(["showAtSymbol"]);
-        console.log(role, roleName);
 
         if (!role?.icon) return <span className="vc-mentionAvatars-role">
             <DefaultRoleIcon />
