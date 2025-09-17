@@ -30,15 +30,16 @@ export const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop"
     dev: "Developer version of Vencord"
 };
 
-interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
+interface PluginCardProps {
     plugin: Plugin;
-    disabled: boolean;
+    disabled?: boolean;
     onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
-    update?: () => void;
+    onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
+    onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, update }: PluginCardProps) {
+export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => isPluginEnabled(plugin.name);
@@ -67,7 +68,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (plugin.patches?.length) {
             settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name, wasEnabled ? "disabled" : "enabled");
+            onRestartNeeded(plugin.name, "enabled");
             return;
         }
 
@@ -91,7 +92,6 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         }
 
         settings.enabled = !wasEnabled;
-        update?.();
     }
 
     return (

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, useSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -34,12 +34,11 @@ import { Margins } from "@utils/margins";
 import { isPluginDev, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
-import { useForceUpdater } from "@utils/react";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, Message } from "@vencord/discord-types";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, Tooltip, TooltipContainer, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -338,10 +337,14 @@ export default definePlugin({
     }, { noop: true }),
 });
 
-function UrlToPluginCard({ url, description }: { url: string, description: string; }) {
-    const update = useForceUpdater();
-
+function ChatPluginCard({ url, description }: { url: string, description: string; }) {
     const pluginName = new URL(url).pathname.split("/")[2];
+
+    // so we rerender if this state changes
+    useSettings([`plugins.${pluginName ?? ""}.enabled`]);
+
+    if (!pluginName) return null;
+
     const p = plugins[pluginName];
     const excludedPlugin = ExcludedPlugins[pluginName];
 
@@ -350,22 +353,7 @@ function UrlToPluginCard({ url, description }: { url: string, description: strin
             ? `${pluginName} is only available on the ${ExcludedReasons[ExcludedPlugins[pluginName]]}`
             : "This plugin is not on this version of Vencord. Try updating!";
 
-        return description ? (
-            <Tooltip text={toolTipText} key={pluginName}>
-                {({ onMouseLeave, onMouseEnter }) =>
-                    <AddonCard
-                        name={pluginName}
-                        description={description || toolTipText}
-                        enabled={false}
-                        setEnabled={() => { }}
-                        disabled={true}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        infoButton={<WarningIcon />}
-                    />
-                }
-            </Tooltip>
-        ) : (
+        const card = (
             <AddonCard
                 name={pluginName}
                 description={description || toolTipText}
@@ -375,15 +363,13 @@ function UrlToPluginCard({ url, description }: { url: string, description: strin
                 infoButton={<WarningIcon />}
             />
         );
+
+        return description
+            ? <TooltipContainer text={toolTipText}>{card}</TooltipContainer>
+            : card;
     }
 
-    const onRestartNeeded = () => Alerts.show({
-        title: "Restart required",
-        body: <p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>,
-        confirmText: "Restart now",
-        cancelText: "Later!",
-        onConfirm: () => location.reload()
-    });
+    const onRestartNeeded = () => showToast("A restart is required for the change to take effect!");
 
     const required = Vencord.Plugins.isPluginRequired(pluginName);
     const dependents = Vencord.Plugins.calculatePluginDependencyMap()[p.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d));
@@ -397,13 +383,12 @@ function UrlToPluginCard({ url, description }: { url: string, description: strin
             <Tooltip text={tooltipText} key={p.name}>
                 {({ onMouseLeave, onMouseEnter }) =>
                     <PluginCard
+                        key={p.name}
                         onMouseLeave={onMouseLeave}
                         onMouseEnter={onMouseEnter}
                         onRestartNeeded={onRestartNeeded}
-                        disabled={true}
-                        update={update}
                         plugin={p}
-                        key={p.name}
+                        disabled
                     />
                 }
             </Tooltip>
@@ -412,11 +397,9 @@ function UrlToPluginCard({ url, description }: { url: string, description: strin
 
     return (
         <PluginCard
-            onRestartNeeded={onRestartNeeded}
-            disabled={false}
-            plugin={p}
-            update={update}
             key={p.name}
+            onRestartNeeded={onRestartNeeded}
+            plugin={p}
         />
     );
 }
@@ -425,8 +408,16 @@ const PluginCards = ErrorBoundary.wrap(function PluginCards({ message }: { messa
     const pluginCards = message.embeds
         ?.map(embed => {
             if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
-            return <UrlToPluginCard url={embed.url} description={embed.rawDescription} key={embed.url} />;
-        }).filter(isNonNullish);
+
+            return (
+                <ChatPluginCard
+                    key={embed.url}
+                    url={embed.url}
+                    description={embed.rawDescription}
+                />
+            );
+        })
+        .filter(isNonNullish);
 
 
     const components = (message.components?.[0] as any)?.components ?? [];
@@ -435,17 +426,21 @@ const PluginCards = ErrorBoundary.wrap(function PluginCards({ message }: { messa
         const description = components[1]?.content;
         const pluginUrl = components.find(c => c?.components)?.components[0]?.url;
         if (pluginUrl?.startsWith("https://vencord.dev/plugins/")) {
-            pluginCards.push(<UrlToPluginCard url={pluginUrl} description={description} key={pluginUrl} />);
+            pluginCards.push(
+                <ChatPluginCard
+                    key={pluginUrl}
+                    url={pluginUrl}
+                    description={description}
+                />
+            );
         }
     }
 
+    if (pluginCards.length === 0) return null;
+
     return (
-        <ErrorBoundary noop>
-            {!pluginCards.length ? null : (
-                <div className="vc-plugins-grid" style={{ marginTop: "0px" }}>
-                    {pluginCards}
-                </div>
-            )}
-        </ErrorBoundary>
+        <div className="vc-plugins-grid" style={{ marginTop: "0px" }}>
+            {pluginCards}
+        </div>
     );
 });
