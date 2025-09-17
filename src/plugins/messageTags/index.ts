@@ -17,7 +17,6 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
-import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -89,14 +88,6 @@ export default definePlugin({
     settings,
 
     async start() {
-        // TODO(OptionType.CUSTOM Related): Remove DataStore tags migration once enough time has passed
-        const oldTags = await DataStore.get<Tag[]>(DATA_KEY);
-        if (oldTags != null) {
-            // @ts-ignore
-            settings.store.tagsList = Object.fromEntries(oldTags.map(oldTag => (delete oldTag.enabled, [oldTag.name, oldTag])));
-            await DataStore.del(DATA_KEY);
-        }
-
         const tags = getTags();
         for (const tagName in tags) {
             createTagCommand(tags[tagName]);
@@ -211,7 +202,7 @@ export default definePlugin({
                                     description: Object.values(getTags())
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
-                                    // @ts-ignore
+                                    // @ts-expect-error
                                     color: 0xd77f7f,
                                     type: "rich",
                                 }

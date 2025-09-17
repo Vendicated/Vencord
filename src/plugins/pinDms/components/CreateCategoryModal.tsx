@@ -7,17 +7,10 @@
 import { classNameFactory } from "@api/Styles";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { Button, ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 
 import { DEFAULT_COLOR, SWATCHES } from "../constants";
 import { categoryLen, createCategory, getCategory } from "../data";
-
-interface ColorPickerProps {
-    color: number | null;
-    showEyeDropper?: boolean;
-    suggestedColors?: string[];
-    onChange(value: number | null): void;
-}
 
 interface ColorPickerWithSwatchesProps {
     defaultColor: number;
@@ -29,7 +22,6 @@ interface ColorPickerWithSwatchesProps {
     renderCustomButton?: () => React.ReactNode;
 }
 
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>('id:"color-picker"');
 
 export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);

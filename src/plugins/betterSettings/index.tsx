@@ -123,8 +123,8 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                    replace: "$1$self.wrapMenu($2)"
+                    match: /(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
+                    replace: "$self.wrapMenu($1)"
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
@@ -142,8 +142,7 @@ export default definePlugin({
     // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
         try {
-            // @ts-ignore
-            [FocusLock.$$vencordInternal(), ComponentDispatch, Classes].forEach(e => e.test);
+            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch, Classes].forEach(e => e.test);
         } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;

@@ -20,11 +20,12 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { FluxStore } from "@webpack/types";
+import { FluxStore } from "@vencord/discord-types";
+import { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
-import { AnyModuleFactory, AnyWebpackRequire, ModuleExports, WebpackRequire } from "./wreq";
+import { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
 
@@ -145,9 +146,17 @@ function makePropertyNonEnumerable(target: Record<PropertyKey, any>, key: Proper
 }
 
 export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire["c"]>, exports: ModuleExports, moduleId: PropertyKey) {
-    if (shouldIgnoreValue(exports)) {
-        makePropertyNonEnumerable(requireCache, moduleId);
-        return true;
+    try {
+        if (shouldIgnoreValue(exports)) {
+            makePropertyNonEnumerable(requireCache, moduleId);
+            return true;
+        }
+    } catch (err) {
+        logger.error(
+            "Error while blacklisting module:\n", err,
+            "\n\nModule id:", moduleId,
+            "\n\nModule exports:", exports,
+        );
     }
 
     if (typeof exports !== "object") {
@@ -156,10 +165,25 @@ export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire
 
     let hasOnlyBadProperties = true;
     for (const exportKey in exports) {
-        if (shouldIgnoreValue(exports[exportKey])) {
-            makePropertyNonEnumerable(exports, exportKey);
-        } else {
-            hasOnlyBadProperties = false;
+        try {
+            // Some exports might have not been initialized yet due to circular imports, so try catch it.
+            try {
+                var exportValue = exports[exportKey];
+            } catch {
+                continue;
+            }
+
+            if (shouldIgnoreValue(exportValue)) {
+                makePropertyNonEnumerable(exports, exportKey);
+            } else {
+                hasOnlyBadProperties = false;
+            }
+        } catch (err) {
+            logger.error(
+                "Error while blacklistng module:\n", err,
+                "\n\nModule id:", moduleId,
+                "\n\nExport value:", exportValue,
+            );
         }
     }
 
@@ -445,6 +469,29 @@ export function findStore(name: StoreNameFilter) {
             }
         }
 
+        try {
+            const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
+            const libdiscoreExports = getLibdiscore();
+
+            for (const libdiscoreExportName in libdiscoreExports) {
+                if (!libdiscoreExportName.endsWith("Store")) {
+                    continue;
+                }
+
+                const storeName = libdiscoreExportName;
+                const store = libdiscoreExports[storeName];
+
+                if (storeName === name) {
+                    res = store;
+                }
+
+                if (fluxStores[storeName] == null) {
+                    fluxStores[storeName] = store;
+                }
+            }
+
+        } catch { }
+
         if (res == null) {
             res = find(filters.byStoreName(name), { isIndirect: true });
         }
@@ -728,7 +775,7 @@ export function extract(id: string | number) {
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
 0,${mod.toString()}
-//# sourceURL=ExtractedWebpackModule${id}
+//# sourceURL=file:///ExtractedWebpackModule${id}
 `;
     const extracted = (0, eval)(code);
     return extracted as Function;

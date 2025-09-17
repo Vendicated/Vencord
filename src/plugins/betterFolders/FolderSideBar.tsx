@@ -42,15 +42,14 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
-    // Also display flex otherwise to fix scrolling
-    const barStyle = {
-        display: isFullscreen ? "none" : "flex",
-        gridArea: "betterFoldersSidebar"
+    // Also display flex otherwise to fix scrolling.
+    const sidebarStyle = {
+        display: isFullscreen ? "none" : "flex"
     } satisfies CSSProperties;
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div style={barStyle}>{Sidebar}</div>
+            ? <div className="vc-betterFolders-sidebar" style={sidebarStyle}>{Sidebar}</div>
             : null;
     }
 
@@ -62,9 +61,9 @@ export default ErrorBoundary.wrap(guildsBarProps => {
             leave={{ width: 0 }}
             config={{ duration: 200 }}
         >
-            {(animationStyle, show) =>
+            {(animationStyle: any, show: any) =>
                 show && (
-                    <Animations.animated.div style={{ ...animationStyle, ...barStyle }}>
+                    <Animations.animated.div className="vc-betterFolders-sidebar" style={{ ...animationStyle, ...sidebarStyle }}>
                         {Sidebar}
                     </Animations.animated.div>
                 )
