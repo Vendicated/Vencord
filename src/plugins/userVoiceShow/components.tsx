@@ -151,7 +151,7 @@ export interface VoiceChannelIndicatorProps {
     shouldHighlight?: boolean;
 }
 
-const clickTimers = {} as Record<string, any>;
+const clickTimers = new Map<string, any>();
 
 export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId);
@@ -178,8 +178,8 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
 
         if (channel == null || channelId == null) return;
 
-        clearTimeout(clickTimers[channelId]);
-        delete clickTimers[channelId];
+        clearTimeout(clickTimers.get(channelId));
+        clickTimers.delete(channelId);
 
         if (e.detail > 1) {
             if (!isDM && !PermissionStore.can(PermissionsBits.CONNECT, channel)) {
@@ -189,10 +189,11 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
 
             selectVoiceChannel(channelId);
         } else {
-            clickTimers[channelId] = setTimeout(() => {
+            const timeoutId = setTimeout(() => {
                 ChannelRouter.transitionToChannel(channelId);
-                delete clickTimers[channelId];
+                clickTimers.delete(channelId);
             }, 250);
+            clickTimers.set(channelId, timeoutId);
         }
     }
 
