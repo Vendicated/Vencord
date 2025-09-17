@@ -334,7 +334,7 @@ export interface CommandOptions {
     autocomplete?: boolean;
 }
 
-export type OpenUserProfileModalProps = {
+export interface OpenUserProfileModalProps {
     userId: string;
     guildId: string | null | undefined;
     showGuildProfile?: boolean;
@@ -345,7 +345,7 @@ export type OpenUserProfileModalProps = {
     };
     section?: "USER_INFO" | "BOT_INFO" | "ACTIVITY" | "MUTUAL_GUILDS" | "MUTUAL_FRIENDS" | "BOT_DATA_ACCESS";
     subsection?: "ROLES" | "CONNECTIONS" | "NOTE" | "RECENT_ACTIVITY";
-};
+}
 
 export interface UserProfileActions {
     openUserProfileModal(props: OpenUserProfileModalProps): Promise<void>;
