@@ -46,6 +46,3 @@
 [submodule "src/userplugins/vc-showMessageEmbeds"]
 	path = src/userplugins/vc-showMessageEmbeds
 	url = https://github.com/lolsuffocate/vc-showMessageEmbeds.git
-[submodule "vc-staticTitle"]
-	path = vc-staticTitle
-	url = https://github.com/sadan4/vc-staticTitle.git
