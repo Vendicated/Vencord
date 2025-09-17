@@ -10,13 +10,15 @@ import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
 import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
+import { WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
-import { _initWebpack, _shouldIgnoreModule, factoryListeners, findModuleId, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
-import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, ModuleExports, PatchedModuleFactory, WebpackRequire } from "./wreq.d";
+import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
+import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 
 export const patches = [] as Patch[];
 
+export const SYM_IS_PROXIED_FACTORY = Symbol("WebpackPatcher.isProxiedFactory");
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
 export const SYM_PATCHED_BY = Symbol("WebpackPatcher.patchedBy");
@@ -26,28 +28,26 @@ export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, 
 
 export const getBuildNumber = makeLazy(() => {
     try {
-        try {
-            if (wreq.m[128014]?.toString().includes("Trying to open a changelog for an invalid build number")) {
-                const hardcodedGetBuildNumber = wreq(128014).b as () => number;
-
-                if (typeof hardcodedGetBuildNumber === "function" && typeof hardcodedGetBuildNumber() === "number") {
-                    return hardcodedGetBuildNumber();
-                }
+        function matchBuildNumber(factoryStr: string) {
+            const buildNumberMatch = factoryStr.match(/.concat\("(\d+?)"\)/);
+            if (buildNumberMatch == null) {
+                return -1;
             }
-        } catch { }
 
-        const moduleId = findModuleId("Trying to open a changelog for an invalid build number");
-        if (moduleId == null) {
-            return -1;
+            return Number(buildNumberMatch[1]);
         }
 
-        const exports = Object.values<ModuleExports>(wreq(moduleId));
-        if (exports.length !== 1 || typeof exports[0] !== "function") {
-            return -1;
+        const hardcodedFactoryStr = String(wreq.m[128014]);
+        if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
+            const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
+
+            if (hardcodedBuildNumber !== -1) {
+                return hardcodedBuildNumber;
+            }
         }
 
-        const buildNumber = exports[0]();
-        return typeof buildNumber === "number" ? buildNumber : -1;
+        const moduleFactory = findModuleFactory("Trying to open a changelog for an invalid build number");
+        return matchBuildNumber(String(moduleFactory));
     } catch {
         return -1;
     }
@@ -61,7 +61,7 @@ export function getFactoryPatchedBy(moduleId: PropertyKey, webpackRequire = wreq
     return webpackRequire.m[moduleId]?.[SYM_PATCHED_BY];
 }
 
-const logger = new Logger("WebpackInterceptor", "#8caaee");
+const logger = new Logger("WebpackPatcher", "#8caaee");
 
 /** Whether we tried to fallback to the WebpackRequire of the factory, or disabled patches */
 let wreqFallbackApplied = false;
@@ -79,7 +79,8 @@ const define: typeof Reflect.defineProperty = (target, p, attributes) => {
 };
 
 // wreq.m is the Webpack object containing module factories. It is pre-populated with factories, and is also populated via webpackGlobal.push
-// We use this setter to intercept when wreq.m is defined and apply patching to its factories.
+// We use this setter to intercept when wreq.m is defined and setup our setters which decide whether we should patch these module factories
+// and the Webpack instance where they are being defined.
 
 // Factories can be patched in two ways. Eagerly or lazily.
 // If we are patching eagerly, pre-populated factories are patched immediately and new factories are patched when set.
@@ -97,7 +98,7 @@ define(Function.prototype, "m", {
     set(this: AnyWebpackRequire, originalModules: AnyWebpackRequire["m"]) {
         define(this, "m", { value: originalModules });
 
-        // Ensure this is one of Discord main Webpack instances.
+        // Ensure this is likely one of Discord main Webpack instances.
         // We may catch Discord bundled libs, React Devtools or other extensions Webpack instances here.
         const { stack } = new Error();
         if (!stack?.includes("http") || stack.match(/at \d+? \(/) || !String(this).includes("exports:{}")) {
@@ -105,53 +106,114 @@ define(Function.prototype, "m", {
         }
 
         const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
-        logger.info("Found Webpack module factories" + interpolateIfDefined` in ${fileName}`);
 
-        allWebpackInstances.add(this);
-
-        // Define a setter for the ensureChunk property of WebpackRequire. Only the main Webpack (which is the only that includes chunk loading) has this property.
-        // So if the setter is called, this means we can initialize the internal references to WebpackRequire.
-        define(this, "e", {
-            enumerable: false,
-
-            set(this: WebpackRequire, ensureChunk: WebpackRequire["e"]) {
-                define(this, "e", { value: ensureChunk });
-                clearTimeout(setterTimeout);
-
-                logger.info("Main WebpackInstance found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
-                _initWebpack(this);
-            }
-        });
-        // setImmediate to clear this property setter if this is not the main Webpack.
-        // If this is the main Webpack, wreq.e will always be set before the timeout runs.
-        const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "e"), 0);
-
-        // Patch the pre-populated factories
-        for (const moduleId in originalModules) {
-            const originalFactory = originalModules[moduleId];
-
-            if (updateExistingFactory(originalModules, moduleId, originalFactory, originalModules, true)) {
-                continue;
-            }
-
-            notifyFactoryListeners(moduleId, originalFactory);
-
-            const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, originalFactory) : originalFactory, moduleFactoryHandler);
-            define(originalModules, moduleId, { value: proxiedFactory });
+        // Currently, sentry and libdiscore Webpack instances are not meant to be patched.
+        // As an extra measure, take advatange of the fact their files include the names and return early if it's one of them.
+        // Later down we also include other measures to avoid patching them.
+        if (["sentry", "libdiscore"].some(name => fileName?.toLowerCase()?.includes(name))) {
+            return;
         }
 
-        define(originalModules, Symbol.toStringTag, {
-            value: "ModuleFactories",
-            enumerable: false
+        // Define a setter for the bundlePath property of WebpackRequire. Only Webpack instances which include chunk loading functionality,
+        // like the main Discord Webpack, have this property.
+        // So if the setter is called with the Discord bundlePath, this means we should patch this instance and initialize the internal references to WebpackRequire.
+        define(this, "p", {
+            enumerable: false,
+
+            set(this: AnyWebpackRequire, bundlePath: NonNullable<AnyWebpackRequire["p"]>) {
+                define(this, "p", { value: bundlePath });
+                clearTimeout(bundlePathTimeout);
+
+                // libdiscore init Webpack instance always returns a constant string for the js filename of a chunk.
+                // In that case, avoid patching this instance,
+                // as it runs before the main Webpack instance and will make the WebpackRequire fallback not work properly, or init an wrongful main WebpackRequire.
+                if (bundlePath !== "/assets/" || /(?:=>|{return)"[^"]/.exec(String(this.u))) {
+                    return;
+                }
+
+                if (wreq == null && this.c != null) {
+                    logger.info("Main WebpackInstance found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
+                    _initWebpack(this as WebpackRequire);
+                }
+
+                patchThisInstance();
+            }
         });
 
-        const proxiedModuleFactories = new Proxy(originalModules, moduleFactoriesHandler);
-        /*
-        If Webpack ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
-        Reflect.setPrototypeOf(originalModules, new Proxy(originalModules, moduleFactoriesHandler));
-        */
+        // In the past, the sentry Webpack instance which we also wanted to patch used to rely on chunks being loaded before initing sentry.
+        // This Webpack instance did not include actual chunk loading, and only awaited for them to be loaded, which means it did not include the bundlePath property.
+        // To keep backwards compability, if this is ever the case again, and keep patching this type of instance, we explicity patch instances which include wreq.O and not wreq.p.
+        // Since we cannot check what is the bundlePath of the instance to filter for the Discord bundlePath, we only patch it if wreq.p is not included,
+        // which means the instance relies on another instance which does chunk loading, and that makes it very likely to only target Discord Webpack instances like the old sentry.
 
-        define(this, "m", { value: proxiedModuleFactories });
+        // Instead of patching when wreq.O is defined, wait for when wreq.O.j is defined, since that will be one of the last things to happen,
+        // which can assure wreq.p could have already been defined before.
+        define(this, "O", {
+            enumerable: false,
+
+            set(this: AnyWebpackRequire, onChunksLoaded: NonNullable<AnyWebpackRequire["O"]>) {
+                define(this, "O", { value: onChunksLoaded });
+                clearTimeout(onChunksLoadedTimeout);
+
+                const wreq = this;
+                define(onChunksLoaded, "j", {
+                    enumerable: false,
+
+                    set(this: NonNullable<AnyWebpackRequire["O"]>, j: NonNullable<AnyWebpackRequire["O"]>["j"]) {
+                        define(this, "j", { value: j });
+
+                        if (wreq.p == null) {
+                            patchThisInstance();
+                        }
+                    }
+                });
+            }
+        });
+
+        // If neither of these properties setters were triggered, delete them as they are not needed anymore.
+        const bundlePathTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
+        const onChunksLoadedTimeout = setTimeout(() => Reflect.deleteProperty(this, "O"), 0);
+
+        /**
+         * Patch the current Webpack instance assigned to `this` context.
+         * This should only be called if this instance was later found to be one we need to patch.
+         */
+        const patchThisInstance = () => {
+            logger.info("Found Webpack module factories" + interpolateIfDefined` in ${fileName}`);
+            allWebpackInstances.add(this);
+
+            // Proxy (and maybe patch) pre-populated factories
+            for (const moduleId in originalModules) {
+                updateExistingOrProxyFactory(originalModules, moduleId, originalModules[moduleId], originalModules, true);
+            }
+
+            define(originalModules, Symbol.toStringTag, {
+                value: "ModuleFactories",
+                enumerable: false
+            });
+
+            const proxiedModuleFactories = new Proxy(originalModules, moduleFactoriesHandler);
+            /*
+            If Webpack ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
+            Reflect.setPrototypeOf(originalModules, new Proxy(originalModules, moduleFactoriesHandler));
+            */
+
+            define(this, "m", { value: proxiedModuleFactories });
+
+            // Overwrite Webpack's defineExports function to define the export descriptors configurable.
+            // This is needed so we can later blacklist specific exports from Webpack search by making them non-enumerable
+            this.d = function (exports, definition) {
+                for (const key in definition) {
+                    if (Object.hasOwn(definition, key) && !Object.hasOwn(exports, key)) {
+                        Object.defineProperty(exports, key, {
+                            enumerable: true,
+                            configurable: true,
+                            get: definition[key],
+                        });
+                    }
+                }
+            };
+        };
     }
 });
 
@@ -172,99 +234,115 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     },
     */
 
-    set(target, p, newValue, receiver) {
-        if (updateExistingFactory(target, p, newValue, receiver)) {
-            return true;
-        }
-
-        notifyFactoryListeners(p, newValue);
-
-        const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(p, newValue) : newValue, moduleFactoryHandler);
-        return Reflect.set(target, p, proxiedFactory, receiver);
-    }
+    set: updateExistingOrProxyFactory
 };
 
 // The proxy for patching lazily and/or running factories with our wrapper.
 const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     apply(target, thisArg: unknown, argArray: Parameters<AnyModuleFactory>) {
-        // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id
-        const moduleId = target.name;
-
         // SYM_ORIGINAL_FACTORY means the factory has already been patched
         if (target[SYM_ORIGINAL_FACTORY] != null) {
-            return runFactoryWithWrap(moduleId, target as PatchedModuleFactory, thisArg, argArray);
+            return runFactoryWithWrap(target as PatchedModuleFactory, thisArg, argArray);
         }
 
+        // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id
+        const moduleId: string = target.name;
+
         const patchedFactory = patchFactory(moduleId, target);
-        return runFactoryWithWrap(moduleId, patchedFactory, thisArg, argArray);
+        return runFactoryWithWrap(patchedFactory, thisArg, argArray);
     },
 
     get(target, p, receiver) {
-        if (target[SYM_ORIGINAL_FACTORY] != null && (p === SYM_PATCHED_SOURCE || p === SYM_PATCHED_BY)) {
-            return Reflect.get(target[SYM_ORIGINAL_FACTORY], p, target[SYM_ORIGINAL_FACTORY]);
+        if (p === SYM_IS_PROXIED_FACTORY) {
+            return true;
         }
 
-        const v = Reflect.get(target, p, receiver);
+        const originalFactory: AnyModuleFactory = target[SYM_ORIGINAL_FACTORY] ?? target;
 
-        // Make proxied factories `toString` return their original factory `toString`
-        if (p === "toString") {
-            return v.bind(target[SYM_ORIGINAL_FACTORY] ?? target);
+        // Redirect these properties to the original factory, including making `toString` return the original factory `toString`
+        if (p === "toString" || p === SYM_PATCHED_SOURCE || p === SYM_PATCHED_BY) {
+            const v = Reflect.get(originalFactory, p, originalFactory);
+            return p === "toString" ? v.bind(originalFactory) : v;
         }
 
-        return v;
+        return Reflect.get(target, p, receiver);
     }
 };
 
+function updateExistingOrProxyFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget = false) {
+    if (updateExistingFactory(moduleFactories, moduleId, newFactory, receiver, ignoreExistingInTarget)) {
+        return true;
+    }
+
+    notifyFactoryListeners(moduleId, newFactory);
+
+    const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, newFactory) : newFactory, moduleFactoryHandler);
+    return Reflect.set(moduleFactories, moduleId, proxiedFactory, receiver);
+}
+
 /**
- * Update a factory that exists in any Webpack instance with a new original factory.
+ * Update a duplicated factory that exists in any of the Webpack instances we track with a new original factory.
  *
- * @param moduleFactoriesTarget The module factories where this new original factory is being set
+ * @param moduleFactories The module factories where this new original factory is being set
  * @param moduleId The id of the module
  * @param newFactory The new original factory
- * @param receiver The receiver of the new factory
- * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactoriesTarget
- * @returns Whether the original factory was updated, or false if it doesn't exist in any Webpack instance
+ * @param receiver The receiver of the factory
+ * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactories where it is being set
+ * @returns Whether the original factory was updated, or false if it doesn't exist in any of the tracked Webpack instances
  */
-function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget: boolean = false) {
-    let existingFactory: TypedPropertyDescriptor<AnyModuleFactory> | undefined;
+function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget) {
+    let existingFactory: AnyModuleFactory | undefined;
     let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of allWebpackInstances) {
-        if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) {
+        if (ignoreExistingInTarget && wreq.m === moduleFactories) {
             continue;
         }
 
         if (Object.hasOwn(wreq.m, moduleId)) {
-            existingFactory = Reflect.getOwnPropertyDescriptor(wreq.m, moduleId);
+            existingFactory = wreq.m[moduleId];
             moduleFactoriesWithFactory = wreq.m;
             break;
         }
     }
 
     if (existingFactory != null) {
-        // If existingFactory exists in any Webpack instance, it's either wrapped in our proxy, or it has already been required.
-        // In the case it is wrapped in our proxy, we need the Webpack instance with this new original factory to also have our proxy.
-        // So, define the descriptor of the existing factory on it.
-        if (moduleFactoriesWithFactory !== moduleFactoriesTarget) {
-            Reflect.defineProperty(receiver, moduleId, existingFactory);
+        // If existingFactory exists in any of the Webpack instances we track, it's either wrapped in our proxy, or it has already been required.
+        // In the case it is wrapped in our proxy, and the instance we are setting does not already have it, we need to make sure the instance contains our proxy too.
+        if (moduleFactoriesWithFactory !== moduleFactories && existingFactory[SYM_IS_PROXIED_FACTORY]) {
+            Reflect.set(moduleFactories, moduleId, existingFactory, receiver);
+        }
+        // Else, if it is not wrapped in our proxy, set this new original factory in all the instances
+        else {
+            defineInWebpackInstances(moduleId, newFactory);
         }
 
-        const existingFactoryValue = moduleFactoriesWithFactory![moduleId];
-
-        // Update with the new original factory, if it does have a current original factory
-        if (existingFactoryValue[SYM_ORIGINAL_FACTORY] != null) {
-            existingFactoryValue[SYM_ORIGINAL_FACTORY] = newFactory;
+        // Update existingFactory with the new original, if it does have a current original factory
+        if (existingFactory[SYM_ORIGINAL_FACTORY] != null) {
+            existingFactory[SYM_ORIGINAL_FACTORY] = newFactory;
         }
 
         // Persist patched source and patched by in the new original factory
         if (IS_DEV) {
-            newFactory[SYM_PATCHED_SOURCE] = existingFactoryValue[SYM_PATCHED_SOURCE];
-            newFactory[SYM_PATCHED_BY] = existingFactoryValue[SYM_PATCHED_BY];
+            newFactory[SYM_PATCHED_SOURCE] = existingFactory[SYM_PATCHED_SOURCE];
+            newFactory[SYM_PATCHED_BY] = existingFactory[SYM_PATCHED_BY];
         }
 
         return true;
     }
 
     return false;
+}
+
+/**
+ * Define a module factory in all the Webpack instances we track.
+ *
+ * @param moduleId The id of the module
+ * @param factory The factory
+ */
+function defineInWebpackInstances(moduleId: PropertyKey, factory: AnyModuleFactory) {
+    for (const wreq of allWebpackInstances) {
+        define(wreq.m, moduleId, { value: factory });
+    }
 }
 
 /**
@@ -286,12 +364,11 @@ function notifyFactoryListeners(moduleId: PropertyKey, factory: AnyModuleFactory
 /**
  * Run a (possibly) patched module factory with a wrapper which notifies our listeners.
  *
- * @param moduleId The id of the module
  * @param patchedFactory The (possibly) patched module factory
  * @param thisArg The `value` of the call to the factory
  * @param argArray The arguments of the call to the factory
  */
-function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModuleFactory, thisArg: unknown, argArray: Parameters<MaybePatchedModuleFactory>) {
+function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unknown, argArray: Parameters<MaybePatchedModuleFactory>) {
     const originalFactory = patchedFactory[SYM_ORIGINAL_FACTORY];
 
     if (patchedFactory === originalFactory) {
@@ -299,25 +376,23 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
         delete patchedFactory[SYM_ORIGINAL_FACTORY];
     }
 
-    // Restore the original factory in all the module factories objects, discarding our proxy and allowing it to be garbage collected
-    for (const wreq of allWebpackInstances) {
-        define(wreq.m, moduleId, { value: originalFactory });
-    }
-
     let [module, exports, require] = argArray;
+
+    // Restore the original factory in all the module factories objects, discarding our proxy and allowing it to be garbage collected
+    defineInWebpackInstances(module.id, originalFactory);
 
     if (wreq == null) {
         if (!wreqFallbackApplied) {
             wreqFallbackApplied = true;
 
             // Make sure the require argument is actually the WebpackRequire function
-            if (typeof require === "function" && require.m != null) {
+            if (typeof require === "function" && require.m != null && require.c != null) {
                 const { stack } = new Error();
                 const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
 
                 logger.warn(
                     "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called wrapped module factory (" +
-                    `id: ${String(moduleId)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
+                    `id: ${String(module.id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
                     ")"
                 );
 
@@ -346,30 +421,20 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
     }
 
     exports = module.exports;
-    if (exports == null) {
-        return factoryReturn;
-    }
 
-    if (typeof require === "function") {
-        const shouldIgnoreModule = _shouldIgnoreModule(exports);
-
-        if (shouldIgnoreModule) {
-            if (require.c != null) {
-                Object.defineProperty(require.c, moduleId, {
-                    value: require.c[moduleId],
-                    enumerable: false,
-                    configurable: true,
-                    writable: true
-                });
-            }
-
+    if (typeof require === "function" && require.c) {
+        if (_blacklistBadModules(require.c, exports, module.id)) {
             return factoryReturn;
         }
     }
 
+    if (exports == null) {
+        return factoryReturn;
+    }
+
     for (const callback of moduleListeners) {
         try {
-            callback(exports, moduleId);
+            callback(exports, module.id);
         } catch (err) {
             logger.error("Error in Webpack module listener:\n", err, callback);
         }
@@ -379,25 +444,44 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
         try {
             if (filter(exports)) {
                 waitForSubscriptions.delete(filter);
-                callback(exports, moduleId);
+                callback(exports, module.id);
                 continue;
             }
+        } catch (err) {
+            logger.error(
+                "Error while filtering or firing callback for Webpack waitFor subscription:\n", err,
+                "\n\nModule exports:", exports,
+                "\n\nFilter:", filter,
+                "\n\nCallback:", callback
+            );
+        }
 
-            if (typeof exports !== "object") {
-                continue;
-            }
+        if (typeof exports !== "object") {
+            continue;
+        }
 
-            for (const exportKey in exports) {
-                const exportValue = exports[exportKey];
+        for (const exportKey in exports) {
+            try {
+                // Some exports might have not been initialized yet due to circular imports, so try catch it.
+                try {
+                    var exportValue = exports[exportKey];
+                } catch {
+                    continue;
+                }
 
                 if (exportValue != null && filter(exportValue)) {
                     waitForSubscriptions.delete(filter);
-                    callback(exportValue, moduleId);
+                    callback(exportValue, module.id);
                     break;
                 }
+            } catch (err) {
+                logger.error(
+                    "Error while filtering or firing callback for Webpack waitFor subscription:\n", err,
+                    "\n\nExport value:", exports,
+                    "\n\nFilter:", filter,
+                    "\n\nCallback:", callback
+                );
             }
-        } catch (err) {
-            logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
         }
     }
 
@@ -422,23 +506,23 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
     for (let i = 0; i < patches.length; i++) {
         const patch = patches[i];
 
-        const moduleMatches = typeof patch.find === "string"
-            ? code.includes(patch.find)
-            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
-
-        if (!moduleMatches) {
-            continue;
-        }
-
-        // Eager patches cannot retrieve the build number because this code runs before the module for it is loaded
-        const buildNumber = Settings.eagerPatches ? -1 : getBuildNumber();
-        const shouldCheckBuildNumber = !Settings.eagerPatches && buildNumber !== -1;
+        const buildNumber = getBuildNumber();
+        const shouldCheckBuildNumber = buildNumber !== -1;
 
         if (
             shouldCheckBuildNumber &&
             (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
             (patch.toBuild != null && buildNumber > patch.toBuild)
         ) {
+            patches.splice(i--, 1);
+            continue;
+        }
+
+        const moduleMatches = typeof patch.find === "string"
+            ? code.includes(patch.find)
+            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
+
+        if (!moduleMatches) {
             continue;
         }
 
@@ -480,7 +564,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 }
 
                 if (newCode === code) {
-                    if (!patch.noWarn) {
+                    if (!(patch.noWarn || replacement.noWarn)) {
                         logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(moduleId)}): ${replacement.match}`);
                         if (IS_DEV) {
                             logger.debug("Function Source:\n", code);
@@ -502,8 +586,13 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                     continue;
                 }
 
+                const pluginsList = [...patchedBy];
+                if (!patchedBy.has(patch.plugin)) {
+                    pluginsList.push(patch.plugin);
+                }
+
                 code = newCode;
-                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${[...patchedBy, patch.plugin].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(moduleId)}`;
+                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
                 patchedFactory = (0, eval)(patchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {

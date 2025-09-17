@@ -18,13 +18,18 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
+import { getIntlMessage, hasGuildFeature } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Constants, GuildStore, RestAPI } from "@webpack/common";
+import { Constants, GuildStore, PermissionStore, RestAPI } from "@webpack/common";
 
 function showDisableInvites(guildId: string) {
-    // @ts-ignore
-    return !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
+    const guild = GuildStore.getGuild(guildId);
+    if (!guild) return false;
+
+    return (
+        !hasGuildFeature(guild, "INVITES_DISABLED") &&
+        PermissionStore.getGuildPermissionProps(guild).canManageRoles
+    );
 }
 
 function disableInvites(guildId: string) {
@@ -69,5 +74,5 @@ export default definePlugin({
                 }}> Pause Indefinitely.</a>}
             </div>
         );
-    })
+    }, { noop: true })
 });

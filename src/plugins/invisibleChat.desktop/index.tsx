@@ -23,8 +23,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, Tooltip } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
@@ -80,8 +80,8 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
             <svg
                 aria-hidden
                 role="img"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox={"0 0 64 64"}
                 style={{ scale: "1.39", translate: "0 -1px" }}
             >
@@ -110,7 +110,7 @@ export default definePlugin({
     patches: [
         {
             // Indicator
-            find: "#{intl::MESSAGE_EDITED}",
+            find: ".SEND_FAILED,",
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"
@@ -149,6 +149,12 @@ export default definePlugin({
 
     renderChatBarButton: ChatBarIcon,
 
+    colorCodeFromNumber(color: number): string {
+        return `#${[color >> 16, color >> 8, color]
+            .map(x => (x & 0xFF).toString(16))
+            .join("")}`;
+    },
+
     // Gets the Embed of a Link
     async getEmbed(url: URL): Promise<Object | {}> {
         const { body } = await RestAPI.post({
@@ -157,6 +163,8 @@ export default definePlugin({
                 urls: [url]
             }
         });
+        // The endpoint returns the color as a number, but Discord expects a string
+        body.embeds[0].color = this.colorCodeFromNumber(body.embeds[0].color);
         return await body.embeds[0];
     },
 
@@ -166,7 +174,7 @@ export default definePlugin({
         message.embeds.push({
             type: "rich",
             rawTitle: "Decrypted Message",
-            color: "0x45f5f5",
+            color: "#45f5f5",
             rawDescription: revealed,
             footer: {
                 text: "Made with ❤️ by c0dine and Sammy!",

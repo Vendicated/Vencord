@@ -24,7 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Menu, Popout, useState } from "@webpack/common";
+import { Menu, Popout, useRef, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
@@ -94,7 +94,8 @@ function VencordPopoutIcon(isShown: boolean) {
     );
 }
 
-function VencordPopoutButton() {
+function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
+    const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 
     return (
@@ -104,11 +105,13 @@ function VencordPopoutButton() {
             animation={Popout.Animation.NONE}
             shouldShow={show}
             onRequestClose={() => setShow(false)}
+            targetElementRef={buttonRef}
             renderPopout={() => VencordPopout(() => setShow(false))}
         >
             {(_, { isShown }) => (
                 <HeaderBarIcon
-                    className="vc-toolbox-btn"
+                    ref={buttonRef}
+                    className={`vc-toolbox-btn ${buttonClass}`}
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : "Vencord Toolbox"}
                     icon={() => VencordPopoutIcon(isShown)}
@@ -119,33 +122,25 @@ function VencordPopoutButton() {
     );
 }
 
-function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
-    children.splice(
-        children.length - 1, 0,
-        <ErrorBoundary noop={true}>
-            <VencordPopoutButton />
-        </ErrorBoundary>
-    );
-
-    return <>{children}</>;
-}
-
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
+    description: "Adds a button to the titlebar that houses Vencord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
 
     patches: [
         {
-            find: "toolbar:function",
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
-                replace: "$self.ToolboxFragmentWrapper,"
+                // TODO: (?:\.button) is for stable compat and should be removed soon:tm:
+                match: /focusSectionProps:"HELP".{0,20},className:(\i(?:\.button)?)\}\),/,
+                replace: "$& $self.renderVencordPopoutButton($1),"
             }
         }
     ],
 
-    ToolboxFragmentWrapper: ErrorBoundary.wrap(ToolboxFragmentWrapper, {
-        fallback: () => <p style={{ color: "red" }}>Failed to render :(</p>
-    })
+    renderVencordPopoutButton: (buttonClass: string) => (
+        <ErrorBoundary noop>
+            <VencordPopoutButton buttonClass={buttonClass} />
+        </ErrorBoundary>
+    )
 });

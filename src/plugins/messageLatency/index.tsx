@@ -9,9 +9,9 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
 import { SnowflakeUtils, Tooltip } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 type FillValue = ("status-danger" | "status-warning" | "status-positive" | "text-muted");
 type Fill = [FillValue, FillValue, FillValue];
@@ -63,11 +63,11 @@ export default definePlugin({
 
     stringDelta(delta: number, showMillis: boolean) {
         const diff: Diff = {
-            days: Math.round(delta / (60 * 60 * 24 * 1000)),
-            hours: Math.round((delta / (60 * 60 * 1000)) % 24),
-            minutes: Math.round((delta / (60 * 1000)) % 60),
-            seconds: Math.round(delta / 1000 % 60),
-            milliseconds: Math.round(delta % 1000)
+            days: Math.floor(delta / (60 * 60 * 24 * 1000)),
+            hours: Math.floor((delta / (60 * 60 * 1000)) % 24),
+            minutes: Math.floor((delta / (60 * 1000)) % 60),
+            seconds: Math.floor(delta / 1000 % 60),
+            milliseconds: Math.floor(delta % 1000)
         };
 
         const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${diff[k] > 1 ? k : k.substring(0, k.length - 1)}` : null;
@@ -98,7 +98,7 @@ export default definePlugin({
         if (!isNonNullish(nonce)) return null;
 
         // Bots basically never send a nonce, and if someone does do it then it's usually not a snowflake
-        if (message.bot) return null;
+        if (message.author.bot) return null;
 
         let isDiscordKotlin = false;
         let delta = SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce); // milliseconds

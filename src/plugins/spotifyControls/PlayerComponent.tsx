@@ -21,12 +21,13 @@ import "./spotifyStyles.css";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
+import { CopyIcon, ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
 import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
+import { SeekBar } from "./SeekBar";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
 const cl = classNameFactory("vc-spotify-");
@@ -75,37 +76,33 @@ function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     );
 }
 
-function CopyContextMenu({ name, path }: { name: string; path: string; }) {
-    const copyId = `spotify-copy-${name}`;
-    const openId = `spotify-open-${name}`;
-
+function CopyContextMenu({ name, type, path }: { type: string; name: string; path: string; }) {
     return (
         <Menu.Menu
-            navId={`spotify-${name}-menu`}
-            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-            aria-label={`Spotify ${name} Menu`}
+            navId="vc-spotify-menu"
+            onClose={ContextMenuApi.closeContextMenu}
+            aria-label={`Spotify ${type} Menu`}
         >
             <Menu.MenuItem
-                key={copyId}
-                id={copyId}
-                label={`Copy ${name} Link`}
+                id="vc-spotify-copy-name"
+                label={`Copy ${type} Name`}
+                action={() => copyWithToast(name)}
+                icon={CopyIcon}
+            />
+            <Menu.MenuItem
+                id="vc-spotify-copy-link"
+                label={`Copy ${type} Link`}
                 action={() => copyWithToast("https://open.spotify.com" + path)}
                 icon={LinkIcon}
             />
             <Menu.MenuItem
-                key={openId}
-                id={openId}
-                label={`Open ${name} in Spotify`}
+                id="vc-spotify-open"
+                label={`Open ${type} in Spotify`}
                 action={() => SpotifyStore.openExternal(path)}
                 icon={OpenExternalIcon}
             />
         </Menu.Menu>
     );
-}
-
-function makeContextMenu(name: string, path: string) {
-    return (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
-        ContextMenuApi.openContextMenu(e, () => <CopyContextMenu name={name} path={path} />);
 }
 
 function Controls() {
@@ -159,7 +156,7 @@ const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
 
-function SeekBar() {
+function SpotifySeekBar() {
     const { duration } = SpotifyStore.track!;
 
     const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
@@ -180,6 +177,12 @@ function SeekBar() {
         }
     }, [storePosition, isSettingPosition, isPlaying]);
 
+    const onChange = (v: number) => {
+        if (isSettingPosition) return;
+        setPosition(v);
+        seek(v);
+    };
+
     return (
         <div id={cl("progress-bar")}>
             <Forms.FormText
@@ -189,16 +192,13 @@ function SeekBar() {
             >
                 {msToHuman(position)}
             </Forms.FormText>
-            <Menu.MenuSliderControl
+            <SeekBar
+                initialValue={position}
                 minValue={0}
                 maxValue={duration}
-                value={position}
-                onChange={(v: number) => {
-                    if (isSettingPosition) return;
-                    setPosition(v);
-                    seek(v);
-                }}
-                renderValue={msToHuman}
+                onValueChange={onChange}
+                asValueChanges={onChange}
+                onValueRender={msToHuman}
             />
             <Forms.FormText
                 variant="text-xs/medium"
@@ -255,13 +255,14 @@ function AlbumContextMenu({ track }: { track: Track; }) {
     );
 }
 
-function makeLinkProps(name: string, condition: unknown, path: string) {
+function makeLinkProps(type: "Song" | "Artist" | "Album", condition: unknown, name: string, path: string) {
     if (!condition) return {};
 
     return {
         role: "link",
         onClick: () => SpotifyStore.openExternal(path),
-        onContextMenu: makeContextMenu(name, path)
+        onContextMenu: e =>
+            ContextMenuApi.openContextMenu(e, () => <CopyContextMenu type={type} name={name} path={path} />)
     } satisfies React.HTMLAttributes<HTMLElement>;
 }
 
@@ -302,20 +303,20 @@ function Info({ track }: { track: Track; }) {
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
                     title={track.name}
-                    {...makeLinkProps("Song", track.id, `/track/${track.id}`)}
+                    {...makeLinkProps("Song", track.id, track.name, `/track/${track.id}`)}
                 >
                     {track.name}
                 </Forms.FormText>
                 {track.artists.some(a => a.name) && (
-                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                        by&nbsp;
+                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                        <span className={cl("song-info-prefix")}>by&nbsp;</span>
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
                                 <span
                                     className={cl("artist")}
                                     style={{ fontSize: "inherit" }}
                                     title={a.name}
-                                    {...makeLinkProps("Artist", a.id, `/artist/${a.id}`)}
+                                    {...makeLinkProps("Artist", a.id, a.name, `/artist/${a.id}`)}
                                 >
                                     {a.name}
                                 </span>
@@ -325,14 +326,14 @@ function Info({ track }: { track: Track; }) {
                     </Forms.FormText>
                 )}
                 {track.album.name && (
-                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                        on&nbsp;
+                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                        <span className={cl("song-info-prefix")}>on&nbsp;</span>
                         <span
                             id={cl("album-title")}
                             className={cl("album")}
                             style={{ fontSize: "inherit" }}
                             title={track.album.name}
-                            {...makeLinkProps("Album", track.album.id, `/album/${track.album.id}`)}
+                            {...makeLinkProps("Album", track.album.id, track.album.name, `/album/${track.album.id}`)}
                         >
                             {track.album.name}
                         </span>
@@ -381,7 +382,7 @@ export function Player() {
     return (
         <div id={cl("player")} style={exportTrackImageStyle}>
             <Info track={track} />
-            <SeekBar />
+            <SpotifySeekBar />
             <Controls />
         </div>
     );

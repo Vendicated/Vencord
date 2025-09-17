@@ -6,8 +6,8 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 
 export default definePlugin({
@@ -54,8 +54,8 @@ export default definePlugin({
         }
     ],
 
-    getAvatarStyles(src: string) {
-        if (src.startsWith("data:")) return {};
+    getAvatarStyles(src: string | null) {
+        if (!src || src.startsWith("data:")) return {};
 
         return Object.fromEntries(
             [128, 256, 512, 1024, 2048, 4096].map(size => [

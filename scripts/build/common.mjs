@@ -129,7 +129,7 @@ export const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {(kind: "web" | "discordDesktop" | "vencordDesktop") => import("esbuild").Plugin}
+ * @type {(kind: "web" | "discordDesktop" | "vesktop") => import("esbuild").Plugin}
  */
 export const globPlugins = kind => ({
     name: "glob-plugins",
@@ -168,7 +168,7 @@ export const globPlugins = kind => ({
                             (target === "web" && kind === "discordDesktop") ||
                             (target === "desktop" && kind === "web") ||
                             (target === "discordDesktop" && kind !== "discordDesktop") ||
-                            (target === "vencordDesktop" && kind !== "vencordDesktop");
+                            (target === "vesktop" && kind !== "vesktop");
 
                         if (excluded) {
                             const name = await resolvePluginName(fullDir, file);
@@ -182,7 +182,7 @@ export const globPlugins = kind => ({
                     const mod = `p${i}`;
                     code += `import ${mod} from "./${dir}/${fileName.replace(/\.tsx?$/, "")}";\n`;
                     pluginsCode += `[${mod}.name]:${mod},\n`;
-                    metaCode += `[${mod}.name]:${JSON.stringify({ folderName, userPlugin })},\n`; // TODO: add excluded plugins to display in the UI?
+                    metaCode += `[${mod}.name]:${JSON.stringify({ folderName, userPlugin })},\n`;
                     i++;
                 }
             }
@@ -363,6 +363,6 @@ export const commonRendererPlugins = [
     banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
     banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
     banImportPlugin(/^ts-pattern$/, "Cannot import from ts-pattern. match and P should be imported from @webpack/common"),
-    // @ts-ignore this is never undefined
+    // @ts-expect-error this is never undefined
     ...commonOpts.plugins
 ];

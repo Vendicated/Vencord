@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
@@ -241,20 +240,5 @@ export default definePlugin({
         // Channel used for sharing rules, applying rules here would be messy
         if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
         msg.content = applyRules(msg.content);
-    },
-
-    async start() {
-        // TODO(OptionType.CUSTOM Related): Remove DataStore rules migrations once enough time has passed
-        const oldStringRules = await DataStore.get<Rule[]>(STRING_RULES_KEY);
-        if (oldStringRules != null) {
-            settings.store.stringRules = oldStringRules;
-            await DataStore.del(STRING_RULES_KEY);
-        }
-
-        const oldRegexRules = await DataStore.get<Rule[]>(REGEX_RULES_KEY);
-        if (oldRegexRules != null) {
-            settings.store.regexRules = oldRegexRules;
-            await DataStore.del(REGEX_RULES_KEY);
-        }
     }
 });
