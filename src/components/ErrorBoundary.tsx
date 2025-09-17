@@ -75,10 +75,15 @@ const ErrorBoundary = LazyComponent(() => {
             logger.error(`${this.props.message || "A component threw an Error"}\n`, error, errorInfo.componentStack);
         }
 
+        get isNoop() {
+            if (IS_DEV) return false;
+            return this.props.noop;
+        }
+
         render() {
             if (this.state.error === NO_ERROR) return this.props.children;
 
-            if (this.props.noop) return null;
+            if (this.isNoop) return null;
 
             if (this.props.fallback)
                 return (

@@ -27,7 +27,7 @@ interface RemoteData {
 let cachedRemoteData: { id: string, data: RemoteData; } | { id: string, failures: number; } | null = null;
 
 const APPLE_MUSIC_BUNDLE_REGEX = /<script type="module" crossorigin src="([a-zA-Z0-9.\-/]+)"><\/script>/;
-const APPLE_MUSIC_TOKEN_REGEX = canonicalizeMatch(/Promise.allSettled\(\i\)\}const \i="([A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*)"/);
+const APPLE_MUSIC_TOKEN_REGEX = canonicalizeMatch(/\b(\i)="([A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*)"(?=.+?Bearer \$\{\1\})/);
 
 let cachedToken: string | undefined = undefined;
 
@@ -38,7 +38,7 @@ const getToken = async () => {
     const bundleUrl = new URL(html.match(APPLE_MUSIC_BUNDLE_REGEX)![1], "https://music.apple.com/");
 
     const bundle = await fetch(bundleUrl).then(r => r.text());
-    const token = bundle.match(APPLE_MUSIC_TOKEN_REGEX)![1];
+    const token = bundle.match(APPLE_MUSIC_TOKEN_REGEX)![2];
 
     cachedToken = token;
     return token;
