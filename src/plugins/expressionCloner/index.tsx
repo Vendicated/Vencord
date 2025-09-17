@@ -432,9 +432,9 @@ export default definePlugin({
         {
             find: '"forum-tag-"',
             replacement: {
-                match: /(?<=&&)\i(?=&&)/,
+                match: /(?<=&&)(\i)(?=&&)(?<=\1=\i\.\i\.getSetting\(\).+?)/,
                 // make sure there is a custom emoji as well
-                replace: "arguments[0]?.tag?.emojiId != null"
+                replace: "(arguments[0]?.tag?.emojiId != null || $1)"
             }
         }
     ],
