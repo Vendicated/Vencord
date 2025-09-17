@@ -46,3 +46,9 @@
 [submodule "src/userplugins/vc-showMessageEmbeds"]
 	path = src/userplugins/vc-showMessageEmbeds
 	url = https://github.com/lolsuffocate/vc-showMessageEmbeds.git
+[submodule "src/userplugins/vc-staticTitle"]
+	path = src/userplugins/vc-staticTitle
+	url = https://github.com/sadan4/vc-staticTitle.git
+[submodule "src/userplugins/voiceUserButtons"]
+	path = src/userplugins/voiceUserButtons
+	url = https://github.com/nicola02nb/voiceUserButtons.git
