@@ -105,7 +105,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 borderRadius: "2px"
             }}
         />
-    ) : isUserplugin ?
+    ) : isUserplugin ? (
         <img
             src="https://equicord.org/assets/icons/userplugin.png"
             alt="Userplugin"
@@ -117,19 +117,19 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 borderRadius: "2px"
             }}
         />
-        : (
-            <img
-                src="https://vencord.dev/assets/favicon-dark.png"
-                alt="Vencord"
-                title="Vencord Plugin"
-                style={{
-                    width: "20px",
-                    height: "20px",
-                    marginLeft: "8px",
-                    borderRadius: "2px"
-                }}
-            />
-        );
+    ) : (
+        <img
+            src="https://vencord.dev/assets/favicon-dark.png"
+            alt="Vencord"
+            title="Vencord Plugin"
+            style={{
+                width: "20px",
+                height: "20px",
+                marginLeft: "8px",
+                borderRadius: "2px"
+            }}
+        />
+    );
 
     return (
         <AddonCard
