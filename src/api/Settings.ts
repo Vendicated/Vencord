@@ -68,6 +68,7 @@ export interface Settings {
         timeout: number;
         position: "top-right" | "bottom-right";
         useNative: "always" | "never" | "not-focused";
+        missed: boolean;
         logLimit: number;
     };
 
@@ -109,6 +110,7 @@ const DefaultSettings: Settings = {
         timeout: 5000,
         position: "bottom-right",
         useNative: "not-focused",
+        missed: true,
         logLimit: 50
     },
 
