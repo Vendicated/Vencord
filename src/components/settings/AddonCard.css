@@ -52,7 +52,6 @@
     width: 100%;
     align-items: center;
     flex-grow: 1;
-    gap: 8px;
 }
 
 .vc-addon-author {
