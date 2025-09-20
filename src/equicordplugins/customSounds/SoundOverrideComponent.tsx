@@ -4,17 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { AudioPlayerInterface, playAudio } from "@api/AudioPlayer";
 import { classNameFactory } from "@api/Styles";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import { makeRange } from "@utils/types";
-import { findByCodeLazy, findLazy } from "@webpack";
+import { findLazy } from "@webpack";
 import { Button, Card, Forms, React, Select, showToast, Slider, Switch } from "@webpack/common";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { deleteAudio, getAllAudio, saveAudio, StoredAudioFile } from "./audioStore";
 import { ensureDataURICached } from "./index";
-import { SoundOverride, SoundPlayer, SoundType } from "./types";
+import { SoundOverride, SoundType } from "./types";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -25,7 +26,6 @@ type FileInput = ComponentType<{
 
 const AUDIO_EXTENSIONS = ["mp3", "wav", "ogg", "m4a", "aac", "flac", "webm", "wma", "mp4"];
 const cl = classNameFactory("vc-custom-sounds-");
-const playSound: (id: string) => SoundPlayer = findByCodeLazy(".playWithListener().then");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 
 const capitalizeWords = (str: string) =>
@@ -38,7 +38,7 @@ export function SoundOverrideComponent({ type, override, onChange }: {
 }) {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const update = useForceUpdater();
-    const sound = React.useRef<SoundPlayer | null>(null);
+    const sound = React.useRef<AudioPlayerInterface | null>(null);
     const [files, setFiles] = React.useState<Record<string, StoredAudioFile>>({});
 
     React.useEffect(() => {
@@ -54,7 +54,7 @@ export function SoundOverrideComponent({ type, override, onChange }: {
         sound.current?.stop();
 
         if (!override.enabled) {
-            sound.current = playSound(type.id);
+            sound.current = playAudio(type.id);
             return;
         }
 
@@ -69,32 +69,20 @@ export function SoundOverrideComponent({ type, override, onChange }: {
                     return;
                 }
 
-                const audio = new Audio(dataUri);
-                audio.volume = override.volume / 100;
-
-                audio.onerror = e => {
-                    console.error("[CustomSounds] Error playing custom audio:", e);
-                    showToast("Error playing custom sound. File may be corrupted.");
-                };
-
-                await audio.play();
-                sound.current = {
-                    play: () => audio.play(),
-                    pause: () => audio.pause(),
-                    stop: () => {
-                        audio.pause();
-                        audio.currentTime = 0;
-                    },
-                    loop: () => { audio.loop = true; }
-                };
+                sound.current = playAudio(dataUri, {
+                    volume: override.volume, onError: e => {
+                        console.error("[CustomSounds] Error playing custom audio:", e);
+                        showToast("Error playing custom sound. File may be corrupted.");
+                    }
+                });
             } catch (error) {
                 console.error("[CustomSounds] Error in previewSound:", error);
                 showToast("Error playing sound.");
             }
         } else if (selectedSound === "default") {
-            sound.current = playSound(type.id);
+            sound.current = playAudio(type.id);
         } else {
-            sound.current = playSound(selectedSound);
+            sound.current = playAudio(selectedSound);
         }
     };
 
@@ -207,6 +195,7 @@ export function SoundOverrideComponent({ type, override, onChange }: {
                         markers={makeRange(0, 100, 10)}
                         initialValue={override.volume}
                         onValueChange={val => {
+                            sound.current && (sound.current.volume = val);
                             override.volume = val;
                             saveAndNotify();
                         }}

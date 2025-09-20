@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { defaultAudioNames, playAudio } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { findLazy } from "@webpack";
 import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
 import { DynamicDropdown, DynamicDropdownSettingOption, ExcludedQuest, GuildlessServerListItem, Quest, QuestIcon, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
-import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, q, QuestifyLogger, QuestsStore, rightClick, setIgnoredQuestIDs, validCommaSeparatedList } from "./utils/misc";
+import { decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, q, QuestifyLogger, QuestsStore, rightClick, setIgnoredQuestIDs, validCommaSeparatedList } from "./utils/misc";
 
-let defaultSounds: string[] | null = null;
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;
 const defaultLeftClickAction = "open-quests";
 const defaultMiddleClickAction = "plugin-settings";
@@ -30,7 +29,6 @@ const defaultIgnoredColor = 8334124;
 const defaultExpiredColor = 2368553;
 const defaultRestyleQuestsGradient = "intense";
 const defaultFetchQuestsAlert = "discodo";
-const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")), false);
 export const minimumAutoFetchIntervalValue = 30 * 60;
 export const maximumAutoFetchIntervalValue = 12 * 60 * 60;
 
@@ -51,7 +49,7 @@ export function fetchAndAlertQuests(source: string, logger: Logger): void {
 
                 if (shouldAlert) {
                     logger.info(`[${getFormattedNow()}] New Quests detected. Playing alert sound.`);
-                    AudioPlayer(shouldAlert, 1).play();
+                    playAudio(shouldAlert);
                 } else {
                     logger.info(`[${getFormattedNow()}] New Quests detected.`);
                 }
@@ -1112,12 +1110,7 @@ function FetchingQuestsSetting(): JSX.Element {
         { value: 60 * 60 * 6, label: "12 Hours" },
     ];
 
-    defaultSounds ??= (findDefaultSounds.keys() || []).map(key => {
-        const match = key.match(/((?:\w|-)+)\.mp3$/);
-        return match ? match[1] : null;
-    }).filter(Boolean) as string[];
-
-    const resolvedSounds: SelectOption[] = defaultSounds.map(sound => {
+    const resolvedSounds: SelectOption[] = defaultAudioNames().map(sound => {
         const label = sound.toUpperCase().replace(/_/g, " ").replace(/(\d+)/g, " $1");
         return { value: sound, label };
     });
@@ -1392,8 +1385,7 @@ function FetchingQuestsSetting(): JSX.Element {
                                         if (activePlayer.current) {
                                             clearActivePlayer();
                                         } else {
-                                            activePlayer.current = AudioPlayer(currentAlertSelection.value as string, 1, clearActivePlayer);
-                                            activePlayer.current?.play();
+                                            activePlayer.current = playAudio(currentAlertSelection.value as string, { onEnded: clearActivePlayer });
                                             setIsPlaying(true);
                                         }
                                     }

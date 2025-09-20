@@ -6,6 +6,7 @@
 
 import "./styles.css";
 
+import { createAudioPlayer } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -48,6 +49,7 @@ export default definePlugin({
     name: "Jumpscare",
     description: "Adds a configurable chance of jumpscaring you whenever you open a channel. Inspired by Geometry Dash Mega Hack",
     authors: [Devs.surgedevs],
+    dependencies: ["AudioPlayerAPI"],
     settings,
 
     start() {
@@ -63,8 +65,7 @@ export default definePlugin({
 
     JumpscareComponent() {
         const [isPlaying, setIsPlaying] = useState(false);
-
-        const audio = new Audio(settings.store.audioSource);
+        const jumpscareAudio = createAudioPlayer(settings.store.audioSource, { volume: 100, onEnded: () => { setIsPlaying(false); } });
 
         const jumpscare = event => {
             if (isPlaying) return;
@@ -73,13 +74,7 @@ export default definePlugin({
             if (Math.random() > chance) return;
 
             setIsPlaying(true);
-            audio.play();
-
-            console.log(isPlaying);
-
-            setTimeout(() => {
-                setIsPlaying(false);
-            }, 1000);
+            jumpscareAudio.play();
         };
 
         useEffect(() => {
