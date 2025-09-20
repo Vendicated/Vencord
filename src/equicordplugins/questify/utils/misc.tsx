@@ -15,7 +15,7 @@ import { Quest, QuestStatus, RGB } from "./components";
 export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
 export const QuestsStore = findStoreLazy("QuestsStore");
-export const questPath = "/discovery/quests";
+export const questPath = "/quest-home";
 export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;

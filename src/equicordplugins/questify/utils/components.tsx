@@ -19,6 +19,15 @@ export const ServerListItemUpperBadgeComponent = findComponentByCodeLazy("STATUS
 export const RadioGroup = findComponentByCodeLazy("\"label\",\"description\"]);");
 export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannelMetadata");
 
+export enum QuestRewardType {
+    UNKNOWN = 0,
+    REWARD_CODE = 1,
+    IN_GAME = 2,
+    COLLECTIBLE = 3,
+    VIRTUAL_CURRENCY = 4,
+    FRACTIONAL_PREMIUM = 5
+}
+
 export enum QuestStatus {
     Claimed = "CLAIMED",
     Unclaimed = "UNCLAIMED",
@@ -76,6 +85,11 @@ export interface Quest {
         messages: {
             questName: string;
         };
+        rewardsConfig: {
+            rewards: {
+                type: QuestRewardType;
+            }[];
+        },
         taskConfigV2: {
             tasks: {
                 WATCH_VIDEO?: {
