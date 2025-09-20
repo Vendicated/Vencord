@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Logger } from "@utils/Logger";
 import { findByCodeLazy, findLazy } from "webpack";
 
 let defaultSounds: null | string[] = null;
@@ -15,7 +14,6 @@ export type AudioProcessor = (data: PreprocessAudioData) => void;
 export type AudioCallback = (() => void);
 export type AudioErrorHandler = ((error: Error) => void);
 export const audioProcessorFunctions: Record<string, AudioProcessor> = {};
-export const AudioPlayerAPILogger = new Logger("AudioPlayerAPI");
 
 export enum AudioType {
     /** An external URL that follows the Content Security Policy. */
@@ -240,7 +238,6 @@ export function identifyAudioType(audio: string): AudioType {
  * @param processor A function that takes an audio, volume (0-100), and type (AudioType), and returns the replacement audio and volume.
  */
 export function addAudioProcessor(key: string, processor: AudioProcessor): void {
-    AudioPlayerAPILogger.log("Adding Audio Processor:", { key, processor });
     audioProcessorFunctions[key] = processor;
 }
 
@@ -249,7 +246,6 @@ export function addAudioProcessor(key: string, processor: AudioProcessor): void 
  * @param key The unique identifier of the audio processor to remove.
  */
 export function removeAudioProcessor(key: string): void {
-    AudioPlayerAPILogger.log("Removing Audio Processor:", { key });
     delete audioProcessorFunctions[key];
 }
 

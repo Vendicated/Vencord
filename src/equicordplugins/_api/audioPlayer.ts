@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { AudioPlayerAPILogger, AudioPlayerInternal, AudioPlayerOptions, audioProcessorFunctions, AudioType, identifyAudioType, playAudio } from "@api/AudioPlayer";
+import { AudioPlayerInternal, AudioPlayerOptions, audioProcessorFunctions, AudioType, identifyAudioType, playAudio } from "@api/AudioPlayer";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -110,8 +110,6 @@ export default definePlugin({
     },
 
     processAudio(player: AudioPlayerInternal) {
-        AudioPlayerAPILogger.log("Processing Audio:", player.preprocessDataOriginal);
-
         player.preprocessDataPrevious = player.preprocessDataCurrent ? structuredClone(player.preprocessDataCurrent) : null;
         player.preprocessDataCurrent = structuredClone(player.preprocessDataOriginal);
         player.preprocessDataCurrent.volume *= 100;
@@ -142,8 +140,6 @@ export default definePlugin({
                 audio.playbackRate = player._speed;
             });
         }
-
-        AudioPlayerAPILogger.log("Processed Audio:", player.preprocessDataCurrent);
     },
 
     buildPlayer(
