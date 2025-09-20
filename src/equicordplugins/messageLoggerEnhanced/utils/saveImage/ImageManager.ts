@@ -60,12 +60,12 @@ export async function getImage(attachmentId: string, fileExt?: string | null): P
     return await Native.getImageNative(attachmentId);
 }
 
-export async function downloadAttachment(attachment: LoggedAttachment): Promise<string | undefined> {
+export async function downloadAttachment(attachemnt: LoggedAttachment): Promise<string | undefined> {
     if (IS_WEB) {
-        return await downloadAttachmentWeb(attachment);
+        return await downloadAttachmentWeb(attachemnt);
     }
 
-    const { path, error } = await Native.downloadAttachment(attachment);
+    const { path, error } = await Native.downloadAttachment(attachemnt);
 
     if (error || !path) {
         Flogger.error("Failed to download attachment", error, path);
@@ -87,31 +87,31 @@ export async function deleteImage(attachmentId: string): Promise<void> {
 }
 
 
-async function downloadAttachmentWeb(attachment: LoggedAttachment, attempts = 0) {
-    if (!attachment?.url || !attachment?.id || !attachment?.fileExtension) {
-        Flogger.error("Invalid attachment", attachment);
+async function downloadAttachmentWeb(attachemnt: LoggedAttachment, attempts = 0) {
+    if (!attachemnt?.url || !attachemnt?.id || !attachemnt?.fileExtension) {
+        Flogger.error("Invalid attachment", attachemnt);
         return;
     }
 
-    const res = await fetch(attachment.url);
+    const res = await fetch(attachemnt.url);
     if (res.status !== 200) {
         if (res.status === 404 || res.status === 403) return;
         attempts++;
         if (attempts > 3) {
-            Flogger.warn(`Failed to get attachment ${attachment.id} for caching, error code ${res.status}`);
+            Flogger.warn(`Failed to get attachment ${attachemnt.id} for caching, error code ${res.status}`);
             return;
         }
 
         await sleep(1000);
-        return downloadAttachmentWeb(attachment, attempts);
+        return downloadAttachmentWeb(attachemnt, attempts);
     }
     const ab = await res.arrayBuffer();
-    const path = `${DEFAULT_IMAGE_CACHE_DIR}/${attachment.id}${attachment.fileExtension}`;
+    const path = `${DEFAULT_IMAGE_CACHE_DIR}/${attachemnt.id}${attachemnt.fileExtension}`;
 
     // await writeImage(imageCacheDir, `${attachmentId}${fileExtension}`, new Uint8Array(ab));
 
     await set(path, new Uint8Array(ab), ImageStore);
-    idbSavedImages.set(attachment.id, { attachmentId: attachment.id, path });
+    idbSavedImages.set(attachemnt.id, { attachmentId: attachemnt.id, path });
 
     return path;
 }

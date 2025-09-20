@@ -14,6 +14,7 @@ import { Native } from ".";
 import { ImageCacheDir, LogsDir } from "./components/FolderSelectInput";
 import { openLogModal } from "./components/LogsModal";
 import { clearMessagesIDB } from "./db";
+import { blockedExts } from "./list";
 import { DEFAULT_IMAGE_CACHE_DIR } from "./utils/constants";
 import { exportLogs, importLogs } from "./utils/settingsUtils";
 
@@ -131,7 +132,19 @@ export const settings = definePluginSettings({
     attachmentFileExtensions: {
         default: "png,jpg,jpeg,gif,webp,mp4,webm,mp3,ogg,wav",
         type: OptionType.STRING,
-        description: "Comma separated list of file extensions to save. Attachments with file extensions not in this list will not be saved. Leave empty to save all attachments."
+        description: "Comma separated list of file extensions to save. Attachments with file extensions not in this list will not be saved. Leave empty to save all attachments.",
+        onChange: (value: string) => {
+            if (!value) return;
+            const exts = value.split(",").map(ext => ext.trim().toLowerCase());
+
+            const invalid = exts.filter(ext => blockedExts.includes(ext));
+            if (invalid.length > 0) {
+                console.warn("Rejected invalid file extensions:", invalid);
+                return exts.filter(ext => !blockedExts.includes(ext)).join(",");
+            }
+
+            return exts.join(",");
+        }
     },
 
     cacheLimit: {

@@ -70,12 +70,11 @@ export async function writeImageNative(_event: IpcMainInvokeEvent, filename: str
     // returns the file name
     // ../../someMalicousPath.png -> someMalicousPath
     const attachmentId = getAttachmentIdFromFilename(filename);
-    const safeName = `${attachmentId}.png`;
 
     const existingImage = nativeSavedImages.get(attachmentId);
     if (existingImage) return;
 
-    const imagePath = path.join(imageDir, safeName);
+    const imagePath = path.join(imageDir, filename);
     await ensureDirectoryExists(imageDir);
     await writeFile(imagePath, content);
 
@@ -146,7 +145,7 @@ export async function chooseFile(_event: IpcMainInvokeEvent, title: string, filt
 // other types of files will cause cors issues
 export async function downloadAttachment(_event: IpcMainInvokeEvent, attachment: LoggedAttachment, attempts = 0, useOldUrl = false): Promise<{ error: string | null; path: string | null; }> {
     try {
-        if (!attachment?.url || !attachment.oldUrl || !attachment?.id || !attachment?.fileExtension)
+        if (!attachment?.url || !attachment.oldUrl || !attachment?.id)
             return { error: "Invalid Attachment", path: null };
 
         if (attachment.id.match(/[\\/.]/)) {
@@ -182,7 +181,7 @@ export async function downloadAttachment(_event: IpcMainInvokeEvent, attachment:
         const imageCacheDir = await getImageCacheDir();
         await ensureDirectoryExists(imageCacheDir);
 
-        const finalPath = path.join(imageCacheDir, `${attachment.id}.png`);
+        const finalPath = path.join(imageCacheDir, `${attachment.id}${attachment.fileExtension}`);
         await writeFile(finalPath, Buffer.from(ab));
 
         nativeSavedImages.set(attachment.id, finalPath);
