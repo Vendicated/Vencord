@@ -1,0 +1,3 @@
+div[class^='list_'][class*='collapsed_'] .click-to-chat-btn {
+    display: none;
+}

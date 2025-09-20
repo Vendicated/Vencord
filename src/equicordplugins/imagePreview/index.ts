@@ -376,6 +376,24 @@ function updatePreviewPosition(mouseEvent: MouseEvent, element: HTMLElement) {
     }
 }
 
+let previewCheckInterval;
+
+function watchSourceElement(el: Element) {
+    if (previewCheckInterval) {
+        clearInterval(previewCheckInterval);
+        previewCheckInterval = null;
+    }
+
+    previewCheckInterval = setInterval(() => {
+        const node = el as HTMLElement;
+        if (!document.body.contains(node) || !node.offsetParent) {
+            deleteCurrentPreview();
+            clearInterval(previewCheckInterval);
+            previewCheckInterval = null;
+        }
+    }, 300);
+}
+
 function addHoverListener(element: Element, sticker: boolean = false) {
     element.setAttribute("data-processed", "true");
 
@@ -406,6 +424,7 @@ function addHoverListener(element: Element, sticker: boolean = false) {
 
         hoverDelayTimeout = setTimeout(() => {
             loadImagePreview(strippedURL, sticker);
+            watchSourceElement(element);
             if (lastMouseEvent) {
                 updatePreviewPosition(lastMouseEvent, element as HTMLElement);
             }

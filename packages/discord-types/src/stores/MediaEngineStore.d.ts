@@ -3,6 +3,8 @@ import { FluxStore } from "..";
 export class MediaEngineStore extends FluxStore {
     isSelfMute(): boolean;
     isSelfDeaf(): boolean;
+    isLocalMute(userId): boolean;
+    isLocalVideoDisabled(userId): boolean;
 
     setAv1Enabled(AV1: boolean): void;
     setH265Enabled(H265: boolean): void;
