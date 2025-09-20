@@ -1,63 +1,106 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { AudioPlayerInterface, createAudioPlayer } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-import { ignoredKeys } from "./packs";
+import { ignoredKeys, packs } from "./packs";
 
-let backspace: AudioPlayerInterface;
-let clicks: Array<{ playing: boolean; player: AudioPlayerInterface; }> = [];
+const allSounds = {
+    backspaces: [] as { playing: boolean; player: AudioPlayerInterface; }[],
+    caps: [] as { playing: boolean; player: AudioPlayerInterface; }[],
+    enters: [] as { playing: boolean; player: AudioPlayerInterface; }[],
+    arrows: [] as { playing: boolean; player: AudioPlayerInterface; }[],
+    others: [] as { playing: boolean; player: AudioPlayerInterface; }[]
+};
+
+let chosenPack: typeof packs[keyof typeof packs];
 const keysCurrentlyPressed = new Set<string>();
-let previousSoundIndex = 0;
 
 const keyup = (e: KeyboardEvent) => { keysCurrentlyPressed.delete(e.code); };
 
 const keydown = (e: KeyboardEvent) => {
-    if (ignoredKeys.includes(e.code)) return;
-    if (!clicks.length || !backspace) return;
+    if (!chosenPack) return;
+    if (ignoredKeys.includes(e.code) && !chosenPack.allowedIgnored?.includes(e.key)) return;
     if (keysCurrentlyPressed.has(e.code)) return;
     keysCurrentlyPressed.add(e.code);
 
-    if (e.code === "Backspace") {
-        backspace.restart();
-    } else {
-        const nonplayingClicks = clicks.filter(click => !click.playing);
-        const randomIndex = Math.floor(Math.random() * nonplayingClicks.length);
-        const chosenClick = nonplayingClicks.length ? nonplayingClicks[randomIndex] : clicks[previousSoundIndex];
-        previousSoundIndex = randomIndex;
-        chosenClick.playing = true;
-        chosenClick.player.restart();
+    function getRandomSound(soundsArray: { playing: boolean; player: AudioPlayerInterface; }[]) {
+        const nonplayingSounds = soundsArray.filter(sound => !sound?.playing);
+        let randomIndex;
+        let chosenSound;
+
+        if (nonplayingSounds.length) {
+            randomIndex = Math.floor(Math.random() * nonplayingSounds.length);
+            chosenSound = nonplayingSounds[randomIndex];
+        } else {
+            randomIndex = Math.floor(Math.random() * soundsArray.length);
+            chosenSound = soundsArray[randomIndex];
+        }
+
+        if (chosenSound) {
+            chosenSound.playing = true;
+            chosenSound.player.restart();
+        }
+    }
+
+    if (e.code === "Backspace" && allSounds.backspaces.length) {
+        getRandomSound(allSounds.backspaces);
+    } else if (e.code === "CapsLock" && allSounds.caps.length) {
+        getRandomSound(allSounds.caps);
+    } else if (e.code === "Enter" && allSounds.enters.length) {
+        getRandomSound(allSounds.enters);
+    } else if (["ArrowUp", "ArrowRight", "ArrowLeft", "ArrowDown"].includes(e.code) && allSounds.arrows.length) {
+        getRandomSound(allSounds.arrows);
+    } else if (allSounds.others.length) {
+        getRandomSound(allSounds.others);
     }
 };
 
-function assignSounds(volume: number) {
-    backspace = createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/backspace.wav", { volume, preload: true, persistent: true });
-    clicks = [];
+function clearSounds() {
+    Array.from(Object.values(allSounds)).forEach(soundsArray => { soundsArray.forEach(sound => sound.player.delete()); });
+    Object.keys(allSounds).forEach(key => { allSounds[key as keyof typeof allSounds] = []; });
+}
 
-    for (let i = 0; i < 3; i++) {
-        const baseIndex = i * 3;
-        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/click1.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex].playing = false; } }) });
-        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/click2.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex + 1].playing = false; } }) });
-        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/click3.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex + 2].playing = false; } }) });
+function assignSounds(volume: number, pack: "operagx" | "osu") {
+    clearSounds();
+    chosenPack = packs[pack];
+
+    if (!chosenPack) {
+        return;
     }
+
+    function addSounds(key: keyof typeof allSounds) {
+        if (!chosenPack[key]) return;
+        let soundIndex = -1;
+
+        for (let i = 0; i < 3; i++) {
+            for (const url of chosenPack[key]) {
+                soundIndex++;
+
+                allSounds[key].push({
+                    playing: false,
+                    player: createAudioPlayer(url, {
+                        volume,
+                        preload: true,
+                        persistent: true,
+                        onEnded: () => { allSounds[key][soundIndex].playing = false; }
+                    })
+                });
+            }
+        }
+    }
+
+    chosenPack.backspaces && addSounds("backspaces");
+    chosenPack.caps && addSounds("caps");
+    chosenPack.enters && addSounds("enters");
+    chosenPack.arrows && addSounds("arrows");
+    chosenPack.others && addSounds("others");
 }
 
 const settings = definePluginSettings({
@@ -67,23 +110,32 @@ const settings = definePluginSettings({
         markers: [0, 25, 50, 75, 100],
         stickToMarkers: false,
         default: 100,
-        onChange: value => { assignSounds(value); }
+        onChange: value => { assignSounds(value, settings.store.soundPack); }
+    },
+    soundPack: {
+        description: "Sound pack to use.",
+        type: OptionType.SELECT,
+        options: [
+            { label: "OperaGX", value: "operagx" as "operagx", default: true },
+            { label: "osu!", value: "osu" as "osu" }
+        ],
+        onChange: value => { assignSounds(settings.store.volume, value); }
     }
 });
 
 export default definePlugin({
     name: "KeyboardSounds",
-    description: "Adds the Opera GX Keyboard Sounds to Discord",
-    authors: [Devs.HypedDomi],
+    description: "Adds OperaGX or osu! sound effects when typing on your keyboard.",
+    authors: [Devs.HypedDomi, EquicordDevs.Etorix],
     dependencies: ["AudioPlayerAPI"],
     settings,
     start() {
-        assignSounds(settings.store.volume);
+        assignSounds(settings.store.volume, settings.store.soundPack);
         document.addEventListener("keyup", keyup);
         document.addEventListener("keydown", keydown);
     },
     stop: () => {
-        [...clicks, { player: backspace }].forEach(sound => sound.player.delete());
+        clearSounds();
         document.removeEventListener("keyup", keyup);
         document.removeEventListener("keydown", keydown);
     },
