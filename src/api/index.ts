@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as $AudioPlayer from "./AudioPlayer";
 import * as $Badges from "./Badges";
 import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
@@ -37,27 +38,30 @@ import * as $UserSettings from "./UserSettings";
 
 /**
  * An API allowing you to listen to Message Clicks or run your own logic
- * before a message is sent
+ * before a message is sent.
  *
- * If your plugin uses this, you must add MessageEventsAPI to its dependencies
+ * If your plugin uses this, you must add MessageEventsAPI to its dependencies.
  */
 export const MessageEvents = $MessageEventsAPI;
+
 /**
  * An API allowing you to create custom notices
- * (snackbars on the top, like the Update prompt)
+ * (snackbars on the top, like the Update prompt).
  */
 export const Notices = $Notices;
+
 /**
- * An API allowing you to register custom commands
+ * An API allowing you to register custom commands.
  */
 export const Commands = $Commands;
+
 /**
  * A wrapper around IndexedDB. This can store arbitrarily
  * large data and supports a lot of datatypes (Blob, Map, ...).
- * For a full list, see the mdn link below
+ * For a full list, see the mdn link below.
  *
  * This should always be preferred over the Settings API if possible, as
- * localstorage has very strict size restrictions and blocks the event loop
+ * localstorage has very strict size restrictions and blocks the event loop.
  *
  * Make sure your keys are unique (tip: prefix them with ur plugin name)
  * and please clean up no longer needed entries.
@@ -66,70 +70,84 @@ export const Commands = $Commands;
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#supported_types}
  */
 export const DataStore = $DataStore;
+
 /**
- * An API allowing you to add custom components as message accessories
+ * An API allowing you to add custom components as message accessories.
  */
 export const MessageAccessories = $MessageAccessories;
+
 /**
- * An API allowing you to add custom buttons in the message popover
+ * An API allowing you to add custom buttons in the message popover.
  */
 export const MessagePopover = $MessagePopover;
+
 /**
- * An API allowing you to add badges to user profiles
+ * An API allowing you to add badges to user profiles.
  */
 export const Badges = $Badges;
+
 /**
- * An API allowing you to add custom elements to the server list
+ * An API allowing you to add custom elements to the server list.
  */
 export const ServerList = $ServerList;
+
 /**
- * An API allowing you to add components as message accessories
+ * An API allowing you to add components as message accessories.
  */
 export const MessageDecorations = $MessageDecorations;
+
 /**
- * An API allowing you to add components to member list users, in both DM's and servers
+ * An API allowing you to add components to member list users, in both DM's and servers.
  */
 export const MemberListDecorators = $MemberListDecorators;
+
 /**
- * An API allowing you to persist data
+ * An API allowing you to persist data.
  */
 export const Settings = $Settings;
+
 /**
- * An API allowing you to dynamically load styles
+ * An API allowing you to dynamically load styles.
  * a
  */
 export const Styles = $Styles;
+
 /**
- * An API allowing you to display notifications
+ * An API allowing you to display notifications.
  */
 export const Notifications = $Notifications;
 
 /**
- * An api allowing you to patch and add/remove items to/from context menus
+ * An api allowing you to patch and add/remove items to/from context menus.
  */
 export const ContextMenu = $ContextMenu;
 
 /**
- * An API allowing you to add buttons to the chat input
+ * An API allowing you to add buttons to the chat input.
  */
 export const ChatButtons = $ChatButtons;
 
 /**
- * An API allowing you to update and re-render messages
+ * An API allowing you to update and re-render messages.
  */
 export const MessageUpdater = $MessageUpdater;
 
 /**
- * An API allowing you to get an user setting
+ * An API allowing you to get an user setting.
  */
 export const UserSettings = $UserSettings;
 
 /**
- * An API allowing you to add icons to the nickname, in profiles
+ * An API allowing you to add icons to the nickname, in profiles.
  */
 export const NicknameIcons = $NicknameIcons;
 
 /**
- * Just used to identify if user is on Equicord as Vencord doesnt have this
+ * An API allowing you to play internal Discord audio files or external audio URLs/URIs.
+ */
+export const AudioPlayer = $AudioPlayer;
+
+/**
+ * Just used to identify if user is on Equicord as Vencord doesn't have this.
  */
 export const isEquicord = true;

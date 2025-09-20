@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { AudioPlayerInterface, createAudioPlayer } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 let clickCount = 0;
+let croissant: AudioPlayerInterface | null = null;
 
 function play() {
+    const triggerAmount = settings.store.amount;
     clickCount++;
 
-    const triggerAmount = settings.store.amount;
-
     if (clickCount % triggerAmount === 0) {
-        const audio = new Audio("https://github.com/Equicord/Equibored/raw/main/sounds/equissant/croissant.mp3");
-        audio.play();
+        croissant?.play();
         clickCount = 0;
     }
 }
@@ -34,11 +34,14 @@ export default definePlugin({
     name: "Equissant",
     description: "Crossant every specified amount of clicks :trolley:",
     authors: [EquicordDevs.SomeAspy, Devs.thororen],
+    dependencies: ["AudioPlayerAPI"],
     settings,
     start() {
+        croissant = createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/equissant/croissant.mp3", { persistent: true });
         document.addEventListener("click", play);
     },
     stop() {
+        croissant?.delete();
         document.removeEventListener("click", play);
     }
 });

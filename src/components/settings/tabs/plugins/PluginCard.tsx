@@ -39,6 +39,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
     const settings = Settings.plugins[plugin.name];
     const pluginMeta = PluginMeta[plugin.name];
     const isEquicordPlugin = pluginMeta?.folderName?.startsWith("src/equicordplugins/") ?? false;
+    const isUserplugin = pluginMeta?.userPlugin ?? false;
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -97,6 +98,18 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             src="https://equicord.org/assets/favicon.png"
             alt="Equicord"
             title="Equicord Plugin"
+            style={{
+                width: "20px",
+                height: "20px",
+                marginLeft: "8px",
+                borderRadius: "2px"
+            }}
+        />
+    ) : isUserplugin ? (
+        <img
+            src="https://equicord.org/assets/icons/userplugin.png"
+            alt="Userplugin"
+            title="Userplugin"
             style={{
                 width: "20px",
                 height: "20px",

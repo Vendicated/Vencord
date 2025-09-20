@@ -55,6 +55,12 @@ export const settings = definePluginSettings({
         default: false
     },
 
+    showTimezoneInfo: {
+        type: OptionType.BOOLEAN,
+        description: "Show timezone info next to time",
+        default: true
+    },
+
     showMessageHeaderTime: {
         type: OptionType.BOOLEAN,
         description: "Show time in message headers",
@@ -136,6 +142,17 @@ function getTime(timezone: string, timestamp: string | number, props: Intl.DateT
     return formatter.format(date);
 }
 
+function getTimezoneAbbreviation(timezone: string, timestamp: string | number) {
+    const date = new Date(timestamp);
+    const formatter = new Intl.DateTimeFormat(locale.getLocale() ?? "en-US", {
+        timeZone: timezone,
+        timeZoneName: "short"
+    });
+    const parts = formatter.formatToParts(date);
+    const timeZonePart = parts.find(part => part.type === "timeZoneName");
+    return timeZonePart ? timeZonePart.value : "";
+}
+
 interface Props {
     userId: string;
     timestamp?: string;
@@ -174,6 +191,20 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
     if (!timezone) return null;
 
     const shortTime = getTime(timezone, currentTime, { hour: "numeric", minute: "numeric" });
+    let displayTime = shortTime;
+    let isLocal = false;
+
+    if (settings.store.showTimezoneInfo) {
+        const userTimezone = getSystemTimezone();
+        if (timezone === userTimezone) {
+            displayTime = "local";
+            isLocal = true;
+        } else {
+            const timezoneInfo = getTimezoneAbbreviation(timezone, currentTime);
+            displayTime = `${shortTime} ${timezoneInfo || timezone}`;
+        }
+    }
+
     const longTime = getTime(timezone, currentTime, {
         weekday: "long",
         year: "numeric",
@@ -182,6 +213,8 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
         hour: "numeric",
         minute: "numeric"
     });
+
+    const tooltipText = isLocal ? `${longTime} (Your local timezone)` : longTime;
 
     return (
         <Tooltip
@@ -192,14 +225,14 @@ const TimestampComponent = ErrorBoundary.wrap(({ userId, timestamp, type }: Prop
             spacing={8}
             hideOnClick={true}
             tooltipClassName="timezone-tooltip"
-            text={longTime}
+            text={tooltipText}
         >
             {toolTipProps => (
                 <span
                     {...toolTipProps}
-                    className={type === "message" ? `timezone-message-item ${classes.timestamp}` : "timezone-profile-item"}
+                    className={`${type === "message" ? `timezone-message-item ${classes.timestamp}` : "timezone-profile-item"}${isLocal ? " timezone-local-text" : ""}`}
                 >
-                    {type === "message" ? `(${shortTime})` : shortTime}
+                    {type === "message" ? `(${displayTime})` : displayTime}
                 </span>
             )}
         </Tooltip>

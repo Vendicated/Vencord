@@ -12,10 +12,10 @@ import { EquicordDevs } from "@utils/constants";
 import { getIntlMessage } from "@utils/index";
 import definePlugin, { StartAt } from "@utils/types";
 import { onceReady } from "@webpack";
-import { ContextMenuApi, Menu, NavigationRouter } from "@webpack/common";
+import { ContextMenuApi, Menu, NavigationRouter, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { addIgnoredQuest, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, rerenderQuests, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
+import { addIgnoredQuest, addRerenderCallback, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, rerenderQuests, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
 import { ExcludedQuestMap, GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, RGB } from "./utils/components";
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, waitUntilEnrolled } from "./utils/misc";
 
@@ -51,15 +51,15 @@ function questMenuIgnoreAllClicked(): void {
     settings.store.unclaimedUnignoredQuests = 0;
 }
 
+function showQuestsButton(questButtonDisplay: string, unclaimedUnignoredQuests: number, onQuestsPage: boolean): boolean {
+    const canShow = questButtonDisplay !== "never";
+    const alwaysShow = questButtonDisplay === "always";
+    return canShow && (alwaysShow || !!unclaimedUnignoredQuests || onQuestsPage);
+}
+
 export function QuestButton(): JSX.Element {
     const { questButtonDisplay, questButtonUnclaimed, questButtonBadgeColor, unclaimedUnignoredQuests, onQuestsPage } = settings.use(["questButtonDisplay", "questButtonUnclaimed", "questButtonBadgeColor", "unclaimedUnignoredQuests", "onQuestsPage"]);
     const questButtonBadgeColorRGB = questButtonBadgeColor === null ? null : decimalToRGB(questButtonBadgeColor);
-
-    function showQuestsButton(): boolean {
-        const canShow = questButtonDisplay !== "never";
-        const alwaysShow = questButtonDisplay === "always";
-        return canShow && (alwaysShow || !!unclaimedUnignoredQuests || onQuestsPage);
-    }
 
     function handleClick(event: React.MouseEvent<Element>) {
         // ListItem does not support onAuxClick, so we have to listen for mousedown events.
@@ -128,7 +128,7 @@ export function QuestButton(): JSX.Element {
             icon={QuestIcon(26, 26)}
             tooltip="Quests"
             showPill={true}
-            isVisible={showQuestsButton()}
+            isVisible={showQuestsButton(questButtonDisplay, unclaimedUnignoredQuests, onQuestsPage)}
             isSelected={onQuestsPage}
             hasUnread={!!unclaimedUnignoredQuests && ["pill", "both"].includes(questButtonUnclaimed)}
             lowerBadgeProps={lowerBadgeProps}
@@ -325,32 +325,8 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
     return returnClasses.join(" ");
 }
 
-function preprocessQuests(quests: Quest[]): Quest[] {
-    const {
-        ignoredQuestIDs,
-        ignoredQuestProfile,
-        reorderQuests,
-        unclaimedSubsort,
-        claimedSubsort,
-        ignoredSubsort,
-        expiredSubsort,
-        makeMobileQuestsDesktopCompatible,
-        completeVideoQuestsInBackground,
-        completeGameQuestsInBackground,
-        triggerQuestsRerender
-    } = settings.use([
-        "ignoredQuestIDs",
-        "ignoredQuestProfile",
-        "reorderQuests",
-        "unclaimedSubsort",
-        "claimedSubsort",
-        "ignoredSubsort",
-        "expiredSubsort",
-        "makeMobileQuestsDesktopCompatible",
-        "completeVideoQuestsInBackground",
-        "completeGameQuestsInBackground",
-        "triggerQuestsRerender"
-    ]);
+function makeDesktopCompatible(quests: Quest[]): void {
+    const { makeMobileQuestsDesktopCompatible, triggerQuestsRerender } = settings.use(["makeMobileQuestsDesktopCompatible", "triggerQuestsRerender"]);
 
     if (makeMobileQuestsDesktopCompatible) {
         quests.forEach(quest => {
@@ -378,8 +354,36 @@ function preprocessQuests(quests: Quest[]): Quest[] {
 
         patchedMobileQuests.clear();
     }
+}
 
-    if (!reorderQuests || !reorderQuests.trim()) {
+function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
+    const {
+        ignoredQuestIDs,
+        ignoredQuestProfile,
+        reorderQuests,
+        unclaimedSubsort,
+        claimedSubsort,
+        ignoredSubsort,
+        expiredSubsort,
+        completeVideoQuestsInBackground,
+        completeGameQuestsInBackground,
+        triggerQuestsRerender
+    } = settings.use([
+        "ignoredQuestIDs",
+        "ignoredQuestProfile",
+        "reorderQuests",
+        "unclaimedSubsort",
+        "claimedSubsort",
+        "ignoredSubsort",
+        "expiredSubsort",
+        "completeVideoQuestsInBackground",
+        "completeGameQuestsInBackground",
+        "triggerQuestsRerender"
+    ]);
+
+    makeDesktopCompatible(quests);
+
+    if (skip || !reorderQuests?.trim()) {
         return quests;
     }
 
@@ -786,55 +790,77 @@ function getQuestPanelOverride(): Quest | null {
     return closestQuest;
 }
 
+function disguiseHomeButton(location: string): boolean {
+    const { questButtonDisplay, unclaimedUnignoredQuests, onQuestsPage } = settings.use(["questButtonDisplay", "unclaimedUnignoredQuests", "onQuestsPage"]);
+
+    if (!showQuestsButton(questButtonDisplay, unclaimedUnignoredQuests, onQuestsPage)) {
+        return false;
+    }
+
+    return location === questPath;
+}
+
+function useQuestRerender(): number {
+    const { triggerQuestsRerender } = settings.use(["triggerQuestsRerender"]);
+    const [renderTrigger, setRenderTrigger] = useState(0);
+    useEffect(() => addRerenderCallback(() => setRenderTrigger(prev => prev + 1)), []);
+    return renderTrigger;
+}
+
+function getLastSortChoice(): string | null {
+    const { rememberQuestPageSort, lastQuestPageSort } = settings.store;
+    return rememberQuestPageSort ? lastQuestPageSort : "questify";
+}
+
+function getLastFilterChoices(): { group: string; filter: string; }[] | null {
+    const { rememberQuestPageFilters, lastQuestPageFilters } = settings.store;
+    return rememberQuestPageFilters ? Object.values(lastQuestPageFilters) : null;
+}
+
+function setLastSortChoice(sort: string): void {
+    const { rememberQuestPageFilters } = settings.use(["rememberQuestPageFilters"]);
+    settings.store.lastQuestPageSort = sort;
+}
+
+function setLastFilterChoices(filters: { group: string; filter: string; }[]): void {
+    const { rememberQuestPageFilters } = settings.use(["rememberQuestPageFilters"]);
+    if (!filters || !Object.keys(filters).length || !Object.values(filters).every(f => f.group && f.filter)) { return; }
+    settings.store.lastQuestPageFilters = JSON.parse(JSON.stringify(filters)).reduce((acc, item) => ({ ...acc, [item.filter]: item }), {});
+}
+
 export default definePlugin({
     name: "Questify",
     description: "Enhance your Quest experience with a suite of features, or disable them entirely if they're not your thing.",
     authors: [EquicordDevs.Etorix],
-    dependencies: ["ServerListAPI"],
+    dependencies: ["AudioPlayerAPI", "ServerListAPI"],
     startAt: StartAt.Init, // Needed in order to beat Read All Messages to inserting above the server list.
     settings,
 
+    sortQuests,
     formatLowerBadge,
     getQuestTileStyle,
-    preprocessQuests,
     getQuestTileClasses,
-    shouldPreloadQuestAssets,
+    makeDesktopCompatible,
     shouldHideQuestPopup,
     shouldHideDiscoveryTab,
+    shouldPreloadQuestAssets,
     shouldPreventFetchingQuests,
     shouldHideBadgeOnUserProfiles,
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
     shouldDisableQuestAcceptedButton,
-    getQuestPanelOverride,
-    getQuestAcceptedButtonText,
     processQuestForAutoComplete,
+    getQuestAcceptedButtonText,
+    getQuestPanelOverride,
+    setLastFilterChoices,
+    getLastFilterChoices,
     activeQuestIntervals,
+    disguiseHomeButton,
+    getLastSortChoice,
+    setLastSortChoice,
+    useQuestRerender,
 
     patches: [
-        {
-            find: "could not play audio",
-            group: true,
-            replacement: [
-                {
-                    // Enables external audio sources for playing audio.
-                    match: /(?<=new Audio;\i\.src=)/,
-                    replace: "this.name.startsWith('https')?this.name:"
-                },
-                {
-                    // Adds an optional callback to the audio player. This is needed to detect
-                    // when the audio has finished playing as playWithListener() relies on a duration
-                    // variable which is never present.
-                    match: /(constructor\(\i,\i,\i,\i)(\){)/,
-                    replace: "$1,callback$2this.callback=callback||null,"
-                },
-                {
-                    // Makes use of the callback if provided.
-                    match: /(?<=.onended=\(\)=>)(this.destroyAudio\(\))/,
-                    replace: "{this.callback?this.callback():null;$1;}"
-                }
-            ]
-        },
         {
             // Hides the notice in the gift inventory that Quests have been relocated to the Discovery tab.
             find: "quests-wumpus-hikes-mountain-transparent-background",
@@ -987,25 +1013,108 @@ export default definePlugin({
                     // Encourages reward icons to load quicker if the setting is enabled.
                     match: /(onReceiveErrorHints:\i,)isVisibleInViewport:(\i)/,
                     replace: "$1isVisibleInViewport:$self.shouldPreloadQuestAssets()?true:$2"
-                }
+                },
             ]
         },
         {
-            // Sorts the "All Quests" tab Quest tiles.
-            // Sorts the "Claimed Quests" tab Quest tiles.
-            // Also sets mobile-only Quests as desktop compatible if the setting is enabled.
+            // Sorts the "Claimed Quests" tabs.
             find: ".ALL)}):(",
             group: true,
             replacement: [
                 {
                     match: /(claimedQuests:(\i).{0,50}?;)/,
-                    replace: "$1$2=$self.preprocessQuests($2);"
+                    replace: "$1$2=$self.sortQuests($2);"
+                },
+            ]
+        },
+        {
+            // Sorts the "All Quests" tab.
+            find: "CLAIMED=\"claimed\",",
+            group: true,
+            replacement: [
+                {
+                    // Run Questify's sort function every time due to hook requirements but return
+                    // early if not applicable. If the sort method is set to "Questify", replace the
+                    // quests with the sorted ones. Also, setup a trigger to rerender the memo.
+                    match: /(?<=function \i\((\i).{0,100}?useRef\(\i\);)(return \i.useMemo\(\(\)=>{)/,
+                    replace: "const questRerenderTrigger=$self.useQuestRerender();const questifySorted=$self.sortQuests($1,arguments[1].sortMethod!==\"questify\");$2if(arguments[1].sortMethod===\"questify\"){$1=questifySorted;};"
                 },
                 {
-                    match: /(quests:(\i).{0,50}?;)/,
-                    replace: "$1$2=$self.preprocessQuests($2);"
+                    // Account for Quest status changes.
+                    match: /return (\i).current;/,
+                    replace: "null;"
+                },
+                {
+                    // If we already applied Questify's sort, skip further sorting.
+                    match: /(?<=(\i)\)\);)(return )((\i).sort)/,
+                    replace: "$2$1===\"questify\"?$4:$3"
+                },
+                {
+                    // Add the trigger to the memo for rerendering Quests order due to progress changes, etc.
+                    match: /(?<=current=\i,\i},\[\i,\i,\i)/,
+                    replace: ",questRerenderTrigger,questifySorted"
                 }
             ]
+        },
+        {
+            // Adds the "Questify" sort option to the sort enum.
+            find: "SUGGESTED=\"suggested\",",
+            replacement: {
+                match: /return ((\i).SUGGESTED="suggested",)/,
+                replace: "return $2.QUESTIFY=\"questify\",$1"
+            }
+        },
+        {
+            // Adds the "Questify" sort option to the sort dropdown.
+            find: "radioItemTitle,options",
+            group: true,
+            replacement: [
+                {
+                    match: /(?=case (\i.\i).SUGGESTED)/,
+                    replace: "case $1.QUESTIFY:return \"Questify\";"
+                }
+            ]
+        },
+        {
+            // Loads the last used sort method and filter choices.
+            // Defaults to sorting by "Questify" and no filters.
+            find: "QUEST_HOME_SORT_METHOD_CHANGED,",
+            group: true,
+            replacement: [
+                {
+                    // Set the initial sort method.
+                    match: /(\i.\i.SUGGESTED)/,
+                    replace: "$self.getLastSortChoice()??$1"
+                },
+                {
+                    // Set the initial filters.
+                    match: /(useState\()(\i\),{quests)/,
+                    replace: "$1$self.getLastFilterChoices()??$2"
+                },
+                {
+                    // Update the last used sort method when it changes.
+                    match: /(onChange:)(\i)(.{0,40}?selectedSortMethod)/,
+                    replace: "$1(value)=>{$self.settings.store.lastQuestPageSort=value;$2(value);}$3"
+                },
+                {
+                    // Update the last used filter choices when they change.
+                    match: /(onChange:)(\i)(.{0,40}?selectedFilters)/,
+                    replace: "$1(value)=>{$self.settings.store.lastQuestPageFilters=value.reduce((acc,item)=>({...acc,[item.filter]:item}),{});$2(value);}$3"
+                },
+                {
+                    // Update the last used sort and filter choices when the toggle setting for either is changed.
+                    match: /(\[(\i),\i\]=\i.useState.{0,80}?\[(\i),\i\]=\i.useState.{0,350}?)(return \i.useEffect)/,
+                    replace: "$1$self.setLastSortChoice($2);$self.setLastFilterChoices($3);$4"
+                }
+            ]
+        },
+        {
+            // Prevent scrolling to a sponsored Quest.
+            find: "Id(\"quest-tile-\".concat",
+            replacement: {
+                match: /(?=document.getElementById)/,
+                replace: "null&&"
+            }
         },
         {
             // Whether preloading assets is enabled or not, the placeholders loading
@@ -1028,14 +1137,19 @@ export default definePlugin({
                     replace: "$1$self.processQuestForAutoComplete($3)&&$2"
                 },
                 {
-                    // Start Quest
-                    match: /(onClick:.{0,10}?{)(.{0,5}?0,\i.\i\)\((\i))/,
-                    replace: "$1const questifyContinue=$self.processQuestForAutoComplete($3);$2"
+                    // Start Video & Play Game Quests.
+                    match: /(?<=onClick:async\(\)=>{)/,
+                    replace: "const startingAutoComplete=$self.processQuestForAutoComplete(arguments[0].quest);"
                 },
                 {
-                    // Open Video Modal
+                    // Prevent the new Video Quest entry point.
+                    match: /(?<=QUEST_HOME_DESKTOP\))/,
+                    replace: "&&false"
+                },
+                {
+                    // Conditionally open the Video Quest modal.
                     match: /(\i\?)?(\(0,\i.openVideoQuestModal\)\({quest:(\i))/,
-                    replace: "$1questifyContinue&&$2"
+                    replace: "$1startingAutoComplete&&$2"
                 },
                 {
                     // The "Resume (XX:XX)" text is changed to "Watching (XX:XX)" if the Quest is active.
@@ -1043,12 +1157,26 @@ export default definePlugin({
                     replace: "$1$self.getQuestAcceptedButtonText(arguments[0].quest)??",
                 },
                 {
-                    // Add trigger to memo for rerendering the progress label.
+                    // Setup a trigger to rerender the memo.
+                    match: /(?=return \i.useMemo)/,
+                    replace: "const questRerenderTrigger=$self.useQuestRerender();"
+                },
+                {
+                    // Add the trigger to the memo for rerendering the progress label.
                     match: /(\i.intl.string\(\i.\i#{intl::QUESTS_SEE_CODE}\)}\)}},\[)/,
-                    replace: "$1$self.settings.store.triggerQuestsRerender,"
+                    replace: "$1questRerenderTrigger,"
                 },
             ]
         },
+        // This patch covers the new entry point blocked in the above group.
+        // If the old entry point gets removed in the future, this will be useful.
+        // {
+        //     find: "CAPTCHA_FAILED:",
+        //     replacement: {
+        //         match: /(?<=SUCCESS:)(\i\({)/,
+        //         replace: "$self.processQuestForAutoComplete(arguments[0])&&$1"
+        //     }
+        // },
         {
             // Sets intervals to progress Play Game Quests in the background.
             // Triggers if a Quest has already been started but was interrupted, such as by a reload.
@@ -1075,6 +1203,15 @@ export default definePlugin({
                 }
             ]
         },
+        {
+            // Prevents the new Quests location from counting as part of the
+            // DM button highlight logic while the Quest button is visible.
+            find: "GLOBAL_DISCOVERY),",
+            replacement: {
+                match: /(pathname:(\i)}.{0,250}?return )/,
+                replace: "$1$self.disguiseHomeButton($2)?false:"
+            }
+        }
     ],
 
     contextMenus: {

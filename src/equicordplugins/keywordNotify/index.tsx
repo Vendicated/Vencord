@@ -16,7 +16,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, User } from "@vencord/discord-types";
+import { Message } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, Forms, Select, SelectedChannelStore, Switch, TabBar, TextInput, Tooltip, UserStore, useState } from "@webpack/common";
 import type { JSX, PropsWithChildren } from "react";
@@ -25,14 +25,12 @@ type IconProps = JSX.IntrinsicElements["svg"];
 type KeywordEntry = { regex: string, listIds: Array<string>, listType: ListType, ignoreCase: boolean; };
 
 let keywordEntries: Array<KeywordEntry> = [];
-let currentUser: User;
 let keywordLog: Array<any> = [];
 let interceptor: (e: any) => void;
 
 const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
 const tabClass = findByPropsLazy("inboxTitle", "tab");
 const buttonClass = findByPropsLazy("size36");
-const MenuHeader = findByCodeLazy(".getUnseenInviteCount())");
 const Popout = findByCodeLazy("getProTip", "canCloseAllMessages:");
 const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
 const KEYWORD_ENTRIES_KEY = "KeywordNotify_keywordEntries";
@@ -85,9 +83,11 @@ function highlightKeywords(str: string, entries: Array<KeywordEntry>) {
     const idx = str.indexOf(matches[0]);
 
     return [
-        <span key={idx}>{str.substring(0, idx)}</span>,
-        <span className="highlight" key={idx}>{matches[0]}</span>,
-        <span key={idx}>{str.substring(idx + matches[0].length)}</span>
+        <>
+            <span>{str.substring(0, idx)}</span>,
+            <span className="highlight">{matches[0]}</span>,
+            <span>{str.substring(idx + matches[0].length)}</span>
+        </>
     ];
 }
 
@@ -102,7 +102,11 @@ function Collapsible({ title, children }) {
                 size={Button.Sizes.ICON}
                 className={cl("collapsible")}>
                 <div style={{ display: "flex", alignItems: "center" }}>
-                    <div style={{ marginLeft: "auto", color: "var(--text-muted)", paddingRight: "5px" }}>{isOpen ? "▼" : "▶"}</div>
+                    <div style={{
+                        marginLeft: "auto",
+                        color: "var(--text-muted)",
+                        paddingRight: "5px"
+                    }}>{isOpen ? "▼" : "▶"}</div>
                     <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
                 </div>
             </Button>
@@ -116,34 +120,36 @@ function ListedIds({ listIds, setListIds }) {
     const [values] = useState(listIds);
 
     async function onChange(e: string, index: number) {
-        values[index] = e;
+        values[index] = e.trim();
         setListIds(values);
         update();
     }
 
     const elements = values.map((currentValue: string, index: number) => {
         return (
-            <Flex flexDirection="row" style={{ marginBottom: "5px" }} key={index}>
-                <div style={{ flexGrow: 1 }}>
-                    <TextInput
-                        placeholder="ID"
-                        spellCheck={false}
-                        value={currentValue}
-                        onChange={e => onChange(e, index)}
-                    />
-                </div>
-                <Button
-                    onClick={() => {
-                        values.splice(index, 1);
-                        setListIds(values);
-                        update();
-                    }}
-                    look={Button.Looks.BLANK}
-                    size={Button.Sizes.ICON}
-                    className={cl("delete")}>
-                    <DeleteIcon />
-                </Button>
-            </Flex>
+            <>
+                <Flex flexDirection="row" style={{ marginBottom: "5px" }}>
+                    <div style={{ flexGrow: 1 }}>
+                        <TextInput
+                            placeholder="ID"
+                            spellCheck={false}
+                            value={currentValue}
+                            onChange={e => onChange(e, index)}
+                        />
+                    </div>
+                    <Button
+                        onClick={() => {
+                            values.splice(index, 1);
+                            setListIds(values);
+                            update();
+                        }}
+                        look={Button.Looks.BLANK}
+                        size={Button.Sizes.ICON}
+                        className={cl("delete")}>
+                        <DeleteIcon />
+                    </Button>
+                </Flex>
+            </>
         );
     });
 
@@ -192,6 +198,12 @@ function KeywordEntries() {
         update();
     }
 
+    async function setIgnoreCase(index: number, value: boolean) {
+        keywordEntries[index].ignoreCase = value;
+        await DataStore.set(KEYWORD_ENTRIES_KEY, keywordEntries);
+        update();
+    }
+
     const elements = keywordEntries.map((entry, i) => {
         return (
             <>
@@ -216,8 +228,7 @@ function KeywordEntries() {
                     <Switch
                         value={values[i].ignoreCase}
                         onChange={() => {
-                            values[i].ignoreCase = !values[i].ignoreCase;
-                            update();
+                            setIgnoreCase(i, !values[i].ignoreCase);
                         }}
                         style={{ marginTop: "0.5em", marginRight: "40px" }}
                     >
@@ -314,16 +325,22 @@ export default definePlugin({
     patches: [
         {
             find: "#{intl::UNREADS_TAB_LABEL})}",
-            replacement: {
-                match: /,(\i\?\(0,\i\.jsxs\)\(\i\.\i\i\.Item)/,
-                replace: ",$self.keywordTabBar()$&"
-            }
+            replacement: [
+                {
+                    match: /,(\i\?\(0,\i\.jsxs\)\(\i\.\i\i\.Item)/,
+                    replace: ",$self.keywordTabBar()$&"
+                },
+                {
+                    match: /:(\i)===\i\.\i\.MENTIONS\?/,
+                    replace: ": $1 === 8 ? $self.keywordClearButton() $&"
+                }
+            ]
         },
         {
             find: "location:\"RecentsPopout\"});",
             replacement: {
-                match: /(?<=setTab:(\i),badgeState:\i,closePopout:(\i).{0,50}):(\i)===\i\.\i\.MENTIONS\?\(0,.+?onJump:(\i)/,
-                replace: ": $3 === 8 ? $self.tryKeywordMenu($1, $4, $2) $&"
+                match: /:(\i)===\i\.\i\.MENTIONS\?\(0,.+?onJump:(\i)}\)/,
+                replace: ": $1 === 8 ? $self.tryKeywordMenu($2) $&"
             }
         },
         {
@@ -343,11 +360,14 @@ export default definePlugin({
 
     async start() {
         this.onUpdate = () => null;
-        currentUser = UserStore.getCurrentUser();
         keywordEntries = await DataStore.get(KEYWORD_ENTRIES_KEY) ?? [];
         await DataStore.set(KEYWORD_ENTRIES_KEY, keywordEntries);
         (await DataStore.get(KEYWORD_LOG_KEY) ?? []).map(e => JSON.parse(e)).forEach(e => {
-            this.addToLog(e);
+            try {
+                this.addToLog(e);
+            } catch (err) {
+                console.error(err);
+            }
         });
 
         interceptor = (e: any) => {
@@ -371,11 +391,11 @@ export default definePlugin({
                 continue;
             }
 
-            let listed = entry.listIds.some(id => id === m.channel_id || id === m.author.id);
+            let listed = entry.listIds.some(id => id.trim() === m.channel_id || id === m.author.id);
             if (!listed) {
                 const channel = ChannelStore.getChannel(m.channel_id);
                 if (channel != null) {
-                    listed = entry.listIds.some(id => id === channel.guild_id);
+                    listed = entry.listIds.some(id => id.trim() === channel.guild_id);
                 }
             }
 
@@ -413,24 +433,45 @@ export default definePlugin({
         }
 
         if (matches) {
-            // @ts-ignore
-            m.mentions.push({ id: currentUser.id });
+            const id = UserStore.getCurrentUser()?.id;
+            if (id !== null) {
+                // @ts-ignore
+                m.mentions.push({ id: id });
+            }
 
-            if (m.author.id !== currentUser.id)
+            if (m.author.id !== id) {
+                this.storeMessage(m);
                 this.addToLog(m);
+            }
         }
     },
+    storeMessage(m: Message) {
+        if (m == null)
+            return;
 
+        DataStore.get(KEYWORD_LOG_KEY).then(log => {
+            log = log ? log.map((e: string) => JSON.parse(e)) : [];
+
+            log.push(m);
+            if (log.length > settings.store.amountToKeep) {
+                log = log.slice(-settings.store.amountToKeep);
+            }
+
+            DataStore.set(KEYWORD_LOG_KEY, log.map(e => JSON.stringify(e)));
+        });
+    },
     addToLog(m: Message) {
         if (m == null || keywordLog.some(e => e.id === m.id))
             return;
 
-        DataStore.get(KEYWORD_LOG_KEY).then(log => {
-            DataStore.set(KEYWORD_LOG_KEY, [...log, JSON.stringify(m)]);
-        });
+        let messageRecord: any;
+        try {
+            messageRecord = createMessageRecord(m);
+        } catch (err) {
+            return;
+        }
 
-        const thing = createMessageRecord(m);
-        keywordLog.push(thing);
+        keywordLog.push(messageRecord);
         keywordLog.sort((a, b) => b.timestamp - a.timestamp);
 
         while (keywordLog.length > settings.store.amountToKeep) {
@@ -453,28 +494,27 @@ export default definePlugin({
         );
     },
 
-    tryKeywordMenu(setTab, onJump, closePopout) {
-        const header = (
-            <><MenuHeader tab={8} setTab={setTab} closePopout={closePopout} badgeState={{ badgeForYou: false }} />
-                <span>
-                    <Tooltip text="Clear All">
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <div className={classes(tabClass.controlButton, buttonClass.button, buttonClass.tertiary, buttonClass.size32)}
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                onClick={() => {
-                                    keywordLog = [];
-                                    DataStore.set(KEYWORD_LOG_KEY, []);
-                                    this.onUpdate();
-                                }}>
-                                <DoubleCheckmarkIcon />
-                            </div>
-                        )}
-                    </Tooltip>
-                </span>
-            </>
+    keywordClearButton() {
+        return (
+            <Tooltip text="Clear All">
+                {({ onMouseLeave, onMouseEnter }) => (
+                    <div
+                        className={classes(tabClass.controlButton, buttonClass.button, buttonClass.tertiary, buttonClass.size32)}
+                        onMouseLeave={onMouseLeave}
+                        onMouseEnter={onMouseEnter}
+                        onClick={() => {
+                            keywordLog = [];
+                            DataStore.set(KEYWORD_LOG_KEY, []);
+                            this.onUpdate();
+                        }}>
+                        <DoubleCheckmarkIcon />
+                    </div>
+                )}
+            </Tooltip>
         );
+    },
 
+    tryKeywordMenu(onJump) {
         const channel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
 
         const [tempLogs, setKeywordLog] = useState(keywordLog);
@@ -503,7 +543,7 @@ export default definePlugin({
             <>
                 <Popout
                     className={classes(recentMentionsPopoutClass.recentMentionsPopout)}
-                    renderHeader={() => header}
+                    renderHeader={() => null}
                     renderMessage={messageRender}
                     channel={channel}
                     onJump={onJump}

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { playAudio } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -90,10 +91,7 @@ async function speak(text: string, { volume, rate, customVoice } = settings.stor
     // 1. Check the in-memory cache (fast check)
     if (ttsCache.has(cacheKey)) {
         const cachedUrl = ttsCache.get(cacheKey)!;
-        const audio = new Audio(cachedUrl);
-        audio.volume = volume;
-        audio.playbackRate = rate;
-        audio.play();
+        playAudio(cachedUrl, { volume: volume * 100, speed: rate });
         return;
     }
 
@@ -105,10 +103,7 @@ async function speak(text: string, { volume, rate, customVoice } = settings.stor
             const url = URL.createObjectURL(cachedBlob);
             // Save it in the in-memory cache for next time.
             ttsCache.set(cacheKey, url);
-            const audio = new Audio(url);
-            audio.volume = volume;
-            audio.playbackRate = rate;
-            audio.play();
+            playAudio(url, { volume: volume * 100, speed: rate });
             return;
         }
     } catch (err) {
@@ -155,10 +150,7 @@ async function speak(text: string, { volume, rate, customVoice } = settings.stor
         console.error("Error storing in IndexedDB:", err);
     }
 
-    const audio = new Audio(url);
-    audio.volume = volume;
-    audio.playbackRate = rate;
-    audio.play();
+    playAudio(url, { volume: volume * 100, speed: rate });
 }
 
 function clean(str: string) {
