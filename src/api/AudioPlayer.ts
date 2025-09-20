@@ -18,18 +18,28 @@ export const audioProcessorFunctions: Record<string, AudioProcessor> = {};
 export const AudioPlayerAPILogger = new Logger("AudioPlayerAPI");
 
 export enum AudioType {
+    /** An external URL that follows the Content Security Policy. */
     URL = "url",
+    /** A base64-encoded data URI. */
     DATA = "data-uri",
+    /** A Blob URI. */
     BLOB = "blob",
+    /** A file path. */
     PATH = "file-path",
-    OTHER = "other",
-    DISCORD = "discord"
+    /** An internal Discord audio filename (e.g. "discodo"). */
+    DISCORD = "discord",
+    /** Any other unrecognized audio type. */
+    OTHER = "other"
 }
 
 export interface PreprocessAudioData {
+    /** The original audio string passed to the player. */
     audio: string;
+    /** The read-only type of audio of the original audio string. */
     readonly type: AudioType;
+    /** The volume of the original audio between 0 and 100. */
     volume: number;
+    /** The playback speed of the original audio between 0.0625 and 16. */
     speed: number;
 }
 
@@ -74,7 +84,7 @@ export interface AudioPlayerInterface {
     /** The playback speed of the audio between 0.0625 and 16. */
     speed: number;
     /** Whether to load the audio immediately. If persistent is false, this will only apply until the first playback. */
-    preload?: boolean;
+    preload: boolean;
     /** Whether the audio element is persistent and not recreated for every playback. */
     persistent: boolean;
     /** Preloads the audio before playback. Automatically called when persistent is true. */
@@ -100,11 +110,17 @@ export interface AudioPlayerInterface {
 }
 
 export interface AudioPlayerOptions {
+    /** The volume of the audio, between 0 and 100, defaulting to 100. */
     volume?: number;
+    /** The playback speed of the audio, between 0.0625 and 16, defaulting to 1. */
     speed?: number;
+    /** Whether to preload the audio as soon as the player is created. */
     preload?: boolean;
+    /** Whether the audio element is persistent and not recreated for every playback. If persistent, you must call delete() to free the memory. Defaults to false. */
     persistent?: boolean;
+    /** An optional callback that is called every time the audio finishes playing. */
     onEnded?: AudioCallback;
+    /** An optional error handler that is called when an error occurs during audio playback. */
     onError?: AudioErrorHandler;
 }
 
@@ -128,6 +144,9 @@ class AudioPlayerWrapper implements AudioPlayerInterface {
 
     get persistent(): boolean { return this.internalPlayer.persistent; }
     set persistent(value: boolean) { this.internalPlayer.persistent = value; }
+
+    get preload(): boolean { return this.internalPlayer.preload; }
+    set preload(value: boolean) { this.internalPlayer.preload = value; value && this.internalPlayer.ensureAudio(); }
 
     get muted(): Promise<boolean> | null { return this.internalPlayer._audio?.then(audio => audio.muted) ?? null; }
     set muted(value: boolean) { this.internalPlayer.ensureAudio().then(audio => audio.muted = value); }
