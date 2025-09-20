@@ -21,12 +21,12 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+import { ignoredKeys } from "./packs";
+
 let backspace: AudioPlayerInterface;
 let clicks: Array<{ playing: boolean; player: AudioPlayerInterface; }> = [];
 const keysCurrentlyPressed = new Set<string>();
 let previousSoundIndex = 0;
-
-const ignoredKeys = ["CapsLock", "ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "ArrowUp", "ArrowRight", "ArrowLeft", "ArrowDown", "MediaPlayPause", "MediaStop", "MediaTrackNext", "MediaTrackPrevious", "MediaSelect", "MediaEject", "MediaVolumeUp", "MediaVolumeDown", "AudioVolumeUp", "AudioVolumeDown"];
 
 const keyup = (e: KeyboardEvent) => { keysCurrentlyPressed.delete(e.code); };
 
@@ -49,14 +49,14 @@ const keydown = (e: KeyboardEvent) => {
 };
 
 function assignSounds(volume: number) {
-    backspace = createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/backspace.wav", { volume, preload: true, persistent: true });
+    backspace = createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/backspace.wav", { volume, preload: true, persistent: true });
     clicks = [];
 
     for (let i = 0; i < 3; i++) {
         const baseIndex = i * 3;
-        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/click1.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex].playing = false; } }) });
-        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/click2.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex + 1].playing = false; } }) });
-        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/click3.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex + 2].playing = false; } }) });
+        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/click1.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex].playing = false; } }) });
+        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/click2.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex + 1].playing = false; } }) });
+        clicks.push({ playing: false, player: createAudioPlayer("https://github.com/Equicord/Equibored/raw/main/sounds/keyboardSounds/operagx/click3.wav", { volume, preload: true, persistent: true, onEnded: () => { clicks[baseIndex + 2].playing = false; } }) });
     }
 }
 
