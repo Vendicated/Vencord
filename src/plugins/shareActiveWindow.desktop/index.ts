@@ -10,22 +10,56 @@ import { FluxDispatcher } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 
-let activeWindowInterval: NodeJS.Timeout | undefined;
-let sharingSettings: any = undefined;
-
-function getWindowHandleFromPid(pid: number): string | undefined {
-    const discordUtils = window.vencord_plugins_shareActiveWindow_discordUtils;
-    if (discordUtils === undefined) {
-        throw Error("Could not get discordUtils. Verify patches.");
-    }
-    return discordUtils.getWindowHandleFromPid(pid) ?? undefined;
+interface CandidateGame {
+    readonly cmdLine: string;
+    readonly elevated: boolean;
+    readonly exeName: string;
+    readonly exePath: string;
+    readonly fullscreenType: number;
+    readonly hidden: boolean;
+    readonly isLauncher: boolean;
+    readonly name: string;
+    readonly pid: number;
+    readonly pidPath: number[];
+    readonly sandboxed: boolean;
+    readonly windowHandle: string;
 }
 
-// const origDispatch = FluxDispatcher.dispatch;
-// FluxDispatcher.dispatch = payload => {
-//     console.log("[Flux Event]", payload.type, payload);
-//     return origDispatch(payload);
-// };
+interface DiscordUtils {
+    setCandidateGamesCallback(callback: (games: CandidateGame[]) => void): void;
+    clearCandidateGamesCallback(): void;
+    getWindowHandleFromPid(pid: number): string;
+}
+
+interface SourceSettings {
+    desktopSettings: {
+        sourceId: string,
+    };
+}
+
+interface StreamStartEvent {
+    readonly sourceId: string;
+}
+
+function getDiscordUtils(): DiscordUtils {
+    const discordUtils: DiscordUtils | undefined = window.vencord_plugins_shareActiveWindow_discordUtils;
+    if (discordUtils === undefined) {
+        throw Error("Could not extract 'getDiscordUtils' from Discord source code.");
+    }
+    return discordUtils;
+}
+
+function setGoLiveSource(settings: SourceSettings): void {
+    const setGoLiveSource: ((s: SourceSettings) => void) | undefined = window.vencord_plugins_shareActiveWindow_setGoLiveSource;
+    if (setGoLiveSource === undefined) {
+        throw Error("Could not extract 'setGoLiveSource' from Discord source code.");
+    }
+    return setGoLiveSource(settings);
+}
+
+let activeWindowInterval: NodeJS.Timeout | undefined;
+let isSharingWindow: boolean = false;
+let sharingSettings: SourceSettings | undefined = undefined;
 
 export default definePlugin({
     name: "ShareActiveWindow",
@@ -39,6 +73,13 @@ export default definePlugin({
                 match: /,setCandidateGamesCallback\(e\)\{/,
                 replace: ",setCandidateGamesCallback(e){window.vencord_plugins_shareActiveWindow_discordUtils=this.getDiscordUtils();",
             },
+        },
+        {
+            find: ",setGoLiveSource(e){",
+            replacement: {
+                match: /,setGoLiveSource\s*\([^)]*\)\s*\{([\s\S]*?)\},/,
+                replace: ",setGoLiveSource(e){let f = function(e1) { $1; };window.vencord_plugins_shareActiveWindow_setGoLiveSource=f;return f(e);},"
+            }
         }
     ],
 
@@ -47,45 +88,64 @@ export default definePlugin({
 
         FluxDispatcher.subscribe(
             "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            eventData => {
-                sharingSettings = eventData.settings;
-                console.log("[Flux Event]", eventData);
+            (event: { settings: SourceSettings; }) => {
+                if (isSharingWindow) {
+                    sharingSettings = event.settings;
+                }
+            }
+        );
+
+        FluxDispatcher.subscribe(
+            "STREAM_START",
+            (event: StreamStartEvent) => {
+                isSharingWindow = event.sourceId.startsWith("window:");
+            }
+        );
+
+        FluxDispatcher.subscribe(
+            "STREAM_STOP",
+            (_event: any) => {
+                isSharingWindow = false;
+                sharingSettings = undefined;
             }
         );
 
         activeWindowInterval = setInterval(async () => {
-            const isSharing = !!sharingSettings;
-            if (isSharing) {
-                const activeWindow = await Native.getActiveWindow();
-                if (activeWindow) {
-                    const windowHandle = getWindowHandleFromPid(activeWindow.pid);
-                    console.log("Window title:", activeWindow.title);
-                    console.log("Application:", activeWindow.application);
-                    console.log("Application path:", activeWindow.path);
-                    console.log("Application PID:", activeWindow.pid);
-                    console.log("Window Handle:", windowHandle);
-
-                    const curSourceId = sharingSettings.desktopSettings.sourceId;
-                    const newSourceId = `window:${windowHandle}`;
-                    // if (curSourceId !== newSourceId) {
-                    //     sharingSettings.desktopSettings.sourceId = `window:${windowHandle}`;
-                    //     FluxDispatcher.dispatch({
-                    //         type: "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-                    //         ...sharingSettings,
-                    //     });
-                    // }
-                }
+            if (!isSharingWindow) {
+                return;
             }
-        }, 5000);
+
+            if (sharingSettings === undefined) {
+                return;
+            }
+
+            const activeWindow = await Native.getActiveWindow();
+            if (!activeWindow) {
+                return;
+            }
+
+            const discordUtils = getDiscordUtils();
+
+            const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
+            const curSourceId = sharingSettings.desktopSettings.sourceId;
+            const newSourceId = `window:${activeWindowHandle}`;
+            if (curSourceId === newSourceId) {
+                return;
+            }
+
+            sharingSettings.desktopSettings.sourceId = newSourceId;
+
+            setGoLiveSource(sharingSettings);
+        }, 1000);
 
         console.log("Hello from ShareActiveWindow plugin!");
 
-        const origDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
-        const myDispatch = payload => {
-            console.log("[Flux Event]", payload.type, payload);
-            return origDispatch(payload);
-        };
-        FluxDispatcher.dispatch = myDispatch;
+        // const origDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
+        // const myDispatch = payload => {
+        //     console.log("[Flux Event]", payload.type, payload);
+        //     return origDispatch(payload);
+        // };
+        // FluxDispatcher.dispatch = myDispatch;
 
         // FluxDispatcher.subscribe(
         //     "GAME_DETECTION_WATCH_CANDIDATE_GAMES_START" as FluxEvents,
@@ -138,12 +198,25 @@ export default definePlugin({
         //             }
         //             )
         //         },
+
+        // setGoLiveSource
+
+        // On closing a window:
+        // e.on(b.Sh.DesktopSourceEnd, (t, n) => {
+        //     v.Z.dispatch({
+        //         type: "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
+        //         settings: {
+        //             context: e.context
+        //         },
+        //         endReason: t,
+        //         errorCode: n
+        //     })
+        // }
     },
 
     stop() {
         if (activeWindowInterval) {
             clearInterval(activeWindowInterval);
         }
-        console.log("Bye from ShareActiveWindow plugin!");
     },
 });
