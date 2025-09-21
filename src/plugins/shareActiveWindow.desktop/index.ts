@@ -11,6 +11,10 @@ import { FluxDispatcher } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 
+let activeWindowInterval: NodeJS.Timeout | undefined;
+let isSharingWindow: boolean = false;
+let sharingSettings: SourceSettings | undefined = undefined;
+
 interface CandidateGame {
     readonly cmdLine: string;
     readonly elevated: boolean;
@@ -58,21 +62,6 @@ function setGoLiveSource(settings: SourceSettings): void {
     return setGoLiveSource(settings);
 }
 
-function callback_MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
-    if (isSharingWindow) {
-        sharingSettings = event.settings;
-    }
-}
-
-function callback_STREAM_START(event: StreamStartEvent): void {
-    isSharingWindow = event.sourceId.startsWith("window:");
-}
-
-function callback_STREAM_STOP(_event: any): void {
-    isSharingWindow = false;
-    sharingSettings = undefined;
-}
-
 function initActiveWindowLoop(): void {
     if (activeWindowInterval !== undefined) {
         clearInterval(activeWindowInterval);
@@ -111,11 +100,6 @@ function initActiveWindowLoop(): void {
         });
     }, settings.store.checkInterval);
 }
-
-let activeWindowInterval: NodeJS.Timeout | undefined;
-
-let isSharingWindow: boolean = false;
-let sharingSettings: SourceSettings | undefined = undefined;
 
 const settings = definePluginSettings({
     checkInterval: {
@@ -157,22 +141,37 @@ export default definePlugin({
         }
     ],
 
+    MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
+        if (isSharingWindow) {
+            sharingSettings = event.settings;
+        }
+    },
+
+    STREAM_START(event: StreamStartEvent): void {
+        isSharingWindow = event.sourceId.startsWith("window:");
+    },
+
+    STREAM_STOP(_event: any): void {
+        isSharingWindow = false;
+        sharingSettings = undefined;
+    },
+
     async start() {
         await Native.initActiveWindow();
 
         FluxDispatcher.subscribe(
             "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            callback_MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
+            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
         );
 
         FluxDispatcher.subscribe(
             "STREAM_START",
-            callback_STREAM_START,
+            this.STREAM_START,
         );
 
         FluxDispatcher.subscribe(
             "STREAM_STOP",
-            callback_STREAM_STOP,
+            this.STREAM_STOP,
         );
 
         initActiveWindowLoop();
@@ -254,17 +253,17 @@ export default definePlugin({
     stop() {
         FluxDispatcher.unsubscribe(
             "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            callback_MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
+            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
         );
 
         FluxDispatcher.unsubscribe(
             "STREAM_START",
-            callback_STREAM_START,
+            this.STREAM_START,
         );
 
         FluxDispatcher.unsubscribe(
             "STREAM_STOP",
-            callback_STREAM_STOP,
+            this.STREAM_STOP,
         );
 
         if (activeWindowInterval) {
