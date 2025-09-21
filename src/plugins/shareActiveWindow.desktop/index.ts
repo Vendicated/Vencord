@@ -126,19 +126,19 @@ export default definePlugin({
 
     patches: [
         {
-            find: ",setCandidateGamesCallback(e){",
+            find: /,setCandidateGamesCallback\s*\([^)]*\)\s*\{/,
             replacement: {
-                match: /,setCandidateGamesCallback\(e\)\{/,
-                replace: ",setCandidateGamesCallback(e){window.vencord_plugins_shareActiveWindow_discordUtils=this.getDiscordUtils();",
+                match: /,setCandidateGamesCallback\s*\([^)]*\)\s*\{/,
+                replace: "$&;window.vencord_plugins_shareActiveWindow_discordUtils=this.getDiscordUtils();",
             },
         },
         {
-            find: ",setGoLiveSource(e){",
+            find: /,setGoLiveSource\s*\([^)]*\)\s*\{/,
             replacement: {
-                match: /,setGoLiveSource\s*\([^)]*\)\s*\{([\s\S]*?)\},/,
-                replace: ",setGoLiveSource(e){let f = function(e1) { $1; };window.vencord_plugins_shareActiveWindow_setGoLiveSource=f;return f(e);},"
-            }
-        }
+                match: /(?<=,setGoLiveSource\s*\([^)]*\)\s*\{)([\s\S]*?)(?=\},)/,
+                replace: "let f=function(e){$1;};window.vencord_plugins_shareActiveWindow_setGoLiveSource=f;return f(e);",
+            },
+        },
     ],
 
     MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
@@ -248,6 +248,22 @@ export default definePlugin({
         //         errorCode: n
         //     })
         // }
+
+        // Checkboxes in stream settings
+        // stream-option-mute
+        // stream-settings-audio-enable
+
+        // MEDIA_ENGINE_VIDEO_STATE_CHANGED
+        // STREAM_SET_PAUSED
+        // STREAM_UPDATE
+
+        // setDesktopSourceStatusCallback
+
+
+        // The place where panel on the bottom left is getting rendered
+        // renderScreenshare
+
+        // getStreamerActiveStreamMetadata
     },
 
     stop() {
