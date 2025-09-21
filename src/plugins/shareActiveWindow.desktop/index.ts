@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { PluginNative } from "@utils/types";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
@@ -57,14 +58,87 @@ function setGoLiveSource(settings: SourceSettings): void {
     return setGoLiveSource(settings);
 }
 
+function callback_MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
+    if (isSharingWindow) {
+        sharingSettings = event.settings;
+    }
+}
+
+function callback_STREAM_START(event: StreamStartEvent): void {
+    isSharingWindow = event.sourceId.startsWith("window:");
+}
+
+function callback_STREAM_STOP(_event: any): void {
+    isSharingWindow = false;
+    sharingSettings = undefined;
+}
+
+function initActiveWindowLoop(): void {
+    if (activeWindowInterval !== undefined) {
+        clearInterval(activeWindowInterval);
+    }
+
+    activeWindowInterval = setInterval(async () => {
+        if (!isSharingWindow) {
+            return;
+        }
+
+        if (sharingSettings === undefined) {
+            return;
+        }
+
+        const activeWindow = await Native.getActiveWindow();
+        if (!activeWindow) {
+            return;
+        }
+
+        const discordUtils = getDiscordUtils();
+
+        const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
+        const curSourceId = sharingSettings.desktopSettings.sourceId;
+        const newSourceId = `window:${activeWindowHandle}`;
+        if (curSourceId === newSourceId) {
+            return;
+        }
+
+        discordUtils.setCandidateGamesCallback(games => {
+            const window = games.find(game => game.pid === activeWindow.pid);
+            if (window && sharingSettings) {
+                sharingSettings.desktopSettings.sourceId = newSourceId;
+                setGoLiveSource(sharingSettings);
+            }
+            discordUtils.clearCandidateGamesCallback();
+        });
+    }, settings.store.checkInterval);
+}
+
 let activeWindowInterval: NodeJS.Timeout | undefined;
+
 let isSharingWindow: boolean = false;
 let sharingSettings: SourceSettings | undefined = undefined;
+
+const settings = definePluginSettings({
+    checkInterval: {
+        description: "How often to check for active window, in milliseconds",
+        type: OptionType.NUMBER,
+        default: 1000,
+        onChange: (_newValue?: number) => {
+            initActiveWindowLoop();
+        },
+        isValid: (value?: number) => {
+            if (!value || value < 0) {
+                return "Check Interval must be greater than 0.";
+            }
+            return true;
+        }
+    }
+});
 
 export default definePlugin({
     name: "ShareActiveWindow",
     description: "Auto-switch to active window during screen sharing",
     authors: [Devs.ipasechnikov],
+    settings,
 
     patches: [
         {
@@ -88,57 +162,20 @@ export default definePlugin({
 
         FluxDispatcher.subscribe(
             "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            (event: { settings: SourceSettings; }) => {
-                if (isSharingWindow) {
-                    sharingSettings = event.settings;
-                }
-            }
+            callback_MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
         );
 
         FluxDispatcher.subscribe(
             "STREAM_START",
-            (event: StreamStartEvent) => {
-                isSharingWindow = event.sourceId.startsWith("window:");
-            }
+            callback_STREAM_START,
         );
 
         FluxDispatcher.subscribe(
             "STREAM_STOP",
-            (_event: any) => {
-                isSharingWindow = false;
-                sharingSettings = undefined;
-            }
+            callback_STREAM_STOP,
         );
 
-        activeWindowInterval = setInterval(async () => {
-            if (!isSharingWindow) {
-                return;
-            }
-
-            if (sharingSettings === undefined) {
-                return;
-            }
-
-            const activeWindow = await Native.getActiveWindow();
-            if (!activeWindow) {
-                return;
-            }
-
-            const discordUtils = getDiscordUtils();
-
-            const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
-            const curSourceId = sharingSettings.desktopSettings.sourceId;
-            const newSourceId = `window:${activeWindowHandle}`;
-            if (curSourceId === newSourceId) {
-                return;
-            }
-
-            sharingSettings.desktopSettings.sourceId = newSourceId;
-
-            setGoLiveSource(sharingSettings);
-        }, 1000);
-
-        console.log("Hello from ShareActiveWindow plugin!");
+        initActiveWindowLoop();
 
         // const origDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
         // const myDispatch = payload => {
@@ -215,6 +252,21 @@ export default definePlugin({
     },
 
     stop() {
+        FluxDispatcher.unsubscribe(
+            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
+            callback_MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
+        );
+
+        FluxDispatcher.unsubscribe(
+            "STREAM_START",
+            callback_STREAM_START,
+        );
+
+        FluxDispatcher.unsubscribe(
+            "STREAM_STOP",
+            callback_STREAM_STOP,
+        );
+
         if (activeWindowInterval) {
             clearInterval(activeWindowInterval);
         }
