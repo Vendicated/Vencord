@@ -7,9 +7,11 @@
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
+import { Activity } from "@vencord/discord-types";
+import { ActivityFlags, ActivityType } from "@vencord/discord-types/enums";
 import { Card, Forms, PresenceStore, React, Select, SnowflakeUtils, Switch, TextInput, UserStore } from "@webpack/common";
 
-import { Activity, ActivityType, AppIdSetting, makeEmptyAppId } from ".";
+import { AppIdSetting, makeEmptyAppId } from ".";
 
 interface SettingsProps {
     appIds: AppIdSetting[];
@@ -28,7 +30,14 @@ export function ReplaceTutorial() {
         <>
             <Forms.FormTitle tag="h3">IDs of currently running activities</Forms.FormTitle>
             {
-                activities.length === 0 ? <Forms.FormText>No running activities</Forms.FormText> : activities.map(activity => { return activity.flags !== 48 ? <Forms.FormText>{activity.name}: {activity.application_id}</Forms.FormText> : null; /* hide spotify */ })
+                activities.length === 0
+                    ? <Forms.FormText>No running activities</Forms.FormText>
+                    : activities.map(activity => {
+                        const isSpotify = (activity.flags & (ActivityFlags.SYNC | ActivityFlags.PLAY)) === (ActivityFlags.SYNC | ActivityFlags.PLAY);
+                        return !isSpotify
+                            ? <Forms.FormText>{activity.name}: {activity.application_id}</Forms.FormText>
+                            : null;
+                    })
             }
             <Forms.FormTitle tag="h3" className={Margins.top8}>Available variables</Forms.FormTitle>
             <Forms.FormText>
