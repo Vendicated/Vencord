@@ -51,7 +51,7 @@ export default definePlugin({
         },
         ignoreSelf: {
             type: OptionType.BOOLEAN,
-            description: "Ignores your own messages",
+            description: "Don't add indicator to your own messages",
             default: false
         }
     }),
