@@ -7,49 +7,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
+import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.AppleMusicRichPresence as PluginNative<typeof import("./native")>;
-
-interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-}
-
-interface ActivityButton {
-    label: string;
-    url: string;
-}
-
-interface Activity {
-    state?: string;
-    details?: string;
-    status_display_type?: number;
-    timestamps?: {
-        start?: number;
-        end?: number;
-    };
-    assets?: ActivityAssets;
-    buttons?: Array<string>;
-    name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: Array<string>;
-    };
-    type: number;
-    flags: number;
-}
-
-const enum ActivityType {
-    PLAYING = 0,
-    LISTENING = 2,
-}
-
-const enum ActivityFlag {
-    INSTANCE = 1 << 0,
-}
 
 export interface TrackData {
     name: string;
@@ -279,11 +241,11 @@ export default definePlugin({
 
             type: settings.store.activityType,
             status_display_type: {
-                "off": 0,
-                "artist": 1,
-                "track": 2
+                "off": ActivityStatusDisplayType.NAME,
+                "artist": ActivityStatusDisplayType.STATE,
+                "track": ActivityStatusDisplayType.DETAILS
             }[settings.store.statusDisplayType],
-            flags: ActivityFlag.INSTANCE,
+            flags: ActivityFlags.INSTANCE,
         };
     }
 });
