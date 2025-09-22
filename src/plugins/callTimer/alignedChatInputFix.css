@@ -1,4 +1,4 @@
-.align-chat-input [class*="panels"] [class*="inner_"],
-.align-chat-input [class*="rtcConnectionStatus_"] {
-    height: fit-content;
+[class*="panels"] [class*="inner_"],
+[class*="rtcConnectionStatus_"] {
+    height: fit-content !important;
 }
