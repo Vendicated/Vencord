@@ -36,15 +36,6 @@ export interface ActivityAssets {
     small_text?: string;
 }
 
-export const enum ActivityType {
-    PLAYING = 0,
-    LISTENING = 2,
-}
-
-export const enum ActivityFlag {
-    INSTANCE = 1 << 0
-}
-
 export interface TrackData {
     title: string;
     album: string;

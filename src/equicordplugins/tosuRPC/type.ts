@@ -4,40 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-}
-
-export interface Activity {
-    state?: string;
-    details?: string;
-    timestamps?: {
-        start?: number;
-        end?: number;
-    };
-    assets: ActivityAssets;
-    buttons?: Array<string>;
-    name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: Array<string>;
-    };
-    type: ActivityType;
-    url?: string;
-    flags: number;
-}
-
-export enum ActivityType {
-    PLAYING = 0,
-    STREAMING = 1,
-    LISTENING = 2,
-    WATCHING = 3,
-    COMPETING = 5
-}
-
 export enum BeatmapStatuses {
     Unknown,
     NotSubmitted = 1,
