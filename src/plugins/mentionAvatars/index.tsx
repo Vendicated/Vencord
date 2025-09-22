@@ -35,7 +35,7 @@ const settings = definePluginSettings({
     useDefaultSymbol: {
         description: "If a role has no icon, display a default icon instead of nothing",
         type: OptionType.BOOLEAN,
-        default: false
+        default: true
     },
 });
 
