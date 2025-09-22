@@ -87,6 +87,14 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    posterSource: {
+        description: "Choose which poster to display in Rich Presence",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Jellyfin", value: "jellyfin", default: true },
+            { label: "TheMovieDB", value: "tmdb" },
+        ],
+    },
     overrideRichPresenceType: {
         description: "Override the rich presence type",
         type: OptionType.SELECT,
@@ -310,7 +318,14 @@ export default definePlugin({
         }
 
         const assets: ActivityAssets = {
-            large_image: tmdbData?.posterPath ? await getApplicationAsset(tmdbData.posterPath) : mediaData.imageUrl ? await getApplicationAsset(mediaData.imageUrl) : undefined,
+            large_image:
+                settings.store.posterSource === "tmdb"
+                    ? (tmdbData?.posterPath
+                        ? await getApplicationAsset(tmdbData.posterPath)
+                        : undefined)
+                    : (mediaData.imageUrl
+                        ? await getApplicationAsset(mediaData.imageUrl)
+                        : undefined),
             large_text: mediaData.seriesName || mediaData.album || undefined,
         };
 
