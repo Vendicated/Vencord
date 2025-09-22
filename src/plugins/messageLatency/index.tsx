@@ -11,7 +11,7 @@ import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { SnowflakeUtils, Tooltip, UserStore } from "@webpack/common";
+import { AuthenticationStore, SnowflakeUtils, Tooltip } from "@webpack/common";
 
 type FillValue = ("status-danger" | "status-warning" | "status-positive" | "text-muted");
 type Fill = [FillValue, FillValue, FillValue];
@@ -105,7 +105,7 @@ export default definePlugin({
         // Bots basically never send a nonce, and if someone does do it then it's usually not a snowflake
         if (message.author.bot) return null;
 
-        if (ignoreSelf && message.author.id === UserStore.getCurrentUser().id) return null;
+        if (ignoreSelf && message.author.id === AuthenticationStore.getId()) return null;
 
         let isDiscordKotlin = false;
         let delta = SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce); // milliseconds
