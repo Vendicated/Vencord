@@ -151,9 +151,9 @@ export interface PluginDef {
     /**
      * Allows you to subscribe to Flux events
      */
-    flux?: {
-        [E in LiteralUnion<FluxEvents, string>]?: (event: any) => void | Promise<void>;
-    };
+    flux?: Partial<{
+        [E in LiteralUnion<FluxEvents, string>]: (event: any) => void | Promise<void>;
+    }>;
     /**
      * Allows you to manipulate context menus
      */
