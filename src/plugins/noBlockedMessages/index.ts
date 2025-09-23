@@ -56,6 +56,12 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: false
     },
+    allowAutoModMessages: {
+        description: "Allow messages sent by AutoMod to bypass filtering.",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false,
+    },
     hideBlockedUserReplies: {
         description: "Hide replies to blocked/ignored users.",
         type: OptionType.BOOLEAN,
@@ -121,6 +127,7 @@ export default definePlugin({
         const blocked = this.isBlocked(message);
         const replyToBlocked = this.isReplyToBlocked(message);
 
+        if (message.type === 24 && settings.store.allowAutoModMessages) return [true, blocked];
         if (blocked) return [this.hideBlockedMessage(message.author.id), true];
         if (replyToBlocked) return [this.hideBlockedMessage(replyToBlocked.author.id), true];
 
@@ -140,7 +147,7 @@ export default definePlugin({
     },
 
     filterStream(channelStream: [ChannelStreamGroupProps | ChannelStreamMessageProps | ChannelStreamDividerProps]) {
-        const { alsoHideIgnoredUsers, disableNotifications, hideBlockedUserReplies, defaultHideUsers, overrideUsers } = settings.use();
+        const { alsoHideIgnoredUsers, disableNotifications, hideBlockedUserReplies, allowAutoModMessages, defaultHideUsers, overrideUsers } = settings.use();
 
         const newChannelStream = channelStream.map(item => {
             if (item.type === "MESSAGE_GROUP_BLOCKED" || (item.type === "MESSAGE_GROUP_IGNORED" && alsoHideIgnoredUsers)) {
@@ -158,9 +165,9 @@ export default definePlugin({
 
         let lastItem = newChannelStream[newChannelStream.length - 1];
 
-        // Remove the NEW Message divider if it is the last item,
-        // implying the messages it was announcing got filtered.
-        while (lastItem && lastItem.type === "DIVIDER" && lastItem.unreadId !== undefined) {
+        // Remove the NEW Message and Date dividers if they are the last
+        // item, implying the messages they were separating got filtered.
+        while (lastItem && lastItem.type === "DIVIDER") {
             newChannelStream.pop();
             lastItem = newChannelStream[newChannelStream.length - 1];
         }

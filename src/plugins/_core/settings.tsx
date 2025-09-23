@@ -66,6 +66,15 @@ export default definePlugin({
             ]
         },
         {
+            find: ".DEVELOPER_SECTION,",
+            replacement: [
+                {
+                    match: /\i\.\i\.isDeveloper/,
+                    replace: "true"
+                },
+            ]
+        },
+        {
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: {
                 match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
