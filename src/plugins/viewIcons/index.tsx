@@ -22,8 +22,8 @@ import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Channel, Guild, User } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
-import type { Channel, Guild, User } from "discord-types/general";
 
 
 interface UserContextProps {
@@ -199,12 +199,6 @@ export default definePlugin({
         {
             find: ".overlay:void 0,status:",
             replacement: [
-                {
-                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
-                    match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
-                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
-                    noWarn: true
-                },
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
                     replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",

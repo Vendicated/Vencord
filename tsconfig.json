@@ -3,7 +3,7 @@
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
-        "skipLibCheck": true,
+        "skipLibCheck": false,
         "allowJs": true,
         "lib": [
             "DOM",
@@ -27,7 +27,6 @@
             "@components/*": ["./components/*"],
             "@utils/*": ["./utils/*"],
             "@shared/*": ["./shared/*"],
-            "@webpack/types": ["./webpack/common/types"],
             "@webpack/common": ["./webpack/common"],
             "@webpack": ["./webpack/webpack"],
             "@webpack/patcher": ["./webpack/patchWebpack"],

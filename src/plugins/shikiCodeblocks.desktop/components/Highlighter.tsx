@@ -41,7 +41,6 @@ export interface HighlighterProps {
     lang?: string;
     content: string;
     isPreview: boolean;
-    tempSettings?: Record<string, any>;
 }
 
 export const createHighlighter = (props: HighlighterProps) => (
@@ -55,13 +54,12 @@ export const Highlighter = ({
     lang,
     content,
     isPreview,
-    tempSettings,
 }: HighlighterProps) => {
     const {
         tryHljs,
         useDevIcon,
         bgOpacity,
-    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"], tempSettings);
+    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const shikiLang = lang ? resolveLang(lang) : null;

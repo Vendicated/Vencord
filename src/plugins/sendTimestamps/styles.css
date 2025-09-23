@@ -15,11 +15,11 @@
 .vc-st-format-select {
     margin-bottom: 1em;
 
-    --background-modifier-accent: transparent;
+    --border-subtle: transparent;
 }
 
 .vc-st-format-label {
-    --background-modifier-accent: transparent;
+    --border-subtle: transparent;
 }
 
 .vc-st-modal-header {

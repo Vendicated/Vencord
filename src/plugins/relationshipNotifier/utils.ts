@@ -19,12 +19,13 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
+import { FluxStore } from "@vencord/discord-types";
+import { ChannelType } from "@vencord/discord-types/enums";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
 
 import settings from "./settings";
-import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
+import { RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
 
 export const GuildAvailabilityStore = findStoreLazy("GuildAvailabilityStore") as FluxStore & {
     totalGuilds: number;
@@ -173,8 +174,8 @@ export async function syncFriends() {
     friends.requests = [];
 
     const relationShips = RelationshipStore.getMutableRelationships();
-    for (const id in relationShips) {
-        switch (relationShips[id]) {
+    for (const [id, type] of relationShips) {
+        switch (type) {
             case RelationshipType.FRIEND:
                 friends.friends.push(id);
                 break;

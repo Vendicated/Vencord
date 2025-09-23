@@ -17,14 +17,13 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 import NoBlockedMessagesPlugin from "plugins/noBlockedMessages";
 import NoReplyMentionPlugin from "plugins/noReplyMention";
 
-const isMac = navigator.platform.includes("Mac"); // bruh
 let currentlyReplyingId: string | null = null;
 let currentlyEditingId: string | null = null;
 
@@ -91,8 +90,8 @@ function onCreatePendingReply({ message, _isQuickReply }: { message: Message; _i
     currentlyReplyingId = message.id;
 }
 
-const isCtrl = (e: KeyboardEvent) => isMac ? e.metaKey : e.ctrlKey;
-const isAltOrMeta = (e: KeyboardEvent) => e.altKey || (!isMac && e.metaKey);
+const isCtrl = (e: KeyboardEvent) => IS_MAC ? e.metaKey : e.ctrlKey;
+const isAltOrMeta = (e: KeyboardEvent) => e.altKey || (!IS_MAC && e.metaKey);
 
 function onKeydown(e: KeyboardEvent) {
     const isUp = e.key === "ArrowUp";
