@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, Menu } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 
@@ -102,11 +102,26 @@ function initActiveWindowLoop(): void {
 }
 
 const settings = definePluginSettings({
+    isEnabled: {
+        description: "Enable active window monitoring",
+        type: OptionType.BOOLEAN,
+        default: true,
+        hidden: true,
+        onChange: (newValue: boolean): void => {
+            if (activeWindowInterval !== undefined) {
+                clearInterval(activeWindowInterval);
+            }
+
+            if (newValue) {
+                initActiveWindowLoop();
+            }
+        },
+    },
     checkInterval: {
         description: "How often to check for active window, in milliseconds",
         type: OptionType.NUMBER,
         default: 1000,
-        onChange: (_newValue?: number) => {
+        onChange: (_newValue?: number): void => {
             initActiveWindowLoop();
         },
         isValid: (value?: number) => {
@@ -114,7 +129,7 @@ const settings = definePluginSettings({
                 return "Check Interval must be greater than 0.";
             }
             return true;
-        }
+        },
     }
 });
 
@@ -139,7 +154,28 @@ export default definePlugin({
                 replace: "let f=function(e){$1;};window.vencord_plugins_shareActiveWindow_setGoLiveSource=f;return f(e);",
             },
         },
+        {
+            find: /id:\s*"stop-streaming",\s*label:/,
+            replacement: {
+                match: /(?<=id:\s*"stop-streaming"[\s\S]*?return)[\s\S]*(?=}})/,
+                replace: (match: string, ..._groups: string[]): string => {
+                    return match.replaceAll(/(?<=children:\s*)(\[[^\[\]]*\])/g, "($&).concat([$self.IsEnabledButton(arguments[1])])");
+                },
+            },
+        },
     ],
+
+    IsEnabledButton(_node: any) {
+        if (isSharingWindow) {
+            const { isEnabled } = settings.use(["isEnabled"]);
+            return <Menu.MenuCheckboxItem
+                id="vc-saw-share-active-window"
+                label="Share Active Window"
+                checked={isEnabled}
+                action={() => settings.store.isEnabled = !isEnabled}
+            />;
+        }
+    },
 
     MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
         if (isSharingWindow) {
@@ -149,11 +185,18 @@ export default definePlugin({
 
     STREAM_START(event: StreamStartEvent): void {
         isSharingWindow = event.sourceId.startsWith("window:");
+        if (isSharingWindow) {
+            initActiveWindowLoop();
+        }
     },
 
     STREAM_STOP(_event: any): void {
         isSharingWindow = false;
         sharingSettings = undefined;
+
+        if (activeWindowInterval) {
+            clearInterval(activeWindowInterval);
+        }
     },
 
     async start() {
@@ -173,8 +216,6 @@ export default definePlugin({
             "STREAM_STOP",
             this.STREAM_STOP,
         );
-
-        initActiveWindowLoop();
 
         // const origDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
         // const myDispatch = payload => {
