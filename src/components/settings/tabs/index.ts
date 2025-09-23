@@ -16,3 +16,4 @@ export { default as BackupAndRestoreTab } from "./sync/BackupAndRestoreTab";
 export { default as CloudTab } from "./sync/CloudTab";
 export { openUpdaterModal, default as UpdaterTab } from "./updater";
 export { default as VencordTab } from "./vencord";
+export { default as ChangelogTab } from "./changelog";
