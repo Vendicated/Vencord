@@ -53,6 +53,15 @@ export function TranslationAccessory({ message }: { message: Message; }) {
 
     if (!translation) return null;
 
+    if (translation.text === "Translating...") {
+        return (
+            <span className={cl("accessory")}>
+                <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />
+                Translating...
+            </span>
+        );
+    }
+
     return (
         <span className={cl("accessory")}>
             <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />

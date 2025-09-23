@@ -57,7 +57,11 @@ export const settings = definePluginSettings({
         options: [
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
-            { label: "DeepL Pro", value: "deepl-pro" }
+            { label: "DeepL Pro", value: "deepl-pro" },
+            { label: "Gemini 1.5 Flash", value: "gemini-1.5-flash" },
+            { label: "Gemini 2.5 Flash", value: "gemini-2.5-flash" },
+            { label: "Gemini 2.5 Flash Lite", value: "gemini-2.5-flash-lite" }, // the fastest model
+            { label: "Gemini 2.5 Pro", value: "gemini-2.5-pro" }
         ] as const,
         onChange: resetLanguageDefaults
     },
@@ -67,6 +71,33 @@ export const settings = definePluginSettings({
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
         disabled: () => IS_WEB
+    },
+    geminiApiKey: {
+        type: OptionType.STRING,
+        description: "Gemini API key",
+        default: "",
+        placeholder: "Get your API key from Google AI Studio",
+        disabled: () => IS_WEB
+    },
+    geminiStyle: {
+        type: OptionType.SELECT,
+        description: "Style for Gemini translations",
+        disabled: () => IS_WEB || !settings.store.service.startsWith("gemini"),
+        options: [
+            { label: "Normal", value: "normal", default: true },
+            { label: "Professional", value: "professional" },
+            { label: "Formal", value: "formal" },
+            { label: "Informal", value: "informal" },
+            { label: "Long", value: "long" },
+            { label: "Short", value: "short" },
+            { label: "Native", value: "native" }
+        ] as const
+    },
+    geminiOptimizeForSpeed: {
+        type: OptionType.BOOLEAN,
+        description: "Optimize for speed (may reduce translation quality)",
+        default: false,
+        disabled: () => IS_WEB || !settings.store.service.startsWith("gemini")
     },
     autoTranslate: {
         type: OptionType.BOOLEAN,
@@ -83,7 +114,7 @@ export const settings = definePluginSettings({
 }>();
 
 export function resetLanguageDefaults() {
-    if (IS_WEB || settings.store.service === "google") {
+    if (IS_WEB || settings.store.service === "google" || settings.store.service.startsWith("gemini")) {
         settings.store.receivedInput = "auto";
         settings.store.receivedOutput = "en";
         settings.store.sentInput = "auto";
