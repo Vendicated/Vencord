@@ -71,6 +71,15 @@ export default definePlugin({
         }
     ],
 
+    // The TRACK event takes an optional `resolve` property that is called when the tracking event was submitted to the server.
+    // A few spots in Discord await this callback before continuing (most notably the Voice Debug Logging toggle).
+    // Since we NOOP the AnalyticsActionHandlers module, there is no handler for the TRACK event, so we have to handle it ourselves
+    flux: {
+        TRACK(event) {
+            event?.resolve?.();
+        }
+    },
+
     startAt: StartAt.Init,
     start() {
         // Sentry is initialized in its own WebpackInstance.
