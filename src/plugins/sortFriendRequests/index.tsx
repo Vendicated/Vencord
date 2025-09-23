@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -33,7 +33,7 @@ const formatter = new Intl.DateTimeFormat(undefined, {
     year: "numeric",
 });
 
-const cl = classNameFactory("vc-sortFriendRequests-");
+const cl = classNameFactory("vc-sortFriends-");
 
 function getSince(user: User) {
     return new Date(RelationshipStore.getSince(user.id));
@@ -48,8 +48,9 @@ const settings = definePluginSettings({
     }
 });
 
+migratePluginSettings("SortFriends", "SortFriendRequests");
 export default definePlugin({
-    name: "SortFriendRequests",
+    name: "SortFriends",
     authors: [Devs.Megu, EquicordDevs.CallMeGii],
     description: "Sorts friend requests by date of receipt",
     settings,

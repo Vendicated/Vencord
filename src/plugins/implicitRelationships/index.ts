@@ -71,7 +71,7 @@ export default definePlugin({
                 replace: "$1.fetchRelationships(),$self.fetchImplicitRelationships()"
             },
         },
-        // Modify sort -- thanks megu for the patch (from sortFriendRequests)
+        // Modify sort -- thanks megu for the patch (from sortFriends)
         {
             find: "getRelationshipCounts(){",
             replacement: {
