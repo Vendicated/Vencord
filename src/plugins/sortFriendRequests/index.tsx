@@ -87,7 +87,7 @@ export default definePlugin({
     },
 
     makeSubtext(user: User, origSubtext: any) {
-        const since = this.getSince(user);
+        const since = getSince(user);
         if (isNaN(since.getTime())) {
             return null;
         }
