@@ -17,6 +17,7 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
+import { Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
@@ -40,6 +41,7 @@ let hideSetting = false;
 
 if (IS_VESKTOP || IS_EQUIBOP || "legcord" in window) {
     hideSetting = true;
+    Settings.plugins["WebRichPresence (arRPC)"].enabled = false;
 } else if ("goofcord" in window) {
     hideSetting = false;
 }
