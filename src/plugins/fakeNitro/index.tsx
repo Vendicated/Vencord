@@ -34,6 +34,8 @@ const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
 const BINARY_READ_OPTIONS = findByPropsLazy("readerFactory");
 
+const logger = new Logger("FakeNitro");
+
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
     if (!field) return;
@@ -269,8 +271,8 @@ export default definePlugin({
         {
             find: ",updateTheme(",
             replacement: {
-                match: /(function \i\(\i\){let{backgroundGradientPresetId:(\i).+?)(\i\.\i\.updateAsync.+?theme=(.+?),.+?},\i\))/,
-                replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
+                match: /(function \i\(\i\){let{backgroundGradientPresetId:(\i).+?customUserThemeSettings:(\i).+?)(\i\.\i\.updateAsync.+?theme=(.+?),.+?},\i\))/,
+                replace: (_, rest, backgroundGradientPresetId, customUserThemeSettings, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${customUserThemeSettings},${theme},()=>${originalCall});`
             }
         },
         // Allow users to use custom client themes
@@ -407,13 +409,16 @@ export default definePlugin({
                 proto.appearance = appearanceSettingsOverwrite;
             }
         } catch (err) {
-            new Logger("FakeNitro").error(err);
+            logger.error(err);
         }
     },
 
-    handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
+    handleGradientThemeSelect(backgroundGradientPresetId: number | null | undefined, customUserThemeSettings: object | null | undefined, theme: number, original: () => void) {
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
-        if (premiumType === 2 || backgroundGradientPresetId == null) return original();
+        const gradientPreset = backgroundGradientPresetId != null;
+        const customTheme = customUserThemeSettings != null;
+
+        if (premiumType === 2 || !(gradientPreset || customTheme)) return original();
 
         if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !BINARY_READ_OPTIONS) return;
 
@@ -426,13 +431,17 @@ export default definePlugin({
         newAppearanceProto.theme = theme;
 
         const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
-            backgroundGradientPresetId: {
+            backgroundGradientPresetId: gradientPreset ? {
                 value: backgroundGradientPresetId
-            }
+            } : undefined,
+            customUserThemeSettings: customTheme ? {
+                ...customUserThemeSettings
+            } : undefined,
         });
 
         newAppearanceProto.clientThemeSettings ??= clientThemeSettingsDummy;
         newAppearanceProto.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
+        newAppearanceProto.clientThemeSettings.customUserThemeSettings = clientThemeSettingsDummy.customUserThemeSettings;
 
         const proto = PreloadedUserSettingsActionCreators.ProtoClass.create();
         proto.appearance = newAppearanceProto;
@@ -574,7 +583,7 @@ export default definePlugin({
 
             return newContent;
         } catch (err) {
-            new Logger("FakeNitro").error(err);
+            logger.error(err);
             return content;
         }
     },
@@ -658,7 +667,7 @@ export default definePlugin({
                 }
             }
         } catch (e) {
-            new Logger("FakeNitro").error("Error in shouldIgnoreEmbed:", e);
+            logger.error("Error in shouldIgnoreEmbed:", e);
         }
 
         return false;
