@@ -176,7 +176,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
             // User switched to an account that isn't connected to cloud
             showNotification({
                 title: "Cloud Settings",
-                body: "Cloud sync was disabled because this account isn't connected to the Vencloud App. You can enable it again by connecting this account in Cloud Settings. (note: it will store your preferences separately)",
+                body: "Cloud sync was disabled because this account isn't connected to the cloud App. You can enable it again by connecting this account in Cloud Settings. (note: it will store your preferences separately)",
                 color: "var(--yellow-360)",
                 onClick: () => SettingsRouter.open("VencordCloud")
             });
