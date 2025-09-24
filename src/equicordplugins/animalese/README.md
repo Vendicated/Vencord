@@ -1,18 +1,16 @@
-## vencord-animalese
-animalese yapping in your discord client
+## Animalese
 
-> [!WARNING]
-> don't go to Vencord support if you can't install this. 
+animalese yapping in your discord client
 
 ### demo
 
-https://github.com/user-attachments/assets/3f1fa925-bbd2-451d-b63e-ea14dbe4be44
+<https://cdn.nest.rip/uploads/8558dfb4-c386-4ffc-a3fb-63cbe180d3d2.mp4>
 
 ### settings
 
 ##### settings used in the video
-![CleanShot 2024-12-26 at 22 11 49@2x](https://github.com/user-attachments/assets/35895fcc-d703-42cb-b0ef-bdef39ab15be)
 
+![settings](https://cdn.nest.rip/uploads/32f09dd7-3cb2-4065-84ed-cbc5b193b2ec.png)
 
 you can change the settings in the settings but otherwise, enjoy the yap
 
