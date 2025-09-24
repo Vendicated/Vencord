@@ -102,7 +102,10 @@ export function UserMuteButton({ user }: { user: User; }) {
 
 export function UserDeafenButton({ user }: { user: User; }) {
     const isCurrent = (user.id === UserStore.getCurrentUser().id);
-    const isDeafened = isCurrent && MediaEngineStore.isSelfDeaf() || MediaEngineStore.isLocalMute(user.id) && SoundboardStore.isLocalSoundboardMuted(user.id) && MediaEngineStore.isLocalVideoDisabled(user.id);
+    const isMuted = MediaEngineStore.isLocalMute(user.id);
+    const isSoundboardMuted = SoundboardStore.isLocalSoundboardMuted(user.id);
+    const isVideoDisabled = MediaEngineStore.isLocalVideoDisabled(user.id);
+    const isDeafened = isCurrent && MediaEngineStore.isSelfDeaf() || isMuted && isSoundboardMuted && isVideoDisabled;
     const color = isDeafened ? "var(--status-danger)" : "var(--channels-default)";
     return (
         <VoiceUserButton
@@ -114,16 +117,30 @@ export function UserDeafenButton({ user }: { user: User; }) {
                     VoiceActions.toggleSelfDeaf();
                     return;
                 }
-                VoiceActions.toggleLocalMute(user.id);
-                if (settings.store.muteSoundboard) {
-                    VoiceActions.toggleLocalSoundboardMute(user.id);
-                }
-                if (settings.store.disableVideo) {
-                    VoiceActions.setDisableLocalVideo(
-                        user.id,
-                        MediaEngineStore.isLocalVideoDisabled(user.id) ? "ENABLED" : "DISABLED",
-                        "default"
-                    );
+                if (isMuted) {
+                    VoiceActions.toggleLocalMute(user.id);
+                    if (settings.store.muteSoundboard && isSoundboardMuted) {
+                        VoiceActions.toggleLocalSoundboardMute(user.id);
+                    }
+                    if (settings.store.disableVideo && isVideoDisabled) {
+                        VoiceActions.setDisableLocalVideo(
+                            user.id,
+                            "ENABLED",
+                            "default"
+                        );
+                    }
+                } else {
+                    VoiceActions.toggleLocalMute(user.id);
+                    if (settings.store.muteSoundboard && !isSoundboardMuted) {
+                        VoiceActions.toggleLocalSoundboardMute(user.id);
+                    }
+                    if (settings.store.disableVideo && !isVideoDisabled) {
+                        VoiceActions.setDisableLocalVideo(
+                            user.id,
+                            "DISABLED",
+                            "default"
+                        );
+                    }
                 }
             }}
         />
