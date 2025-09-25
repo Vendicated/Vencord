@@ -33,12 +33,6 @@ interface CandidateGame {
     readonly windowHandle: string;
 }
 
-interface DiscordUtils {
-    setCandidateGamesCallback(callback: (games: CandidateGame[]) => void): void;
-    clearCandidateGamesCallback(): void;
-    getWindowHandleFromPid(pid: number): string;
-}
-
 interface SourceSettings {
     desktopSettings: {
         sourceId: string,
@@ -60,19 +54,14 @@ function patchFluxDispatcher(): void {
     FluxDispatcher.dispatch = newDispatch;
 }
 
-function getDiscordUtils(): DiscordUtils {
-    const discordUtils: DiscordUtils | undefined = window.vencord_plugins_shareActiveWindow_discordUtils;
-    if (discordUtils === undefined) {
-        throw Error("Could not extract 'getDiscordUtils' from Discord source code.");
-    }
-    return discordUtils;
-}
-
 function setGoLiveSource(settings: SourceSettings): void {
     const setGoLiveSource: ((s: SourceSettings) => void) | undefined = window.vencord_plugins_shareActiveWindow_setGoLiveSource;
     if (setGoLiveSource === undefined) {
         throw Error("Could not extract 'setGoLiveSource' from Discord source code.");
     }
+
+    // const setGoLiveSource = findByCodeLazy('.startsWith("window:"))');
+
     return setGoLiveSource(settings);
 }
 
@@ -88,7 +77,12 @@ function initActiveWindowLoop(): void {
         return;
     }
 
-    const discordUtils = getDiscordUtils();
+    const discordUtils: {
+        setCandidateGamesCallback(callback: (games: CandidateGame[]) => void): void,
+        clearCandidateGamesCallback(): void,
+        getWindowHandleFromPid(pid: number): string,
+    } = DiscordNative.nativeModules.requireModule("discord_utils");
+
     activeWindowInterval = setInterval(async () => {
         // Should never be true. Otherwise it is a bug in the plugin
         if (sharingSettings === undefined) {
@@ -180,13 +174,6 @@ export default definePlugin({
     settings,
 
     patches: [
-        {
-            find: /,setCandidateGamesCallback\s*\([^)]*\)\s*\{/,
-            replacement: {
-                match: /,setCandidateGamesCallback\s*\([^)]*\)\s*\{/,
-                replace: "$&;window.vencord_plugins_shareActiveWindow_discordUtils=this.getDiscordUtils();",
-            },
-        },
         {
             find: /,setGoLiveSource\s*\([^)]*\)\s*\{/,
             replacement: {
@@ -422,6 +409,27 @@ export default definePlugin({
 
         // let CopyIdMenuItem: (props: CopyIdMenuItemProps) => React.ReactElement | null = NoopComponent;
         // waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => CopyIdMenuItem = m);
+
+        // function X(e) {
+        //     var t, n, r;
+        //     if (null == e)
+        //         return "unknown";
+        //     if (g.isPlatformEmbedded || (null == (t = platform) ? void 0 : t.name) === "Chrome") {
+        //         if (e.startsWith("web-contents-media-stream:"))
+        //             return "tab";
+        //         else if (e.startsWith("window:"))
+        //             return "window";
+        //         else if (e.startsWith("screen:"))
+        //             return "screen"
+        //     } else if ((null == (n = platform) ? void 0 : n.name) === "Firefox")
+        //         if ("" !== e)
+        //             return "window";
+        //         else
+        //             return "screen";
+        //     else if ((null == (r = platform) ? void 0 : r.name) === "Safari")
+        //         return "window";
+        //     return "unknown"
+        // }
     },
 
     stop() {
