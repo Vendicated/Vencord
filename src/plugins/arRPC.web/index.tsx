@@ -17,7 +17,7 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
-import { Settings } from "@api/Settings";
+import { migratePluginSettings, Settings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
@@ -38,17 +38,18 @@ async function lookupApp(applicationId: string): Promise<string> {
 }
 
 let hideSetting = false;
+let ws: WebSocket;
 
 if (IS_VESKTOP || IS_EQUIBOP || "legcord" in window) {
     hideSetting = true;
-    Settings.plugins["WebRichPresence (arRPC)"].enabled = false;
+    Settings.plugins.WebRichPresence.enabled = false;
 } else if ("goofcord" in window) {
     hideSetting = false;
 }
 
-let ws: WebSocket;
+migratePluginSettings("WebRichPresence", "WebRichPresence (arRPC)");
 export default definePlugin({
-    name: "WebRichPresence (arRPC)",
+    name: "WebRichPresence",
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
     authors: [Devs.Ducko],
     reporterTestable: ReporterTestable.None,
