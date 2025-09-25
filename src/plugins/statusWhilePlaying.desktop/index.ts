@@ -10,8 +10,8 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { PresenceStore, UserStore } from "@webpack/common";
 
-let oldStatus = "";
-const statusSettings = getUserSettingLazy("status", "status");
+let savedStatus = "";
+const StatusSettings = getUserSettingLazy("status", "status");
 const settings = definePluginSettings({
     statusToSet: {
         type: OptionType.SELECT,
@@ -44,15 +44,18 @@ export default definePlugin({
     authors: [Devs.thororen],
     settings,
     flux: {
-        RUNNING_GAMES_CHANGE(event) {
-            const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
-            if (event.games.length > 0 && status !== settings.store.statusToSet) {
-                oldStatus = status;
-                statusSettings?.updateSetting(settings.store.statusToSet);
-            } else {
-                if (oldStatus !== "" && oldStatus !== settings.store.statusToSet)
-                    statusSettings?.updateSetting(oldStatus);
+        RUNNING_GAMES_CHANGE({ games }) {
+            const userId = UserStore.getCurrentUser().id;
+            const status = PresenceStore.getStatus(userId);
+
+            if (games.length > 0) {
+                if (status !== settings.store.statusToSet) {
+                    savedStatus = status;
+                    StatusSettings?.updateSetting(settings.store.statusToSet);
+                }
+            } else if (savedStatus && savedStatus !== settings.store.statusToSet) {
+                StatusSettings?.updateSetting(savedStatus);
             }
-        },
+        }
     }
 });
