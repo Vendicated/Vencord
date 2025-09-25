@@ -99,6 +99,12 @@ export const settings = definePluginSettings({
         default: false,
         disabled: () => IS_WEB || !settings.store.service.startsWith("gemini")
     },
+    geminiExplain: {
+        type: OptionType.BOOLEAN,
+        description: "When using Gemini, also provide a brief, speculated explanation of the message's context or meaning.",
+        default: false,
+        disabled: () => IS_WEB || !settings.store.service.startsWith("gemini")
+    },
     autoTranslate: {
         type: OptionType.BOOLEAN,
         description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
