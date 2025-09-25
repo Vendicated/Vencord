@@ -7,10 +7,12 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
+const logger = new Logger("ShareActiveWindow");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
 let isSharingWindow: boolean = false;
@@ -63,21 +65,22 @@ function setGoLiveSource(settings: SourceSettings): void {
     return setGoLiveSource(settings);
 }
 
-function initActiveWindowLoop(): void {
+function stopActiveWindowLoop(): void {
     if (activeWindowInterval !== undefined) {
         clearInterval(activeWindowInterval);
+        activeWindowInterval = undefined;
     }
+}
 
+function initActiveWindowLoop(): void {
     if (!isSharingWindow) {
         return;
     }
 
     activeWindowInterval = setInterval(async () => {
-        if (!isSharingWindow) {
-            return;
-        }
-
+        // Should never be true. Otherwise it is a bug in the plugin
         if (sharingSettings === undefined) {
+            logger.error("Could not retrieve 'sharingSettings' from 'MEDIA_ENGINE_SET_GO_LIVE_SOURCE' event");
             return;
         }
 
@@ -109,6 +112,7 @@ function initActiveWindowLoop(): void {
 const manageStreamsContextMenuPatch: NavContextMenuPatchCallback = (children): void => {
     const { isEnabled } = settings.use(["isEnabled"]);
 
+    // Add checkbox only during window sharing mode
     if (!isSharingWindow) {
         return;
     }
@@ -135,10 +139,7 @@ const settings = definePluginSettings({
         default: true,
         hidden: true,
         onChange: (newValue: boolean): void => {
-            if (activeWindowInterval !== undefined) {
-                clearInterval(activeWindowInterval);
-            }
-
+            stopActiveWindowLoop();
             if (newValue) {
                 initActiveWindowLoop();
             }
@@ -149,6 +150,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         default: 1000,
         onChange: (_newValue?: number): void => {
+            stopActiveWindowLoop();
             initActiveWindowLoop();
         },
         isValid: (value?: number) => {
@@ -187,20 +189,18 @@ export default definePlugin({
         "manage-streams": manageStreamsContextMenuPatch,
     },
 
-    MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
-        if (isSharingWindow) {
-            sharingSettings = event.settings;
-        }
-    },
-
     STREAM_START(event: StreamStartEvent): void {
         isSharingWindow = event.sourceId.startsWith("window:");
+        if (!isSharingWindow) {
+            stopActiveWindowLoop();
+            return;
+        }
 
         if (!settings.store.isEnabled) {
             return;
         }
 
-        if (isSharingWindow) {
+        if (!activeWindowInterval) {
             initActiveWindowLoop();
         }
     },
@@ -208,19 +208,17 @@ export default definePlugin({
     STREAM_STOP(_event: any): void {
         isSharingWindow = false;
         sharingSettings = undefined;
+        stopActiveWindowLoop();
+    },
 
-        if (activeWindowInterval) {
-            clearInterval(activeWindowInterval);
+    MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
+        if (isSharingWindow) {
+            sharingSettings = event.settings;
         }
     },
 
     async start() {
         await Native.initActiveWindow();
-
-        FluxDispatcher.subscribe(
-            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
-        );
 
         FluxDispatcher.subscribe(
             "STREAM_START",
@@ -230,6 +228,11 @@ export default definePlugin({
         FluxDispatcher.subscribe(
             "STREAM_STOP",
             this.STREAM_STOP,
+        );
+
+        FluxDispatcher.subscribe(
+            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
+            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
         );
 
         // const origDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
@@ -416,11 +419,6 @@ export default definePlugin({
 
     stop() {
         FluxDispatcher.unsubscribe(
-            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
-        );
-
-        FluxDispatcher.unsubscribe(
             "STREAM_START",
             this.STREAM_START,
         );
@@ -430,8 +428,11 @@ export default definePlugin({
             this.STREAM_STOP,
         );
 
-        if (activeWindowInterval) {
-            clearInterval(activeWindowInterval);
-        }
+        FluxDispatcher.unsubscribe(
+            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
+            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
+        );
+
+        stopActiveWindowLoop();
     },
 });
