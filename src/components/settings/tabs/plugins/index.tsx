@@ -191,8 +191,8 @@ export default function PluginSettings() {
         const { status } = searchValue;
         const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
         const pluginMeta = PluginMeta[plugin.name];
-        const isEquicordPlugin = pluginMeta?.folderName?.startsWith("src/equicordplugins/") ?? false;
-        const isUserplugin = pluginMeta?.userPlugin ?? false;
+        const isEquicordPlugin = pluginMeta.folderName.startsWith("src/equicordplugins/") ?? false;
+        const isUserplugin = pluginMeta.userPlugin ?? false;
 
         if (enabled && status === SearchStatus.DISABLED) return false;
         if (!enabled && status === SearchStatus.ENABLED) return false;
