@@ -88,6 +88,7 @@ function initActiveWindowLoop(): void {
         return;
     }
 
+    const discordUtils = getDiscordUtils();
     activeWindowInterval = setInterval(async () => {
         // Should never be true. Otherwise it is a bug in the plugin
         if (sharingSettings === undefined) {
@@ -99,8 +100,6 @@ function initActiveWindowLoop(): void {
         if (!activeWindow) {
             return;
         }
-
-        const discordUtils = getDiscordUtils();
 
         const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
         const curSourceId = sharingSettings.desktopSettings.sourceId;
@@ -161,6 +160,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         default: 1000,
         onChange: (_newValue?: number): void => {
+            // Restart loop with a new check interval
             stopActiveWindowLoop();
             initActiveWindowLoop();
         },
@@ -202,6 +202,8 @@ export default definePlugin({
 
     STREAM_START(event: StreamStartEvent): void {
         isSharingWindow = event.sourceId.startsWith("window:");
+
+        // No need to track active window if we are not sharing a window
         if (!isSharingWindow) {
             stopActiveWindowLoop();
             return;
@@ -211,6 +213,7 @@ export default definePlugin({
             return;
         }
 
+        // Init loop if it is not running yet
         if (!activeWindowInterval) {
             initActiveWindowLoop();
         }
