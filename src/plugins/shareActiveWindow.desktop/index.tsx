@@ -49,6 +49,17 @@ interface StreamStartEvent {
     readonly sourceId: string;
 }
 
+// Debug helper function to track Flux events
+// Call it in plugin's start method
+function patchFluxDispatcher(): void {
+    const oldDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
+    const newDispatch = payload => {
+        logger.debug("[Flux Event]", payload.type, payload);
+        return oldDispatch(payload);
+    };
+    FluxDispatcher.dispatch = newDispatch;
+}
+
 function getDiscordUtils(): DiscordUtils {
     const discordUtils: DiscordUtils | undefined = window.vencord_plugins_shareActiveWindow_discordUtils;
     if (discordUtils === undefined) {
@@ -234,13 +245,6 @@ export default definePlugin({
             "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
             this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
         );
-
-        // const origDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
-        // const myDispatch = payload => {
-        //     console.log("[Flux Event]", payload.type, payload);
-        //     return origDispatch(payload);
-        // };
-        // FluxDispatcher.dispatch = myDispatch;
 
         // FluxDispatcher.subscribe(
         //     "GAME_DETECTION_WATCH_CANDIDATE_GAMES_START" as FluxEvents,
