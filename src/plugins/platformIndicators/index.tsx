@@ -27,7 +27,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
-import { PresenceStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { AuthenticationStore, PresenceStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 export interface Session {
     sessionId: string;
@@ -113,7 +113,7 @@ const PlatformIcon = ({ platform, status, small }: PlatformIconProps) => {
 };
 
 function useEnsureOwnStatus(user: User) {
-    if (user.id !== UserStore.getCurrentUser()?.id) {
+    if (user.id !== AuthenticationStore.getId()) {
         return;
     }
 
