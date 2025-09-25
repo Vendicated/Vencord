@@ -21,7 +21,7 @@ jobs:
             - uses: actions/checkout@v4
 
             - name: Initialize submodules
-              run: git submodule update --init --recursive
+              run: git submodule update --init --recursive --remote --merge
 
             - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
