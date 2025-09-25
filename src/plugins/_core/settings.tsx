@@ -39,7 +39,7 @@ export default definePlugin({
             find: ".versionHash",
             replacement: [
                 {
-                    match: /\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
+                    match: /\.info.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
                     replace: (m, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component}, ${props})`;
@@ -59,8 +59,7 @@ export default definePlugin({
                     replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
                 },
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?(?:function\(\){return |\(\)=>))\2/,
+                    match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?\(\)=>)\2/,
                     replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
                 }
             ]
