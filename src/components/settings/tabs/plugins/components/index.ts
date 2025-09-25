@@ -24,6 +24,7 @@ import { ComponentType } from "react";
 import { BooleanSetting } from "./BooleanSetting";
 import { ComponentSettingProps, SettingProps } from "./Common";
 import { ComponentSetting } from "./ComponentSetting";
+import { KeybindSetting } from "./KeybindSetting";
 import { NumberSetting } from "./NumberSetting";
 import { SelectSetting } from "./SelectSetting";
 import { SliderSetting } from "./SliderSetting";
@@ -36,6 +37,7 @@ export const OptionComponentMap: Record<OptionType, ComponentType<SettingProps<a
     [OptionType.BOOLEAN]: BooleanSetting,
     [OptionType.SELECT]: SelectSetting,
     [OptionType.SLIDER]: SliderSetting,
+    [OptionType.KEYBIND]: KeybindSetting,
     [OptionType.COMPONENT]: ComponentSetting,
     [OptionType.CUSTOM]: () => null,
 };

@@ -19,6 +19,7 @@
 import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Keybind, KeybindShortcut } from "@api/Keybinds/types";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
@@ -90,6 +91,7 @@ export interface PluginAuthor {
 
 export interface Plugin extends PluginDef {
     patches?: Patch[];
+    keybinds?: Keybind[];
     started: boolean;
     isDependency?: boolean;
 }
@@ -105,6 +107,10 @@ export interface PluginDef {
      * List of commands that your plugin wants to register
      */
     commands?: Command[];
+    /**
+     * List of keybinds that your plugin wants to register
+     */
+    keybinds?: Keybind[];
     /**
      * A list of other plugins that your plugin depends on.
      * These will automatically be enabled and loaded before your plugin
@@ -212,6 +218,7 @@ export const enum OptionType {
     BOOLEAN,
     SELECT,
     SLIDER,
+    KEYBIND,
     COMPONENT,
     CUSTOM
 }
@@ -230,6 +237,7 @@ export type PluginSettingDef =
         | PluginSettingBooleanDef
         | PluginSettingSelectDef
         | PluginSettingSliderDef
+        | PluginSettingKeybindDef
         | PluginSettingBigIntDef
     ) & PluginSettingCommon);
 
@@ -315,6 +323,18 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
+export interface PluginSettingKeybindDef {
+    type: OptionType.KEYBIND;
+    /**
+     * If true, this keybind will be global (works outside of the app window).
+     */
+    global: boolean;
+    /**
+     * If true, this keybind can be cleared by the user when it is disabled.
+     */
+    default?: KeybindShortcut;
+}
+
 export interface IPluginOptionComponentProps {
     /**
      * Run this when the value changes.
@@ -341,6 +361,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
+    O extends PluginSettingKeybindDef ? KeybindShortcut :
     O extends PluginSettingComponentDef ? O extends { default: infer Default; } ? Default : any :
     O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
     never;
@@ -396,6 +417,7 @@ export type PluginOptionsItem =
     | PluginOptionBoolean
     | PluginOptionSelect
     | PluginOptionSlider
+    | PluginOptionKeybind
     | PluginOptionComponent
     | PluginOptionCustom;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
@@ -403,6 +425,7 @@ export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDe
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
+export type PluginOptionKeybind = PluginSettingKeybindDef & PluginSettingCommon & IsDisabled & IsValid<KeybindShortcut>;
 export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
