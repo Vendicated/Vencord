@@ -22,11 +22,21 @@ const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } =
 
 export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
+export const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+    desktop: "Discord Desktop app or Vesktop",
+    discordDesktop: "Discord Desktop app",
+    vencordDesktop: "Vesktop app",
+    web: "Vesktop app and the Web version of Discord",
+    dev: "Developer version of Vencord"
+};
+
+interface PluginCardProps {
     plugin: Plugin;
-    disabled: boolean;
+    disabled?: boolean;
     onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
+    onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
+    onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
