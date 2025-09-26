@@ -79,6 +79,21 @@ interface StreamStartEvent {
     readonly streamType: string;
 }
 
+interface MediaEngineSetGoLiveSourceEvent {
+    readonly settings: {
+        readonly context: string;
+        readonly desktopSettings: {
+            readonly sourceId: string;
+            readonly sound: boolean;
+        };
+        readonly qualityOptions: {
+            readonly frameRate: number;
+            readonly preset: number;
+            readonly resolution: number;
+        };
+    };
+}
+
 interface WindowDescriptor {
     readonly id: string;
     readonly url?: string;
@@ -287,6 +302,20 @@ export default definePlugin({
         };
     },
 
+    MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: MediaEngineSetGoLiveSourceEvent): void {
+        const streamSettingsPartial = {
+            preset: event.settings.qualityOptions.preset,
+            fps: event.settings.qualityOptions.frameRate,
+            resolution: event.settings.qualityOptions.resolution,
+            soundshareEnabled: event.settings.desktopSettings.sound,
+        };
+
+        sharingSettings = {
+            ...sharingSettings,
+            ...streamSettingsPartial,
+        };
+    },
+
     async start() {
         await Native.initActiveWindow();
 
@@ -304,6 +333,11 @@ export default definePlugin({
             "STREAM_UPDATE_SETTINGS",
             this.STREAM_UPDATE_SETTINGS,
         );
+
+        FluxDispatcher.subscribe(
+            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
+            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
+        );
     },
 
     stop() {
@@ -320,6 +354,11 @@ export default definePlugin({
         FluxDispatcher.unsubscribe(
             "STREAM_UPDATE_SETTINGS",
             this.STREAM_UPDATE_SETTINGS,
+        );
+
+        FluxDispatcher.unsubscribe(
+            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
+            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
         );
 
         stopActiveWindowLoop();
