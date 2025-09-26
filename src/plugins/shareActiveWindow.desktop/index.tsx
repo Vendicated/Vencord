@@ -79,13 +79,15 @@ interface StreamStartEvent {
     readonly streamType: string;
 }
 
+interface WindowDescriptor {
+    readonly id: string;
+    readonly url?: string;
+    readonly icon: string;
+    readonly name: string;
+}
+
 const shareWindow: (
-    window: {
-        readonly id: string,
-        readonly url?: string,
-        readonly icon: string,
-        readonly name: string,
-    },
+    window: WindowDescriptor,
     settings: StreamSettings,
 ) => void = findByCodeLazy(',"no permission"]');
 
@@ -97,14 +99,17 @@ function stopActiveWindowLoop(): void {
 }
 
 function initActiveWindowLoop(): void {
+    // Do not init the loop if we don't share a window (e.g. share the entire screen)
     if (!isSharingWindow) {
         return;
     }
 
     const discordUtils: {
-        setCandidateGamesCallback(callback: (games: CandidateGame[]) => void): void,
-        clearCandidateGamesCallback(): void,
-        getWindowHandleFromPid(pid: number): string,
+        setCandidateGamesCallback(
+            callback: (games: CandidateGame[]) => void
+        ): void;
+        clearCandidateGamesCallback(): void;
+        getWindowHandleFromPid(pid: number): string;
     } = DiscordNative.nativeModules.requireModule("discord_utils");
 
     activeWindowInterval = setInterval(async () => {
@@ -118,28 +123,42 @@ function initActiveWindowLoop(): void {
             return;
         }
 
-        logger.debug("Active Window", activeWindow);
-
         const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
-        const curSourceId = sharingSettings.sourceId;
         const newSourceId = `window:${activeWindowHandle}`;
+        const curSourceId = sharingSettings.sourceId;
         if (curSourceId === newSourceId) {
             return;
         }
 
-        discordUtils.setCandidateGamesCallback(games => {
-            const window = games.find(game => game.pid === activeWindow.pid);
-            if (window && sharingSettings) {
+        switch (settings.store.shareableWindows) {
+            case "all":
                 sharingSettings.sourceId = newSourceId;
                 shareWindow({
                     id: newSourceId,
-                    url: undefined,
                     icon: activeWindow.icon,
                     name: activeWindow.title,
                 }, sharingSettings);
-            }
-            discordUtils.clearCandidateGamesCallback();
-        });
+                break;
+            case "preview":
+                discordUtils.setCandidateGamesCallback(games => {
+                    const window = games.find(game => game.pid === activeWindow.pid);
+                    if (window && sharingSettings) {
+                        sharingSettings.sourceId = newSourceId;
+                        shareWindow({
+                            id: newSourceId,
+                            icon: activeWindow.icon,
+                            name: activeWindow.title,
+                        }, sharingSettings);
+                    }
+                    discordUtils.clearCandidateGamesCallback();
+                });
+                break;
+            default:
+                logger.debug(
+                    `Unsupported "shareableWindows" value: ${settings.store.shareableWindows}`
+                );
+                break;
+        }
     }, settings.store.checkInterval);
 }
 
@@ -153,6 +172,7 @@ const manageStreamsContextMenuPatch: NavContextMenuPatchCallback = (children): v
 
     const mainGroup = findGroupChildrenByChildId("stream-settings-audio-enable", children);
     if (!mainGroup) {
+        logger.debug("Failed to find manage-streams context menu");
         return;
     }
 
@@ -178,6 +198,14 @@ const settings = definePluginSettings({
                 initActiveWindowLoop();
             }
         },
+    },
+    shareableWindows: {
+        description: "What windows can be shared",
+        type: OptionType.SELECT,
+        options: [
+            { label: "All windows", value: "all" },
+            { label: "Preview list", value: "preview", default: true },
+        ],
     },
     checkInterval: {
         description: "How often to check for active window, in milliseconds",
