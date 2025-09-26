@@ -134,6 +134,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         if (m.deleted) return false;
         if (!isReply && m.author.id !== meId) return false; // editing only own messages
         if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
+        if (m.type === 6) return false; // prevents replying to CHANNEL_PINNED_MESSAGE
 
         return true;
     });
