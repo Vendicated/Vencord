@@ -181,117 +181,79 @@ export default definePlugin({
         "manage-streams": manageStreamsContextMenuPatch,
     },
 
-    STREAM_START(event: StreamStartEvent): void {
-        isSharingWindow = event.sourceId.startsWith("window:");
+    flux: {
+        STREAM_START(event: StreamStartEvent): void {
+            isSharingWindow = event.sourceId.startsWith("window:");
 
-        // No need to track active window if we are not sharing a window
-        if (!isSharingWindow) {
+            // No need to track active window if we are not sharing a window
+            if (!isSharingWindow) {
+                stopActiveWindowLoop();
+                return;
+            }
+
+            if (!settings.store.isEnabled) {
+                return;
+            }
+
+            const streamSettingsPartial: Partial<StreamSettings> = {
+                analyticsLocations: event.analyticsLocations,
+                audioSourceId: event.audioSourceId,
+                goLiveModalDurationMs: event.goLiveModalDurationMs,
+                previewDisabled: event.previewDisabled,
+                sourceId: event.sourceId,
+            };
+
+            sharingSettings = {
+                ...sharingSettings,
+                ...streamSettingsPartial,
+            };
+
+            // Init loop if it is not running yet
+            if (!activeWindowInterval) {
+                initActiveWindowLoop();
+            }
+        },
+
+        STREAM_STOP(_event: any): void {
+            isSharingWindow = false;
+            sharingSettings = undefined;
             stopActiveWindowLoop();
-            return;
-        }
+        },
 
-        if (!settings.store.isEnabled) {
-            return;
-        }
+        STREAM_UPDATE_SETTINGS(event: StreamUpdateSettingsEvent): void {
+            const streamSettingsPartial = {
+                preset: event.preset,
+                fps: event.frameRate,
+                resolution: event.resolution,
+                soundshareEnabled: event.soundshareEnabled,
+            };
 
-        const streamSettingsPartial: Partial<StreamSettings> = {
-            analyticsLocations: event.analyticsLocations,
-            audioSourceId: event.audioSourceId,
-            goLiveModalDurationMs: event.goLiveModalDurationMs,
-            previewDisabled: event.previewDisabled,
-            sourceId: event.sourceId,
-        };
+            sharingSettings = {
+                ...sharingSettings,
+                ...streamSettingsPartial,
+            };
+        },
 
-        sharingSettings = {
-            ...sharingSettings,
-            ...streamSettingsPartial,
-        };
+        MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: MediaEngineSetGoLiveSourceEvent): void {
+            const streamSettingsPartial = {
+                preset: event.settings.qualityOptions.preset,
+                fps: event.settings.qualityOptions.frameRate,
+                resolution: event.settings.qualityOptions.resolution,
+                soundshareEnabled: event.settings.desktopSettings.sound,
+            };
 
-        // Init loop if it is not running yet
-        if (!activeWindowInterval) {
-            initActiveWindowLoop();
-        }
-    },
-
-    STREAM_STOP(_event: any): void {
-        isSharingWindow = false;
-        sharingSettings = undefined;
-        stopActiveWindowLoop();
-    },
-
-    STREAM_UPDATE_SETTINGS(event: StreamUpdateSettingsEvent): void {
-        const streamSettingsPartial = {
-            preset: event.preset,
-            fps: event.frameRate,
-            resolution: event.resolution,
-            soundshareEnabled: event.soundshareEnabled,
-        };
-
-        sharingSettings = {
-            ...sharingSettings,
-            ...streamSettingsPartial,
-        };
-    },
-
-    MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: MediaEngineSetGoLiveSourceEvent): void {
-        const streamSettingsPartial = {
-            preset: event.settings.qualityOptions.preset,
-            fps: event.settings.qualityOptions.frameRate,
-            resolution: event.settings.qualityOptions.resolution,
-            soundshareEnabled: event.settings.desktopSettings.sound,
-        };
-
-        sharingSettings = {
-            ...sharingSettings,
-            ...streamSettingsPartial,
-        };
+            sharingSettings = {
+                ...sharingSettings,
+                ...streamSettingsPartial,
+            };
+        },
     },
 
     async start() {
         await Native.initActiveWindow();
-
-        FluxDispatcher.subscribe(
-            "STREAM_START",
-            this.STREAM_START,
-        );
-
-        FluxDispatcher.subscribe(
-            "STREAM_STOP",
-            this.STREAM_STOP,
-        );
-
-        FluxDispatcher.subscribe(
-            "STREAM_UPDATE_SETTINGS",
-            this.STREAM_UPDATE_SETTINGS,
-        );
-
-        FluxDispatcher.subscribe(
-            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
-        );
     },
 
     stop() {
-        FluxDispatcher.unsubscribe(
-            "STREAM_START",
-            this.STREAM_START,
-        );
-
-        FluxDispatcher.unsubscribe(
-            "STREAM_STOP",
-            this.STREAM_STOP,
-        );
-
-        FluxDispatcher.unsubscribe(
-            "STREAM_UPDATE_SETTINGS",
-            this.STREAM_UPDATE_SETTINGS,
-        );
-
-        FluxDispatcher.unsubscribe(
-            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
-        );
-
         stopActiveWindowLoop();
     },
 });
