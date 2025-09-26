@@ -9,7 +9,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
@@ -17,7 +17,7 @@ const logger = new Logger("ShareActiveWindow");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
 let isSharingWindow: boolean = false;
-let sharingSettings: SourceSettings | undefined = undefined;
+let sharingSettings: StreamSettings | undefined = undefined;
 
 interface CandidateGame {
     readonly cmdLine: string;
@@ -45,15 +45,49 @@ function patchFluxDispatcher(): void {
     FluxDispatcher.dispatch = newDispatch;
 }
 
-interface SourceSettings {
-    desktopSettings: {
-        sourceId: string,
-    };
+interface StreamSettings {
+    preset?: number;
+    fps?: number;
+    resolution?: number;
+    soundshareEnabled?: boolean;
+    previewDisabled?: boolean;
+    audioSourceId?: string;
+    goLiveModalDurationMs?: number;
+    analyticsLocations?: string[];
+    sourceId?: string;
 }
 
-const mediaHelpers: {
-    setGoLiveSource(settings: SourceSettings): void,
-} = findByPropsLazy("setGoLiveSource");
+interface StreamUpdateSettingsEvent {
+    readonly frameRate: number;
+    readonly preset: number;
+    readonly resolution: number;
+    readonly soundshareEnabled: boolean;
+}
+
+interface StreamStartEvent {
+    readonly analyticsLocations: string[];
+    readonly appContext: string;
+    readonly audioSourceId: string;
+    readonly channelId: string;
+    readonly goLiveModalDurationMs: number;
+    readonly guildId: string;
+    readonly previewDisabled: boolean;
+    readonly sound: boolean;
+    readonly sourceIcon: string;
+    readonly sourceId: string;
+    readonly sourceName: string;
+    readonly streamType: string;
+}
+
+const shareWindow: (
+    window: {
+        readonly id: string,
+        readonly url?: string,
+        readonly icon: string,
+        readonly name: string,
+    },
+    settings: StreamSettings,
+) => void = findByCodeLazy(',"no permission"]');
 
 function stopActiveWindowLoop(): void {
     if (activeWindowInterval !== undefined) {
@@ -76,7 +110,6 @@ function initActiveWindowLoop(): void {
     activeWindowInterval = setInterval(async () => {
         // Should never be true. Otherwise it is a bug in the plugin
         if (sharingSettings === undefined) {
-            logger.error("Could not retrieve 'sharingSettings' from 'MEDIA_ENGINE_SET_GO_LIVE_SOURCE' event");
             return;
         }
 
@@ -88,7 +121,7 @@ function initActiveWindowLoop(): void {
         logger.debug("Active Window", activeWindow);
 
         const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
-        const curSourceId = sharingSettings.desktopSettings.sourceId;
+        const curSourceId = sharingSettings.sourceId;
         const newSourceId = `window:${activeWindowHandle}`;
         if (curSourceId === newSourceId) {
             return;
@@ -97,8 +130,13 @@ function initActiveWindowLoop(): void {
         discordUtils.setCandidateGamesCallback(games => {
             const window = games.find(game => game.pid === activeWindow.pid);
             if (window && sharingSettings) {
-                sharingSettings.desktopSettings.sourceId = newSourceId;
-                mediaHelpers.setGoLiveSource(sharingSettings);
+                sharingSettings.sourceId = newSourceId;
+                shareWindow({
+                    id: newSourceId,
+                    url: undefined,
+                    icon: activeWindow.icon,
+                    name: activeWindow.title,
+                }, sharingSettings);
             }
             discordUtils.clearCandidateGamesCallback();
         });
@@ -169,7 +207,7 @@ export default definePlugin({
         "manage-streams": manageStreamsContextMenuPatch,
     },
 
-    STREAM_START(event: { sourceId: string; }): void {
+    STREAM_START(event: StreamStartEvent): void {
         isSharingWindow = event.sourceId.startsWith("window:");
 
         // No need to track active window if we are not sharing a window
@@ -181,6 +219,19 @@ export default definePlugin({
         if (!settings.store.isEnabled) {
             return;
         }
+
+        const streamSettingsPartial: Partial<StreamSettings> = {
+            analyticsLocations: event.analyticsLocations,
+            audioSourceId: event.audioSourceId,
+            goLiveModalDurationMs: event.goLiveModalDurationMs,
+            previewDisabled: event.previewDisabled,
+            sourceId: event.sourceId,
+        };
+
+        sharingSettings = {
+            ...sharingSettings,
+            ...streamSettingsPartial,
+        };
 
         // Init loop if it is not running yet
         if (!activeWindowInterval) {
@@ -194,10 +245,18 @@ export default definePlugin({
         stopActiveWindowLoop();
     },
 
-    MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: { settings: SourceSettings; }): void {
-        if (isSharingWindow) {
-            sharingSettings = event.settings;
-        }
+    STREAM_UPDATE_SETTINGS(event: StreamUpdateSettingsEvent): void {
+        const streamSettingsPartial = {
+            preset: event.preset,
+            fps: event.frameRate,
+            resolution: event.resolution,
+            soundshareEnabled: event.soundshareEnabled,
+        };
+
+        sharingSettings = {
+            ...sharingSettings,
+            ...streamSettingsPartial,
+        };
     },
 
     async start() {
@@ -214,8 +273,8 @@ export default definePlugin({
         );
 
         FluxDispatcher.subscribe(
-            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
+            "STREAM_UPDATE_SETTINGS",
+            this.STREAM_UPDATE_SETTINGS,
         );
     },
 
@@ -231,8 +290,8 @@ export default definePlugin({
         );
 
         FluxDispatcher.unsubscribe(
-            "MEDIA_ENGINE_SET_GO_LIVE_SOURCE",
-            this.MEDIA_ENGINE_SET_GO_LIVE_SOURCE,
+            "STREAM_UPDATE_SETTINGS",
+            this.STREAM_UPDATE_SETTINGS,
         );
 
         stopActiveWindowLoop();
