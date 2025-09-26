@@ -22,3 +22,18 @@
 [submodule "src/userplugins/MediaStatus"]
 	path = src/userplugins/MediaStatus
 	url = https://github.com/redbaron2k7/MediaStatus.git
+[submodule "src/userplugins/bigFileUpload"]
+	path = src/userplugins/bigFileUpload
+	url = https://github.com/ScattrdBlade/bigFileUpload
+[submodule "src/userplugins/fart"]
+	path = src/userplugins/fart
+	url = https://git.nin0.dev/duke/fart
+[submodule "src/userplugins/WigglyText"]
+	path = src/userplugins/WigglyText
+	url = https://github.com/nexpid/WigglyText
+[submodule "src/userplugins/showPing"]
+	path = src/userplugins/showPing
+	url = https://github.com/nicola02nb/showPing
+[submodule "src/userplugins/vc-voiceChatUtilities"]
+	path = src/userplugins/vc-voiceChatUtilities
+	url = https://github.com/D3SOX/vc-voiceChatUtilities
