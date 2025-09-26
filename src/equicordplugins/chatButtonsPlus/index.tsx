@@ -227,8 +227,7 @@ migratePluginSettings("ChatButtonsPlus", "Meow", "Woof");
 export default definePlugin({
     name: "ChatButtonsPlus",
     description: "Add custom chat buttons with personalized + messages and SVG icons",
-    authors:
-        [EquicordDevs.creations],
+    authors: [EquicordDevs.creations],
     settings,
 
     renderChatBarButton: ({ isMainChat }) => {

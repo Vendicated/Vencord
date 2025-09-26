@@ -1191,7 +1191,7 @@ export default definePlugin({
                 {
                     // The Quest Accepted button is disabled by default. If the user reloads the client, they need a way
                     // to resume the automatic completion, so patch in optionally enabling it if the feature is enabled.
-                    match: /(START_QUEST_CTA.{0,400}?disabled:)(!0)/,
+                    match: /(fullWidth:!0}\)}\):.{0,150}?disabled:)(!0.{0,150}?"horizontal")/,
                     replace: "$1$self.shouldDisableQuestAcceptedButton(arguments[0].quest)??$2"
                 },
                 {

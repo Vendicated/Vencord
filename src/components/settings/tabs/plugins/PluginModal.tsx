@@ -39,7 +39,7 @@ import { PluginMeta } from "~plugins";
 
 import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
-import { GithubButton } from "./LinkIconButton";
+import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
@@ -146,6 +146,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     const pluginMeta = PluginMeta[plugin.name];
+    const isEquicordPlugin = pluginMeta.folderName.startsWith("src/equicordplugins/") ?? false;
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
@@ -160,6 +161,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>
                         {!pluginMeta.userPlugin && (
                             <div className="vc-settings-modal-links">
+                                <WebsiteButton
+                                    text="View more info"
+                                    href={isEquicordPlugin ? `https://equicord.org/plugins/${plugin.name}` : `https://vencord.dev/plugins/${plugin.name}`}
+                                />
                                 <GithubButton
                                     text="View source code"
                                     href={`https://github.com/${gitRemote}/tree/main/${pluginMeta.folderName}`}
