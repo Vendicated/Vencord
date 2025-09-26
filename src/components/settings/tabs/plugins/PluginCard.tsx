@@ -28,11 +28,13 @@ const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } =
 
 export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
+interface PluginCardProps {
     plugin: Plugin;
-    disabled: boolean;
+    disabled?: boolean;
     onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
+    onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
+    onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
