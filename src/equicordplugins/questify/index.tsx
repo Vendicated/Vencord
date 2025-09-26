@@ -828,6 +828,14 @@ function setLastFilterChoices(filters: { group: string; filter: string; }[]): vo
     settings.store.lastQuestPageFilters = JSON.parse(JSON.stringify(filters)).reduce((acc, item) => ({ ...acc, [item.filter]: item }), {});
 }
 
+function getQuestAcceptedButtonProps(quest: Quest, text: string) {
+    return {
+        disabled: shouldDisableQuestAcceptedButton(quest) ?? true,
+        text: getQuestAcceptedButtonText(quest) ?? text,
+        onClick: () => { processQuestForAutoComplete(quest); }
+    };
+}
+
 export default definePlugin({
     name: "Questify",
     description: "Enhance your Quest experience with a suite of features, or disable them entirely if they're not your thing.",
@@ -851,6 +859,7 @@ export default definePlugin({
     shouldDisableQuestAcceptedButton,
     processQuestForAutoComplete,
     getQuestAcceptedButtonText,
+    getQuestAcceptedButtonProps,
     getQuestPanelOverride,
     setLastFilterChoices,
     getLastFilterChoices,
@@ -1191,15 +1200,11 @@ export default definePlugin({
                 {
                     // The Quest Accepted button is disabled by default. If the user reloads the client, they need a way
                     // to resume the automatic completion, so patch in optionally enabling it if the feature is enabled.
-                    match: /(fullWidth:!0}\)}\):.{0,150}?disabled:)(!0.{0,150}?"horizontal")/,
-                    replace: "$1$self.shouldDisableQuestAcceptedButton(arguments[0].quest)??$2"
-                },
-                {
                     // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress but not active.
                     // When the Quest Accepted button which has been enabled again by the above patch is clicked,
                     // resume the automatic completion of the Quest and disable the button again.
-                    match: /(\i.intl.string\(\i.\i#{intl::QUEST_ACCEPTED}\))/,
-                    replace: "$self.getQuestAcceptedButtonText(arguments[0].quest)??$1,onClick:()=>{$self.processQuestForAutoComplete(arguments[0].quest)}"
+                    match: /(?<=fullWidth:!0}\)}\):.{0,150}?secondary",)disabled:!0,text:(.{0,30}?\["9KoPyM"\]\)),/,
+                    replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1),"
                 }
             ]
         },

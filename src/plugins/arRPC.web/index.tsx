@@ -42,7 +42,8 @@ let ws: WebSocket;
 
 if (IS_VESKTOP || IS_EQUIBOP || "legcord" in window) {
     hideSetting = true;
-    Settings.plugins.WebRichPresence.enabled = false;
+    const { WebRichPresence } = Settings.plugins;
+    if (WebRichPresence) WebRichPresence.enabled = false;
 } else if ("goofcord" in window) {
     hideSetting = false;
 }
