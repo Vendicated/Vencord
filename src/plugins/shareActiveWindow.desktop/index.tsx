@@ -12,27 +12,14 @@ import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
+import { CandidateGame, MediaEngineSetGoLiveSourceEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent, WindowDescriptor } from "./types";
+
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 const logger = new Logger("ShareActiveWindow");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
 let isSharingWindow: boolean = false;
 let sharingSettings: StreamSettings | undefined = undefined;
-
-interface CandidateGame {
-    readonly cmdLine: string;
-    readonly elevated: boolean;
-    readonly exeName: string;
-    readonly exePath: string;
-    readonly fullscreenType: number;
-    readonly hidden: boolean;
-    readonly isLauncher: boolean;
-    readonly name: string;
-    readonly pid: number;
-    readonly pidPath: number[];
-    readonly sandboxed: boolean;
-    readonly windowHandle: string;
-}
 
 // Debug helper function to track Flux events
 // Call it in plugin's start method
@@ -43,62 +30,6 @@ function patchFluxDispatcher(): void {
         return oldDispatch(payload);
     };
     FluxDispatcher.dispatch = newDispatch;
-}
-
-interface StreamSettings {
-    preset?: number;
-    fps?: number;
-    resolution?: number;
-    soundshareEnabled?: boolean;
-    previewDisabled?: boolean;
-    audioSourceId?: string;
-    goLiveModalDurationMs?: number;
-    analyticsLocations?: string[];
-    sourceId?: string;
-}
-
-interface StreamUpdateSettingsEvent {
-    readonly frameRate: number;
-    readonly preset: number;
-    readonly resolution: number;
-    readonly soundshareEnabled: boolean;
-}
-
-interface StreamStartEvent {
-    readonly analyticsLocations: string[];
-    readonly appContext: string;
-    readonly audioSourceId: string;
-    readonly channelId: string;
-    readonly goLiveModalDurationMs: number;
-    readonly guildId: string;
-    readonly previewDisabled: boolean;
-    readonly sound: boolean;
-    readonly sourceIcon: string;
-    readonly sourceId: string;
-    readonly sourceName: string;
-    readonly streamType: string;
-}
-
-interface MediaEngineSetGoLiveSourceEvent {
-    readonly settings: {
-        readonly context: string;
-        readonly desktopSettings: {
-            readonly sourceId: string;
-            readonly sound: boolean;
-        };
-        readonly qualityOptions: {
-            readonly frameRate: number;
-            readonly preset: number;
-            readonly resolution: number;
-        };
-    };
-}
-
-interface WindowDescriptor {
-    readonly id: string;
-    readonly url?: string;
-    readonly icon: string;
-    readonly name: string;
 }
 
 const shareWindow: (
