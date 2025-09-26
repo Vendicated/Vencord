@@ -149,7 +149,7 @@ const settings = definePluginSettings({
         description: "What windows can be shared",
         type: OptionType.SELECT,
         options: [
-            { label: "All windows", value: "all" },
+            { label: "All", value: "all" },
             { label: "Preview list", value: "preview", default: true },
         ],
     },
@@ -163,8 +163,8 @@ const settings = definePluginSettings({
             initActiveWindowLoop();
         },
         isValid: (value?: number) => {
-            if (!value || value < 0) {
-                return "Check Interval must be greater than 0.";
+            if (!value || value < 100) {
+                return "Check Interval must be greater or equal to 100.";
             }
             return true;
         },
