@@ -12,6 +12,7 @@ import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
 
 import { BanchoStatusEnum, GameState, Modes, TosuApi, UserLoginStatus } from "./type";
 
+const socketId = "tosu";
 const OSU_APP_ID = "367827983903490050";
 const OSU_LARGE_IMAGE = "373344233077211136";
 const OSU_STARDARD_SMALL_IMAGE = "373370493127884800";

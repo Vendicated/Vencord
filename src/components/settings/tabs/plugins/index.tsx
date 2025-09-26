@@ -40,12 +40,13 @@ import { openWarningModal } from "./PluginModal";
 import { StockPluginsCard, UserPluginsCard } from "./PluginStatCards";
 
 // Avoid circular dependency
-const { stopPlugin } = proxyLazy(() => require("plugins"));
+const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("plugins"));
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
 
 const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");
+const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
 function showErrorToast(message: string) {
     Toasts.show({

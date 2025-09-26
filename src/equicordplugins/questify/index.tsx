@@ -178,10 +178,12 @@ function shouldHideBadgeOnUserProfiles(): boolean {
 function shouldHideQuestPopup(quest: Quest | null): boolean {
     const {
         disableQuestsPopupAboveAccountPanel,
-        disableQuestsEverything
+        disableQuestsEverything,
+        triggerQuestsRerender
     } = settings.use([
         "disableQuestsPopupAboveAccountPanel",
-        "disableQuestsEverything"
+        "disableQuestsEverything",
+        "triggerQuestsRerender"
     ]);
 
     const noProgress = !quest?.userStatus?.progress || Object.keys(quest?.userStatus?.progress || {}).length === 0;
@@ -249,12 +251,16 @@ function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; 
 
 export function getQuestTileClasses(originalClasses: string, quest: Quest, color: number | null | undefined, gradient: string | undefined): string {
     const {
+        ignoredQuestIDs,
+        ignoredQuestProfile,
         restyleQuestsUnclaimed,
         restyleQuestsClaimed,
         restyleQuestsIgnored,
         restyleQuestsExpired,
         restyleQuestsGradient
     } = settings.use([
+        "ignoredQuestIDs",
+        "ignoredQuestProfile",
         "restyleQuestsUnclaimed",
         "restyleQuestsClaimed",
         "restyleQuestsIgnored",
@@ -320,7 +326,7 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest, color
 }
 
 function makeDesktopCompatible(quests: Quest[]): void {
-    const { makeMobileQuestsDesktopCompatible } = settings.use(["makeMobileQuestsDesktopCompatible", "triggerQuestsRerender"]);
+    const { makeMobileQuestsDesktopCompatible, triggerQuestsRerender } = settings.use(["makeMobileQuestsDesktopCompatible", "triggerQuestsRerender"]);
 
     if (makeMobileQuestsDesktopCompatible) {
         quests.forEach(quest => {
@@ -352,17 +358,27 @@ function makeDesktopCompatible(quests: Quest[]): void {
 
 function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
     const {
+        ignoredQuestIDs,
+        ignoredQuestProfile,
         reorderQuests,
         unclaimedSubsort,
         claimedSubsort,
         ignoredSubsort,
-        expiredSubsort
+        expiredSubsort,
+        completeVideoQuestsInBackground,
+        completeGameQuestsInBackground,
+        triggerQuestsRerender
     } = settings.use([
+        "ignoredQuestIDs",
+        "ignoredQuestProfile",
         "reorderQuests",
         "unclaimedSubsort",
         "claimedSubsort",
         "ignoredSubsort",
-        "expiredSubsort"
+        "expiredSubsort",
+        "completeVideoQuestsInBackground",
+        "completeGameQuestsInBackground",
+        "triggerQuestsRerender"
     ]);
 
     makeDesktopCompatible(quests);
@@ -452,6 +468,16 @@ function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
 }
 
 export function getQuestTileStyle(quest: Quest | null): Record<string, string> {
+    const {
+        restyleQuests,
+        ignoredQuestIDs,
+        ignoredQuestProfile
+    } = settings.use([
+        "restyleQuests",
+        "ignoredQuestIDs",
+        "ignoredQuestProfile"
+    ]);
+
     const style: Record<string, string> = {};
     let themeColor: RGB | null = null;
 
@@ -775,6 +801,7 @@ function disguiseHomeButton(location: string): boolean {
 }
 
 function useQuestRerender(): number {
+    const { triggerQuestsRerender } = settings.use(["triggerQuestsRerender"]);
     const [renderTrigger, setRenderTrigger] = useState(0);
     useEffect(() => addRerenderCallback(() => setRenderTrigger(prev => prev + 1)), []);
     return renderTrigger;
@@ -791,10 +818,12 @@ function getLastFilterChoices(): { group: string; filter: string; }[] | null {
 }
 
 function setLastSortChoice(sort: string): void {
+    const { rememberQuestPageFilters } = settings.use(["rememberQuestPageFilters"]);
     settings.store.lastQuestPageSort = sort;
 }
 
 function setLastFilterChoices(filters: { group: string; filter: string; }[]): void {
+    const { rememberQuestPageFilters } = settings.use(["rememberQuestPageFilters"]);
     if (!filters || !Object.keys(filters).length || !Object.values(filters).every(f => f.group && f.filter)) { return; }
     settings.store.lastQuestPageFilters = JSON.parse(JSON.stringify(filters)).reduce((acc, item) => ({ ...acc, [item.filter]: item }), {});
 }

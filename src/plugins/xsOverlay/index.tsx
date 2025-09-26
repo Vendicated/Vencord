@@ -90,6 +90,7 @@ interface NotificationObject {
 }
 
 const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
+const logger = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
     webSocketPort: {

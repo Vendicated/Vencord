@@ -8,13 +8,17 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-uvs-");
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
+const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
+    useChannelName: filters.byCode("()=>null==")
+});
+
 const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
 
 type IconProps = Omit<React.ComponentPropsWithoutRef<"div">, "children"> & {

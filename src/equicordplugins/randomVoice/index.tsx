@@ -175,7 +175,7 @@ export default definePlugin({
         }
     ],
     flux: {
-        VOICE_STATE_UPDATES() {
+        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const currentUserId = UserStore.getCurrentUser().id;
             const myChannelId = VoiceStateStore.getVoiceStateForUser(currentUserId)?.channelId;
             if (!myChannelId || !settings.store.leaveEmpty) return;
