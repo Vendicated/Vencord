@@ -1,15 +1,20 @@
-/* eslint-disable */
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import fs from "fs";
 import os from "os";
 import path from "path";
+
 import { binBase64 as binBase64DarwinArm64 } from "./addons/active-window-v2.1.2-napi-v6-darwin-arm64";
 import { binBase64 as binBase64DarwinX64 } from "./addons/active-window-v2.1.2-napi-v6-darwin-x64";
 import { binBase64 as binBase64LinuxX64 } from "./addons/active-window-v2.1.2-napi-v6-linux-x64";
 import { binBase64 as binBase64Win32X64 } from "./addons/active-window-v2.1.2-napi-v6-win32-x64";
 import { Module, NativeWindowInfo } from "./types";
 
-const SUPPORTED_PLATFORMS = ['win32', 'linux', 'darwin'];
+const SUPPORTED_PLATFORMS = ["win32", "linux", "darwin"];
 
 function getBinBase64ForCurrentSystem(): string | undefined {
     switch (process.platform) {
