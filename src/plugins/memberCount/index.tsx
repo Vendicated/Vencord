@@ -36,19 +36,23 @@ export const ThreadMemberListStore = findStoreLazy("ThreadMemberListStore") as F
     getMemberListSections(channelId?: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
 };
 
-
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     toolTip: {
         type: OptionType.BOOLEAN,
-        description: "If the member count should be displayed on the server tooltip",
+        description: "Show member count on the server tooltip",
         default: true,
         restartNeeded: true
     },
     memberList: {
         type: OptionType.BOOLEAN,
-        description: "If the member count should be displayed on the member list",
+        description: "Show member count in the member list",
         default: true,
         restartNeeded: true
+    },
+    voiceActivity: {
+        type: OptionType.BOOLEAN,
+        description: "Show voice activity with member count in the member list",
+        default: true
     }
 });
 
@@ -58,8 +62,8 @@ export const cl = classNameFactory("vc-membercount-");
 
 export default definePlugin({
     name: "MemberCount",
-    description: "Shows the amount of online & total members in the server member list and tooltip",
-    authors: [Devs.Ven, Devs.Commandtechno],
+    description: "Shows the number of online members, total members, and users in voice channels on the server — in the member list and tooltip.",
+    authors: [Devs.Ven, Devs.Commandtechno, Devs.Apexo],
     settings,
 
     patches: [
@@ -82,6 +86,6 @@ export default definePlugin({
             predicate: () => settings.store.toolTip
         }
     ],
-    render: ErrorBoundary.wrap(MemberCount, { noop: true }),
+    render: ErrorBoundary.wrap(() => <MemberCount />, { noop: true }),
     renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });
