@@ -1198,8 +1198,8 @@ export default definePlugin({
                     // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress but not active.
                     // When the Quest Accepted button which has been enabled again by the above patch is clicked,
                     // resume the automatic completion of the Quest and disable the button again.
-                    match: /(\i.intl.string\(\i.\i#{intl::QUEST_ACCEPTED}\))/,
-                    replace: "$self.getQuestAcceptedButtonText(arguments[0].quest)??$1,onClick:()=>{$self.processQuestForAutoComplete(arguments[0].quest)}"
+                    match: /(\.CLOUD_GAMING_ACTIVITY.{0,500})(\i.\i.\i\(\i.\i#{intl::QUEST_ACCEPTED}\))/,
+                    replace: "$1$self.getQuestAcceptedButtonText(arguments[0].quest)??$2,onClick:()=>{$self.processQuestForAutoComplete(arguments[0].quest)}"
                 }
             ]
         },
