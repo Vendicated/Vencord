@@ -70,40 +70,12 @@ export default definePlugin({
                     type: "UPDATE_BACKGROUND_GRADIENT_PRESET",
                     presetId: isDark ? this.settings.store.darkMode : this.settings.store.lightMode
                 });
-                FluxDispatcher.dispatch({
-                    type: "USER_SETTINGS_PROTO_UPDATE",
-                    partial: true,
-                    local: true,
-                    settings: {
-                        "type": 1,
-                        "proto": {
-                            "appearance": {
-                                "theme": isDark ? 1 : 2,
-                                "clientThemeSettings": {
-                                    "backgroundGradientPresetId": {
-                                        "value": isDark ? this.settings.store.darkMode : this.settings.store.lightMode
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
             }
-            else {
-                FluxDispatcher.dispatch({
-                    type: "USER_SETTINGS_PROTO_UPDATE",
-                    partial: true,
-                    local: true,
-                    settings: {
-                        "type": 1,
-                        "proto": {
-                            "appearance": {
-                                "theme": isDark ? 1 : 2,
-                            }
-                        }
-                    }
-                });
-            }
+            FluxDispatcher.dispatch({
+                type: "SET_THEME_OVERRIDE",
+                theme: isDark ? "dark" : "light"
+            });
+
         };
 
         this._mediaQuery.addEventListener("change", this._applyTheme);
