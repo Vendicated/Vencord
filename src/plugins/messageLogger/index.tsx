@@ -312,7 +312,7 @@ export default definePlugin({
                     oldMsg === newMsg,
             );
 
-            const { showEditDiffs, inlineEdits } = settings.use(["showEditDiffs", "inlineEdits"]);
+            const { inlineEdits } = settings.use(["inlineEdits"]);
 
             return inlineEdits && (
                 <React.Fragment key={disabledDiffMessages.has(messageId) ? `diff-off-${messageId}` : `diff-on-${messageId}`}>

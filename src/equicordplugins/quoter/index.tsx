@@ -1,10 +1,10 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
@@ -20,44 +20,28 @@ enum ImageStyle {
     inspirational
 }
 
-const messagePatch: NavContextMenuPatchCallback = (children, { message }) => {
-    recentmessage = message;
-    if (!message.content) return;
-
-    const buttonElement =
-        <Menu.MenuItem
-            id="vc-quote"
-            label="Quote"
-            icon={QuoteIcon}
-            action={async () => {
-                openModal(props => <QuoteModal {...props} />);
-            }}
-        />;
-
-    const group = findGroupChildrenByChildId("copy-text", children);
-    if (!group) {
-        children.push(buttonElement);
-        return;
-    }
-
-    group.splice(
-        group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, buttonElement
-    );
-};
-
-let recentmessage: Message;
-let grayscale;
-let setStyle: ImageStyle = ImageStyle.inspirational;
-let customMessage: string = "";
-
 enum userIDOptions {
     displayName,
     userName,
     userId
 }
+
+interface QuoteImageOptions {
+    avatarUrl: string;
+    quoteOld: string;
+    grayScale: boolean;
+    imageStyle: ImageStyle;
+    author: {
+        username: string;
+        globalName?: string;
+        id: string;
+    };
+    userIdentifier: userIDOptions;
+}
+
+
 const settings = definePluginSettings({
-    userIdentifier:
-    {
+    userIdentifier: {
         type: OptionType.SELECT,
         description: "What the author's name should be displayed as",
         options: [
@@ -71,14 +55,28 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Quoter",
     description: "Adds the ability to create an inspirational quote image from a message",
-    authors: [Devs.Samwich],
+    authors: [Devs.Samwich, Devs.thororen],
+    settings,
     contextMenus: {
-        "message": messagePatch
-    },
-    settings
+        "message": (children, { message }) => {
+            if (!message.content) return;
+            const buttonElement = (
+                <Menu.MenuItem
+                    id="vc-quote"
+                    label="Quote"
+                    icon={QuoteIcon}
+                    action={() => openModal(props => <QuoteModal message={message} {...props} />)}
+                />
+            );
+
+            const group = findGroupChildrenByChildId("copy-text", children);
+            if (!group) children.push(buttonElement);
+            else group.splice(group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, buttonElement);
+        }
+    }
 });
 
-function sizeUpgrade(url) {
+function sizeUpgrade(url: string) {
     const u = new URL(url);
     u.searchParams.set("size", "512");
     return u.toString();
@@ -87,68 +85,49 @@ function sizeUpgrade(url) {
 const preparingSentence: string[] = [];
 const lines: string[] = [];
 
-async function createQuoteImage(avatarUrl: string, quoteOld: string, grayScale: boolean): Promise<Blob> {
+async function createQuoteImage(options: QuoteImageOptions): Promise<Blob> {
+    const { avatarUrl, quoteOld, grayScale, imageStyle, author, userIdentifier } = options;
+
     const quote = FixUpQuote(quoteOld);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Cant get 2d rendering context :(");
 
-    if (!ctx) {
-        throw new Error("Cant get 2d rendering context :(");
-    }
-
-    let name: string = "";
-
-    switch (settings.store.userIdentifier) {
+    let name = "";
+    switch (userIdentifier) {
         case userIDOptions.displayName:
-            // @ts-ignore
-            const meow = recentmessage.author.globalName;
-            if (meow) {
-                name = meow;
-            }
-            else {
-                name = recentmessage.author.username;
-            }
+            name = author.globalName || author.username;
             break;
         case userIDOptions.userName:
-            name = recentmessage.author.username;
+            name = author.username;
             break;
         case userIDOptions.userId:
-            name = recentmessage.author.id;
+            name = author.id;
             break;
         default:
-            name = "MAN WTF HAPPENED";
-            break;
+            name = "Unknown";
     }
 
-    switch (setStyle) {
+    switch (imageStyle) {
         case ImageStyle.inspirational:
-
             const cardWidth = 1200;
             const cardHeight = 600;
-
             canvas.width = cardWidth;
             canvas.height = cardHeight;
 
             ctx.fillStyle = "#000";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, cardWidth, cardHeight);
 
             const avatarBlob = await fetchImageAsBlob(avatarUrl);
-            const fadeBlob = await fetchImageAsBlob("https://raw.githubusercontent.com/Equicord/Equibored/refs/heads/main/icons/quoter/quoter.png");
+            const fadeBlob = await fetchImageAsBlob("https://raw.githubusercontent.com/Equicord/Equibored/main/icons/quoter/quoter.png");
 
             const avatar = new Image();
             const fade = new Image();
 
-            const avatarPromise = new Promise<void>(resolve => {
-                avatar.onload = () => resolve();
-                avatar.src = URL.createObjectURL(avatarBlob);
-            });
-
-            const fadePromise = new Promise<void>(resolve => {
-                fade.onload = () => resolve();
-                fade.src = URL.createObjectURL(fadeBlob);
-            });
-
-            await Promise.all([avatarPromise, fadePromise]);
+            await Promise.all([
+                new Promise<void>(resolve => { avatar.onload = () => resolve(); avatar.src = URL.createObjectURL(avatarBlob); }),
+                new Promise<void>(resolve => { fade.onload = () => resolve(); fade.src = URL.createObjectURL(fadeBlob); })
+            ]);
 
             ctx.drawImage(avatar, 0, 0, cardHeight, cardHeight);
 
@@ -164,42 +143,69 @@ async function createQuoteImage(avatarUrl: string, quoteOld: string, grayScale: 
             ctx.fillStyle = "#fff";
             ctx.font = "italic 20px Georgia";
             const quoteWidth = cardWidth / 2 - 50;
-            const quoteX = ((cardWidth - cardHeight));
+            const quoteX = cardWidth - cardHeight;
             const quoteY = cardHeight / 2 - 10;
             wrapText(ctx, `"${quote}"`, quoteX, quoteY, quoteWidth, 20, preparingSentence, lines);
 
             const wrappedTextHeight = lines.length * 25;
 
             ctx.font = "bold 16px Georgia";
-            const authorNameX = (cardHeight * 1.5) - (ctx.measureText(`- ${name}`).width / 2) - 30;
+            const authorNameX = cardHeight * 1.5 - ctx.measureText(`- ${name}`).width / 2 - 30;
             const authorNameY = quoteY + wrappedTextHeight + 30;
-
             ctx.fillText(`- ${name}`, authorNameX, authorNameY);
+
             preparingSentence.length = 0;
             lines.length = 0;
+
             return await canvasToBlob(canvas);
     }
 }
 
-function registerStyleChange(style) {
-    setStyle = style;
-    GeneratePreview();
+function generateFileNamePreview(message: string) {
+    const words = message.split(" ");
+    return words.length >= 6 ? words.slice(0, 6).join(" ") : words.join(" ");
 }
 
-function QuoteModal(props: ModalProps) {
+function QuoteModal({ message, ...props }: ModalProps & { message: Message; }) {
     const [gray, setGray] = useState(true);
-    useEffect(() => {
-        grayscale = gray;
-        GeneratePreview();
-    }, [gray]);
+    const [style, setStyle] = useState(ImageStyle.inspirational);
+    const [quoteImage, setQuoteImage] = useState<Blob | null>(null);
+    const { userIdentifier } = settings.store;
+    const safeContent = message.content ? message.content : "";
 
-    const safeContent = recentmessage && recentmessage.content ? recentmessage.content : "";
+    const generateImage = async () => {
+        const image = await createQuoteImage({
+            avatarUrl: sizeUpgrade(message.author.getAvatarURL()),
+            quoteOld: safeContent,
+            grayScale: gray,
+            imageStyle: style,
+            author: message.author,
+            userIdentifier
+        });
+        setQuoteImage(image);
+        document.getElementById("quoterPreview")?.setAttribute("src", URL.createObjectURL(image));
+    };
 
-    const [custom, setCustom] = useState(safeContent);
-    useEffect(() => {
-        customMessage = custom;
-        GeneratePreview();
-    }, [custom]);
+    useEffect(() => { generateImage(); }, [gray, style, safeContent]);
+
+    const Export = () => {
+        if (!quoteImage) return;
+        const link = document.createElement("a");
+        const preview = generateFileNamePreview(safeContent);
+        link.href = URL.createObjectURL(quoteImage);
+        link.download = `${preview} - ${message.author.username}.png`;
+        link.click();
+        link.remove();
+    };
+
+    const SendInChat = () => {
+        if (!quoteImage) return;
+        const preview = generateFileNamePreview(safeContent);
+        const file = new File([quoteImage], `${preview} - ${message.author.username}.png`, { type: "image/png" });
+        // @ts-expect-error typing issue
+        UploadHandler.promptToUpload([file], getCurrentChannel(), 0);
+        props.onClose?.();
+    };
 
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
@@ -210,59 +216,27 @@ function QuoteModal(props: ModalProps) {
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
             <ModalContent scrollbarType="none">
-                <img alt="" src="" id={"quoterPreview"} style={{ borderRadius: "20px", width: "100%" }}></img>
-                <br></br><br></br>
+                <img alt="" src="" id="quoterPreview" style={{ borderRadius: "20px", width: "100%" }} />
+                <br /><br />
+                <br /><br />
                 <Switch value={gray} onChange={setGray}>Grayscale</Switch>
-                <Select look={1}
-                    options={Object.keys(ImageStyle).filter(key => isNaN(parseInt(key, 10))).map(key => ({
-                        label: key.charAt(0).toUpperCase() + key.slice(1),
-                        value: ImageStyle[key as keyof typeof ImageStyle]
-                    }))}
-                    select={v => registerStyleChange(v)} isSelected={v => v === setStyle}
-                    serialize={v => v}></Select>
+                <Select
+                    look={1}
+                    options={Object.keys(ImageStyle)
+                        .filter(key => isNaN(parseInt(key, 10)))
+                        .map(key => ({
+                            label: key.charAt(0).toUpperCase() + key.slice(1),
+                            value: ImageStyle[key as keyof typeof ImageStyle]
+                        }))}
+                    select={v => setStyle(v)}
+                    isSelected={v => v === style}
+                    serialize={v => v}
+                />
                 <br />
-                <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={() => Export()} style={{ display: "inline-block", marginRight: "5px" }}>Export</Button>
-                <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={() => SendInChat(props.onClose)} style={{ display: "inline-block" }}>Send</Button>
+                <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={async () => await Export()} style={{ display: "inline-block", marginRight: "5px" }}>Export</Button>
+                <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.SMALL} onClick={async () => await SendInChat()} style={{ display: "inline-block" }}>Send</Button>
             </ModalContent>
             <br></br>
         </ModalRoot>
     );
-}
-
-async function SendInChat(onClose) {
-    const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.content, grayscale);
-    const preview = generateFileNamePreview(recentmessage.content);
-    const imageName = `${preview} - ${recentmessage.author.username}`;
-    const file = new File([image], `${imageName}.png`, { type: "image/png" });
-    // @ts-expect-error typing issue
-    UploadHandler.promptToUpload([file], getCurrentChannel(), 0);
-    onClose();
-}
-
-async function Export() {
-    const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.content, grayscale);
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(image);
-    const preview = generateFileNamePreview(recentmessage.content);
-
-    const imageName = `${preview} - ${recentmessage.author.username}`;
-    link.download = `${imageName}.png`;
-    link.click();
-    link.remove();
-}
-
-async function GeneratePreview() {
-    const image = await createQuoteImage(sizeUpgrade(recentmessage.author.getAvatarURL()), recentmessage.content, grayscale);
-    document.getElementById("quoterPreview")?.setAttribute("src", URL.createObjectURL(image));
-}
-
-function generateFileNamePreview(message) {
-    const words = message.split(" ");
-    let preview;
-    if (words.length >= 6) {
-        preview = words.slice(0, 6).join(" ");
-    } else {
-        preview = words.join(" ");
-    }
-    return preview;
 }

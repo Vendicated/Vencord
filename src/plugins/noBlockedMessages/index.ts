@@ -147,7 +147,7 @@ export default definePlugin({
     },
 
     filterStream(channelStream: [ChannelStreamGroupProps | ChannelStreamMessageProps | ChannelStreamDividerProps]) {
-        const { alsoHideIgnoredUsers, disableNotifications, hideBlockedUserReplies, allowAutoModMessages, defaultHideUsers, overrideUsers } = settings.use();
+        const { alsoHideIgnoredUsers } = settings.use();
 
         const newChannelStream = channelStream.map(item => {
             if (item.type === "MESSAGE_GROUP_BLOCKED" || (item.type === "MESSAGE_GROUP_IGNORED" && alsoHideIgnoredUsers)) {

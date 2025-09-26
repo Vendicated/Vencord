@@ -5,7 +5,6 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { getUserSettingLazy } from "@api/UserSettings";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -102,8 +101,6 @@ interface Item {
 interface SFMR {
     item: Item;
 }
-
-const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 const applicationId = "1325126169179197500";
 const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";

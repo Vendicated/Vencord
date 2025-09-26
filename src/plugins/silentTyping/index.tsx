@@ -121,21 +121,11 @@ const SilentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
     const {
         enabledGlobally,
         chatIcon,
-        defaultHidden,
-        enabledLocations,
-        disabledLocations,
-        chatIconLeftClickAction,
-        chatIconMiddleClickAction,
-        chatIconRightClickAction,
+        defaultHidden
     } = settings.use([
         "enabledGlobally",
         "chatIcon",
-        "defaultHidden",
-        "enabledLocations",
-        "disabledLocations",
-        "chatIconLeftClickAction",
-        "chatIconMiddleClickAction",
-        "chatIconRightClickAction",
+        "defaultHidden"
     ]);
 
     const validChat = ["normal", "sidebar"].some(x => type.analyticsName === x);
@@ -238,16 +228,12 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
         chatIcon,
         chatContextMenu,
         enabledGlobally,
-        defaultHidden,
-        hideChatBoxTypingIndicators,
-        hideMembersListTypingIndicators
+        defaultHidden
     } = settings.use([
         "chatIcon",
         "chatContextMenu",
         "enabledGlobally",
-        "defaultHidden",
-        "hideChatBoxTypingIndicators",
-        "hideMembersListTypingIndicators"
+        "defaultHidden"
     ]);
 
     if (!chatContextMenu) return;

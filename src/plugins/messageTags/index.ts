@@ -22,7 +22,6 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const EMOTE = "<:luna:1035316192220553236>";
-const DATA_KEY = "MessageTags_TAGS";
 const MessageTagsMarker = Symbol("MessageTags");
 
 interface Tag {

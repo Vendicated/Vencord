@@ -80,7 +80,6 @@ const enum ChannelFlags {
 
 
 const ChatScrollClasses = findByPropsLazy("auto", "managedReactiveScroller");
-const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
 const ChannelBeginHeader = findComponentByCodeLazy("#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}");
 const TagComponent = findComponentByCodeLazy("#{intl::FORUM_TAG_A11Y_FILTER_BY_TAG}");
 

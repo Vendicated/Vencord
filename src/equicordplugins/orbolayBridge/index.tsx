@@ -22,17 +22,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { VoiceState } from "@vencord/discord-types";
 import { ChannelStore, FluxDispatcher, GuildMemberStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
 
-interface ChannelState {
-    userId: string;
-    channelId: string;
-    deaf: boolean;
-    mute: boolean;
-    stream: boolean;
-    selfDeaf: boolean;
-    selfMute: boolean;
-    selfStream: boolean;
-}
-
 const settings = definePluginSettings({
     port: {
         type: OptionType.NUMBER,

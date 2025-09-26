@@ -354,7 +354,7 @@ function renderUsername(
     const isVoice = type === "voiceChannel";
 
     const config = hookless ? settings.store : settings.use();
-    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, triggerNameRerender } = config;
+    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor } = config;
 
     const canUseGradient = ((author as GuildMember)?.guildId ? (GuildStore.getGuild((author as GuildMember).guildId) ?? {}).premiumFeatures?.features.includes("ENHANCED_ROLE_COLORS") : false);
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
@@ -921,22 +921,22 @@ export default definePlugin({
     ],
 
     flux: {
-        RELATIONSHIP_UPDATE(data) {
+        RELATIONSHIP_UPDATE() {
             // Allows rerendering when changing friend names.
             settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
         },
 
-        RUNNING_STREAMER_TOOLS_CHANGE(data) {
+        RUNNING_STREAMER_TOOLS_CHANGE() {
             // Allows rerendering when toggling streamer mode.
             settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
         },
 
-        ACCESSIBILITY_SYSTEM_PREFERS_REDUCED_MOTION_CHANGED(data) {
+        ACCESSIBILITY_SYSTEM_PREFERS_REDUCED_MOTION_CHANGED() {
             // Allows rerendering when toggling reduced motion.
             settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
         },
 
-        ACCESSIBILITY_SET_PREFERS_REDUCED_MOTION(data) {
+        ACCESSIBILITY_SET_PREFERS_REDUCED_MOTION() {
             // Allows rerendering when toggling reduced motion.
             settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
         }

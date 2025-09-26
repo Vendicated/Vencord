@@ -364,7 +364,6 @@ function validateQuestButtonSetting() {
 
 function validateDisableQuestSetting() {
     const {
-        disableQuestsEverything,
         disableQuestsDiscoveryTab,
         disableQuestsFetchingQuests,
         disableQuestsPopupAboveAccountPanel,
@@ -372,7 +371,6 @@ function validateDisableQuestSetting() {
         disableQuestsGiftInventoryRelocationNotice,
         disableFriendsListActiveNowPromotion
     } = settings.use([
-        "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
         "disableQuestsFetchingQuests",
         "disableQuestsPopupAboveAccountPanel",
