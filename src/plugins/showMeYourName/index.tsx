@@ -208,8 +208,6 @@ function validTemplate(value: string) {
             suffix.length > 3 ||
             (!!prefix && !symbolPattern.test(prefix)) ||
             (!!suffix && !symbolPattern.test(suffix)) ||
-            (!prefix && !!suffix) ||
-            (!!prefix && !suffix) ||
             targetProcessedNames.length > 4 ||
             targetProcessedNames.some(name => !["friend", "nick", "display", "user"].includes(name.trim()))
         );
@@ -354,7 +352,7 @@ function renderUsername(
     const isVoice = type === "voiceChannel";
 
     const config = hookless ? settings.store : settings.use();
-    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, triggerNameRerender } = config;
+    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, nameSeparator, triggerNameRerender } = config;
 
     const canUseGradient = ((author as GuildMember)?.guildId ? (GuildStore.getGuild((author as GuildMember).guildId) ?? {}).premiumFeatures?.features.includes("ENHANCED_ROLE_COLORS") : false);
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
@@ -363,7 +361,7 @@ function renderUsername(
     const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "", canUseGradient) : null;
     const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "", canUseGradient) : null;
     const resolvedFriendNameColor = author ? resolveColor(author, friendNameColor.trim(), "", canUseGradient) : null;
-    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate" };
+    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate", "white-space": "pre" };
     const [username, display, nick, friend] = getProcessedNames(author, truncateAllNamesWithStreamerMode, discriminators);
 
     const names: Record<string, [string | null, object | null]> = {
@@ -482,7 +480,8 @@ function renderUsername(
     third = remainingNames.shift();
     fourth = remainingNames.shift();
 
-    const topRoleStyle = isMention || isReactionsPopout ? resolveColor(author, "Role", "", canUseGradient) : null;
+    const useTopRoleStyle = isMention || isReactionsPopout;
+    const topRoleStyle = resolveColor(author, "Role", "", canUseGradient);
     const hasGradient = !!topRoleStyle?.gradient && Object.keys(topRoleStyle.gradient).length > 0;
     const message = channelId && messageId ? MessageStore.getMessage(channelId, messageId) : null;
     const groupId = (message as any)?.showMeYourNameGroupId || null;
@@ -496,16 +495,15 @@ function renderUsername(
     const shouldAnimateGradients = shouldGradientGlow && !AccessibilityStore.useReducedMotion;
     const shouldAnimateSecondaryNames = animateGradients && !ignoreGradients;
 
-    // Replace spaces and @ symbols because attr(data-text) seems to struggle with them.
-    const firstDataText = mentionSymbol + first.name.replaceAll(/\s/g, ".").replaceAll(/@/g, "at");
-    const secondDataText = second && shouldAnimateSecondaryNames ? (second.prefix + second.name + second.suffix).replaceAll(/\s/g, ".").replaceAll(/@/g, "at") : "";
-    const thirdDataText = third && shouldAnimateSecondaryNames ? (third.prefix + third.name + third.suffix).replaceAll(/\s/g, ".").replaceAll(/@/g, "at") : "";
-    const fourthDataText = fourth && shouldAnimateSecondaryNames ? (fourth.prefix + fourth.name + fourth.suffix).replaceAll(/\s/g, ".").replaceAll(/@/g, "at") : "";
-    const allDataText = [firstDataText, secondDataText, thirdDataText, fourthDataText].filter(Boolean).join(" ").trim().replaceAll(/\s/g, ".").replaceAll(/@/g, "at");
+    const firstDataText = mentionSymbol + first.name;
+    const secondDataText = second && shouldAnimateSecondaryNames ? (second.prefix + second.name + second.suffix) : "";
+    const thirdDataText = third && shouldAnimateSecondaryNames ? (third.prefix + third.name + third.suffix) : "";
+    const fourthDataText = fourth && shouldAnimateSecondaryNames ? (fourth.prefix + fourth.name + fourth.suffix) : "";
+    const allDataText = [firstDataText, secondDataText, thirdDataText, fourthDataText].filter(Boolean).join(nameSeparator).trim();
 
     // Only mentions and reactions popouts should patch in the gradient glow or else a double glow will appear on messages.
     const hoveringClass = (isHovering ? " show-me-your-name-gradient-hovered" : "");
-    const gradientClasses = isMention || isReactionsPopout
+    const gradientClasses = useTopRoleStyle
         ? "show-me-your-name-gradient show-me-your-name-gradient-inherit-bg" + hoveringClass
         : "show-me-your-name-gradient show-me-your-name-gradient-unset-bg" + hoveringClass;
 
@@ -534,7 +532,7 @@ function renderUsername(
                 <span
                     className={(shouldGradientGlow ? (gradientClasses + " " + firstGroupClasses) : firstGroupClasses)}
                     data-text={shouldGradientGlow ? firstDataText : undefined}
-                    style={(shouldGradientGlow && topRoleStyle ? topRoleStyle.gradient.animated : undefined) as React.CSSProperties}
+                    style={(shouldGradientGlow && useTopRoleStyle && topRoleStyle ? topRoleStyle.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span
                         className={firstNameClasses}
@@ -556,8 +554,8 @@ function renderUsername(
                     data-text={shouldGradientGlow && secondDataText ? secondDataText : undefined}
                     style={(shouldGradientGlow && shouldAnimateSecondaryNames ? second.style.gradient.animated : undefined) as React.CSSProperties}
                 >
-                    <span>&nbsp;</span>
                     <span style={affixColor as React.CSSProperties} className={prefixClasses}>
+                        <span>{nameSeparator}</span>
                         {second.prefix}</span>
                     <span
                         // On non-primary names, allow disabling the gradients completely, or just their animation & glow.
@@ -582,8 +580,8 @@ function renderUsername(
                     data-text={shouldGradientGlow && thirdDataText ? thirdDataText : undefined}
                     style={(shouldGradientGlow && shouldAnimateSecondaryNames ? third.style.gradient.animated : undefined) as React.CSSProperties}
                 >
-                    <span>&nbsp;</span>
                     <span style={affixColor as React.CSSProperties} className={prefixClasses}>
+                        <span>{nameSeparator}</span>
                         {third.prefix}</span>
                     <span
                         className={thirdNameClasses}
@@ -607,8 +605,8 @@ function renderUsername(
                     data-text={shouldGradientGlow && fourthDataText ? fourthDataText : undefined}
                     style={(shouldGradientGlow && shouldAnimateSecondaryNames ? fourth.style.gradient.animated : undefined) as React.CSSProperties}
                 >
-                    <span>&nbsp;</span>
                     <span style={affixColor as React.CSSProperties} className={prefixClasses}>
+                        <span>{nameSeparator}</span>
                         {fourth.prefix}</span>
                     <span
                         className={fourthNameClasses}
@@ -734,6 +732,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         description: "For the second, third, and fourth names, if the role has a gradient, animate it. This is disabled by \"Ignore Gradients\" and reduced motion.",
+    },
+    nameSeparator: {
+        type: OptionType.STRING,
+        description: "The separator to use between names. The default is a single space.",
+        default: " ",
     },
     includedNames: {
         type: OptionType.STRING,
