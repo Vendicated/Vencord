@@ -6,7 +6,7 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { PaintbrushIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
@@ -133,10 +133,6 @@ export default definePlugin({
         await requireSettingsMenu();
 
         enableStyle(css);
-        if (Settings.plugins?.RemixMe?.enabled) {
-            Settings.plugins.RemixMe.enabled = false;
-            settings.store.remixMe = true;
-        }
         if (settings.store.remixMe) {
             addMessagePreSendListener(handleMessage);
         }
