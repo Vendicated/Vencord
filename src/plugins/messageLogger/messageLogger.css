@@ -84,6 +84,18 @@
     pointer-events: none;
 }
 
+.messagelogger-diff-view {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.messagelogger-diff-original,
+.messagelogger-diff-updated {
+    display: block;
+    white-space: pre-wrap;
+}
+
 /* when diffs are disabled for a specific message, remove diff colors */
 .messagelogger-diff-disabled .messagelogger-diff-added,
 .messagelogger-diff-disabled .messagelogger-diff-removed {

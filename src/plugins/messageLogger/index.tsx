@@ -166,40 +166,78 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (
     );
 };
 
-function renderDiffParts(diffParts: DiffPart[], message: Message) {
-    return diffParts.map((part, index) => {
-        const parsedContent = Parser.parse(part.text, true, {
-            channelId: message.channel_id,
-            messageId: message.id,
-            allowLinks: true,
-            allowHeading: true,
-            allowList: true,
-            allowEmojiLinks: true,
-            viewingChannelId: SelectedChannelStore.getChannelId(),
-        });
-
-        if (part.type === "unchanged") {
-            return React.createElement("span", { key: index }, parsedContent);
-        } else if (part.type === "added") {
-            return React.createElement("span", {
-                key: index,
-                className: "messagelogger-diff-added"
-            }, parsedContent);
-        } else if (part.type === "removed") {
-            return React.createElement("span", {
-                key: index,
-                className: "messagelogger-diff-removed"
-            }, parsedContent);
-        }
-        return React.createElement("span", { key: index }, parsedContent);
+function createDiffSegment(part: DiffPart, message: Message, key: React.Key, highlightType?: "removed" | "added") {
+    const parsedContent = Parser.parse(part.text, true, {
+        channelId: message.channel_id,
+        messageId: message.id,
+        allowLinks: true,
+        allowHeading: true,
+        allowList: true,
+        allowEmojiLinks: true,
+        viewingChannelId: SelectedChannelStore.getChannelId(),
     });
+
+    let className: string | undefined;
+    if (part.type === "added" || part.type === "removed") {
+        if (!highlightType || highlightType === part.type) {
+            className = `messagelogger-diff-${part.type}`;
+        }
+    }
+
+    return React.createElement("span", { key, className }, parsedContent);
+}
+
+function renderDiffParts(diffParts: DiffPart[], message: Message) {
+    return diffParts.map((part, index) => createDiffSegment(part, message, index));
+}
+
+function renderFilteredDiffParts(diffParts: DiffPart[], message: Message, mode: "removed" | "added") {
+    const segments: React.ReactNode[] = [];
+
+    diffParts.forEach((part, index) => {
+        if (mode === "removed" && part.type === "added") return;
+        if (mode === "added" && part.type === "removed") return;
+
+        segments.push(createDiffSegment(part, message, `${mode}-${index}`, mode));
+    });
+
+    return segments;
 }
 
 export function parseEditContent(content: string, message: Message, previousContent?: string) {
     const perMessageDiffEnabled = !disabledDiffMessages.has(message.id);
     if (previousContent && content !== previousContent && settings.store.showEditDiffs && perMessageDiffEnabled) {
         const diffParts = createMessageDiff(content, previousContent);
+        const useSeparatedDiffs = settings.store.separatedDiffs;
+
+        if (useSeparatedDiffs) {
+            const highlightCurrent = previousContent === message.content;
+            const originalView = renderFilteredDiffParts(diffParts, message, "removed");
+
+            if (highlightCurrent) {
+                (message as any).customRenderedContent = {
+                    __messageloggerDiff: true,
+                    content: renderFilteredDiffParts(diffParts, message, "added"),
+                };
+            } else if ((message as any).customRenderedContent?.__messageloggerDiff) {
+                delete (message as any).customRenderedContent;
+            }
+
+            return React.createElement("div", { className: "messagelogger-diff-view" },
+                React.createElement("div", { className: "messagelogger-diff-original" }, originalView),
+                !highlightCurrent && React.createElement("div", { className: "messagelogger-diff-updated" }, renderFilteredDiffParts(diffParts, message, "added")),
+            );
+        }
+
+        if ((message as any).customRenderedContent?.__messageloggerDiff) {
+            delete (message as any).customRenderedContent;
+        }
+
         return renderDiffParts(diffParts, message);
+    }
+
+    if ((message as any).customRenderedContent?.__messageloggerDiff) {
+        delete (message as any).customRenderedContent;
     }
 
     return Parser.parse(content, true, {
@@ -274,6 +312,21 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show visual differences between edited message versions",
         default: false,
+        onChange: value => {
+            if (value && settings.store.separatedDiffs) {
+                settings.store.separatedDiffs = false;
+            }
+        },
+    },
+    separatedDiffs: {
+        type: OptionType.BOOLEAN,
+        description: "Separate addition and removals in diffs for a more readable differential",
+        default: false,
+        onChange: value => {
+            if (value && settings.store.showEditDiffs) {
+                settings.store.showEditDiffs = false;
+            }
+        },
     },
 });
 
