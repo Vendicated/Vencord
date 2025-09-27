@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { sendBotMessage } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -32,7 +33,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, shortGitHash, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, SelectedChannelStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -40,7 +41,7 @@ import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
-const CodeBlockRe = /```js\n(.+?)```/s;
+const CodeBlockRe = /```snippet\n(.+?)```/s;
 
 const TrustedRolesIds = [
     VC_CONTRIB_ROLE_ID, // Vencord Contributor
@@ -388,7 +389,14 @@ export default definePlugin({
                             key="vc-run-snippet"
                             onClick={async () => {
                                 try {
-                                    await AsyncFunction(match[1])();
+                                    const result = await AsyncFunction(match[1])();
+                                    const stringed = String(result);
+                                    if (stringed) {
+                                        await sendBotMessage(SelectedChannelStore.getChannelId(), {
+                                            content: stringed
+                                        });
+                                    }
+
                                     showToast("Success!", Toasts.Type.SUCCESS);
                                 } catch (e) {
                                     new Logger(this.name).error("Error while running snippet:", e);

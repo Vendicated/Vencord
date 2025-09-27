@@ -92,7 +92,7 @@
         "typescript-eslint": "^8.28.0",
         "typescript-transform-paths": "^3.5.5"
     },
-    "packageManager": "pnpm@10.14.0",
+    "packageManager": "pnpm@10.17.1",
     "pnpm": {
         "patchedDependencies": {
             "eslint@9.20.1": "patches/eslint@9.20.1.patch",
