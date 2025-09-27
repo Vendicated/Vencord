@@ -64,13 +64,12 @@ export default definePlugin({
                 }
             ]
         },
-        // Fix the settings cog context menu to work properly
         {
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: {
-                // Skip the check discord performs to make sure the section is valid
-                match: /(?<=function\((\i),(\i),\i\)\{)(?=let \i=Object.values\(\i\.\i\).*?(\(0,\i\.openUserSettings\))\()/,
-                replace: (_, target, section, func) => `${func}(${target},{section:${section}});return;`
+                // Skip the check Discord performs to make sure the section being selected in the user settings context menu is valid
+                match: /(?<=function\((\i),(\i),\i\)\{)(?=let \i=Object.values\(\i\.\i\).+?(\(0,\i\.openUserSettings\))\()/,
+                replace: (_, settingsPanel, section, openUserSettings) => `${openUserSettings}(${settingsPanel},{section:${section}});return;`
             }
         }
     ],
