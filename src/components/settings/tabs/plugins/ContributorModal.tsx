@@ -12,7 +12,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
-import { classes, pluralise } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Translate } from "@utils/translation";
 import { User } from "@vencord/discord-types";
