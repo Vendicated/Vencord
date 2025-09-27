@@ -155,7 +155,7 @@ for (const p of pluginsValues) {
 
             // TODO remove this in a few months when everyone has updated.
             if (
-                (def.type === OptionType.ARRAY || def.type === OptionType.USERS || def.type === OptionType.GUILDS || def.type === OptionType.CHANNELS)
+                (def.type === OptionType.ARRAY || def.type === OptionType.USERS || def.type === OptionType.GUILDS || def.type === OptionType.CHANNELS || def.type === OptionType.ROLES)
                 && typeof p.settings.store[name] === "string"
             ) {
                 if (p.settings.store[name] === "")

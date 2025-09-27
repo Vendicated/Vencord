@@ -9,13 +9,13 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { OptionType, PluginOptionArray } from "@utils/types";
-import { Channel, Guild,SelectOption } from "@vencord/discord-types";
+import { Channel, Guild, Role, SelectOption } from "@vencord/discord-types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Avatar,
     Button,
     ChannelStore,
-    Flex,
+    Flex, GuildRoleStore,
     GuildStore,
     IconUtils,
     React,
@@ -27,6 +27,7 @@ import {
 } from "@webpack/common";
 
 import { SettingProps, SettingsSection } from "./Common";
+import { Logger } from "@utils/Logger";
 
 
 const cl = classNameFactory("vc-plugin-modal-");
@@ -48,7 +49,7 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
     const [text, setText] = useState<string>("");
 
     const type = option.type === OptionType.GUILDS ? "guild" :
-        option.type === OptionType.USERS ? "user" : "channel";
+        option.type === OptionType.USERS ? "user" : option.type === OptionType.CHANNELS ? "channel" : "role";
 
     function ensureSettingsMigrated(): string[] | undefined {
         // in case the settings get manually overridden without a restart of Vencord itself this will prevent crashing
@@ -329,6 +330,72 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
         </div>;
     }
 
+    function renderRoleView() {
+        const [guild, setGuild] = useState<string>();
+
+        const renderRoleSymbol = (e: SelectOption) => {
+            if (!e || e.value === "" || e.label === e.value || !guild) return null;
+            const role = GuildRoleStore.getRole(guild, e.value);
+            if (!role || !role.icon) return null;
+            return <img
+                className={cl("role-icon")}
+                src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.webp?size=24&quality=lossless`}
+                alt={"role icon"}
+            />;
+        };
+
+        const guildSelect = <SearchableSelect
+            className={cl("roles-select-guild-select")}
+            options={convertToSelectOption(Object.keys(GuildStore.getGuilds()), OptionType.GUILDS)}
+            multi={false}
+            value={!guild ? void 0 : convertToSelectOption([guild], OptionType.GUILDS)[0]}
+            closeOnSelect={true}
+            placeholder="Select a Server to pick roles from."
+            renderOptionPrefix={renderGuildIcon}
+            onChange={(v: string) => setGuild(v)}
+        />;
+
+
+        const getSelectedValues = () => {
+            if (!guild) return [];
+            return GuildRoleStore.getSortedRoles(guild).filter(r => items.includes(r.id)).map(role => ({
+                label: role.name,
+                value: role.id,
+            })) as SelectOption[];
+        };
+
+        const getOptions = () => {
+            if (!guild) return [];
+            return GuildRoleStore.getSortedRoles(guild).filter(r => r.id !== guild).map(role => {
+                return {
+                    label: role.name,
+                    value: role.id,
+                };
+            }) as SelectOption[];
+        };
+
+
+        const rolesSelect = createSelect(
+            renderRoleSymbol, !guild ? [] : getOptions(), {
+                isDisabled: !guild,
+                placeholder: !guild ? "Select a server first!" : "Search or select roles...",
+                value: !guild ? [] : getSelectedValues(),
+            }
+        );
+
+        return <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+            }}
+        >
+            {guildSelect}
+            {rolesSelect}
+        </div>;
+
+    }
+
     function renderUserView() {
         const renderUserIcon = (e: SelectOption) => {
             if (!e || e.value === "" || e.label === e.value) return null;
@@ -347,6 +414,7 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
                 option.type === OptionType.GUILDS ? renderGuildView() :
                 option.type === OptionType.USERS ? renderUserView() :
                 option.type === OptionType.CHANNELS ? renderChannelView() :
+                option.type === OptionType.ROLES ? renderRoleView() :
                     items.map((item, index) => (
                         <Flex
                             flexDirection="row"

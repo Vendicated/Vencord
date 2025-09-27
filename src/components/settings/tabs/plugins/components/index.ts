@@ -43,4 +43,5 @@ export const OptionComponentMap: Record<OptionType, ComponentType<SettingProps<a
     [OptionType.USERS]: ArraySetting,
     [OptionType.CHANNELS]: ArraySetting,
     [OptionType.GUILDS]: ArraySetting,
+    [OptionType.ROLES]: ArraySetting,
 };

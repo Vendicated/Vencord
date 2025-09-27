@@ -230,7 +230,12 @@ export const enum OptionType {
      * Array of guilds.
      * A guild context menu will be automatically added for this setting.
      */
-    GUILDS
+    GUILDS,
+    /**
+     * Array of roles.
+     * A role context menu will be automatically added for this setting.
+     */
+    ROLES,
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -334,16 +339,16 @@ export interface PluginSettingSliderDef {
 }
 
 export interface PluginSettingArrayDef {
-    type: OptionType.ARRAY | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS;
+    type: OptionType.ARRAY | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS | OptionType.ROLES;
     /**
      * The text to show in the context-menu.
      * If not specified, the setting name will be used.
-     * Only applies to User, Channel, and Guild arrays.
+     * Only applies to User, Channel, Guild and Role arrays.
      */
     popoutText?: string;
     /**
      * If the context-menu entry should be hidden.
-     * Only applies to User, Channel, and Guild arrays.
+     * Only applies to User, Channel, Guild and Role arrays.
      */
     hidePopout?: boolean;
     default?: string[];
