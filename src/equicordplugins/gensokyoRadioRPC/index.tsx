@@ -7,9 +7,10 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import { Activity } from "@vencord/discord-types";
+import { ActivityFlags, ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
-import { Activity, ActivityFlag, ActivityType } from "./types";
 
 const Native = VencordNative.pluginHelpers.GensokyoRadioRPC as PluginNative<typeof import("./native")>;
 
@@ -96,7 +97,7 @@ export default definePlugin({
             metadata: { button_urls: undefined },
 
             type: ActivityType.LISTENING,
-            flags: ActivityFlag.INSTANCE,
+            flags: ActivityFlags.INSTANCE,
         };
     }
 });

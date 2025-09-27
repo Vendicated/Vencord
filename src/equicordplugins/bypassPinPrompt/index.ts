@@ -15,20 +15,20 @@ export default definePlugin({
         {
             find: '"Channel Pins"',
             replacement: {
-                match: /(?<=(\i\.\i\.unpinMessage\(\i,\i\.id\)):)\i\.\i\.confirmUnpin\(\i,\i\)/,
-                replace: "$1"
+                match: /(\i\.\i\.unpinMessage\(\i,\i\.id\)):\i\.\i\.confirmUnpin\(\i,\i\)/,
+                replace: "$1:$1"
             }
         },
         {
             find: 'source:"message-actions"',
             replacement: [
                 {
-                    match: /(?<=(\i\.\i\.pinMessage\(\i,\i\.id\)):)\i\.\i\.confirmPin\(\i,\i\)/,
-                    replace: "$1"
+                    match: /(\i\.\i\.pinMessage\(\i,\i\.id\)):\i\.\i\.confirmPin\(\i,\i\)/,
+                    replace: "$1:$1"
                 },
                 {
-                    match: /(?<=(\i\.\i\.unpinMessage\(\i,\i\.id\)):)\i\.\i\.confirmUnpin\(\i,\i\)/,
-                    replace: "$1"
+                    match: /(\i\.\i\.unpinMessage\(\i,\i\.id\)):\i\.\i\.confirmUnpin\(\i,\i\)/,
+                    replace: "$1:$1"
                 }
             ]
         },
@@ -36,12 +36,12 @@ export default definePlugin({
             find: 'id:"pin"',
             replacement: [
                 {
-                    match: /(?<=(\i\.\i\.pinMessage\(\i,\i\.id\)):)\i\.\i\.confirmPin\(\i,\i\)/,
-                    replace: "$1"
+                    match: /(\i\.\i\.pinMessage\(\i,\i\.id\)):\i\.\i\.confirmPin\(\i,\i\)/,
+                    replace: "$1:$1"
                 },
                 {
-                    match: /(?<=(\i\.\i\.unpinMessage\(\i,\i\.id\)):)\i\.\i\.confirmUnpin\(\i,\i\)/,
-                    replace: "$1"
+                    match: /(\i\.\i\.unpinMessage\(\i,\i\.id\)):\i\.\i\.confirmUnpin\(\i,\i\)/,
+                    replace: "$1:$1"
                 }
             ]
         },

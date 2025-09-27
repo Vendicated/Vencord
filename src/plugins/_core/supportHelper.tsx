@@ -16,23 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { sendBotMessage } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
-import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_HELPERS, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_IDS, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_IDS, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { isEquicordPluginDev, isPluginDev, tryOrElse } from "@utils/misc";
+import { isEquicordGuild, isEquicordPluginDev, isEquicordSupport, isPluginDev, isSupportChannel, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, shortGitHash, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, SelectedChannelStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -40,7 +41,7 @@ import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
-const CodeBlockRe = /```js\n(.+?)```/s;
+const CodeBlockRe = /```snippet\n(.+?)```/s;
 
 const TrustedRolesIds = [
     VC_CONTRIB_ROLE_ID, // Vencord Contributor
@@ -164,7 +165,9 @@ function generatePluginList() {
         content += `**Enabled UserPlugins (${enabledUserPlugins.length}):**\n${makeCodeblock(enabledUserPlugins.join(", "))}`;
     }
 
-    if (enabledPlugins.length > 100 && !(isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id))) {
+    const user = UserStore.getCurrentUser();
+
+    if (enabledPlugins.length > 100 && !(isPluginDev(user.id) || isEquicordPluginDev(user.id))) {
         Alerts.show({
             title: "You are attempting to get support!",
             body: <div>
@@ -181,7 +184,7 @@ function generatePluginList() {
             </div>
         });
 
-        return "You have more than 100 plugins enabled, please reduce the number of enabled plugins to get support.";
+        return `${user.username} has more than 100 plugins enabled, please reduce the number of enabled plugins to get support.`;
     }
 
     return content;
@@ -217,14 +220,14 @@ export default definePlugin({
             name: "equicord-debug",
             description: "Send Equicord debug info",
             // @ts-ignore
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || GUILD_ID === ctx?.guild?.id,
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || isEquicordGuild(ctx?.guild?.id, true),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
             name: "equicord-plugins",
             description: "Send Equicord plugin list",
             // @ts-ignore
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || GUILD_ID === ctx?.guild?.id,
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || isEquicordGuild(ctx?.guild?.id, true),
             execute: () => {
                 const pluginList = generatePluginList();
                 return { content: typeof pluginList === "string" ? pluginList : "Unable to generate plugin list." };
@@ -326,11 +329,11 @@ export default definePlugin({
     renderMessageAccessory(props) {
         const buttons = [] as JSX.Element[];
 
-        const equicordSupport = GuildMemberStore.getMember(GUILD_ID, props.message.author.id)?.roles?.includes(EQUICORD_HELPERS);
+        const equicordSupport = isEquicordSupport(props.message.author.id);
 
         const shouldAddUpdateButton =
             !IS_UPDATER_DISABLED
-            && ((props.channel.id === SUPPORT_CHANNEL_ID && equicordSupport))
+            && ((isSupportChannel(props.channel.id) && equicordSupport))
             && props.message.content?.includes("update");
 
         if (shouldAddUpdateButton) {
@@ -355,7 +358,7 @@ export default definePlugin({
             );
         }
 
-        if (props.channel.id === SUPPORT_CHANNEL_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
+        if (isSupportChannel(props.channel.id) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
             if (props.message.content.includes("/equicord-debug") || props.message.content.includes("/equicord-plugins")) {
                 buttons.push(
                     <Button
@@ -386,7 +389,14 @@ export default definePlugin({
                             key="vc-run-snippet"
                             onClick={async () => {
                                 try {
-                                    await AsyncFunction(match[1])();
+                                    const result = await AsyncFunction(match[1])();
+                                    const stringed = String(result);
+                                    if (stringed) {
+                                        await sendBotMessage(SelectedChannelStore.getChannelId(), {
+                                            content: stringed
+                                        });
+                                    }
+
                                     showToast("Success!", Toasts.Type.SUCCESS);
                                 } catch (e) {
                                     new Logger(this.name).error("Error while running snippet:", e);

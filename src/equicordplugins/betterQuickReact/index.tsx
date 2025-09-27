@@ -14,6 +14,7 @@ export const settings = definePluginSettings({
     frequentEmojis: {
         description: "Use frequently used emojis instead of favourite emojis",
         type: OptionType.BOOLEAN,
+        restartNeeded: true,
         default: true
     },
     rows: {
@@ -54,8 +55,9 @@ export default definePlugin({
             find: "this.favoriteEmojisWithoutFetchingLatest.concat",
             replacement: {
                 match: /(this\.favoriteEmojisWithoutFetchingLatest)\.concat/,
-                replace: "($self.settings.store.frequentEmojis?[]:$1).concat"
-            }
+                replace: "[].concat"
+            },
+            predicate: () => settings.store.frequentEmojis
         },
         {
             find: "#{intl::ADD_REACTION_NAMED}",
@@ -69,7 +71,7 @@ export default definePlugin({
                 // Add a custom class to identify the quick reactions have been modified and a CSS variable for the number of columns to display
                 {
                     match: /className:(\i)\.wrapper,/,
-                    replace: "className:\"vc-better-quick-react \"+($self.settings.store.compactMode?\"vc-better-quick-react-compact \":\"\")+$1.wrapper,style:{\"--vc-better-quick-react-columns\":$self.settings.store.columns},"
+                    replace: "className:\"vc-better-quick-react \"+(Vencord.Settings.plugins.BetterQuickReact.compactMode?\"vc-better-quick-react-compact \":\"\")+$1.wrapper,style:{\"--vc-better-quick-react-columns\":$self.settings.store.columns},"
                 },
                 // Scroll handler + Apply the emoji count limit from earlier with custom logic
                 {

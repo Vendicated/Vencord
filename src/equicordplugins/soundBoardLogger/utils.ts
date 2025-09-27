@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { playAudio } from "@api/AudioPlayer";
 import { classNameFactory } from "@api/Styles";
 import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/react";
@@ -40,9 +41,7 @@ export function getEmojiUrl(emoji) {
 }
 
 export const playSound = id => {
-    const audio = new Audio(`https://cdn.discordapp.com/soundboard-sounds/${id}`);
-    audio.volume = settings.store.soundVolume;
-    audio.play();
+    playAudio(`https://cdn.discordapp.com/soundboard-sounds/${id}`, { volume: settings.store.soundVolume * 100 });
 };
 
 export async function downloadAudio(id: string): Promise<void> {

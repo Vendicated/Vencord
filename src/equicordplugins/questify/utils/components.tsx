@@ -16,8 +16,17 @@ export const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip
 export const GuildedServerListItemPillComponent = findComponentByCodeLazy('"pill":"empty"');
 export const ServerListItemLowerBadgeComponent = findComponentByCodeLazy("STATUS_DANGER,disableColor:");
 export const ServerListItemUpperBadgeComponent = findComponentByCodeLazy("STATUS_DANGER,shape:", "iconBadge,");
-export const RadioGroup = findComponentByCodeLazy("\"label\",\"description\"]);");
+export const RadioGroup = findComponentByCodeLazy('["label"', "description:");
 export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannelMetadata");
+
+export enum QuestRewardType {
+    UNKNOWN = 0,
+    REWARD_CODE = 1,
+    IN_GAME = 2,
+    COLLECTIBLE = 3,
+    VIRTUAL_CURRENCY = 4,
+    FRACTIONAL_PREMIUM = 5
+}
 
 export enum QuestStatus {
     Claimed = "CLAIMED",
@@ -76,6 +85,11 @@ export interface Quest {
         messages: {
             questName: string;
         };
+        rewardsConfig: {
+            rewards: {
+                type: QuestRewardType;
+            }[];
+        },
         taskConfigV2: {
             tasks: {
                 WATCH_VIDEO?: {

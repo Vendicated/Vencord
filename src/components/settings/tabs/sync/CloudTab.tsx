@@ -135,11 +135,11 @@ function CloudTab() {
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                     Equicord comes with a cloud integration allowing settings to be synced across apps and devices.
                     <br />
-                    We use Vencord's <Link href="https://github.com/Vencord/Backend">cloud source code</Link> to provide our cloud instance which has a 32MB backup cap.
+                    We use our own <Link href="https://github.com/Equicord/Equicloud">Equicloud backend</Link> to provide our cloud instance with enhanced features.
                     <br />
-                    Our <Link href="https://vencord.dev/cloud/privacy">privacy policy</Link> allows you to see what information we store, how we use it, and data retention.
+                    Our <Link href="https://equicord.org/cloud/policy">privacy policy</Link> allows you to see what information we store, how we use it, and data retention.
                     <br />
-                    The Vencord Cloud repository is AGPL 3.0 licensed so you can host it yourself it you would like.
+                    Equicloud is BSD 3.0 licensed so you can host it yourself if you would like.
                     <br />
                     You can swap between Equicord and Vencord's different cloud instances below if needed.
                 </Forms.FormText>

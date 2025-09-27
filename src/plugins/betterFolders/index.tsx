@@ -34,7 +34,7 @@ enum FolderIconDisplay {
 }
 
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
-const SortedGuildStore = findStoreLazy("SortedGuildStore");
+export const SortedGuildStore = findStoreLazy("SortedGuildStore");
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
 let lastGuildId = null as string | null;

@@ -6,15 +6,17 @@ import type { FluxEvents } from "./fluxEvents";
 
 export { FluxEvents };
 
+type FluxEventsAutoComplete = LiteralUnion<FluxEvents, string>;
+
 export interface FluxDispatcher {
     _actionHandlers: any;
     _interceptors: any;
     _subscriptions: any;
     addInterceptor(interceptor: any): void;
-    dispatch(event: { [key: string]: unknown; type: FluxEvents; }): Promise<void>;
+    dispatch(event: { [key: string]: unknown; type: FluxEventsAutoComplete; }): Promise<void>;
     isDispatching(): boolean;
-    subscribe(event: FluxEvents, callback: (data: any) => void): void;
-    unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
+    subscribe(event: FluxEventsAutoComplete, callback: (data: any) => void): void;
+    unsubscribe(event: FluxEventsAutoComplete, callback: (data: any) => void): void;
     wait(callback: () => void): void;
 }
 

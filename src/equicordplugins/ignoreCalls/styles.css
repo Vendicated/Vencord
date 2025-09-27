@@ -1,0 +1,5 @@
+.vc-ignore-calls-render {
+    text-align: center;
+    color: var(--text-danger);
+    margin-bottom: 15px;
+}

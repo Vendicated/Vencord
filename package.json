@@ -1,7 +1,7 @@
 {
     "name": "equicord",
     "private": "true",
-    "version": "1.12.13",
+    "version": "1.13.0",
     "description": "The other cutest Discord client mod",
     "homepage": "https://github.com/Equicord/Equicord#readme",
     "bugs": {
@@ -30,6 +30,7 @@
         "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types --allowJs false",
         "inject": "node scripts/runInstaller.mjs -- --install",
         "uninject": "node scripts/runInstaller.mjs -- --uninstall",
+        "repair": "node scripts/runInstaller.mjs -- --repair",
         "lint": "eslint",
         "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
@@ -91,7 +92,7 @@
         "typescript-eslint": "^8.28.0",
         "typescript-transform-paths": "^3.5.5"
     },
-    "packageManager": "pnpm@10.14.0",
+    "packageManager": "pnpm@10.17.1",
     "pnpm": {
         "patchedDependencies": {
             "eslint@9.20.1": "patches/eslint@9.20.1.patch",

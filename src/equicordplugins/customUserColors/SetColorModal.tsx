@@ -14,8 +14,8 @@ import { colors, DATASTORE_KEY } from "./index";
 
 const cl = classNameFactory("vc-customColors-");
 
-export function SetColorModal({ userId, modalProps }: { userId: string, modalProps: ModalProps; }) {
-    const initialColor = parseInt(colors[userId], 16) || 372735;
+export function SetColorModal({ id, modalProps }: { id: string, modalProps: ModalProps; }) {
+    const initialColor = parseInt(colors[id], 16) || 372735;
     // color picker default to current color set for user (if null it's 0x05afff :3 )
 
     const [colorPickerColor, setColorPickerColor] = useState(initialColor);
@@ -32,13 +32,13 @@ export function SetColorModal({ userId, modalProps }: { userId: string, modalPro
     }
 
     async function saveUserColor() {
-        colors[userId] = colorPickerColor.toString(16).padStart(6, "0");
+        colors[id] = colorPickerColor.toString(16).padStart(6, "0");
         await set(DATASTORE_KEY, colors);
         modalProps.onClose();
     }
 
     async function deleteUserColor() {
-        delete colors[userId];
+        delete colors[id];
         await set(DATASTORE_KEY, colors);
         modalProps.onClose();
     }

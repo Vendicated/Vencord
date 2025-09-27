@@ -18,17 +18,31 @@
 
 import { Settings } from "@api/Settings";
 import { Queue } from "@utils/Queue";
-import { createRoot } from "@webpack/common";
+import { createRoot, WindowStore } from "@webpack/common";
 import type { ReactNode } from "react";
 import type { Root } from "react-dom/client";
 
 import NotificationComponent from "./NotificationComponent";
-import { persistNotification } from "./notificationLog";
+import { openNotificationLogModal, persistNotification } from "./notificationLog";
 
 const NotificationQueue = new Queue();
 
 let reactRoot: Root;
 let id = 42;
+let missedCount = 0;
+
+window.addEventListener("focus", () => {
+    const { missed, timeout, useNative } = Settings.notifications;
+    if (!missed) return;
+    if (missedCount > 0 && timeout > 0 && useNative === "never") {
+        showNotification({
+            title: "While you were away",
+            body: `${missedCount} notifications received`,
+            onClick: () => openNotificationLogModal(),
+        });
+        missedCount = 0;
+    }
+});
 
 function getRoot() {
     if (!reactRoot) {
@@ -105,7 +119,17 @@ export async function showNotification(data: NotificationData) {
         });
         n.onclick = onClick;
         n.onclose = onClose;
+
+        if (!WindowStore.isFocused()) missedCount++;
     } else {
-        NotificationQueue.push(() => _showNotification(data, id++));
+        NotificationQueue.push(() =>
+            _showNotification({
+                ...data,
+                onClose: () => {
+                    data.onClose?.();
+                    if (!WindowStore.isFocused()) missedCount++;
+                }
+            }, id++)
+        );
     }
 }

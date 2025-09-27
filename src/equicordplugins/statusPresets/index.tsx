@@ -28,8 +28,9 @@ import { openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { extractAndLoadChunksLazy, findByPropsLazy, findComponentByCodeLazy, findModuleId, wreq } from "@webpack";
-import { Button, Clickable, Menu, Toasts, UserStore, useState } from "@webpack/common";
+import { Clickable, Menu, Toasts, UserStore, useState } from "@webpack/common";
 
+import managedStyle from "./fixActionBar.css?managed";
 
 const settings = definePluginSettings({
     StatusPresets: {
@@ -62,7 +63,7 @@ const EmojiComponent = findComponentByCodeLazy(/\.translateSurrogatesToInlineEmo
 
 const CustomStatusSettings = getUserSettingLazy("status", "customStatus")!;
 const StatusModule = proxyLazy(() => {
-    const id = findModuleId("this.renderCustomStatusInput()");
+    const id = findModuleId(".customStatusInputTitle,");
     return wreq(Number(id));
 });
 
@@ -150,12 +151,13 @@ export default definePlugin({
     authors: [EquicordDevs.iamme],
     settings: settings,
     dependencies: ["UserSettingsAPI"],
+    managedStyle,
     patches: [
         {
-            find: "#{intl::CUSTOM_STATUS_SET_CUSTOM_STATUS}",
+            find: '"CustomStatusModalWithPreview"',
             replacement: {
-                match: /cancelButton,(children|text):\i\.\i\.string\(\i\.\i#{intl::CANCEL}\)\}\)/,
-                replace: "$&,$self.renderRememberButton(this.state)"
+                match: /(?<=(\i)\.state\).*?)\{text:\i\.\i\.\i\(\i\.\i\.R3BPHx\)/,
+                replace: "$self.renderRememberButton($1),$&"
             }
         },
         {
@@ -205,21 +207,19 @@ export default definePlugin({
             </ErrorBoundary>
         );
     },
-    renderRememberButton(statue: DiscordStatus) {
-        return <Button
-            look={Button.Looks.LINK}
-            color={Button.Colors.WHITE}
-            size={Button.Sizes.MEDIUM}
-            onClick={e => {
-                settings.store.StatusPresets[statue.text] = statue;
+    renderRememberButton(status: DiscordStatus) {
+        return {
+            text: "Keep",
+            style: { marginLeft: "20px" },
+            onClick: () => {
+                settings.store.StatusPresets[status.text] = status;
                 Toasts.show({
                     message: "Successfully Saved Status",
                     type: Toasts.Type.SUCCESS,
                     id: Toasts.genId()
                 });
-            }}
-            style={{ marginRight: "20px" }}
-        >Remember</Button>;
+            }
+        };
     },
     startAt: StartAt.WebpackReady
 });

@@ -20,8 +20,8 @@ Before starting your plugin:
 
 - Be in our discord
 - Check existing pull requests to see if someone is already working on a similar plugin
-- Check our [plugin requests tracker](https://discord.com/channels/1173279886065029291/1173334591302553631) to see if there is an existing request, or if the same idea has been rejected
-- If there isn't an existing request, [open one](https://discord.com/channels/1173279886065029291/1173334591302553631) yourself.
+- Check our [plugin requests tracker](https://discord.com/channels/1173279886065029291/1419347113745059961) to see if there is an existing request, or if the same idea has been rejected
+- If there isn't an existing request, [open one](https://discord.com/channels/1173279886065029291/1419347113745059961) yourself.
   and include that you'd like to work on this yourself. Then wait for feedback to see if the idea even has any chance of being accepted. Or maybe others have some ideas to improve it!
 - Familarise yourself with our plugin rules below to ensure your plugin is not banned
 

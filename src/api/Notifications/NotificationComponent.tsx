@@ -21,7 +21,7 @@ import "./styles.css";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { React, useEffect, useMemo, useState, useStateFromStores, WindowStore } from "@webpack/common";
+import { React, useEffect, useRef, useState } from "@webpack/common";
 
 import { NotificationData } from "./Notifications";
 
@@ -39,26 +39,38 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     dismissOnClick
 }: NotificationData & { className?: string; }) {
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
-    const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
 
     const [isHover, setIsHover] = useState(false);
     const [elapsed, setElapsed] = useState(0);
 
-    const start = useMemo(() => Date.now(), [timeout, isHover, hasFocus]);
+    const start = useRef(Date.now());
+    const pause = useRef<number | null>(null);
 
     useEffect(() => {
-        if (isHover || !hasFocus || timeout === 0 || permanent) return void setElapsed(0);
+        if (timeout === 0 || permanent) return;
+
+        if (isHover) {
+            if (pause.current === null) pause.current = Date.now();
+            return;
+        }
+
+        if (pause.current !== null) {
+            const pausedFor = Date.now() - pause.current;
+            start.current += pausedFor;
+            pause.current = null;
+        }
 
         const intervalId = setInterval(() => {
-            const elapsed = Date.now() - start;
-            if (elapsed >= timeout)
+            const elapsedNow = Date.now() - start.current;
+            if (elapsedNow >= timeout) {
                 onClose!();
-            else
-                setElapsed(elapsed);
+            } else {
+                setElapsed(elapsedNow);
+            }
         }, 10);
 
         return () => clearInterval(intervalId);
-    }, [timeout, isHover, hasFocus]);
+    }, [timeout, isHover, permanent]);
 
     const timeoutProgress = elapsed / timeout;
 

@@ -48,7 +48,7 @@ export default definePlugin({
         },
         // Sections header
         {
-            find: "#{intl::FRIENDS_SECTION_ONLINE}",
+            find: "#{intl::FRIENDS_SECTION_ONLINE}),className",
             replacement: {
                 match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.item)/,
                 replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
@@ -71,7 +71,7 @@ export default definePlugin({
                 replace: "$1.fetchRelationships(),$self.fetchImplicitRelationships()"
             },
         },
-        // Modify sort -- thanks megu for the patch (from sortFriendRequests)
+        // Modify sort -- thanks megu for the patch (from sortFriends)
         {
             find: "getRelationshipCounts(){",
             replacement: {

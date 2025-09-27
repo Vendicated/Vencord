@@ -146,7 +146,7 @@ export const globPlugins = kind => ({
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins", "equicordplugins"];
+            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins", "equicordplugins", "equicordplugins/_api"];
             let code = "";
             let pluginsCode = "\n";
             let metaCode = "\n";
@@ -162,6 +162,7 @@ export const globPlugins = kind => ({
                     const fileName = file.name;
                     if (fileName.startsWith("_") || fileName.startsWith(".")) continue;
                     if (fileName === "index.ts") continue;
+                    if (/\.(zip|rar|7z|tar|gz|bz2)/.test(fileName)) continue;
 
                     const target = getPluginTarget(fileName);
 

@@ -1,45 +1,43 @@
-import { CSSProperties, ImgHTMLAttributes, JSX } from "react";
-import { Application } from "./Application";
-import { User } from "./User";
+import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "../../enums";
 
-export interface ActivityTimestamp {
-    start?: number;
-    end?: number;
+export interface ActivityAssets {
+    large_image?: string;
+    large_text?: string;
+    small_image?: string;
+    small_text?: string;
+}
+
+export interface ActivityButton {
+    label: string;
+    url: string;
 }
 
 export interface Activity {
-    created_at: number;
-    id: string;
+    created_at?: number;
+    id?: string;
     name: string;
-    type: number;
+    application_id: string;
+    type: ActivityType;
     emoji?: {
         animated: boolean;
         id: string;
         name: string;
     };
     state?: string;
-    flags?: number;
-    sync_id?: string;
+    state_url?: string;
     details?: string;
-    application_id?: string;
-    assets?: {
-        large_text?: string;
-        large_image?: string;
-        small_text?: string;
-        small_image?: string;
+    details_url?: string;
+    url?: string;
+    flags: ActivityFlags;
+    status_display_type?: ActivityStatusDisplayType;
+    timestamps?: {
+        start?: number;
+        end?: number;
     };
-    buttons?: Array<string>;
+    assets?: ActivityAssets;
+    buttons?: string[];
     metadata?: {
         button_urls?: Array<string>;
     };
-    timestamps?: ActivityTimestamp;
     platform?: string;
-}
-
-export const enum ActivityType {
-    PLAYING = 0,
-    STREAMING = 1,
-    LISTENING = 2,
-    WATCHING = 3,
-    COMPETING = 5
 }

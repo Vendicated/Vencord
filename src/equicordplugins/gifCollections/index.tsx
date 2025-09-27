@@ -41,6 +41,20 @@ const addCollectionContextMenuPatch: NavContextMenuPatchCallback = (children, pr
     if (group && !group.some(child => child?.props?.id === "add-to-collection")) {
         const collections = cache_collections;
 
+        if (settings.store.showCopyImageLink) {
+            group.push(
+                <Menu.MenuItem
+                    label="Copy Image Link"
+                    key="copy-image-link"
+                    id="copy-image-link"
+                    action={() => {
+                        copyToClipboard(gif.url);
+                        showToast("Image link copied to clipboard", Toasts.Type.SUCCESS);
+                    }}
+                />
+            );
+        }
+
         group.push(
             <Menu.MenuItem
                 label="Add To Collection"
@@ -109,6 +123,11 @@ export const settings = definePluginSettings({
     },
     stopWarnings: {
         description: "Stop deletion warnings",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    showCopyImageLink: {
+        description: "Show 'Copy Image Link' option in context menus",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -642,7 +661,23 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
 
 const MenuThingy = ({ gif }) => {
     const collections = cache_collections;
-    return (
+    const menuItems: React.ReactNode[] = [];
+
+    if (settings.store.showCopyImageLink) {
+        menuItems.push(
+            <Menu.MenuItem
+                label="Copy Image Link"
+                key="copy-image-link"
+                id="copy-image-link"
+                action={() => {
+                    copyToClipboard(gif.url);
+                    showToast("Image link copied to clipboard", Toasts.Type.SUCCESS);
+                }}
+            />
+        );
+    }
+
+    menuItems.push(
         <Menu.MenuItem label="Add To Collection" key="add-to-collection" id="add-to-collection">
             {collections.map(col => (
                 <Menu.MenuItem
@@ -663,6 +698,8 @@ const MenuThingy = ({ gif }) => {
             />
         </Menu.MenuItem>
     );
+
+    return <>{menuItems}</>;
 };
 
 function CreateCollectionModal({ gif, onClose, modalProps }) {

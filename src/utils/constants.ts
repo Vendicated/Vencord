@@ -27,6 +27,7 @@ export const EQUICORD_TEAM = "1173520023239786538";
 export const EQUICORD_HELPERS = "1326406112144265257";
 export const EQUIBOP_CONTRIB_ROLE_ID = "1287079931645263968";
 export const VENCORD_CONTRIB_ROLE_ID = "1173343399470964856";
+export const EQUIBOT_USER_ID = "1243063117852835941";
 
 // Vencord
 export const VC_SUPPORT_CHANNEL_ID = "1026515880080842772";
@@ -1148,7 +1149,19 @@ export const EquicordDevs = Object.freeze({
     justjxke: {
         name: "justjxke",
         id: 852558183087472640n
-    }
+    },
+    nicola02nb: {
+        name: "nicola02nb",
+        id: 257900031351193600n
+    },
+    qouesm: {
+        name: "qouesm",
+        id: 130388483494641664n,
+    },
+    CallMeGii: {
+        name: "gii",
+        id: 156481332652802048n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

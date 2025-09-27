@@ -1,0 +1,7 @@
+.voice-user-buttons {
+    flex: none !important;
+}
+
+div[class^='list_'][class*='collapsed_'] .voice-user-buttons {
+    display: none;
+}

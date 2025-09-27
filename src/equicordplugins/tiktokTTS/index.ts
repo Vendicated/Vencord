@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { playAudio } from "@api/AudioPlayer";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -16,22 +17,14 @@ async function readOutText(text: string): Promise<void> {
     });
 
     const mp3JSON = await mp3Response.json();
-
-    const audioElement = new Audio();
-
-    audioElement.src = `data:audio/mpeg;base64,${mp3JSON.data}`;
-    audioElement.volume = 0.5;
-    audioElement.onended = () => audioElement.remove();
-
-    document.body.appendChild(audioElement);
-
-    audioElement.play();
+    playAudio(`data:audio/mpeg;base64,${mp3JSON.data}`, { volume: 50 });
 }
 
 export default definePlugin({
     name: "TiktokTTS",
     description: "Reads out chat messages with the good ol' Tiktok TTS voice :sob:",
     authors: [EquicordDevs.VillainsRule],
+    dependencies: ["AudioPlayerAPI"],
     flux: {
         async MESSAGE_CREATE({ optimistic, type, message }) {
             if (optimistic || type !== "MESSAGE_CREATE") return;

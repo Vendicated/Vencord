@@ -6,9 +6,11 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Activity } from "@vencord/discord-types";
+import { ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
 
-import { Activity, ActivityType, BanchoStatusEnum, GameState, Modes, TosuApi, UserLoginStatus } from "./type";
+import { BanchoStatusEnum, GameState, Modes, TosuApi, UserLoginStatus } from "./type";
 
 const socketId = "tosu";
 const OSU_APP_ID = "367827983903490050";
@@ -63,6 +65,8 @@ async function onMessage(data: string) {
         },
         flags: 1 << 0,
     };
+
+    activity.assets = {};
 
     switch (profile.mode.number) {
         case Modes.Osu:

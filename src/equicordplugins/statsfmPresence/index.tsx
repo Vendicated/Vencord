@@ -9,6 +9,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
+import { ActivityFlags, ActivityType } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
@@ -50,16 +51,6 @@ interface TrackData {
     imageUrl?: string;
 }
 
-// only relevant enum values
-const enum ActivityType {
-    PLAYING = 0,
-    LISTENING = 2,
-}
-
-const enum ActivityFlag {
-    INSTANCE = 1 << 0,
-}
-
 const enum NameFormat {
     StatusName = "status-name",
     ArtistFirst = "artist-first",
@@ -68,8 +59,6 @@ const enum NameFormat {
     SongOnly = "song",
     albumsName = "albums"
 }
-
-
 
 interface Albums {
     id: number;
@@ -373,7 +362,7 @@ export default definePlugin({
             },
 
             type: settings.store.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
-            flags: ActivityFlag.INSTANCE,
+            flags: ActivityFlags.INSTANCE,
         };
     }
 });

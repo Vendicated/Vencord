@@ -8,6 +8,7 @@ import "./styles.css";
 
 export { default as ThemesTab } from "../../ThemeSettings/ThemesTab";
 export * from "./BaseTab";
+export { default as ChangelogTab } from "./changelog";
 export { default as PatchHelperTab } from "./patchHelper";
 export { default as PluginsTab } from "./plugins";
 export { openContributorModal } from "./plugins/ContributorModal";

@@ -8,7 +8,6 @@ import "./VencordTab.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
 import { DonateButton, InviteButton } from "@components/settings/DonateButton";
@@ -23,8 +22,6 @@ import { Button, Flex, Forms, GuildMemberStore, React, Select, Switch, UserStore
 import BadgeAPI from "plugins/_api/badges";
 
 import { openNotificationSettingsModal } from "./NotificationSettings";
-
-const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://i.imgur.com/57ATLZu.png";
@@ -339,14 +336,14 @@ function DonateButtonComponent() {
     );
 }
 
-function isVencordDonor(userId: string): boolean {
-    const donorBadges = BadgeAPI.getDonorBadges(userId);
-    return GuildMemberStore.getMember(VC_GUILD_ID, userId)?.roles.includes(VC_DONOR_ROLE_ID) || !!donorBadges;
-}
+export default wrapTab(EquicordSettings, "Equicord Settings");
 
 export function isEquicordDonor(userId: string): boolean {
     const donorBadges = BadgeAPI.getEquicordDonorBadges(userId);
     return GuildMemberStore.getMember(GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
 }
 
-export default wrapTab(EquicordSettings, "Equicord Settings");
+export function isVencordDonor(userId: string): boolean {
+    const donorBadges = BadgeAPI.getDonorBadges(userId);
+    return GuildMemberStore.getMember(VC_GUILD_ID, userId)?.roles.includes(VC_DONOR_ROLE_ID) || !!donorBadges;
+}

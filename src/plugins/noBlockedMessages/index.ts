@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSetting } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting, Settings } from "@api/Settings";
+import { containsBlockedKeywords } from "@equicordplugins/blockKeywords";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -55,6 +56,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: false
+    },
+    allowAutoModMessages: {
+        description: "Allow messages sent by AutoMod to bypass filtering.",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false,
     },
     hideBlockedUserReplies: {
         description: "Hide replies to blocked/ignored users.",
@@ -121,6 +128,7 @@ export default definePlugin({
         const blocked = this.isBlocked(message);
         const replyToBlocked = this.isReplyToBlocked(message);
 
+        if (message.type === 24 && settings.store.allowAutoModMessages) return [true, blocked];
         if (blocked) return [this.hideBlockedMessage(message.author.id), true];
         if (replyToBlocked) return [this.hideBlockedMessage(replyToBlocked.author.id), true];
 
@@ -140,7 +148,7 @@ export default definePlugin({
     },
 
     filterStream(channelStream: [ChannelStreamGroupProps | ChannelStreamMessageProps | ChannelStreamDividerProps]) {
-        const { alsoHideIgnoredUsers, disableNotifications, hideBlockedUserReplies, defaultHideUsers, overrideUsers } = settings.use();
+        const { alsoHideIgnoredUsers, disableNotifications, hideBlockedUserReplies, allowAutoModMessages, defaultHideUsers, overrideUsers } = settings.use();
 
         const newChannelStream = channelStream.map(item => {
             if (item.type === "MESSAGE_GROUP_BLOCKED" || (item.type === "MESSAGE_GROUP_IGNORED" && alsoHideIgnoredUsers)) {
@@ -158,9 +166,9 @@ export default definePlugin({
 
         let lastItem = newChannelStream[newChannelStream.length - 1];
 
-        // Remove the NEW Message divider if it is the last item,
-        // implying the messages it was announcing got filtered.
-        while (lastItem && lastItem.type === "DIVIDER" && lastItem.unreadId !== undefined) {
+        // Remove the NEW Message and Date dividers if they are the last
+        // item, implying the messages they were separating got filtered.
+        while (lastItem && lastItem.type === "DIVIDER") {
             newChannelStream.pop();
             lastItem = newChannelStream[newChannelStream.length - 1];
         }
@@ -188,7 +196,15 @@ export default definePlugin({
 
     isBlocked(message: Message) {
         try {
-            if (RelationshipStore.isBlocked(message.author.id)) {
+            if (RelationshipStore.isBlocked(message.author.id)) return true;
+
+            const { BlockKeywords } = Settings.plugins;
+            if (
+                BlockKeywords &&
+                BlockKeywords.enabled &&
+                BlockKeywords.ignoreBlockedMessages &&
+                containsBlockedKeywords(message)
+            ) {
                 return true;
             }
 

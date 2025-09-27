@@ -20,16 +20,18 @@ const settings = definePluginSettings(
 );
 
 const presendObject: MessageSendListener = (_, msg) => {
-    const sentences = msg.content.split(/(?<=\w\.)\s/);
     const blockedWordsArray: string[] = settings.store.blockedWords.split(", ");
+    const sentences = msg.content.split(/(?<=[.!?]+['")\]]*)(\s+)/);
 
-    msg.content = sentences.map(element => {
+    msg.content = sentences.map((element, i) => {
+        if (i % 2 === 1) return element;
+
         if (!blockedWordsArray.some(word => element.toLowerCase().startsWith(word.toLocaleLowerCase()))) {
             return element.charAt(0).toUpperCase() + element.slice(1);
         } else {
             return element;
         }
-    }).join(" ");
+    }).join("");
 };
 
 export default definePlugin({

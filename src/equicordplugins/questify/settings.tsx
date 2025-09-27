@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { defaultAudioNames, playAudio } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { findLazy } from "@webpack";
 import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
-import { DynamicDropdown, DynamicDropdownSettingOption, ExcludedQuest, GuildlessServerListItem, Quest, QuestIcon, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
-import { AudioPlayer, decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, q, QuestifyLogger, QuestsStore, rightClick, setIgnoredQuestIDs, validCommaSeparatedList } from "./utils/misc";
+import { DynamicDropdown, DynamicDropdownSettingOption, ExcludedQuest, GuildlessServerListItem, Quest, QuestIcon, QuestRewardType, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
+import { decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, q, QuestifyLogger, QuestsStore, rightClick, setIgnoredQuestIDs, validCommaSeparatedList } from "./utils/misc";
 
-let defaultSounds: string[] | null = null;
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;
 const defaultLeftClickAction = "open-quests";
 const defaultMiddleClickAction = "plugin-settings";
@@ -30,15 +29,32 @@ const defaultIgnoredColor = 8334124;
 const defaultExpiredColor = 2368553;
 const defaultRestyleQuestsGradient = "intense";
 const defaultFetchQuestsAlert = "discodo";
-const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")), false);
 export const minimumAutoFetchIntervalValue = 30 * 60;
 export const maximumAutoFetchIntervalValue = 12 * 60 * 60;
 
+const rerenderCallbacks = new Set<() => void>();
+
+export function addRerenderCallback(callback: () => void): () => void {
+    rerenderCallbacks.add(callback);
+    return () => rerenderCallbacks.delete(callback);
+}
+
 export function rerenderQuests(): void {
     settings.store.triggerQuestsRerender = !settings.store.triggerQuestsRerender;
+    rerenderCallbacks.forEach(callback => callback());
 }
 
 export function fetchAndAlertQuests(source: string, logger: Logger): void {
+    const { questRewardIncludeRewardCode, questRewardIncludeNitroCode, questRewardIncludeCollectibles, questRewardIncludeInGame, questRewardIncludeOrbs } = settings.store;
+
+    const rewardTypeToSettingMap = {
+        [QuestRewardType.REWARD_CODE]: questRewardIncludeRewardCode,
+        [QuestRewardType.IN_GAME]: questRewardIncludeInGame,
+        [QuestRewardType.COLLECTIBLE]: questRewardIncludeCollectibles,
+        [QuestRewardType.VIRTUAL_CURRENCY]: questRewardIncludeOrbs,
+        [QuestRewardType.FRACTIONAL_PREMIUM]: questRewardIncludeNitroCode
+    };
+
     const currentQuests = Array.from(QuestsStore.quests.values()) as Quest[];
 
     fetchAndDispatchQuests(source, logger).then(newQuests => {
@@ -46,12 +62,17 @@ export function fetchAndAlertQuests(source: string, logger: Logger): void {
             const currentIds = new Set(currentQuests.map((q: Quest) => q.id));
             const newOnly = newQuests.filter((q: Quest) => !currentIds.has(q.id));
 
+            const newOnlyFiltered = newOnly.filter(quest => {
+                const rewardType = getQuestRewardType(quest);
+                return rewardType in rewardTypeToSettingMap && rewardTypeToSettingMap[rewardType];
+            });
+
             if (newOnly.length > 0) {
                 const shouldAlert = settings.store.fetchingQuestsAlert;
 
-                if (shouldAlert) {
+                if (shouldAlert && newOnlyFiltered.length > 0) {
                     logger.info(`[${getFormattedNow()}] New Quests detected. Playing alert sound.`);
-                    AudioPlayer(shouldAlert, 1).play();
+                    playAudio(shouldAlert);
                 } else {
                     logger.info(`[${getFormattedNow()}] New Quests detected.`);
                 }
@@ -146,7 +167,23 @@ export function questIsIgnored(questID: string): boolean {
     return ignoredQuests.includes(questID);
 }
 
+function getQuestRewardType(quest: Quest): QuestRewardType {
+    const reward = quest.config.rewardsConfig.rewards[0];
+    if (!(reward.type in QuestRewardType)) return QuestRewardType.UNKNOWN;
+    return reward.type as QuestRewardType;
+}
+
 export function validateIgnoredQuests(ignoredQuests?: string[], questsData?: Quest[]): [string[], number] {
+    const { questRewardIncludeRewardCode, questRewardIncludeNitroCode, questRewardIncludeCollectibles, questRewardIncludeInGame, questRewardIncludeOrbs } = settings.store;
+
+    const rewardTypeToSettingMap = {
+        [QuestRewardType.REWARD_CODE]: questRewardIncludeRewardCode,
+        [QuestRewardType.IN_GAME]: questRewardIncludeInGame,
+        [QuestRewardType.COLLECTIBLE]: questRewardIncludeCollectibles,
+        [QuestRewardType.VIRTUAL_CURRENCY]: questRewardIncludeOrbs,
+        [QuestRewardType.FRACTIONAL_PREMIUM]: questRewardIncludeNitroCode
+    };
+
     const quests = questsData ?? Array.from(QuestsStore.quests.values()) as Quest[];
     const excludedQuests = Array.from(QuestsStore.excludedQuests.values()) as ExcludedQuest[];
     const currentlyIgnored = ignoredQuests ? new Set(ignoredQuests) : new Set(getIgnoredQuestIDs(questsData?.[0]?.userStatus?.userId));
@@ -159,7 +196,11 @@ export function validateIgnoredQuests(ignoredQuests?: string[], questsData?: Que
         if (currentlyIgnored.has(quest.id)) {
             validIgnored.add(quest.id);
         } else if (questStatus === QuestStatus.Unclaimed) {
-            numUnclaimedUnignoredQuests++;
+            const rewardType = getQuestRewardType(quest);
+
+            if (rewardTypeToSettingMap[rewardType]) {
+                numUnclaimedUnignoredQuests++;
+            }
         }
     }
 
@@ -176,6 +217,7 @@ export function validateAndOverwriteIgnoredQuests(ignoredQuests?: string[], ques
     const [validIgnored, numUnclaimedUnignoredQuests] = validateIgnoredQuests(ignoredQuests, questsData);
     settings.store.unclaimedUnignoredQuests = numUnclaimedUnignoredQuests;
     setIgnoredQuestIDs(validIgnored, questsData?.[0]?.userStatus?.userId);
+    rerenderQuests();
     return validIgnored;
 }
 
@@ -349,6 +391,11 @@ function QuestButtonSettings(): JSX.Element {
 
     const {
         questButtonDisplay,
+        questRewardIncludeRewardCode,
+        questRewardIncludeNitroCode,
+        questRewardIncludeCollectibles,
+        questRewardIncludeInGame,
+        questRewardIncludeOrbs,
         questButtonUnclaimed,
         questButtonBadgeColor,
         questButtonLeftClickAction,
@@ -356,6 +403,11 @@ function QuestButtonSettings(): JSX.Element {
         questButtonRightClickAction
     } = settings.use([
         "questButtonDisplay",
+        "questRewardIncludeRewardCode",
+        "questRewardIncludeNitroCode",
+        "questRewardIncludeCollectibles",
+        "questRewardIncludeInGame",
+        "questRewardIncludeOrbs",
         "questButtonUnclaimed",
         "questButtonBadgeColor",
         "questButtonLeftClickAction",
@@ -383,6 +435,15 @@ function QuestButtonSettings(): JSX.Element {
         { label: "Nothing", value: "nothing" }
     ];
 
+    const questButtonRewardDisplayOptions: DynamicDropdownSettingOption[] = [
+        { label: "Orbs", value: "orbs", selected: questRewardIncludeOrbs },
+        { label: "Nitro Codes", value: "nitro-code", selected: questRewardIncludeNitroCode },
+        { label: "Reward Codes", value: "reward-code", selected: questRewardIncludeRewardCode },
+        { label: "In Game Items", value: "in-game", selected: questRewardIncludeInGame },
+        { label: "Profile Collectibles", value: "collectibles", selected: questRewardIncludeCollectibles },
+    ];
+
+    const [currentRewardsOptions, setCurrentRewardsOptions] = useState(questButtonRewardDisplayOptions.filter(option => option.selected));
     const [currentQuestButtonDisplay, setCurrentQuestButtonDisplay] = useState((questButtonDisplayOptions.find(option => option.value === questButtonDisplay) as RadioOption));
     const [currentQuestButtonUnclaimed, setCurrentQuestButtonUnclaimed] = useState((questButtonUnclaimedOptions.find(option => option.value === questButtonUnclaimed) as RadioOption));
     const [currentQuestButtonLeftClickAction, setCurrentQuestButtonLeftClickAction] = useState<"open-quests" | "plugin-settings" | "context-menu" | "nothing">(questButtonLeftClickAction as "open-quests" | "plugin-settings" | "context-menu" | "nothing");
@@ -390,6 +451,40 @@ function QuestButtonSettings(): JSX.Element {
     const [currentQuestButtonRightClickAction, setCurrentQuestButtonRightClickAction] = useState<"open-quests" | "plugin-settings" | "context-menu" | "nothing">(questButtonRightClickAction as "open-quests" | "plugin-settings" | "context-menu" | "nothing");
     const [currentBadgeColor, setCurrentBadgeColor] = useState((questButtonBadgeColor as number | null));
     const [dummySelected, setDummySelected] = useState(false);
+
+    function updateSettingsTruthy(enabled: DynamicDropdownSettingOption[]) {
+        const enabledValues = enabled.map(option => option.value);
+
+        questButtonRewardDisplayOptions.forEach(option => {
+            option.selected = enabledValues.includes(option.value);
+        });
+
+        settings.store.questRewardIncludeRewardCode = enabledValues.includes("reward-code");
+        settings.store.questRewardIncludeNitroCode = enabledValues.includes("nitro-code");
+        settings.store.questRewardIncludeCollectibles = enabledValues.includes("collectibles");
+        settings.store.questRewardIncludeInGame = enabledValues.includes("in-game");
+        settings.store.questRewardIncludeOrbs = enabledValues.includes("orbs");
+
+        setCurrentRewardsOptions(enabled);
+        validateAndOverwriteIgnoredQuests();
+    }
+
+    function handleQuestRewardDisplayChange(values: Array<DynamicDropdownSettingOption | string>) {
+        if (values.length === 0) {
+            updateSettingsTruthy([]);
+            return;
+        }
+
+        const stringlessValues = values.filter(v => typeof v !== "string") as DynamicDropdownSettingOption[];
+        const selectedOption = values.find(v => typeof v === "string") as string;
+        const option = questButtonRewardDisplayOptions.find(option => option.value === selectedOption) as DynamicDropdownSettingOption;
+
+        if (option.selected) {
+            updateSettingsTruthy(stringlessValues.filter(v => v.value !== selectedOption));
+        } else {
+            updateSettingsTruthy([...stringlessValues, option]);
+        }
+    }
 
     function handleQuestButtonDisplayChange(value: RadioOption) {
         setCurrentQuestButtonDisplay(value);
@@ -453,6 +548,47 @@ function QuestButtonSettings(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("inline-group-item")}>
+                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                                Left Click Action
+                            </Forms.FormTitle>
+                            <Select
+                                options={questButtonClickOptions}
+                                className={q("select")}
+                                popoutPosition="top"
+                                serialize={String}
+                                isSelected={(value: string) => value === currentQuestButtonLeftClickAction}
+                                select={handleLeftClickActionChange}
+                            />
+                        </div>
+                        <div className={q("inline-group-item")}>
+                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                                Middle Click Action
+                            </Forms.FormTitle>
+                            <Select
+                                options={questButtonClickOptions}
+                                className={q("select")}
+                                popoutPosition="top"
+                                serialize={String}
+                                isSelected={(value: string) => value === currentQuestButtonMiddleClickAction}
+                                select={handleMiddleClickActionChange}
+                            />
+                        </div>
+                        <div className={q("inline-group-item")}>
+                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                                Right Click Action
+                            </Forms.FormTitle>
+                            <Select
+                                options={questButtonClickOptions}
+                                className={q("select")}
+                                popoutPosition="top"
+                                serialize={String}
+                                isSelected={(value: string) => value === currentQuestButtonRightClickAction}
+                                select={handleRightClickActionChange}
+                            />
+                        </div>
+                    </div>
+                    <div className={q("main-inline-group")}>
+                        <div className={q("inline-group-item")}>
                             <Forms.FormTitle className={q("form-subtitle")}>
                                 Button Visibility
                             </Forms.FormTitle>
@@ -496,45 +632,28 @@ function QuestButtonSettings(): JSX.Element {
                         </div>
                     </div>
                     <div className={q("main-inline-group")}>
-                        <div className={q("inline-group-item")}>
+                        <Forms.FormSection>
                             <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
-                                Left Click Action
+                                Included Reward Types
                             </Forms.FormTitle>
-                            <Select
-                                options={questButtonClickOptions}
+                            <Forms.FormText className={q("form-description")}>
+                                Only count Quests with these reward types as unclaimed when determining button
+                                visibility, badge count, and when playing the alert sound.
+                            </Forms.FormText>
+                            <DynamicDropdown
+                                placeholder="Select which reward types to include in the unclaimed count..."
+                                feedback="There's no supported Quest feature by that name."
                                 className={q("select")}
-                                popoutPosition="top"
-                                serialize={String}
-                                isSelected={(value: string) => value === currentQuestButtonLeftClickAction}
-                                select={handleLeftClickActionChange}
-                            />
-                        </div>
-                        <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
-                                Middle Click Action
-                            </Forms.FormTitle>
-                            <Select
-                                options={questButtonClickOptions}
-                                className={q("select")}
-                                popoutPosition="top"
-                                serialize={String}
-                                isSelected={(value: string) => value === currentQuestButtonMiddleClickAction}
-                                select={handleMiddleClickActionChange}
-                            />
-                        </div>
-                        <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
-                                Right Click Action
-                            </Forms.FormTitle>
-                            <Select
-                                options={questButtonClickOptions}
-                                className={q("select")}
-                                popoutPosition="top"
-                                serialize={String}
-                                isSelected={(value: string) => value === currentQuestButtonRightClickAction}
-                                select={handleRightClickActionChange}
-                            />
-                        </div>
+                                maxVisibleItems={questButtonRewardDisplayOptions.length}
+                                clearable={true}
+                                multi={true}
+                                value={currentRewardsOptions as any}
+                                options={questButtonRewardDisplayOptions}
+                                onChange={handleQuestRewardDisplayChange}
+                                closeOnSelect={false}
+                            >
+                            </DynamicDropdown>
+                        </Forms.FormSection>
                     </div>
                 </Forms.FormSection>
             </div>
@@ -921,13 +1040,17 @@ function ReorderQuestsSetting(): JSX.Element {
         claimedSubsort,
         ignoredSubsort,
         expiredSubsort,
-        ignoredQuestProfile
+        ignoredQuestProfile,
+        rememberQuestPageSort,
+        rememberQuestPageFilters
     } = settings.use([
         "unclaimedSubsort",
         "claimedSubsort",
         "ignoredSubsort",
         "expiredSubsort",
-        "ignoredQuestProfile"
+        "ignoredQuestProfile",
+        "rememberQuestPageSort",
+        "rememberQuestPageFilters"
     ]);
 
     const getSubsortOptions = (source: string): SelectOption[] => {
@@ -968,7 +1091,7 @@ function ReorderQuestsSetting(): JSX.Element {
                             Reorder Quests
                         </Forms.FormTitle>
                         <Forms.FormText className={q("form-description")}>
-                            Sort Quests by their status. Leave empty for default sorting.
+                            Sort Quests by their status. Applied when the "Questify" sort option is selected on the Quest page.
                             <br /><br />
                             Comma-separated list must contain all of: <span className={q("inline-code-block")}>UNCLAIMED, CLAIMED, IGNORED, EXPIRED</span>.
                         </Forms.FormText>
@@ -990,9 +1113,9 @@ function ReorderQuestsSetting(): JSX.Element {
                                     settings.store.reorderQuests = cleaned;
                                 }
                             }}
-                            placeholder="Using Discord's default sorting."
+                            placeholder="You must include all of UNCLAIMED, CLAIMED, IGNORED, EXPIRED"
                             error={
-                                validCommaSeparatedList(reorderQuests, ["UNCLAIMED", "CLAIMED", "IGNORED", "EXPIRED"], true, true, true, false)
+                                validCommaSeparatedList(reorderQuests, ["UNCLAIMED", "CLAIMED", "IGNORED", "EXPIRED"], false, true, true, false)
                                     ? undefined
                                     : "Invalid format."
                             }
@@ -1077,11 +1200,50 @@ function ReorderQuestsSetting(): JSX.Element {
                                 popoutPosition="bottom"
                                 serialize={String}
                                 isSelected={(value: string) => value === ignoredQuestProfile}
-                                select={(value: string) => {
-                                    settings.store.ignoredQuestProfile = value;
-                                }}
+                                select={(value: string) => { settings.store.ignoredQuestProfile = value; }}
                             />
                         </div>
+                    </div>
+                    <div className={q("main-inline-group")}>
+                        <div className={q("inline-group-item")}>
+                            <Forms.FormTitle className={q("form-subtitle")}>
+                                Remember Sort Choice
+                            </Forms.FormTitle>
+                            <Select
+                                options={[
+                                    { label: "Yes", value: true },
+                                    { label: "No", value: false }
+                                ]}
+                                className={q("select")}
+                                popoutPosition="bottom"
+                                serialize={String}
+                                isSelected={(value: boolean) => value === rememberQuestPageSort}
+                                select={(value: boolean) => { settings.store.rememberQuestPageSort = value; }}
+                            />
+                        </div>
+                        <div className={q("inline-group-item")}>
+                            <Forms.FormTitle className={q("form-subtitle")}>
+                                Remember Filter Choice
+                            </Forms.FormTitle>
+                            <Select
+                                options={[
+                                    { label: "Yes", value: true },
+                                    { label: "No", value: false }
+                                ]}
+                                className={q("select")}
+                                popoutPosition="bottom"
+                                serialize={String}
+                                isSelected={(value: boolean) => value === rememberQuestPageFilters}
+                                select={(value: boolean) => { settings.store.rememberQuestPageFilters = value; }}
+                            />
+                        </div>
+                    </div>
+                    <div className={q("main-inline-group")}>
+                        <Forms.FormText className={q("form-description")}>
+                            This sort and filter choice refers to the built-in sort and filter options on the Quest page.
+                            The custom sorting above is only applied when the "Questify" sort option is selected on the Quest page.
+                            If remembering is disabled, the sort or filter options will be reset each time you open the Quest page.
+                        </Forms.FormText>
                     </div>
                 </Forms.FormSection>
             </div>
@@ -1112,12 +1274,7 @@ function FetchingQuestsSetting(): JSX.Element {
         { value: 60 * 60 * 6, label: "12 Hours" },
     ];
 
-    defaultSounds ??= (findDefaultSounds.keys() || []).map(key => {
-        const match = key.match(/((?:\w|-)+)\.mp3$/);
-        return match ? match[1] : null;
-    }).filter(Boolean) as string[];
-
-    const resolvedSounds: SelectOption[] = defaultSounds.map(sound => {
+    const resolvedSounds: SelectOption[] = defaultAudioNames().map(sound => {
         const label = sound.toUpperCase().replace(/_/g, " ").replace(/(\d+)/g, " $1");
         return { value: sound, label };
     });
@@ -1392,8 +1549,7 @@ function FetchingQuestsSetting(): JSX.Element {
                                         if (activePlayer.current) {
                                             clearActivePlayer();
                                         } else {
-                                            activePlayer.current = AudioPlayer(currentAlertSelection.value as string, 1, clearActivePlayer);
-                                            activePlayer.current?.play();
+                                            activePlayer.current = playAudio(currentAlertSelection.value as string, { onEnded: clearActivePlayer });
                                             setIsPlaying(true);
                                         }
                                     }
@@ -1511,6 +1667,36 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Which display type to use for the Quest button in the server list.",
         default: defaultQuestButtonDisplay, // "always", "unclaimed", "never"
+        hidden: true,
+    },
+    questRewardIncludeRewardCode: {
+        type: OptionType.BOOLEAN,
+        description: "Include Quests with Reward Codes when displaying Quest counts.",
+        default: true,
+        hidden: true,
+    },
+    questRewardIncludeNitroCode: {
+        type: OptionType.BOOLEAN,
+        description: "Include Quests with Nitro Codes when displaying Quest counts.",
+        default: true,
+        hidden: true,
+    },
+    questRewardIncludeInGame: {
+        type: OptionType.BOOLEAN,
+        description: "Include Quests with In-Game rewards when displaying Quest counts.",
+        default: true,
+        hidden: true,
+    },
+    questRewardIncludeCollectibles: {
+        type: OptionType.BOOLEAN,
+        description: "Include Quests with Collectibles when displaying Quest counts.",
+        default: true,
+        hidden: true,
+    },
+    questRewardIncludeOrbs: {
+        type: OptionType.BOOLEAN,
+        description: "Include Quests with Orbs when displaying Quest counts.",
+        default: true,
         hidden: true,
     },
     questButtonUnclaimed: {
@@ -1653,6 +1839,30 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "The profile used for ignored Quests.",
         default: "private", // "shared", "private"
+        hidden: true
+    },
+    rememberQuestPageSort: {
+        type: OptionType.BOOLEAN,
+        description: "Remember the last used sort on the Quests page.",
+        default: true,
+        hidden: true
+    },
+    rememberQuestPageFilters: {
+        type: OptionType.BOOLEAN,
+        description: "Remember the last used filters on the Quests page.",
+        default: true,
+        hidden: true
+    },
+    lastQuestPageSort: {
+        type: OptionType.STRING,
+        description: "Remember the last used sort on the Quests page.",
+        default: "questify" as string, // sort key
+        hidden: true
+    },
+    lastQuestPageFilters: {
+        type: OptionType.CUSTOM,
+        description: "Remember the last used filters on the Quests page.",
+        default: {} as { [filter: string]: { group: string, filter: string; }; }, // Array of filters
         hidden: true
     },
     ignoredQuestIDs: {

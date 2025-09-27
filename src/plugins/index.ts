@@ -28,6 +28,7 @@ import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/Messag
 import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
@@ -52,10 +53,36 @@ const subscribedFluxEventsPlugins = new Set<string>();
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 
+/**
+ * Whether a plugin is required (or dependency of another enabled plugin)
+ */
+export function isPluginRequired(name: string) {
+    const p = Plugins[name];
+    if (!p) return false;
+    return p.required || p.isDependency;
+}
+
+/**
+ * A map of plugin names to the plugins that depend on them
+ */
+export const calculatePluginDependencyMap = makeLazy(() => {
+    const dependencies: Record<string, string[]> = {};
+    for (const plugin in Plugins) {
+        const deps = Plugins[plugin].dependencies;
+        if (deps) {
+            for (const dep of deps) {
+                dependencies[dep] ??= [];
+                dependencies[dep].push(plugin);
+            }
+        }
+    }
+
+    return dependencies;
+});
+
 export function isPluginEnabled(p: string) {
     return (
-        Plugins[p]?.required ||
-        Plugins[p]?.isDependency ||
+        isPluginRequired(p) ||
         settings[p]?.enabled
     ) ?? false;
 }
@@ -233,7 +260,7 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
             const wrappedHandler = p.flux[event] = function () {
                 if (p.name === "Encryptcord" && event === "MESSAGE_CREATE") return;
                 try {
-                    const res = handler.apply(p, arguments as any);
+                    const res = handler!.apply(p, arguments as any);
                     return res instanceof Promise
                         ? res.catch(e => logger.error(`${p.name}: Error while handling ${event}\n`, e))
                         : res;
@@ -253,7 +280,7 @@ export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Fl
 
         logger.debug("Unsubscribing from flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
-            fluxDispatcher.unsubscribe(event as FluxEvents, handler);
+            fluxDispatcher.unsubscribe(event as FluxEvents, handler!);
         }
     }
 }
