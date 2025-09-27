@@ -5,10 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
+const ClientThemeSettings = getUserSettingLazy("appearance", "clientThemeSettings")!;
 
 export const settings = definePluginSettings({
     justUseCustomTheme: {
@@ -56,7 +58,7 @@ export const settings = definePluginSettings({
 
 export default definePlugin({
     name: "AutoSystemTheme",
-    description: "Automatically switch Discord theme based on system theme",
+    description: "Automatically switch Discord color theme based on system theme",
     authors: [Devs.MahiroX36],
     dependencies: ["UserSettingsAPI"],
     settings,
@@ -65,11 +67,10 @@ export default definePlugin({
         this._mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
         this._applyTheme = () => {
             const isDark = this._mediaQuery.matches;
+            const clientTheme = ClientThemeSettings.getSetting();
             if (!this.settings.store.justUseCustomTheme) {
-                FluxDispatcher.dispatch({
-                    type: "UPDATE_BACKGROUND_GRADIENT_PRESET",
-                    presetId: isDark ? this.settings.store.darkMode : this.settings.store.lightMode
-                });
+                clientTheme.backgroundGradientPresetId = isDark ? this.settings.store.darkMode : this.settings.store.lightMode;
+                ClientThemeSettings.updateSetting(clientTheme);
             }
             FluxDispatcher.dispatch({
                 type: "SET_THEME_OVERRIDE",
