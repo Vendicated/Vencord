@@ -26,6 +26,7 @@ import { MessageClickListener, MessageEditListener, MessageSendListener } from "
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
+import { LiteralUnion } from "type-fest";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<PropertyKey, any>) {
@@ -150,9 +151,9 @@ export interface PluginDef {
     /**
      * Allows you to subscribe to Flux events
      */
-    flux?: {
-        [E in FluxEvents]?: (event: any) => void | Promise<void>;
-    };
+    flux?: Partial<{
+        [E in LiteralUnion<FluxEvents, string>]: (event: any) => void | Promise<void>;
+    }>;
     /**
      * Allows you to manipulate context menus
      */

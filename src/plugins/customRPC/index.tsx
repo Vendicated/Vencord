@@ -27,6 +27,8 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
+import { Activity } from "@vencord/discord-types";
+import { ActivityType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, React, UserStore } from "@webpack/common";
 
@@ -39,41 +41,7 @@ async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0];
 }
 
-interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-}
-
-interface Activity {
-    state?: string;
-    details?: string;
-    timestamps?: {
-        start?: number;
-        end?: number;
-    };
-    assets?: ActivityAssets;
-    buttons?: Array<string>;
-    name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: Array<string>;
-    };
-    type: ActivityType;
-    url?: string;
-    flags: number;
-}
-
-const enum ActivityType {
-    PLAYING = 0,
-    STREAMING = 1,
-    LISTENING = 2,
-    WATCHING = 3,
-    COMPETING = 5
-}
-
-const enum TimestampMode {
+export const enum TimestampMode {
     NONE,
     NOW,
     TIME,
