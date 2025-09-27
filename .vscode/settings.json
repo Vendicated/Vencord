@@ -22,5 +22,13 @@
     "css.format.spaceAroundSelectorSeparator": true,
     "[css]": {
         "editor.defaultFormatter": "vscode.css-language-features"
-    }
+    },
+    "i18n-ally.namespace": true,
+    "i18n-ally.localesPaths": [
+        "./i18n"
+    ],
+    "i18n-ally.sourceLanguage": "en",
+    "i18n-ally.extract.keygenStyle": "camelCase",
+    "i18n-ally.sortKeys": true,
+    "i18n-ally.keystyle": "nested"
 }

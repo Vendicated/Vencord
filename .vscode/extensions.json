@@ -4,6 +4,7 @@
         "EditorConfig.EditorConfig",
         "GregorBiswanger.json2ts",
         "stylelint.vscode-stylelint",
-        "Vendicated.vencord-companion"
+        "Vendicated.vencord-companion",
+        "lokalise.i18n-ally"
     ]
 }
