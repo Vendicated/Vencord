@@ -111,8 +111,8 @@ export function t(key: string, variables?: Record<string, any>): string {
             if (!translation.other)
                 throw new Error(`translation key ${key} is an object, not a string or a plural`);
 
-            if (!variables?.count)
-                throw new Error(`translation key ${key} is plural but no count variable was provided`);
+            if (typeof variables?.count !== "number")
+                throw new Error(`translation key ${key} is plural and requires a numeric 'count' variable`);
 
             const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
                 new Intl.PluralRules(bestLocale).select(variables.count);

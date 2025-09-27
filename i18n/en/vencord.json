@@ -58,6 +58,15 @@
       "logButton": "View Notification Log",
       "settingsButton": "Notification Settings"
     },
+    "plugins": {
+      "contributorModal": {
+        "contributorInfo": {
+          "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!",
+          "one": "This person has <0>contributed</0> to 1 plugin!",
+          "other": "This person has <0>contributed</0> to {count} plugins!"
+        }
+      }
+    },
     "requiresFullRestart": "Requires a full restart",
     "title": "Settings",
     "transparent": {

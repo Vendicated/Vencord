@@ -14,6 +14,7 @@ import { DevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { Translate } from "@utils/translation";
 import { User } from "@vencord/discord-types";
 import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
@@ -88,15 +89,11 @@ function ContributorModal({ user }: { user: User; }) {
                 </div>
             </div>
 
-            {plugins.length ? (
-                <Forms.FormText>
-                    This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Forms.FormText>
-            ) : (
-                <Forms.FormText>
-                    This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
-                </Forms.FormText>
-            )}
+            <Forms.FormText>
+                <Translate i18nKey="vencord.settings.plugins.contributorModal.contributorInfo" variables={{ count: plugins.length }}>
+                    This person has <Link href="https://vencord.dev/source">contributed</Link> to some plugins!
+                </Translate>
+            </Forms.FormText>
 
             {!!plugins.length && (
                 <div className={cl("plugins")}>
