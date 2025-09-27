@@ -5,14 +5,14 @@
  */
 
 import { Devs } from "@utils/constants";
-import { setLocale } from "@utils/translation";
+import { setLocale, t } from "@utils/translation";
 import definePlugin from "@utils/types";
 import { i18n } from "@webpack/common";
 
 export default definePlugin({
     name: "Translation",
     required: true,
-    description: "Assists with translating Vencord",
+    description: t("translation.description"),
     authors: [Devs.lewisakura],
 
     flux: {

@@ -44,7 +44,7 @@ declare module "~git-remote" {
 declare module "~translations" {
     type BaseTranslation = string | { [key: string]: BaseTranslation; };
     export type TranslationBundle = {
-        [scope: string]: Record<string, BaseTranslation>;
+        [namespace: string]: Record<string, BaseTranslation>;
     };
 
     const translations: {
