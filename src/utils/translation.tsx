@@ -15,6 +15,8 @@ import { Logger } from "./Logger";
 
 const logger = new Logger("Translations", "#7bc876");
 
+export const availableLocales = Object.keys(translations);
+
 let loadedLocale: TranslationBundle;
 
 let lastDiscordLocale: string = localStorage.getItem("vcLocale")!;
@@ -45,7 +47,7 @@ function reloadLocale() {
 
     loadedLocale = translations[bestLocale];
 
-    logger.info("Changed locale to", bestLocale);
+    logger.info(`Locale was updated (wanted ${lastDiscordLocale}, negotiated to ${bestLocale})`);
 }
 
 // derived from stackoverflow's string formatting function
@@ -146,13 +148,14 @@ export function t(key: string, variables?: Record<string, any>): string {
     });
 }
 
+type TranslatableChild = (string | JSX.Element);
 interface TranslateProps {
     /** The key to translate. */
     i18nKey: string;
     /** The variables to interpolate into the resultant string. If dealing with plurals, `count` must be set. */
     variables?: Record<string, any>;
     /** The component(s) to interpolate into the resultant string. */
-    children: (string | JSX.Element)[];
+    children: TranslatableChild | TranslatableChild[];
 }
 
 /**

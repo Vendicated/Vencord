@@ -4,10 +4,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { setLocale, t } from "@utils/translation";
-import definePlugin from "@utils/types";
+import { availableLocales, setLocale, t } from "@utils/translation";
+import definePlugin, { OptionType } from "@utils/types";
 import { i18n } from "@webpack/common";
+
+const settings = definePluginSettings({
+    forceLocale: {
+        type: OptionType.SELECT,
+        description: t("translation.settings.forceLocale.description"),
+        options: [
+            {
+                label: t("translation.settings.forceLocale.followDiscord"),
+                value: "",
+                default: true,
+            },
+            ...availableLocales.map(l => ({
+                label: l,
+                value: l
+            }))
+        ],
+        onChange: (value: string) => {
+            setLocale(value || i18n.intl.currentLocale);
+        }
+    }
+});
 
 export default definePlugin({
     name: "Translation",
@@ -15,9 +37,12 @@ export default definePlugin({
     description: t("translation.description"),
     authors: [Devs.lewisakura],
 
+    settings,
+
     flux: {
         USER_SETTINGS_PROTO_UPDATE({ settings }) {
-            setLocale(settings.proto.localization.locale.value);
+            if (settings.proto.localization) // sometimes this apparently doesn't exist? not sure why
+                setLocale(settings.proto.localization.locale.value);
         }
     },
 

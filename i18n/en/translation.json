@@ -1,3 +1,9 @@
 {
-    "description": "Assists with translating Vencord"
+  "description": "Assists with translating Vencord",
+  "settings": {
+    "forceLocale": {
+      "description": "Force a different locale for Vencord to use",
+      "followDiscord": "Default (follow Discord)"
+    }
+  }
 }
