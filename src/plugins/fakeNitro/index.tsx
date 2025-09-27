@@ -411,8 +411,7 @@ export default definePlugin({
 
     handleGradientThemeSelect(clientThemeSettings: any, theme: number, original: () => void) {
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
-        const { backgroundGradientPresetId, customUserThemeSettings } = clientThemeSettings ?? {};
-        const hasNitroCustomization = backgroundGradientPresetId != null || customUserThemeSettings != null;
+        const hasNitroCustomization = Object.values(clientThemeSettings ?? {}).some(v => v != null);
 
         if (premiumType === 2 || !hasNitroCustomization) {
             return original();
