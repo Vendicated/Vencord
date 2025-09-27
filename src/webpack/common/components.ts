@@ -87,13 +87,7 @@ export const ListScrollerNone = LazyComponent(() => createListScroller(listScrol
 export const ListScrollerThin = LazyComponent(() => createListScroller(listScrollerClasses.thin, listScrollerClasses.fade, "", ResizeObserver));
 export const ListScrollerAuto = LazyComponent(() => createListScroller(listScrollerClasses.auto, listScrollerClasses.fade, "", ResizeObserver));
 
-const { FocusLock_ } = mapMangledModuleLazy('document.getElementById("app-mount"))', {
-    FocusLock_: filters.componentByCode(".containerRef")
-}) as {
-    FocusLock_: t.FocusLock;
-};
-
-export const FocusLock = LazyComponent(() => FocusLock_);
+export const FocusLock = waitForComponent<t.FocusLock>("FocusLock", filters.componentByCode(".containerRef,{keyboardModeEnabled:"));
 
 export let useToken: t.useToken;
 waitFor(m => {
