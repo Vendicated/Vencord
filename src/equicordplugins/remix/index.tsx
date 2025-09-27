@@ -5,14 +5,12 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { PaintbrushIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { closeModal, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { extractAndLoadChunksLazy, findLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, Menu, MessageActions, RestAPI, showToast, SnowflakeUtils, Toasts } from "@webpack/common";
 
@@ -90,7 +88,6 @@ export function sendRemix(blob: Blob) {
                     filename: upload.filename,
                     uploaded_filename: upload.uploadedFilename,
                     size: blob.size,
-                    is_remix: settings.store.remixTag
                 }],
                 message_reference: reply ? MessageActions.getSendMessageOptionsForReply(reply)?.messageReference : null,
             },
@@ -101,27 +98,11 @@ export function sendRemix(blob: Blob) {
     upload.upload();
 }
 
-const settings = definePluginSettings({
-    remixTag: {
-        description: "Include the remix tag in remixed messages",
-        type: OptionType.BOOLEAN,
-        default: true,
-    },
-    remixMe: {
-        description: "Turns every single message with attachment to have remix tag",
-        type: OptionType.BOOLEAN,
-        default: false,
-    }
-});
-
-const handleMessage: MessageSendListener = (_, __, ex) => ex.uploads && ex.uploads.forEach(att => att.isRemix = true);
-
 
 export default definePlugin({
     name: "Remix",
     description: "Adds Remix to Desktop",
     authors: [EquicordDevs.MrDiamond, EquicordDevs.meowabyte],
-    settings,
     contextMenus: {
         "channel-attach": UploadContextMenuPatch,
         "message": MessageContextMenuPatch,
@@ -133,15 +114,9 @@ export default definePlugin({
         await requireSettingsMenu();
 
         enableStyle(css);
-        if (settings.store.remixMe) {
-            addMessagePreSendListener(handleMessage);
-        }
     },
 
     stop() {
         disableStyle(css);
-        if (settings.store.remixMe) {
-            removeMessagePreSendListener(handleMessage);
-        }
     },
 });
