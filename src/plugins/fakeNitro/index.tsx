@@ -422,7 +422,7 @@ export default definePlugin({
 
         const appearanceSettingsOverwrite = AppearanceSettingsActionCreators.create({
             ...currentAppearanceSettings,
-            theme: theme,
+            theme,
             clientThemeSettings
         });
 
