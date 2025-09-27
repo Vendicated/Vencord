@@ -9,7 +9,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { OptionType, PluginOptionArray } from "@utils/types";
-import { Channel, Guild, Role, SelectOption } from "@vencord/discord-types";
+import { Channel, Guild, SelectOption } from "@vencord/discord-types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Avatar,
@@ -27,7 +27,6 @@ import {
 } from "@webpack/common";
 
 import { SettingProps, SettingsSection } from "./Common";
-import { Logger } from "@utils/Logger";
 
 
 const cl = classNameFactory("vc-plugin-modal-");

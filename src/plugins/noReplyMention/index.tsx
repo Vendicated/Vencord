@@ -30,11 +30,13 @@ const settings = definePluginSettings({
         description: "List of users to allow or exempt pings for",
         type: OptionType.USERS,
         oldStringSeparator: sep,
+        popoutText: () => !settings.store.shouldPingListed ? "Prevent pinging this user" : "Ping this user",
     },
     roleList: {
         description:
             "List of roles to allow or exempt pings for",
         type: OptionType.ROLES,
+        popoutText: () => !settings.store.shouldPingListed ? "Prevent pinging this role" : "Ping this role",
         oldStringSeparator: sep,
     },
     shouldPingListed: {

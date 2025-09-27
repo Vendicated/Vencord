@@ -345,7 +345,7 @@ export interface PluginSettingArrayDef {
      * If not specified, the setting name will be used.
      * Only applies to User, Channel, Guild and Role arrays.
      */
-    popoutText?: string;
+    popoutText?: string | (() => string);
     /**
      * If the context-menu entry should be hidden.
      * Only applies to User, Channel, Guild and Role arrays.

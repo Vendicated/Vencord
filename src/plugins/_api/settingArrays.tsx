@@ -6,28 +6,30 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
+import { getCurrentGuild } from "@utils/discord";
 import definePlugin, { OptionType, PluginSettingArrayDef } from "@utils/types";
-import { Channel, Guild, User } from "@vencord/discord-types";
-import { Menu, React } from "@webpack/common";
+import { Channel, Guild, Role, User } from "@vencord/discord-types";
+import { GuildRoleStore, Menu, React } from "@webpack/common";
 
-type ContextMenuType = Channel | User | Guild;
+type ContextMenuType = Channel | User | Guild | Role;
 
 function createContextMenuItem(name: string, value: ContextMenuType) {
+    const type = name === "Guild" ? OptionType.GUILDS : name === "User" ? OptionType.USERS : name === "Channel" ? OptionType.CHANNELS : OptionType.ROLES;
+    if (Object.keys((registeredPlugins[type])).length === 0) return null;
+
     return (
         <Menu.MenuItem
             id="vc-plugin-settings"
             label="Plugins"
         >
-            {renderRegisteredPlugins(name, value)}
+            {renderRegisteredPlugins(type, value)}
         </Menu.MenuItem>
     );
 }
 
 
-function renderRegisteredPlugins(name: string, value: ContextMenuType) {
-    const type = name === "Guild" ? OptionType.GUILDS : name === "User" ? OptionType.USERS : OptionType.CHANNELS;
-    const plugins = registeredPlugins[type];
-
+function renderRegisteredPlugins(type: OptionType, value: ContextMenuType) {
+    const plugins: Record<string, Array<string>> = registeredPlugins[type];
 
     const [checkedItems, setCheckedItems] = React.useState<Record<string, boolean>>(
         Object.fromEntries(
@@ -63,7 +65,12 @@ function renderRegisteredPlugins(name: string, value: ContextMenuType) {
                 <Menu.MenuCheckboxItem
                     id={`vc-plugin-settings-${plugin}-${setting}`}
                     key={`vc-plugin-settings-${plugin}-${setting}`}
-                    label={(Vencord.Plugins.plugins[plugin].settings!.def[setting] as PluginSettingArrayDef).popoutText ?? setting}
+                    label={(() => {
+                        const popout = (Vencord.Plugins.plugins[plugin].settings!.def[setting] as PluginSettingArrayDef).popoutText;
+                        return typeof popout === "function"
+                            ? popout()
+                            : popout ?? setting;
+                    })()}
                     action={() => handleCheckboxClick(plugin, setting)}
                     checked={checkedItems[`${plugin}-${setting}-${value.id}`]}
                 />
@@ -113,11 +120,25 @@ const UserContext: NavContextMenuPatchCallback = (children, props) => {
     children.splice(idx + 1, 0, newGroup);
 };
 
+
+const RoleContext: NavContextMenuPatchCallback = (children, { id }: { id: string; }) => {
+    if (!registeredPlugins[OptionType.ROLES]) return null;
+    const guild = getCurrentGuild();
+    if (!guild) return;
+
+    const role = GuildRoleStore.getRole(guild.id, id);
+    if (!role) return;
+
+    children.push(createContextMenuItem("Role", role));
+};
+
+
 // {type: {plugin: [setting, setting, setting]}}
-const registeredPlugins: Record<OptionType.USERS | OptionType.GUILDS | OptionType.CHANNELS, Record<string, Array<string>>> = {
+const registeredPlugins: Record<OptionType.USERS | OptionType.GUILDS | OptionType.CHANNELS | OptionType.ROLES, Record<string, Array<string>>> = {
     [OptionType.USERS]: {},
     [OptionType.GUILDS]: {},
-    [OptionType.CHANNELS]: {}
+    [OptionType.CHANNELS]: {},
+    [OptionType.ROLES]: {},
 };
 
 
@@ -133,6 +154,8 @@ export default definePlugin({
         "user-context": UserContext,
         "user-profile-actions": UserContext,
         "user-profile-overflow-menu": UserContext,
+        // This requires developer mode, but I don't think it's sensible to force enable it for this alone
+        "dev-context": RoleContext,
     },
     required: true,
 
@@ -140,7 +163,7 @@ export default definePlugin({
         for (const plugin of Object.values(Vencord.Plugins.plugins)) {
             if (!Vencord.Plugins.isPluginEnabled(plugin.name) || !plugin.settings) continue;
             for (const [key, setting] of Object.entries(plugin.settings.def)) {
-                if ((setting.type === OptionType.USERS || setting.type === OptionType.GUILDS || setting.type === OptionType.CHANNELS) && !setting.hidePopout) {
+                if ((setting.type === OptionType.USERS || setting.type === OptionType.GUILDS || setting.type === OptionType.CHANNELS || setting.type === OptionType.ROLES) && !setting.hidePopout) {
                     if (!registeredPlugins[setting.type][plugin.name]) {
                         registeredPlugins[setting.type][plugin.name] = [];
                     }
