@@ -1,0 +1,259 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import { findByCodeLazy } from "@webpack";
+import { FluxDispatcher, Menu } from "@webpack/common";
+
+import { CandidateGame, MediaEngineSetGoLiveSourceEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent, WindowDescriptor } from "./types";
+
+const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
+const logger = new Logger("ShareActiveWindow");
+
+let activeWindowInterval: NodeJS.Timeout | undefined;
+let isSharingWindow: boolean = false;
+let sharingSettings: StreamSettings | undefined = undefined;
+
+// Debug helper function to track Flux events
+// Call it in plugin's start method
+function patchFluxDispatcher(): void {
+    const oldDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
+    const newDispatch = payload => {
+        logger.debug("[Flux Event]", payload.type, payload);
+        return oldDispatch(payload);
+    };
+    FluxDispatcher.dispatch = newDispatch;
+}
+
+const shareWindow: (
+    window: WindowDescriptor,
+    settings: StreamSettings,
+) => void = findByCodeLazy(',"no permission"]');
+
+function stopActiveWindowLoop(): void {
+    if (activeWindowInterval !== undefined) {
+        clearInterval(activeWindowInterval);
+        activeWindowInterval = undefined;
+    }
+}
+
+function initActiveWindowLoop(): void {
+    // Do not init the loop if we don't share a window (e.g. share the entire screen)
+    if (!isSharingWindow) {
+        return;
+    }
+
+    const discordUtils: {
+        setCandidateGamesCallback(
+            callback: (games: CandidateGame[]) => void
+        ): void;
+        clearCandidateGamesCallback(): void;
+        getWindowHandleFromPid(pid: number): string;
+    } = DiscordNative.nativeModules.requireModule("discord_utils");
+
+    activeWindowInterval = setInterval(async () => {
+        // Should never be true. Otherwise it is a bug in the plugin
+        if (sharingSettings === undefined) {
+            return;
+        }
+
+        const activeWindow = await Native.getActiveWindow();
+        if (!activeWindow) {
+            return;
+        }
+
+        const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
+        const newSourceId = `window:${activeWindowHandle}`;
+        const curSourceId = sharingSettings.sourceId;
+        if (curSourceId === newSourceId) {
+            return;
+        }
+
+        switch (settings.store.shareableWindows) {
+            case "all":
+                sharingSettings.sourceId = newSourceId;
+                shareWindow({
+                    id: newSourceId,
+                    icon: activeWindow.icon,
+                    name: activeWindow.title,
+                }, sharingSettings);
+                break;
+            case "preview":
+                discordUtils.setCandidateGamesCallback(games => {
+                    const window = games.find(game => game.pid === activeWindow.pid);
+                    if (window && sharingSettings) {
+                        sharingSettings.sourceId = newSourceId;
+                        shareWindow({
+                            id: newSourceId,
+                            icon: activeWindow.icon,
+                            name: activeWindow.title,
+                        }, sharingSettings);
+                    }
+                    discordUtils.clearCandidateGamesCallback();
+                });
+                break;
+            default:
+                logger.debug(
+                    `Unsupported "shareableWindows" value: ${settings.store.shareableWindows}`
+                );
+                break;
+        }
+    }, settings.store.checkInterval);
+}
+
+const manageStreamsContextMenuPatch: NavContextMenuPatchCallback = (children): void => {
+    const { isEnabled } = settings.use(["isEnabled"]);
+
+    // Add checkbox only during window sharing mode
+    if (!isSharingWindow) {
+        return;
+    }
+
+    const mainGroup = findGroupChildrenByChildId("stream-settings-audio-enable", children);
+    if (!mainGroup) {
+        logger.debug("Failed to find manage-streams context menu");
+        return;
+    }
+
+    mainGroup.push(
+        <Menu.MenuCheckboxItem
+            id="vc-saw-share-active-window"
+            label="Share Active Window"
+            checked={isEnabled}
+            action={() => settings.store.isEnabled = !isEnabled}
+        />
+    );
+};
+
+const settings = definePluginSettings({
+    isEnabled: {
+        description: "Enable active window monitoring",
+        type: OptionType.BOOLEAN,
+        default: true,
+        hidden: true,
+        onChange: (newValue: boolean): void => {
+            stopActiveWindowLoop();
+            if (newValue) {
+                initActiveWindowLoop();
+            }
+        },
+    },
+    shareableWindows: {
+        description: "What windows can be shared",
+        type: OptionType.SELECT,
+        options: [
+            { label: "All", value: "all" },
+            { label: "Preview list", value: "preview", default: true },
+        ],
+    },
+    checkInterval: {
+        description: "How often to check for active window, in milliseconds",
+        type: OptionType.NUMBER,
+        default: 1000,
+        onChange: (_newValue?: number): void => {
+            // Restart loop with a new check interval
+            stopActiveWindowLoop();
+            initActiveWindowLoop();
+        },
+        isValid: (value?: number) => {
+            if (!value || value < 100) {
+                return "Check Interval must be greater or equal to 100.";
+            }
+            return true;
+        },
+    }
+});
+
+export default definePlugin({
+    name: "ShareActiveWindow",
+    description: "Auto-switch to active window during screen sharing",
+    authors: [Devs.ipasechnikov],
+    settings,
+
+    contextMenus: {
+        "manage-streams": manageStreamsContextMenuPatch,
+    },
+
+    flux: {
+        STREAM_START(event: StreamStartEvent): void {
+            isSharingWindow = event.sourceId.startsWith("window:");
+
+            // No need to track active window if we are not sharing a window
+            if (!isSharingWindow) {
+                stopActiveWindowLoop();
+                return;
+            }
+
+            if (!settings.store.isEnabled) {
+                return;
+            }
+
+            const streamSettingsPartial: Partial<StreamSettings> = {
+                analyticsLocations: event.analyticsLocations,
+                audioSourceId: event.audioSourceId,
+                goLiveModalDurationMs: event.goLiveModalDurationMs,
+                previewDisabled: event.previewDisabled,
+                sourceId: event.sourceId,
+            };
+
+            sharingSettings = {
+                ...sharingSettings,
+                ...streamSettingsPartial,
+            };
+
+            // Init loop if it is not running yet
+            if (!activeWindowInterval) {
+                initActiveWindowLoop();
+            }
+        },
+
+        STREAM_STOP(_event: any): void {
+            isSharingWindow = false;
+            sharingSettings = undefined;
+            stopActiveWindowLoop();
+        },
+
+        STREAM_UPDATE_SETTINGS(event: StreamUpdateSettingsEvent): void {
+            const streamSettingsPartial = {
+                preset: event.preset,
+                fps: event.frameRate,
+                resolution: event.resolution,
+                soundshareEnabled: event.soundshareEnabled,
+            };
+
+            sharingSettings = {
+                ...sharingSettings,
+                ...streamSettingsPartial,
+            };
+        },
+
+        MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: MediaEngineSetGoLiveSourceEvent): void {
+            const streamSettingsPartial = {
+                preset: event.settings.qualityOptions.preset,
+                fps: event.settings.qualityOptions.frameRate,
+                resolution: event.settings.qualityOptions.resolution,
+                soundshareEnabled: event.settings.desktopSettings.sound,
+            };
+
+            sharingSettings = {
+                ...sharingSettings,
+                ...streamSettingsPartial,
+            };
+        },
+    },
+
+    async start() {
+        await Native.initActiveWindow();
+    },
+
+    stop() {
+        stopActiveWindowLoop();
+    },
+});
