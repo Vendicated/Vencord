@@ -188,16 +188,6 @@ export default definePlugin({
                 repliedMessage = messageReference ? MessageStore.getMessage(messageReference.channel_id, messageReference.message_id) : null;
             }
 
-            const { BlockKeywords } = Settings.plugins;
-            if (
-                BlockKeywords &&
-                BlockKeywords.enabled &&
-                BlockKeywords.ignoreBlockedMessages &&
-                containsBlockedKeywords(message)
-            ) {
-                return true;
-            }
-
             return repliedMessage && this.isBlocked(repliedMessage) ? repliedMessage : false;
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked or ignored:", e);
