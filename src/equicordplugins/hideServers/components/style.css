@@ -45,3 +45,10 @@
 .vc-hideservers-row-button {
     margin-left: auto;
 }
+
+.vc-hideservers-folder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 20px;
+}
