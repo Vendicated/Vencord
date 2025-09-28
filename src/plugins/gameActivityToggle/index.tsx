@@ -60,7 +60,7 @@ function makeIcon(showCurrentGame?: boolean) {
     };
 }
 
-function GameActivityToggleButton() {
+function GameActivityToggleButton(props: { nameplate?: any; }) {
     const showCurrentGame = ShowCurrentGame.useSetting();
 
     return (
@@ -70,6 +70,7 @@ function GameActivityToggleButton() {
             role="switch"
             aria-checked={!showCurrentGame}
             redGlow={!showCurrentGame}
+            plated={props?.nameplate != null}
             onClick={() => ShowCurrentGame.updateSetting(old => !old)}
         />
     );
@@ -97,7 +98,7 @@ export default definePlugin({
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
                 match: /className:\i\.buttons,.{0,50}children:\[/,
-                replace: "$&$self.GameActivityToggleButton(),"
+                replace: "$&$self.GameActivityToggleButton(arguments[0]),"
             }
         }
     ],
