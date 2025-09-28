@@ -139,6 +139,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 export default function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
+    const changeArray = changes.map(s => s);
 
     React.useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
@@ -146,12 +147,17 @@ export default function PluginSettings() {
             body: (
                 <>
                     <p>The following plugins require a restart:</p>
-                    <div>{changes.map((s, i) => (
-                        <>
-                            {i > 0 && ", "}
-                            {Parser.parse("`" + s + "`")}
-                        </>
-                    ))}</div>
+                    <div>
+                        {changeArray.slice(0, 15).map((s, i) => (
+                            <span key={i}>
+                                {i > 0 && ", "}
+                                {Parser.parse("`" + s + "`")}
+                            </span>
+                        ))}
+                        {changeArray.length > 15 && (
+                            <span> and {changeArray.length - 15} more</span>
+                        )}
+                    </div>
                 </>
             ),
             confirmText: "Restart now",
