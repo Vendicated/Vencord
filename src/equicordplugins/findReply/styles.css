@@ -6,3 +6,10 @@
     align-items: inherit !important;
     line-height: 0 !important;
 }
+
+.vc-findreply-div {
+    background-color: var(--background-base-lower);
+    flex-direction: row;
+    align-items: center;
+    width: 270px;
+}
