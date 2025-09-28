@@ -139,31 +139,34 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 export default function PluginSettings() {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
-    const changeArray = changes.map(s => s);
 
     React.useEffect(() => {
-        return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
-            body: (
-                <>
-                    <p>The following plugins require a restart:</p>
+        return () => {
+            if (!changes.hasChanges) return;
+
+            const allChanges = [...changes.getChanges()];
+            const maxDisplay = 15;
+            const displayed = allChanges.slice(0, maxDisplay);
+            const remainingCount = allChanges.length - displayed.length;
+
+            Alerts.show({
+                title: "Restart required",
+                body: (
                     <div>
-                        {changeArray.slice(0, 15).map((s, i) => (
+                        {displayed.map((s, i) => (
                             <span key={i}>
                                 {i > 0 && ", "}
                                 {Parser.parse("`" + s + "`")}
                             </span>
                         ))}
-                        {changeArray.length > 15 && (
-                            <span> and {changeArray.length - 15} more</span>
-                        )}
+                        {remainingCount > 0 && <span> and {remainingCount} more</span>}
                     </div>
-                </>
-            ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: () => location.reload()
-        }));
+                ),
+                confirmText: "Restart now",
+                cancelText: "Later!",
+                onConfirm: () => location.reload()
+            });
+        };
     }, []);
 
     const depMap = Vencord.Plugins.calculatePluginDependencyMap();

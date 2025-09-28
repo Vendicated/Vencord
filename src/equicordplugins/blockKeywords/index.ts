@@ -39,7 +39,7 @@ const settings = definePluginSettings({
 });
 
 export function containsBlockedKeywords(message: Message) {
-    if (blockedKeywords.length === 0) { return false; }
+    if (!blockedKeywords || blockedKeywords.length === 0) { return false; }
 
     // can't use forEach because we need to return from inside the loop
     // message content loop
