@@ -856,10 +856,9 @@ export default definePlugin({
     shouldHideBadgeOnUserProfiles,
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
-    shouldDisableQuestAcceptedButton,
     processQuestForAutoComplete,
-    getQuestAcceptedButtonText,
     getQuestAcceptedButtonProps,
+    getQuestAcceptedButtonText,
     getQuestPanelOverride,
     setLastFilterChoices,
     getLastFilterChoices,
@@ -1201,8 +1200,8 @@ export default definePlugin({
                     // The Quest Accepted button is disabled by default. If the user reloads the client, they need a way
                     // to resume the automatic completion, so patch in optionally enabling it if the feature is enabled.
                     // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress but not active.
-                    // When the Quest Accepted button which has been enabled again by the above patch is clicked,
-                    // resume the automatic completion of the Quest and disable the button again.
+                    // Then, when the Quest Accepted button is clicked, resume the automatic completion of the
+                    // Quest and disable the button again.
                     match: /(?<=fullWidth:!0}\)}\):.{0,150}?secondary",)disabled:!0,text:(.{0,30}?\["9KoPyM"\]\)),/,
                     replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1),"
                 }

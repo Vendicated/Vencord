@@ -28,20 +28,30 @@ import { relaunch } from "./native";
 import { chooseFile, saveFile } from "./web";
 
 export async function importSettings(data: string) {
+    let parsed: any;
     try {
-        var parsed = JSON.parse(data);
+        parsed = JSON.parse(data);
     } catch (err) {
         console.log(data);
         throw new Error("Failed to parse JSON: " + String(err));
     }
 
-    if ("settings" in parsed && "quickCss" in parsed) {
+    if ("settings" in parsed) {
         Object.assign(PlainSettings, parsed.settings);
         await VencordNative.settings.set(parsed.settings);
+    }
+
+    if ("quickCss" in parsed) {
         await VencordNative.quickCss.set(parsed.quickCss);
-        if (parsed.dataStore) await DataStore.setMany(parsed.dataStore);
-    } else
+    }
+
+    if ("dataStore" in parsed) {
+        await DataStore.setMany(parsed.dataStore);
+    }
+
+    if (!("settings" in parsed || "quickCss" in parsed || "dataStore" in parsed)) {
         throw new Error("Invalid Settings. Is this even an Equicord Settings file?");
+    }
 }
 
 export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
@@ -51,9 +61,44 @@ export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
     return JSON.stringify({ settings, quickCss, dataStore }, null, minify ? undefined : 4);
 }
 
-export async function downloadSettingsBackup() {
-    const filename = `equicord-settings-backup-${moment().format("YYYY-MM-DD")}.json`;
-    const backup = await exportSettings();
+export async function exportPlugins({ minify }: { minify?: boolean; } = {}) {
+    const { plugins } = VencordNative.settings.get();
+    return JSON.stringify({ settings: { plugins } }, null, minify ? undefined : 4);
+}
+
+export async function exportCSS({ minify }: { minify?: boolean; } = {}) {
+    const quickCss = await VencordNative.quickCss.get();
+    return JSON.stringify({ quickCss }, null, minify ? undefined : 4);
+}
+
+export async function exportDataStores({ minify }: { minify?: boolean; } = {}) {
+    const dataStore = await DataStore.entries();
+    return JSON.stringify({ dataStore }, null, minify ? undefined : 4);
+}
+
+type BackupType = "settings" | "plugins" | "css" | "datastore";
+
+export async function downloadSettingsBackup(type: BackupType, { minify }: { minify?: boolean; } = {}) {
+    let backup: string;
+
+    switch (type) {
+        case "settings":
+            backup = await exportSettings({ minify });
+            break;
+        case "plugins":
+            backup = await exportPlugins({ minify });
+            break;
+        case "css":
+            backup = await exportCSS({ minify });
+            break;
+        case "datastore":
+            backup = await exportDataStores({ minify });
+            break;
+        default:
+            throw new Error("Invalid backup type");
+    }
+
+    const filename = `equicord-${type}-backup-${moment().format("YYYY-MM-DD")}.json`;
     const data = new TextEncoder().encode(backup);
 
     if (IS_DISCORD_DESKTOP) {

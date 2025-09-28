@@ -7,28 +7,18 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Menu, MessageActions, MessageStore, NavigationRouter, Toasts, UserStore } from "@webpack/common";
+import { Menu, NavigationRouter, RestAPI, Toasts, UserStore } from "@webpack/common";
 
-async function findLastMessageFromUser(channelId: string, userId: string) {
+async function findLastMessageFromUser(guildId: string, channelId: string, userId: string) {
     try {
-        const messageCollection = MessageStore.getMessages(channelId);
-        let messages = messageCollection?.toArray() || [];
-        let userMessage = messages.filter(m => m?.author?.id === userId).pop();
-        if (userMessage) return userMessage.id;
-        try {
-            await MessageActions.fetchMessages({
-                channelId: channelId,
-                limit: 50
-            });
+        const res = await RestAPI.get({
+            url: `/guilds/${guildId}/messages/search?author_id=${userId}&channel_id=${channelId}&sort_by=timestamp&sort_order=desc&offset=0`
+        });
 
-            const updatedCollection = MessageStore.getMessages(channelId);
-            messages = updatedCollection?.toArray() || [];
-            userMessage = messages.filter(m => m?.author?.id === userId).pop();
+        const allMessages = res.body.messages?.flat() || [];
+        const newestMessage = allMessages.find(msg => msg && msg.id);
 
-            if (userMessage) return userMessage.id;
-        } catch (fetchError) {
-            console.error("Error fetching messages:", fetchError);
-        }
+        if (newestMessage) return newestMessage.id;
 
         Toasts.show({
             type: Toasts.Type.FAILURE,
@@ -46,6 +36,7 @@ async function findLastMessageFromUser(channelId: string, userId: string) {
         return null;
     }
 }
+
 async function jumpToLastActive(channel: any, targetUserId?: string) {
     try {
         if (!channel) {
@@ -66,7 +57,7 @@ async function jumpToLastActive(channel: any, targetUserId?: string) {
             const currentUser = UserStore.getCurrentUser();
             userId = currentUser.id;
         }
-        const messageId = await findLastMessageFromUser(channelId, userId);
+        const messageId = await findLastMessageFromUser(guildId, channelId, userId);
         if (messageId) {
             const url = `/channels/${guildId}/${channelId}/${messageId}`;
             NavigationRouter.transitionTo(url);
@@ -106,6 +97,7 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user, cha
         />
     );
 };
+
 export function UserLastActiveIcon() {
     return (
         <svg
@@ -139,6 +131,7 @@ export function LastActiveIcon() {
         </svg>
     );
 }
+
 export default definePlugin({
     name: "LastActive",
     description: "A plugin to jump to last active message from yourself or another user in a channel/server.",

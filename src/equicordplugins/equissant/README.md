@@ -1,3 +1,3 @@
 # Equissant
 
-Plays crossant every 10 clicks
+Plays crossant every specified amount of clicks

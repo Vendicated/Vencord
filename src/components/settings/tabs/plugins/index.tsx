@@ -141,23 +141,32 @@ export default function PluginSettings() {
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
     React.useEffect(() => {
-        return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
-            body: (
-                <>
-                    <p>The following plugins require a restart:</p>
-                    <div>{changes.map((s, i) => (
-                        <>
-                            {i > 0 && ", "}
-                            {Parser.parse("`" + s + "`")}
-                        </>
-                    ))}</div>
-                </>
-            ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: () => location.reload()
-        }));
+        return () => {
+            if (!changes.hasChanges) return;
+
+            const allChanges = [...changes.getChanges()];
+            const maxDisplay = 15;
+            const displayed = allChanges.slice(0, maxDisplay);
+            const remainingCount = allChanges.length - displayed.length;
+
+            Alerts.show({
+                title: "Restart required",
+                body: (
+                    <div>
+                        {displayed.map((s, i) => (
+                            <span key={i}>
+                                {i > 0 && ", "}
+                                {Parser.parse("`" + s + "`")}
+                            </span>
+                        ))}
+                        {remainingCount > 0 && <span> and {remainingCount} more</span>}
+                    </div>
+                ),
+                confirmText: "Restart now",
+                cancelText: "Later!",
+                onConfirm: () => location.reload()
+            });
+        };
     }, []);
 
     const depMap = Vencord.Plugins.calculatePluginDependencyMap();

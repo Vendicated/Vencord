@@ -27,7 +27,7 @@ let buttonEntries: ButtonEntry[] = [];
 const BUTTON_ENTRIES_KEY = "ChatButtonsPlus_buttonEntries";
 
 function generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
 async function handleButtonClick(context: string) {
@@ -67,8 +67,31 @@ async function removeButtonEntry(id: string, forceUpdate: () => void) {
     }
 }
 
+async function resetAllButtons(forceUpdate: () => void) {
+    try {
+        buttonEntries.length = 0;
+        await DataStore.set(BUTTON_ENTRIES_KEY, []);
+        forceUpdate();
+    } catch (error) {
+        console.error("ChatButtonsPlus: Failed to reset buttons:", error);
+    }
+}
+
 function ButtonEntries() {
     const update = useForceUpdater();
+
+    React.useEffect(() => {
+        const loadEntries = async () => {
+            try {
+                const storedEntries = await DataStore.get(BUTTON_ENTRIES_KEY) ?? [];
+                buttonEntries = storedEntries;
+                update();
+            } catch (error) {
+                console.error("ChatButtonsPlus: Failed to load entries:", error);
+            }
+        };
+        loadEntries();
+    }, []);
 
     async function setLabel(id: string, value: string) {
         try {
@@ -87,7 +110,7 @@ function ButtonEntries() {
         try {
             const index = buttonEntries.findIndex(entry => entry.id === id);
             if (index !== -1) {
-                buttonEntries[index].message = value.trim() || "Hello!";
+                buttonEntries[index].message = value;
                 await DataStore.set(BUTTON_ENTRIES_KEY, buttonEntries);
                 update();
             }
@@ -99,10 +122,12 @@ function ButtonEntries() {
     async function setSvg(id: string, value: string) {
         try {
             const index = buttonEntries.findIndex(entry => entry.id === id);
-            if (index !== -1 && isValidSvg(value.trim())) {
-                buttonEntries[index].svg = value.trim();
-                await DataStore.set(BUTTON_ENTRIES_KEY, buttonEntries);
-                update();
+            if (index !== -1) {
+                if (value.trim() === "" || isValidSvg(value.trim())) {
+                    buttonEntries[index].svg = value.trim();
+                    await DataStore.set(BUTTON_ENTRIES_KEY, buttonEntries);
+                    update();
+                }
             }
         } catch (error) {
             console.error("ChatButtonsPlus: Failed to update SVG:", error);
@@ -185,19 +210,23 @@ function ButtonEntries() {
 
                 <div className="chatButtonsPlus-field">
                     <Forms.FormText className="chatButtonsPlus-label">Message to Send</Forms.FormText>
-                    <TextInput
+                    <textarea
+                        className="chatButtonsPlus-textarea"
                         placeholder="Message to send when clicked"
                         value={entry.message}
-                        onChange={e => setMessage(entry.id, e)}
+                        onChange={e => setMessage(entry.id, e.target.value)}
+                        rows={2}
                     />
                 </div>
 
                 <div className="chatButtonsPlus-field">
                     <Forms.FormText className="chatButtonsPlus-label">Custom SVG Path (24x24 viewBox)</Forms.FormText>
-                    <TextInput
+                    <textarea
+                        className="chatButtonsPlus-textarea"
                         placeholder='<path fill="currentColor" d="..."/>'
                         value={entry.svg}
-                        onChange={e => setSvg(entry.id, e)}
+                        onChange={e => setSvg(entry.id, e.target.value)}
+                        rows={3}
                     />
                     <Forms.FormText className="chatButtonsPlus-description">
                         Enter SVG path elements for a 24x24 viewBox. Use "currentColor" for the fill to match Discord's theme.
@@ -210,7 +239,16 @@ function ButtonEntries() {
     return (
         <>
             {elements}
-            <Button onClick={() => addButtonEntry(update)}>Add Button</Button>
+            <div className="chatButtonsPlus-actions">
+                <Button onClick={() => addButtonEntry(update)}>Add Button</Button>
+                <Button
+                    onClick={() => resetAllButtons(update)}
+                    look={Button.Looks.OUTLINED}
+                    color={Button.Colors.RED}
+                >
+                    Reset All
+                </Button>
+            </div>
         </>
     );
 }

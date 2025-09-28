@@ -50,3 +50,29 @@
     color: var(--text-muted);
     margin-top: 3px;
 }
+
+.chatButtonsPlus-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--text-muted);
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    color: var(--header-primary);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    resize: vertical;
+    min-height: 60px;
+    box-sizing: border-box;
+}
+
+.chatButtonsPlus-textarea:focus {
+    outline: none;
+    border-color: var(--brand-experiment);
+    box-shadow: 0 0 0 1px var(--brand-experiment);
+}
+
+.chatButtonsPlus-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}

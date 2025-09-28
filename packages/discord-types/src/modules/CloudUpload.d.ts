@@ -16,7 +16,6 @@ export interface ReactNativeUploadItem extends BaseUploadItem {
     mimeType?: string;
     durationSecs?: number;
     waveform?: string;
-    isRemix?: boolean;
 }
 
 export interface WebUploadItem extends BaseUploadItem {
@@ -41,7 +40,6 @@ export class CloudUpload extends EventEmitter {
     filename: string;
     id: string;
     isImage: boolean;
-    isRemix: boolean | undefined;
     isThumbnail: boolean;
     isVideo: boolean;
     item: {

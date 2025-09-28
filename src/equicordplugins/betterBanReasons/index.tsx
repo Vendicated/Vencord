@@ -10,7 +10,6 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, TextInput } from "@webpack/common";
 
@@ -78,8 +77,8 @@ export default definePlugin({
         {
             find: "#{intl::BAN_REASON_OPTION_SPAM_ACCOUNT}",
             replacement: [{
-                match: /\[(\{name:\i\.\i\.\i\(\i\.\i\.\i\),value:(\i\.\i\.\i\(\i\.\i\.\i\)|"other")\},?)+\]/,
-                replace: "$self.getReasons()"
+                match: /(\[\{name:\i\.\i\.\i\(\i\.\i\.\i\),.+?"other"\}\])/,
+                replace: "$self.getReasons($1)"
             },
             {
                 match: /useState\(null\)(?=.{0,300}targetUserId:)/,
@@ -87,16 +86,15 @@ export default definePlugin({
             }]
         }
     ],
-    getReasons() {
+    getReasons(defaults) {
         const storedReasons = settings.store.reasons.filter((r: string) => r.trim());
         const reasons: string[] = storedReasons.length
             ? storedReasons
-            : [
-                getIntlMessage("BAN_REASON_OPTION_SPAM_ACCOUNT"),
-                getIntlMessage("BAN_REASON_OPTION_HACKED_ACCOUNT"),
-                getIntlMessage("BAN_REASON_OPTION_BREAKING_RULES"),
-            ];
-        return reasons.map(s => ({ name: s, value: s }));
+            : [];
+        return [
+            ...reasons.map(s => ({ name: s, value: s })),
+            ...defaults
+        ];
     },
     getDefaultState: () => settings.store.isTextInputDefault ? 1 : 0,
     settings,

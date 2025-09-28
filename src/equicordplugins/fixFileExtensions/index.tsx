@@ -11,12 +11,13 @@ import definePlugin, { ReporterTestable } from "@utils/types";
 import { CloudUpload } from "@vencord/discord-types";
 
 const extensionMap = {
-    "ogg": [".ogv", ".oga", ".ogx", ".ogm", ".spx", ".opus"],
-    "jpg": [".jpg", ".jpeg", ".jfif", ".jpe", ".jif", ".jfi", ".pjpeg", ".pjp"],
-    "svg": [".svgz"],
-    "mp4": [".m4v", ".m4r", ".m4p"],
-    "m4a": [".m4b"],
-    "mov": [".movie", ".qt"],
+    "ogg": [".ogv", ".oga", ".ogx", ".ogm", ".spx", ".opus", ".flac", ".aac", ".wma"],
+    "jpg": [".jpeg", ".jfif", ".jpe", ".jif", ".jfi", ".pjpeg", ".pjp", ".bmp", ".tiff", ".tif", ".webp"],
+    "svg": [".svgz", ".ai", ".eps"],
+    "mp4": [".m4v", ".m4r", ".m4p", ".avi", ".mkv", ".wmv", ".flv", ".3gp", ".webm"],
+    "m4a": [".m4b", ".aiff", ".wav"],
+    "mov": [".movie", ".qt", ".asf", ".rm", ".rmvb"],
+    "png": [".ico", ".cur"],
 };
 
 export const reverseExtensionMap = Object.entries(extensionMap).reduce((acc, [target, exts]) => {
@@ -50,6 +51,6 @@ export default definePlugin({
         const ext = extIdx !== -1 ? file.slice(extIdx) : "";
         const newExt = reverseExtensionMap[ext] || ext;
 
-        return fileName + newExt;
+        upload.filename = fileName + newExt;
     },
 });

@@ -54,10 +54,28 @@ function BackupAndRestoreTab() {
                     Import Settings
                 </Button>
                 <Button
-                    onClick={downloadSettingsBackup}
+                    onClick={() => downloadSettingsBackup("settings")}
                     size={Button.Sizes.SMALL}
                 >
                     Export Settings
+                </Button>
+                <Button
+                    onClick={() => downloadSettingsBackup("plugins")}
+                    size={Button.Sizes.SMALL}
+                >
+                    Export Plugins
+                </Button>
+                <Button
+                    onClick={() => downloadSettingsBackup("css")}
+                    size={Button.Sizes.SMALL}
+                >
+                    Export CSS
+                </Button>
+                <Button
+                    onClick={() => downloadSettingsBackup("datastore")}
+                    size={Button.Sizes.SMALL}
+                >
+                    Export DataStores
                 </Button>
             </Flex>
         </SettingsTab>

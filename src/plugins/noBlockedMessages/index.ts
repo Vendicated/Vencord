@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSetting } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting, Settings } from "@api/Settings";
+import { containsBlockedKeywords } from "@equicordplugins/blockKeywords";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -196,6 +197,17 @@ export default definePlugin({
     isBlocked(message: Message) {
         try {
             if (RelationshipStore.isBlocked(message.author.id)) return true;
+
+            const { BlockKeywords } = Settings.plugins;
+            if (
+                BlockKeywords &&
+                BlockKeywords.enabled &&
+                BlockKeywords.ignoreBlockedMessages &&
+                containsBlockedKeywords(message)
+            ) {
+                return true;
+            }
+
             return settings.store.alsoHideIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if message is blocked or ignored:", e);

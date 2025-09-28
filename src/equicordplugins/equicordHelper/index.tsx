@@ -25,7 +25,12 @@ const settings = definePluginSettings({
         description: "Disables the DM list context menu in favor of the x button",
         restartNeeded: true,
         default: false
-    }
+    },
+    noMirroredCamera: {
+        type: OptionType.BOOLEAN,
+        description: "Prevents the camera from being mirrored on your screen",
+        default: false,
+    },
 });
 
 export default definePlugin({
@@ -49,6 +54,7 @@ export default definePlugin({
                 }
             ]
         },
+        // Disable Giant Create DM Button
         {
             find: ".createDMButtonContainer,",
             replacement: {
@@ -57,6 +63,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.disableCreateDMButton
         },
+        // Remove DM Context Menu
         {
             find: "#{intl::d+e27u::raw}",
             replacement: {
@@ -65,6 +72,33 @@ export default definePlugin({
             },
             predicate: () => settings.store.disableDMContextMenu
         },
+        // When focused on voice channel or group chat voice call
+        {
+            find: /\i\?\i.\i.SELF_VIDEO/,
+            replacement: {
+                match: /mirror:\i/,
+                replace: "mirror:!1"
+            },
+            predicate: () => settings.store.noMirroredCamera
+        },
+        // Popout camera when not focused on voice channel
+        {
+            find: ".mirror]:",
+            replacement: {
+                match: /\[(\i).mirror]:\i/,
+                replace: "[$1.mirror]:!1"
+            },
+            predicate: () => settings.store.noMirroredCamera
+        },
+        // Overriding css on Preview Camera/Change Video Background popup
+        {
+            find: ".cameraPreview,",
+            replacement: {
+                match: /className:\i.camera,/,
+                replace: "$&style:{transform: \"scalex(1)\"},"
+            },
+            predicate: () => settings.store.noMirroredCamera
+        }
     ],
     renderMessageAccessory(props) {
         return (
