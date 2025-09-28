@@ -12,7 +12,7 @@ import noteHandler from "../../NoteHandler";
 import { downloadNotes, uploadNotes } from "../../utils";
 
 export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; }) => {
-    const { colorStatusGreen } = findByProps("colorStatusGreen");
+    const { statusTagGreen } = findByProps("statusTagGreen");
 
     return (
         <ModalRoot {...modalProps} className="vc-help-modal" size={ModalSize.MEDIUM}>
@@ -28,7 +28,7 @@ export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; 
                         <br />
                         the button with the notebook name you would like to note the message to.
                         <br />
-                        <span style={{ fontWeight: "bold" }} className={colorStatusGreen}>
+                        <span style={{ fontWeight: "bold" }} className={statusTagGreen}>
                             Protip:
                         </span>{" "}
                         Clicking the "Note Message" button by itself will note to Main by default!
@@ -72,7 +72,7 @@ export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; 
                     <Button
                         look={Button.Looks.FILLED}
                         color={Button.Colors.GREEN}
-                        style={{ marginRight: "70px" }}
+                        style={{ marginRight: "10px" }}
                         onClick={() => {
                             downloadNotes();
                         }}>Export Notes</Button>
