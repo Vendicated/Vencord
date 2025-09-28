@@ -33,12 +33,6 @@ export const settings = definePluginSettings({
         description: "Remove gift button",
         restartNeeded: true,
     },
-    gif: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Remove gif and sticker buttons",
-        restartNeeded: true,
-    },
     emojiList: {
         type: OptionType.BOOLEAN,
         default: true,
@@ -113,15 +107,6 @@ export default definePlugin({
             find: '"sticker")',
             replacement: { match: /&&\i\.push\(\([^&]*?,"gift"\)\)/, replace: "", },
             predicate: () => settings.store.gift,
-        },
-        {
-            // Gif and sticker buttons
-            find: '"sticker")',
-            replacement: [
-                { match: /&&\i\.push\([^&]*?,"gif"\)\)/, replace: "", },
-                { match: /&&\i\.push\([^&]*?,"sticker"\)\)/, replace: "", },
-            ],
-            predicate: () => settings.store.gif,
         },
         {
             // Emoji list
