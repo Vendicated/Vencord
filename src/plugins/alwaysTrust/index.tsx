@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -47,7 +47,7 @@ const settings = definePluginSettings({
     noDeleteSafety: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Remove the 'Potentially Dangerous Download' popup when opening links",
+        description: "Removes the enter server name requirement when deleting a server",
         restartNeeded: true
     },
     confirmModal: {
@@ -88,12 +88,6 @@ export default definePlugin({
             predicate: () => settings.store.noDeleteSafety
         }
     ],
-    start() {
-        if (Settings.plugins?.NoDeleteSafety?.enabled) {
-            Settings.plugins.NoDeleteSafety.enabled = false;
-            settings.store.noDeleteSafety = true;
-        }
-    },
     async HandleGuildDeleteModal(server) {
         if (settings.store.confirmModal) {
             return Alerts.show({
