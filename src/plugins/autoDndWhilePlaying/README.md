@@ -1,4 +1,4 @@
-# StatusWhilePlaying
+# AutoDNDWhilePlaying
 
 This plugin automatically updates your online status (online, idle, dnd) when launching games.
 
