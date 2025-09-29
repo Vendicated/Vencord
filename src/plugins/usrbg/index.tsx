@@ -17,12 +17,9 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-import style from "./index.css?managed";
 
 const API_URL = "https://usrbg.is-hardly.online/users";
 
@@ -57,14 +54,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".NITRO_BANNER,",
-            replacement: {
-                match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
-                replace: "&&$self.shouldShowBadge(arguments[0])$&"
-            }
-        },
-        {
-            find: ".banner)==null",
+            find: '.banner)==null?"COMPLETE"',
             replacement: {
                 match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
@@ -109,10 +99,6 @@ export default definePlugin({
         if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
     },
 
-    shouldShowBadge({ displayProfile, user }: any) {
-        return displayProfile?.banner && (!this.userHasBackground(user.id) || settings.store.nitroFirst);
-    },
-
     userHasBackground(userId: string) {
         return !!this.data?.users[userId];
     },
@@ -126,8 +112,6 @@ export default definePlugin({
     },
 
     async start() {
-        enableStyle(style);
-
         const res = await fetch(API_URL);
         if (res.ok) {
             this.data = await res.json();

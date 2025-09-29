@@ -46,7 +46,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".PREVIEW_NUM_LINES",
+            find: "#{intl::PREVIEW_NUM_LINES}",
             replacement: {
                 match: /(?<=function \i\((\i)\)\{)(?=let\{text:\i,language:)/,
                 replace: "return $self.renderHighlighter({lang:$1.language,content:$1.text});"
@@ -63,11 +63,10 @@ export default definePlugin({
         shiki.destroy();
         clearStyles();
     },
-    settingsAboutComponent: ({ tempSettings }) => createHighlighter({
+    settingsAboutComponent: () => createHighlighter({
         lang: "tsx",
         content: previewExampleText,
-        isPreview: true,
-        tempSettings,
+        isPreview: true
     }),
 
     // exports

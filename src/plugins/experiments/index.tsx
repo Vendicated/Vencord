@@ -20,15 +20,19 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "combo");
+const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
+
+const modKey = IS_MAC ? "cmd" : "ctrl";
+const altKey = IS_MAC ? "opt" : "alt";
 
 const settings = definePluginSettings({
     toolbarDevMenu: {
@@ -47,7 +51,7 @@ export default definePlugin({
         Devs.Ven,
         Devs.Nickyux,
         Devs.BanTheNons,
-        Devs.Nuckyz
+        Devs.Nuckyz,
     ],
 
     settings,
@@ -63,8 +67,8 @@ export default definePlugin({
         {
             find: 'type:"user",revision',
             replacement: {
-                match: /!(\i)&&"CONNECTION_OPEN".+?;/g,
-                replace: "$1=!0;"
+                match: /!(\i)(?=&&"CONNECTION_OPEN")/,
+                replace: "!($1=true)"
             }
         },
         {
@@ -74,33 +78,62 @@ export default definePlugin({
                 replace: "$&$self.WarningCard(),"
             }
         },
-        // change top right chat toolbar button from the help one to the dev one
+        // Change top right chat toolbar button from the help one to the dev one
         {
-            find: "toolbar:function",
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /\i\.isStaff\(\)/,
-                replace: "true"
+                match: /hasBugReporterAccess:(\i)/,
+                replace: "_hasBugReporterAccess:$1=true"
             },
             predicate: () => settings.store.toolbarDevMenu
         },
 
-        // makes the Favourites Server experiment allow favouriting DMs and threads
+        // Make the Favourites Server experiment allow favouriting DMs and threads
         {
             find: "useCanFavoriteChannel",
             replacement: {
-                match: /!\(\i\.isDM\(\)\|\|\i\.isThread\(\)\)/,
-                replace: "true",
+                match: /\i\.isDM\(\)\|\|\i\.isThread\(\)/,
+                replace: "false",
+            }
+        },
+        // Enable option to always record clips even if you are not streaming
+        {
+            find: "isDecoupledGameClippingEnabled(){",
+            replacement: {
+                match: /\i\.isStaff\(\)/,
+                replace: "true"
+            }
+        },
+
+        // Enable experiment embed on sent experiment links
+        {
+            find: "dev://experiment/",
+            replacement: [
+                {
+                    match: /\i\.isStaff\(\)/,
+                    replace: "true"
+                },
+                // Fix some tricky experiments name causing a client crash
+                {
+                    match: /.getExperimentBucketName.+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
+                    replace: "$&||({})[$1]!=null"
+                }
+            ]
+        },
+        // Fix another function which cases crashes with tricky experiment names and the experiment embed
+        {
+            find: "}getServerAssignment(",
+            replacement: {
+                match: /}getServerAssignment\((\i),\i,\i\){/,
+                replace: "$&if($1==null)return;"
             }
         }
     ],
 
-    start: () => enableStyle(hideBugReport),
+    start: () => !BugReporterExperiment.getCurrentConfig().hasBugReporterAccess && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
-        const isMacOS = navigator.platform.includes("Mac");
-        const modKey = isMacOS ? "cmd" : "ctrl";
-        const altKey = isMacOS ? "opt" : "alt";
         return (
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>

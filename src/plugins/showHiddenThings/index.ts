@@ -16,44 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import { Logger } from "@utils/Logger";
+import definePlugin, { OptionType, PluginSettingDef } from "@utils/types";
+import { GuildMember, Role } from "@vencord/discord-types";
+
+const opt = (description: string) => ({
+    type: OptionType.BOOLEAN,
+    description,
+    default: true,
+    restartNeeded: true
+} satisfies PluginSettingDef);
 
 const settings = definePluginSettings({
-    showTimeouts: {
-        type: OptionType.BOOLEAN,
-        description: "Show member timeout icons in chat.",
-        default: true,
-    },
-    showInvitesPaused: {
-        type: OptionType.BOOLEAN,
-        description: "Show the invites paused tooltip in the server list.",
-        default: true,
-    },
-    showModView: {
-        type: OptionType.BOOLEAN,
-        description: "Show the member mod view context menu item in all servers.",
-        default: true,
-    },
-    disableDiscoveryFilters: {
-        type: OptionType.BOOLEAN,
-        description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
-        default: true,
-    },
-    disableDisallowedDiscoveryFilters: {
-        type: OptionType.BOOLEAN,
-        description: "Disable filters in Server Discovery search that hide NSFW & disallowed servers.",
-        default: true,
-    },
+    showTimeouts: opt("Show member timeout icons in chat."),
+    showInvitesPaused: opt("Show the invites paused tooltip in the server list."),
+    showModView: opt("Show the member mod view context menu item in all servers.")
 });
 
-migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
     name: "ShowHiddenThings",
     tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
     description: "Displays various hidden & moderator-only things regardless of permissions.",
     authors: [Devs.Dolfies],
+    settings,
+
     patches: [
         {
             find: "showCommunicationDisabledStyles",
@@ -64,7 +52,7 @@ export default definePlugin({
             },
         },
         {
-            find: "2022-07_invites_disabled",
+            find: "INVITES_DISABLED))||",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
                 match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,
@@ -72,58 +60,39 @@ export default definePlugin({
             },
         },
         {
-            find: /context:\i,checkElevated:!1\}\),\i\.\i.{0,200}autoTrackExposure/,
+            find: /,checkElevated:!1}\),\i\.\i\)}(?<=getCurrentUser\(\);return.+?)/,
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /return \i\.\i\(\i\.\i\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.\i\)/,
                 replace: "return true",
             }
         },
+        // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
         {
-            find: "prod_discoverable_guilds",
-            predicate: () => settings.store.disableDiscoveryFilters,
+            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}),allowOverflow:",
+            predicate: () => settings.store.showModView,
             replacement: {
-                match: /\{"auto_removed:.*?\}/,
-                replace: "{}"
+                match: /(?<=\.highestRole\),)role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+)/,
+                replace: "role:$self.getHighestRole(arguments[0],$1)",
             }
         },
-        // remove the 200 server minimum
+        // allows you to open mod view on yourself
         {
-            find: '">200"',
-            predicate: () => settings.store.disableDiscoveryFilters,
+            find: 'action:"PRESS_MOD_VIEW",icon:',
+            predicate: () => settings.store.showModView,
             replacement: {
-                match: '">200"',
-                replace: '">0"'
-            }
-        },
-        // empty word filter (why would anyone search "horny" in fucking server discovery... please... why are we patching this again??)
-        {
-            find: '"horny","fart"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /=\["egirl",.+?\]/,
-                replace: "=[]"
-            }
-        },
-        // empty 2nd word filter
-        {
-            find: '"pepe","nude"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /(?<=[?=])\["pepe",.+?\]/,
-                replace: "[]",
-            },
-        },
-        // patch request that queries if term is allowed
-        {
-            find: ".GUILD_DISCOVERY_VALID_TERM",
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            all: true,
-            replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
-                replace: "Promise.resolve({ body: { valid: true } });"
+                match: /\i(?=\?null)/,
+                replace: "false"
             }
         }
     ],
-    settings,
+
+    getHighestRole({ member }: { member: GuildMember; }, roles: Role[]): Role | undefined {
+        try {
+            return roles.find(role => role.id === member.highestRoleId);
+        } catch (e) {
+            new Logger("ShowHiddenThings").error("Failed to find highest role", e);
+            return undefined;
+        }
+    }
 });

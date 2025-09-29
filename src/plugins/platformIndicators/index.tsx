@@ -18,16 +18,15 @@
 
 import "./style.css";
 
-import { addBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeBadge } from "@api/Badges";
-import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeProfileBadge } from "@api/Badges";
+import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
+import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
+import { AuthenticationStore, PresenceStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 export interface Session {
     sessionId: string;
@@ -70,7 +69,9 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
+const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
+    useStatusFillColor: filters.byCode(".hex")
+});
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform === "embedded"
@@ -79,11 +80,11 @@ const PlatformIcon = ({ platform, status, small }: { platform: Platform, status:
 
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={StatusUtils.useStatusFillColor(status)} tooltip={tooltip} small={small} />;
+    return <Icon color={useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
 function ensureOwnStatus(user: User) {
-    if (user.id === UserStore.getCurrentUser().id) {
+    if (user.id === AuthenticationStore.getId()) {
         const sessions = SessionsStore.getSessions();
         if (typeof sessions !== "object") return null;
         const sortedSessions = Object.values(sessions).sort(({ status: a }, { status: b }) => {
@@ -102,7 +103,7 @@ function ensureOwnStatus(user: User) {
         }, {});
 
         const { clientStatuses } = PresenceStore.getState();
-        clientStatuses[UserStore.getCurrentUser().id] = ownStatus;
+        clientStatuses[AuthenticationStore.getId()] = ownStatus;
     }
 }
 
@@ -113,7 +114,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
     ensureOwnStatus(user);
 
-    const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
+    const status = PresenceStore.getClientStatus(user.id) as Record<Platform, string>;
     if (!status) return [];
 
     return Object.entries(status).map(([platform, status]) => ({
@@ -131,12 +132,10 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     }));
 }
 
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
-    if (!user || user.bot) return null;
-
+const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolean; }) => {
     ensureOwnStatus(user);
 
-    const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
+    const status = useStateFromStores([PresenceStore], () => PresenceStore.getClientStatus(user.id) as Record<Platform, string>);
     if (!status) return null;
 
     const icons = Object.entries(status).map(([platform, status]) => (
@@ -153,11 +152,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
     return (
         <span
             className="vc-platform-indicator"
-            style={{
-                marginLeft: wantMargin ? 4 : 0,
-                top: wantTopMargin ? 2 : 0,
-                gap: 2
-            }}
+            style={{ gap: "2px" }}
         >
             {icons}
         </span>
@@ -172,26 +167,23 @@ const badge: ProfileBadge = {
 const indicatorLocations = {
     list: {
         description: "In the member list",
-        onEnable: () => addDecorator("platform-indicator", props =>
-            <ErrorBoundary noop>
-                <PlatformIndicator user={props.user} small={true} />
-            </ErrorBoundary>
+        onEnable: () => addMemberListDecorator("platform-indicator", ({ user }) =>
+            user && !user.bot ? <PlatformIndicator user={user} small={true} /> : null
         ),
-        onDisable: () => removeDecorator("platform-indicator")
+        onDisable: () => removeMemberListDecorator("platform-indicator")
     },
     badges: {
         description: "In user profiles, as badges",
-        onEnable: () => addBadge(badge),
-        onDisable: () => removeBadge(badge)
+        onEnable: () => addProfileBadge(badge),
+        onDisable: () => removeProfileBadge(badge)
     },
     messages: {
         description: "Inside messages",
-        onEnable: () => addDecoration("platform-indicator", props =>
-            <ErrorBoundary noop>
-                <PlatformIndicator user={props.message?.author} wantTopMargin={true} />
-            </ErrorBoundary>
-        ),
-        onDisable: () => removeDecoration("platform-indicator")
+        onEnable: () => addMessageDecoration("platform-indicator", props => {
+            const user = props.message?.author;
+            return user && !user.bot ? <PlatformIndicator user={props.message?.author} /> : null;
+        }),
+        onDisable: () => removeMessageDecoration("platform-indicator")
     }
 };
 
@@ -203,19 +195,6 @@ export default definePlugin({
 
     start() {
         const settings = Settings.plugins.PlatformIndicators;
-        const { displayMode } = settings;
-
-        // transfer settings from the old ones, which had a select menu instead of booleans
-        if (displayMode) {
-            if (displayMode !== "both") settings[displayMode] = true;
-            else {
-                settings.list = true;
-                settings.badges = true;
-            }
-            settings.messages = true;
-            delete settings.displayMode;
-        }
-
         Object.entries(indicatorLocations).forEach(([key, value]) => {
             if (settings[key]) value.onEnable();
         });

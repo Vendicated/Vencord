@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel, Message } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
@@ -40,7 +40,7 @@ import {
     Text,
     UserStore
 } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
+import { JSX } from "react";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -119,11 +119,11 @@ const settings = definePluginSettings({
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
-        description: "Clear the linked message cache",
-        component: () =>
+        component: () => (
             <Button onClick={() => messageCache.clear()}>
                 Clear the linked message cache
             </Button>
+        )
     }
 });
 
@@ -147,6 +147,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     if (!msg) return;
 
     const message: Message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id);
+    if (!message) return;
 
     messageCache.set(message.id, {
         message,
@@ -216,7 +217,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
     return new Proxy(message, {
         get(_, prop) {
             if (prop === "vencordEmbeddedBy") return embeddedBy;
-            // @ts-ignore ts so bad
+            // @ts-expect-error ts so bad
             return Reflect.get(...arguments);
         }
     });
@@ -224,7 +225,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
 
 
 function MessageEmbedAccessory({ message }: { message: Message; }) {
-    // @ts-ignore
+    // @ts-expect-error
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
     const accessories = [] as (JSX.Element | null)[];
@@ -293,7 +294,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
         <Embed
             embed={{
                 rawDescription: "",
-                color: "var(--background-secondary)",
+                color: "var(--background-base-lower)",
                 author: {
                     name: <Text variant="text-xs/medium" tag="span">
                         <span>{channelLabel} - </span>
@@ -346,10 +347,10 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                     ? parse(message.content)
                     : [noContent(message.attachments.length, message.embeds.length)]
                 }
-                {images.map(a => {
+                {images.map((a, idx) => {
                     const { width, height } = computeWidthAndHeight(a.width, a.height);
                     return (
-                        <div>
+                        <div key={idx}>
                             <img src={a.url} width={width} height={height} />
                         </div>
                     );
@@ -371,7 +372,7 @@ export default definePlugin({
     settings,
 
     start() {
-        addAccessory("messageLinkEmbed", props => {
+        addMessageAccessory("MessageLinkEmbeds", props => {
             if (!messageLinkRegex.test(props.message.content))
                 return null;
 
@@ -379,16 +380,14 @@ export default definePlugin({
             messageLinkRegex.lastIndex = 0;
 
             return (
-                <ErrorBoundary>
-                    <MessageEmbedAccessory
-                        message={props.message}
-                    />
-                </ErrorBoundary>
+                <MessageEmbedAccessory
+                    message={props.message}
+                />
             );
         }, 4 /* just above rich embeds */);
     },
 
     stop() {
-        removeAccessory("messageLinkEmbed");
+        removeMessageAccessory("MessageLinkEmbeds");
     }
 });
