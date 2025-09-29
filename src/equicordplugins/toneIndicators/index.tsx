@@ -57,28 +57,33 @@ function splitTextWithIndicators(text: string): ReactNode[] {
     const nodes: ReactNode[] = [];
     let lastIndex = 0;
     let count = 0;
-    const regex = /(?:^|\s)\/([^/\s]+)(?:$|\s|\p{P})/giu;
+    const regex = /(?:^|\s)\/([^/\s]+)(?=\s|$|\p{P})/giu;
     let match: RegExpExecArray | null;
 
     while ((match = regex.exec(text)) && count < settings.store.maxIndicators) {
         const indicator = match[1];
         const desc = getIndicator(indicator);
-        if (!desc) continue;
 
-        if (match.index > lastIndex) {
-            nodes.push(text.slice(lastIndex, match.index));
+        const matchStart = match.index;
+        const matchEnd = regex.lastIndex;
+
+        if (matchStart > lastIndex) {
+            nodes.push(text.slice(lastIndex, matchStart));
         }
 
-        nodes.push(
-            <ToneIndicator
-                key={`ti-${match.index}`}
-                indicator={indicator}
-                desc={desc}
-            />,
-        );
+        if (desc) {
+            nodes.push(
+                <ToneIndicator
+                    key={`ti-${matchStart}`}
+                    indicator={indicator}
+                    desc={desc}
+                />,
+            );
+            count++;
+        }
 
-        lastIndex = regex.lastIndex;
-        count++;
+        // always advance lastIndex to avoid skipping consecutive indicators
+        lastIndex = matchEnd;
     }
 
     if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
