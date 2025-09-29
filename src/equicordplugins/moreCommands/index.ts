@@ -66,7 +66,7 @@ export default definePlugin({
             },
         },
         {
-            name: "getUptime",
+            name: "getuptime",
             description: "Returns the system uptime",
             execute: async () => {
                 const uptime = performance.now() / 1000;
@@ -75,25 +75,11 @@ export default definePlugin({
             },
         },
         {
-            name: "getTime",
+            name: "gettime",
             description: "Returns the current server time",
             execute: async () => {
                 const currentTime = new Date().toLocaleString();
                 return { content: `> **Current Time**: ${currentTime}` };
-            },
-        },
-        {
-            name: "getLocation",
-            description: "Returns the user's approximate location based on IP",
-            execute: async (opts, ctx) => {
-                try {
-                    const response = await fetch("https://ipapi.co/json/");
-                    const data = await response.json();
-                    const locationInfo = `> **Country**: ${data.country_name}\n> **Region**: ${data.region}\n> **City**: ${data.city}`;
-                    return { content: locationInfo };
-                } catch (err) {
-                    sendBotMessage(ctx.channel.id, { content: "Failed to fetch location information" });
-                }
             },
         },
         {
