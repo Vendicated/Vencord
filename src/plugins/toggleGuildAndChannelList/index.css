@@ -1,0 +1,24 @@
+.vc-toggle-guild-and-channel-btn,
+.vc-toggle-guild-and-channel-icon {
+    -webkit-app-region: no-drag;
+}
+
+.vc-toggle-guild-and-channel-icon {
+    color: var(--interactive-active);
+}
+
+.vc-toggle-guild-and-channel-btn[class*="selected"] .vc-toggle-guild-and-channel-icon {
+    color: var(--interactive-normal);
+}
+
+.vc-toggle-guild-and-channel-btn:hover .vc-toggle-guild-and-channel-icon {
+    color: var(--interactive-hover);
+}
+
+.vc-toggle-guild-and-channel-btn:focus-visible .vc-toggle-guild-and-channel-icon {
+    color: var(--interactive-hover);
+}
+
+body.hm-hide-sidebar div[class^="sidebar_"] {
+    display: none !important;
+}
