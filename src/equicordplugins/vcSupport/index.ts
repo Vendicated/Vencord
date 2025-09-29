@@ -5,7 +5,7 @@
  */
 
 import { Devs, EquicordDevs } from "@utils/constants";
-import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
+import { isAnyPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { UserStore } from "@webpack/common";
 
@@ -16,7 +16,7 @@ export default definePlugin({
     required: true,
     start() {
         const selfId = UserStore.getCurrentUser()?.id;
-        if (isPluginDev(selfId) || isEquicordPluginDev(selfId)) {
+        if (isAnyPluginDev(selfId)) {
             Vencord.Settings.plugins.VCSupport.enabled = false;
         } else {
             Vencord.Settings.plugins.VCSupport.enabled = true;

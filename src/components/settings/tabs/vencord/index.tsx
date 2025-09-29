@@ -16,7 +16,7 @@ import { SpecialCard } from "@components/settings/SpecialCard";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { DONOR_ROLE_ID, GUILD_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { identity, isEquicordPluginDev, isPluginDev } from "@utils/misc";
+import { identity, isAnyPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { Button, Flex, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 import BadgeAPI from "plugins/_api/badges";
@@ -139,7 +139,7 @@ function EquicordSettings() {
                     <DonateButtonComponent />
                 </SpecialCard>
             )}
-            {isPluginDev(user?.id) || isEquicordPluginDev(user?.id) && (
+            {isAnyPluginDev(user?.id) && (
                 <SpecialCard
                     title="Contributions"
                     subtitle="Thank you for contributing!"
