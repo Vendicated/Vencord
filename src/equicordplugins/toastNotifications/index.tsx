@@ -20,12 +20,13 @@ import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
+import { MessageType } from "@vencord/discord-types/enums";
 import { findByPropsLazy, findStore } from "@webpack";
 import { Button, ChannelStore, GuildRoleStore, NavigationRouter, RelationshipStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
 import { ReactNode } from "react";
 
 import { NotificationData, showNotification } from "./components/Notifications";
-import { MessageTypes, RelationshipType, StreamingTreatment } from "./types";
+import { RelationshipType, StreamingTreatment } from "./types";
 
 let ignoredUsers: string[] = [];
 let notifyFor: string[] = [];
@@ -271,11 +272,11 @@ export default definePlugin({
 
             // Handle specific message types.
             switch (message.type) {
-                case MessageTypes.CALL: {
+                case MessageType.CALL: {
                     Notification.body = "Started a call with you!";
                     break;
                 }
-                case MessageTypes.CHANNEL_RECIPIENT_ADD: {
+                case MessageType.RECIPIENT_ADD: {
                     const actor = UserStore.getUser(message.author.id);
                     const user = message.mentions[0];
                     const targetUser = UserStore.getUser((user as any).id);
@@ -283,7 +284,7 @@ export default definePlugin({
                     Notification.body = `${getName(targetUser)} was added to the group by ${getName(actor)}.`;
                     break;
                 }
-                case MessageTypes.CHANNEL_RECIPIENT_REMOVE: {
+                case MessageType.RECIPIENT_REMOVE: {
                     const actor = UserStore.getUser(message.author.id);
                     const user = message.mentions[0];
                     const targetUser = UserStore.getUser((user as any).id);
@@ -295,15 +296,15 @@ export default definePlugin({
                     }
                     break;
                 }
-                case MessageTypes.CHANNEL_NAME_CHANGE: {
+                case MessageType.CHANNEL_NAME_CHANGE: {
                     Notification.body = `Changed the channel name to '${message.content}'.`;
                     break;
                 }
-                case MessageTypes.CHANNEL_ICON_CHANGE: {
+                case MessageType.CHANNEL_ICON_CHANGE: {
                     Notification.body = "Changed the channel icon.";
                     break;
                 }
-                case MessageTypes.CHANNEL_PINNED_MESSAGE: {
+                case MessageType.CHANNEL_PINNED_MESSAGE: {
                     Notification.body = "Pinned a message.";
                     break;
                 }

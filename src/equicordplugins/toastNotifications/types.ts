@@ -16,15 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const enum MessageTypes {
-    CHANNEL_RECIPIENT_ADD = 1,
-    CHANNEL_RECIPIENT_REMOVE = 2,
-    CALL = 3,
-    CHANNEL_NAME_CHANGE = 4,
-    CHANNEL_ICON_CHANGE = 5,
-    CHANNEL_PINNED_MESSAGE = 6,
-}
-
 export const enum RelationshipType {
     FRIEND = 1,
     BLOCKED = 2,
