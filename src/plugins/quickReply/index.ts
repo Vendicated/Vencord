@@ -21,7 +21,7 @@ import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { MessageFlags } from "@vencord/discord-types/enums";
-import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, MessageTypeSets, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, FluxDispatcher as Dispatcher, MessageActions, MessageStore, MessageTypeSets, PermissionsBits, PermissionStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import NoBlockedMessagesPlugin from "plugins/noBlockedMessages";
 import NoReplyMentionPlugin from "plugins/noReplyMention";
 
@@ -40,13 +40,18 @@ const settings = definePluginSettings({
         description: "Ping reply by default",
         options: [
             {
-                label: "Follow NoReplyMention",
+                label: "Follow NoReplyMention plugin (if enabled)",
                 value: MentionOptions.NO_REPLY_MENTION_PLUGIN,
                 default: true
             },
             { label: "Enabled", value: MentionOptions.ENABLED },
             { label: "Disabled", value: MentionOptions.DISABLED },
         ]
+    },
+    ignoreBlockedAndIgnored: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore messages by blocked/ignored users when navigating",
+        default: true
     }
 });
 
@@ -126,7 +131,7 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 }
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
-    let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
+    let messages: Message[] = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
 
     const meId = UserStore.getCurrentUser().id;
     const hasNoBlockedMessages = Vencord.Plugins.isPluginEnabled(NoBlockedMessagesPlugin.name);
@@ -134,8 +139,9 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     messages = messages.filter(m => {
         if (m.deleted) return false;
         if (!isReply && m.author.id !== meId) return false; // editing only own messages
-        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
         if (!MessageTypeSets.REPLYABLE.has(m.type) || m.hasFlag(MessageFlags.EPHEMERAL)) return false;
+        if (settings.store.ignoreBlockedAndIgnored && RelationshipStore.isBlockedOrIgnored(m.author.id)) return false;
+        if (hasNoBlockedMessages && NoBlockedMessagesPlugin.shouldIgnoreMessage(m)) return false;
 
         return true;
     });
