@@ -110,11 +110,4 @@ export default definePlugin({
             setStatus(inVoiceChannel, status);
         }
     },
-
-    stop() {
-        if (savedStatus) {
-            StatusSettings?.updateSetting(savedStatus);
-            savedStatus = "";
-        }
-    }
 });
