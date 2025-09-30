@@ -8,11 +8,10 @@ import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { AuthenticationStore, PresenceStore } from "@webpack/common";
 
 let savedStatus: string | null;
 
-const StatusSettings = getUserSettingLazy("status", "status")!;
+const StatusSettings = getUserSettingLazy<string>("status", "status")!;
 
 const settings = definePluginSettings({
     statusToSet: {
@@ -47,7 +46,7 @@ export default definePlugin({
     settings,
     flux: {
         RUNNING_GAMES_CHANGE({ games }) {
-            const status = PresenceStore.getStatus(AuthenticationStore.getId());
+            const status = StatusSettings.getSetting();
 
             if (games.length > 0) {
                 if (status !== settings.store.statusToSet) {
