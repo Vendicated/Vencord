@@ -108,11 +108,6 @@ function openViewRawModalMessage(msg: Message) {
 }
 
 const settings = definePluginSettings({
-    popoverButton: {
-        description: "Show a button in the message popover to view the raw content/data of the message.",
-        type: OptionType.BOOLEAN,
-        default: true,
-    },
     clickMethod: {
         description: "Change the button to view the raw content/data of any message.",
         type: OptionType.SELECT,
@@ -188,8 +183,6 @@ export default definePlugin({
     },
 
     renderMessagePopoverButton(msg) {
-        if (!settings.store.popoverButton) return null;
-
         const handleClick = () => {
             if (settings.store.clickMethod === "Right") {
                 copyWithToast(msg.content);
