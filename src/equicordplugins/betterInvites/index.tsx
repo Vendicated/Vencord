@@ -6,13 +6,13 @@
 
 import "./style.css";
 
+import { InfoIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import definePlugin, { StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Parser } from "@webpack/common";
-
+import { Parser, Tooltip, UserStore } from "@webpack/common";
 
 const AvatarStyles = findByPropsLazy("avatar", "zalgo");
 const GuildManager = findByPropsLazy("joinGuild");
@@ -37,36 +37,77 @@ export default definePlugin({
     authors: [EquicordDevs.iamme],
     patches: [
         {
-            find: "#{intl::HUB_INVITE_ANOTHER_SCHOOL_LINK}",
+            find: ".hideDetailsButtonContainer,",
             replacement: [
                 {
-                    match: /,(\i)&&(\(.{0,50}asContainer.+)(\i\.\i\.string\(\i\.\i#{intl::GUEST_MEMBERSHIP_EXPLANATION}\))/,
-                    replace: ",($1||((!$1)&&arguments[0].invite.expires_at)) && $2$self.RenderTip($1, $3, arguments[0].invite.expires_at)"
-                },
-                {
-                    match: /(\.jsx\)\(\i.\i.Info,{.+onClick:\i)/,
-                    replace: "$& || $self.Lurkable(arguments[0].invite.guild.id, arguments[0].invite.guild.features)"
-                },
-                {
-                    match: /(\.jsx\)\(\i\.\i\.Header,\{)text:(\i)/,
-                    replace: "$1text: $self.Header(arguments[0].currentUserId, arguments[0].invite.inviter, $2)"
+                    match: /banner\}\),.{0,25}profile:\i\}\),.{0,15}profile:\i/,
+                    replace: "$&,invite:arguments[0].invite"
                 }
             ]
-        }
+        },
+        {
+            find: '"disableGuildNameClick"',
+            replacement: [
+                {
+                    match: /(?=children:\i\.name\}\)\):)/,
+                    replace: "onClick:$self.Lurkable(arguments[0].invite.guild.id,arguments[0].invite.guild.features),"
+                },
+                {
+                    match: /\),\{profile:\i,disableGuildNameClick:\i/,
+                    replace: "$&,invite:arguments[0].invite"
+                },
+                {
+                    match: /\}\)\)\}\),\i/,
+                    replace: "$&,$self.RenderTip(arguments[0].invite.expires_at)"
+                },
+                {
+                    match: /(?<=text:(\i\.name).*?\]\}\))/,
+                    replace: "$&,$self.Header(arguments[0].invite.inviter,$1)"
+                }
+            ]
+        },
     ],
-    RenderTip(isGuest: boolean, message: string, expires_at: string) {
-        return <>This invite will expire {Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}{isGuest ? ". " + message : ""}</>;
+    RenderTip(expires_at: string) {
+        const timestamp = <>{Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}</>;
+        const tooltipText = (
+            <>
+                This invite will {expires_at ? <>expire {timestamp}</> : <>not expire</>}
+            </>
+        );
+
+
+        return (
+            <Tooltip text={tooltipText}>
+                {({ onMouseEnter, onMouseLeave }) => (
+                    <div
+                        className="vc-bi-tooltip"
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                    >
+                        <InfoIcon className="vc-bi-tooltip-icon" />
+                    </div>
+                )}
+            </Tooltip>
+        );
     },
-    Header(currentUserId: string, inviter: User | undefined, defaultMessage: string) {
-        return <div className="vc-bi-header-inner">
-            {(inviter && (currentUserId !== inviter.id)) ? <>
+    Header(inviter: User | undefined, guildName: string) {
+        const currentUserId = UserStore.getCurrentUser().id;
+        if (!inviter || currentUserId === inviter.id) return null;
+        return (
+            <div className="vc-bi-header-inner">
                 <img
                     alt=""
                     className={classes(AvatarStyles.avatar, AvatarStyles.clickable) + " vc-bi-inviter-avatar"}
                     onClick={() => openUserProfile(inviter.id)}
-                    src={inviter.avatar ? `https://cdn.discordapp.com/avatars/${inviter.id}/${inviter.avatar}.webp?size=80` : "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                /> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN
-            </> : defaultMessage}</div>;
+                    src={inviter.avatar
+                        ? `https://cdn.discordapp.com/avatars/${inviter.id}/${inviter.avatar}.webp?size=80`
+                        : "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                />
+                <div className="vc-bi-header-text">
+                    {inviter.username} invited you to {guildName}
+                </div>
+            </div>
+        );
     },
     Lurkable: (id: string, features: Iterable<string> | undefined) => {
         return new Set(features).has("DISCOVERABLE") ? () => lurk(id) : null;

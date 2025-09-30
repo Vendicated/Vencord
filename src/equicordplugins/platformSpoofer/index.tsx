@@ -21,12 +21,10 @@ const settings = definePluginSettings({
                 label: "Desktop",
                 value: "desktop",
                 default: true,
-                hidden: IS_DISCORD_DESKTOP
             },
             {
                 label: "Web",
                 value: "web",
-                hidden: IS_WEB
             },
             {
                 label: "Xbox",
