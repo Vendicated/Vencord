@@ -17,6 +17,7 @@
 */
 
 import { addProfileBadge, BadgePosition, ProfileBadge, removeProfileBadge } from "@api/Badges";
+import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -41,7 +42,6 @@ let badgeImages;
 
 // const API_URL = "https://clientmodbadges-api.herokuapp.com/";
 const API_URL = "https://globalbadges.equicord.org/";
-
 const cache = new Map<string, BadgeCache>();
 const EXPIRES = 1000 * 60 * 15;
 
@@ -89,6 +89,7 @@ const GlobalBadges = ({ userId }: { userId: string; }) => {
     Object.keys(badges).forEach(mod => {
         if (mod.toLowerCase() === "vencord") return;
         if (mod.toLowerCase() === "equicord") return;
+        if (mod.toLowerCase() === "badgevault" && !settings.store.showCustom) return;
         badges[mod].forEach(badge => {
             if (typeof badge === "string") {
                 const fullNames = { "hunter": "Bug Hunter", "early": "Early User" };
@@ -97,9 +98,8 @@ const GlobalBadges = ({ userId }: { userId: string; }) => {
                     badge: `${API_URL}badges/${mod}/${(badge as string).replace(mod, "").trim().split(" ")[0]}`
                 };
             } else if (typeof badge === "object") badge.custom = true;
-            if (!showCustom() && badge.custom) return;
             const cleanName = badge.name.replace(mod, "").trim();
-            const prefix = showPrefix() ? mod : "";
+            const prefix = settings.store.showPrefix ? mod : "";
             if (!badge.custom) badge.name = `${prefix} ${cleanName.charAt(0).toUpperCase() + cleanName.slice(1)}`;
             if (badge.custom) {
                 if (cleanName.toLowerCase().includes(mod)) return;
@@ -129,31 +129,28 @@ const Badge: ProfileBadge = {
     key: "GlobalBadges"
 };
 
-const showPrefix = () => Vencord.Settings.plugins.GlobalBadges.showPrefix;
-const showCustom = () => Vencord.Settings.plugins.GlobalBadges.showCustom;
+const settings = definePluginSettings({
+    showPrefix: {
+        type: OptionType.BOOLEAN,
+        description: "Shows the Mod as Prefix",
+        default: true,
+        restartNeeded: false
+    },
+    showCustom: {
+        type: OptionType.BOOLEAN,
+        description: "Show Custom Badges",
+        default: true,
+        restartNeeded: false
+    }
+});
 
 export default definePlugin({
     name: "GlobalBadges",
     description: "Adds global badges from other client mods",
     authors: [Devs.HypedDomi, EquicordDevs.Wolfie],
-
+    settings,
     start: () => addProfileBadge(Badge),
     stop: () => removeProfileBadge(Badge),
-
-    options: {
-        showPrefix: {
-            type: OptionType.BOOLEAN,
-            description: "Shows the Mod as Prefix",
-            default: true,
-            restartNeeded: false
-        },
-        showCustom: {
-            type: OptionType.BOOLEAN,
-            description: "Show Custom Badges",
-            default: true,
-            restartNeeded: false
-        }
-    }
 });
 
 /*
