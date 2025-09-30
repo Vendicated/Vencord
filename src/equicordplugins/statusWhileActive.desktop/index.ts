@@ -4,38 +4,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { VoiceState } from "@vencord/discord-types";
-import { PresenceStore, UserStore, VoiceStateStore } from "@webpack/common";
+import { UserStore, VoiceStateStore } from "@webpack/common";
 
-let savedStatus: string | null = null;
-const StatusSettings = getUserSettingLazy("status", "status");
+let savedStatus: string | null;
+
+const StatusSettings = getUserSettingLazy<string>("status", "status")!;
+
 const settings = definePluginSettings({
-    trigger: {
-        type: OptionType.SELECT,
-        description: "When to change your status",
-        options: [
-            {
-                label: "While playing a game",
-                value: "game",
-                default: true,
-            },
-            {
-                label: "While in a voice channel",
-                value: "vc",
-            },
-            {
-                label: "While playing or in a voice channel",
-                value: "either",
-            },
-        ]
-    },
     statusToSet: {
         type: OptionType.SELECT,
-        description: "Status to set",
+        description: "Status to set while playing a game",
         options: [
             {
                 label: "Online",
@@ -48,7 +31,7 @@ const settings = definePluginSettings({
             {
                 label: "Do Not Disturb",
                 value: "dnd",
-                default: true,
+                default: true
             },
             {
                 label: "Invisible",
@@ -70,41 +53,25 @@ function setStatus(preq, status) {
     }
 }
 
-migratePluginSettings("StatusWhileActive", "StatusWhilePlaying");
 export default definePlugin({
     name: "StatusWhileActive",
-    description: "Automatically updates your online status when playing games or in a voice channel.",
-    authors: [Devs.thororen, EquicordDevs.smuki],
+    description: "Automatically updates your online status when in a voice channel.",
+    authors: [EquicordDevs.smuki],
     settings,
     flux: {
-        RUNNING_GAMES_CHANGE({ games }) {
-            const { trigger } = settings.store;
-            if (trigger === "vc") return;
-
-            const userId = UserStore.getCurrentUser().id;
-            const status = PresenceStore.getStatus(userId);
-
-            setStatus(games.length > 0, status);
-        },
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            const { trigger } = settings.store;
-            if (trigger === "game") return;
-
             const userId = UserStore.getCurrentUser().id;
             const myState = voiceStates.find(state => state.userId === userId);
             if (!myState) return;
 
-            const status = PresenceStore.getStatus(userId);
+            const status = StatusSettings.getSetting();
             const inVoiceChannel = !!VoiceStateStore.getVoiceStateForUser(userId)?.channelId;
 
             setStatus(inVoiceChannel, status);
         },
         VOICE_CHANNEL_STATUS_UPDATE() {
-            const { trigger } = settings.store;
-            if (trigger === "game") return;
-
             const userId = UserStore.getCurrentUser().id;
-            const status = PresenceStore.getStatus(userId);
+            const status = StatusSettings.getSetting();
             const inVoiceChannel = !!VoiceStateStore.getVoiceStateForUser(userId)?.channelId;
 
             setStatus(inVoiceChannel, status);
