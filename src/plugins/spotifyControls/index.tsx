@@ -23,6 +23,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import hoverOnlyStyle from "./hoverOnly.css?managed";
+import centerControlsStyle from "./centerControls.css?managed";
 import { Player } from "./PlayerComponent";
 
 function toggleHoverControls(value: boolean) {
@@ -32,7 +33,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev, Devs.winb],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -49,6 +50,30 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Restart currently playing track when pressing the previous button if playtime is >3s",
             default: true
+        }
+        ,
+        showSeekBar: {
+            type: OptionType.BOOLEAN,
+            description: "Show the seek/progress bar in the Spotify player",
+            default: true
+        }
+        ,
+        autoCloseOnPause: {
+            type: OptionType.BOOLEAN,
+            description: "Automatically close the Spotify player when playback is paused for the configured number of seconds",
+            default: true
+        },
+        autoClosePauseSeconds: {
+            type: OptionType.NUMBER,
+            description: "Number of seconds of continuous pause after which the Spotify player will close (when autoCloseOnPause is enabled)",
+            default: 20
+        }
+        ,
+        toggleVolumeControls: {
+            type: OptionType.BOOLEAN,
+            description: "When OFF: center the play controls and hide the volume control. When ON: show the volume control and left-align the controls.",
+            default: false,
+            onChange: v => (v ? disableStyle : enableStyle)(centerControlsStyle)
         }
     },
     patches: [
@@ -91,7 +116,11 @@ export default definePlugin({
         },
     ],
 
-    start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
+    start: () => {
+        toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls);
+        // inverted: enable the centering style when the option is false
+        (Settings.plugins.SpotifyControls.centerControlsAndHoverVolume ? disableStyle : enableStyle)(centerControlsStyle);
+    },
 
     PanelWrapper({ VencordOriginal, ...props }) {
         return (

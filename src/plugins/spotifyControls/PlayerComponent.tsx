@@ -62,8 +62,11 @@ const PlayButton = Svg("M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62
 const PauseButton = Svg("M8 19c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2v10c0 1.1.9 2 2 2zm6-12v10c0 1.1.9 2 2 2s2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2z", "pause");
 const SkipPrev = Svg("M7 6c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1s-1-.45-1-1V7c0-.55.45-1 1-1zm3.66 6.82l5.77 4.07c.66.47 1.58-.01 1.58-.82V7.93c0-.81-.91-1.28-1.58-.82l-5.77 4.07c-.57.4-.57 1.24 0 1.64z", "previous");
 const SkipNext = Svg("M7.58 16.89l5.77-4.07c.56-.4.56-1.24 0-1.63L7.58 7.11C6.91 6.65 6 7.12 6 7.93v8.14c0 .81.91 1.28 1.58.82zM16 7v10c0 .55.45 1 1 1s1-.45 1-1V7c0-.55-.45-1-1-1s-1 .45-1 1z", "next");
-const Repeat = Svg("M7 7h10v1.79c0 .45.54.67.85.35l2.79-2.79c.2-.2.2-.51 0-.71l-2.79-2.79c-.31-.31-.85-.09-.85.36V5H6c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1s1-.45 1-1V7zm10 10H7v-1.79c0-.45-.54-.67-.85-.35l-2.79 2.79c-.2.2-.2.51 0 .71l2.79 2.79c.31.31.85.09.85-.36V19h11c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1s-1 .45-1 1v3z", "repeat");
+const Repeat = Svg("M7 7h10v1.79c0 .45.54.67.85.35l2.79-2.79c.2-.2.2-.51 0-.71l-2.79-2.79c-.31-.31-.85-.09-.85.36V5H6c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1s1-.45 1-1V7zm10 10H7v-1.79c0-.45-.54-.67-.85-.35l-2.79 2.79c-.2.2-.2-.51 0 .71l2.79 2.79c.31.31.85.09.85-.36V19h11c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1s-1 .45-1 1v3z", "repeat");
 const Shuffle = Svg("M10.59 9.17L6.12 4.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l4.46 4.46 1.42-1.4zm4.76-4.32l1.19 1.19L4.7 17.88c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L17.96 7.46l1.19 1.19c.31.31.85.09.85-.36V4.5c0-.28-.22-.5-.5-.5h-3.79c-.45 0-.67.54-.36.85zm-.52 8.56l-1.41 1.41 3.13 3.13-1.2 1.2c-.31.31-.09.85.36.85h3.79c.28 0 .5-.22.5-.5v-3.79c0-.45-.54-.67-.85-.35l-1.19 1.19-3.13-3.14z", "shuffle");
+const VolumeUp = Svg("M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z", "volume");
+const VolumeMuted = Svg("M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z", "volume-muted");
+
 
 function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     return (
@@ -185,13 +188,21 @@ function SpotifySeekBar() {
 
     return (
         <div id={cl("progress-bar")}>
-            <Forms.FormText
-                variant="text-xs/medium"
-                className={cl("progress-time") + " " + cl("time-left")}
-                aria-label="Progress"
-            >
-                {msToHuman(position)}
-            </Forms.FormText>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Forms.FormText
+                    variant="text-xs/medium"
+                    className={cl("progress-time") + " " + cl("time-left")}
+                    aria-label="Progress"
+                >
+                    {msToHuman(position)}
+                </Forms.FormText>
+                {isSettingPosition && (
+                    <Forms.FormText variant="text-xs/medium" className={cl("progress-syncing")}
+                        aria-label="Syncing">
+                        Syncing…
+                    </Forms.FormText>
+                )}
+            </div>
             <SeekBar
                 initialValue={position}
                 minValue={0}
@@ -309,7 +320,7 @@ function Info({ track }: { track: Track; }) {
                 </Forms.FormText>
                 {track.artists.some(a => a.name) && (
                     <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
-                        <span className={cl("song-info-prefix")}>by&nbsp;</span>
+                        <span className={cl("song-info-prefix")}>by </span>
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
                                 <span
@@ -327,7 +338,7 @@ function Info({ track }: { track: Track; }) {
                 )}
                 {track.album.name && (
                     <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
-                        <span className={cl("song-info-prefix")}>on&nbsp;</span>
+                        <span className={cl("song-info-prefix")}>on </span>
                         <span
                             id={cl("album-title")}
                             className={cl("album")}
@@ -340,6 +351,84 @@ function Info({ track }: { track: Track; }) {
                     </Forms.FormText>
                 )}
             </div>
+        </div>
+    );
+}
+
+function VolumeControl() {
+    const storeVolume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
+    const [localVolume, setLocalVolume] = React.useState(storeVolume);
+
+    const interactionTimeoutRef = React.useRef<number | null>(null);
+
+    React.useEffect(() => {
+        if (interactionTimeoutRef.current === null) {
+            setLocalVolume(storeVolume);
+        }
+    }, [storeVolume]);
+
+    const lastVolumeRef = React.useRef(50);
+    React.useEffect(() => {
+        if (storeVolume !== 0) {
+            lastVolumeRef.current = storeVolume;
+        }
+    }, [storeVolume]);
+
+    // This is the corrected line. By wrapping SpotifyStore.setVolume in an arrow function,
+    // we ensure it's called correctly and doesn't break.
+    const debouncedSetVolume = React.useCallback(
+        debounce((volume: number) => SpotifyStore.setVolume(volume), 100),
+        []
+    );
+
+    const handleValueChange = (v: number) => {
+        if (interactionTimeoutRef.current) {
+            clearTimeout(interactionTimeoutRef.current);
+        }
+
+        setLocalVolume(v);
+        debouncedSetVolume(v);
+
+        interactionTimeoutRef.current = window.setTimeout(() => {
+            interactionTimeoutRef.current = null;
+        }, 300);
+    };
+
+    const handleWheelScroll = (e: React.WheelEvent) => {
+        e.preventDefault();
+        const scrollSensitivity = 0.05;
+        const volumeChange = -e.deltaY * scrollSensitivity;
+        const newVolume = Math.max(0, Math.min(100, localVolume + volumeChange));
+
+        if (Math.round(newVolume) === Math.round(localVolume)) return;
+
+        handleValueChange(newVolume);
+    };
+
+    const toggleMute = () => {
+        const isMuted = storeVolume === 0;
+        if (isMuted) {
+            const restoreVolume = lastVolumeRef.current > 0 ? lastVolumeRef.current : 50;
+            handleValueChange(restoreVolume);
+        } else {
+            handleValueChange(0);
+        }
+    };
+
+    const Icon = localVolume === 0 ? VolumeMuted : VolumeUp;
+
+    return (
+        <div className={cl("volume-control")} onWheel={handleWheelScroll}>
+            <button className={cl("volume-button")} onClick={toggleMute} aria-label="Toggle Mute">
+                <Icon />
+            </button>
+            <SeekBar
+                initialValue={localVolume}
+                minValue={0}
+                maxValue={100}
+                onValueChange={handleValueChange}
+                asValueChanges={handleValueChange}
+            />
         </div>
     );
 }
@@ -362,14 +451,46 @@ export function Player() {
     const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
     const [shouldHide, setShouldHide] = useState(false);
 
-    // Hide player after 5 minutes of inactivity
-
+    // Hide player after 5 minutes of inactivity (existing behavior)
     React.useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {
             const timeout = setTimeout(() => setShouldHide(true), 1000 * 60 * 5);
             return () => clearTimeout(timeout);
         }
+    }, [isPlaying]);
+
+    // Auto-close player when paused for a configured duration
+    React.useEffect(() => {
+        if (!Settings.plugins.SpotifyControls.autoCloseOnPause) return;
+
+        let pauseTimer: number | undefined;
+
+        const startPauseTimer = () => {
+            // If already hidden via shouldHide, don't schedule
+            const seconds = Settings.plugins.SpotifyControls.autoClosePauseSeconds ?? 20;
+            pauseTimer = window.setTimeout(() => {
+                setShouldHide(true);
+            }, seconds * 1000);
+        };
+
+        const clearPauseTimer = () => {
+            if (pauseTimer) {
+                clearTimeout(pauseTimer as any);
+                pauseTimer = undefined;
+            }
+        };
+
+        if (!isPlaying) {
+            // when playback pauses, start the timer
+            startPauseTimer();
+        } else {
+            // when playback resumes, ensure player is visible and clear timer
+            clearPauseTimer();
+            setShouldHide(false);
+        }
+
+        return () => clearPauseTimer();
     }, [isPlaying]);
 
     if (!track || !device?.is_active || shouldHide)
@@ -379,11 +500,16 @@ export function Player() {
         "--vc-spotify-track-image": `url(${track?.album?.image?.url || ""})`,
     } as React.CSSProperties;
 
+    const showSeek = Settings.plugins.SpotifyControls.showSeekBar ?? true;
+
     return (
         <div id={cl("player")} style={exportTrackImageStyle}>
             <Info track={track} />
-            <SpotifySeekBar />
-            <Controls />
+            {showSeek && <SpotifySeekBar />}
+            <div className={classes(cl("bottom-row"), !showSeek ? cl("bottom-row-centered") : "")}>
+                <Controls />
+                <VolumeControl />
+            </div>
         </div>
     );
 }

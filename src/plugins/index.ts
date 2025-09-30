@@ -34,7 +34,8 @@ import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 
-import Plugins from "~plugins";
+import Plugins, { PluginMeta } from "~plugins";
+import myCoolplugin from "../userplugins/MicBridge";
 
 import { traceFunction } from "../debug/Tracer";
 
@@ -48,6 +49,14 @@ export { patches };
 let enabledPluginsSubscribedFlux = false;
 const subscribedFluxEventsPlugins = new Set<string>();
 
+// Add user plugin to Plugins object under its declared name so it appears in the Settings UI
+(Plugins as any)[myCoolplugin.name] = myCoolplugin;
+
+// Ensure PluginMeta knows this is a user plugin and where its source lives so the settings UI
+// can render "View source" links and classify it correctly.
+if (typeof PluginMeta === "object" && PluginMeta != null) {
+    PluginMeta[myCoolplugin.name] = PluginMeta[myCoolplugin.name] ?? { folderName: "userplugins/myCoolplugin", userPlugin: true };
+}
 const pluginsValues = Object.values(Plugins);
 const settings = Settings.plugins;
 

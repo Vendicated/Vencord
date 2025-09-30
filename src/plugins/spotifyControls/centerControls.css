@@ -1,0 +1,21 @@
+#vc-spotify-player .vc-spotify-bottom-row {
+    justify-content: center;
+}
+
+/* Completely hide the volume control to center the play controls */
+#vc-spotify-player .vc-spotify-volume-control {
+    display: none !important;
+}
+
+#vc-spotify-player .vc-spotify-volume-control > [class^="slider"] {
+    display: none !important;
+}
+
+#vc-spotify-player .vc-spotify-volume-control:hover > [class^="slider"] {
+    display: block !important;
+    width: 100%;
+}
+
+#vc-spotify-player .vc-spotify-volume-control:hover {
+    flex-grow: 1;
+}

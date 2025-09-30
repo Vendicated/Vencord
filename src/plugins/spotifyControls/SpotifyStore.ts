@@ -111,40 +111,87 @@ export const SpotifyStore = proxyLazyWebpack(() => {
         }
 
         prev() {
-            this._req("post", "/previous");
+            // optimistic: assume track will change, reset position locally
+            this.mPosition = 0;
+            this._start = Date.now();
+            this.emitChange();
+
+            this._req("post", "/previous").catch((e: any) => {
+                console.error("[VencordSpotifyControls] Failed to previous", e);
+                // rely on SPOTIFY_PLAYER_STATE to reconcile
+            });
         }
 
         next() {
-            this._req("post", "/next");
+            // optimistic: assume track will change, reset position locally
+            this.mPosition = 0;
+            this._start = Date.now();
+            this.emitChange();
+
+            this._req("post", "/next").catch((e: any) => {
+                console.error("[VencordSpotifyControls] Failed to next", e);
+            });
         }
 
         setVolume(percent: number) {
+            const prev = this.volume;
+            // optimistic update
+            this.volume = percent;
+            this.emitChange();
+
             this._req("put", "/volume", {
                 query: {
                     volume_percent: Math.round(percent)
                 }
-
-            }).then(() => {
-                this.volume = percent;
+            }).catch((e: any) => {
+                console.error("[VencordSpotifyControls] Failed to set volume", e);
+                // revert on failure; SPOTIFY_PLAYER_STATE will also reconcile when available
+                this.volume = prev;
                 this.emitChange();
             });
         }
 
         setPlaying(playing: boolean) {
-            this._req("put", playing ? "/play" : "/pause");
+            const prev = this.isPlaying;
+            // optimistic update
+            this.isPlaying = playing;
+            if (playing) this._start = Date.now();
+            this.emitChange();
+
+            this._req("put", playing ? "/play" : "/pause").catch((e: any) => {
+                console.error("[VencordSpotifyControls] Failed to set playing", e);
+                // revert on failure
+                this.isPlaying = prev;
+                this.emitChange();
+            });
         }
 
         setRepeat(state: Repeat) {
+            const prev = this.repeat;
+            // optimistic update
+            this.repeat = state;
+            this.emitChange();
+
             this._req("put", "/repeat", {
                 query: { state }
+            }).catch((e: any) => {
+                console.error("[VencordSpotifyControls] Failed to set repeat", e);
+                this.repeat = prev;
+                this.emitChange();
             });
         }
 
         setShuffle(state: boolean) {
+            const prev = this.shuffle;
+            // optimistic update
+            this.shuffle = state;
+            this.emitChange();
+
             this._req("put", "/shuffle", {
                 query: { state }
-            }).then(() => {
-                this.shuffle = state;
+            }).catch((e: any) => {
+                console.error("[VencordSpotifyControls] Failed to set shuffle", e);
+                this.shuffle = prev;
                 this.emitChange();
             });
         }
@@ -152,7 +199,11 @@ export const SpotifyStore = proxyLazyWebpack(() => {
         seek(ms: number) {
             if (this.isSettingPosition) return Promise.resolve();
 
+            // optimistic: update local position immediately and mark as setting
             this.isSettingPosition = true;
+            this.mPosition = Math.round(ms);
+            this._start = Date.now();
+            this.emitChange();
 
             return this._req("put", "/seek", {
                 query: {
@@ -160,6 +211,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
                 }
             }).catch((e: any) => {
                 console.error("[VencordSpotifyControls] Failed to seek", e);
+                // clear flag on request failure; SPOTIFY_PLAYER_STATE will clear it on success
                 this.isSettingPosition = false;
             });
         }

@@ -49,10 +49,6 @@
     height: 22px;
 }
 
-/* .vc-spotify-button:hover {
-    filter: brightness(1.3);
-} */
-
 .vc-spotify-repeat-context,
 .vc-spotify-repeat-track,
 .vc-spotify-shuffle-on {
@@ -82,8 +78,85 @@
 }
 
 .vc-spotify-button-row {
-    justify-content: center;
+    justify-content: flex-start;
+    margin-top: 0;
+}
+
+.vc-spotify-bottom-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     margin-top: 14px;
+}
+
+.vc-spotify-bottom-row-centered {
+    justify-content: center;
+}
+
+.vc-spotify-volume-control {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-spotify-volume-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    width: 32px;
+    height: 32px;
+}
+
+.vc-spotify-volume-button:hover {
+    color: var(--interactive-hover);
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-spotify-volume-button .vc-spotify-button-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.vc-spotify-volume-control > [class^="slider"] {
+    width: 100%;
+    padding: 0 !important;
+}
+
+.vc-spotify-volume-control > [class^="slider"] [class^="bar"] {
+    height: 3px !important;
+    top: calc(12px - 4px / 2 + var(--bar-offset));
+}
+
+.vc-spotify-volume-control > [class^="slider"] [class^="barFill"] {
+    background-color: var(--interactive-active);
+}
+
+.vc-spotify-volume-control > [class^="slider"]:hover [class^="barFill"] {
+    background-color: var(--vc-spotify-green);
+}
+
+.vc-spotify-volume-control > [class^="slider"] [class^="grabber"] {
+    height: 16px !important;
+    width: 16px !important;
+    margin-top: calc(17px/-2 + var(--bar-offset)/2);
+    margin-left: -0.5px;
+    background-color: var(--interactive-active);
+    border-color: var(--interactive-normal);
+    color: var(--interactive-normal);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.vc-spotify-volume-control:hover > [class^="slider"] [class^="grabber"] {
+    opacity: 1;
 }
 
 .vc-spotify-secondary-song-info {

@@ -1,15 +1,18 @@
-.vc-spotify-button-row {
+.vc-spotify-bottom-row {
     height: 0;
     opacity: 0;
     pointer-events: none;
     transition: 0.2s;
     transition-property: height;
+    margin-top: 0;
+    overflow: hidden;
 }
 
-#vc-spotify-player:hover .vc-spotify-button-row {
+#vc-spotify-player:hover .vc-spotify-bottom-row {
     opacity: 1;
     height: 32px;
     pointer-events: auto;
+    margin-top: 14px;
 
     /* only transition opacity on show to prevent clipping */
     transition-property: height, opacity;
