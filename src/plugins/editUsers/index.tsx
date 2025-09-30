@@ -8,8 +8,8 @@ import "./styles.css";
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { Menu } from "@webpack/common";
-import { User } from "discord-types/general";
 
 import { getUserOverride, hasFlag, OverrideFlags, settings } from "./data";
 import { openUserEditModal } from "./modal";

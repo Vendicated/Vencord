@@ -8,8 +8,8 @@ import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { User } from "@vencord/discord-types";
 import { Button, DisplayProfileUtils, showToast, Switch, TabBar, Text, TextInput, Toasts, UsernameUtils, useState } from "@webpack/common";
-import { User } from "discord-types/general";
 import type { Dispatch, SetStateAction } from "react";
 
 import { emptyOverride, hasFlag, OverrideFlags, settings, UserOverride } from "./data";
