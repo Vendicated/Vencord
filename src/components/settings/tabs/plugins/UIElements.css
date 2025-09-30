@@ -1,0 +1,21 @@
+.vc-plugin-ui-elements-button {
+    display: flex;
+    align-items: center;
+    background-color: var(--card-primary-bg);
+    color: var(--interactive-normal);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 1em;
+    margin-top: 0.5em;
+
+    &:hover {
+        background-color: var(--background-modifier-hover);
+        color: var(--interactive-hover);
+    }
+}
+
+.vc-plugin-ui-elements-button-arrow {
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+}
