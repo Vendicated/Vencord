@@ -251,6 +251,7 @@ export default definePlugin({
 
     async start() {
         await Native.initActiveWindow();
+        initActiveWindowLoop();
     },
 
     stop() {
