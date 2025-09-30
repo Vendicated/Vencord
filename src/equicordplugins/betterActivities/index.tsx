@@ -55,14 +55,5 @@ export default definePlugin({
             },
             predicate: () => settings.store.userPopout
         },
-        // User Panel
-        {
-            find: "#{intl::STATUS_MENU_LABEL}",
-            replacement: {
-                match: /((\i)=.{0,10}(\i)\.id\).*?,)\i\?.{0,250}onClose:\i\}\)/,
-                replace: "$1$self.showAllActivitiesComponent({ activity: $2, user: $3 })"
-            },
-            predicate: () => settings.store.userPopout
-        }
     ],
 });
