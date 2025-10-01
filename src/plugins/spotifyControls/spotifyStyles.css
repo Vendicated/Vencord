@@ -111,12 +111,13 @@
 
 #vc-spotify-album-image:hover {
     filter: brightness(1.2);
-    cursor: pointer;
+    cursor: zoom-in;
 }
 
 #vc-spotify-album-expanded-wrapper #vc-spotify-album-image {
     width: 100%;
     object-fit: contain;
+    cursor: zoom-out;
 }
 
 #vc-spotify-titles {
