@@ -27,3 +27,20 @@
     flex-direction: column;
     gap: 1.5em;
 }
+
+.vc-plugin-ui-elements-switches {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.vc-plugin-ui-elements-switches-row {
+    display: flex;
+    gap: 1em;
+    width: 100%;
+    align-items: center;
+
+    :last-child {
+        margin-left: auto;
+    }
+}

@@ -7,10 +7,12 @@
 import "./UIElements.css";
 
 import { classNameFactory } from "@api/Styles";
+import { PlaceholderIcon } from "@components/Icons";
+import { Switch } from "@components/settings/Switch";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Clickable, Switch, Text } from "@webpack/common";
+import { Clickable, Text } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -45,9 +47,9 @@ function UIElementsModal(props: ModalProps) {
     const allPlugins = Object.values(Plugins);
 
     const pluginsWithChatBarButtons = allPlugins
-        .filter(p => p.renderChatBarButton && Vencord.Plugins.isPluginEnabled(p.name));
+        .filter(p => p.chatBarButton && Vencord.Plugins.isPluginEnabled(p.name));
     const pluginsWithMessagePopoverButton = allPlugins
-        .filter(p => p.renderMessagePopoverButton && Vencord.Plugins.isPluginEnabled(p.name));
+        .filter(p => p.messagePopoverButton && Vencord.Plugins.isPluginEnabled(p.name));
 
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
@@ -56,32 +58,36 @@ function UIElementsModal(props: ModalProps) {
                     <Text tag="h3" variant="heading-xl/bold">Chatbar Buttons</Text>
                     <Text variant="text-sm/normal" className={classes(Margins.top8, Margins.bottom20)}>These buttons appear in the chat input.</Text>
 
-                    {pluginsWithChatBarButtons.map(p => (
-                        <Switch
-                            value={true}
-                            onChange={() => { }}
-                            key={p.name}
-                            hideBorder
-                        >
-                            {p.name}
-                        </Switch>
-                    ))}
+                    <div className={cl("switches")}>
+                        {pluginsWithChatBarButtons.map(p => {
+                            const Icon = p.chatBarButton!.icon ?? PlaceholderIcon;
+                            return (
+                                <Text variant="text-md/semibold" key={p.name} className={cl("switches-row")}>
+                                    <Icon height={20} width={20} />
+                                    {p.name}
+                                    <Switch checked onChange={() => { }} />
+                                </Text>
+                            );
+                        })}
+                    </div>
                 </section>
 
                 <section>
                     <Text tag="h3" variant="heading-xl/bold">Message Popover Buttons</Text>
                     <Text variant="text-sm/normal" className={classes(Margins.top8, Margins.bottom20)}>These buttons appear when you hover over a message.</Text>
 
-                    {pluginsWithMessagePopoverButton.map(p => (
-                        <Switch
-                            value={true}
-                            onChange={() => { }}
-                            key={p.name}
-                            hideBorder
-                        >
-                            {p.name}
-                        </Switch>
-                    ))}
+                    <div className={cl("switches")}>
+                        {pluginsWithMessagePopoverButton.map(p => {
+                            const Icon = p.messagePopoverButton!.icon ?? PlaceholderIcon;
+                            return (
+                                <Text variant="text-md/semibold" key={p.name} className={cl("switches-row")}>
+                                    <Icon height={20} width={20} />
+                                    {p.name}
+                                    <Switch checked onChange={() => { }} />
+                                </Text>
+                            );
+                        })}
+                    </div>
                 </section>
             </ModalContent>
         </ModalRoot>
