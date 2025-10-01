@@ -17,7 +17,7 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
-import { migratePluginSettings, Settings } from "@api/Settings";
+import { migratePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
@@ -42,8 +42,6 @@ let ws: WebSocket;
 
 if (IS_VESKTOP || IS_EQUIBOP || "legcord" in window) {
     hideSetting = true;
-    const { WebRichPresence } = Settings.plugins;
-    if (WebRichPresence) WebRichPresence.enabled = false;
 } else if ("goofcord" in window) {
     hideSetting = false;
 }
