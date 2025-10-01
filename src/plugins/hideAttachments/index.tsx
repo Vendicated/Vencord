@@ -57,6 +57,7 @@ export default definePlugin({
         }
     }],
 
+    messagePopoverIcon: ImageInvisible,
     renderMessagePopoverButton(msg) {
         if (!hasMedia(msg) && !msg.messageSnapshots.some(s => hasMedia(s.message))) return null;
 

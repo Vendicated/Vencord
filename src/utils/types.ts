@@ -25,7 +25,7 @@ import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { Command, FluxEvents } from "@vencord/discord-types";
-import { ReactNode } from "react";
+import { ComponentType, ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -89,13 +89,23 @@ export interface PluginAuthor {
     id: BigInt;
 }
 
-export interface Plugin extends PluginDef {
+export type Plugin = PluginDef & {
     patches?: Patch[];
     started: boolean;
     isDependency?: boolean;
+};
+
+interface PluginDefChatBarButton {
+    renderChatBarButton: ChatBarButtonFactory;
+    chatBarButtonIcon: ComponentType<{ height?: number; width?: number; className?: string; }>;
 }
 
-export interface PluginDef {
+interface PluginDefMessagePopoverButton {
+    renderMessagePopoverButton: MessagePopoverButtonFactory;
+    messagePopoverIcon: ComponentType<{ height?: number; width?: number; className?: string; }>;
+}
+
+export type PluginDef = AllOrNothing<PluginDefChatBarButton> & AllOrNothing<PluginDefMessagePopoverButton> & {
     name: string;
     description: string;
     authors: PluginAuthor[];
@@ -177,14 +187,11 @@ export interface PluginDef {
     onBeforeMessageSend?: MessageSendListener;
     onBeforeMessageEdit?: MessageEditListener;
 
-    renderMessagePopoverButton?: MessagePopoverButtonFactory;
     renderMessageAccessory?: MessageAccessoryFactory;
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
-
-    renderChatBarButton?: ChatBarButtonFactory;
-}
+};
 
 export const enum StartAt {
     /** Right away, as soon as Vencord initialised */
@@ -413,3 +420,5 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
     ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
     : never;
 };
+
+export type AllOrNothing<T> = T | { [K in keyof T]?: never; };

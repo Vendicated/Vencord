@@ -7,6 +7,7 @@
     border-radius: var(--radius-sm);
     padding: 1em;
     margin-top: 0.5em;
+    cursor: pointer;
 
     &:hover {
         background-color: var(--background-modifier-hover);

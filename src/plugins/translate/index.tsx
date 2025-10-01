@@ -74,8 +74,10 @@ export default definePlugin({
 
     renderMessageAccessory: props => <TranslationAccessory message={props.message} />,
 
+    chatBarButtonIcon: TranslateIcon,
     renderChatBarButton: TranslateChatBarIcon,
 
+    messagePopoverIcon: TranslateIcon,
     renderMessagePopoverButton(message: Message) {
         const content = getMessageContent(message);
         if (!content) return null;
