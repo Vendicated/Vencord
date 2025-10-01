@@ -19,3 +19,10 @@
     width: 24px;
     height: 24px;
 }
+
+.vc-plugin-ui-elements-modal-content {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+}

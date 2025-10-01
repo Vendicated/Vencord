@@ -51,9 +51,11 @@ function UIElementsModal(props: ModalProps) {
 
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
-            <ModalContent>
+            <ModalContent className={cl("modal-content")}>
                 <section>
-                    <Text tag="h3" variant="heading-xl/bold" className={Margins.bottom16}>Chat Bar Buttons</Text>
+                    <Text tag="h3" variant="heading-xl/bold">Chatbar Buttons</Text>
+                    <Text variant="text-sm/normal" className={classes(Margins.top8, Margins.bottom20)}>These buttons appear in the chat input.</Text>
+
                     {pluginsWithChatBarButtons.map(p => (
                         <Switch
                             value={true}
@@ -67,7 +69,9 @@ function UIElementsModal(props: ModalProps) {
                 </section>
 
                 <section>
-                    <Text tag="h3" variant="heading-xl/bold" className={classes(Margins.bottom16, Margins.top16)}>Message Hover Bar Buttons</Text>
+                    <Text tag="h3" variant="heading-xl/bold">Message Popover Buttons</Text>
+                    <Text variant="text-sm/normal" className={classes(Margins.top8, Margins.bottom20)}>These buttons appear when you hover over a message.</Text>
+
                     {pluginsWithMessagePopoverButton.map(p => (
                         <Switch
                             value={true}
