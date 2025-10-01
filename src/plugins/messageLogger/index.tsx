@@ -313,7 +313,7 @@ const settings = definePluginSettings({
         description: "Show visual differences between edited message versions",
         default: false,
         onChange: value => {
-            if (value && settings.store.separatedDiffs) {
+            if (!value && settings.store.separatedDiffs) {
                 settings.store.separatedDiffs = false;
             }
         },
@@ -322,10 +322,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Separate addition and removals in diffs for a more readable differential",
         default: false,
-        onChange: value => {
-            if (value && settings.store.showEditDiffs) {
-                settings.store.showEditDiffs = false;
-            }
+    },
+}, {
+    separatedDiffs: {
+        disabled() {
+            return !this.store.showEditDiffs;
         },
     },
 });
