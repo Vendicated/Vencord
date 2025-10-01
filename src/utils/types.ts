@@ -89,23 +89,13 @@ export interface PluginAuthor {
     id: BigInt;
 }
 
-export type Plugin = PluginDef & {
+export interface Plugin extends PluginDef {
     patches?: Patch[];
     started: boolean;
     isDependency?: boolean;
-};
-
-interface PluginDefChatBarButton {
-    renderChatBarButton: ChatBarButtonFactory;
-    chatBarButtonIcon: ComponentType<{ height?: number; width?: number; className?: string; }>;
 }
 
-interface PluginDefMessagePopoverButton {
-    renderMessagePopoverButton: MessagePopoverButtonFactory;
-    messagePopoverIcon: ComponentType<{ height?: number; width?: number; className?: string; }>;
-}
-
-export type PluginDef = AllOrNothing<PluginDefChatBarButton> & AllOrNothing<PluginDefMessagePopoverButton> & {
+export interface PluginDef {
     name: string;
     description: string;
     authors: PluginAuthor[];
@@ -183,6 +173,24 @@ export type PluginDef = AllOrNothing<PluginDefChatBarButton> & AllOrNothing<Plug
 
     userProfileBadge?: ProfileBadge;
 
+    messagePopoverButton?: {
+        /**
+         * This icon is used only for Settings UI. Your render function must still return an icon,
+         * and it can be different from this one.
+         */
+        icon: ComponentType<{ height?: number; width?: number; className?: string; }>;
+        render: MessagePopoverButtonFactory;
+    };
+
+    chatBarButton?: {
+        /**
+         * This icon is used only for Settings UI. Your render function must still render an icon,
+         * and it can be different from this one.
+         */
+        icon: ComponentType<{ height?: number; width?: number; className?: string; }>;
+        render: ChatBarButtonFactory;
+    };
+
     onMessageClick?: MessageClickListener;
     onBeforeMessageSend?: MessageSendListener;
     onBeforeMessageEdit?: MessageEditListener;
@@ -191,7 +199,16 @@ export type PluginDef = AllOrNothing<PluginDefChatBarButton> & AllOrNothing<Plug
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
-};
+
+    /**
+     * @deprecated Use {@link chatBarButton} instead
+     */
+    renderChatBarButton?: never;
+    /**
+     * @deprecated Use {@link messagePopoverButton} instead
+     */
+    renderMessagePopoverButton?: never;
+}
 
 export const enum StartAt {
     /** Right away, as soon as Vencord initialised */

@@ -42,17 +42,19 @@ export default definePlugin({
     authors: [Devs.kemo],
     description: "Adds a quick mention button to the message actions bar",
 
-    messagePopoverIcon: Icon,
-    renderMessagePopoverButton(msg) {
-        const channel = ChannelStore.getChannel(msg.channel_id);
-        if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
+    messagePopoverButton: {
+        icon: Icon,
+        render(msg) {
+            const channel = ChannelStore.getChannel(msg.channel_id);
+            if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
 
-        return {
-            label: "Quick Mention",
-            icon: Icon,
-            message: msg,
-            channel,
-            onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
-        };
-    },
+            return {
+                label: "Quick Mention",
+                icon: Icon,
+                message: msg,
+                channel,
+                onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
+            };
+        }
+    }
 });

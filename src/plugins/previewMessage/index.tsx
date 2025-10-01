@@ -132,6 +132,8 @@ export default definePlugin({
     // This makes the popping in less awkward
     startAt: StartAt.Init,
 
-    chatBarButtonIcon: PreviewIcon,
-    renderChatBarButton: PreviewButton,
+    chatBarButton: {
+        icon: PreviewIcon,
+        render: PreviewButton
+    }
 });

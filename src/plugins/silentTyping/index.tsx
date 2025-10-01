@@ -153,6 +153,8 @@ export default definePlugin({
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
-    chatBarButtonIcon: SilentTypingIcon,
-    renderChatBarButton: SilentTypingToggle,
+    chatBarButton: {
+        icon: SilentTypingIcon,
+        render: SilentTypingToggle
+    }
 });

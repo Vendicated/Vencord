@@ -171,8 +171,10 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Tyler, Devs.Grzesiek11],
     settings,
 
-    chatBarButtonIcon: SendTimestampIcon,
-    renderChatBarButton: SendTimestampButton,
+    chatBarButton: {
+        icon: SendTimestampIcon,
+        render: SendTimestampButton
+    },
 
     onBeforeMessageSend(_, msg) {
         if (settings.store.replaceMessageContents) {

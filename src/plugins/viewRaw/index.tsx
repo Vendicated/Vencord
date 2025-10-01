@@ -188,39 +188,41 @@ export default definePlugin({
         "dev-context": devContextCallback
     },
 
-    messagePopoverIcon: CopyIcon,
-    renderMessagePopoverButton(msg) {
-        const handleClick = () => {
-            if (settings.store.clickMethod === "Right") {
-                copyWithToast(msg.content);
-            } else {
-                openViewRawModalMessage(msg);
-            }
-        };
+    messagePopoverButton: {
+        icon: CopyIcon,
+        render(msg) {
+            const handleClick = () => {
+                if (settings.store.clickMethod === "Right") {
+                    copyWithToast(msg.content);
+                } else {
+                    openViewRawModalMessage(msg);
+                }
+            };
 
-        const handleContextMenu = e => {
-            if (settings.store.clickMethod === "Left") {
-                e.preventDefault();
-                e.stopPropagation();
-                copyWithToast(msg.content);
-            } else {
-                e.preventDefault();
-                e.stopPropagation();
-                openViewRawModalMessage(msg);
-            }
-        };
+            const handleContextMenu = e => {
+                if (settings.store.clickMethod === "Left") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    copyWithToast(msg.content);
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openViewRawModalMessage(msg);
+                }
+            };
 
-        const label = settings.store.clickMethod === "Right"
-            ? "Copy Raw (Left Click) / View Raw (Right Click)"
-            : "View Raw (Left Click) / Copy Raw (Right Click)";
+            const label = settings.store.clickMethod === "Right"
+                ? "Copy Raw (Left Click) / View Raw (Right Click)"
+                : "View Raw (Left Click) / Copy Raw (Right Click)";
 
-        return {
-            label,
-            icon: CopyIcon,
-            message: msg,
-            channel: ChannelStore.getChannel(msg.channel_id),
-            onClick: handleClick,
-            onContextMenu: handleContextMenu
-        };
+            return {
+                label,
+                icon: CopyIcon,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: handleClick,
+                onContextMenu: handleContextMenu
+            };
+        }
     }
 });
