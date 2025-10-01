@@ -132,7 +132,13 @@ let lastNavigationTime = 0;
 
 export function handleChannelSwitch(ch: BasicChannelTabsProps) {
     const tab = openTabs.find(c => c.id === currentlyOpenTab);
-    const existingTab = openTabs.find(tab => tab.channelId === ch.channelId && tab.guildId === ch.guildId);
+
+    // Normalize guildId for DMs/Group Chats to ensure consistent comparison
+    const normalizedGuildId = ch.guildId || "@me";
+    const existingTab = openTabs.find(tab => {
+        const tabGuildId = tab.guildId || "@me";
+        return tab.channelId === ch.channelId && tabGuildId === normalizedGuildId;
+    });
 
     // First check: switch to existing tab if setting enabled and tab exists
     if (settings.store.switchToExistingTab && existingTab) {
@@ -150,7 +156,7 @@ export function handleChannelSwitch(ch: BasicChannelTabsProps) {
         if (isRapidNavigation && settings.store.enableRapidNavigation) {
             // Replace current tab content instead of creating new one
             const currentTab = openTabs.find(t => t.id === currentlyOpenTab);
-            if (currentTab) {
+            if (currentTab && currentTab.channelId !== ch.channelId) {
                 currentTab.channelId = ch.channelId;
                 currentTab.guildId = ch.guildId;
                 update();
@@ -159,7 +165,9 @@ export function handleChannelSwitch(ch: BasicChannelTabsProps) {
         }
 
         // Create new tab (normal behavior)
-        createTab(ch, true);
+        if (!existingTab) {
+            createTab(ch, true);
+        }
         return;
     }
 
@@ -179,10 +187,12 @@ export function isTabSelected(id: number) {
 }
 
 export function moveDraggedTabs(index1: number, index2: number) {
-    if (index1 < 0 || index2 > openTabs.length)
+    if (index1 < 0 || index1 >= openTabs.length || index2 < 0 || index2 >= openTabs.length)
         return logger.error(`Out of bounds drag (swap between indexes ${index1} and ${index2})`, openTabs);
 
     const firstItem = openTabs.splice(index1, 1)[0];
+    if (!firstItem) return logger.error(`Tab at index ${index1} is undefined`, openTabs);
+
     openTabs.splice(index2, 0, firstItem);
     update();
 }
