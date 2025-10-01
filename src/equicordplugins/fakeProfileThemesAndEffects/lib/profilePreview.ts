@@ -70,7 +70,7 @@ export function profilePreviewHook(props: Record<string, any>) {
             props.canUsePremiumCustomization = true;
         }
         if (!props.forProfileEffectModal && profileEffect) {
-            props.pendingProfileEffectId = profileEffect.id;
+            props.pendingProfileEffect = profileEffect;
             props.canUsePremiumCustomization = true;
         }
     }

@@ -79,7 +79,7 @@ export function setProfileEffectModal(comp: typeof ProfileEffectModal) {
     ProfileEffectModal = comp;
 }
 
-const requireProfileEffectModal = extractAndLoadChunksLazy([/guild:\i,initialSelectedEffectId:/, /\i\.\i\i\)/]);
+const requireProfileEffectModal = extractAndLoadChunksLazy([/initialSelectedEffect:\i,analyticsLocations:/, /\i\.\i\i\)/]);
 
 export async function openProfileEffectModal(
     initialEffectId: ProfileEffectModalProps["initialSelectedEffectId"],

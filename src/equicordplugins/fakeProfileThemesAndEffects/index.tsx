@@ -87,7 +87,7 @@ export default definePlugin({
         },
         // ProfileEffectModal
         {
-            find: "initialSelectedProfileEffectId:",
+            find: '"ProfileEffectModal"',
             group: true,
             replacement: [
                 // Modal root
@@ -157,7 +157,7 @@ export default definePlugin({
             find: "#{intl::COLLECTIBLES_GIFT_LABEL}",
             replacement: {
                 // Add back removed "forProfileEffectModal" property
-                match: /(?<=[{,])(?=pendingProfileEffectId:)/,
+                match: /(?<=[{,])(?=pendingProfileEffect:)/,
                 replace: "forProfileEffectModal:!0,"
             }
         }
