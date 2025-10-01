@@ -180,7 +180,8 @@ export async function loadLazyChunks() {
         // Chunks which our regex could not catch to load
         // It will always contain WebWorker assets, and also currently contains some language packs which are loaded differently
         const chunksLeft = allChunks.filter(id => {
-            return !(validChunks.has(id) || invalidChunks.has(id));
+            const key = Number.isNaN(Number(id)) ? id : Number(id);
+            return !(validChunks.has(key) || invalidChunks.has(key));
         });
 
         await Promise.all(chunksLeft.map(async id => {
