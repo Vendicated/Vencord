@@ -55,15 +55,15 @@ export interface StreamStartEvent {
 
 export interface MediaEngineSetGoLiveSourceEvent {
     readonly settings: {
-        readonly context: string;
-        readonly desktopSettings: {
-            readonly sourceId: string;
-            readonly sound: boolean;
+        readonly context?: string;
+        readonly desktopSettings?: {
+            readonly sourceId?: string;
+            readonly sound?: boolean;
         };
-        readonly qualityOptions: {
-            readonly frameRate: number;
-            readonly preset: number;
-            readonly resolution: number;
+        readonly qualityOptions?: {
+            readonly frameRate?: number;
+            readonly preset?: number;
+            readonly resolution?: number;
         };
     };
 }
