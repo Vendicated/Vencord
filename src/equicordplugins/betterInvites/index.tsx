@@ -49,7 +49,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?=children:\i\.name\}\)\):)/,
-                    replace: "onClick:$self.Lurkable(arguments[0].invite.guild.id,arguments[0].invite.guild.features),"
+                    replace: "onClick:$self.Lurkable(arguments[0].invite?.guild?.id,arguments[0].invite?.guild?.features),"
                 },
                 {
                     match: /\),\{profile:\i,disableGuildNameClick:\i/,
@@ -57,11 +57,11 @@ export default definePlugin({
                 },
                 {
                     match: /\}\)\)\}\),\i/,
-                    replace: "$&,$self.RenderTip(arguments[0].invite.expires_at)"
+                    replace: "$&,$self.RenderTip(arguments[0].invite?.expires_at)"
                 },
                 {
                     match: /(?<=text:(\i\.name).*?\]\}\))/,
-                    replace: "$&,$self.Header(arguments[0].invite.inviter,$1)"
+                    replace: "$&,$self.Header(arguments[0].invite?.inviter,$1)"
                 }
             ]
         },
@@ -109,6 +109,7 @@ export default definePlugin({
         );
     },
     Lurkable: (id: string, features: Iterable<string> | undefined) => {
+        if (!id || !features) return null;
         return new Set(features).has("DISCOVERABLE") ? () => lurk(id) : null;
     },
     startAt: StartAt.WebpackReady
