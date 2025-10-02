@@ -5,12 +5,13 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { FormSwitch } from "@components/FormSwitch";
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, wreq } from "@webpack";
-import { Button, Flex, Forms, Switch, Text, Timestamp, useState } from "@webpack/common";
+import { Button, Flex, Forms, Text, Timestamp, useState } from "@webpack/common";
 
 import TarFile from "./tar";
 import * as Webpack from "./webpack";
@@ -136,13 +137,12 @@ function TarModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                     </Flex>
                 </div>
 
-                <Switch
+                <FormSwitch
                     value={patched}
                     onChange={v => settings.store.patched = v}
+                    title={settings.def.patched.description}
                     hideBorder
-                >
-                    {settings.def.patched.description}
-                </Switch>
+                />
             </ModalContent>
 
             <ModalFooter>

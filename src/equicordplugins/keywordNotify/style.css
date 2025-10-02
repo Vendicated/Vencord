@@ -14,3 +14,8 @@
     padding: 8px;
     cursor: pointer;
 }
+
+.vc-keywordnotify-switch {
+    margin-top: 0.5em;
+    margin-right: 40px;
+}
