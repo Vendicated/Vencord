@@ -11,6 +11,12 @@
     }
 }
 
+.vc-form-switch-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
 .vc-form-switch-text {
     display: flex;
     flex-direction: column;

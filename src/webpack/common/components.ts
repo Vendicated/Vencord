@@ -39,7 +39,7 @@ export const Forms = {
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
 export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
 /** @deprecated Use FormSwitch from Vencord */
-export const Switch = FormSwitchCompat;
+export const Switch = FormSwitchCompat as never;
 export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
