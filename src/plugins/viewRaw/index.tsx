@@ -26,12 +26,12 @@ import { getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { Button, ChannelStore, Forms, GuildRoleStore, Menu, Text } from "@webpack/common";
 
 
-function CopyIcon({ height = 20, width = 20, className }: { height?: number; width?: number; className?: string; }) {
+const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg
             viewBox="0 0 20 20"
@@ -45,7 +45,7 @@ function CopyIcon({ height = 20, width = 20, className }: { height?: number; wid
             <path d="M8.42616 4.60245C8.6193 4.40733 8.61898 4.09297 8.42545 3.89824L7.78047 3.24928C7.58466 3.05226 7.26578 3.05261 7.07041 3.25007L0.739669 9.64832C0.5469 9.84314 0.546901 10.1568 0.739669 10.3517L7.07041 16.7499C7.26578 16.9474 7.58465 16.9477 7.78047 16.7507L8.42545 16.1017C8.61898 15.907 8.6193 15.5927 8.42616 15.3975L3.43155 10.3517C3.23869 10.1569 3.23869 9.84309 3.43155 9.64824L8.42616 4.60245Z" />
         </svg>
     );
-}
+};
 
 function sortObject<T extends object>(obj: T): T {
     return Object.fromEntries(Object.entries(obj).sort(([k1], [k2]) => k1.localeCompare(k2))) as T;

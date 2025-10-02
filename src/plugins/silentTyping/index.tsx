@@ -21,7 +21,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { FluxDispatcher, Menu, React } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -55,7 +55,7 @@ function SilentTypingEnabledIcon() {
     );
 }
 
-function SilentTypingIcon({ height = 20, width = 20, className, children }: { height?: number; width?: number; className?: string; children?: React.ReactNode; }) {
+const SilentTypingIcon: IconComponent = ({ height = 20, width = 20, className, children }) => {
     return (
         <svg
             width={width}
@@ -68,7 +68,7 @@ function SilentTypingIcon({ height = 20, width = 20, className, children }: { he
             {children}
         </svg>
     );
-}
+};
 
 const SilentTypingToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const { isEnabled, showIcon } = settings.use(["isEnabled", "showIcon"]);

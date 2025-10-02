@@ -20,7 +20,7 @@ import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { React, useEffect, useState } from "@webpack/common";
 
 let lastState = false;
@@ -53,7 +53,7 @@ function SilentMessageDisabledIcon() {
     );
 }
 
-function SilentMessageIcon({ height = 20, width = 20, className, children }: { height?: number; width?: number; className?: string; children?: React.ReactNode; }) {
+const SilentMessageIcon: IconComponent = ({ height = 20, width = 20, className, children }) => {
     return (
         <svg
             width={width}
@@ -66,7 +66,7 @@ function SilentMessageIcon({ height = 20, width = 20, className, children }: { h
             {children}
         </svg>
     );
-}
+};
 
 const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const [enabled, setEnabled] = useState(lastState);

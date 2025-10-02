@@ -310,12 +310,14 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) addMessageClickListener(onMessageClick);
 
-    if (chatBarButton) addChatBarButton(name, chatBarButton.render);
+    if (chatBarButton) addChatBarButton(name, chatBarButton.render, chatBarButton.icon);
+    // @ts-expect-error: legacy code doesn't have icon
     else if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
-    if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render);
+    if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
+    // @ts-expect-error: legacy code doesn't have icon
     else if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
 
     return true;

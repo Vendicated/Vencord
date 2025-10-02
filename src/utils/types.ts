@@ -17,15 +17,15 @@
 */
 
 import { ProfileBadge } from "@api/Badges";
-import { ChatBarButtonFactory } from "@api/ChatButtons";
+import { ChatBarButtonData } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import { MessagePopoverButtonFactory } from "@api/MessagePopover";
+import { MessagePopoverButtonData } from "@api/MessagePopover";
 import { Command, FluxEvents } from "@vencord/discord-types";
-import { ComponentType, ReactNode } from "react";
+import { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -95,6 +95,8 @@ export interface Plugin extends PluginDef {
     isDependency?: boolean;
 }
 
+export type IconComponent = (props: IconProps & Record<string, any>) => ReactNode;
+export type IconProps = { height?: number | string; width?: number | string; className?: string; };
 export interface PluginDef {
     name: string;
     description: string;
@@ -173,23 +175,8 @@ export interface PluginDef {
 
     userProfileBadge?: ProfileBadge;
 
-    messagePopoverButton?: {
-        /**
-         * This icon is used only for Settings UI. Your render function must still return an icon,
-         * and it can be different from this one.
-         */
-        icon: ComponentType<{ height?: number; width?: number; className?: string; }>;
-        render: MessagePopoverButtonFactory;
-    };
-
-    chatBarButton?: {
-        /**
-         * This icon is used only for Settings UI. Your render function must still render an icon,
-         * and it can be different from this one.
-         */
-        icon: ComponentType<{ height?: number; width?: number; className?: string; }>;
-        render: ChatBarButtonFactory;
-    };
+    messagePopoverButton?: MessagePopoverButtonData;
+    chatBarButton?: ChatBarButtonData;
 
     onMessageClick?: MessageClickListener;
     onBeforeMessageSend?: MessageSendListener;

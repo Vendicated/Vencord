@@ -22,7 +22,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
-import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
+import definePlugin, { IconComponent, OptionType, ReporterTestable } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, Tooltip } from "@webpack/common";
 
@@ -35,7 +35,7 @@ const EMBED_API_URL = "https://embed.sammcheese.net";
 const INV_REGEX = /( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/;
 const URL_REGEX = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 
-function PopOverIcon({ height = 24, width = 24, className }: { height?: number; width?: number; className?: string; }) {
+const PopoverIcon: IconComponent = ({ height = 24, width = 24, className }) => {
     return (
         <svg
             fill="var(--header-secondary)"
@@ -46,9 +46,9 @@ function PopOverIcon({ height = 24, width = 24, className }: { height?: number; 
             <path d="M 32 9 C 24.832 9 19 14.832 19 22 L 19 27.347656 C 16.670659 28.171862 15 30.388126 15 33 L 15 49 C 15 52.314 17.686 55 21 55 L 43 55 C 46.314 55 49 52.314 49 49 L 49 33 C 49 30.388126 47.329341 28.171862 45 27.347656 L 45 22 C 45 14.832 39.168 9 32 9 z M 32 13 C 36.963 13 41 17.038 41 22 L 41 27 L 23 27 L 23 22 C 23 17.038 27.037 13 32 13 z" />
         </svg>
     );
-}
+};
 
-function ChatBarIcon({ height = 20, width = 20, className }: { height?: number; width?: number; className?: string; }) {
+const ChatBarIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg
             aria-hidden
@@ -62,7 +62,7 @@ function ChatBarIcon({ height = 20, width = 20, className }: { height?: number; 
             <path fill="currentColor" d="M 32 9 C 24.832 9 19 14.832 19 22 L 19 27.347656 C 16.670659 28.171862 15 30.388126 15 33 L 15 49 C 15 52.314 17.686 55 21 55 L 43 55 C 46.314 55 49 52.314 49 49 L 49 33 C 49 30.388126 47.329341 28.171862 45 27.347656 L 45 22 C 45 14.832 39.168 9 32 9 z M 32 13 C 36.963 13 41 17.038 41 22 L 41 27 L 23 27 L 23 22 C 23 17.038 27.037 13 32 13 z" />
         </svg>
     );
-}
+};
 
 function Indicator() {
     return (
@@ -133,12 +133,12 @@ export default definePlugin({
     },
 
     messagePopoverButton: {
-        icon: PopOverIcon,
+        icon: PopoverIcon,
         render(message) {
             return INV_REGEX.test(message?.content)
                 ? {
                     label: "Decrypt Message",
-                    icon: PopOverIcon,
+                    icon: PopoverIcon,
                     message: message,
                     channel: ChannelStore.getChannel(message.channel_id),
                     onClick: async () => {

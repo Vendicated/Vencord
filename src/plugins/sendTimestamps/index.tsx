@@ -25,7 +25,7 @@ import { Devs } from "@utils/constants";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Button, Forms, Parser, Select, useMemo, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -125,7 +125,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     );
 }
 
-function SendTimestampIcon({ height = 20, width = 20, className }: { height?: number; width?: number; className?: string; }) {
+const SendTimestampIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg
             aria-hidden="true"
@@ -142,7 +142,7 @@ function SendTimestampIcon({ height = 20, width = 20, className }: { height?: nu
             </g>
         </svg>
     );
-}
+};
 
 const SendTimestampButton: ChatBarButtonFactory = ({ isMainChat }) => {
     if (!isMainChat) return null;
