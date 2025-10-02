@@ -24,7 +24,7 @@ import BadgeAPI from "plugins/_api/badges";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
-const SHIGGY_DONATE_IMAGE = "https://i.imgur.com/57ATLZu.png";
+const SHIGGY_DONATE_IMAGE = "https://equicord.org/assets/favicon.png";
 
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
 const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
