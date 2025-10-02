@@ -12,7 +12,7 @@ import { classNameFactory } from "@api/Styles";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
 import { closeModal, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelRouter, ChannelStore, IconUtils, React, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
+import { Button, ChannelRouter, ChannelStore, IconUtils, React, RelationshipStore, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
 
 const STORAGE_KEY = "RDMSwitch_history";
 const MAX_HISTORY = 50;
@@ -203,7 +203,8 @@ function getDisplayForChannel(id: string) {
     if (ch.isDM()) {
         const uid = ch.recipients?.[0];
         const user = uid ? UserStore.getUser(uid) : null;
-        return { name: user?.globalName ?? user?.username ?? "DM", avatar: user ? IconUtils.getUserAvatarURL(user, true, 64) : "" };
+        const friendNick = user ? RelationshipStore.getNickname(user.id) : null;
+        return { name: friendNick ?? user?.globalName ?? user?.username ?? "DM", avatar: user ? IconUtils.getUserAvatarURL(user, true, 64) : "" };
     }
 
     if (ch.isGroupDM()) {
