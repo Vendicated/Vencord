@@ -19,13 +19,14 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Alerts, Button, Forms, Switch, Tooltip, useState } from "@webpack/common";
+import { Alerts, Button, Forms, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -72,14 +73,13 @@ function SettingsSyncSection() {
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
                 minimal effort.
             </Forms.FormText>
-            <Switch
+            <FormSwitch
                 key="cloud-sync"
-                disabled={!cloud.authenticated}
+                title="Settings Sync"
                 value={cloud.settingsSync}
                 onChange={v => { cloud.settingsSync = v; }}
-            >
-                Settings Sync
-            </Switch>
+                disabled={!cloud.authenticated}
+            />
             <div className="vc-cloud-settings-sync-grid">
                 <Button
                     size={Button.Sizes.SMALL}
@@ -143,8 +143,10 @@ function CloudTab() {
                     <br />
                     You can swap between Equicord and Vencord's different cloud instances below if needed.
                 </Forms.FormText>
-                <Switch
+                <FormSwitch
                     key="backend"
+                    title="Enable Cloud Integrations"
+                    description="This will request authorization if you have not yet set up cloud integrations."
                     value={settings.cloud.authenticated}
                     onChange={v => {
                         if (v)
@@ -152,10 +154,7 @@ function CloudTab() {
                         else
                             settings.cloud.authenticated = v;
                     }}
-                    note="This will request authorization if you have not yet set up cloud integrations."
-                >
-                    Enable Cloud Integrations
-                </Switch>
+                />
                 <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.

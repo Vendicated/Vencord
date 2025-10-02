@@ -19,6 +19,7 @@
 import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
+import { FormSwitch } from "@components/FormSwitch";
 import { Link } from "@components/Link";
 import { handleSettingsTabError, SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
@@ -27,7 +28,7 @@ import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openM
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, shortGitHash, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
+import { Alerts, Button, Card, Forms, Parser, React, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -204,21 +205,19 @@ function Updater() {
     return (
         <SettingsTab title="Equicord Updater">
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
-            <Switch
+            <FormSwitch
+                title="Automatically update"
+                description="Automatically update Equicord without confirmation prompt"
                 value={settings.autoUpdate}
                 onChange={(v: boolean) => settings.autoUpdate = v}
-                note="Automatically update Equicord without confirmation prompt"
-            >
-                Automatically update
-            </Switch>
-            <Switch
+            />
+            <FormSwitch
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => settings.autoUpdateNotification = v}
-                note="Shows a notification when Equicord automatically updates"
+                title="Get notified when an automatic update completes"
+                description="Shows a notification when Equicord automatically updates"
                 disabled={!settings.autoUpdate}
-            >
-                Get notified when an automatic update completes
-            </Switch>
+            />
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 

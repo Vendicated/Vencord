@@ -8,6 +8,7 @@ import "./VencordTab.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
+import { FormSwitch } from "@components/FormSwitch";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
 import { DonateButton, InviteButton } from "@components/settings/DonateButton";
@@ -18,7 +19,7 @@ import { DONOR_ROLE_ID, GUILD_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/c
 import { Margins } from "@utils/margins";
 import { identity, isAnyPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Button, Flex, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
+import { Button, Flex, Forms, GuildMemberStore, React, Select, UserStore } from "@webpack/common";
 import BadgeAPI from "plugins/_api/badges";
 
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -210,11 +211,12 @@ function EquicordSettings() {
                 {Switches.map(
                     s =>
                         s && (
-                            <Switch
+                            <FormSwitch
                                 key={s.key}
                                 value={settings[s.key]}
                                 onChange={v => (settings[s.key] = v)}
-                                note={
+                                title={s.title}
+                                description={
                                     s.warning.enabled ? (
                                         <>
                                             {s.note}
@@ -226,9 +228,7 @@ function EquicordSettings() {
                                         s.note
                                     )
                                 }
-                            >
-                                {s.title}
-                            </Switch>
+                            />
                         ),
                 )}
             </Forms.FormSection>
