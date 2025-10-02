@@ -19,7 +19,7 @@ const logger = new Logger("ShareActiveWindow");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
 let isSharingWindow: boolean = false;
-let sharingSettings: StreamSettings | undefined = undefined;
+let sharingSettings: StreamSettings = {};
 
 // Debug helper function to track Flux events
 // Call it in plugin's start method
@@ -59,11 +59,6 @@ function initActiveWindowLoop(): void {
     } = DiscordNative.nativeModules.requireModule("discord_utils");
 
     activeWindowInterval = setInterval(async () => {
-        // Should never be true. Otherwise it is a bug in the plugin
-        if (sharingSettings === undefined) {
-            return;
-        }
-
         const activeWindow = await Native.getActiveWindow();
         if (!activeWindow) {
             return;
@@ -195,18 +190,25 @@ export default definePlugin({
                 return;
             }
 
-            const streamSettingsPartial: Partial<StreamSettings> = {
-                analyticsLocations: event.analyticsLocations,
-                audioSourceId: event.audioSourceId,
-                goLiveModalDurationMs: event.goLiveModalDurationMs,
-                previewDisabled: event.previewDisabled,
-                sourceId: event.sourceId,
-            };
+            if (event.analyticsLocations !== undefined) {
+                sharingSettings.analyticsLocations = event.analyticsLocations;
+            }
 
-            sharingSettings = {
-                ...sharingSettings,
-                ...streamSettingsPartial,
-            };
+            if (event.audioSourceId !== undefined) {
+                sharingSettings.audioSourceId = event.audioSourceId;
+            }
+
+            if (event.goLiveModalDurationMs !== undefined) {
+                sharingSettings.goLiveModalDurationMs = event.goLiveModalDurationMs;
+            }
+
+            if (event.previewDisabled !== undefined) {
+                sharingSettings.previewDisabled = event.previewDisabled;
+            }
+
+            if (event.sourceId !== undefined) {
+                sharingSettings.sourceId = event.sourceId;
+            }
 
             // Init loop if it is not running yet
             if (!activeWindowInterval) {
@@ -216,36 +218,48 @@ export default definePlugin({
 
         STREAM_STOP(_event: any): void {
             isSharingWindow = false;
-            sharingSettings = undefined;
+            sharingSettings = {};
             stopActiveWindowLoop();
         },
 
         STREAM_UPDATE_SETTINGS(event: StreamUpdateSettingsEvent): void {
-            const streamSettingsPartial = {
-                preset: event.preset,
-                fps: event.frameRate,
-                resolution: event.resolution,
-                soundshareEnabled: event.soundshareEnabled,
-            };
+            if (event.preset !== undefined) {
+                sharingSettings.preset = event.preset;
+            }
 
-            sharingSettings = {
-                ...sharingSettings,
-                ...streamSettingsPartial,
-            };
+            if (event.frameRate !== undefined) {
+                sharingSettings.fps = event.frameRate;
+            }
+
+            if (event.resolution !== undefined) {
+                sharingSettings.resolution = event.resolution;
+            }
+
+            if (event.soundshareEnabled !== undefined) {
+                sharingSettings.soundshareEnabled = event.soundshareEnabled;
+            }
         },
 
         MEDIA_ENGINE_SET_GO_LIVE_SOURCE(event: MediaEngineSetGoLiveSourceEvent): void {
-            const streamSettingsPartial = {
-                preset: event.settings.qualityOptions.preset,
-                fps: event.settings.qualityOptions.frameRate,
-                resolution: event.settings.qualityOptions.resolution,
-                soundshareEnabled: event.settings.desktopSettings.sound,
-            };
+            const preset = event.settings?.qualityOptions?.preset;
+            if (preset !== undefined) {
+                sharingSettings.preset = preset;
+            }
 
-            sharingSettings = {
-                ...sharingSettings,
-                ...streamSettingsPartial,
-            };
+            const frameRate = event.settings?.qualityOptions?.frameRate;
+            if (frameRate !== undefined) {
+                sharingSettings.fps = frameRate;
+            }
+
+            const resolution = event.settings?.qualityOptions?.resolution;
+            if (resolution !== undefined) {
+                sharingSettings.resolution = resolution;
+            }
+
+            const sound = event.settings?.desktopSettings?.sound;
+            if (sound !== undefined) {
+                sharingSettings.soundshareEnabled = sound;
+            }
         },
     },
 
