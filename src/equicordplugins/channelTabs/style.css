@@ -23,16 +23,22 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     margin-left: 0.125rem;
-    font-weight: 500;
+    font-weight: 400;
+    color: var(--text-muted);
+    transition:
+        color 0.15s ease,
+        font-weight 0.1s ease,
+        transform 0.2s ease;
 }
 
 .vc-channeltabs-tab-inner {
-    border-radius: 4px;
-    padding: 2px 4px;
+    border-radius: 12px;
+    padding: 0 28px 0 0;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
+    transition: gap 0.15s ease, padding 0.2s ease-in-out;
 }
 
 .vc-channeltabs-tab-container,
@@ -53,7 +59,7 @@
     --channeltabs-orange: #e67e22;
     --channeltabs-pink: #ff73fa;
 
-    padding: 4px 0;
+    padding: 4px;
     display: flex;
     flex-direction: column-reverse;
     -webkit-app-region: no-drag;
@@ -62,6 +68,7 @@
 }
 
 .vc-channeltabs-container-top {
+    padding-left: 80px;
     box-shadow: inset 0 -1px 0 var(--background-tertiary);
 }
 
@@ -152,14 +159,25 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: 4px;
+    border-radius: 12px;
     width: 12rem;
     min-width: 0;
-    margin: 0 2px;
-    background-color: var(--background-secondary);
-    border: none;
-    transition: background-color 0.15s ease;
-    padding: 2px;
+    margin: 0 4px;
+    background-color: transparent;
+    border: 1px solid var(--background-modifier-accent);
+    transition:
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
+    padding: 6px 8px;
+    position: relative;
+    cursor: grab;
+}
+
+.vc-channeltabs-tab:active {
+    cursor: grabbing;
 }
 
 .vc-channeltabs-tab.vc-channeltabs-wider:not(.vc-channeltabs-tab-compact) {
@@ -167,15 +185,54 @@
 }
 
 .vc-channeltabs-tab-compact {
-    width: unset;
+    width: auto;
     min-width: unset;
+    transition: all 0.4s ease-out;
+}
+
+.vc-channeltabs-tab-compact .vc-channeltabs-tab-inner {
+    padding-right: 0;
+    transition: padding 0.4s ease-out;
+}
+
+.vc-channeltabs-tab-compact:hover .vc-channeltabs-tab-inner,
+.vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-tab-inner {
+    padding-right: 28px;
+}
+
+.vc-channeltabs-tab-compact .vc-channeltabs-name-text {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-left: 0.125rem;
+    transform: translateX(-20px);
+    transition:
+        max-width 0.4s ease-out,
+        opacity 0.4s ease-out,
+        transform 0.4s ease-out;
+}
+
+.vc-channeltabs-tab-compact:hover .vc-channeltabs-name-text,
+.vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-name-text {
+    max-width: 200px;
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .vc-channeltabs-tab-selected {
-    background-color: var(--brand-experiment, var(--brand-500));
+    transform: translateY(-1px);
+    background-color: var(--background-secondary);
+    border: 1px solid var(--brand-500);
+    border-bottom: 2px solid var(--brand-500);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
 }
 
-.vc-channeltabs-tab-selected .vc-channeltabs-name-text,
+/* stylelint-disable-next-line no-descending-specificity */
+.vc-channeltabs-tab-selected .vc-channeltabs-name-text {
+    font-weight: 600;
+    color: var(--white-500);
+}
+
 .vc-channeltabs-tab-selected .vc-channeltabs-guild-acronym-icon span {
     color: var(--white-500);
 }
@@ -197,13 +254,35 @@
     transform: scale(0.8);
 }
 
+.vc-channeltabs-container [class^="numberBadge"] {
+    background-color: var(--channeltabs-red) !important;
+    color: var(--channeltabs-white);
+    border-radius: 50%;
+    min-width: 16px;
+    height: 16px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
 .vc-channeltabs-ghost-tab {
     visibility: hidden;
 }
 
 .vc-channeltabs-hoverable:hover,
 .vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected) {
-    background-color: var(--background-modifier-hover);
+    transform: translateY(-1px) scale(1.02);
+    background-color: var(--background-secondary-alt);
+    border-color: var(--background-modifier-accent);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+}
+
+.vc-channeltabs-tab:active:not(.vc-channeltabs-tab-selected) {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 0.05s;
 }
 
 .vc-channeltabs-button {
@@ -216,25 +295,71 @@
     margin: 0 4px;
     border-radius: 4px;
     background-color: var(--background-secondary);
+    transition: all 0.2s ease;
 }
 
 .vc-channeltabs-new-button:hover {
     background-color: var(--background-modifier-hover);
+    transform: scale(1.1);
+}
+
+.vc-channeltabs-new-button:active {
+    transform: scale(0.95);
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.vc-channeltabs-new-button svg {
+    transition: all 0.2s ease;
 }
 
 .vc-channeltabs-new-button:hover svg {
     color: var(--interactive-hover);
+    animation: vc-channeltabs-plus-spin 0.3s ease-in-out;
+}
+
+@keyframes vc-channeltabs-plus-spin {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(90deg) scale(1.15);
+    }
+
+    100% {
+        transform: rotate(90deg) scale(1);
+    }
 }
 
 .vc-channeltabs-close-button {
     height: 1rem;
     padding: 0;
-    margin: 0 4px 0 2px;
-    border-radius: 3px;
+    margin: 0 0 0 4px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    transition: all 0.15s ease, transform 0.2s ease-in-out;
+}
+
+.vc-channeltabs-close-button:hover {
+    background-color: var(--background-modifier-hover);
+    transform: rotate(90deg);
+}
+
+.vc-channeltabs-close-button:active {
+    transform: rotate(90deg) scale(0.9);
+}
+
+.vc-channeltabs-tab-selected .vc-channeltabs-close-button {
+    color: var(--white-500);
 }
 
 .vc-channeltabs-tab-selected .vc-channeltabs-close-button:hover {
     background-color: color-mix(in srgb, white 15%, transparent);
+    transform: rotate(90deg);
+}
+
+.vc-channeltabs-tab-selected .vc-channeltabs-close-button:active {
+    transform: rotate(90deg) scale(0.9);
 }
 
 .vc-channeltabs-close-button-compact {
@@ -247,11 +372,36 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    transform: translateX(-10px) scale(0.8);
+    transition:
+        opacity 0.3s ease-out 0.2s,
+        transform 0.3s ease-out 0.2s;
+    right: 4px;
 }
 
-.vc-channeltabs-close-button-compact:hover {
-    background-color: black;
-    opacity: 0.5;
+.vc-channeltabs-tab-compact:hover .vc-channeltabs-close-button-compact,
+.vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-close-button-compact {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.vc-channeltabs-close-button.vc-channeltabs-close-button-compact:hover {
+    background-color: var(--background-modifier-hover);
+    transform: translateX(0) scale(1) rotate(90deg) !important;
+    transition:
+        opacity 0.3s ease-out 0.2s,
+        transform 0.2s ease-in-out,
+        background-color 0.15s ease;
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.vc-channeltabs-close-button.vc-channeltabs-close-button-compact:active {
+    transform: translateX(0) scale(0.9) rotate(90deg) !important;
+    transition:
+        opacity 0.3s ease-out 0.2s,
+        transform 0.2s ease-in-out,
+        background-color 0.15s ease;
 }
 
 .vc-channeltabs-emoji-container {
@@ -312,4 +462,287 @@
 /* stylelint-disable-next-line no-descending-specificity */
 .vc-channeltabs-tab-container svg {
     -webkit-app-region: no-drag;
+}
+
+/* Red glow effect for tabs with mentions */
+/* stylelint-disable-next-line no-descending-specificity */
+.vc-channeltabs-tab:has([data-has-mention="true"]) {
+    animation: vc-channeltabs-mention-pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgb(242 63 66 / 60%), 0 0 16px rgb(242 63 66 / 30%);
+}
+
+@keyframes vc-channeltabs-mention-pulse {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgb(242 63 66 / 60%), 0 0 16px rgb(242 63 66 / 30%);
+    }
+
+    50% {
+        box-shadow: 0 0 12px rgb(242 63 66 / 80%), 0 0 24px rgb(242 63 66 / 50%);
+    }
+}
+
+/* Enhance glow for selected tabs with mentions */
+.vc-channeltabs-tab-selected:has([data-has-mention="true"]) {
+    box-shadow:
+        0 1px 3px rgb(0 0 0 / 20%),
+        0 0 12px rgb(242 63 66 / 80%),
+        0 0 24px rgb(242 63 66 / 50%);
+}
+
+/* Tab closing animation */
+@keyframes vc-channeltabs-tab-close {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+        max-width: 100%;
+        margin: 0 4px;
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.95);
+        max-width: 50%;
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.9) translateX(-20px);
+        max-width: 0;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.vc-channeltabs-tab-closing {
+    animation: vc-channeltabs-tab-close 0.2s ease-in-out forwards;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* New tab slide-in animation */
+@keyframes vc-channeltabs-tab-enter {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateX(-20px);
+    }
+
+    60% {
+        transform: scale(1.05) translateX(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateX(0);
+    }
+}
+
+.vc-channeltabs-tab-entering {
+    animation: vc-channeltabs-tab-enter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Icon scale on selection */
+.vc-channeltabs-tab-selected .vc-channeltabs-icon,
+.vc-channeltabs-tab-selected .vc-channeltabs-guild-acronym-icon {
+    animation: vc-channeltabs-icon-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes vc-channeltabs-icon-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Drag and drop visual feedback */
+.vc-channeltabs-tab-dragging {
+    opacity: 0.5;
+    transform: rotate(3deg);
+    cursor: grabbing !important;
+    z-index: 1000;
+    transition: none !important;
+}
+
+/* Disable tab transitions when any tab is being dragged for smoother reordering */
+.vc-channeltabs-tab-container:has(.vc-channeltabs-tab-dragging) .vc-channeltabs-tab:not(.vc-channeltabs-tab-dragging) {
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vc-channeltabs-tab-drop-target {
+    position: relative;
+}
+
+.vc-channeltabs-tab-drop-target::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--brand-500);
+    border-radius: 3px;
+    animation: vc-channeltabs-drop-indicator 0.5s ease-in-out infinite;
+}
+
+@keyframes vc-channeltabs-drop-indicator {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
+    0%,
+    100% {
+        opacity: 0.6;
+        box-shadow: 0 0 8px var(--brand-500);
+    }
+
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 12px var(--brand-500);
+    }
+}
+
+.vc-channeltabs-tab-container {
+    transition: all 0.2s ease-out;
+}
+
+/* animation override settings */
+/* stylelint-disable no-descending-specificity */
+
+/* Hover animation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-hover-animation .vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected) {
+    transform: none !important;
+}
+
+/* Selection animation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-selection-animation .vc-channeltabs-tab-selected {
+    transform: none !important;
+}
+
+/* Drag & drop animation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-drag-animation .vc-channeltabs-tab-dragging {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-drag-animation .vc-channeltabs-tab-drop-target::before {
+    display: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-drag-animation .vc-channeltabs-tab-drop-target {
+    transform: none !important;
+    background-color: transparent !important;
+    border-color: var(--background-modifier-accent) !important;
+    box-shadow: none !important;
+}
+
+/* Enter/exit animation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-enter-exit-animation .vc-channeltabs-tab-entering {
+    animation: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-enter-exit-animation .vc-channeltabs-tab {
+    transition: opacity 0.2s ease-out,
+        transform 0.2s ease-in-out,
+        background-color 0.15s ease !important;
+}
+
+/* Icon pop animation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-icon-pop-animation .vc-channeltabs-tab-selected .vc-channeltabs-icon,
+.vc-channeltabs-container.vc-channeltabs-no-icon-pop-animation .vc-channeltabs-tab-selected .vc-channeltabs-guild-acronym-icon {
+    animation: none !important;
+}
+
+/* Selected tab border - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-selected-border .vc-channeltabs-tab-selected {
+    border: 1px solid var(--background-modifier-accent) !important;
+    border-bottom: 1px solid var(--background-modifier-accent) !important;
+}
+
+/* Selected tab background - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-selected-background .vc-channeltabs-tab-selected {
+    background-color: transparent !important;
+}
+
+/* Tab shadows - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-tab-shadows .vc-channeltabs-tab,
+.vc-channeltabs-container.vc-channeltabs-no-tab-shadows .vc-channeltabs-tab-selected,
+.vc-channeltabs-container.vc-channeltabs-no-tab-shadows .vc-channeltabs-tab:hover {
+    box-shadow: none !important;
+}
+
+/* Close button rotation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-close-rotation .vc-channeltabs-tab-selected .vc-channeltabs-close-button:hover {
+    transform: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-close-rotation .vc-channeltabs-close-button:hover {
+    transform: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-close-rotation .vc-channeltabs-tab-selected .vc-channeltabs-close-button:active {
+    transform: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-close-rotation .vc-channeltabs-close-button:active {
+    transform: none !important;
+}
+
+/* Plus button animation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-plus-animation .vc-channeltabs-new-button:hover {
+    transform: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-plus-animation .vc-channeltabs-new-button:active {
+    transform: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-plus-animation .vc-channeltabs-new-button:hover svg {
+    animation: none !important;
+}
+
+/* Mention glow - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-mention-glow .vc-channeltabs-tab:has([data-has-mention="true"]) {
+    animation: none !important;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 20%) !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-mention-glow .vc-channeltabs-tab-selected:has([data-has-mention="true"]) {
+    box-shadow: 0 1px 3px rgb(0 0 0 / 20%) !important;
+}
+
+/* Compact mode expansion animation - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-compact-animation .vc-channeltabs-tab-compact {
+    transition: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-compact-animation .vc-channeltabs-tab-compact .vc-channeltabs-name-text {
+    transition: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-compact-animation .vc-channeltabs-close-button-compact {
+    transition: none !important;
+}
+
+/* Compact auto-expand selected - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-compact-auto-expand .vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-tab-inner {
+    padding-right: 0 !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-compact-auto-expand .vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-name-text {
+    max-width: 0 !important;
+    opacity: 0 !important;
+    transform: translateX(-20px) !important;
+}
+
+/* Hide close button on selected compact tabs when auto-expand is disabled */
+.vc-channeltabs-container.vc-channeltabs-no-compact-auto-expand .vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-close-button-compact {
+    opacity: 0 !important;
+    pointer-events: none;
 }

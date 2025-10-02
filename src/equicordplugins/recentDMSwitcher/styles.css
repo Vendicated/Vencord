@@ -1,0 +1,73 @@
+.vc-rdms-background {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 168px;
+    height: 95px;
+    border-radius: 10px;
+    background: var(--background-floating);
+}
+
+.vc-rdms-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-size: cover;
+}
+
+.vc-rdms-name {
+    margin-top: 8px;
+    color: var(--header-primary);
+    font-size: 12px;
+    max-width: 152px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.vc-rdms-page-indicator-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.vc-rdms-page-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.vc-rdms-overlay-container {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 38%);
+    backdrop-filter: blur(2px);
+    pointer-events: none;
+}
+
+.vc-rdms-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: color-mix(in oklab, var(--background-floating) 85%, transparent);
+    backdrop-filter: saturate(120%);
+    box-shadow: 0 6px 24px rgb(0 0 0 / 25%);
+}
+
+.vc-rdms-cards {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}

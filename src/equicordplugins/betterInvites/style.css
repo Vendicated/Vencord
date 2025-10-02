@@ -5,14 +5,30 @@ h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
 
 .vc-bi-inviter-avatar {
     margin: 0;
-    margin-right: 5px;
-    height: 16px;
-    width: 16px;
+    height: 14px;
+    width: 14px;
     position: static;
+    flex-shrink: 0;
 }
 
 .vc-bi-header-inner {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
     margin: 0;
     margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.vc-bi-header-text {
+    flex: 1;
+    white-space: normal;
+    color: var(--text-secondary);
+}
+
+.vc-bi-tooltip-icon {
+    color: var(--text-muted);
+    width: 16px;
+    height: 16px;
 }

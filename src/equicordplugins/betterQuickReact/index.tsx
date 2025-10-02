@@ -63,6 +63,10 @@ export default definePlugin({
             find: "#{intl::ADD_REACTION_NAMED}",
             group: true,
             replacement: [
+                {
+                    match: /isEmojiPremiumLocked\(\{.{0,25}channel:(\i),/,
+                    replace: "$&guild_id:$1?.guild_id??null,"
+                },
                 // Override limit of emojis to display with offset hook.
                 {
                     match: /(\i)\.length>4&&\((\i)\.length=4\);/,

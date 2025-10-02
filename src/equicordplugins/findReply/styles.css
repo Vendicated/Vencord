@@ -8,8 +8,11 @@
 }
 
 .vc-findreply-div {
-    background-color: var(--background-base-lower);
+    background-color: var(--background-base-lowest);
+    display: flex;
     flex-direction: row;
     align-items: center;
-    width: 270px;
+    width: fit-content;
+    padding: 10px;
+    gap: 10px;
 }

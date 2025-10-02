@@ -302,7 +302,7 @@ function getMemberListProfilesReactionsVoiceNameElement(props: memberListProfile
 }
 
 function getMessageName(props: messageProps): [string | null, JSX.Element | null, string | null] {
-    const { hideDefaultAtSign, replies } = settings.use();
+    const { hideDefaultAtSign, replies } = settings.use(["hideDefaultAtSign", "replies"]);
     const { message, userOverride, isRepliedMessage, withMentionPrefix } = props;
     const isWebhook = !!message.webhookId && !message.interaction;
     const channel = ChannelStore.getChannel(message.channel_id) || {};
@@ -323,7 +323,7 @@ function getMessageNameText(props: messageProps): string | null {
 }
 
 export function getMentionNameElement(props: mentionProps): JSX.Element | null {
-    const { hideDefaultAtSign, mentions } = settings.use();
+    const { hideDefaultAtSign, mentions } = settings.use(["hideDefaultAtSign", "mentions"]);
     const { channelId, userId, props: nestedProps } = props;
     const channel = channelId ? ChannelStore.getChannel(channelId) || null : null;
     const user = UserStore.getUser(userId);
@@ -351,7 +351,7 @@ function renderUsername(
     const isReaction = isReactionsTooltip || isReactionsPopout;
     const isVoice = type === "voiceChannel";
 
-    const config = hookless ? settings.store : settings.use();
+    const config = hookless ? settings.store : settings.use(["messages", "replies", "mentions", "memberList", "profilePopout", "reactions", "discriminators", "hideDefaultAtSign", "truncateAllNamesWithStreamerMode", "removeDuplicates", "ignoreGradients", "animateGradients", "includedNames", "friendNameColor", "nicknameColor", "displayNameColor", "usernameColor", "nameSeparator", "triggerNameRerender"]);
     const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, nameSeparator, triggerNameRerender } = config;
 
     const canUseGradient = ((author as GuildMember)?.guildId ? (GuildStore.getGuild((author as GuildMember).guildId) ?? {}).premiumFeatures?.features.includes("ENHANCED_ROLE_COLORS") : false);

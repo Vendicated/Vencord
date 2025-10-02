@@ -24,6 +24,7 @@ import {
     clearIndividualLog,
     formatTimestamp,
     getChangelogHistory,
+    getCommitsSinceLastSeen,
     getLastRepositoryCheckHash,
     getNewPlugins,
     getNewSettings,
@@ -295,6 +296,32 @@ function ChangelogContent() {
         }
     }, []);
 
+    const ensureLocalUpdateLogged = React.useCallback(async () => {
+        if (repoPending || repoErr) return false;
+        const repoUrl = repo;
+        if (!repoUrl) return false;
+
+        try {
+            const commits = await getCommitsSinceLastSeen(repoUrl);
+            if (commits.length === 0) return false;
+
+            const newPlgs = await getNewPlugins();
+            const updatedPlgs = await getUpdatedPlugins();
+            const newSettings = await getNewSettings();
+
+            await saveUpdateSession(commits, newPlgs, updatedPlgs, newSettings);
+
+            setChangelog(commits);
+            setNewPlugins(newPlgs);
+            setUpdatedPlugins(updatedPlgs);
+            await loadChangelogHistory();
+            return true;
+        } catch (err) {
+            console.error("Failed to log local update:", err);
+            return false;
+        }
+    }, [repo, repoErr, repoPending, loadChangelogHistory]);
+
     // check if the repository was recently refreshed
     React.useEffect(() => {
         const checkRecentStatus = async () => {
@@ -339,52 +366,66 @@ function ChangelogContent() {
             if (lastRepoCheck === currentRepoHash) {
                 setIsLoading(false);
                 setRecentlyChecked(true);
-                Toasts.show({
-                    message: "Already up to date with repository",
-                    id: Toasts.genId(),
-                    type: Toasts.Type.MESSAGE,
-                    options: {
-                        position: Toasts.Position.BOTTOM,
-                    },
-                });
+                const logged = await ensureLocalUpdateLogged();
+                if (!logged) {
+                    setChangelog([]);
+                    Toasts.show({
+                        message: "Already up to date with repository",
+                        id: Toasts.genId(),
+                        type: Toasts.Type.MESSAGE,
+                        options: {
+                            position: Toasts.Position.BOTTOM,
+                        },
+                    });
+                }
                 return;
             }
 
             if (updates.ok && updates.value) {
-                setChangelog(updates.value);
+                if (updates.value.length > 0) {
+                    setChangelog(updates.value);
 
-                // Load current new/updated plugins and settings
-                const newPlgs = await getNewPlugins();
-                const updatedPlgs = await getUpdatedPlugins();
-                const newSettings = await getNewSettings();
-                setNewPlugins(newPlgs);
-                setUpdatedPlugins(updatedPlgs);
+                    const newPlgs = await getNewPlugins();
+                    const updatedPlgs = await getUpdatedPlugins();
+                    const newSettings = await getNewSettings();
+                    setNewPlugins(newPlgs);
+                    setUpdatedPlugins(updatedPlgs);
 
-                // always save the current fetch session to history to track repo state
-                await saveUpdateSession(
-                    updates.value,
-                    newPlgs,
-                    updatedPlgs,
-                    newSettings,
-                    true, // forceLog = true for repository fetches
-                );
-                await loadChangelogHistory();
-                setRecentlyChecked(true);
+                    await saveUpdateSession(
+                        updates.value,
+                        newPlgs,
+                        updatedPlgs,
+                        newSettings,
+                        true,
+                    );
+                    await loadChangelogHistory();
+                    setRecentlyChecked(true);
 
-                Toasts.show({
-                    message:
-                        updates.value.length > 0
-                            ? `Found ${updates.value.length} commit${updates.value.length === 1 ? "" : "s"} from repository`
+                    Toasts.show({
+                        message: `Found ${updates.value.length} commit${updates.value.length === 1 ? "" : "s"} from repository`,
+                        id: Toasts.genId(),
+                        type: Toasts.Type.SUCCESS,
+                        options: {
+                            position: Toasts.Position.BOTTOM,
+                        },
+                    });
+                } else {
+                    const logged = await ensureLocalUpdateLogged();
+                    setRecentlyChecked(true);
+                    Toasts.show({
+                        message: logged
+                            ? "Logged commits from your latest update"
                             : "Repository is up to date with your local copy",
-                    id: Toasts.genId(),
-                    type:
-                        updates.value.length > 0
-                            ? Toasts.Type.SUCCESS
-                            : Toasts.Type.MESSAGE,
-                    options: {
-                        position: Toasts.Position.BOTTOM,
-                    },
-                });
+                        id: Toasts.genId(),
+                        type: logged ? Toasts.Type.SUCCESS : Toasts.Type.MESSAGE,
+                        options: {
+                            position: Toasts.Position.BOTTOM,
+                        },
+                    });
+                    if (!logged) {
+                        setChangelog([]);
+                    }
+                }
             } else if (!updates.ok) {
                 throw new Error(
                     updates.error?.message || "Failed to fetch from repository",
@@ -414,18 +455,27 @@ function ChangelogContent() {
     React.useEffect(() => {
         const loadInitialData = async () => {
             if (!repoPending && !repoErr) {
-                // load new plugins first, then fetch the commits
                 await loadNewPlugins();
-                await fetchChangelog();
+                const logged = await ensureLocalUpdateLogged();
+                if (!logged) {
+                    await fetchChangelog();
+                } else {
+                    setIsLoading(false);
+                }
             } else if (!repoPending) {
                 // perseverance
                 await loadNewPlugins();
                 setIsLoading(false);
             }
         };
-
         loadInitialData();
-    }, [repoPending, repoErr, fetchChangelog, loadNewPlugins]);
+    }, [
+        repoPending,
+        repoErr,
+        fetchChangelog,
+        loadNewPlugins,
+        ensureLocalUpdateLogged,
+    ]);
 
     const toggleLogExpanded = (logId: string) => {
         const newExpanded = new Set(expandedLogs);
