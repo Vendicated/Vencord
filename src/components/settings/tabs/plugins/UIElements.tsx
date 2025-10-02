@@ -68,9 +68,9 @@ function Section(props: {
                             {name}
                             <Switch
                                 checked={settings[name]?.enabled ?? true}
-                                onChange={() => {
-                                    settings[name] ??= { enabled: true };
-                                    settings[name].enabled = !settings[name].enabled;
+                                onChange={v => {
+                                    settings[name] ??= {} as any;
+                                    settings[name].enabled = v;
                                 }}
                             />
                         </Text>

@@ -11,9 +11,10 @@ import { Logger } from "@utils/Logger";
 import { IconComponent } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
-import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { Button, ButtonWrapperClasses, Menu, Tooltip } from "@webpack/common";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
+import { addContextMenuPatch, findGroupChildrenByChildId } from "./ContextMenu";
 import { useSettings } from "./Settings";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
@@ -158,3 +159,35 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
         </Tooltip>
     );
 }, { noop: true });
+
+addContextMenuPatch("textarea-context", (children, args) => {
+    const { chatBarButtons } = useSettings().uiElements;
+
+    const buttons = Array.from(ChatBarButtonMap.entries());
+    if (!buttons.length) return;
+
+    const group = findGroupChildrenByChildId("submit-button", children);
+    if (!group) return;
+
+    const idx = group.findIndex(c => c?.props?.id === "submit-button");
+    if (idx === -1) return;
+
+    group.splice(idx, 0,
+        <Menu.MenuItem id="vc-chat-buttons" key="vencord-chat-buttons" label="Vencord Buttons">
+            {buttons.map(([id, { icon: Icon }]) => (
+                <Menu.MenuCheckboxItem
+                    label={id}
+                    key={id}
+                    id={`vc-chat-button-${id}`}
+                    checked={chatBarButtons[id]?.enabled !== false}
+                    action={() => {
+                        const wasEnabled = chatBarButtons[id]?.enabled !== false;
+
+                        chatBarButtons[id] ??= {} as any;
+                        chatBarButtons[id].enabled = !wasEnabled;
+                    }}
+                />
+            ))}
+        </Menu.MenuItem>
+    );
+});
