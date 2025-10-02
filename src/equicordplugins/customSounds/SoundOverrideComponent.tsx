@@ -6,11 +6,12 @@
 
 import { AudioPlayerInterface, playAudio } from "@api/AudioPlayer";
 import { classNameFactory } from "@api/Styles";
+import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import { makeRange } from "@utils/types";
 import { findLazy } from "@webpack";
-import { Button, Card, Forms, React, Select, showToast, Slider, Switch } from "@webpack/common";
+import { Button, Card, Forms, React, Select, showToast, Slider } from "@webpack/common";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { deleteAudio, getAllAudio, saveAudio, StoredAudioFile } from "./audioStore";
@@ -148,7 +149,8 @@ export function SoundOverrideComponent({ type, override, onChange }: {
 
     return (
         <Card className={cl("card")}>
-            <Switch
+            <FormSwitch
+                title={type.name}
                 value={override.enabled || false}
                 onChange={async val => {
                     console.log(`[CustomSounds] Setting ${type.id} enabled to:`, val);
@@ -169,9 +171,7 @@ export function SoundOverrideComponent({ type, override, onChange }: {
                 }}
                 className={Margins.bottom16}
                 hideBorder
-            >
-                {type.name}
-            </Switch>
+            />
 
             {override.enabled && (
                 <>

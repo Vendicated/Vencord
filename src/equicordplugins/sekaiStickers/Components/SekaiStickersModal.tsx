@@ -5,8 +5,9 @@
  */
 
 import { Flex } from "@components/Flex";
+import { FormSwitch } from "@components/FormSwitch";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, ChannelStore, Forms, React, SelectedChannelStore, Slider, Switch, Text, TextArea, UploadHandler } from "@webpack/common";
+import { Button, ChannelStore, Forms, React, SelectedChannelStore, Slider, Text, TextArea, UploadHandler } from "@webpack/common";
 
 import { characters } from "../characters.json";
 import Canvas from "./Canvas";
@@ -117,7 +118,7 @@ export default function SekaiStickersModal({ modalProps, settings }: { modalProp
                         <Slider minValue={10} asValueChanges={val => setFontSize(Math.round(val))} maxValue={100} initialValue={fontSize} keyboardStep={1} orientation={"horizontal"} onValueRender={(v: number) => String(Math.round(v))} />
                         <Forms.FormTitle>Spacing</Forms.FormTitle>
                         <Slider markers={[18, 36, 72, 100]} stickToMarkers={false} minValue={18} maxValue={100} initialValue={spaceSize} asValueChanges={e => setSpaceSize(e)} onValueRender={e => String(Math.round(e))} />
-                        <Switch value={curve} onChange={val => setCurve(val)}>Enable curve</Switch>
+                        <FormSwitch title="Enable curve" value={curve} onChange={val => setCurve(val)} />
                         <Button onClick={() => openModal(props => <CharSelectModal modalProps={props} setCharacter={setChracter} />)}>Switch Character</Button>
                     </div>
                 </Flex>

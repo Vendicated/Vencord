@@ -5,7 +5,7 @@
  */
 
 export const images = {
-    cross: "https://i.imgur.com/XxRnu3b.png",
+    cross: "https://cdn.discordapp.com/emojis/1423430200938463315.webp",
     deviceImage: {
         success:
             "https://github.com/nexpid/Themelings/raw/data/icons/images/native/img_remote_auth_succeeded.png",

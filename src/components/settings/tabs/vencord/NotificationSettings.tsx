@@ -8,10 +8,11 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
+import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, Select, Slider, Switch, Text } from "@webpack/common";
+import { Button, Forms, Select, Slider, Text } from "@webpack/common";
 
 export function NotificationSection() {
     return (
@@ -89,12 +90,11 @@ function NotificationSettings() {
             />
 
             <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Missed Notification Count</Forms.FormTitle>
-            <Switch
+            <FormSwitch
+                title="When refocusing discord a notification will popup with how you missed"
                 value={settings.missed}
                 onChange={(v: boolean) => settings.missed = v}
-            >
-                When refocusing discord a notification will popup with how you missed
-            </Switch>
+            />
 
             <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>

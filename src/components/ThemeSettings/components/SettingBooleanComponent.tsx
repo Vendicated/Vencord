@@ -4,13 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, Switch } from "@webpack/common";
+import "./styles.css";
+
+import { classNameFactory } from "@api/Styles";
+import { FormSwitch } from "@components/FormSwitch";
+import { Forms } from "@webpack/common";
 
 interface Props {
     label: string;
     name: string;
     themeSettings: Record<string, string>;
 }
+
+const cl = classNameFactory("vc-settings-boolean-");
 
 export function SettingBooleanComponent({ label, name, themeSettings }: Props) {
     function handleChange(value: boolean) {
@@ -21,15 +27,14 @@ export function SettingBooleanComponent({ label, name, themeSettings }: Props) {
 
     return (
         <Forms.FormSection>
-            <Switch
+            <FormSwitch
+                title={label}
                 key={name}
+                className={cl("switch")}
                 value={themeSettings[name] === "1"}
                 onChange={handleChange}
                 hideBorder
-                style={{ marginBottom: "0.5em" }}
-            >
-                {label}
-            </Switch>
+            />
         </Forms.FormSection>
     );
 }

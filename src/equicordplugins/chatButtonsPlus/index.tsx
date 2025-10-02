@@ -9,11 +9,12 @@ import "./styles.css";
 import { ChatBarButton } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
 import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
+import { FormSwitch } from "@components/FormSwitch";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, React, Switch, TextInput } from "@webpack/common";
+import { Button, Forms, React, TextInput } from "@webpack/common";
 
 type ButtonEntry = {
     id: string;
@@ -181,13 +182,12 @@ function ButtonEntries() {
                 <div className="chatButtonsPlus-header">
                     <Forms.FormTitle tag="h5" className="chatButtonsPlus-title">Button {i + 1}</Forms.FormTitle>
                     <div className="chatButtonsPlus-controls">
-                        <Switch
+                        <FormSwitch
+                            title="Enabled"
                             value={entry.enabled ?? true}
                             onChange={value => setEnabled(entry.id, value)}
                             className="chatButtonsPlus-toggle"
-                        >
-                            Enabled
-                        </Switch>
+                        />
                         <Button
                             onClick={() => removeButtonEntry(entry.id, update)}
                             look={Button.Looks.OUTLINED}

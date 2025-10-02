@@ -19,8 +19,8 @@
 import "./AddonCard.css";
 
 import { classNameFactory } from "@api/Styles";
+import { Switch } from "@components/settings";
 import { AddonBadge } from "@components/settings/PluginBadge";
-import { Switch } from "@components/settings/Switch";
 import { Text, useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
