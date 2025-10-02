@@ -142,7 +142,7 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavCo
             children = p.children;
         }
 
-        // typescript parter goes crazy if this is inline
+        // typescript parser goes crazy if this is inline
         const id = `vc-view-${name.toLowerCase()}-raw`;
         children.splice(-1, 0,
             <Menu.MenuItem
