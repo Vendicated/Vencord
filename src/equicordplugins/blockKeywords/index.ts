@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
@@ -85,7 +85,7 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => Settings.plugins.BlockKeywords.ignoreBlockedMessages && !Settings.plugins.NoBlockedMessages.ignoreBlockedMessages,
+            predicate: () => settings.store.ignoreBlockedMessages,
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
@@ -99,10 +99,10 @@ export default definePlugin({
     containsBlockedKeywords,
 
     start() {
-        const blockedWordsList: Array<string> = Settings.plugins.BlockKeywords.blockedWords.split(",");
-        const caseSensitiveFlag = Settings.plugins.BlockKeywords.caseSensitive ? "" : "i";
+        const blockedWordsList: Array<string> = settings.store.blockedWords.split(",");
+        const caseSensitiveFlag = settings.store.caseSensitive ? "" : "i";
 
-        if (Settings.plugins.BlockKeywords.useRegex) {
+        if (settings.store.useRegex) {
             blockedKeywords = blockedWordsList.map(word => {
                 return new RegExp(word, caseSensitiveFlag);
             });
@@ -113,7 +113,6 @@ export default definePlugin({
                 return new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, caseSensitiveFlag);
             });
         }
-        console.log(blockedKeywords);
     },
 
     blockMessagesWithKeywords(messageList: any) {
