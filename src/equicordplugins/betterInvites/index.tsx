@@ -30,11 +30,10 @@ function lurk(id: string) {
         .catch(() => { throw new Error("Guild is not lurkable"); });
 }
 
-
 export default definePlugin({
     name: "BetterInvites",
     description: "See invites expiration date, view inviter profile and preview discoverable servers before joining by clicking their name",
-    authors: [EquicordDevs.iamme],
+    authors: [EquicordDevs.iamme, EquicordDevs.thororen],
     patches: [
         {
             find: ".hideDetailsButtonContainer,",
@@ -68,13 +67,13 @@ export default definePlugin({
         },
     ],
     RenderTip(expires_at: string) {
+        if (!expires_at) return null;
         const timestamp = <>{Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}</>;
         const tooltipText = (
             <>
                 This invite will {expires_at ? <>expire {timestamp}</> : <>not expire</>}
             </>
         );
-
 
         return (
             <Tooltip text={tooltipText}>
@@ -91,8 +90,8 @@ export default definePlugin({
         );
     },
     Header(inviter: User | undefined, guildName: string) {
-        const currentUserId = UserStore.getCurrentUser().id;
-        if (!inviter || currentUserId === inviter.id) return null;
+        const userId = UserStore.getCurrentUser().id;
+        if (!inviter || userId === inviter.id) return null;
         return (
             <div className="vc-bi-header-inner">
                 <img
