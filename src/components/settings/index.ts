@@ -9,5 +9,5 @@ export * from "./DonateButton";
 export * from "./PluginBadge";
 export * from "./QuickAction";
 export * from "./SpecialCard";
-export * from "./Switch";
+export * from "../Switch";
 export * from "./tabs";

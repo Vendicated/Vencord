@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
-import { Forms, Parser, Switch, TextInput, useEffect, useState } from "@webpack/common";
+import { Forms, Parser, TextInput, useEffect, useState } from "@webpack/common";
 
 const RegexGuide = {
     "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
@@ -69,15 +70,14 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
                 </div>
             )}
 
-            <Switch
+            <FormSwitch
                 className={Margins.top16}
                 value={isFunc}
                 onChange={setIsFunc}
-                note="'replacement' will be evaled if this is toggled"
+                title={"Treat as Function"}
+                description="'replacement' will be evaled if this is toggled"
                 hideBorder
-            >
-                Treat as Function
-            </Switch>
+            />
         </>
     );
 }

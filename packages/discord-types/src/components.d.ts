@@ -161,19 +161,6 @@ export type Button = ComponentType<ButtonProps> & {
     Link: any;
 };
 
-export type Switch = ComponentType<PropsWithChildren<{
-    value: boolean;
-    onChange(value: boolean): void;
-
-    disabled?: boolean;
-    hideBorder?: boolean;
-    className?: string;
-    style?: CSSProperties;
-
-    note?: ReactNode;
-    tooltipNote?: ReactNode;
-}>>;
-
 export type CheckboxAligns = {
     CENTER: "center";
     TOP: "top";
