@@ -124,6 +124,8 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavCo
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
 
+        let sliceIndex = -1;
+
         const lastChild = children.at(-1);
         if (lastChild?.key === "developer-actions") {
             const p = lastChild.props;
@@ -131,9 +133,28 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavCo
                 p.children = [p.children];
 
             children = p.children;
+        } else {
+            if (!Vencord.Plugins.isPluginEnabled("BetterRoleContext")) {
+                const copyIndex = children.findIndex(child => {
+                    const props = child?.props;
+
+                    if (Array.isArray(props))
+                        return false;
+
+                    const { id } = props;
+
+                    if (typeof id !== "string")
+                        return false;
+
+                    return id.includes("vc-permviewer-copy-");
+                });
+
+                if (copyIndex !== -1)
+                    sliceIndex = copyIndex + 1;
+            }
         }
 
-        children.splice(-1, 0,
+        children.splice(sliceIndex, 0,
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
@@ -163,18 +184,20 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
 
 export default definePlugin({
     name: "ViewRaw",
-    description: "Copy and view the raw content/data of any message, channel or guild",
+    description: "Copy and view the raw content/data of any message, user, role, channel or guild",
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
     settings,
 
     contextMenus: {
         "guild-context": MakeContextCallback("Guild"),
         "guild-settings-role-context": MakeContextCallback("Role"),
+        "vc-permviewer-role-context-menu": MakeContextCallback("Role"),
         "channel-context": MakeContextCallback("Channel"),
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
-        "dev-context": devContextCallback
+        "vc-permviewer-user-context-menu": MakeContextCallback("User"),
+        "dev-context": devContextCallback,
     },
 
     renderMessagePopoverButton(msg) {
