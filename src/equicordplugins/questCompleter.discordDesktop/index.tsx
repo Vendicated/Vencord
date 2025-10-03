@@ -55,7 +55,7 @@ async function openCompleteQuestUI() {
     const QuestsStore = findByProps("getQuest");
     const quest = [...QuestsStore.quests.values()].find(x => x.id !== "1412491570820812933" && x.userStatus?.enrolledAt && !x.userStatus?.completedAt && new Date(x.config.expiresAt).getTime() > Date.now());
 
-    if (!quest) {
+    if (!quest && !settings.store.disableNotifications) {
         showNotification({
             title: "Quest Completer",
             body: "No Quests To Complete. Click to navigate to the quests tab",
@@ -94,18 +94,15 @@ async function openCompleteQuestUI() {
                     }
                     await new Promise(resolve => setTimeout(resolve, interval * 1000));
                 }
-                showNotification({
-                    title: `${applicationName} - Quest Completer`,
-                    body: "Quest Completed.",
-                    icon: icon,
-                });
+                if (!settings.store.disableNotifications) {
+                    showNotification({
+                        title: `${applicationName} - Quest Completer`,
+                        body: "Quest Completed.",
+                        icon: icon,
+                    });
+                }
             };
             fn();
-            showNotification({
-                title: `${applicationName} - Quest Completer`,
-                body: `Spoofing video for ${applicationName}.`,
-                icon: icon,
-            });
         } else if (taskName === "PLAY_ON_DESKTOP") {
             RestAPI.get({ url: `/applications/public?application_ids=${applicationId}` }).then(res => {
                 const appData = res.body[0];
@@ -135,18 +132,15 @@ async function openCompleteQuestUI() {
 
                 const fn = data => {
                     const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.PLAY_ON_DESKTOP.value);
-                    showNotification({
-                        title: `${applicationName} - Quest Completer`,
-                        body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
-                        icon: icon,
-                    });
 
                     if (progress >= secondsNeeded) {
-                        showNotification({
-                            title: `${applicationName} - Quest Completer`,
-                            body: "Quest Completed.",
-                            icon: icon,
-                        });
+                        if (!settings.store.disableNotifications) {
+                            showNotification({
+                                title: `${applicationName} - Quest Completer`,
+                                body: "Quest Completed.",
+                                icon: icon,
+                            });
+                        }
 
                         RunningGameStore.getRunningGames = realGetRunningGames;
                         RunningGameStore.getGameForPID = realGetGameForPID;
@@ -155,26 +149,16 @@ async function openCompleteQuestUI() {
                     }
                 };
                 FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-                showNotification({
-                    title: `${applicationName} - Quest Completer`,
-                    body: `Spoofed your application to ${applicationName}.`,
-                    icon: icon,
-                });
             });
         } else if (taskName === "STREAM_ON_DESKTOP") {
             const stream = ApplicationStreamingStore.getAnyStreamForUser(UserStore.getCurrentUser()?.id);
-            if (!stream) {
+            if (!stream && !settings.store.disableNotifications) {
                 showNotification({
                     title: "You're not streaming - Quest Completer",
-                    body: `${applicationName} requires you to be streaming.\nPlease stream any window in vc.`,
+                    body: `${applicationName} requires you to be streaming.\nPlease stream any window in vc. Make sure 1 other user is watching.`,
                     icon: icon,
                 });
             }
-            showNotification({
-                title: `${applicationName} - Quest Completer`,
-                body: "Remember that you need at least 1 other person to be in the vc!",
-                icon: icon,
-            });
             const realFunc = ApplicationStreamingStore.getStreamerActiveStreamMetadata;
             ApplicationStreamingStore.getStreamerActiveStreamMetadata = () => ({
                 id: applicationId,
@@ -184,34 +168,20 @@ async function openCompleteQuestUI() {
 
             const fn = data => {
                 const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.STREAM_ON_DESKTOP.value);
-                showNotification({
-                    title: `${applicationName} - Quest Completer`,
-                    body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
-                    icon: icon,
-                });
-
                 if (progress >= secondsNeeded) {
-                    showNotification({
-                        title: `${applicationName} - Quest Completer`,
-                        body: "Quest Completed.",
-                        icon: icon,
-                    });
+                    if (!settings.store.disableNotifications) {
+                        showNotification({
+                            title: `${applicationName} - Quest Completer`,
+                            body: "Quest Completed.",
+                            icon: icon,
+                        });
+                    }
 
                     ApplicationStreamingStore.getStreamerActiveStreamMetadata = realFunc;
                     FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
                 }
             };
             FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-            showNotification({
-                title: `${applicationName} - Quest Completer`,
-                body: `Stream any window in vc for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`,
-                icon: icon,
-            });
-            showNotification({
-                title: `${applicationName} - Quest Completer`,
-                body: "Remember that you need at least 1 other person to be in the vc!",
-                icon: icon,
-            });
         } else if (taskName === "PLAY_ACTIVITY") {
             const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id ?? Object.values(GuildChannelStore.getAllGuilds() as any[]).find(x => x != null && x.VOCAL.length > 0).VOCAL[0].channel.id;
             const streamKey = `call:${channelId}:1`;
@@ -221,11 +191,6 @@ async function openCompleteQuestUI() {
                 while (true) {
                     const res = await RestAPI.post({ url: `/quests/${quest.id}/heartbeat`, body: { stream_key: streamKey, terminal: false } });
                     const progress = res.body.progress.PLAY_ACTIVITY.value;
-                    showNotification({
-                        title: `${applicationName} - Quest Completer`,
-                        body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
-                        icon: icon,
-                    });
 
                     await new Promise(resolve => setTimeout(resolve, 20 * 1000));
 
@@ -234,12 +199,13 @@ async function openCompleteQuestUI() {
                         break;
                     }
                 }
-
-                showNotification({
-                    title: `${applicationName} - Quest Completer`,
-                    body: "Quest Completed.",
-                    icon: icon,
-                });
+                if (!settings.store.disableNotifications) {
+                    showNotification({
+                        title: `${applicationName} - Quest Completer`,
+                        body: "Quest Completed.",
+                        icon: icon,
+                    });
+                }
             };
             fn();
         }
@@ -252,7 +218,12 @@ const settings = definePluginSettings({
         description: "Move quest button down to the server nav bar",
         type: OptionType.BOOLEAN,
         default: false,
-    }
+    },
+    disableNotifications: {
+        description: "Disable notifications when no quests are available or when a quest is completed",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
 });
 
 export default definePlugin({
