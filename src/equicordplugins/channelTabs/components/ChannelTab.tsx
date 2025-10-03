@@ -5,20 +5,38 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { activeQuestIntervals } from "@equicordplugins/questify"; // sorry murphy!
 import { getGuildAcronym, getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { Channel, Guild, User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Avatar, ChannelStore, ContextMenuApi, GuildStore, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { JSX } from "react";
 
-import { ChannelTabsProps, CircleQuestionIcon, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
+import { ChannelTabsProps, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
+import { CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, NitroIcon, QuestIcon, ShopIcon } from "../util/icons";
 import { TabContextMenu } from "./ContextMenus";
 
 const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
 
-const FriendsIcon = findComponentByCodeLazy("12h1a8");
 const ChannelTypeIcon = findComponentByCodeLazy(".iconContainerWithGuildIcon,");
+
+// Custom SVG icons for pages that don't have findable components
+
+function LibraryIcon(height: number = 20, width: number = 20, className?: string): JSX.Element {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            height={height}
+            width={width}
+            fill="none"
+            className={className}
+        >
+            <path fill="currentColor" d="M3 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3zm2 1v16h10V4H5zm13-1h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2V3zm0 2v12h1V5h-1z" />
+        </svg>
+    );
+}
 
 const cl = classNameFactory("vc-channeltabs-");
 
@@ -176,13 +194,38 @@ function ChannelTabContent(props: ChannelTabsProps & {
         }
     }
 
-    if (guildId === "@me" || guildId === undefined)
+    // handle special synthetic pages
+    if (channelId && channelId.startsWith("__")) {
+        const specialPagesConfig: Record<string, { label: string, Icon: React.ComponentType<any>; }> = {
+            "__quests__": { label: "Quests", Icon: QuestIcon },
+            "__message-requests__": { label: "Message Requests", Icon: EnvelopeIcon },
+            "__friends__": { label: getIntlMessage("FRIENDS"), Icon: FriendsIcon },
+            "__shop__": { label: "Shop", Icon: ShopIcon },
+            "__library__": { label: "Library", Icon: () => LibraryIcon(20, 20) },
+            "__discovery__": { label: "Discovery", Icon: DiscoveryIcon },
+            "__nitro__": { label: "Nitro", Icon: NitroIcon }
+        };
+
+        const pageConfig = specialPagesConfig[channelId];
+        if (pageConfig) {
+            const { label, Icon } = pageConfig;
+            return (
+                <>
+                    <Icon />
+                    <Text className={cl("name-text")}>{label}</Text>
+                </>
+            );
+        }
+    }
+
+    if (guildId === "@me" || guildId === undefined) {
         return (
             <>
                 <FriendsIcon />
                 <Text className={cl("name-text")}>{getIntlMessage("FRIENDS")}</Text>
             </>
         );
+    }
 
     return (
         <>
@@ -220,12 +263,52 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     const lastSwapTimeRef = useRef(0);
     const SWAP_THROTTLE_MS = 100;
 
+    const handleResizeStart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const startX = e.clientX;
+        const startWidth = ref.current?.getBoundingClientRect().width || 0;
+        const baseWidth = 192; // 12rem in pixels (assuming 16px base font)
+
+        document.body.style.cursor = "ew-resize";
+        document.body.style.userSelect = "none";
+
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            const newWidth = startWidth + deltaX;
+            const newScale = newWidth / baseWidth;
+
+            // 50% and 200% scale
+            const clampedScale = Math.max(0.5, Math.min(2, newScale));
+            settings.store.tabWidthScale = Math.round(clampedScale * 100);
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
+        };
+
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+    };
+
     const [, drag] = useDrag(() => ({
         type: "vc_ChannelTab",
         item: () => {
             setIsDragging(true);
             lastSwapTimeRef.current = Date.now() - SWAP_THROTTLE_MS;
-            return { id };
+
+            // get fresh tab data dynamically to avoid stale closures
+            const tab = openedTabs.find(t => t.id === id);
+
+            return {
+                id,
+                channelId: tab?.channelId || channelId,
+                guildId: tab?.guildId || guildId
+            };
         },
         collect: monitor => ({
             isDragging: !!monitor.isDragging()
@@ -235,7 +318,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
             setIsDropTarget(false);
             lastSwapTimeRef.current = 0;
         }
-    }));
+    }), [id, channelId, guildId]);
     const [, drop] = useDrop(() => ({
         accept: "vc_ChannelTab",
         hover: (item, monitor) => {
@@ -267,7 +350,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
             const hoverWidth = hoverBoundingRect.right - hoverBoundingRect.left;
             const hoverMiddleX = hoverWidth / 2;
 
-            // Get tab width
+            // get tab width
             const draggedElement = document.querySelector(".vc-channeltabs-tab-dragging") as HTMLElement;
             const draggedWidth = draggedElement?.getBoundingClientRect().width || hoverWidth;
             const halfDraggedWidth = draggedWidth / 2;
@@ -295,6 +378,9 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     }), []);
     drag(drop(ref));
 
+    // check if quests running (questify momentLet)
+    const hasActiveQuests = activeQuestIntervals.size > 0;
+
     return <div
         className={cl("tab", {
             "tab-compact": compact,
@@ -303,6 +389,8 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
             "tab-closing": isClosing,
             "tab-dragging": isDragging,
             "tab-drop-target": isDropTarget,
+            "tab-nitro": channelId === "__nitro__",
+            "tab-quests-active": channelId === "__quests__" && hasActiveQuests,
             wider: settings.store.widerTabsAndBookmarks
         })}
         key={index}
@@ -334,6 +422,11 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
         >
             <XIcon size={16} fill="var(--interactive-normal)" />
         </button>}
+
+        {!compact && settings.store.showResizeHandle && <div
+            className={cl("tab-resize-handle")}
+            onMouseDown={handleResizeStart}
+        />}
     </div>;
 }
 

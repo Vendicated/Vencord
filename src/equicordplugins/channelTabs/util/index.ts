@@ -6,5 +6,6 @@
 
 export * from "./bookmarks";
 export * from "./constants";
+export * from "./icons";
 export * from "./tabs";
 export * from "./types";

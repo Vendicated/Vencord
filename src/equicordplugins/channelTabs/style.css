@@ -68,8 +68,12 @@
 }
 
 .vc-channeltabs-container-top {
-    padding-left: 80px;
+    padding-left: 4px;
     box-shadow: inset 0 -1px 0 var(--background-tertiary);
+}
+
+.vc-channeltabs-container-top-macos {
+    padding-left: 80px !important;
 }
 
 .vc-channeltabs-separator {
@@ -94,7 +98,12 @@
 .vc-channeltabs-bookmarks {
     flex-grow: 1;
     overflow: hidden;
-    padding: 2px 0;
+    padding: 2px 0 2px 8px;
+}
+
+/* Add spacing between bookmark items */
+.vc-channeltabs-bookmarks > [class*="scroller"] {
+    gap: 4px;
 }
 
 .vc-channeltabs-bookmark-placeholder-text {
@@ -121,14 +130,14 @@
 .vc-channeltabs-bookmark {
     display: flex;
     flex-direction: row;
-    max-width: 8rem;
+    max-width: calc(8rem * var(--tab-width-scale, 1));
     padding: 4px 8px;
     border-radius: 4px;
     align-items: center;
 }
 
 .vc-channeltabs-bookmark.vc-channeltabs-wider {
-    max-width: 12rem;
+    max-width: calc(12rem * var(--tab-width-scale, 1));
 }
 
 .vc-channeltabs-bookmark .vc-channeltabs-name-text {
@@ -160,7 +169,7 @@
     justify-content: space-between;
     align-items: center;
     border-radius: 12px;
-    width: 12rem;
+    width: calc(12rem * var(--tab-width-scale, 1));
     min-width: 0;
     margin: 0 4px;
     background-color: transparent;
@@ -180,8 +189,44 @@
     cursor: grabbing;
 }
 
+.vc-channeltabs-tab-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: ew-resize;
+    z-index: 10;
+    opacity: 0;
+    background: var(--brand-500);
+    border-radius: 0 11px 11px 0;
+    transition: opacity 0.2s ease;
+}
+
+.vc-channeltabs-tab-resize-handle:hover {
+    opacity: 0.7 !important;
+}
+
+.vc-channeltabs-no-resize-handle-animation .vc-channeltabs-tab-resize-handle {
+    transition: none !important;
+}
+
+.vc-channeltabs-tab:hover .vc-channeltabs-tab-resize-handle {
+    opacity: 0.3;
+}
+
+.vc-channeltabs-tab-resizing {
+    pointer-events: none;
+    user-select: none;
+}
+
+.vc-channeltabs-tab-resizing * {
+    pointer-events: none;
+    user-select: none;
+}
+
 .vc-channeltabs-tab.vc-channeltabs-wider:not(.vc-channeltabs-tab-compact) {
-    width: 16rem;
+    width: calc(16rem * var(--tab-width-scale, 1));
 }
 
 .vc-channeltabs-tab-compact {
@@ -429,7 +474,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 12rem;
+    width: calc(12rem * var(--tab-width-scale, 1));
     padding: 0.125rem 0;
     min-width: 0;
     border-radius: 0.25rem;
@@ -490,6 +535,160 @@
         0 1px 3px rgb(0 0 0 / 20%),
         0 0 12px rgb(242 63 66 / 80%),
         0 0 24px rgb(242 63 66 / 50%);
+}
+
+/* Pink Nitro glow effect (easter egg) */
+.vc-channeltabs-tab-nitro {
+    animation: vc-channeltabs-nitro-pulse 3s ease-in-out infinite;
+    box-shadow: 0 0 10px rgb(255 115 250 / 70%), 0 0 20px rgb(255 115 250 / 40%);
+}
+
+@keyframes vc-channeltabs-nitro-pulse {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgb(255 115 250 / 70%), 0 0 20px rgb(255 115 250 / 40%);
+    }
+
+    50% {
+        box-shadow: 0 0 16px rgb(255 115 250 / 90%), 0 0 32px rgb(255 115 250 / 60%);
+    }
+}
+
+/* Enhanced Nitro glow for selected tab */
+.vc-channeltabs-tab-selected.vc-channeltabs-tab-nitro {
+    box-shadow:
+        0 1px 3px rgb(0 0 0 / 20%),
+        0 0 16px rgb(255 115 250 / 90%),
+        0 0 32px rgb(255 115 250 / 60%);
+}
+
+/* Nitro icon gradient animation */
+.vc-channeltabs-tab-nitro .vc-channeltabs-tab-inner svg {
+    filter: drop-shadow(0 0 2px rgb(255 115 250 / 80%));
+}
+
+.vc-channeltabs-tab-nitro .vc-channeltabs-tab-inner svg path {
+    fill: rgb(255 115 250) !important;
+    animation: vc-channeltabs-nitro-icon-gradient 3s ease-in-out infinite;
+}
+
+@keyframes vc-channeltabs-nitro-icon-gradient {
+    0%,
+    100% {
+        fill: rgb(255 115 250);
+    }
+
+    50% {
+        fill: rgb(255 180 250);
+    }
+}
+
+/* Quests active gradient (blue+pink) when quests are running */
+.vc-channeltabs-tab-quests-active {
+    position: relative;
+    overflow: visible;
+}
+
+.vc-channeltabs-tab-quests-active::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 11px;
+    background: linear-gradient(135deg,
+        transparent,
+        transparent 25%,
+        rgb(0 200 255) 40%,
+        rgb(88 101 242) 50%,
+        rgb(220 104 255) 60%,
+        transparent 75%,
+        transparent);
+    background-size: 300% 300%;
+    animation: vc-channeltabs-quests-diagonal 5s linear infinite;
+    opacity: 0.8;
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+.vc-channeltabs-tab-quests-active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 11px;
+    animation: vc-channeltabs-quests-glow 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes vc-channeltabs-quests-diagonal {
+    0%,
+    40% {
+        background-position: 100% 0;
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    60%,
+    100% {
+        background-position: 0 100%;
+        opacity: 0;
+    }
+}
+
+@keyframes vc-channeltabs-quests-glow {
+    0% {
+        box-shadow: 0 0 8px 1px rgb(0 200 255 / 60%);
+    }
+
+    33% {
+        box-shadow: 0 0 8px 1px rgb(88 101 242 / 60%);
+    }
+
+    66% {
+        box-shadow: 0 0 8px 1px rgb(220 104 255 / 60%);
+    }
+
+    100% {
+        box-shadow: 0 0 8px 1px rgb(0 200 255 / 60%);
+    }
+}
+
+/* Enhanced gradient for selected Quests tab with active quests */
+.vc-channeltabs-tab-selected.vc-channeltabs-tab-quests-active::before {
+    opacity: 1;
+    filter: blur(3px);
+}
+
+.vc-channeltabs-tab-selected.vc-channeltabs-tab-quests-active::after {
+    animation: vc-channeltabs-quests-glow-selected 3s ease-in-out infinite;
+}
+
+@keyframes vc-channeltabs-quests-glow-selected {
+    0% {
+        box-shadow: 0 0 12px 2px rgb(0 200 255 / 80%);
+    }
+
+    33% {
+        box-shadow: 0 0 12px 2px rgb(88 101 242 / 80%);
+    }
+
+    66% {
+        box-shadow: 0 0 12px 2px rgb(220 104 255 / 80%);
+    }
+
+    100% {
+        box-shadow: 0 0 12px 2px rgb(0 200 255 / 80%);
+    }
+}
+
+/* Disable Quests active animations when setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-quests-active-animation .vc-channeltabs-tab-quests-active::before,
+.vc-channeltabs-container.vc-channeltabs-no-quests-active-animation .vc-channeltabs-tab-quests-active::after {
+    animation: none !important;
+    opacity: 0 !important;
 }
 
 /* Tab closing animation */
@@ -647,6 +846,13 @@
     animation: none !important;
 }
 
+/* Also disable closing animation for instant disappear */
+.vc-channeltabs-container.vc-channeltabs-no-enter-exit-animation .vc-channeltabs-tab-closing {
+    animation: none !important;
+    opacity: 0 !important;
+    display: none !important;
+}
+
 .vc-channeltabs-container.vc-channeltabs-no-enter-exit-animation .vc-channeltabs-tab {
     transition: opacity 0.2s ease-out,
         transform 0.2s ease-in-out,
@@ -730,6 +936,31 @@
     transition: none !important;
 }
 
+/* Also disable tab-inner padding transition */
+.vc-channeltabs-container.vc-channeltabs-no-compact-animation .vc-channeltabs-tab-compact .vc-channeltabs-tab-inner {
+    transition: none !important;
+}
+
+/* Make close button appear instantly with more specificity */
+.vc-channeltabs-container.vc-channeltabs-no-compact-animation .vc-channeltabs-tab-compact:hover .vc-channeltabs-close-button-compact,
+.vc-channeltabs-container.vc-channeltabs-no-compact-animation .vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-close-button-compact {
+    transition: none !important;
+    transition-delay: 0s !important;
+}
+
+/* Tab positioning - disable if setting is off for INSTANT position changes */
+.vc-channeltabs-container.vc-channeltabs-no-tab-positioning .vc-channeltabs-tab-container {
+    transition: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-tab-positioning .vc-channeltabs-tab {
+    transition: none !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-tab-positioning .vc-channeltabs-tab-container:has(.vc-channeltabs-tab-dragging) .vc-channeltabs-tab:not(.vc-channeltabs-tab-dragging) {
+    transition: none !important;
+}
+
 /* Compact auto-expand selected - disable if setting is off */
 .vc-channeltabs-container.vc-channeltabs-no-compact-auto-expand .vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-tab-inner {
     padding-right: 0 !important;
@@ -745,4 +976,75 @@
 .vc-channeltabs-container.vc-channeltabs-no-compact-auto-expand .vc-channeltabs-tab-compact.vc-channeltabs-tab-selected .vc-channeltabs-close-button-compact {
     opacity: 0 !important;
     pointer-events: none;
+}
+
+/* Compact hover expansion - disable if setting is off */
+.vc-channeltabs-container.vc-channeltabs-no-compact-hover-expand .vc-channeltabs-tab-compact:hover .vc-channeltabs-tab-inner {
+    padding-right: 0 !important;
+}
+
+.vc-channeltabs-container.vc-channeltabs-no-compact-hover-expand .vc-channeltabs-tab-compact:hover .vc-channeltabs-name-text {
+    max-width: 0 !important;
+    opacity: 0 !important;
+    transform: translateX(-20px) !important;
+}
+
+/* Hide close button on hover for compact tabs when hover-expand is disabled */
+.vc-channeltabs-container.vc-channeltabs-no-compact-hover-expand .vc-channeltabs-tab-compact:hover .vc-channeltabs-close-button-compact {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+/* Enhanced caching mode - smoother transitions */
+[class*="chat_"] {
+    transition: opacity 0.1s ease;
+}
+
+/* Prevent flash when switching tabs with cache enabled */
+[class*="scrollerInner_"] {
+    scroll-behavior: auto;
+}
+
+/* Drag and drop visual feedback */
+.vc-channeltabs-bookmarks-drop-target {
+    background-color: color-mix(in srgb, var(--brand-500) 20%, transparent);
+    border: 2px dashed var(--brand-500);
+    border-radius: 4px;
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-folder-drop-target {
+    background-color: color-mix(in srgb, var(--brand-500) 30%, transparent);
+    border: 2px solid var(--brand-500);
+    transform: scale(1.05);
+    box-shadow: 0 0 8px var(--brand-500);
+}
+
+/* Folder expansion */
+.vc-channeltabs-bookmark.vc-channeltabs-folder-expanded {
+    background-color: var(--background-modifier-selected);
+}
+
+/* Folder item styling - indented and visually connected to folder */
+.vc-channeltabs-bookmark.vc-channeltabs-folder-item {
+    margin-left: 0.5rem;
+    border-left: 2px solid var(--background-modifier-accent);
+    padding-left: 0.5rem;
+    opacity: 0.9;
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-folder-item:hover {
+    opacity: 1;
+    background-color: var(--background-modifier-hover);
+}
+
+/* Active bookmark visual indicator */
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-active {
+    border: 1px solid var(--brand-500);
+    box-shadow: 0 0 4px var(--brand-500);
+    background-color: color-mix(in srgb, var(--brand-500) 15%, transparent);
+}
+
+.vc-channeltabs-bookmark.vc-channeltabs-bookmark-active:hover {
+    box-shadow: 0 0 6px var(--brand-500);
 }

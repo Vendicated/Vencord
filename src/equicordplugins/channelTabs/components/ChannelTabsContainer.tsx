@@ -5,12 +5,13 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { IS_MAC } from "@utils/constants";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
-import { BasicChannelTabsProps, ChannelTabsProps, createTab, handleChannelSwitch, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
+import { BasicChannelTabsProps, ChannelTabsProps, clearStaleNavigationContext, createTab, handleChannelSwitch, isNavigationFromSource, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu } from "./ContextMenus";
@@ -27,6 +28,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     const {
         showBookmarkBar,
         widerTabsAndBookmarks,
+        tabWidthScale,
         enableHotkeys,
         hotkeyCount,
         tabBarPosition,
@@ -42,10 +44,15 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         animationSelectedBorder,
         animationSelectedBackground,
         animationTabShadows,
-        compactAutoExpandSelected
+        animationTabPositioning,
+        animationResizeHandle,
+        animationQuestsActive,
+        compactAutoExpandSelected,
+        compactAutoExpandOnHover
     } = settings.use([
         "showBookmarkBar",
         "widerTabsAndBookmarks",
+        "tabWidthScale",
         "enableHotkeys",
         "hotkeyCount",
         "tabBarPosition",
@@ -61,7 +68,11 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         "animationSelectedBorder",
         "animationSelectedBackground",
         "animationTabShadows",
-        "compactAutoExpandSelected"
+        "animationTabPositioning",
+        "animationResizeHandle",
+        "animationQuestsActive",
+        "compactAutoExpandSelected",
+        "compactAutoExpandOnHover"
     ]);
     const GhostTabs = useGhostTabs();
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext() ?? false);
@@ -135,8 +146,18 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
 
     useEffect(() => {
         if (userId) {
-            handleChannelSwitch(props);
+            // Normalize guildId for comparison
+            const normalizedGuildId = props.guildId || "@me";
+
+            // Skip if this navigation came from a bookmark
+            if (!isNavigationFromSource(normalizedGuildId, props.channelId, "bookmark")) {
+                handleChannelSwitch(props);
+            }
+
             saveTabs(userId);
+
+            // Clean up any stale navigation contexts
+            clearStaleNavigationContext();
         }
     }, [userId, props.channelId, props.guildId]);
 
@@ -149,6 +170,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
             className={classes(
                 cl("container"),
                 tabBarPosition === "top" && cl("container-top"),
+                IS_MAC && tabBarPosition === "top" && cl("container-top-macos"),
                 !animationHover && cl("no-hover-animation"),
                 !animationSelection && cl("no-selection-animation"),
                 !animationDragDrop && cl("no-drag-animation"),
@@ -161,9 +183,14 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
                 !animationSelectedBorder && cl("no-selected-border"),
                 !animationSelectedBackground && cl("no-selected-background"),
                 !animationTabShadows && cl("no-tab-shadows"),
-                !compactAutoExpandSelected && cl("no-compact-auto-expand")
+                !animationTabPositioning && cl("no-tab-positioning"),
+                !animationResizeHandle && cl("no-resize-handle-animation"),
+                !animationQuestsActive && cl("no-quests-active-animation"),
+                !compactAutoExpandSelected && cl("no-compact-auto-expand"),
+                !compactAutoExpandOnHover && cl("no-compact-hover-expand")
             )}
             ref={ref}
+            style={{ "--tab-width-scale": tabWidthScale / 100 } as React.CSSProperties}
             onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
         >
             {showBookmarkBar && <>

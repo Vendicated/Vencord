@@ -7,7 +7,6 @@
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
 import { Forms, SearchableSelect, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -32,7 +31,10 @@ function AnimationSettings(): JSX.Element {
         { label: "Compact Mode Expansion", value: "compact-expand", selected: settings.store.animationCompactExpand },
         { label: "Selected Tab Blue Border", value: "selected-border", selected: settings.store.animationSelectedBorder },
         { label: "Selected Tab Background Color", value: "selected-background", selected: settings.store.animationSelectedBackground },
-        { label: "Tab Shadow Effects", value: "tab-shadows", selected: settings.store.animationTabShadows }
+        { label: "Tab Shadow Effects", value: "tab-shadows", selected: settings.store.animationTabShadows },
+        { label: "Tab Repositioning (smooth position changes)", value: "tab-positioning", selected: settings.store.animationTabPositioning },
+        { label: "Resize Handle Fade", value: "resize-handle", selected: settings.store.animationResizeHandle },
+        { label: "Active Quests Gradient", value: "quests-active", selected: settings.store.animationQuestsActive }
     ];
 
     const [currentValue, setCurrentValue] = useState(animationOptions.filter(option => option.selected));
@@ -56,6 +58,9 @@ function AnimationSettings(): JSX.Element {
         settings.store.animationSelectedBorder = enabledValues.includes("selected-border");
         settings.store.animationSelectedBackground = enabledValues.includes("selected-background");
         settings.store.animationTabShadows = enabledValues.includes("tab-shadows");
+        settings.store.animationTabPositioning = enabledValues.includes("tab-positioning");
+        settings.store.animationResizeHandle = enabledValues.includes("resize-handle");
+        settings.store.animationQuestsActive = enabledValues.includes("quests-active");
 
         setCurrentValue(enabled);
     }
@@ -157,6 +162,19 @@ export const settings = definePluginSettings({
     widerTabsAndBookmarks: {
         description: "Extend the length of tabs and bookmarks for larger monitors",
         type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false
+    },
+    tabWidthScale: {
+        type: OptionType.NUMBER,
+        description: "Tab width scale (percentage) - adjustable by dragging tab edges",
+        default: 100,
+        hidden: true,
+        restartNeeded: false
+    },
+    renderAllTabs: {
+        type: OptionType.BOOLEAN,
+        description: "Keep all tabs cached in memory for faster switching (caches scroll position and state)",
         default: false,
         restartNeeded: false
     },
@@ -284,9 +302,33 @@ export const settings = definePluginSettings({
         default: true,
         hidden: true
     },
+    animationTabPositioning: {
+        type: OptionType.BOOLEAN,
+        description: "Enable smooth transitions when tabs move positions",
+        default: true,
+        hidden: true
+    },
+    animationResizeHandle: {
+        type: OptionType.BOOLEAN,
+        description: "Enable fade animation for resize handle",
+        default: true,
+        hidden: true
+    },
+    animationQuestsActive: {
+        type: OptionType.BOOLEAN,
+        description: "Enable gradient animations on Quests tab when quests are actively running",
+        default: true,
+        hidden: true
+    },
     compactAutoExpandSelected: {
         type: OptionType.BOOLEAN,
         description: "Automatically expand compact tabs when selected to show the full channel name",
+        default: true,
+        restartNeeded: false
+    },
+    compactAutoExpandOnHover: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically expand compact tabs on hover to show the full channel name",
         default: true,
         restartNeeded: false
     },
@@ -295,7 +337,17 @@ export const settings = definePluginSettings({
         description: "Automatically switch to new tabs opened from 'Open in New Tab' context menu",
         default: true,
         restartNeeded: false
+    },
+    bookmarksIndependentFromTabs: {
+        type: OptionType.BOOLEAN,
+        description: "Bookmarks navigate independently without affecting the active tabs bar",
+        default: true,
+        restartNeeded: false
+    },
+    showResizeHandle: {
+        type: OptionType.BOOLEAN,
+        description: "Show resize handle when hovering over tabs to adjust tab width",
+        default: true,
+        restartNeeded: false
     }
 });
-
-export const CircleQuestionIcon = findComponentByCodeLazy("10.58l-3.3-3.3a1");
