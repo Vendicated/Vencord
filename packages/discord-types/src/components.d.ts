@@ -282,8 +282,7 @@ export type Select = ComponentType<PropsWithChildren<{
 export type SearchableSelect = ComponentType<PropsWithChildren<{
     placeholder?: string;
     options: ReadonlyArray<SelectOption>; // TODO
-    value?: SelectOption;
-
+    value?: SelectOption | SelectOption[];
     /**
      * - 0 ~ Filled
      * - 1 ~ Custom
@@ -302,7 +301,7 @@ export type SearchableSelect = ComponentType<PropsWithChildren<{
     clearOnSelect?: boolean;
     multi?: boolean;
 
-    onChange(value: any): void;
+    onChange(value: string | Array<SelectOption|string>): void;
     onSearchChange?(value: string): void;
 
     onClose?(): void;
