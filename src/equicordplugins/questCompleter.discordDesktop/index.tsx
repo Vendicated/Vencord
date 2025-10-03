@@ -53,7 +53,7 @@ async function openCompleteQuestUI() {
     const ApplicationStreamingStore = findByProps("getStreamerActiveStreamMetadata");
     const RunningGameStore = findByProps("getRunningGames");
     const QuestsStore = findByProps("getQuest");
-    const quest = [...QuestsStore.quests.values()].find(x => x.id !== "1248385850622869556" && x.userStatus?.enrolledAt && !x.userStatus?.completedAt && new Date(x.config.expiresAt).getTime() > Date.now());
+    const quest = [...QuestsStore.quests.values()].find(x => x.id !== "1412491570820812933" && x.userStatus?.enrolledAt && !x.userStatus?.completedAt && new Date(x.config.expiresAt).getTime() > Date.now());
 
     if (!quest) {
         showNotification({
@@ -71,7 +71,7 @@ async function openCompleteQuestUI() {
 
         const applicationId = quest.config.application.id;
         const applicationName = quest.config.application.name;
-        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"].find(x => quest.config.taskConfigV2.tasks[x] != null);
+        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE", "ACHIEVEMENT_IN_ACTIVITY"].find(x => quest.config.taskConfigV2.tasks[x] != null);
         const icon = `https://cdn.discordapp.com/quests/${quest.id}/${theme}/${quest.config.assets.gameTile}`;
         // @ts-ignore
         const secondsNeeded = quest.config.taskConfigV2.tasks[taskName].target;
