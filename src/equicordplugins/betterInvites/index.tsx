@@ -48,12 +48,12 @@ export default definePlugin({
             find: ".guildNameContainer,onClick:",
             replacement: [
                 {
-                    match: /(?=children:\i\.name\}\).{0,100}\.guildNameContainer)/,
-                    replace: "onClick:$self.Lurkable(arguments[0].invite?.guild?.id,arguments[0].invite?.guild?.features),"
+                    match: /children:\i\.name\}\).{0,100}\.guildNameContainer/,
+                    replace: "onClick:$self.Lurkable(arguments[0].invite?.guild?.id,arguments[0].invite?.guild?.features),$&"
                 },
                 {
-                    match: /(\.nameContainer.{0,100}disableGuildNameClick:\i)/,
-                    replace: "$1,invite:arguments[0].invite"
+                    match: /\.nameContainer.{0,100}disableGuildNameClick:\i/,
+                    replace: "$&,invite:arguments[0].invite"
                 },
                 {
                     match: /disableGuildNameClick:\i.{0,50}\}\),\i/,

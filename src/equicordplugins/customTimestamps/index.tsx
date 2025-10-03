@@ -273,7 +273,7 @@ export default definePlugin({
             find: ".full,children:",
             replacement: {
                 // Tooltips for timestamp markdown (e.g. <t:1234567890>)
-                match: /(\i).full(?=,children:)/,
+                match: /(\i).full/,
                 replace: "$self.renderTimestamp(new Date($1.timestamp*1000),'tooltip')"
             }
         }
