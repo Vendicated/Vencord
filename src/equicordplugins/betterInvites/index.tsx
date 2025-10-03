@@ -45,23 +45,23 @@ export default definePlugin({
             ]
         },
         {
-            find: '"disableGuildNameClick"',
+            find: ".guildNameContainer,onClick:",
             replacement: [
                 {
-                    match: /(?=children:\i\.name\}\)\):)/,
+                    match: /(?=children:\i\.name\}\).{0,100}\.guildNameContainer)/,
                     replace: "onClick:$self.Lurkable(arguments[0].invite?.guild?.id,arguments[0].invite?.guild?.features),"
                 },
                 {
-                    match: /\),\{profile:\i,disableGuildNameClick:\i/,
-                    replace: "$&,invite:arguments[0].invite"
+                    match: /(\.nameContainer.{0,100}disableGuildNameClick:\i)/,
+                    replace: "$1,invite:arguments[0].invite"
                 },
                 {
-                    match: /\}\)\)\}\),\i/,
+                    match: /disableGuildNameClick:\i.{0,50}\}\),\i/,
                     replace: "$&,$self.RenderTip(arguments[0].invite?.expires_at)"
                 },
                 {
-                    match: /(?<=text:(\i\.name).*?\]\}\))/,
-                    replace: "$&,$self.Header(arguments[0].invite?.inviter,$1)"
+                    match: /\.nameContainer.{0,200}\]\}\)/,
+                    replace: "$&,$self.Header(arguments[0].invite?.inviter,arguments[0].profile.name)"
                 }
             ]
         },

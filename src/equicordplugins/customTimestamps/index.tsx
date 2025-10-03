@@ -264,17 +264,17 @@ export default definePlugin({
                 },
                 {
                     // Tooltips when hovering over message timestamps
-                    match: /(?<=text:)\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)(?=,)/,
+                    match: /\(0,\i.\i\)\((\i),"LLLL"\)/,
                     replace: "$self.renderTimestamp($1,'tooltip')",
                 },
             ]
         },
         {
-            find: ".full,tooltipClassName:",
+            find: ".full,children:",
             replacement: {
                 // Tooltips for timestamp markdown (e.g. <t:1234567890>)
-                match: /text:(\i).full,/,
-                replace: "text: $self.renderTimestamp(new Date($1.timestamp*1000),'tooltip'),"
+                match: /(\i).full(?=,children:)/,
+                replace: "$self.renderTimestamp(new Date($1.timestamp*1000),'tooltip')"
             }
         }
     ],
