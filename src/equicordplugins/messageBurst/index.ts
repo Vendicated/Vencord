@@ -45,22 +45,29 @@ function shouldEdit(channel: Channel, message: Message, timePeriod: number, shou
     };
 }
 
+const settings = definePluginSettings({
+    timePeriod: {
+        type: OptionType.NUMBER,
+        description: "The duration of bursts (in seconds).",
+        default: 3
+    },
+    shouldMergeWithAttachment: {
+        type: OptionType.BOOLEAN,
+        description: "Should the message be merged if the last message has an attachment?",
+        default: false
+    },
+    useSpace: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to add a space between messages when merging instead of new lines.",
+        default: false
+    }
+});
+
 export default definePlugin({
     name: "MessageBurst",
     description: "Merges messages sent within a time period with your previous sent message if no one else sends a message before you.",
     authors: [EquicordDevs.port22exposed],
-    settings: definePluginSettings({
-        timePeriod: {
-            type: OptionType.NUMBER,
-            description: "The duration of bursts (in seconds).",
-            default: 3
-        },
-        shouldMergeWithAttachment: {
-            type: OptionType.BOOLEAN,
-            description: "Should the message be merged if the last message has an attachment?",
-            default: false
-        }
-    }),
+    settings,
     onBeforeMessageSend(channelId, message) {
         const messages = MessageStore.getMessages(channelId)._map;
 
@@ -76,9 +83,13 @@ export default definePlugin({
         const { should, content } = shouldEdit(channel, lastMessage as Message, this.settings.store.timePeriod, this.settings.store.shouldMergeWithAttachment);
 
         if (should) {
+            const separator = settings.store.useSpace ? " " : "\n";
+            const newContent = content + separator + message.content;
+
             MessageActions.editMessage(channelId, lastMessageId, {
-                content: `${content}\n${message.content}`
+                content: newContent,
             });
+
             message.content = "";
         }
     },
