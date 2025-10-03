@@ -8,11 +8,13 @@ import { Tooltip } from "@webpack/common";
 import type { ReactElement } from "react";
 
 export interface ToneIndicatorProps {
+    prefix: string;
     indicator: string;
     desc: string;
 }
 
 export default function ToneIndicator({
+    prefix,
     indicator,
     desc,
 }: ToneIndicatorProps): ReactElement {
@@ -26,7 +28,7 @@ export default function ToneIndicator({
                         userSelect: "text",
                     }}
                 >
-                    /{indicator}
+                    {prefix}{indicator}
                 </span>
             )}
         </Tooltip>
