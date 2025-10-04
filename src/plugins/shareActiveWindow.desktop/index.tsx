@@ -119,12 +119,37 @@ const manageStreamsContextMenuPatch: NavContextMenuPatchCallback = (children): v
 
     mainGroup.push(
         <Menu.MenuCheckboxItem
-            id="vc-saw-share-active-window"
+            id="stream-settings-vc-saw-share-active-window"
             label="Share Active Window"
             checked={isEnabled}
             action={() => settings.store.isEnabled = !isEnabled}
         />
     );
+};
+
+const streamOptionsContextMenuPatch: NavContextMenuPatchCallback = (children): void => {
+    const { isEnabled } = settings.use(["isEnabled"]);
+
+    const mainGroup = findGroupChildrenByChildId("stream-option-mute", children);
+    if (!mainGroup) {
+        logger.debug("Failed to find stream-options context menu");
+        return;
+    }
+
+    const shareActiveWindowCheckbox =
+        <Menu.MenuCheckboxItem
+            id="stream-option-vc-saw-share-active-window"
+            label="Share active window"
+            checked={isEnabled}
+            action={() => settings.store.isEnabled = !isEnabled}
+        />;
+
+    const idx = mainGroup.findIndex(c => c?.props?.id === "stream-option-mute");
+    if (idx !== -1) {
+        mainGroup.splice(idx + 1, 0, shareActiveWindowCheckbox);
+    } else {
+        mainGroup.push(shareActiveWindowCheckbox);
+    }
 };
 
 const settings = definePluginSettings({
@@ -174,6 +199,7 @@ export default definePlugin({
 
     contextMenus: {
         "manage-streams": manageStreamsContextMenuPatch,
+        "stream-options": streamOptionsContextMenuPatch,
     },
 
     flux: {
