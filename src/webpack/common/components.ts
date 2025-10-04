@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FormSwitchCompat } from "@components/FormSwitch";
 import { LazyComponent } from "@utils/lazyReact";
 import * as t from "@vencord/discord-types";
 import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
@@ -37,7 +38,8 @@ export const Forms = {
 
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
 export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
-export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode(".labelRow,ref:", ".disabledText"));
+/** @deprecated Use FormSwitch from Vencord */
+export const Switch = FormSwitchCompat as never;
 export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
@@ -87,13 +89,7 @@ export const ListScrollerNone = LazyComponent(() => createListScroller(listScrol
 export const ListScrollerThin = LazyComponent(() => createListScroller(listScrollerClasses.thin, listScrollerClasses.fade, "", ResizeObserver));
 export const ListScrollerAuto = LazyComponent(() => createListScroller(listScrollerClasses.auto, listScrollerClasses.fade, "", ResizeObserver));
 
-const { FocusLock_ } = mapMangledModuleLazy('document.getElementById("app-mount"))', {
-    FocusLock_: filters.componentByCode(".containerRef")
-}) as {
-    FocusLock_: t.FocusLock;
-};
-
-export const FocusLock = LazyComponent(() => FocusLock_);
+export const FocusLock = waitForComponent<t.FocusLock>("FocusLock", filters.componentByCode(".containerRef,{keyboardModeEnabled:"));
 
 export let useToken: t.useToken;
 waitFor(m => {
