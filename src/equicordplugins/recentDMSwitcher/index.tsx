@@ -11,11 +11,10 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
 import { closeModal, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { Button, ChannelRouter, ChannelStore, IconUtils, React, RelationshipStore, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
 
 const STORAGE_KEY = "RDMSwitch_history";
-const MAX_HISTORY = 50;
 
 let rmdsDmChannelIds: string[] = [];
 let isCyclingSessionActive = false;
@@ -42,6 +41,13 @@ const settings = definePluginSettings({
             { label: "Row of recent", value: "row", default: true },
             { label: "Current only", value: "current" }
         ]
+    },
+    amountOfUsers: {
+        type: OptionType.SLIDER,
+        description: "Number of users to show in overlay",
+        markers: makeRange(10, 50, 10),
+        stickToMarkers: true,
+        default: 20,
     },
     overlayRowLength: {
         type: OptionType.SLIDER,
@@ -99,7 +105,7 @@ function isDirectMessageChannel(channelId: string | null | undefined): boolean {
 function pushChannelToFront(channelId: string) {
     rmdsDmChannelIds = rmdsDmChannelIds.filter(id => id !== channelId);
     rmdsDmChannelIds.unshift(channelId);
-    if (rmdsDmChannelIds.length > MAX_HISTORY) rmdsDmChannelIds.length = MAX_HISTORY;
+    if (rmdsDmChannelIds.length > settings.store.amountOfUsers) rmdsDmChannelIds.length = settings.store.amountOfUsers;
     void DataStore.set(STORAGE_KEY, rmdsDmChannelIds);
 }
 
@@ -112,7 +118,7 @@ function sanitizeHistory(ids: string[]): string[] {
         if (!isDirectMessageChannel(id)) continue;
         seen.add(id);
         result.push(id);
-        if (result.length >= MAX_HISTORY) break;
+        if (result.length >= settings.store.amountOfUsers) break;
     }
     return result;
 }
@@ -244,15 +250,14 @@ function OverlayContent(): any {
     const maxCount = Math.max(3, Math.min(7, settings.store.overlayRowLength));
 
     const pageSize = mode === "current" ? 1 : maxCount;
-    const totalSlots = mode === "current" ? 1 : pageSize * 2;
     const visibleList = mode === "current"
         ? [cycleSnapshot[cycleIndex]]
-        : cycleSnapshot.slice(0, totalSlots);
+        : cycleSnapshot;
 
     let pageCount = 1;
     let currentPage = 0;
     if (mode !== "current") {
-        pageCount = visibleList.length > pageSize ? 2 : 1;
+        pageCount = Math.ceil(visibleList.length / pageSize);
         currentPage = Math.min(pageCount - 1, Math.floor((cycleIndex >= 0 ? cycleIndex : 0) / pageSize));
     }
 

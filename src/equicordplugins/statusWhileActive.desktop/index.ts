@@ -18,7 +18,7 @@ const StatusSettings = getUserSettingLazy<string>("status", "status")!;
 const settings = definePluginSettings({
     statusToSet: {
         type: OptionType.SELECT,
-        description: "Status to set while playing a game",
+        description: "Status to set while in a voice channel.",
         options: [
             {
                 label: "Online",
