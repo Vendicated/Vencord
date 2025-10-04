@@ -57,13 +57,13 @@ const timeFormats: Record<string, TimeFormat> = {
     sameDayFormat: {
         name: "Same day",
         description: "[calendar] format for today",
-        default: "[Today at ] HH:mm:ss",
+        default: "[Today at] HH:mm:ss",
         offset: 0,
     },
     lastDayFormat: {
         name: "Last day",
         description: "[calendar] format for yesterday",
-        default: "[Yesterday at ] HH:mm:ss",
+        default: "[Yesterday at] HH:mm:ss",
         offset: -1000 * 60 * 60 * 24,
     },
     lastWeekFormat: {
@@ -264,8 +264,8 @@ export default definePlugin({
                 },
                 {
                     // Tooltips when hovering over message timestamps
-                    match: /\(0,\i.\i\)\((\i),"LLLL"\)/,
-                    replace: "$self.renderTimestamp($1,'tooltip')",
+                    match: /__unsupportedReactNodeAsText:\(0,\i.\i\)\((\i),"LLLL"\)/,
+                    replace: "text:$self.renderTimestamp($1,'tooltip')",
                 },
             ]
         },

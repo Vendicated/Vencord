@@ -28,7 +28,6 @@ import { ChannelStore } from "@webpack/common";
 import { convert } from "./converter";
 import { conversions, ConverterAccessory, ConvertIcon } from "./ConverterAccessory";
 
-
 export const settings = definePluginSettings({
     myUnits: {
         type: OptionType.SELECT,
@@ -45,13 +44,8 @@ export const settings = definePluginSettings({
             }
         ]
     },
-    // invert: {
-    //     type: OptionType.BOOLEAN,
-    //     default: false,
-    //     // is there a better way to word this?
-    //     description: "If this option is set, ignore the units you set and invert every conversion."
-    // }
 });
+
 export default definePlugin({
     name: "UnitConverter",
     description: "Converts metric units to Imperal units and vice versa",
