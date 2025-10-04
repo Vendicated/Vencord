@@ -104,14 +104,7 @@ export default definePlugin({
                 return;
             }
 
-            // Check if we're in bookmark viewing mode
-            const wasViewingViaBookmark = ChannelTabsUtils.isViewingViaBookmarkMode();
-
-            // Clear bookmark viewing mode when ANY navigation occurs
-            // This allows subsequent channel switches to work normally
-            if (wasViewingViaBookmark) {
-                ChannelTabsUtils.clearBookmarkViewingMode();
-            }
+            const isViewingViaBookmark = ChannelTabsUtils.isViewingViaBookmarkMode();
 
             let { channelId } = data;
             let { guildId } = data;
@@ -146,6 +139,16 @@ export default definePlugin({
                     return;
                 }
             }
+
+            // if bookmark independent mode setting is on, navigate
+            if (isViewingViaBookmark) {
+                // dont modify tabs, just let that bookmark action happen
+                return;
+            }
+
+            // clear bookmark viewing mode only when this is NOT a bookmark navigation
+            // this happens when someone manually navigates to a channel (channel list)
+            ChannelTabsUtils.clearBookmarkViewingMode();
 
             // At this point, channelId is guaranteed to be non-null
             if (channelId && guildId) {
