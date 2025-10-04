@@ -46,13 +46,20 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
             .then(r => r.json())
             .then(data => data.results.find(song => song.collectionName === album) || data.results[0]);
 
+        const artistArtworkURL = await fetch(songData.artistViewUrl)
+            .then(r => r.text())
+            .then(data => {
+                const match = data.match(/<meta property="og:image" content="(.+?)">/);
+                return match ? match[1].replace(/[0-9]+x.+/, "220x220bb-60.png") : undefined;
+            });
+
         cachedRemoteData = {
             id,
             data: {
                 appleMusicLink: songData.trackViewUrl,
                 songLink: `https://song.link/i/${new URL(songData.trackViewUrl).searchParams.get("i")}`,
                 albumArtwork: (songData.artworkUrl100).replace("100x100", "512x512"),
-                artistArtwork: "", // TODO: artist artwork
+                artistArtwork: artistArtworkURL
             }
         };
 
