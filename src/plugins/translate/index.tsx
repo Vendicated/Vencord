@@ -19,6 +19,7 @@
 import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { addMessageClickListener, removeMessageClickListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
@@ -27,7 +28,8 @@ import { ChannelStore, Menu } from "@webpack/common";
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
-import { translate } from "./utils";
+import { ctrlLeftClickShortcut, translate } from "./utils";
+
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     const content = getMessageContent(message);
@@ -64,7 +66,7 @@ let tooltipTimeout: any;
 export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate or DeepL",
-    authors: [Devs.Ven, Devs.AshtonMemer],
+    authors: [Devs.Ven, Devs.AshtonMemer, Devs.sliwka],
     settings,
     contextMenus: {
         "message": messageCtxPatch
@@ -102,5 +104,14 @@ export default definePlugin({
 
         const trans = await translate("sent", message.content);
         message.content = trans.text;
+    },
+
+
+    start() {
+        addMessageClickListener(ctrlLeftClickShortcut);
+    },
+
+    stop() {
+        removeMessageClickListener(ctrlLeftClickShortcut);
     }
 });
