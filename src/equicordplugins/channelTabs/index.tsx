@@ -36,7 +36,7 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props: { channe
 export default definePlugin({
     name: "ChannelTabs",
     description: "Group your commonly visited channels in tabs, like a browser",
-    authors: [Devs.TheSun, Devs.TheKodeToad, EquicordDevs.keifufu, Devs.Nickyux, EquicordDevs.DiabeloDEV],
+    authors: [Devs.TheSun, Devs.TheKodeToad, EquicordDevs.keifufu, Devs.Nickyux, EquicordDevs.DiabeloDEV, EquicordDevs.justjxke],
     dependencies: ["ContextMenuAPI"],
     contextMenus: {
         "channel-mention-context": contextMenuPatch,

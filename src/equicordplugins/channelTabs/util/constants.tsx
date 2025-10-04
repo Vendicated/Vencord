@@ -198,9 +198,9 @@ export const settings = definePluginSettings({
     },
     rapidNavigationThreshold: {
         type: OptionType.SLIDER,
-        description: "Time window (in milliseconds) for rapid navigation. Within this time, new channels replace the current tab instead of creating new ones.",
-        markers: [500, 1000, 1500, 2000, 3000, 5000, 10000],
-        default: 3000,
+        description: "Time window (in seconds) for rapid navigation. Within this time, new channels replace the current tab instead of creating new ones.",
+        markers: [1, 2, 3, 5, 10, 20, 30, 40, 50, 60],
+        default: 3,
         stickToMarkers: false,
     },
     tabBarPosition: {
@@ -348,6 +348,12 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show resize handle when hovering over tabs to adjust tab width",
         default: true,
+        restartNeeded: false
+    },
+    openNewTabsInCompactMode: {
+        type: OptionType.BOOLEAN,
+        description: "Open all newly created tabs in compact mode by default",
+        default: false,
         restartNeeded: false
     }
 });

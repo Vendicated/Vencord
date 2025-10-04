@@ -115,7 +115,7 @@ let clearGhostTabs = () => {
 
 export function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string, save = true) {
     const id = genId();
-    openTabs.push({ ...props, id, messageId, compact: "compact" in props ? props.compact : false });
+    openTabs.push({ ...props, id, messageId, compact: "compact" in props ? props.compact : settings.store.openNewTabsInCompactMode });
     if (switchToTab) moveToTab(id);
     clearGhostTabs();
     update(save);
@@ -227,7 +227,7 @@ export function handleChannelSwitch(ch: BasicChannelTabsProps) {
     if (settings.store.createNewTabIfNotExists) {
         // Apply rapid navigation logic when creating new tabs
         const now = Date.now();
-        const isRapidNavigation = now - lastNavigationTime < settings.store.rapidNavigationThreshold;
+        const isRapidNavigation = now - lastNavigationTime < settings.store.rapidNavigationThreshold * 1000;
         lastNavigationTime = now;
 
         if (isRapidNavigation && settings.store.enableRapidNavigation) {
