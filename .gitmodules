@@ -1,9 +1,6 @@
 [submodule "src/userplugins/randomGary"]
 	path = src/userplugins/randomGary
 	url = https://github.com/Zach11111/randomGary.git
-[submodule "src/userplugins/userplugininstaller"]
-	path = src/userplugins/userplugininstaller
-	url = https://git.nin0.dev/userplugins/userplugininstaller.git
 [submodule "src/userplugins/venfetch"]
 	path = src/userplugins/venfetch
 	url = https://git.nin0.dev/userplugins/venfetch.git
@@ -13,9 +10,6 @@
 [submodule "src/userplugins/vencord-steamStatusSync"]
 	path = src/userplugins/vencord-steamStatusSync
 	url = https://github.com/hauntii/vencord-steamStatusSync
-[submodule "src/userplugins/Vencord-SyncVRChatStatus"]
-	path = src/userplugins/Vencord-SyncVRChatStatus
-	url = https://github.com/lillithkt/Vencord-SyncVRChatStatus
 [submodule "src/userplugins/betterForwardMeta"]
 	path = src/userplugins/betterForwardMeta
 	url = https://git.nin0.dev/userplugins/betterForwardMeta.git
@@ -25,12 +19,6 @@
 [submodule "src/userplugins/bigFileUpload"]
 	path = src/userplugins/bigFileUpload
 	url = https://github.com/ScattrdBlade/bigFileUpload
-[submodule "src/userplugins/fart"]
-	path = src/userplugins/fart
-	url = https://git.nin0.dev/duke/fart
-[submodule "src/userplugins/WigglyText"]
-	path = src/userplugins/WigglyText
-	url = https://github.com/nexpid/WigglyText
 [submodule "src/userplugins/showPing"]
 	path = src/userplugins/showPing
 	url = https://github.com/nicola02nb/showPing
