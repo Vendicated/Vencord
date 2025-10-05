@@ -17,9 +17,8 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
+import { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Channel, Guild, Message, User } from "discord-types/general";
-import GuildFeatures from "discord-types/other/Constants";
 import { Except } from "type-fest";
 
 import { runtimeHashMessageKey } from "./intlHash";
@@ -111,20 +110,34 @@ export function insertTextIntoChatInputBox(text: string) {
     });
 }
 
-interface MessageExtra {
+interface MessageOptions {
     messageReference: Message["messageReference"];
     allowedMentions: {
         parse: string[];
         replied_user: boolean;
     };
     stickerIds: string[];
+    attachmentsToUpload: CloudUpload[];
+    poll: {
+        allow_multiselect: boolean;
+        answers: Array<{
+            poll_media: {
+                text: string;
+                attachment_ids?: unknown;
+                emoji?: { name: string; id?: string; };
+            };
+        }>;
+        duration: number;
+        layout_type: number;
+        question: { text: string; };
+    };
 }
 
 export function sendMessage(
     channelId: string,
     data: Partial<MessageObject>,
-    waitForChannelReady?: boolean,
-    extra?: Partial<MessageExtra>
+    waitForChannelReady = true,
+    options: Partial<MessageOptions> = {}
 ) {
     const messageData = {
         content: "",
@@ -134,7 +147,7 @@ export function sendMessage(
         ...data
     };
 
-    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
+    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, options);
 }
 
 /**
@@ -195,7 +208,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     });
 
     FluxDispatcher.dispatch({ type: "USER_UPDATE", user: body.user });
-    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", ...body });
+    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", userProfile: body });
     if (options?.guild_id && body.guild_member)
         FluxDispatcher.dispatch({ type: "GUILD_MEMBER_PROFILE_UPDATE", guildId: options.guild_id, guildMember: body.guild_member });
 
@@ -228,6 +241,6 @@ export function getGuildAcronym(guild: Guild): string {
         .replace(/\s/g, "");
 }
 
-export function hasGuildFeature(guild: Guild, feature: keyof GuildFeatures["GuildFeatures"]): boolean {
+export function hasGuildFeature(guild: Guild, feature: GuildFeatures): boolean {
     return guild.features?.has(feature) ?? false;
 }

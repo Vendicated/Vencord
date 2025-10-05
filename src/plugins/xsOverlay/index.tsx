@@ -5,13 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import definePlugin, { makeRange, OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import type { Channel, Embed, GuildMember, MessageAttachment, User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { Button, ChannelStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
-import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
 
 const ChannelTypes = findLazy(m => m.ANNOUNCEMENT_THREAD === 10);
 

@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, Command, findOption, OptionalMessageOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, findOption, OptionalMessageOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { Command } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, MessageActions } from "@webpack/common";
 
@@ -45,7 +46,7 @@ interface Artist {
 }
 
 interface Track {
-    id: string;
+    id: string | null;
     album: Album;
     artists: Artist[];
     duration: number;
@@ -67,6 +68,13 @@ function makeCommand(name: string, formatUrl: (track: Track) => string): Command
             if (!track) {
                 return sendBotMessage(channel.id, {
                     content: "You're not listening to any music."
+                });
+            }
+
+            // local tracks have an id of null
+            if (track.id == null) {
+                return sendBotMessage(channel.id, {
+                    content: "Failed to find the track on spotify."
                 });
             }
 

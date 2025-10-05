@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { WebpackRequire } from "@webpack/wreq.d";
+import { WebpackRequire } from "@vencord/discord-types/webpack";
 
 const settings = definePluginSettings({
     disableAnalytics: {
@@ -70,6 +70,15 @@ export default definePlugin({
             }
         }
     ],
+
+    // The TRACK event takes an optional `resolve` property that is called when the tracking event was submitted to the server.
+    // A few spots in Discord await this callback before continuing (most notably the Voice Debug Logging toggle).
+    // Since we NOOP the AnalyticsActionHandlers module, there is no handler for the TRACK event, so we have to handle it ourselves
+    flux: {
+        TRACK(event) {
+            event?.resolve?.();
+        }
+    },
 
     startAt: StartAt.Init,
     start() {
