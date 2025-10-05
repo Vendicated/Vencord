@@ -7,8 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { RelationshipStore } from "@webpack/common";
 
-// Define plugin settings
 const settings = definePluginSettings({
     hideNameplateBackground: {
         type: OptionType.BOOLEAN,
@@ -69,12 +69,18 @@ const settings = definePluginSettings({
         description: "Hide Discord's Super Reactions Burst Effect",
         default: false,
         restartNeeded: true
+    },
+    hideBlockedOrIgnored: {
+        type: OptionType.BOOLEAN,
+        description: "Hide members that are blocked or ignored",
+        default: true,
+        restartNeeded: false
     }
 });
 
 export default definePlugin({
     name: "CleanCord",
-    description: "Hide Discord's visual clutter like nameplates, decorations, tags, role icons, and super reactions. Fully configurable in settings!",
+    description: "Hide Discord's visual clutter like nameplates, decorations, tags, role icons, super reactions, and optionally blocked/ignored members. Fully configurable in settings!",
     authors: [Devs.Minato],
     settings,
 
@@ -118,14 +124,45 @@ export default definePlugin({
             selectors.push('div[class^="effectsWrapper_"]');
         }
 
-        if (selectors.length === 0) return;
+        // Apply general hiding style
+        if (selectors.length > 0) {
+            this.style = document.createElement("style");
+            this.style.textContent = `${selectors.join(", ")} { display: none !important; }`;
+            document.head.appendChild(this.style);
+        }
 
-        this.style = document.createElement("style");
-        this.style.textContent = `${selectors.join(", ")} { display: none !important; }`;
-        document.head.appendChild(this.style);
+        // Hide blocked/ignored members
+        if (settings.store.hideBlockedOrIgnored) {
+            this.ignoreObserver = new MutationObserver(() => {
+                const members = document.querySelectorAll<HTMLDivElement>(
+                    'div[class^="member__"][class*="member_"][data-list-item-id^="members-"]'
+                );
+
+                members.forEach(member => {
+                    // Find avatar image
+                    const img = member.querySelector<HTMLImageElement>("img.avatar__44b0c, img.avatar__91a9d");
+                    if (!img) return;
+
+                    // Extract user ID from URL
+                    const match = img.src.match(/avatars\/(\d+)\//);
+                    if (!match) return;
+
+                    const userId = match[1];
+
+                    // Hide if ignored or blocked
+                    if (RelationshipStore.isIgnored(userId) || RelationshipStore.isBlocked(userId)) {
+                        member.style.display = "none";
+                    }
+                });
+            });
+
+            this.ignoreObserver.observe(document.body, { childList: true, subtree: true });
+        }
+
     },
 
     stop() {
         if (this.style) this.style.remove();
+        if (this.ignoreObserver) this.ignoreObserver.disconnect();
     }
 });
