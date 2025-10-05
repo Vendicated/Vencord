@@ -50,9 +50,9 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
             .then(r => r.text())
             .then(data => {
                 const match = data.match(/<meta property="og:image" content="(.+?)">/);
-                return match ? match[1].replace(/[0-9]+x.+/, "220x220bb-60.png") : null;
+                return match ? match[1].replace(/[0-9]+x.+/, "220x220bb-60.png") : undefined;
             })
-            .catch(() => null);
+            .catch(() => void 0);
 
         cachedRemoteData = {
             id,
