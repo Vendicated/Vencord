@@ -1,3 +1,5 @@
 # Fix Images Quality
 
-Prevents images from being loaded as webp, which can cause quality loss
+Improves quality of images in chat by forcing png format.
+
+This plugin does not change how others see your images!
