@@ -46,7 +46,7 @@ export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacemen
             }
 
             if (!replacement.match) throw new Error("No 'replacement.match' field");
-            if (!replacement.replace) throw new Error("No 'replacement.replace' field");
+            if (replacement.replace == null) throw new Error("No 'replacement.replace' field");
 
             setFind(find instanceof RegExp ? `/${find.source}/` : find);
             setParsedFind(find);
