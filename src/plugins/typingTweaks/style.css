@@ -1,5 +1,6 @@
 .vc-typing-user {
     cursor: pointer;
+
     [class^="wrapper"] {
         display: inline-block;
         margin-right: 0.25em;
