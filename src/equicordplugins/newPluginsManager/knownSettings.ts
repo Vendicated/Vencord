@@ -25,14 +25,21 @@ function getCurrentSettings(pluginList: string[]): KnownPluginSettingsMap {
     ]));
 }
 
-export async function getKnownSettings(): Promise<KnownPluginSettingsMap> {
-    let map = await DataStore.get(KNOWN_SETTINGS_DATA_KEY) as KnownPluginSettingsMap;
-    if (map === undefined) {
+export async function getKnownSettings(): Promise<Map<string, Set<string>>> {
+    const raw = await DataStore.get(KNOWN_SETTINGS_DATA_KEY);
+    let map: Map<string, Set<string>>;
+
+    if (!raw) {
         const knownPlugins = await DataStore.get(KNOWN_PLUGINS_LEGACY_DATA_KEY) ?? [] as string[];
         const Plugins = [...Object.keys(plugins), ...knownPlugins];
         map = getCurrentSettings(Plugins);
-        DataStore.set(KNOWN_SETTINGS_DATA_KEY, map);
+        await DataStore.set(KNOWN_SETTINGS_DATA_KEY, [...map.entries()].map(
+            ([plugin, settings]) => [plugin, [...settings]]
+        ));
+    } else {
+        map = new Map(raw.map(([plugin, settings]: [string, string[]]) => [plugin, new Set(settings)]));
     }
+
     return map;
 }
 

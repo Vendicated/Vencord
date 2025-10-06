@@ -138,8 +138,8 @@ export default definePlugin({
                     replace: "false"
                 },
                 {
-                    match: /canCopyImage\(.+?(?=return"function"==typeof \i\.clipboard\.copyImage)/,
-                    replace: "$&return true;"
+                    match: /(canCopyImage\(.+?)\|\|"function"!=typeof \i\.clipboard\.copyImage/,
+                    replace: "$1"
                 }
             ]
         },
