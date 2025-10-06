@@ -23,6 +23,9 @@ export interface Gif {
     height: number,
     width: number;
     addedAt?: number;
+    channelId?: string;
+    messageId?: string;
+    attachmentId?: string;
 }
 
 export interface Props {

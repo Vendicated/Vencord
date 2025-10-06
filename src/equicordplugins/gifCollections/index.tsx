@@ -16,9 +16,10 @@ import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, ContextMenuApi, FluxDispatcher, Forms, Menu, React, showToast, TextInput, Toasts, useCallback, useState } from "@webpack/common";
 
-import { addToCollection, cache_collections, createCollection, DATA_COLLECTION_NAME, deleteCollection, fixPrefix, getCollections, getGifById, getItemCollectionNameFromId, moveGifToCollection, refreshCacheCollection, removeFromCollection, renameCollection } from "./utils/collectionManager";
+import { addToCollection, cache_collections, createCollection, DATA_COLLECTION_NAME, deleteCollection, fixPrefix, getCollections, getGifById, getItemCollectionNameFromId, moveGifToCollection, refreshCacheCollection, removeFromCollection, renameCollection, updateGif } from "./utils/collectionManager";
 import { getFormat } from "./utils/getFormat";
 import { getGif } from "./utils/getGif";
+import { refreshGifUrl } from "./utils/refreshUrl";
 import { downloadCollections, uploadGifCollections } from "./utils/settingsUtils";
 import { uuidv4 } from "./utils/uuidv4";
 
@@ -128,6 +129,11 @@ export const settings = definePluginSettings({
     },
     showCopyImageLink: {
         description: "Show 'Copy Image Link' option in context menus",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    preventDuplicates: {
+        description: "Prevent adding the same GIF to a collection multiple times",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -536,6 +542,40 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                 </ModalFooter>
                             </ModalRoot>
                         ));
+                    }}
+                />
+                <Menu.MenuSeparator />
+                <Menu.MenuItem
+                    key="refresh-url"
+                    id="refresh-url"
+                    label="Refresh URL"
+                    action={async () => {
+                        const gifInfo = getGifById(nameOrId);
+                        if (!gifInfo) return;
+
+                        if (!gifInfo.channelId || !gifInfo.messageId || !gifInfo.attachmentId) {
+                            showToast("Cannot refresh: GIF missing metadata (re-add to collection)", Toasts.Type.FAILURE);
+                            return;
+                        }
+
+                        showToast("Refreshing URL...", Toasts.Type.MESSAGE);
+                        const refreshedGif = await refreshGifUrl(gifInfo);
+
+                        if (refreshedGif) {
+                            await updateGif(nameOrId, refreshedGif);
+                            const collectionName = getItemCollectionNameFromId(nameOrId);
+                            FluxDispatcher.dispatch({
+                                type: "GIF_PICKER_QUERY",
+                                query: `${collectionName} `
+                            });
+                            FluxDispatcher.dispatch({
+                                type: "GIF_PICKER_QUERY",
+                                query: `${collectionName}`
+                            });
+                            showToast("URL refreshed successfully", Toasts.Type.SUCCESS);
+                        } else {
+                            showToast("Failed to refresh URL", Toasts.Type.FAILURE);
+                        }
                     }}
                 />
                 <Menu.MenuSeparator />
