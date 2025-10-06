@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
@@ -39,9 +39,9 @@ export default definePlugin({
     ],
 
     reveal(event: MouseEvent) {
-        const { ctrlKey, shiftKey, target } = event;
+        const { ctrlKey, metaKey, shiftKey, target } = event;
 
-        if (!ctrlKey) { return; }
+        if (!(IS_MAC ? metaKey : ctrlKey)) { return; }
 
         const { spoilerContent, hidden } = SpoilerClasses;
         const { messagesWrapper } = MessagesClasses;
