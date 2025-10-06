@@ -32,7 +32,8 @@ const settings = definePluginSettings({
     organizeMenu: {
         description: "Organizes the settings cog context menu into categories",
         type: OptionType.BOOLEAN,
-        default: true
+        default: true,
+        restartNeeded: true
     },
     eagerLoad: {
         description: "Removes the loading delay when opening the menu for the first time",
@@ -85,22 +86,19 @@ export default definePlugin({
         {
             find: "this.renderArtisanalHack()",
             replacement: [
-                {
-                    // Fade in on layer
+                { // Fade in on layer
                     match: /(?<=\((\i),"contextType",\i\.\i\);)/,
                     replace: "$1=$self.Layer;",
                     predicate: () => settings.store.disableFade
                 },
-                {
-                    // Lazy-load contents
+                { // Lazy-load contents
                     match: /createPromise:\(\)=>([^:}]*?),webpackId:"?\d+"?,name:(?!="CollectiblesShop")"[^"]+"/g,
                     replace: "$&,_:$1",
                     predicate: () => settings.store.eagerLoad
                 }
             ]
         },
-        {
-            // For some reason standardSidebarView also has a small fade-in
+        { // For some reason standardSidebarView also has a small fade-in
             find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
@@ -122,12 +120,14 @@ export default definePlugin({
             },
             predicate: () => settings.store.eagerLoad
         },
-        { // Settings cog context menu
+        {
+            // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /(\i)(?=\.forEach\(\i=>\{let\{)/,
-                    replace: "$self.wrapMenu($1)"
+                    match: /=\[\];return (\i)(?=\.forEach)/,
+                    replace: "=$self.wrapMap([]);return $self.transformSettingsEntries($1)",
+                    predicate: () => settings.store.organizeMenu
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
@@ -154,9 +154,7 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    wrapMenu(list: SettingsEntry[]) {
-        if (!settings.store.organizeMenu) return list;
-
+    transformSettingsEntries(list: SettingsEntry[]) {
         const items = [{ label: null as string | null, items: [] as SettingsEntry[] }];
 
         for (const item of list) {
@@ -169,34 +167,32 @@ export default definePlugin({
             }
         }
 
-        return {
-            forEach(predicate: (item: SettingsEntry) => void) {
-                for (const category of items) {
-                    category.items.forEach(predicate);
-                }
-                return this;
-            },
-            map(render: (item: SettingsEntry) => ReactElement<any>) {
-                return items
-                    .filter(a => a.items.length > 0)
-                    .map(({ label, items }) => {
-                        const children = items.map(render);
-                        if (label) {
-                            return (
-                                <Menu.MenuItem
-                                    key={label}
-                                    id={label.replace(/\W/, "_")}
-                                    label={label}
-                                    action={children[0].props.action}
-                                >
-                                    {children}
-                                </Menu.MenuItem>
-                            );
-                        } else {
-                            return children;
-                        }
-                    });
-            }
+        return items;
+    },
+
+    wrapMap(toWrap: any[]) {
+        // @ts-expect-error
+        toWrap.map = function (render: (item: SettingsEntry) => ReactElement<any>) {
+            return this
+                .filter(a => a.items.length > 0)
+                .map(({ label, items }) => {
+                    const children = items.map(render);
+                    if (label) {
+                        return (
+                            <Menu.MenuItem
+                                key={label}
+                                id={label.replace(/\W/, "_")}
+                                label={label}
+                            >
+                                {children}
+                            </Menu.MenuItem>
+                        );
+                    } else {
+                        return children;
+                    }
+                });
         };
+
+        return toWrap;
     }
 });
