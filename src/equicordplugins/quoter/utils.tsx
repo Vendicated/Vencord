@@ -37,7 +37,7 @@ export function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number,
 export async function fetchImageAsBlob(url: string): Promise<Blob> {
     if (!url) throw new Error("Invalid URL: URL is empty or undefined");
     try {
-        const response = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(url)}`);
+        const response = await fetch(url);
         if (!response.ok) throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
         return await response.blob();
     } catch (error) {
