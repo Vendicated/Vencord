@@ -32,8 +32,7 @@ const settings = definePluginSettings({
     organizeMenu: {
         description: "Organizes the settings cog context menu into categories",
         type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
+        default: true
     },
     eagerLoad: {
         description: "Removes the loading delay when opening the menu for the first time",
@@ -120,14 +119,12 @@ export default definePlugin({
             },
             predicate: () => settings.store.eagerLoad
         },
-        {
-            // Settings cog context menu
+        { // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /=\[\];return (\i)(?=\.forEach)/,
-                    replace: "=$self.wrapMap([]);return $self.transformSettingsEntries($1)",
-                    predicate: () => settings.store.organizeMenu
+                    match: /(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
+                    replace: "$self.wrapMenu($1)"
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
@@ -154,7 +151,9 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    transformSettingsEntries(list: SettingsEntry[]) {
+    wrapMenu(list: SettingsEntry[]) {
+        if (!settings.store.organizeMenu) return list;
+
         const items = [{ label: null as string | null, items: [] as SettingsEntry[] }];
 
         for (const item of list) {
@@ -167,32 +166,34 @@ export default definePlugin({
             }
         }
 
-        return items;
-    },
-
-    wrapMap(toWrap: any[]) {
-        // @ts-expect-error
-        toWrap.map = function (render: (item: SettingsEntry) => ReactElement<any>) {
-            return this
-                .filter(a => a.items.length > 0)
-                .map(({ label, items }) => {
-                    const children = items.map(render);
-                    if (label) {
-                        return (
-                            <Menu.MenuItem
-                                key={label}
-                                id={label.replace(/\W/, "_")}
-                                label={label}
-                            >
-                                {children}
-                            </Menu.MenuItem>
-                        );
-                    } else {
-                        return children;
-                    }
-                });
+        return {
+            filter(predicate: (item: SettingsEntry) => boolean) {
+                for (const category of items) {
+                    category.items = category.items.filter(predicate);
+                }
+                return this;
+            },
+            map(render: (item: SettingsEntry) => ReactElement<any>) {
+                return items
+                    .filter(a => a.items.length > 0)
+                    .map(({ label, items }) => {
+                        const children = items.map(render);
+                        if (label) {
+                            return (
+                                <Menu.MenuItem
+                                    key={label}
+                                    id={label.replace(/\W/, "_")}
+                                    label={label}
+                                    action={children[0].props.action}
+                                >
+                                    {children}
+                                </Menu.MenuItem>
+                            );
+                        } else {
+                            return children;
+                        }
+                    });
+            }
         };
-
-        return toWrap;
     }
 });
