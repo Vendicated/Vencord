@@ -31,7 +31,7 @@ import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, s
 const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
-const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
+const TimestampClasses = findByPropsLazy("timestamp", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
 const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
@@ -108,7 +108,7 @@ export default definePlugin({
 
     renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => {
         return (
-            <Tooltip text={session.approx_last_used_time.toLocaleString()} tooltipClassName={TimestampClasses.timestampTooltip}>
+            <Tooltip text={session.approx_last_used_time.toLocaleString()}>
                 {props => (
                     <span {...props} className={TimestampClasses.timestamp}>
                         {timeLabel}
