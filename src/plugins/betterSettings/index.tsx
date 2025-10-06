@@ -123,7 +123,7 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
+                    match: /(\i)(?=\.forEach\(\i=>\{let\{)/,
                     replace: "$self.wrapMenu($1)"
                 },
                 {
@@ -167,9 +167,9 @@ export default definePlugin({
         }
 
         return {
-            filter(predicate: (item: SettingsEntry) => boolean) {
+            forEach(predicate: (item: SettingsEntry) => void) {
                 for (const category of items) {
-                    category.items = category.items.filter(predicate);
+                    category.items.forEach(predicate);
                 }
                 return this;
             },
