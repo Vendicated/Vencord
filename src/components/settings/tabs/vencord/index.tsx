@@ -68,8 +68,8 @@ function Switches() {
             note: t("vencord.settings.requiresFullRestart")
         } : {
             key: "winNativeTitleBar",
-                title: t("vencord.settings.winNativeTitleBar.title"),
-                note: t("vencord.settings.requiresFullRestart")
+            title: t("vencord.settings.winNativeTitleBar.title"),
+            note: t("vencord.settings.requiresFullRestart")
         }),
         !IS_WEB && {
             key: "transparent",
