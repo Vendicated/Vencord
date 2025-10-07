@@ -177,7 +177,7 @@ export default definePlugin({
                     // "x" blocked messages -> normal messages if DM and should be shown
                     if (isDmChannel == null) {
                         const checkMsg = elem.content[0].content as Message;
-                        isDmChannel = this.shouldShowInDM(checkMsg.channel_id);
+                        isDmChannel = ChannelStore.getChannel(checkMsg?.channel_id)?.isDM();
                     }
                     if (!isDmChannel) return newStream.push(elem);
                     if (isDmChannel) return newStream.push(...elem.content as ChannelStreamProps[]);
