@@ -96,19 +96,6 @@ if (!IS_VANILLA && !IS_EXTENSION) {
             }
         });
 
-        protocol.handle("https", async req => {
-            const res = await net.fetch(req, { bypassCustomProtocolHandlers: true });
-            const headers = new Headers(res.headers);
-            headers.set("Access-Control-Allow-Origin", "*");
-            headers.set("Access-Control-Allow-Methods", "*");
-            headers.set("Access-Control-Allow-Headers", "*");
-
-            return new Response(res.body, {
-                ...res,
-                headers,
-            });
-        });
-
         try {
             if (RendererSettings.store.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
@@ -116,10 +103,8 @@ if (!IS_VANILLA && !IS_EXTENSION) {
                     .catch(err => console.error("[Equicord] Failed to install React Developer Tools", err));
         } catch { }
 
-
         initCsp();
     });
-
 }
 
 if (IS_DISCORD_DESKTOP) {
