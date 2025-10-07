@@ -39,7 +39,7 @@
     display: grid;
     height: 40px;
     gap: 10px;
-    grid-template-columns: 1fr 150px;
+    grid-template-columns: 150px 1fr;
 }
 
 .vc-addon-badge {
