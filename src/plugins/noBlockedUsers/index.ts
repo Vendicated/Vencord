@@ -186,7 +186,10 @@ export default definePlugin({
             });
             return newStream;
         }
-        return vals;
+        // if we don't check for MESSAGE_GROUP_BLOCKED there will be gaps in the chat.
+        return vals.filter(
+            elem => elem.type !== "MESSAGE_GROUP_BLOCKED" && (!settings.store.applyToIgnoredUsers || elem.type !== "MESSAGE_GROUP_IGNORED")
+        )
     },
 
     undoBlockedRepliesInDms(data: IncompleteMessageReplyRenderProps) {
