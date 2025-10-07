@@ -1,0 +1,347 @@
+.zp-file-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.zp-wrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: inherit;
+    overflow: hidden;
+    background: inherit;
+}
+
+.zp-content {
+    padding: 16px;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.zp-dropdown-expander {
+    width: 100%;
+    display: flex;
+    height: 16px;
+    align-items: flex-end;
+    justify-content: center;
+    border-top: 2px solid var(--border-subtle);
+    cursor: pointer;
+}
+
+.zp-dropdown-expander svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--text-link);
+    margin-top: 0;
+}
+
+.zp-card {
+    width: 100%;
+    max-width: 560px;
+}
+
+.zp-attachment-integrated .zp-card {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    max-width: none;
+}
+
+.zp-header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 12px 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.zp-file-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zp-filename {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-normal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zp-zipmeta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.zp-zip-preview {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease, padding 0.2s ease;
+    color: var(--text-normal);
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.zp-zip-preview.expanded {
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 8px 16px 12px;
+}
+
+.zp-path {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+    line-height: 1.4;
+}
+
+.zp-path-text {
+    color: var(--text-muted);
+}
+
+.zp-entry-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    cursor: pointer;
+    padding: 1px 0;
+}
+
+.zp-entry-name {
+    color: var(--text-link);
+    text-decoration: none;
+}
+
+.zp-entry-row:hover .zp-entry-name {
+    text-decoration: underline;
+}
+
+.zp-entry-size {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.zp-folder-return {
+    cursor: pointer;
+}
+
+.zp-folder-return svg {
+    fill: var(--text-muted);
+    width: 20px;
+    height: 20px;
+}
+
+.zp-preview {
+    color: var(--text-normal);
+    max-width: 80vw;
+    min-width: 30vw;
+    max-height: 80vh;
+    min-height: 20vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: text;
+    border-radius: var(--radius-md);
+}
+
+.zp-preview-header {
+    height: 46px;
+    background: var(--background-accent-tertiary);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    padding: 0 12px;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(0 0 0 / 8%);
+}
+
+.zp-preview-content-wrap {
+    margin: 12px;
+    padding: 12px;
+    border: 1px solid rgba(0 0 0 / 8%);
+    border-radius: 8px;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    align-self: stretch;
+    flex-grow: 1;
+}
+
+.zp-preview-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.zp-preview-content {
+    min-height: 0;
+    overflow: auto;
+    width: 100%;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.zp-preview img,
+.zp-preview video {
+    width: 100%;
+    height: auto;
+}
+
+.zp-preview-footer {
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 12px;
+}
+
+.zp-attachment-tab {
+    padding: 6px 10px;
+    background: var(--background-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-link);
+}
+
+.zp-attachment-integrated {
+    max-width: 520px;
+    overflow: hidden;
+}
+
+.zp-attachment-integrated .zp-header {
+    display: none;
+}
+
+.zp-attachment-integrated .zp-zip-preview {
+    background: transparent;
+}
+
+.zp-injected-preview .zp-dropdown-expander {
+    width: 100%;
+    margin: 0;
+}
+
+.zp-attachment-integrated .zp-dropdown-expander {
+    background: transparent;
+    border-radius: 0 0 8px 8px;
+    transition: background 0.2s ease;
+}
+
+.zp-attachment-integrated .zp-dropdown-expander:hover {
+    background: var(--background-modifier-hover);
+}
+
+.zp-error,
+.zp-loading {
+    padding: 8px 12px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.zp-injected-preview .zp-error,
+.zp-injected-preview .zp-loading {
+    background: transparent;
+    border-top: 1px solid var(--background-modifier-accent);
+    margin-top: 8px;
+    width: 100%;
+    display: block;
+}
+
+.zp-inline-container {
+    margin-top: 8px;
+}
+
+.zp-inline-preview {
+    margin-top: 8px;
+}
+
+[class^="file__"][data-zp-processed="true"] {
+    flex-wrap: wrap !important;
+}
+
+.zp-injected-preview {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.zp-injected-preview .zp-attachment-integrated {
+    max-width: none;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+
+.zp-injected-preview .zp-card {
+    background: transparent;
+}
+
+.zp-injected-preview .zp-header {
+    display: none;
+}
+
+/* Force code block container to full width and add balanced padding */
+.zp-code-modal .vc-shiki-container {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+}
+
+.zp-code-modal .vc-shiki-root {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    position: relative !important;
+}
+
+.zp-code-modal .vc-shiki-code {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    padding-right: 48px !important;
+    box-sizing: border-box !important;
+}
+
+.zp-code-modal .vc-shiki-table {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+}
+
+.zp-code-modal .vc-shiki-root .vc-shiki-table-cell:last-child {
+    padding-right: 48px !important;
+}
+
+/* Reposition copy button to be accessible without scrolling */
+.zp-code-modal .vc-shiki-btns {
+    position: absolute !important;
+    bottom: 8px !important;
+    right: 8px !important;
+    z-index: 100 !important;
+}
