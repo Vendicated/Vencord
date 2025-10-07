@@ -37,7 +37,9 @@ export async function getKnownSettings(): Promise<Map<string, Set<string>>> {
             ([plugin, settings]) => [plugin, [...settings]]
         ));
     } else {
-        map = new Map(raw.map(([plugin, settings]: [string, string[]]) => [plugin, new Set(settings)]));
+        map = raw instanceof Map
+            ? raw
+            : new Map(raw.map(([plugin, settings]: [string, string[]]) => [plugin, new Set(settings)]));
     }
 
     return map;

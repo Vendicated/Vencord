@@ -31,6 +31,11 @@ const settings = definePluginSettings({
         description: "Prevents the camera from being mirrored on your screen",
         default: false,
     },
+    removeActivitySection: {
+        type: OptionType.BOOLEAN,
+        description: "Removes the activity section above member list",
+        default: false,
+    }
 });
 
 export default definePlugin({
@@ -57,38 +62,40 @@ export default definePlugin({
         // Disable Giant Create DM Button
         {
             find: ".createDMButtonContainer,",
+            predicate: () => settings.store.disableCreateDMButton,
             replacement: {
                 match: /"create-dm"\)/,
                 replace: "$&&&false"
             },
-            predicate: () => settings.store.disableCreateDMButton
         },
         // Remove DM Context Menu
         {
             find: "#{intl::d+e27u::raw}",
+            predicate: () => settings.store.disableDMContextMenu,
+
             replacement: {
                 match: /\{dotsInsteadOfCloseButton:(\i),rearrangeContextMenu:(\i).*?autoTrackExposure:!0\}\)/,
                 replace: "$1=false,$2=false"
             },
-            predicate: () => settings.store.disableDMContextMenu
         },
         // When focused on voice channel or group chat voice call
         {
             find: /\i\?\i.\i.SELF_VIDEO/,
+            predicate: () => settings.store.noMirroredCamera,
             replacement: {
                 match: /mirror:\i/,
                 replace: "mirror:!1"
             },
-            predicate: () => settings.store.noMirroredCamera
         },
         // Popout camera when not focused on voice channel
         {
             find: ".mirror]:",
+            all: true,
+            predicate: () => settings.store.noMirroredCamera,
             replacement: {
                 match: /\[(\i).mirror]:\i/,
                 replace: "[$1.mirror]:!1"
             },
-            predicate: () => settings.store.noMirroredCamera
         },
         // Overriding css on Preview Camera/Change Video Background popup
         {
@@ -98,6 +105,14 @@ export default definePlugin({
                 replace: "$&style:{transform: \"scalex(1)\"},"
             },
             predicate: () => settings.store.noMirroredCamera
+        },
+        {
+            find: ".MEMBERLIST_CONTENT_FEED_TOGGLED,",
+            predicate: () => settings.store.removeActivitySection,
+            replacement: {
+                match: /null==\i\|\|/,
+                replace: "true||$&"
+            },
         }
     ],
     renderMessageAccessory(props) {
