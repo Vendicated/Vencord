@@ -9,7 +9,6 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
@@ -38,9 +37,6 @@ export const settings = definePluginSettings({
 
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
-const logger = new Logger("GitHubRepos");
-logger.info("Plugin loaded");
-
 const ProfilePopoutComponent = ErrorBoundary.wrap(
     (props: { user: User; displayProfile?: any; }) => {
         return (
@@ -53,11 +49,9 @@ const ProfilePopoutComponent = ErrorBoundary.wrap(
     },
     {
         noop: true,
-        onError: err => {
-            logger.error("Error in profile popout component", err);
-            return <Text variant="text-xs/semibold" className="vc-github-repos-error" style={{ color: "var(--text-danger)" }}>
-                Error, Failed to render GithubRepos</Text>;
-        }
+        fallback: () => <Text variant="text-xs/semibold" className="vc-github-repos-error" style={{ color: "var(--text-danger)" }}>
+            Error, Failed to render GithubRepos
+        </Text>
     }
 );
 
