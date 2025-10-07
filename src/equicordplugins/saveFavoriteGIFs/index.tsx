@@ -4,15 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findComponentByCodeLazy } from "@webpack";
 import { UserSettingsActionCreators } from "@webpack/common";
-
-const StarIcon = findComponentByCodeLazy(".73-2.25h6.12l1.9-5.83Z");
 
 async function saveGifs() {
     const filename = `favorite-gifs-${new Date().toISOString().split("T")[0]}.txt`;
@@ -40,22 +36,14 @@ async function saveGifs() {
     }
 }
 
-const button: ChatBarButtonFactory = ({ isMainChat }) => {
-    if (!isMainChat) return null;
-
-    return (
-        <ChatBarButton
-            tooltip={"Save Favorite GIFs"}
-            onClick={() => saveGifs()}
-        >
-            <StarIcon height={18} width={18} />
-        </ChatBarButton>
-    );
-};
-
 export default definePlugin({
     name: "SaveFavoriteGIFs",
     description: "Save favorite GIF urls to a file",
     authors: [Devs.thororen],
-    renderChatBarButton: button,
+    dependencies: ["EquicordToolbox"],
+    toolboxActions: {
+        "Save Favorite GIFs": () => {
+            saveGifs();
+        }
+    }
 });
