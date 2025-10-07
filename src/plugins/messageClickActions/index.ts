@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -93,7 +94,7 @@ export default definePlugin({
                 if (!MessageTypeSets.REPLYABLE.has(msg.type) || msg.hasFlag(MessageFlags.EPHEMERAL)) return;
 
                 const isShiftPress = event.shiftKey && !settings.store.requireModifier;
-                const shouldMention = Vencord.Plugins.isPluginEnabled(NoReplyMentionPlugin.name)
+                const shouldMention = isPluginEnabled(NoReplyMentionPlugin.name)
                     ? NoReplyMentionPlugin.shouldMention(msg, isShiftPress)
                     : !isShiftPress;
 

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
@@ -274,7 +275,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 }
                 <div className={cl("allowed-users-and-roles-container")}>
                     <div className={cl("allowed-users-and-roles-container-title")}>
-                        {Vencord.Plugins.isPluginEnabled("PermissionsViewer") && (
+                        {isPluginEnabled("PermissionsViewer") && (
                             <Tooltip text="Permission Details">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button

@@ -25,7 +25,7 @@ import {
 } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
 
-import { decrypt } from "../index";
+import InvisibleChatPlugin, { decrypt } from "../index";
 
 export function DecModal(props: any) {
     const encryptedMessage: string = props?.message?.content;
@@ -53,8 +53,7 @@ export function DecModal(props: any) {
                     onClick={() => {
                         const toSend = decrypt(encryptedMessage, password, true);
                         if (!toSend || !props?.message) return;
-                        // @ts-expect-error
-                        Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
+                        InvisibleChatPlugin.buildEmbed(props?.message, toSend);
                         props.onClose();
                     }}>
                     Decrypt

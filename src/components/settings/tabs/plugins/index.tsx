@@ -19,6 +19,7 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
+import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
@@ -156,7 +157,7 @@ function PluginSettings() {
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { status } = searchValue;
-        const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+        const enabled = isPluginEnabled(plugin.name);
 
         switch (status) {
             case SearchStatus.DISABLED:

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
@@ -139,7 +140,7 @@ export function LocalThemesTab() {
                             Icon={PaintbrushIcon}
                         />
 
-                        {Vencord.Plugins.isPluginEnabled(ClientThemePlugin.name) && (
+                        {isPluginEnabled(ClientThemePlugin.name) && (
                             <QuickAction
                                 text="Edit ClientTheme"
                                 action={() => openPluginModal(ClientThemePlugin)}

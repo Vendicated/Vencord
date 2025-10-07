@@ -8,7 +8,7 @@ import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
 import { getBuildNumber, patchTimings } from "@webpack/patcher";
 
-import { addPatch, patches } from "../plugins";
+import { addPatch, patches } from "../api/PluginManager";
 import { loadLazyChunks } from "./loadLazyChunks";
 
 async function runReporter() {

@@ -23,8 +23,8 @@ import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { CopyIcon, ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
-import { openImageModal } from "@utils/discord";
-import { classes, copyWithToast } from "@utils/misc";
+import { copyWithToast, openImageModal } from "@utils/discord";
+import { classes } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { SeekBar } from "./SeekBar";

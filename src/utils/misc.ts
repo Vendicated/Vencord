@@ -16,9 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Toasts } from "@webpack/common";
-
-import { copyToClipboard } from "./clipboard";
 import { DevsById } from "./constants";
 
 /**
@@ -34,15 +31,6 @@ export function classes(...classes: Array<string | null | undefined | false>) {
  */
 export function sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
-}
-
-export async function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    await copyToClipboard(text);
-    Toasts.show({
-        message: toastMessage,
-        id: Toasts.genId(),
-        type: Toasts.Type.SUCCESS
-    });
 }
 
 /**

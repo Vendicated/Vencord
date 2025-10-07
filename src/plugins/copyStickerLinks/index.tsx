@@ -17,8 +17,9 @@
 */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { isPluginEnabled } from "@api/PluginManager";
 import { Devs } from "@utils/constants";
-import { copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Message, Sticker } from "@vencord/discord-types";
 import { Menu, React, StickersStore } from "@webpack/common";
@@ -79,7 +80,7 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 
     const sticker = StickersStore.getStickerById(id);
     if (sticker) {
-        children.push(buildMenuItem(sticker, Vencord.Plugins.isPluginEnabled(ExpressionClonerPlugin.name)));
+        children.push(buildMenuItem(sticker, isPluginEnabled(ExpressionClonerPlugin.name)));
     }
 };
 
