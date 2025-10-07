@@ -134,14 +134,14 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     let messages: Message[] = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
 
     const meId = UserStore.getCurrentUser().id;
-    const hasNoBlockedMessages = Vencord.Plugins.isPluginEnabled(NoBlockedUsersPlugin.name);
+    const hasNoBlockedUsers = Vencord.Plugins.isPluginEnabled(NoBlockedUsersPlugin.name);
 
     messages = messages.filter(m => {
         if (m.deleted) return false;
         if (!isReply && m.author.id !== meId) return false; // editing only own messages
         if (!MessageTypeSets.REPLYABLE.has(m.type) || m.hasFlag(MessageFlags.EPHEMERAL)) return false;
         if (settings.store.ignoreBlockedAndIgnored && RelationshipStore.isBlockedOrIgnored(m.author.id)) return false;
-        return !(hasNoBlockedMessages && NoBlockedUsersPlugin.shouldIgnoreMessage(m));
+        return !(hasNoBlockedUsers && NoBlockedUsersPlugin.shouldIgnoreMessage(m));
     });
 
     const findNextNonDeleted = (id: string | null) => {

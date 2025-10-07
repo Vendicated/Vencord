@@ -21,8 +21,8 @@ import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "@vencord/discord-types";
-import { i18n, MessageStore, RelationshipStore } from "@webpack/common";
+import { Channel, Message, User } from "@vencord/discord-types";
+import { ChannelStore, i18n, MessageStore, RelationshipStore } from "@webpack/common";
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
@@ -32,20 +32,39 @@ interface MessageDeleteProps {
 interface ChannelStreamProps {
     // this is incomplete but we only need content and type
     type: string,
-    content: Message,
+    content: Message | ChannelStreamProps[],
+}
+
+interface IncompleteMessageReplyRenderProps {
+    baseAuthor: User,
+    baseMessage: Message,
+    channel: Channel,
+    isReplyAuthorBlocked: boolean,
+    isReplyAuthorIgnored: boolean,
+    repliedAuthor: User,
 }
 
 // Remove this migration once enough time has passed
 migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
-migratePluginSettings("NoBlockedUsers","NoBlockedMessages");
+migratePluginSettings("NoBlockedUsers", "NoBlockedMessages");
 
 const settings = definePluginSettings({
-    ignoreMessages: {
+    ignoreMessagesFromBlockedUsers: {
         description: "Prevents the client from receiving messages from blocked users (if you disable this, you will see invisible unread messages)",
         type: OptionType.BOOLEAN,
         // default to true because it hides unreads from appearing, which is preferred
         default: true,
         restartNeeded: true
+    },
+    overrideInDms: {
+        // Useful – you may want them gone completely in servers but still be able to access their messages in DMs
+        // without having to unblock them or disable the plugin, in many cases access to such messages is necessary
+        // default true because if you're already viewing DMs with a blocked user, you probably want to see their messages
+        // in which case we essentially present the DM chat history as if they weren't blocked
+        description: "Show the chat history in DMs as if the user wasn't blocked at all",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false,
     },
     hideRepliesToBlockedMessages: {
         description: "Hides replies to blocked messages",
@@ -55,6 +74,12 @@ const settings = definePluginSettings({
     },
     hideUsersFromMemberList: {
         description: "Hide blocked users from the members list in servers",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    },
+    hideUsersFromReactions: {
+        description: "Hides blocked users from the reaction list and prevents their avatar from showing up (the reaction itself is not hidden)",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
@@ -87,11 +112,11 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => settings.store.ignoreMessages,
+            predicate: () => settings.store.ignoreMessagesFromBlockedUsers,
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}?.message)||$self.isReplyToBlocked(${props}?.message))return;`
+                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}?.message)||$self.isReplyToBlocked(${props}?.message))null;`
                 }
             ]
         })),
@@ -110,29 +135,77 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=,premiumSince:\i\}=(\i);)return/,
-                    replace: "return !$self.shouldHide($1.userId)&&",
+                    replace: "return !$self.shouldHide($1?.userId)&&",
                 },
             ],
-        }
+            predicate: () => settings.store.hideUsersFromMemberList,
+        },
+        {
+            find: ".reactorDefault",
+            replacement: [
+                {
+                    match: /return(?=.{0,30}.reactorDefault,onContextMenu:\i=>.{0,15}\(\i,(\i),\i\))/,
+                    replace: "return $self.shouldHide($1?.id)?null:",
+                }
+            ],
+            predicate: () => settings.store.hideUsersFromReactions,
+        },
+        {
+            find: "contextCommandMessage:{",
+            replacement: [
+                {
+                    match: /\{let(?=.{0,10}\{repliedAuthor)/,
+                    replace: "{$self.undoBlockedRepliesInDms(arguments[0]);let",
+                },
+            ],
+        },
     ],
 
     filterStream(channelStream: ChannelStreamProps[]) {
-        return channelStream.filter(
+        const vals = channelStream.filter(
             elem => {
-                // if we don't check for MESSAGE_GROUP_BLOCKED there will be gaps in the chat.
-                if (elem.type === "MESSAGE_GROUP_BLOCKED") return false;
                 if (elem.type !== "MESSAGE") return true;
-                return !this.isReplyToBlocked(elem.content);
-            }
-        );
+                return !this.isReplyToBlocked(elem.content as Message);
+            });
+
+        if (settings.store.overrideInDms) {
+            const newStream: ChannelStreamProps[] = [];
+            // each ChannelStream is channel unique, therefore if one message is in a DM channel, all are
+            let isDmChannel: boolean;
+            channelStream.forEach(elem => {
+                if (elem.type === "MESSAGE_GROUP_BLOCKED" || (settings.store.applyToIgnoredUsers && elem.type === "MESSAGE_GROUP_IGNORED")) {
+                    // "x" blocked messages -> normal messages if DM and should be shown
+                    if (isDmChannel == null) {
+                        const checkMsg = elem.content[0].content as Message;
+                        isDmChannel = this.shouldShowInDM(checkMsg.channel_id);
+                    }
+                    if (!isDmChannel) return newStream.push(elem);
+                    if (isDmChannel) return newStream.push(...elem.content as ChannelStreamProps[]);
+                }
+                return newStream.push(elem);
+            });
+            return newStream;
+        }
+        return vals;
+    },
+
+    undoBlockedRepliesInDms(data: IncompleteMessageReplyRenderProps) {
+        if (!this.shouldShowInDM(data.channel.id) || (!data.isReplyAuthorBlocked && !data.isReplyAuthorIgnored)) return;
+        if (data.isReplyAuthorBlocked) data.isReplyAuthorBlocked = false;
+        if (data.isReplyAuthorIgnored && settings.store.applyToIgnoredUsers) data.isReplyAuthorIgnored = false;
+    },
+
+    shouldShowInDM(channelId: string) {
+        return settings.store.overrideInDms && ChannelStore.getChannel(channelId).isDM();
     },
 
     shouldIgnoreMessage(message: Message) {
-        return this.shouldHide(message.author.id);
+        return !this.shouldShowInDM(message.channel_id) && this.shouldHide(message.author.id);
     },
 
     isReplyToBlocked(message: Message) {
         if (!settings.store.hideRepliesToBlockedMessages) return false;
+        if (this.shouldShowInDM(message.channel_id)) return false;
 
         try {
             const { messageReference } = message;
