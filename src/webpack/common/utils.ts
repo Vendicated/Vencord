@@ -23,7 +23,6 @@ import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapM
 export let FluxDispatcher: t.FluxDispatcher;
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
-    // Non import access to avoid circular dependency
     subscribeAllPluginsFluxEvents(m);
 
     const cb = () => {

@@ -5,7 +5,6 @@
  */
 
 import { showNotice } from "@api/Notices";
-// Avoid circular dependency
 import { isPluginEnabled, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
