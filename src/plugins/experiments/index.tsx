@@ -60,9 +60,9 @@ export default definePlugin({
             }
         },
         {
-            find: 'H1,title:"Experiments"',
+            find: 'Search experiments"',
             replacement: {
-                match: 'title:"Experiments",children:[',
+                match: '"div",{children:[',
                 replace: "$&$self.WarningCard(),"
             }
         },
