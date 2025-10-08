@@ -18,16 +18,10 @@
 
 import { definePluginSettings, migratePluginSetting, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
-import { ChannelStore, i18n, MessageStore, RelationshipStore } from "@webpack/common";
-
-interface MessageDeleteProps {
-    // Internal intl message for BLOCKED_MESSAGE_COUNT
-    collapsedReason: () => any;
-}
+import { ChannelStore, MessageStore, RelationshipStore } from "@webpack/common";
 
 interface ChannelStreamProps {
     // this is incomplete but we only need content and type
@@ -98,15 +92,6 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365, Devs.Elvyra],
     settings,
     patches: [
-        {
-            find: ".__invalid_blocked,",
-            replacement: [
-                {
-                    match: /let{expanded:\i,[^}]*?collapsedReason[^}]*}/,
-                    replace: "if($self.shouldHideMessage(arguments[0]))return null;$&"
-                }
-            ]
-        },
         ...[
             '"MessageStore"',
             '"ReadStateStore"'
@@ -179,7 +164,7 @@ export default definePlugin({
                         const checkMsg = elem.content[0].content as Message;
                         isDmChannel = ChannelStore.getChannel(checkMsg?.channel_id)?.isDM();
                     }
-                    if (!isDmChannel) return newStream.push(elem);
+                    if (!isDmChannel) return null; // if not in DM channel, hide the blocked message group
                     if (isDmChannel) return newStream.push(...elem.content as ChannelStreamProps[]);
                 }
                 return newStream.push(elem);
@@ -234,19 +219,4 @@ export default definePlugin({
             return false;
         }
     },
-
-    shouldHideMessage(props: MessageDeleteProps): boolean {
-        try {
-            const collapsedReason = props.collapsedReason();
-            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
-            const ignoredReason = settings.store.applyToIgnoredUsers
-                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
-                : null;
-
-            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
-        } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to hide blocked message:", e);
-            return false;
-        }
-    }
 });
