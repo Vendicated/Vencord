@@ -9,14 +9,14 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "FixImagesQuality",
-    description: "Prevents images from being loaded as webp, which can cause quality loss",
+    description: "Improves quality of images in chat by forcing png format",
     authors: [Devs.Nuckyz],
     patches: [
         {
             find: ".handleImageLoad)",
             replacement: {
-                match: /(?<=null;return )\i\.\i&&\(\i\|\|!\i\.isAnimated.+?:(?=\i&&\(\i="png"\))/,
-                replace: ""
+                match: /(?<=\i=)"webp"/,
+                replace: '"png"'
             }
         }
     ]

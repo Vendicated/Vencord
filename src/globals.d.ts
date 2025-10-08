@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LoDashStatic } from "lodash";
-
 declare global {
     /**
      * This exists only at build time, so references to it in patches should insert it
@@ -65,9 +63,7 @@ declare global {
     export var Vesktop: any;
     export var VesktopNative: any;
 
-    interface Window extends Record<PropertyKey, any> {
-        _: LoDashStatic;
-    }
+    interface Window extends Record<PropertyKey, any> { }
 }
 
 export { };

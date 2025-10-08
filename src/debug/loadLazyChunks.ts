@@ -11,6 +11,24 @@ import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
 import { AnyModuleFactory } from "webpack";
 
+function getWebpackChunkMap() {
+    const sym = Symbol();
+    let v: Record<PropertyKey, string> | null = null;
+
+    Object.defineProperty(Object.prototype, sym, {
+        get() {
+            v = this;
+            return "";
+        },
+        configurable: true
+    });
+
+    wreq.u(sym);
+    delete Object.prototype[sym];
+
+    return v;
+}
+
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
 
@@ -153,17 +171,10 @@ export async function loadLazyChunks() {
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
-        const allChunks = [] as PropertyKey[];
+        const chunkMap = getWebpackChunkMap();
+        if (!chunkMap) throw new Error("Failed to get chunk map");
 
-        // Matches "id" or id:
-        for (const currentMatch of String(wreq.u).matchAll(/(?:"([\deE]+?)"(?![,}]))|(?:([\deE]+?):)/g)) {
-            const id = currentMatch[1] ?? currentMatch[2];
-            if (id == null) continue;
-
-            const numId = Number(id);
-            allChunks.push(Number.isNaN(numId) ? id : numId);
-        }
-
+        const allChunks = Object.keys(chunkMap).map(id => Number.isNaN(Number(id)) ? id : Number(id));
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
         // Chunks which our regex could not catch to load

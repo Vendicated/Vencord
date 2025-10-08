@@ -1,0 +1,29 @@
+.vc-form-switch-wrapper {
+    margin-bottom: 20px;
+}
+
+.vc-form-switch {
+    display: flex;
+    width: 100%;
+
+    > :last-child {
+        margin-left: auto;
+    }
+}
+
+.vc-form-switch-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.vc-form-switch-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+
+.vc-form-switch-border {
+    margin-top: 20px;
+}
