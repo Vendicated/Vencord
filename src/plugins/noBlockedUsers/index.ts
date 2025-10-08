@@ -23,11 +23,19 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
 import { ChannelStore, MessageStore, RelationshipStore } from "@webpack/common";
 
-interface ChannelStreamProps {
-    // this is incomplete but we only need content and type
-    type: string,
-    content: Message | ChannelStreamProps[],
+
+interface ChannelStreamMessage {
+    type: "MESSAGE",
+    content: Message,
 }
+
+interface ChannelStreamBlockedGroup {
+    type: "MESSAGE_GROUP_BLOCKED" | "MESSAGE_GROUP_IGNORED",
+    content: ChannelStreamMessage[],
+}
+
+// There is other types too, such as for the date separators, but these are not relevant here
+type ChannelStreamProps = ChannelStreamMessage | ChannelStreamBlockedGroup;
 
 interface IncompleteMessageReplyRenderProps {
     baseAuthor: User,
@@ -160,15 +168,15 @@ export default definePlugin({
                 if (elem.type === "MESSAGE_GROUP_BLOCKED" || (settings.store.applyToIgnoredUsers && elem.type === "MESSAGE_GROUP_IGNORED")) {
                     // "x" blocked messages -> normal messages if DM and should be shown
                     if (isDmChannel == null) {
-                        const checkMsg = elem.content[0].content as Message;
-                        isDmChannel = ChannelStore.getChannel(checkMsg?.channel_id)?.isDM();
+                        const checkMsg = elem.content[0].content;
+                        isDmChannel = ChannelStore.getChannel(checkMsg?.channel_id)?.isDM(); // can apparently be undefined
                     }
                     // if not in DM channel, hide the blocked message group
                     if (!isDmChannel) return;
                     // A message group blocked has ChannelStreamProps[] as content, with the blocked messages
                     // themselves inside (elem.type is MESSAGE), therefore we can just spread them into the
                     // stream as non-blocked messages, and they will be rendered as normal messages
-                    else return newStream.push(...elem.content as ChannelStreamProps[]);
+                    else return newStream.push(...elem.content);
                 }
                 return newStream.push(elem);
             });
@@ -178,7 +186,7 @@ export default definePlugin({
             elem => {
                 if (elem.type === "MESSAGE_GROUP_BLOCKED" || (settings.store.applyToIgnoredUsers && elem.type === "MESSAGE_GROUP_IGNORED")) return false;
                 else if (elem.type !== "MESSAGE") return true;
-                return !this.isReplyToBlocked(elem.content as Message);
+                return !this.isReplyToBlocked(elem.content);
             });
     },
 
