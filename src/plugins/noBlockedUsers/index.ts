@@ -147,11 +147,10 @@ export default definePlugin({
     ],
 
     filterStream(channelStream: ChannelStreamProps[]) {
-        const vals = channelStream.filter(
-            elem => {
-                if (elem.type !== "MESSAGE") return true;
-                return !this.isReplyToBlocked(elem.content as Message);
-            });
+        // removing MESSAGE_GROUP_BLOCKED hides the "x blocked messages" text.
+        // simultaneously we can check if replies are to blocked messages and hide those too
+        // or override in DMs to show everything
+        // which makes the old method to hide blocked messages obsolete
 
         if (settings.store.overrideInDms) {
             const newStream: ChannelStreamProps[] = [];
@@ -164,17 +163,23 @@ export default definePlugin({
                         const checkMsg = elem.content[0].content as Message;
                         isDmChannel = ChannelStore.getChannel(checkMsg?.channel_id)?.isDM();
                     }
-                    if (!isDmChannel) return null; // if not in DM channel, hide the blocked message group
-                    if (isDmChannel) return newStream.push(...elem.content as ChannelStreamProps[]);
+                    // if not in DM channel, hide the blocked message group
+                    if (!isDmChannel) return;
+                    // A message group blocked has ChannelStreamProps[] as content, with the blocked messages
+                    // themselves inside (elem.type is MESSAGE), therefore we can just spread them into the
+                    // stream as non-blocked messages, and they will be rendered as normal messages
+                    else return newStream.push(...elem.content as ChannelStreamProps[]);
                 }
                 return newStream.push(elem);
             });
             return newStream;
         }
-        // if we don't check for MESSAGE_GROUP_BLOCKED there will be gaps in the chat.
-        return vals.filter(
-            elem => elem.type !== "MESSAGE_GROUP_BLOCKED" && (!settings.store.applyToIgnoredUsers || elem.type !== "MESSAGE_GROUP_IGNORED")
-        );
+        return channelStream.filter(
+            elem => {
+                if (elem.type === "MESSAGE_GROUP_BLOCKED" || (settings.store.applyToIgnoredUsers && elem.type === "MESSAGE_GROUP_IGNORED")) return false;
+                else if (elem.type !== "MESSAGE") return true;
+                return !this.isReplyToBlocked(elem.content as Message);
+            });
     },
 
     undoBlockedRepliesInDms(data: IncompleteMessageReplyRenderProps) {
