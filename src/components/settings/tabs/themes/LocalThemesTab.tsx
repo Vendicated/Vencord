@@ -99,7 +99,8 @@ export function LocalThemesTab() {
                 <Forms.FormText>Make sure all your assets are hosted on GitHub, GitLab, Codeberg, Imgur, Discord or Google Fonts.</Forms.FormText>
             </Card>
 
-            <Forms.FormSection title="Local Themes">
+            <section>
+                <Forms.FormTitle tag="h5">Local Themes</Forms.FormTitle>
                 <QuickActionCard>
                     <>
                         {IS_WEB ?
@@ -164,7 +165,7 @@ export function LocalThemesTab() {
                         />
                     ))}
                 </div>
-            </Forms.FormSection>
+            </section>
         </>
     );
 }

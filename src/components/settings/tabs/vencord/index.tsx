@@ -153,7 +153,9 @@ function VencordSettings() {
                 />
             )}
 
-            <Forms.FormSection title="Quick Actions">
+            <section>
+                <Forms.FormTitle tag="h5">Quick Actions</Forms.FormTitle>
+
                 <QuickActionCard>
                     <QuickAction
                         Icon={LogIcon}
@@ -185,11 +187,12 @@ function VencordSettings() {
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
                 </QuickActionCard>
-            </Forms.FormSection>
+            </section>
 
             <Forms.FormDivider />
 
-            <Forms.FormSection className={Margins.top16} title="Settings" tag="h5">
+            <section className={Margins.top16}>
+                <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
@@ -198,7 +201,7 @@ function VencordSettings() {
                 </Forms.FormText>
 
                 <Switches />
-            </Forms.FormSection>
+            </section>
 
 
             {needsVibrancySettings && <VibrancySettings />}
