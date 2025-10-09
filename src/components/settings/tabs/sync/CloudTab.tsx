@@ -19,6 +19,7 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
@@ -189,7 +190,7 @@ function CloudTab() {
                     </Button>
                 </Grid>
 
-                <Forms.FormDivider className={Margins.top16} />
+                <Divider className={Margins.top16} />
             </section >
             <SettingsSyncSection />
         </SettingsTab>

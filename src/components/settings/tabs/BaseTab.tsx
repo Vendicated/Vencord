@@ -18,11 +18,10 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
+import { HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
-import { Forms } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
-import { HeadingSecondary } from "@components/Heading";
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (

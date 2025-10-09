@@ -16,23 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Divider } from "@components/Divider";
 import { FormSwitchCompat } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { LazyComponent } from "@utils/lazyReact";
 import * as t from "@vencord/discord-types";
 import { filters, find, LazyComponentWebpack, mapMangledModuleLazy, waitFor } from "@webpack";
-import { Divider } from "@components/Divider";
 
-import { FormText } from "./FormText";
 import { waitForComponent } from "./internal";
 
-const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat', '="h5"'));
-
 export const Forms = {
-    FormTitle,
-    FormText,
+    // TODO: stop using this and use Heading and Paragraph directly
+    FormTitle: Heading,
+    FormText: Paragraph,
     /** @deprecated don't use this */
     FormSection: "section" as never, // Backwards compat since Vesktop uses this
-    Divider
+    /** @deprecated use `@components/Divider` */
+    FormDivider: Divider as never, // Backwards compat since Vesktop uses this
 };
 
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
@@ -55,7 +56,6 @@ export const TooltipContainer = LazyComponent(() => Tooltips.TooltipContainer);
 export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode("#{intl::MAXIMUM_LENGTH_ERROR}", '"input"'));
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("this.getPaddingRight()},id:"));
 export const Text = waitForComponent<t.Text>("Text", filters.componentByCode('case"always-white"'));
-export const Heading = waitForComponent<t.Heading>("Heading", filters.componentByCode(">6?{", "variant:"));
 export const Select: t.Select = LazyComponentWebpack(() => {
     const oldFilter = filters.componentByCode('="bottom",', ".select,", '"Escape"===');
     const newFilter = filters.componentByCode('"Select"', ".newOptionLabel");

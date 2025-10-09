@@ -21,7 +21,10 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingTertiary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
@@ -31,9 +34,6 @@ import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
-import { Divider } from "@components/Divider";
-import { HeadingTertiary } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
