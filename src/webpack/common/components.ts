@@ -24,7 +24,6 @@ import { filters, find, LazyComponentWebpack, mapMangledModuleLazy, waitFor } fr
 import { FormText } from "./FormText";
 import { waitForComponent } from "./internal";
 
-
 const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat', '="h5"'));
 const FormDivider = waitForComponent<t.FormDivider>("FormDivider", filters.componentByCode(".divider,", ",style:", '"div"', /\.divider,\i\),style:/));
 
@@ -66,7 +65,7 @@ export const Select: t.Select = LazyComponentWebpack(() => {
 
     throw new Error("Vencord failed to find the Select component");
 });
-export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode(".searchableSelect"));
+export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('"SearchableSelect"'));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode('"markDash".concat('));
 export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCode("ref:this.ref,", "renderPopout:this.renderPopout,"));
 export const Dialog = waitForComponent<t.Dialog>("Dialog", filters.componentByCode('role:"dialog",tabIndex:-1'));
