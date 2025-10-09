@@ -16,17 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Channel } from "@vencord/discord-types";
 
 let style: HTMLStyleElement;
 
+
+const settings = definePluginSettings({
+    blurAmount: {
+        type: OptionType.NUMBER,
+        description: "Blur Amount (in pixels)",
+        default: 10,
+        onChange: setCss
+    },
+    onlyNSFW: {
+        type: OptionType.BOOLEAN,
+        description: "Only blur media in NSFW channels",
+        default: true,
+    }
+});
+
 function setCss() {
     style.textContent = `
-        .vc-nsfw-img [class^=imageContainer],
-        .vc-nsfw-img [class^=wrapperPaused] {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+        .vc-blurMedia-blur [class^=imageContainer],
+        .vc-blurMedia-blur [class^=wrapperPaused] {
+            filter: blur(${settings.store.blurAmount}px);
             transition: filter 0.2s;
 
             &:hover {
@@ -36,28 +52,28 @@ function setCss() {
         `;
 }
 
+migratePluginSettings("BlurMedia", "BlurNSFW");
 export default definePlugin({
-    name: "BlurNSFW",
-    description: "Blur attachments in NSFW channels until hovered",
+    name: "BlurMedia",
+    description: "Blur attachments in channels until hovered",
     authors: [Devs.Ven],
+    settings,
 
     patches: [
         {
             find: "}renderEmbeds(",
             replacement: [{
                 match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
+                replace: "$&+$self.getClassName(this?.props?.channel)"
             }]
         }
     ],
 
-    options: {
-        blurAmount: {
-            type: OptionType.NUMBER,
-            description: "Blur Amount (in pixels)",
-            default: 10,
-            onChange: setCss
+    getClassName(channel: Channel | undefined): string {
+        if (settings.store.onlyNSFW) {
+            return channel?.nsfw ? " vc-blurMedia-blur" : "";
         }
+        return " vc-blurMedia-blur";
     },
 
     start() {
