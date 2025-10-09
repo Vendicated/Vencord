@@ -21,6 +21,7 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { SettingsTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { ChangeList } from "@utils/ChangeList";
@@ -362,23 +363,27 @@ export default function PluginSettings() {
             </Forms.FormTitle>
 
             <div className={classes(Margins.bottom20, cl("filter-controls"))}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
+                <ErrorBoundary noop>
+                    <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
+                </ErrorBoundary>
                 <div className={InputStyles.inputWrapper}>
-                    <Select
-                        options={[
-                            { label: "Show All", value: SearchStatus.ALL, default: true },
-                            { label: "Show Enabled", value: SearchStatus.ENABLED },
-                            { label: "Show Disabled", value: SearchStatus.DISABLED },
-                            { label: "Show Equicord", value: SearchStatus.EQUICORD },
-                            { label: "Show Vencord", value: SearchStatus.VENCORD },
-                            ...(totalUserPlugins > 0 ? [{ label: "Show Custom", value: SearchStatus.CUSTOM }] : []),
-                            { label: "Show New", value: SearchStatus.NEW },
-                        ]}
-                        serialize={String}
-                        select={onStatusChange}
-                        isSelected={v => v === searchValue.status}
-                        closeOnSelect={true}
-                    />
+                    <ErrorBoundary noop>
+                        <Select
+                            options={[
+                                { label: "Show All", value: SearchStatus.ALL, default: true },
+                                { label: "Show Enabled", value: SearchStatus.ENABLED },
+                                { label: "Show Disabled", value: SearchStatus.DISABLED },
+                                { label: "Show Equicord", value: SearchStatus.EQUICORD },
+                                { label: "Show Vencord", value: SearchStatus.VENCORD },
+                                ...(totalUserPlugins > 0 ? [{ label: "Show Custom", value: SearchStatus.CUSTOM }] : []),
+                                { label: "Show New", value: SearchStatus.NEW },
+                            ]}
+                            serialize={String}
+                            select={onStatusChange}
+                            isSelected={v => v === searchValue.status}
+                            closeOnSelect={true}
+                        />
+                    </ErrorBoundary>
                 </div>
             </div>
 

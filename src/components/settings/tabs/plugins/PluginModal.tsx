@@ -109,14 +109,15 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
             const Component = OptionComponentMap[setting.type];
             return (
-                <Component
-                    id={key}
-                    key={key}
-                    option={setting}
-                    onChange={debounce(onChange)}
-                    pluginSettings={pluginSettings}
-                    definedSettings={plugin.settings}
-                />
+                <ErrorBoundary noop key={key}>
+                    <Component
+                        id={key}
+                        option={setting}
+                        onChange={debounce(onChange)}
+                        pluginSettings={pluginSettings}
+                        definedSettings={plugin.settings}
+                    />
+                </ErrorBoundary>
             );
         });
 
@@ -156,7 +157,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             </ModalHeader>
 
             <ModalContent className={Margins.bottom16}>
-                <Forms.FormSection>
+                <section>
                     <Flex className={cl("info")}>
                         <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>
                         {!pluginMeta.userPlugin && (
@@ -195,22 +196,22 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             )}
                         />
                     </div>
-                </Forms.FormSection>
+                </section>
 
                 {!!plugin.settingsAboutComponent && (
                     <div className={Margins.top16}>
-                        <Forms.FormSection>
+                        <section>
                             <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
                                 <plugin.settingsAboutComponent />
                             </ErrorBoundary>
-                        </Forms.FormSection>
+                        </section>
                     </div>
                 )}
 
-                <Forms.FormSection>
+                <section>
                     <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
                     {renderSettings()}
-                </Forms.FormSection>
+                </section>
             </ModalContent>
             {
                 hasSettings && <ModalFooter>

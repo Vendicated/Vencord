@@ -68,7 +68,9 @@ function SettingsSyncSection() {
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
-        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
+        <section className={Margins.top16}>
+            <Forms.FormTitle tag="h5">Settings Sync</Forms.FormTitle>
+
             <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
                 minimal effort.
@@ -111,7 +113,7 @@ function SettingsSyncSection() {
                     Delete Cloud Settings
                 </Button>
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }
 
@@ -131,7 +133,9 @@ function CloudTab() {
 
     return (
         <SettingsTab title="Equicord Cloud">
-            <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
+            <section className={Margins.top16}>
+                <Forms.FormTitle tag="h5">Cloud Settings</Forms.FormTitle>
+
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                     Equicord comes with a cloud integration allowing settings to be synced across apps and devices.
                     <br />
@@ -206,7 +210,7 @@ function CloudTab() {
                 </Grid>
 
                 <Forms.FormDivider className={Margins.top16} />
-            </Forms.FormSection >
+            </section >
             <SettingsSyncSection />
         </SettingsTab>
     );
