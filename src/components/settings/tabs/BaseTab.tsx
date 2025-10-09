@@ -25,7 +25,7 @@ import type { ComponentType, PropsWithChildren } from "react";
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
-        <Forms.FormSection>
+        <section>
             <Text
                 variant="heading-lg/semibold"
                 tag="h2"
@@ -35,7 +35,7 @@ export function SettingsTab({ title, children }: PropsWithChildren<{ title: stri
             </Text>
 
             {children}
-        </Forms.FormSection>
+        </section>
     );
 }
 
