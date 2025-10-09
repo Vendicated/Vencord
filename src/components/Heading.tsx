@@ -9,7 +9,7 @@ import "./Heading.css";
 import { classes } from "@utils/misc";
 import type { ComponentPropsWithoutRef } from "react";
 
-export type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+export type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5";
 export type HeadingProps<Tag extends HeadingTag> = ComponentPropsWithoutRef<Tag> & {
     tag?: Tag;
 };

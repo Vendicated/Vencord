@@ -2,7 +2,6 @@ import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSPropertie
 
 // copy(find(m => Array.isArray(m) && m.includes("heading-sm/normal")).map(JSON.stringify).join("|"))
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-sm/extrabold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-md/extrabold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-lg/extrabold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/semibold" | "heading-xl/bold" | "heading-xl/extrabold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/semibold" | "heading-xxl/bold" | "heading-xxl/extrabold" | "eyebrow" | "heading-deprecated-12/normal" | "heading-deprecated-12/medium" | "heading-deprecated-12/semibold" | "heading-deprecated-12/bold" | "heading-deprecated-12/extrabold" | "redesign/heading-18/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "redesign/message-preview/normal" | "redesign/message-preview/medium" | "redesign/message-preview/semibold" | "redesign/message-preview/bold" | "redesign/channel-title/normal" | "redesign/channel-title/medium" | "redesign/channel-title/semibold" | "redesign/channel-title/bold" | "display-sm" | "display-md" | "display-lg" | "code";
-export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTION" | "LABEL_BOLD" | "LABEL_SELECTED" | "LABEL_DESCRIPTOR" | "ERROR" | "SUCCESS", string>;
 export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
 
 export type Margins = Record<"marginTop16" | "marginTop8" | "marginBottom8" | "marginTop20" | "marginBottom20", string>;
@@ -15,35 +14,6 @@ export type TextProps = PropsWithChildren<HtmlHTMLAttributes<HTMLDivElement> & {
 }>;
 
 export type Text = ComponentType<TextProps>;
-export type Heading = ComponentType<TextProps>;
-
-export type FormTitle = ComponentType<HTMLProps<HTMLTitleElement> & PropsWithChildren<{
-    /** default is h5 */
-    tag?: HeadingTag;
-    faded?: boolean;
-    disabled?: boolean;
-    required?: boolean;
-    error?: ReactNode;
-}>>;
-
-export type FormSection = ComponentType<PropsWithChildren<{
-    /** default is h5 */
-    tag?: HeadingTag;
-    className?: string;
-    titleClassName?: string;
-    titleId?: string;
-    title?: ReactNode;
-    disabled?: boolean;
-    htmlFor?: unknown;
-}>>;
-
-export type FormDivider = ComponentType<{
-    className?: string;
-    style?: CSSProperties;
-}>;
-
-
-export type FormText = ComponentType<TextProps>;
 
 export type Tooltip = ComponentType<{
     text: ReactNode | ComponentType;
