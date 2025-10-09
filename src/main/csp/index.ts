@@ -131,7 +131,7 @@ const patchCsp = (headers: PolicyMap) => {
 };
 
 export function initCsp() {
-    session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType, url }, cb) => {
+    session.defaultSession.webRequest.onHeadersReceived(({ responseHeaders, resourceType }, cb) => {
         if (responseHeaders) {
             if (resourceType === "mainFrame")
                 patchCsp(responseHeaders);
@@ -142,13 +142,6 @@ export function initCsp() {
                 const header = findHeader(responseHeaders, "content-type");
                 if (header)
                     responseHeaders[header] = ["text/css"];
-            }
-
-            const parsedUrl = new URL(url);
-            if (parsedUrl.hostname === "cdn.discordapp.com" && parsedUrl.pathname.startsWith("/attachments")) {
-                responseHeaders["Access-Control-Allow-Origin"] = ["*"];
-                responseHeaders["Access-Control-Allow-Methods"] = ["*"];
-                responseHeaders["Access-Control-Allow-Headers"] = ["*"];
             }
         }
 

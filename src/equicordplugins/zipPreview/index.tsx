@@ -15,7 +15,7 @@ import ZipPreview from "./ZipPreview";
 
 async function fetchBlobWithDebug(url: string) {
     try {
-        const res = await fetch(url);
+        const res = await fetch("https://corsproxy.io/?url=" + encodeURIComponent(url));
         if (!res.ok) {
             console.error("ZipPreview: fetch failed", url, res.status, res.statusText);
             return null;
@@ -114,6 +114,9 @@ const blobCache = new Map<string, Blob>();
 
 // Component to render inside each zip attachment
 function ZipAttachmentPreview({ attachment }: { attachment: any; }) {
+    const ext = attachment.fileName.match(/\.tar\.\w+$|(\.\w+)$/)?.[0] ?? "";
+    if (ext !== ".zip") return;
+
     const [blob, setBlob] = useState<Blob | null>(() => blobCache.get(attachment.id) || null);
     const [error, setError] = useState<string | null>(null);
     const [expanded, setExpanded] = useState<boolean>(() => {
@@ -174,7 +177,7 @@ export default definePlugin({
             find: "#{intl::ATTACHMENT_PROCESSING}",
             replacement: {
                 match: /null!=\i&&\i\(\)(?<=renderAdjacentContent.*?\}=(\i);.*?)/,
-                replace: "$self.ZipAttachmentPreview({ attachment: $1 })"
+                replace: "$&,$self.ZipAttachmentPreview({ attachment: $1 })"
             }
         }
     ],
