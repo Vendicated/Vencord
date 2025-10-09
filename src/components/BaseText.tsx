@@ -8,7 +8,7 @@ import "./BaseText.css";
 
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
-import { HeadingTag } from "@vencord/discord-types";
+import { HeadingTag, Text as DiscordText } from "@vencord/discord-types";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 const cl = classNameFactory("vc-text-");
@@ -74,3 +74,21 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
         </Tag>
     );
 }
+
+export const TextCompat: DiscordText = function TextCompat({ color, variant, ...restProps }) {
+    const newProps = restProps as BaseTextProps;
+    if (variant) {
+        const [left, right] = variant.split("/");
+        if (left && right) {
+            const size = left.split("-").pop();
+            newProps.size = size as TextSize;
+            newProps.weight = right as TextWeight;
+        }
+    }
+    if (color) {
+        newProps.style ??= {};
+        newProps.style.color = `var(--${color}, var(--text-default))`;
+    }
+
+    return <BaseText {...newProps} />;
+};
