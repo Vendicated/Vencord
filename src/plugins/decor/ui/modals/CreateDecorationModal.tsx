@@ -89,7 +89,8 @@ function CreateDecorationModal(props: ModalProps) {
                 <div className={cl("create-decoration-modal-form-preview-container")}>
                     <div className={cl("create-decoration-modal-form")}>
                         {error !== null && <Text color="text-danger" variant="text-xs/normal">{error.message}</Text>}
-                        <Forms.FormSection title="File">
+                        <section>
+                            <Forms.FormTitle tag="h5">File</Forms.FormTitle>
                             <FileUpload
                                 filename={file?.name}
                                 placeholder="Choose a file"
@@ -100,8 +101,9 @@ function CreateDecorationModal(props: ModalProps) {
                             <Forms.FormText className={Margins.top8}>
                                 File should be APNG or PNG.
                             </Forms.FormText>
-                        </Forms.FormSection>
-                        <Forms.FormSection title="Name">
+                        </section>
+                        <section>
+                            <Forms.FormTitle tag="h5">Name</Forms.FormTitle>
                             <TextInput
                                 placeholder="Companion Cube"
                                 value={name}
@@ -110,7 +112,7 @@ function CreateDecorationModal(props: ModalProps) {
                             <Forms.FormText className={Margins.top8}>
                                 This name will be used when referring to this decoration.
                             </Forms.FormText>
-                        </Forms.FormSection>
+                        </section>
                     </div>
                     <div>
                         <AvatarDecorationModalPreview
