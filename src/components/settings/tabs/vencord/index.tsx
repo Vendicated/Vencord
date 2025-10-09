@@ -18,6 +18,7 @@
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
+import { FormSwitch } from "@components/FormSwitch";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
@@ -29,7 +30,7 @@ import { IS_MAC, IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Forms, React, Switch, useMemo, UserStore } from "@webpack/common";
+import { Forms, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { VibrancySettings } from "./MacVibrancySettings";
@@ -91,14 +92,13 @@ function Switches() {
     }>;
 
     return Switches.map(s => s && (
-        <Switch
+        <FormSwitch
             key={s.key}
+            title={s.title}
+            description={s.note}
             value={settings[s.key]}
             onChange={v => settings[s.key] = v}
-            note={s.note}
-        >
-            {s.title}
-        </Switch>
+        />
     ));
 }
 
@@ -153,7 +153,9 @@ function VencordSettings() {
                 />
             )}
 
-            <Forms.FormSection title="Quick Actions">
+            <section>
+                <Forms.FormTitle tag="h5">Quick Actions</Forms.FormTitle>
+
                 <QuickActionCard>
                     <QuickAction
                         Icon={LogIcon}
@@ -185,11 +187,12 @@ function VencordSettings() {
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
                 </QuickActionCard>
-            </Forms.FormSection>
+            </section>
 
             <Forms.FormDivider />
 
-            <Forms.FormSection className={Margins.top16} title="Settings" tag="h5">
+            <section className={Margins.top16}>
+                <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
@@ -198,7 +201,7 @@ function VencordSettings() {
                 </Forms.FormText>
 
                 <Switches />
-            </Forms.FormSection>
+            </section>
 
 
             {needsVibrancySettings && <VibrancySettings />}

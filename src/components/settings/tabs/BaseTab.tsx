@@ -26,13 +26,10 @@ import { HeadingSecondary } from "ui/Heading";
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
-        <Forms.FormSection>
-            <HeadingSecondary className={Margins.bottom16}>
-                {title}
-            </HeadingSecondary>
-
+        <section>
+           <HeadingSecondary className={Margins.bottom16}>{title}</HeadingSecondary>
             {children}
-        </Forms.FormSection>
+        </section>
     );
 }
 
