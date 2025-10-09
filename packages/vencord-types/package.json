@@ -1,7 +1,7 @@
 {
     "name": "@vencord/types",
     "private": false,
-    "version": "1.11.5",
+    "version": "1.13.2",
     "description": "",
     "types": "index.d.ts",
     "scripts": {
@@ -19,9 +19,14 @@
     "dependencies": {
         "@types/lodash": "4.17.15",
         "@types/node": "^22.13.4",
-        "@types/react": "18.3.1",
-        "@types/react-dom": "18.3.1",
-        "standalone-electron-types": "^34.2.0",
+        "@vencord/discord-types": "^1.0.0",
+        "highlight.js": "11.11.1",
+        "moment": "^2.22.2",
+        "ts-pattern": "^5.6.0",
         "type-fest": "^4.35.0"
+    },
+    "peerDependencies": {
+        "@types/react": "18.3.1",
+        "@types/react-dom": "18.3.1"
     }
 }
