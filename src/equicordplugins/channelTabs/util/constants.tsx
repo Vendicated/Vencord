@@ -83,7 +83,7 @@ function AnimationSettings(): JSX.Element {
     }
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle>Animation Controls</Forms.FormTitle>
             <Forms.FormText>
                 Enable or disable specific animations for channel tabs. Each option can be toggled independently.
@@ -100,7 +100,7 @@ function AnimationSettings(): JSX.Element {
                     closeOnSelect={false}
                 />
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }
 

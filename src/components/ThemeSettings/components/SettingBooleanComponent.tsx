@@ -8,7 +8,6 @@ import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
 import { FormSwitch } from "@components/FormSwitch";
-import { Forms } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -26,7 +25,7 @@ export function SettingBooleanComponent({ label, name, themeSettings }: Props) {
     }
 
     return (
-        <Forms.FormSection>
+        <section>
             <FormSwitch
                 title={label}
                 key={name}
@@ -35,6 +34,6 @@ export function SettingBooleanComponent({ label, name, themeSettings }: Props) {
                 onChange={handleChange}
                 hideBorder
             />
-        </Forms.FormSection>
+        </section>
     );
 }

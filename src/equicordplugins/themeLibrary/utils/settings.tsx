@@ -54,7 +54,7 @@ export const settings = definePluginSettings({
             };
 
             return (
-                <Forms.FormSection>
+                <section>
                     <Forms.FormTitle tag="h3" style={{ marginTop: 0, marginBottom: 8 }}>ThemeLibrary Auth</Forms.FormTitle>
                     <div className={cl("button-grid")}>
                         <Button onClick={() => authorizeUser()}>
@@ -74,7 +74,7 @@ export const settings = definePluginSettings({
                             Request Theme Removal <OpenExternalIcon height={16} width={16} />
                         </Button>
                     </div>
-                </Forms.FormSection>
+                </section>
             );
         }
     }

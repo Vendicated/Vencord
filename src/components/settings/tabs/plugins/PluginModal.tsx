@@ -325,7 +325,7 @@ export function openWarningModal(plugin?: Plugin | null, pluginModalProps?: Moda
                 <ModalCloseButton onClick={warningModalProps.onClose} className="vc-modal-close-button" />
             </ModalHeader>
             <ModalContent>
-                <Forms.FormSection>
+                <section>
                     <Flex className="vc-warning-info">
                         <Text className="text-normal">
                             {text}
@@ -337,7 +337,7 @@ export function openWarningModal(plugin?: Plugin | null, pluginModalProps?: Moda
                             If you are certain you want to proceed, click <strong>Confirm Reset</strong>. Otherwise, click <strong>Cancel</strong>.
                         </Text>
                     </Flex>
-                </Forms.FormSection>
+                </section>
             </ModalContent>
             <ModalFooter className="vc-modal-footer">
                 <Flex className="vc-button-container">

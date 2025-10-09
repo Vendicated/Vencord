@@ -35,7 +35,7 @@ export function SettingSelectComponent({ label, name, options, default: def, the
     } satisfies SelectOption)), [options, def]);
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
             <Select
                 placeholder={label}
@@ -47,6 +47,6 @@ export function SettingSelectComponent({ label, name, options, default: def, the
                 isSelected={v => v === themeSettings[name]}
                 serialize={identity}
             />
-        </Forms.FormSection>
+        </section>
     );
 }

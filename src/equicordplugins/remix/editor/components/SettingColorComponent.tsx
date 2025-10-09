@@ -10,7 +10,7 @@
 import "./colorStyles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { ColorPicker, Forms } from "@webpack/common";
+import { ColorPicker } from "@webpack/common";
 
 const cl = classNameFactory("vc-remix-settings-color-");
 
@@ -30,7 +30,7 @@ export function SettingColorComponent({ name, onChange, color }: Props) {
     }
 
     return (
-        <Forms.FormSection>
+        <section>
             <div className={cl("swatch-row")}>
                 <ColorPicker
                     key={name}
@@ -38,6 +38,6 @@ export function SettingColorComponent({ name, onChange, color }: Props) {
                     onChange={handleChange}
                 />
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }

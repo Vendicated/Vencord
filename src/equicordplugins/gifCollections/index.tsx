@@ -461,7 +461,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                     <Forms.FormText className="custom-modal-title">Collection Information</Forms.FormText>
                                 </ModalHeader>
                                 <ModalContent className="custom-modal-content">
-                                    <Forms.FormSection>
+                                    <section>
                                         <Flex className="collection-info">
                                             <Forms.FormTitle tag="h5" className="collection-info-title">Name</Forms.FormTitle>
                                             <Forms.FormText className="collection-info-text">{collection.name.replace(/.+?:/, "")}</Forms.FormText>
@@ -478,7 +478,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                             <Forms.FormTitle tag="h5" className="collection-info-title">Last Updated</Forms.FormTitle>
                                             <Forms.FormText className="collection-info-text">{collection.lastUpdated ? new Date(collection.lastUpdated).toLocaleString() : "Unknown"}</Forms.FormText>
                                         </Flex>
-                                    </Forms.FormSection>
+                                    </section>
                                 </ModalContent>
                                 <ModalFooter className="custom-modal-footer">
                                     <Button onClick={modalProps.onClose} className="custom-modal-button">Close</Button>
@@ -522,7 +522,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                     <Forms.FormText className="custom-modal-title">Information</Forms.FormText>
                                 </ModalHeader>
                                 <ModalContent className="custom-modal-content">
-                                    <Forms.FormSection>
+                                    <section>
                                         <Flex className="gif-info">
                                             <Forms.FormTitle tag="h5" className="gif-info-title">Added At</Forms.FormTitle>
                                             <Forms.FormText className="gif-info-text">{gifInfo.addedAt ? new Date(gifInfo.addedAt).toLocaleString() : "Unknown"}</Forms.FormText>
@@ -535,7 +535,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                             <Forms.FormTitle tag="h5" className="gif-info-title">Height</Forms.FormTitle>
                                             <Forms.FormText className="gif-info-text">{gifInfo.height}</Forms.FormText>
                                         </Flex>
-                                    </Forms.FormSection>
+                                    </section>
                                 </ModalContent>
                                 <ModalFooter className="custom-modal-footer">
                                     <Button onClick={modalProps.onClose} className="custom-modal-button">Close</Button>

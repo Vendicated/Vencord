@@ -27,7 +27,7 @@ export function FormatSetting(setValue) {
     const preview = makeDevBanner(state);
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormText className={"vc-discord-dev-banner-text"}>
                 The format for the Discord Dev Banner. You can use the following variables:
                 {"\n\n"}
@@ -67,6 +67,6 @@ export function FormatSetting(setValue) {
             {error && (
                 <Forms.FormText className={"vc-discord-dev-banner-error"}>{error}</Forms.FormText>
             )}
-        </Forms.FormSection>
+        </section>
     );
 }

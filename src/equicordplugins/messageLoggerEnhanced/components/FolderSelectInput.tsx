@@ -30,13 +30,13 @@ function createDirSelector(settingKey: "logsDir" | "imageCacheDir", successMessa
         if (IS_WEB) return null;
 
         return (
-            <Forms.FormSection>
+            <section>
                 <Forms.FormTitle>{option.description}</Forms.FormTitle>
                 <SelectFolderInput
                     settingsKey={settingKey}
                     successMessage={successMessage}
                 />
-            </Forms.FormSection>
+            </section>
         );
     };
 }

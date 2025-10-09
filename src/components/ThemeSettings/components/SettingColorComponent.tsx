@@ -8,7 +8,7 @@ import "./colorStyles.css";
 
 import { classNameFactory } from "@api/Styles";
 import { findByCodeLazy } from "@webpack";
-import { ColorPicker, Forms, useMemo } from "@webpack/common";
+import { ColorPicker, useMemo } from "@webpack/common";
 
 // TinyColor is completely unmangled and it's duplicated in two modules! Fun!
 const TinyColor: tinycolor.Constructor = findByCodeLazy("this._gradientType=");
@@ -31,7 +31,7 @@ export function SettingColorComponent({ label, name, themeSettings }: Props) {
     const normalizedValue = useMemo(() => parseInt(TinyColor(themeSettings[name]).toHex(), 16), [themeSettings[name]]);
 
     return (
-        <Forms.FormSection>
+        <section>
             <div className={cl("swatch-row")}>
                 <span>{label}</span>
                 <ColorPicker
@@ -40,6 +40,6 @@ export function SettingColorComponent({ label, name, themeSettings }: Props) {
                     onChange={handleChange}
                 />
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }

@@ -195,7 +195,7 @@ const settings = definePluginSettings({
                 <>
                     <DemoMessageContainer />
                     {Object.entries(timeFormats).map(([key, value]) => (
-                        <Forms.FormSection key={key}>
+                        <section key={key}>
                             {key === "sameDayFormat" && (
                                 <div className={Margins.bottom20}>
                                     <Forms.FormDivider style={{ marginBottom: "10px" }} />
@@ -211,7 +211,7 @@ const settings = definePluginSettings({
                                 onChange={setNewValue}
                                 pluginSettings={settingsState}
                             />
-                        </Forms.FormSection>
+                        </section>
                     ))}
                 </>);
         }

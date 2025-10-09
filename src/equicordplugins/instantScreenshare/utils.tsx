@@ -92,10 +92,10 @@ function ScreenSetting() {
 
 function SettingSection() {
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle>Media source to stream</Forms.FormTitle>
             <Forms.FormText>Resets to main screen if not found</Forms.FormText>
             <ScreenSetting />
-        </Forms.FormSection>
+        </section>
     );
 }

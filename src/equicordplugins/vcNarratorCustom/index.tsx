@@ -373,7 +373,7 @@ export default definePlugin({
         const errorComponent: React.ReactElement | null = null;
 
         return (
-            <Forms.FormSection>
+            <section>
                 <Forms.FormText>
                     You can customise the spoken messages below. You can disable
                     specific messages by setting them to nothing
@@ -415,7 +415,7 @@ export default definePlugin({
                     ))}
                 </div>
                 {errorComponent}
-            </Forms.FormSection>
+            </section>
         );
     },
 });

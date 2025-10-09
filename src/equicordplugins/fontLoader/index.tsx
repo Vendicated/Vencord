@@ -130,7 +130,7 @@ function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) =
     };
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h3">Search Google Fonts</Forms.FormTitle>
             <Forms.FormText>Click on any font to apply it.</Forms.FormText>
 
@@ -163,7 +163,7 @@ function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) =
                     ))}
                 </div>
             )}
-        </Forms.FormSection>
+        </section>
     );
 }
 

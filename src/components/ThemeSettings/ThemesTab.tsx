@@ -331,7 +331,8 @@ function ThemesTab() {
                     <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
                 </Card>
 
-                <Forms.FormSection title="Local Themes">
+                <section>
+                    <Forms.FormTitle tag="h5">Local Themes</Forms.FormTitle>
                     <QuickActionCard>
                         <>
                             {IS_WEB ?
@@ -408,7 +409,7 @@ function ThemesTab() {
                                 />
                             )))}
                     </div>
-                </Forms.FormSection>
+                </section>
             </>
         );
     }
@@ -463,7 +464,8 @@ function ThemesTab() {
 
         return (
             <>;
-                <Forms.FormSection title="Online Themes" tag="h5">
+                <section>
+                    <Forms.FormTitle tag="h5">Online Themes</Forms.FormTitle>
                     <Card className="vc-settings-theme-add-card">
                         <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
                         <Flex flexDirection="row">
@@ -506,7 +508,7 @@ function ThemesTab() {
                             );
                         })}
                     </div>
-                </Forms.FormSection>
+                </section>
             </>
         );
     }

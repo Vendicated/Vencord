@@ -19,7 +19,8 @@ function ReasonsComponent() {
     const { reasons } = settings.store;
 
     return (
-        <Forms.FormSection title="Reasons">
+        <section>
+            <Forms.FormTitle tag="h5">Reasons</Forms.FormTitle>
             {reasons.map((r, i) => (
                 <div
                     key={i}
@@ -52,7 +53,7 @@ function ReasonsComponent() {
                     <PlusIcon /> Add another reason
                 </Button>
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }
 

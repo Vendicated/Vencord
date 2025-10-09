@@ -18,13 +18,13 @@ export function SettingTextComponent({ label, name, themeSettings }: Props) {
     }
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
             <TextInput
                 key={name}
                 value={themeSettings[name]}
                 onChange={handleChange}
             />
-        </Forms.FormSection>
+        </section>
     );
 }

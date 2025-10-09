@@ -35,7 +35,7 @@ export function SettingRangeComponent({ label, name, default: def, min, max, ste
     }, [min, max, step]);
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
             <Slider
                 initialValue={parseInt(themeSettings[name], 10)}
@@ -47,6 +47,6 @@ export function SettingRangeComponent({ label, name, default: def, min, max, ste
                 markers={markers}
                 stickToMarkers={true}
             />
-        </Forms.FormSection>
+        </section>
     );
 }
