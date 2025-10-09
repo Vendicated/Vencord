@@ -231,7 +231,7 @@
 
 .vc-channeltabs-tab-compact {
     width: auto;
-    min-width: unset;
+    min-width: calc(3rem * var(--tab-width-scale, 1));
     transition: all 0.4s ease-out;
 }
 
@@ -575,6 +575,8 @@
 }
 
 @keyframes vc-channeltabs-nitro-icon-gradient {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
     0%,
     100% {
         fill: rgb(255 115 250);
@@ -597,13 +599,13 @@
     inset: 0;
     border-radius: 11px;
     background: linear-gradient(135deg,
-        transparent,
-        transparent 25%,
-        rgb(0 200 255) 40%,
-        rgb(88 101 242) 50%,
-        rgb(220 104 255) 60%,
-        transparent 75%,
-        transparent);
+            transparent,
+            transparent 25%,
+            rgb(0 200 255) 40%,
+            rgb(88 101 242) 50%,
+            rgb(220 104 255) 60%,
+            transparent 75%,
+            transparent);
     background-size: 300% 300%;
     animation: vc-channeltabs-quests-diagonal 5s linear infinite;
     opacity: 0.8;
@@ -621,6 +623,8 @@
 }
 
 @keyframes vc-channeltabs-quests-diagonal {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
     0%,
     40% {
         background-position: 100% 0;
