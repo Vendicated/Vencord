@@ -21,6 +21,7 @@ import { FormSwitchCompat } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { LazyComponent } from "@utils/lazyReact";
+import { Logger } from "@utils/Logger";
 import * as t from "@vencord/discord-types";
 import { filters, find, LazyComponentWebpack, mapMangledModuleLazy, waitFor } from "@webpack";
 
@@ -60,10 +61,14 @@ export const Select: t.Select = LazyComponentWebpack(() => {
     const oldFilter = filters.componentByCode('="bottom",', ".select,", '"Escape"===');
     const newFilter = filters.componentByCode('"Select"', ".newOptionLabel");
 
-    const res = find(oldFilter) ?? find(newFilter);
+    const res = find(oldFilter, { isIndirect: true }) ?? find(newFilter, { isIndirect: true });
     if (res) return res;
 
-    throw new Error("Vencord failed to find the Select component");
+    const err = new Error("Failed to find Select component");
+    new Logger("Webpack").error(err);
+
+    if (IS_DEV)
+        throw err;
 });
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('"SearchableSelect"'));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode('"markDash".concat('));
