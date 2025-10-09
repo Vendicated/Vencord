@@ -10,7 +10,7 @@ import { classes } from "@utils/misc";
 import { Text } from "@webpack/common";
 import type { PropsWithChildren, ReactNode } from "react";
 
-import { FormDivider } from "./FormDivider";
+import { Divider } from "./Divider";
 import { Switch } from "./Switch";
 
 export interface FormSwitchProps {
@@ -35,7 +35,7 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
 
                 <Switch checked={value} onChange={onChange} disabled={disabled} />
             </div>
-            {!hideBorder && <FormDivider className="vc-form-switch-border" />}
+            {!hideBorder && <Divider className="vc-form-switch-border" />}
         </div>
     );
 }

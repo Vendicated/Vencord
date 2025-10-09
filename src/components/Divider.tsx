@@ -7,10 +7,11 @@
 import "./Divider.css";
 
 import { classes } from "@utils/misc";
+import type { CSSProperties } from "react";
 
 export interface DividerProps {
     className?: string;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 }
 
 export function Divider({ className, style }: DividerProps) {

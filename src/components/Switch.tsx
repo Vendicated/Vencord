@@ -29,6 +29,7 @@ interface SwitchProps {
 
 const SWITCH_ON = "var(--brand-500)";
 const SWITCH_OFF = "var(--primary-400)";
+// FIXME: this shouldn't use Discord's classes
 const SwitchClasses = findByPropsLazy("slider", "input", "container");
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {

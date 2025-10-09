@@ -20,19 +20,19 @@ import { FormSwitchCompat } from "@components/FormSwitch";
 import { LazyComponent } from "@utils/lazyReact";
 import * as t from "@vencord/discord-types";
 import { filters, find, LazyComponentWebpack, mapMangledModuleLazy, waitFor } from "@webpack";
+import { Divider } from "@components/Divider";
 
 import { FormText } from "./FormText";
 import { waitForComponent } from "./internal";
 
 const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat', '="h5"'));
-const FormDivider = waitForComponent<t.FormDivider>("FormDivider", filters.componentByCode(".divider,", ",style:", '"div"', /\.divider,\i\),style:/));
 
 export const Forms = {
     FormTitle,
     FormText,
     /** @deprecated don't use this */
     FormSection: "section" as never, // Backwards compat since Vesktop uses this
-    FormDivider
+    Divider
 };
 
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));

@@ -17,6 +17,7 @@
 */
 
 import { CodeBlock } from "@components/CodeBlock";
+import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { debounce } from "@shared/debounce";
@@ -134,7 +135,7 @@ function PatchHelper() {
                 replacementError={replacementError}
             />
 
-            <Forms.FormDivider />
+            <Divider />
             {module && (
                 <PatchPreview
                     module={module}

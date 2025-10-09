@@ -31,9 +31,9 @@ import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
-import { Divider } from "ui/Divider";
-import { HeadingTertiary } from "ui/Heading";
-import { Paragraph } from "ui/Paragraph";
+import { Divider } from "@components/Divider";
+import { HeadingTertiary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 

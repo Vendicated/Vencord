@@ -26,7 +26,6 @@ export type MarginSize = (typeof Sizes)[number];
 
 export const Margins: Record<`${MarginDirection}${MarginSize}`, string> = {} as any;
 
-
 export function generateMarginCss() {
     let css = "";
 

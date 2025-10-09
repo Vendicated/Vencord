@@ -22,12 +22,12 @@ import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
 import { Forms } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
-import { HeadingSecondary } from "ui/Heading";
+import { HeadingSecondary } from "@components/Heading";
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
         <section>
-           <HeadingSecondary className={Margins.bottom16}>{title}</HeadingSecondary>
+            <HeadingSecondary className={Margins.bottom16}>{title}</HeadingSecondary>
             {children}
         </section>
     );

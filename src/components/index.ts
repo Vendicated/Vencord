@@ -9,8 +9,6 @@ export * from "./CodeBlock";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export * from "./ErrorCard";
 export * from "./Flex";
-export * from "./FormDivider";
-export * from "./FormSwitch";
 export * from "./Grid";
 export * from "./Heart";
 export * from "./Icons";
