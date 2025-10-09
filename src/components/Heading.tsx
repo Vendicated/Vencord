@@ -4,39 +4,51 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText, BaseTextProps } from "./BaseText";
+import "./Heading.css";
+
+import { classes } from "@utils/misc";
+import type { ComponentPropsWithoutRef } from "react";
 
 export type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-export type HeadingProps = BaseTextProps<HeadingTag>;
+export type HeadingProps<Tag extends HeadingTag> = ComponentPropsWithoutRef<Tag> & {
+    tag?: Tag;
+};
 
-export function Heading(props: HeadingProps) {
+/**
+ * A simple heading component that automatically sizes according to the tag used.
+ *
+ * If you need more control, use the BaseText component instead.
+ */
+export function Heading<T extends HeadingTag>(props: HeadingProps<T>) {
+    const { tag: Tag = "h5", className, ...restProps } = props;
+
     return (
-        <BaseText tag="h3" size="md" weight="semibold" {...props}>
+        <Tag className={classes(`vc-${Tag}`, !className && `vc-${Tag}-defaultMargin`, className)} {...restProps}>
             {props.children}
-        </BaseText>
+        </Tag>
     );
 }
 
-export function HeadingPrimary(props: HeadingProps) {
+export function HeadingPrimary(props: HeadingProps<"h2">) {
     return (
-        <BaseText tag="h2" size="xl" weight="bold" {...props}>
+        <Heading tag="h2" {...props}>
             {props.children}
-        </BaseText>
+        </Heading>
     );
 }
 
-export function HeadingSecondary(props: HeadingProps) {
+export function HeadingSecondary(props: HeadingProps<"h3">) {
     return (
-        <BaseText tag="h3" size="lg" weight="semibold" {...props}>
+        <Heading tag="h3" {...props}>
             {props.children}
-        </BaseText>
+        </Heading>
     );
 }
 
-export function HeadingTertiary(props: HeadingProps) {
+export function HeadingTertiary(props: HeadingProps<"h4">) {
     return (
-        <BaseText tag="h4" size="md" weight="semibold" {...props}>
+        <Heading tag="h4" {...props}>
             {props.children}
-        </BaseText>
+        </Heading>
     );
 }
