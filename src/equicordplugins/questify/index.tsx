@@ -1036,10 +1036,22 @@ export default definePlugin({
             ]
         },
         {
-            // Sorts the "All Quests" tab.
+            // Adds the "Questify" sort option to the sort enum.
+            find: "SUGGESTED=\"suggested\",",
+            replacement: {
+                match: /return ((\i).SUGGESTED="suggested",)/,
+                replace: "return $2.QUESTIFY=\"questify\",$1"
+            }
+        },
+        {
             find: "CLAIMED=\"claimed\",",
             group: true,
             replacement: [
+                {
+                    // Adds the "Questify" sort option to the sort dropdown.
+                    match: /(?=case (\i.\i).SUGGESTED)/,
+                    replace: "case $1.QUESTIFY:return \"Questify\";"
+                },
                 {
                     // Run Questify's sort function every time due to hook requirements but return
                     // early if not applicable. If the sort method is set to "Questify", replace the
@@ -1061,24 +1073,6 @@ export default definePlugin({
                     // Add the trigger to the memo for rerendering Quests order due to progress changes, etc.
                     match: /(?<=id\);.{0,100}?,\i},\[\i,\i,\i)/,
                     replace: ",questRerenderTrigger,questifySorted"
-                }
-            ]
-        },
-        {
-            // Adds the "Questify" sort option to the sort enum.
-            find: "SUGGESTED=\"suggested\",",
-            replacement: {
-                match: /return ((\i).SUGGESTED="suggested",)/,
-                replace: "return $2.QUESTIFY=\"questify\",$1"
-            }
-        },
-        {
-            // Adds the "Questify" sort option to the sort dropdown.
-            find: "#{intl::K6oEu7::raw}",
-            replacement: [
-                {
-                    match: /(?=case (\i.\i).SUGGESTED)/,
-                    replace: "case $1.QUESTIFY:return \"Questify\";"
                 }
             ]
         },
@@ -1108,11 +1102,6 @@ export default definePlugin({
                     match: /(onChange:)(\i)(.{0,40}?selectedFilters)/,
                     replace: "$1(value)=>{$self.settings.store.lastQuestPageFilters=value.reduce((acc,item)=>({...acc,[item.filter]:item}),{});$2(value);}$3"
                 },
-            ]
-        },
-        {
-            find: "filterSortOption,selectedFilters",
-            replacement: [
                 {
                     // Update the last used sort and filter choices when the toggle setting for either is changed.
                     match: /(\[(\i),\i\]=\i.useState.{0,80}?\[(\i),\i\]=\i.useState.{0,350}?)(return \i.useEffect)/,
