@@ -105,14 +105,15 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
             const Component = OptionComponentMap[setting.type];
             return (
-                <Component
-                    id={key}
-                    key={key}
-                    option={setting}
-                    onChange={debounce(onChange)}
-                    pluginSettings={pluginSettings}
-                    definedSettings={plugin.settings}
-                />
+                <ErrorBoundary noop key={key}>
+                    <Component
+                        id={key}
+                        option={setting}
+                        onChange={debounce(onChange)}
+                        pluginSettings={pluginSettings}
+                        definedSettings={plugin.settings}
+                    />
+                </ErrorBoundary>
             );
         });
 
