@@ -8,10 +8,10 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
-import { Channel } from "@vencord/discord-types";
+import { ButtonProps, Channel } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
 import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
-import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
+import { JSX, MouseEventHandler, ReactNode } from "react";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
 waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
@@ -100,7 +100,7 @@ export interface ChatBarButtonProps {
     onClick: MouseEventHandler<HTMLButtonElement>;
     onContextMenu?: MouseEventHandler<HTMLButtonElement>;
     onAuxClick?: MouseEventHandler<HTMLButtonElement>;
-    buttonProps?: Omit<HTMLProps<HTMLButtonElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
+    buttonProps?: Omit<ButtonProps, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
 }
 export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
