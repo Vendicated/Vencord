@@ -34,7 +34,7 @@ import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
-import { PluginCard } from "./PluginCard";
+import { ExcludedReasons, PluginCard } from "./PluginCard";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
@@ -74,17 +74,10 @@ const enum SearchStatus {
     NEW
 }
 
+
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
-
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
-        desktop: "Discord Desktop app or Vesktop",
-        discordDesktop: "Discord Desktop app",
-        vesktop: "Vesktop app",
-        web: "Vesktop app and the Web version of Discord",
-        dev: "Developer version of Vencord"
-    };
 
     return (
         <Text variant="text-md/normal" className={Margins.top16}>
@@ -104,6 +97,8 @@ function ExcludedPluginsList({ search }: { search: string; }) {
         </Text>
     );
 }
+
+
 
 function PluginSettings() {
     const settings = useSettings();
@@ -130,19 +125,7 @@ function PluginSettings() {
             });
     }, []);
 
-    const depMap = useMemo(() => {
-        const o = {} as Record<string, string[]>;
-        for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
-            if (deps) {
-                for (const dep of deps) {
-                    o[dep] ??= [];
-                    o[dep].push(plugin);
-                }
-            }
-        }
-        return o;
-    }, []);
+    const depMap = Vencord.Plugins.calculatePluginDependencyMap();
 
     const sortedPlugins = useMemo(() =>
         Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)),
@@ -212,7 +195,7 @@ function PluginSettings() {
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
                 ? "This plugin is required for Vencord to function."
-                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+                : <PluginDependencyList deps={depMap[p.name]?.filter(d => settings.plugins[d].enabled)} />;
 
             requiredPlugins.push(
                 <Tooltip text={tooltipText} key={p.name}>
@@ -301,7 +284,7 @@ function PluginSettings() {
     );
 }
 
-function makeDependencyList(deps: string[]) {
+export function PluginDependencyList({ deps }: { deps: string[]; }) {
     return (
         <>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
