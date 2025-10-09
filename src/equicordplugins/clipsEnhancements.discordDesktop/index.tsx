@@ -53,11 +53,11 @@ export default definePlugin({
             find: "clips_recording_settings",
             replacement: [
                 {
-                    match: /\[\{.{0,10}\i.\i.FPS_15.{0,250}\}\]/,
+                    match: /\[\{.{0,25}\i.\i.FPS_15.{0,500}\}\]/,
                     replace: "$self.patchFramerates($&)"
                 },
                 {
-                    match: /\[\{.{0,10}\i.\i.SECONDS_30.{0,250}\}\]/,
+                    match: /\[\{.{0,25}\i.\i.SECONDS_30.{0,500}\}\]/,
                     replace: "$self.patchTimeslots($&)"
                 },
             ]

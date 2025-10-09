@@ -1074,8 +1074,7 @@ export default definePlugin({
         },
         {
             // Adds the "Questify" sort option to the sort dropdown.
-            find: "radioItemTitle,options",
-            group: true,
+            find: "#{intl::K6oEu7::raw}",
             replacement: [
                 {
                     match: /(?=case (\i.\i).SUGGESTED)/,
@@ -1086,7 +1085,7 @@ export default definePlugin({
         {
             // Loads the last used sort method and filter choices.
             // Defaults to sorting by "Questify" and no filters.
-            find: "QUEST_HOME_SORT_METHOD_CHANGED,",
+            find: "filterSortOption,selectedFilters",
             group: true,
             replacement: [
                 {
@@ -1109,6 +1108,11 @@ export default definePlugin({
                     match: /(onChange:)(\i)(.{0,40}?selectedFilters)/,
                     replace: "$1(value)=>{$self.settings.store.lastQuestPageFilters=value.reduce((acc,item)=>({...acc,[item.filter]:item}),{});$2(value);}$3"
                 },
+            ]
+        },
+        {
+            find: "filterSortOption,selectedFilters",
+            replacement: [
                 {
                     // Update the last used sort and filter choices when the toggle setting for either is changed.
                     match: /(\[(\i),\i\]=\i.useState.{0,80}?\[(\i),\i\]=\i.useState.{0,350}?)(return \i.useEffect)/,
