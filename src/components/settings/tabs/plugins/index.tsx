@@ -35,6 +35,7 @@ import { JSX } from "react";
 import Plugins, { ExcludedPlugins } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
+import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
@@ -244,6 +245,8 @@ function PluginSettings() {
     return (
         <SettingsTab title="Plugins">
             <ReloadRequiredCard required={changes.hasChanges} />
+
+            <UIElementsButton />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
