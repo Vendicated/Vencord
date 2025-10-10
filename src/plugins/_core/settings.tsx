@@ -17,7 +17,6 @@
 */
 
 import { Settings } from "@api/Settings";
-import { Showcase } from "@components/Button";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
@@ -243,7 +242,5 @@ export default definePlugin({
         return this.getInfoRows().map((text, i) =>
             <Component key={i} {...props}>{text}</Component>
         );
-    },
-
-    settingsAboutComponent: Showcase
+    }
 });

@@ -104,29 +104,18 @@ export interface ButtonProps extends PropsWithChildren<Omit<HTMLProps<HTMLButton
     color?: string;
     /** Button.Sizes.MEDIUM */
     size?: string;
-    /** Button.BorderColors.BLACK */
-    borderColor?: string;
 
-    wrapperClassName?: string;
     className?: string;
     innerClassName?: string;
 
     buttonRef?: Ref<HTMLButtonElement>;
-    focusProps?: any;
     submitting?: boolean;
-
-    submittingStartedLabel?: string;
-    submittingFinishedLabel?: string;
 }
 
 export type Button = ComponentType<ButtonProps> & {
-    BorderColors: Record<"BLACK" | "BRAND" | "BRAND_NEW" | "GREEN" | "LINK" | "PRIMARY" | "RED" | "TRANSPARENT" | "WHITE" | "YELLOW", string>;
-    Colors: Record<"BRAND" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "BLACK" | "TRANSPARENT" | "BRAND_NEW" | "CUSTOM", string>;
-    Hovers: Record<"DEFAULT" | "BRAND" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "BLACK" | "TRANSPARENT", string>;
-    Looks: Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
-    Sizes: Record<"NONE" | "TINY" | "SMALL" | "MEDIUM" | "LARGE" | "XLARGE" | "MIN" | "MAX" | "ICON", string>;
-
-    Link: any;
+    Colors: Record<"BRAND" | "RED" | "GREEN" | "PRIMARY" | "LINK" | "WHITE" | "TRANSPARENT" | "CUSTOM", string>;
+    Looks: Record<"FILLED" | "LINK", string>;
+    Sizes: Record<"NONE" | "SMALL" | "MEDIUM" | "LARGE" | "XLARGE" | "MIN", string>;
 };
 
 export type CheckboxAligns = {

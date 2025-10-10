@@ -17,6 +17,7 @@
 */
 
 import { TextCompat } from "@components/BaseText";
+import { ButtonCompat } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { FormSwitchCompat } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
@@ -42,7 +43,7 @@ export const Forms = {
 export const Text = TextCompat;
 
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
-export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
+export const Button = ButtonCompat;
 /** @deprecated Use FormSwitch from Vencord */
 export const Switch = FormSwitchCompat as never;
 export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
