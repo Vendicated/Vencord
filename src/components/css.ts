@@ -10,6 +10,6 @@ import { generateTextCss } from "./BaseText";
 import { generateMarginCss } from "./margins";
 
 export function addVencordUiStyles() {
+    createAndAppendStyle("vencord-text", document.head).textContent = generateTextCss();
     createAndAppendStyle("vencord-margins").textContent = generateMarginCss();
-    createAndAppendStyle("vencord-text").textContent = generateTextCss();
 }

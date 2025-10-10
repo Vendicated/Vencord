@@ -16,20 +16,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createAndAppendStyle } from "./css";
-
-let styleStr = "";
-
-export const Margins: Record<`${"top" | "bottom" | "left" | "right"}${8 | 16 | 20}`, string> = {} as any;
-
-for (const dir of ["top", "bottom", "left", "right"] as const) {
-    for (const size of [8, 16, 20] as const) {
-        const cl = `vc-m-${dir}-${size}`;
-        Margins[`${dir}${size}`] = cl;
-        styleStr += `.${cl}{margin-${dir}:${size}px;}`;
-    }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    createAndAppendStyle("vencord-margins").textContent = styleStr;
-});
+// TODO: migrate
+export { Margins } from "@components/margins";
