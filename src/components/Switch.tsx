@@ -21,13 +21,13 @@ import "./Switch.css";
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 
-interface SwitchProps {
+export interface SwitchProps {
+    disabled?: boolean;
     checked: boolean;
     onChange: (checked: boolean) => void;
-    disabled?: boolean;
 }
 
-const cl = classNameFactory("vc-switch-");
+const switchCls = classNameFactory("vc-switch-");
 
 const SWITCH_ON = "var(--brand-500)";
 const SWITCH_OFF = "var(--primary-400)";
@@ -35,9 +35,9 @@ const SWITCH_OFF = "var(--primary-400)";
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
     return (
         <div>
-            <div className={classes(cl("container"), "default-colors", cl({ checked, disabled }))}>
+            <div className={classes(switchCls("container"), "default-colors", switchCls({ checked, disabled }))}>
                 <svg
-                    className={cl("slider")}
+                    className={switchCls("slider")}
                     viewBox="0 0 28 20"
                     preserveAspectRatio="xMinYMid meet"
                     aria-hidden="true"
@@ -64,7 +64,7 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
                 <input
                     disabled={disabled}
                     type="checkbox"
-                    className={cl("input")}
+                    className={switchCls("input")}
                     tabIndex={0}
                     checked={checked}
                     onChange={e => onChange(e.currentTarget.checked)}

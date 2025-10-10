@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classNameFactory } from "@api/Styles";
+
+const marginCls = classNameFactory("vc-margin-");
+
 const Directions = ["top", "bottom", "left", "right"] as const;
 const Sizes = [8, 16, 20] as const;
 
@@ -29,9 +33,9 @@ export function generateMarginCss() {
 
     for (const direction of Directions) {
         for (const size of Sizes) {
-            const cl = `vc-m-${direction}-${size}`;
+            const cl = marginCls(`${direction}-${size}`);
             Margins[`${direction}${size}`] = cl;
-            css += `.${cl}{margin-${direction}:${size}px;}`;
+            css += `.${cl}{${direction}:${size}px;}`;
         }
     }
 

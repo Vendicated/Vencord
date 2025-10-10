@@ -7,18 +7,15 @@
 import "./Divider.css";
 
 import { classes } from "@utils/misc";
-import type { CSSProperties } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 
-export interface DividerProps {
-    className?: string;
-    style?: CSSProperties;
-}
+export type DividerProps = ComponentPropsWithoutRef<"hr">;
 
-export function Divider({ className, style }: DividerProps) {
+export function Divider({ className, ...restProps }: DividerProps) {
     return (
         <hr
             className={classes("vc-divider", className)}
-            style={style}
+            {...restProps}
         />
     );
 }

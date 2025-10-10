@@ -8,10 +8,10 @@ import { BaseText, BaseTextProps } from "./BaseText";
 
 export type SpanProps = BaseTextProps<"span">;
 
-export function Span(props: SpanProps) {
+export function Span({ children, ...restProps }: SpanProps) {
     return (
-        <BaseText tag="span" size="sm" weight="normal" {...props}>
-            {props.children}
+        <BaseText tag="span" size="sm" weight="normal" {...restProps}>
+            {children}
         </BaseText>
     );
 }

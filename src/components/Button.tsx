@@ -16,8 +16,8 @@ import { OpenExternalIcon } from "./Icons";
 const btnCls = classNameFactory("vc-btn-");
 const textBtnCls = classNameFactory("vc-text-btn-");
 
-export type ButtonVariant = "primary" | "secondary" | "dangerPrimary" | "dangerSecondary"
-    | "overlayPrimary" | "positive" | "link" | "none";
+export type ButtonVariant =
+    "primary" | "secondary" | "dangerPrimary" | "dangerSecondary" | "overlayPrimary" | "positive" | "link" | "none";
 export type ButtonSize = "min" | "xs" | "small" | "medium";
 
 export type ButtonProps = ComponentPropsWithRef<"button"> & {
@@ -25,21 +25,20 @@ export type ButtonProps = ComponentPropsWithRef<"button"> & {
     size?: ButtonSize;
 };
 
+export function Button({ variant = "primary", size = "medium", children, className, ...restProps }: ButtonProps) {
+    return (
+        <button className={classes(btnCls("base", variant, size), className)} {...restProps}>
+            {children}
+            {variant === "link" && <OpenExternalIcon className={btnCls("link-icon")} />}
+        </button>
+    );
+}
+
 export type TextButtonVariant = "primary" | "secondary" | "danger" | "link";
 
 export type TextButtonProps = ComponentPropsWithRef<"button"> & {
     variant?: TextButtonVariant;
 };
-
-export function Button({ variant = "primary", size = "medium", children, className, ...restProps }: ButtonProps) {
-    return (
-        <button className={classes(btnCls("base", variant, size), className)} {...restProps}>
-            {children}
-
-            {variant === "link" && <OpenExternalIcon className={btnCls("link-icon")} />}
-        </button>
-    );
-}
 
 export function TextButton({ variant = "primary", className, ...restProps }: TextButtonProps) {
     return (

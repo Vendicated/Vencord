@@ -8,10 +8,10 @@ import { BaseText, BaseTextProps } from "./BaseText";
 
 export type ParagraphProps = BaseTextProps<"p">;
 
-export function Paragraph(props: ParagraphProps) {
+export function Paragraph({ children, ...restProps }: ParagraphProps) {
     return (
-        <BaseText tag="p" size="sm" weight="normal" {...props}>
-            {props.children}
+        <BaseText tag="p" size="sm" weight="normal" {...restProps}>
+            {children}
         </BaseText>
     );
 }

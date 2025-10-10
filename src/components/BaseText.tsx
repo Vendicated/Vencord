@@ -34,18 +34,6 @@ const Weights = {
     extrabold: "800",
 } as const;
 
-export type TextSize = keyof typeof Sizes;
-export type TextWeight = keyof typeof Weights;
-
-export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
-export type TextTag = "div" | "span" | "p" | `h${1 | 2 | 3 | 4 | 5 | 6}`;
-
-export type BaseTextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRef<Tag> & {
-    size?: TextSize;
-    weight?: TextWeight;
-    tag?: Tag;
-};
-
 export function generateTextCss() {
     let css = "";
 
@@ -60,7 +48,17 @@ export function generateTextCss() {
     return css;
 }
 
-export function BaseText<Tag extends TextTag = "div">(props: BaseTextProps<Tag>): ReactNode {
+export type TextSize = keyof typeof Sizes;
+export type TextWeight = keyof typeof Weights;
+export type TextTag = "div" | "span" | "p" | `h${1 | 2 | 3 | 4 | 5 | 6}`;
+
+export type BaseTextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRef<Tag> & {
+    size?: TextSize;
+    weight?: TextWeight;
+    tag?: Tag;
+};
+
+export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): ReactNode {
     const {
         size = "md",
         weight = "normal",
