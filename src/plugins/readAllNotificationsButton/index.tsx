@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import { Clickable, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
 
 interface ThreadJoined {
     channel: Channel;
@@ -69,15 +69,12 @@ function onClick() {
 }
 
 const ReadAllButton = () => (
-    <Button
+    <Clickable
         onClick={onClick}
-        size={Button.Sizes.MIN}
-        look={Button.Looks.BLANK}
-        color={Button.Colors.CUSTOM}
         className="vc-ranb-button"
     >
         Read All
-    </Button>
+    </Clickable>
 );
 
 export default definePlugin({
