@@ -345,8 +345,6 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
  * @returns string or null
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: CodeFilter) {
-    if (IS_ANTI_CRASH_TEST) return null;
-
     code = code.map(canonicalizeMatch);
 
     for (const id in wreq.m) {
@@ -601,7 +599,8 @@ function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumera
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     const exports = {} as Record<S, any>;
 
-    if (IS_ANTI_CRASH_TEST) return exports;
+    // whitelist Modal API to be able to test modals
+    if (IS_ANTI_CRASH_TEST && code !== ':"thin")' && code !== ".modalKey?") return exports;
 
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
     if (id === null)
@@ -728,6 +727,7 @@ export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtr
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | PropsFilter | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    // if react find fails then we are fully cooked
     if (IS_ANTI_CRASH_TEST && filter !== "useState") return;
 
     if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
