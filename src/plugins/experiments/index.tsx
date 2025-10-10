@@ -73,10 +73,10 @@ export default definePlugin({
             }
         },
         {
-            find: 'H1,title:"Experiments"',
+            find: 'placeholder:"Search experiments"',
             replacement: {
-                match: 'title:"Experiments",children:[',
-                replace: "$&$self.WarningCard(),"
+                match: /(?<=children:\[)(?=\(0,\i\.jsx?\)\(\i\.\i,{placeholder:"Search experiments")/,
+                replace: "$self.WarningCard(),"
             }
         },
         // Change top right chat toolbar button from the help one to the dev one
