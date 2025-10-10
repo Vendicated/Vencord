@@ -27,7 +27,7 @@ export type ButtonProps = ComponentPropsWithRef<"button"> & {
 
 export function Button({ variant = "primary", size = "medium", children, className, ...restProps }: ButtonProps) {
     return (
-        <button className={classes(btnCls("base", variant, size), className)} {...restProps}>
+        <button data-mana-component="button" className={classes(btnCls("base", variant, size), className)} {...restProps}>
             {children}
             {variant === "link" && <OpenExternalIcon className={btnCls("link-icon")} />}
         </button>
