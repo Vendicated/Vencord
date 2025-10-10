@@ -6,11 +6,11 @@ const style = document.createElement("link");
 style.type = "text/css";
 style.rel = "stylesheet";
 style.href = browser.runtime.getURL("dist/Vencord.css");
-document.documentElement.append(style);
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
+        document.body.insertAdjacentElement("afterend", style);
         window.postMessage({
             type: "vencord:meta",
             meta: {

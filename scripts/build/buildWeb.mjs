@@ -177,12 +177,12 @@ async function buildExtension(target, files) {
 
 const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
     const cssRuntime = `
-;document.documentElement.appendChild(
+;document.addEventListener("DOMContentLoaded", () => document.body.insertAdjacentElement("afterend",
     Object.assign(document.createElement("style"), {
         textContent: \`${content.replaceAll("`", "\\`")}\`,
         id: "vencord-css-core"
     })
-);
+), { once: true });
 `;
 
     return appendFile("dist/Vencord.user.js", cssRuntime);
