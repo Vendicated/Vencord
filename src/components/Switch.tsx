@@ -18,28 +18,26 @@
 
 import "./Switch.css";
 
+import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
 
-interface SwitchProps {
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-    disabled?: boolean;
-}
+const switchCls = classNameFactory("vc-switch-");
 
 const SWITCH_ON = "var(--brand-500)";
 const SWITCH_OFF = "var(--primary-400)";
-const SwitchClasses = findByPropsLazy("slider", "input", "container");
+
+export interface SwitchProps {
+    disabled?: boolean;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+}
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
     return (
         <div>
-            <div className={classes(SwitchClasses.container, "default-colors", checked ? SwitchClasses.checked : void 0)} style={{
-                backgroundColor: checked ? SWITCH_ON : SWITCH_OFF,
-                opacity: disabled ? 0.3 : 1
-            }}>
+            <div className={classes(switchCls("container"), "default-colors", switchCls({ checked, disabled }))}>
                 <svg
-                    className={SwitchClasses.slider + " vc-switch-slider"}
+                    className={switchCls("slider")}
                     viewBox="0 0 28 20"
                     preserveAspectRatio="xMinYMid meet"
                     aria-hidden="true"
@@ -66,7 +64,7 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
                 <input
                     disabled={disabled}
                     type="checkbox"
-                    className={SwitchClasses.input}
+                    className={switchCls("input")}
                     tabIndex={0}
                     checked={checked}
                     onChange={e => onChange(e.currentTarget.checked)}

@@ -8,9 +8,10 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
-import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { ButtonWrapperClasses, Clickable, Tooltip } from "@webpack/common";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
@@ -97,32 +98,30 @@ export const removeChatBarButton = (id: string) => buttonFactories.delete(id);
 export interface ChatBarButtonProps {
     children: ReactNode;
     tooltip: string;
-    onClick: MouseEventHandler<HTMLButtonElement>;
-    onContextMenu?: MouseEventHandler<HTMLButtonElement>;
-    onAuxClick?: MouseEventHandler<HTMLButtonElement>;
-    buttonProps?: Omit<HTMLProps<HTMLButtonElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
+    onClick: MouseEventHandler;
+    onContextMenu?: MouseEventHandler;
+    onAuxClick?: MouseEventHandler;
+    buttonProps?: Omit<HTMLProps<HTMLDivElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
 }
 export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
         <Tooltip text={props.tooltip}>
             {({ onMouseEnter, onMouseLeave }) => (
                 <div className={`expression-picker-chat-input-button ${ChannelTextAreaClasses?.buttonContainer ?? ""} vc-chatbar-button`}>
-                    <Button
+                    <Clickable
                         aria-label={props.tooltip}
-                        size=""
-                        look={Button.Looks.BLANK}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
-                        innerClassName={`${ButtonWrapperClasses.button} ${ChannelTextAreaClasses?.button}`}
+                        className={classes(ButtonWrapperClasses?.button, ChannelTextAreaClasses?.button)}
                         onClick={props.onClick}
                         onContextMenu={props.onContextMenu}
                         onAuxClick={props.onAuxClick}
                         {...props.buttonProps}
                     >
-                        <div className={ButtonWrapperClasses.buttonWrapper}>
+                        <div className={ButtonWrapperClasses?.buttonWrapper}>
                             {props.children}
                         </div>
-                    </Button>
+                    </Clickable>
                 </div>
             )}
         </Tooltip>

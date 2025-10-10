@@ -16,5 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// TODO: Migrate all usages from utils to components
-export { Margins } from "@components/margins";
+import { classNameFactory } from "@api/Styles";
+
+const marginCls = classNameFactory("vc-margin-");
+
+const Directions = ["top", "bottom", "left", "right"] as const;
+const Sizes = [8, 16, 20] as const;
+
+export type MarginDirection = (typeof Directions)[number];
+export type MarginSize = (typeof Sizes)[number];
+
+export const Margins: Record<`${MarginDirection}${MarginSize}`, string> = {} as any;
+
+export function generateMarginCss() {
+    let css = "";
+
+    for (const direction of Directions) {
+        for (const size of Sizes) {
+            const cl = marginCls(`${direction}-${size}`);
+            Margins[`${direction}${size}`] = cl;
+            css += `.${cl}{margin-${direction}:${size}px;}`;
+        }
+    }
+
+    return css;
+}

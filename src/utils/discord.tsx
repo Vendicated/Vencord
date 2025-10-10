@@ -100,7 +100,11 @@ export const enum Theme {
 }
 
 export function getTheme(): Theme {
-    return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
+    try {
+        return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
+    } catch {
+        return Theme.Dark;
+    }
 }
 
 export function insertTextIntoChatInputBox(text: string) {

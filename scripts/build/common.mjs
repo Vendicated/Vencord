@@ -42,6 +42,7 @@ export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now
 export const watch = process.argv.includes("--watch");
 export const IS_DEV = watch || process.argv.includes("--dev");
 export const IS_REPORTER = process.argv.includes("--reporter");
+export const IS_ANTI_CRASH_TEST = process.argv.includes("--anti-crash-test");
 export const IS_STANDALONE = process.argv.includes("--standalone");
 
 export const IS_UPDATER_DISABLED = process.argv.includes("--disable-updater");

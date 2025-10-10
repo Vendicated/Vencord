@@ -17,6 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingTertiary } from "@components/Heading";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import type { Guild, GuildMember } from "@vencord/discord-types";
@@ -140,7 +141,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
 
     return <div>
         <div className={cl("user-header-container")}>
-            <Text variant="eyebrow">Permissions</Text>
+            <HeadingTertiary>Permissions</HeadingTertiary>
             <div className={cl("user-header-btns")}>
                 <Tooltip text={`Sorting by ${permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
                     {tooltipProps => (

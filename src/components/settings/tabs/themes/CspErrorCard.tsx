@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
@@ -61,7 +62,7 @@ export function CspErrorCard() {
             <div className="vc-settings-csp-list">
                 {errors.map((url, i) => (
                     <div key={url}>
-                        {i !== 0 && <Forms.FormDivider className={Margins.bottom8} />}
+                        {i !== 0 && <Divider className={Margins.bottom8} />}
                         <div className="vc-settings-csp-row">
                             <Link href={url}>{url}</Link>
                             <Button color={Button.Colors.PRIMARY} onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
@@ -74,7 +75,7 @@ export function CspErrorCard() {
 
             {hasImgurHtmlDomain && (
                 <>
-                    <Forms.FormDivider className={classes(Margins.top8, Margins.bottom16)} />
+                    <Divider className={classes(Margins.top8, Margins.bottom16)} />
                     <Forms.FormText>
                         Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>
                     </Forms.FormText>

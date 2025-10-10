@@ -77,12 +77,16 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
-                const author = user.id
-                    ? await UserUtils.getUser(`${user.id}`)
-                        .catch(() => makeDummyUser({ username: user.name }))
-                    : makeDummyUser({ username: user.name });
+                try {
+                    const author = user.id
+                        ? await UserUtils.getUser(String(user.id))
+                            .catch(() => makeDummyUser({ username: user.name }))
+                        : makeDummyUser({ username: user.name });
 
-                setAuthors(a => [...a, author]);
+                    setAuthors(a => [...a, author]);
+                } catch (e) {
+                    continue;
+                }
             }
         })();
     }, [plugin.authors]);
@@ -172,27 +176,29 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </Flex>
                     <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
                     <div style={{ width: "fit-content" }}>
-                        <UserSummaryItem
-                            users={authors}
-                            guildId={undefined}
-                            renderIcon={false}
-                            max={6}
-                            showDefaultAvatarsForNullUsers
-                            renderMoreUsers={renderMoreUsers}
-                            renderUser={(user: User) => (
-                                <Clickable
-                                    className={AvatarStyles.clickableAvatar}
-                                    onClick={() => openContributorModal(user)}
-                                >
-                                    <img
-                                        className={AvatarStyles.avatar}
-                                        src={user.getAvatarURL(void 0, 80, true)}
-                                        alt={user.username}
-                                        title={user.username}
-                                    />
-                                </Clickable>
-                            )}
-                        />
+                        <ErrorBoundary noop>
+                            <UserSummaryItem
+                                users={authors}
+                                guildId={undefined}
+                                renderIcon={false}
+                                max={6}
+                                showDefaultAvatarsForNullUsers
+                                renderMoreUsers={renderMoreUsers}
+                                renderUser={(user: User) => (
+                                    <Clickable
+                                        className={AvatarStyles.clickableAvatar}
+                                        onClick={() => openContributorModal(user)}
+                                    >
+                                        <img
+                                            className={AvatarStyles.avatar}
+                                            src={user.getAvatarURL(void 0, 80, true)}
+                                            alt={user.username}
+                                            title={user.username}
+                                        />
+                                    </Clickable>
+                                )}
+                            />
+                        </ErrorBoundary>
                     </div>
                 </section>
 

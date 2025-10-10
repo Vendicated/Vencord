@@ -19,6 +19,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -75,7 +76,7 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
                             <>
                                 <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
                                 <CodeBlock content={msgContent} lang="" />
-                                <Forms.FormDivider className={Margins.bottom20} />
+                                <Divider className={Margins.bottom20} />
                             </>
                         )}
 

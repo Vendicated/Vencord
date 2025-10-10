@@ -22,10 +22,12 @@ import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { CopyIcon, ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
+import { Span } from "@components/Span";
 import { debounce } from "@shared/debounce";
 import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
-import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { SeekBar } from "./SeekBar";
 import { SpotifyStore, Track } from "./SpotifyStore";
@@ -185,13 +187,14 @@ function SpotifySeekBar() {
 
     return (
         <div id={cl("progress-bar")}>
-            <Forms.FormText
-                variant="text-xs/medium"
+            <Span
+                size="xs"
+                weight="medium"
                 className={cl("progress-time") + " " + cl("time-left")}
                 aria-label="Progress"
             >
                 {msToHuman(position)}
-            </Forms.FormText>
+            </Span>
             <SeekBar
                 initialValue={position}
                 minValue={0}
@@ -200,13 +203,14 @@ function SpotifySeekBar() {
                 asValueChanges={onChange}
                 onValueRender={msToHuman}
             />
-            <Forms.FormText
-                variant="text-xs/medium"
+            <Span
+                size="xs"
+                weight="medium"
                 className={cl("progress-time") + " " + cl("time-right")}
                 aria-label="Total Duration"
             >
                 {msToHuman(duration)}
-            </Forms.FormText>
+            </Span>
         </div>
     );
 }
@@ -298,17 +302,17 @@ function Info({ track }: { track: Track; }) {
         <div id={cl("info-wrapper")}>
             {i}
             <div id={cl("titles")}>
-                <Forms.FormText
-                    variant="text-sm/semibold"
+                <Paragraph
+                    weight="semibold"
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
                     title={track.name}
                     {...makeLinkProps("Song", track.id, track.name, `/track/${track.id}`)}
                 >
                     {track.name}
-                </Forms.FormText>
+                </Paragraph>
                 {track.artists.some(a => a.name) && (
-                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                    <Paragraph className={cl(["ellipoverflow", "secondary-song-info"])}>
                         <span className={cl("song-info-prefix")}>by&nbsp;</span>
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
@@ -323,10 +327,10 @@ function Info({ track }: { track: Track; }) {
                                 {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                             </React.Fragment>
                         ))}
-                    </Forms.FormText>
+                    </Paragraph>
                 )}
                 {track.album.name && (
-                    <Forms.FormText variant="text-sm/normal" className={cl(["ellipoverflow", "secondary-song-info"])}>
+                    <Paragraph className={cl(["ellipoverflow", "secondary-song-info"])}>
                         <span className={cl("song-info-prefix")}>on&nbsp;</span>
                         <span
                             id={cl("album-title")}
@@ -337,7 +341,7 @@ function Info({ track }: { track: Track; }) {
                         >
                             {track.album.name}
                         </span>
-                    </Forms.FormText>
+                    </Paragraph>
                 )}
             </div>
         </div>

@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { Divider } from "@components/Divider";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
@@ -88,7 +89,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                             onChange={e => setName(e)}
                         />
                     </section>
-                    <Forms.FormDivider />
+                    <Divider />
                     <section>
                         <Forms.FormTitle>Color</Forms.FormTitle>
                         <ColorPickerWithSwatches

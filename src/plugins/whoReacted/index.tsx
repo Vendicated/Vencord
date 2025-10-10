@@ -130,7 +130,7 @@ export default definePlugin({
 
         useEffect(() => {
             const cb = (e: any) => {
-                if (e.messageId === message.id)
+                if (e?.messageId === message.id)
                     forceUpdate();
             };
             FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);

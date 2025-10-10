@@ -191,11 +191,10 @@ export default definePlugin({
                     <TooltipContainer text="View Permissions">
                         <Button
                             {...popoutProps}
-                            buttonRef={buttonRef}
+                            ref={buttonRef}
                             color={Button.Colors.CUSTOM}
                             look={Button.Looks.FILLED}
                             size={Button.Sizes.NONE}
-                            innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon)}
                             className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, "vc-permviewer-role-button")}
                         >
                             <SafetyIcon height="16" width="16" />

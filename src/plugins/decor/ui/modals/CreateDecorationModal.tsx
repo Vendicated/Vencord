@@ -145,24 +145,24 @@ function CreateDecorationModal(props: ModalProps) {
             </ErrorBoundary>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
-            <Button
-                onClick={() => {
-                    setSubmitting(true);
-                    createDecoration({ alt: name, file: file! })
-                        .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
-                }}
-                disabled={!file || !name}
-                submitting={submitting}
-            >
-                Submit for Review
-            </Button>
-            <Button
-                onClick={props.onClose}
-                color={Button.Colors.PRIMARY}
-                look={Button.Looks.LINK}
-            >
-                Cancel
-            </Button>
+            <div className={cl("modal-footer-btn-container")}>
+                <Button
+                    onClick={props.onClose}
+                    color={Button.Colors.PRIMARY}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    onClick={() => {
+                        setSubmitting(true);
+                        createDecoration({ alt: name, file: file! })
+                            .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
+                    }}
+                    disabled={!file || !name || submitting}
+                >
+                    Submit for Review
+                </Button>
+            </div>
         </ModalFooter>
     </ModalRoot>;
 }
