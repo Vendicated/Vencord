@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button as NewButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { openInviteModal } from "@utils/discord";
@@ -241,7 +242,7 @@ function ChangeDecorationModal(props: ModalProps) {
             </div>
             <div className={cl("modal-footer-btn-container")}>
                 <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
-                    {tooltipProps => <Button
+                    {tooltipProps => <NewButton
                         {...tooltipProps}
                         onClick={async () => {
                             if (!GuildStore.getGuild(GUILD_ID)) {
@@ -256,13 +257,12 @@ function ChangeDecorationModal(props: ModalProps) {
                                 NavigationRouter.transitionToGuild(GUILD_ID);
                             }
                         }}
-                        color={Button.Colors.PRIMARY}
-                        look={Button.Looks.LINK}
+                        variant="link"
                     >
                         Discord Server
-                    </Button>}
+                    </NewButton>}
                 </Tooltip>
-                <Button
+                <NewButton
                     onClick={() => Alerts.show({
                         title: "Log Out",
                         body: "Are you sure you want to log out of Decor?",
@@ -274,11 +274,10 @@ function ChangeDecorationModal(props: ModalProps) {
                             props.onClose();
                         }
                     })}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
+                    variant="dangerSecondary"
                 >
                     Log Out
-                </Button>
+                </NewButton>
             </div>
         </ModalFooter>
     </ModalRoot>;
