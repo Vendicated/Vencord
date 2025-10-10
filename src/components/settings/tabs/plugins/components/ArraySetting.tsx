@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { PluginOptionArray } from "@utils/types";

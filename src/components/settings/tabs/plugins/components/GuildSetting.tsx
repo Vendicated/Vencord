@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { convertToArray } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { PlusIcon } from "@components/Icons";
@@ -31,7 +32,7 @@ export const GuildSetting = ErrorBoundary.wrap(function GuildSetting({
     id
 }: SettingProps<PluginOptionArray>) {
     const [error, setError] = useState<string | null>(null);
-    const [items, setItems] = useState<string[]>(ensureSettingsMigrated() || []);
+    const [items, setItems] = useState<string[]>(ensureSettingsMigrated());
     const [text, setText] = useState<string>("");
 
     useEffect(() => {
@@ -57,25 +58,13 @@ export const GuildSetting = ErrorBoundary.wrap(function GuildSetting({
         }
     }, [text, items]);
 
-    // TODO: remove this after a few months
-    function ensureSettingsMigrated(): string[] | undefined {
-        // TODO maybe move this to @api/Settings where migratePluginSettings is?
+    function ensureSettingsMigrated(): string[] {
         // in case the settings get manually overridden without a restart of Vencord itself this will prevent crashing
-        if (pluginSettings[id] == null || Array.isArray(pluginSettings[id])) {
-            return pluginSettings[id];
-        }
-        const sep = option.oldStringSeparator || ",";
-        let migrated: string[];
-        if (typeof sep === "string" || sep instanceof RegExp) {
-            migrated = pluginSettings[id]?.split(sep);
-        } else if (typeof sep === "function") {
-            migrated = sep(pluginSettings[id]);
-        } else {
-            throw new Error(`Invalid oldStringSeparator for in setting ${id} for plugin ${definedSettings?.pluginName || "Unknown plugin"}`);
-        }
+        const migrated = convertToArray(pluginSettings[id], option.oldStringSeparator ?? ",");
         onChange(migrated);
         return migrated;
     }
+
     const guildIcon = (guild: Guild) => {
         const icon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
             id: guild.id,
