@@ -146,6 +146,10 @@ export const SettingsStore = new SettingsStoreClass(settings, {
                     // normal setting with a default value
                     return (target[key] = setting.default);
 
+                else if ([OptionType.ARRAY, OptionType.USERS, OptionType.GUILDS, OptionType.CHANNELS, OptionType.ROLES].includes(setting.type))
+                    // if there is no default value we initialize it as an empty array
+                    return (target[key] = []);
+
                 if (setting.type === OptionType.SELECT) {
                     const def = setting.options.find(o => o.default);
                     if (def)
@@ -231,6 +235,35 @@ export function migratePluginSetting(pluginName: string, oldSetting: string, new
     settings[newSetting] = settings[oldSetting];
     delete settings[oldSetting];
     SettingsStore.markAsChanged();
+}
+
+export function migratePluginSettingToArray(pluginName: string, settingName: string) {
+    const settings = SettingsStore.plain.plugins[pluginName];
+    if (!settings) return;
+    if (!Object.hasOwn(settings, settingName)) return;
+
+    const { def } = plugins.settings[pluginName].def;
+
+    if (![OptionType.ARRAY, OptionType.USERS, OptionType.GUILDS, OptionType.CHANNELS, OptionType.ROLES].includes(def.type)) {
+        throw new Error("Cannot migrate a setting that is not an array settings type");
+    }
+
+    settings[settingName] = convertToArray(settings[settingName], def[settingName].oldStringSeparator ?? ",");
+
+    SettingsStore.markAsChanged();
+
+}
+
+// Helper function because this bit of code specifically needs to be used in places where the above code isn't used
+export function convertToArray(val: string, sep: string | RegExp | ((old: string) => string[])): string[] {
+    if (Array.isArray(val)) return val;
+    let newVal: string[];
+    if (typeof sep === "string" || sep instanceof RegExp) newVal = val.split(sep);
+    else newVal = sep(val);
+
+    // additional safeguard to prevent the new array to be an empty string, can cause issues in some places
+    if (newVal.length > 1 || newVal[0] !== "") return newVal;
+    else return [];
 }
 
 export function definePluginSettings<
