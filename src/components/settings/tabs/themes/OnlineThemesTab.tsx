@@ -28,7 +28,7 @@ export function OnlineThemesTab() {
     return (
         <>
             <Card className={classes("vc-warning-card", Margins.bottom16)}>
-                <Forms.FormText>
+                <Forms.FormText size="md">
                     This section is for advanced users. If you are having difficulties using it, use the
                     Local Themes tab instead.
                 </Forms.FormText>
