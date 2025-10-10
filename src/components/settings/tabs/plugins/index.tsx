@@ -31,7 +31,6 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -41,8 +40,6 @@ import { PluginCard } from "./PluginCard";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
-
-const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
@@ -256,7 +253,7 @@ function PluginSettings() {
                 <ErrorBoundary noop>
                     <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
                 </ErrorBoundary>
-                <div className={InputStyles.inputWrapper}>
+                <div>
                     <ErrorBoundary noop>
                         <Select
                             options={[

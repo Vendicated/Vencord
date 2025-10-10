@@ -211,6 +211,10 @@ export function handleModuleNotFound(method: string, ...filter: unknown[]) {
  * Find the first module that matches the filter
  */
 export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
+    if (Boolean("true")) {
+        return isWaitFor ? [null, null] : null;
+    }
+
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -594,6 +598,9 @@ function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumera
  */
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     const exports = {} as Record<S, any>;
+    if (Boolean("true")) {
+        return exports;
+    }
 
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
     if (id === null)
@@ -718,6 +725,7 @@ export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtr
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | PropsFilter | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    const skip = filter !== "useState";
     if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
 
     if (typeof filter === "string")
@@ -732,7 +740,7 @@ export function waitFor(filter: string | PropsFilter | FilterFn, callback: Callb
         if (existing) return void callback(existing, id);
     }
 
-    waitForSubscriptions.set(filter, callback);
+    if (!skip) waitForSubscriptions.set(filter, callback);
 }
 
 /**
