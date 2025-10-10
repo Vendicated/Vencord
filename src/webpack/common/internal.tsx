@@ -23,7 +23,7 @@ export function waitForComponent<T extends React.ComponentType<any> = React.Comp
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForComponent", Array.isArray(filter) ? filter : [filter]]);
 
     let myValue: T = function () {
-        throw new Error(`Vencord could not find the ${name} Component`);
+        throw new Error(`Equicord could not find the ${name} Component`);
     } as any;
 
     const lazyComponent = LazyComponent(() => myValue) as LazyComponentWrapper<T>;
