@@ -16,5 +16,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// TODO: migrate
+// TODO: Migrate all usages from utils to components
 export { Margins } from "@components/margins";

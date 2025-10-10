@@ -21,16 +21,16 @@ import "./Switch.css";
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 
+const switchCls = classNameFactory("vc-switch-");
+
+const SWITCH_ON = "var(--brand-500)";
+const SWITCH_OFF = "var(--primary-400)";
+
 export interface SwitchProps {
     disabled?: boolean;
     checked: boolean;
     onChange: (checked: boolean) => void;
 }
-
-const switchCls = classNameFactory("vc-switch-");
-
-const SWITCH_ON = "var(--brand-500)";
-const SWITCH_OFF = "var(--primary-400)";
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
     return (

@@ -204,7 +204,6 @@ export default definePlugin({
                     }}>
                         <ModalRoot {...props}>
                             <ModalHeader>
-
                                 <Forms.FormTitle
                                     tag="h2"
                                     style={{

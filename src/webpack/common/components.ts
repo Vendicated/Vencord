@@ -30,7 +30,7 @@ import { filters, find, LazyComponentWebpack, mapMangledModuleLazy, waitFor } fr
 import { waitForComponent } from "./internal";
 
 export const Forms = {
-    // TODO: stop using this and use Heading and Paragraph directly
+    // TODO: Stop using this and use Heading/Paragraph directly
     FormTitle: Heading,
     FormText: Paragraph,
     /** @deprecated don't use this */
@@ -39,7 +39,7 @@ export const Forms = {
     FormDivider: Divider as never, // Backwards compat since Vesktop uses this
 };
 
-// TODO: stop using this and use Paragraph/Span directly
+// TODO: Stop using this and use Paragraph/Span directly
 export const Text = TextCompat;
 export const Button = ButtonCompat;
 /** @deprecated Use FormSwitch from Vencord */

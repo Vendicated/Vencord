@@ -8,6 +8,7 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
 import { ButtonWrapperClasses, Clickable, Tooltip } from "@webpack/common";
@@ -111,13 +112,13 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
                         aria-label={props.tooltip}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
-                        className={`${ButtonWrapperClasses.button} ${ChannelTextAreaClasses?.button}`}
+                        className={classes(ButtonWrapperClasses?.button, ChannelTextAreaClasses?.button)}
                         onClick={props.onClick}
                         onContextMenu={props.onContextMenu}
                         onAuxClick={props.onAuxClick}
                         {...props.buttonProps}
                     >
-                        <div className={ButtonWrapperClasses.buttonWrapper}>
+                        <div className={ButtonWrapperClasses?.buttonWrapper}>
                             {props.children}
                         </div>
                     </Clickable>

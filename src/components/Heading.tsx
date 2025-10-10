@@ -35,26 +35,26 @@ export function Heading<T extends HeadingTag>(props: HeadingProps<T>) {
     );
 }
 
-export function HeadingPrimary(props: HeadingProps<"h2">) {
+export function HeadingPrimary({ children, ...restProps }: HeadingProps<"h2">) {
     return (
-        <Heading tag="h2" {...props}>
-            {props.children}
+        <Heading tag="h2" {...restProps}>
+            {children}
         </Heading>
     );
 }
 
-export function HeadingSecondary(props: HeadingProps<"h3">) {
+export function HeadingSecondary({ children, ...restProps }: HeadingProps<"h3">) {
     return (
-        <Heading tag="h3" {...props}>
-            {props.children}
+        <Heading tag="h3" {...restProps}>
+            {children}
         </Heading>
     );
 }
 
-export function HeadingTertiary(props: HeadingProps<"h4">) {
+export function HeadingTertiary({ children, ...restProps }: HeadingProps<"h4">) {
     return (
-        <Heading tag="h4" {...props}>
-            {props.children}
+        <Heading tag="h4" {...restProps}>
+            {children}
         </Heading>
     );
 }

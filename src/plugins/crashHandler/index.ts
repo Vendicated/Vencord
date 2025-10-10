@@ -76,8 +76,6 @@ export default definePlugin({
     ],
 
     handleCrash(_this: any, errorState: any) {
-        console.error("=====CRASHED====="); // make it easier to find error that caused crash
-
         _this.setState(errorState);
 
         // Already recovering, prevent error which happens more than once too fast to trigger another recover
