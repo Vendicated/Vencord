@@ -44,7 +44,6 @@ function searchProtoClassField(localName: string, protoClass: any) {
 
 const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
 const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
-const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
 const isUnusableRoleSubscriptionEmoji = findByCodeLazy(".getUserIsAdmin(");
 
@@ -269,8 +268,8 @@ export default definePlugin({
         {
             find: ",updateTheme(",
             replacement: {
-                match: /(function \i\(\i\){let{backgroundGradientPresetId:(\i).+?)(\i\.\i\.updateAsync.+?theme=(.+?),.+?},\i\))/,
-                replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
+                match: /(function \i\(\i\){let{backgroundGradientPresetId:.+?)(\i\.\i\.updateAsync.+?\.theme=(.+?),.+?\.clientThemeSettings=(\i\({.+?}\)).*?},\i\))/,
+                replace: (_, rest, originalCall, theme, clientThemeSettings) => `${rest}$self.handleGradientThemeSelect(${clientThemeSettings},${theme},()=>${originalCall});`
             }
         },
         // Allow users to use custom client themes
@@ -387,55 +386,49 @@ export default definePlugin({
         return (UserStore.getCurrentUser().premiumType ?? 0) > 1;
     },
 
-    handleProtoChange(proto: any, user: any) {
+    handleProtoChange(userSettingsProto: any, user: any) {
         try {
-            if (proto == null || typeof proto === "string") return;
+            if (userSettingsProto == null || typeof userSettingsProto === "string") return;
 
             const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
+            if (premiumType === 2 || !AppearanceSettingsActionCreators) return;
 
-            if (premiumType !== 2) {
-                proto.appearance ??= AppearanceSettingsActionCreators.create();
+            userSettingsProto.appearance ??= AppearanceSettingsActionCreators.create();
 
-                const protoStoreAppearenceSettings = UserSettingsProtoStore.settings.appearance;
+            const userSettingsProtoStoreAppearenceSettings = UserSettingsProtoStore.settings.appearance;
 
-                const appearanceSettingsOverwrite = AppearanceSettingsActionCreators.create({
-                    ...proto.appearance,
-                    theme: protoStoreAppearenceSettings?.theme,
-                    clientThemeSettings: protoStoreAppearenceSettings?.clientThemeSettings
-                });
+            const appearanceSettingsOverwrite = AppearanceSettingsActionCreators.create({
+                ...userSettingsProto.appearance,
+                theme: userSettingsProtoStoreAppearenceSettings?.theme,
+                clientThemeSettings: userSettingsProtoStoreAppearenceSettings?.clientThemeSettings
+            });
 
-                proto.appearance = appearanceSettingsOverwrite;
-            }
+            userSettingsProto.appearance = appearanceSettingsOverwrite;
         } catch (err) {
             new Logger("FakeNitro").error(err);
         }
     },
 
-    handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
+    handleGradientThemeSelect(clientThemeSettings: any, theme: number, original: () => void) {
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
-        if (premiumType === 2 || backgroundGradientPresetId == null) return original();
+        const hasNitroCustomization = Object.values(clientThemeSettings ?? {}).some(v => v != null);
 
-        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !BINARY_READ_OPTIONS) return;
+        if (premiumType === 2 || !hasNitroCustomization) {
+            return original();
+        }
 
-        const currentAppearanceSettings = PreloadedUserSettingsActionCreators.getCurrentValue().appearance;
+        if (!AppearanceSettingsActionCreators) return;
 
-        const newAppearanceProto = currentAppearanceSettings != null
-            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), BINARY_READ_OPTIONS)
-            : AppearanceSettingsActionCreators.create();
+        const currentAppearanceSettings = UserSettingsProtoStore.settings.appearance;
 
-        newAppearanceProto.theme = theme;
-
-        const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
-            backgroundGradientPresetId: {
-                value: backgroundGradientPresetId
-            }
+        const appearanceSettingsOverwrite = AppearanceSettingsActionCreators.create({
+            ...currentAppearanceSettings,
+            theme,
+            clientThemeSettings
         });
 
-        newAppearanceProto.clientThemeSettings ??= clientThemeSettingsDummy;
-        newAppearanceProto.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
-
-        const proto = PreloadedUserSettingsActionCreators.ProtoClass.create();
-        proto.appearance = newAppearanceProto;
+        const userSettingsProto = PreloadedUserSettingsActionCreators.ProtoClass.create();
+        userSettingsProto.appearance = appearanceSettingsOverwrite;
 
         FluxDispatcher.dispatch({
             type: "USER_SETTINGS_PROTO_UPDATE",
@@ -443,7 +436,7 @@ export default definePlugin({
             partial: true,
             settings: {
                 type: 1,
-                proto
+                proto: userSettingsProto
             }
         });
     },
