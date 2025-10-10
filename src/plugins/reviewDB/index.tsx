@@ -85,9 +85,9 @@ export default definePlugin({
             }
         },
         {
-            find: ".SIDEBAR,shouldShowTooltip:",
+            find: '"UserProfileSidebar"',
             replacement: {
-                match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
+                match: /children:\[(?=[^[]+?\.SIDEBAR)/,
                 replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
             }
         }

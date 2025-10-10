@@ -114,18 +114,17 @@ const blobCache = new Map<string, Blob>();
 
 // Component to render inside each zip attachment
 function ZipAttachmentPreview({ attachment }: { attachment: any; }) {
+    const key = attachment?.id || attachment?.url || attachment?.proxy_url;
     const ext = attachment.fileName.match(/\.tar\.\w+$|(\.\w+)$/)?.[0] ?? "";
     if (ext !== ".zip") return;
 
-    const [blob, setBlob] = useState<Blob | null>(() => blobCache.get(attachment.id) || null);
+    const [blob, setBlob] = useState<Blob | null>(() => blobCache.get(key) || null);
     const [error, setError] = useState<string | null>(null);
-    const [expanded, setExpanded] = useState<boolean>(() => {
-        try { return expandedState.get(attachment.id) ?? false; } catch { return false; }
-    });
+    const [expanded, setExpanded] = useState<boolean>(() => expandedState.get(key) ?? false);
 
     useEffect(() => {
         // If already cached, skip fetch
-        if (blobCache.has(attachment.id)) return;
+        if (blobCache.has(key)) return;
 
         let mounted = true;
         (async () => {
@@ -143,14 +142,15 @@ function ZipAttachmentPreview({ attachment }: { attachment: any; }) {
                 }
                 if (mounted) {
                     setBlob(b);
-                    blobCache.set(attachment.id, b);
+                    blobCache.set(key, b);
                 }
-            } catch (err) {
+            } catch {
                 if (mounted) setError("Failed to fetch archive");
             }
         })();
+
         return () => { mounted = false; };
-    }, [attachment.id]);
+    }, [key]);
 
     if (error) return <div className="zp-error">{error}</div>;
     if (!blob) return <div className="zp-loading">Loading preview…</div>;
@@ -161,7 +161,10 @@ function ZipAttachmentPreview({ attachment }: { attachment: any; }) {
                 blob={blob}
                 name={attachment.filename || attachment.name || "archive.zip"}
                 expanded={expanded}
-                onExpandedChange={v => { setExpanded(v); expandedState.set(attachment.id, v); }}
+                onExpandedChange={v => {
+                    setExpanded(v);
+                    expandedState.set(key, v);
+                }}
             />
         </div>
     );
