@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
 import type { ComponentType, PropsWithChildren } from "react";
@@ -26,7 +26,7 @@ import type { ComponentType, PropsWithChildren } from "react";
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
         <section>
-            <HeadingSecondary className={Margins.bottom16}>{title}</HeadingSecondary>
+            <BaseText tag="h2" size="xl" weight="semibold" className={Margins.bottom16}>{title}</BaseText>
             {children}
         </section>
     );
