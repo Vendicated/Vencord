@@ -23,9 +23,8 @@ import { FormSwitchCompat } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { LazyComponent } from "@utils/lazyReact";
-import { Logger } from "@utils/Logger";
 import * as t from "@vencord/discord-types";
-import { filters, find, LazyComponentWebpack, mapMangledModuleLazy, waitFor } from "@webpack";
+import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
 
@@ -61,19 +60,7 @@ export const TooltipContainer = LazyComponent(() => Tooltips.TooltipContainer);
 
 export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode("#{intl::MAXIMUM_LENGTH_ERROR}", '"input"'));
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("this.getPaddingRight()},id:"));
-export const Select: t.Select = LazyComponentWebpack(() => {
-    const oldFilter = filters.componentByCode('="bottom",', ".select,", '"Escape"===');
-    const newFilter = filters.componentByCode('"Select"', ".newOptionLabel");
-
-    const res = find(oldFilter, { isIndirect: true }) ?? find(newFilter, { isIndirect: true });
-    if (res) return res;
-
-    const err = new Error("Failed to find Select component");
-    new Logger("Webpack").error(err);
-
-    if (IS_DEV)
-        throw err;
-});
+export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('"Select"', ".newOptionLabel"));
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('"SearchableSelect"'));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode('"markDash".concat('));
 export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCode("ref:this.ref,", "renderPopout:this.renderPopout,"));
