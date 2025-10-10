@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// TODO: remove the duplicate of this file in utils and migrate code
-
 const Directions = ["top", "bottom", "left", "right"] as const;
 const Sizes = [8, 16, 20] as const;
 
