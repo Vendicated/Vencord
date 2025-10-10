@@ -63,8 +63,6 @@
     line-height: 1.25;
 }
 
-/* variants: "positive" | "link" | "linkButton" */
-
 .vc-btn-primary {
     background-color: var(--control-background-primary-default);
     border-color: var(--control-border-primary-default);
