@@ -30,7 +30,8 @@
     margin: 3px;
     position: absolute;
     width: 28px;
-    transition: 100ms transform ease-in-out
+    transition: 100ms transform ease-in-out;
+    overflow: visible
 }
 
 
