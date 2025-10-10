@@ -19,8 +19,6 @@ import {
 
 import { SettingProps, SettingsSection } from "./Common";
 
-const isDevModeEnabled = () => getUserSettingLazy("appearance", "developerMode")?.getSetting() === true;
-
 export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
     option,
     pluginSettings,

@@ -7,7 +7,6 @@
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { PlusIcon } from "@components/Icons";
-import { SettingProps, SettingsSection } from "./Common";
 import { PluginOptionArray } from "@utils/types";
 import { Guild, SelectOption } from "@vencord/discord-types";
 import {
@@ -19,6 +18,8 @@ import {
     UserStore,
     useState
 } from "@webpack/common";
+
+import { SettingProps, SettingsSection } from "./Common";
 
 const isDevModeEnabled = () => getUserSettingLazy("appearance", "developerMode")?.getSetting() === true;
 
@@ -76,14 +77,6 @@ export const UserSetting = ErrorBoundary.wrap(function UserSetting({
         onChange(migrated);
         return migrated;
     }
-    const guildIcon = (guild: Guild) => {
-        const icon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
-            id: guild.id,
-            icon: guild.icon,
-            size: 16,
-        });
-        return icon != null ? <img src={icon} alt="" /> : null;
-    };
 
     function renderUserSelect() {
        return <SearchableSelect
