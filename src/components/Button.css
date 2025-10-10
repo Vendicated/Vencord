@@ -75,7 +75,8 @@
     }
 }
 
-.vc-btn-secondary {
+.vc-btn-secondary,
+.vc-btn-link {
     background-color: var(--control-background-secondary-default);
     border-color: var(--control-border-secondary-default);
     color: var(--control-text-secondary-default);

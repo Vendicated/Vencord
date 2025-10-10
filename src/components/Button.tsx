@@ -26,14 +26,11 @@ export type TextButtonProps = ComponentPropsWithRef<"button"> & {
 };
 
 export function Button({ variant = "primary", size = "medium", children, className, ...restProps }: ButtonProps) {
-    const isLink = variant === "link";
-    if (isLink) variant = "secondary";
-
     return (
         <button className={classes(btnCls("base", variant, size), className)} {...restProps}>
             {children}
 
-            {isLink && <OpenExternalIcon className={btnCls("link-icon")} />}
+            {variant === "link" && <OpenExternalIcon className={btnCls("link-icon")} />}
         </button>
     );
 }
