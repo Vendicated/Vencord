@@ -35,7 +35,7 @@ export function generateMarginCss() {
         for (const size of Sizes) {
             const cl = marginCls(`${direction}-${size}`);
             Margins[`${direction}${size}`] = cl;
-            css += `.${cl}{${direction}:${size}px;}`;
+            css += `.${cl}{margin-${direction}:${size}px;}`;
         }
     }
 

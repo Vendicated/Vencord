@@ -7,10 +7,10 @@
 import "./FormSwitch.css";
 
 import { classes } from "@utils/misc";
-import { Text } from "@webpack/common";
 import type { PropsWithChildren, ReactNode } from "react";
 
 import { Divider } from "./Divider";
+import { Span } from "./Span";
 import { Switch } from "./Switch";
 
 export interface FormSwitchProps {
@@ -29,8 +29,8 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
         <div className="vc-form-switch-wrapper">
             <div className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
                 <div className={"vc-form-switch-text"}>
-                    <Text variant="text-md/medium">{title}</Text>
-                    {description && <Text variant="text-sm/normal">{description}</Text>}
+                    <Span size="md" weight="medium">{title}</Span>
+                    <Span size="sm" weight="normal">{description}</Span>
                 </div>
 
                 <Switch checked={value} onChange={onChange} disabled={disabled} />
@@ -41,6 +41,6 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
 }
 
 /** Compatibility with Discord's old FormSwitch */
-export function FormSwitchCompat(props: PropsWithChildren<any>) {
-    return <FormSwitch {...props} title={props.children ?? ""} description={props.note} />;
+export function FormSwitchCompat({ note, children, ...restProps }: PropsWithChildren<any>) {
+    return <FormSwitch title={children ?? ""} description={note} {...restProps} />;
 }

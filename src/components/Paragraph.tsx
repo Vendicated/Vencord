@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText, BaseTextProps } from "./BaseText";
+import { BaseText, type BaseTextProps } from "./BaseText";
 
 export type ParagraphProps = BaseTextProps<"p">;
 
