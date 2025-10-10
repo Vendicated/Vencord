@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes, copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Queue } from "@utils/Queue";
 import { User } from "@vencord/discord-types";
@@ -222,8 +222,14 @@ function ChangeDecorationModal(props: ModalProps) {
                 </div>
             </ErrorBoundary>
         </ModalContent>
-        <ModalFooter className={classes(cl("change-decoration-modal-footer", cl("modal-footer")))}>
-            <div className={cl("change-decoration-modal-footer-btn-container")}>
+        <ModalFooter className={cl("change-decoration-modal-footer", "modal-footer")}>
+            <div className={cl("modal-footer-btn-container")}>
+                <Button
+                    onClick={props.onClose}
+                    color={Button.Colors.PRIMARY}
+                >
+                    Cancel
+                </Button>
                 <Button
                     onClick={() => {
                         selectDecoration(tryingDecoration!).then(props.onClose);
@@ -232,32 +238,8 @@ function ChangeDecorationModal(props: ModalProps) {
                 >
                     Apply
                 </Button>
-                <Button
-                    onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
-                >
-                    Cancel
-                </Button>
             </div>
-            <div className={cl("change-decoration-modal-footer-btn-container")}>
-                <Button
-                    onClick={() => Alerts.show({
-                        title: "Log Out",
-                        body: "Are you sure you want to log out of Decor?",
-                        confirmText: "Log Out",
-                        confirmColor: cl("danger-btn"),
-                        cancelText: "Cancel",
-                        onConfirm() {
-                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
-                            props.onClose();
-                        }
-                    })}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
-                >
-                    Log Out
-                </Button>
+            <div className={cl("modal-footer-btn-container")}>
                 <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
                     {tooltipProps => <Button
                         {...tooltipProps}
@@ -280,6 +262,23 @@ function ChangeDecorationModal(props: ModalProps) {
                         Discord Server
                     </Button>}
                 </Tooltip>
+                <Button
+                    onClick={() => Alerts.show({
+                        title: "Log Out",
+                        body: "Are you sure you want to log out of Decor?",
+                        confirmText: "Log Out",
+                        confirmColor: cl("danger-btn"),
+                        cancelText: "Cancel",
+                        onConfirm() {
+                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
+                            props.onClose();
+                        }
+                    })}
+                    color={Button.Colors.PRIMARY}
+                    look={Button.Looks.LINK}
+                >
+                    Log Out
+                </Button>
             </div>
         </ModalFooter>
     </ModalRoot>;
