@@ -1044,14 +1044,18 @@ export default definePlugin({
             }
         },
         {
+            // Adds the "Questify" sort option to the sort dropdown.
+            find: "NOT_SHAREABLE}",
+            replacement: {
+                match: /(?=case (\i.\i).SUGGESTED)/,
+                replace: "case $1.QUESTIFY:return \"Questify\";"
+            },
+        },
+        {
             find: "CLAIMED=\"claimed\",",
             group: true,
             replacement: [
-                {
-                    // Adds the "Questify" sort option to the sort dropdown.
-                    match: /(?=case (\i.\i).SUGGESTED)/,
-                    replace: "case $1.QUESTIFY:return \"Questify\";"
-                },
+
                 {
                     // Run Questify's sort function every time due to hook requirements but return
                     // early if not applicable. If the sort method is set to "Questify", replace the
