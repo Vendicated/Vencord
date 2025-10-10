@@ -25,7 +25,7 @@ export type TextButtonProps = ComponentPropsWithRef<"button"> & {
     variant?: "primary" | "secondary" | "danger" | "link";
 };
 
-export function Button({ variant = "primary", size = "small", children, className, ...restProps }: ButtonProps) {
+export function Button({ variant = "primary", size = "medium", children, className, ...restProps }: ButtonProps) {
     const isLink = variant === "link";
     if (isLink) variant = "secondary";
 
@@ -44,7 +44,7 @@ export function TextButton({ variant = "primary", className, ...restProps }: Tex
     );
 }
 
-export const ButtonCompat: DiscordButton = function ButtonCompat({ look, color = "BRAND", size = "md", ...restProps }) {
+export const ButtonCompat: DiscordButton = function ButtonCompat({ look, color = "BRAND", size = "medium", ...restProps }) {
     return look === "link"
         ? <TextButton variant={TextButtonPropsColorMapping[color]} {...restProps as any} />
         : <Button variant={ButtonColorMapping[color]} size={size} {...restProps as any} />;
