@@ -79,7 +79,7 @@ export default definePlugin({
                 replace: "$self.WarningCard(),"
             }
         },
-        // Change top right chat toolbar button from the help one to the dev one
+        // Change top right toolbar button from the help one to the dev one
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
@@ -88,7 +88,14 @@ export default definePlugin({
             },
             predicate: () => settings.store.toolbarDevMenu
         },
-
+        // Disable opening the bug report menu when clicking the top right toolbar dev button
+        {
+            find: 'navId:"staff-help-popout"',
+            replacement: {
+                match: /(isShown.+?)onClick:\i/,
+                replace: (_, rest) => `${rest}onClick:()=>{}`
+            }
+        },
         // Make the Favourites Server experiment allow favouriting DMs and threads
         {
             find: "useCanFavoriteChannel",
