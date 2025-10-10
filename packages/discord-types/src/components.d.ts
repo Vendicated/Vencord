@@ -106,10 +106,6 @@ export interface ButtonProps extends PropsWithChildren<Omit<HTMLProps<HTMLButton
     size?: string;
 
     className?: string;
-    innerClassName?: string;
-
-    buttonRef?: Ref<HTMLButtonElement>;
-    submitting?: boolean;
 }
 
 export type Button = ComponentType<ButtonProps> & {

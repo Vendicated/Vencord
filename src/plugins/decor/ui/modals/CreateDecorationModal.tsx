@@ -151,8 +151,7 @@ function CreateDecorationModal(props: ModalProps) {
                     createDecoration({ alt: name, file: file! })
                         .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
                 }}
-                disabled={!file || !name}
-                submitting={submitting}
+                disabled={!file || !name || submitting}
             >
                 Submit for Review
             </Button>
