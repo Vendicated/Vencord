@@ -211,6 +211,8 @@ export function handleModuleNotFound(method: string, ...filter: unknown[]) {
  * Find the first module that matches the filter
  */
 export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
+    if (IS_ANTI_CRASH_TEST) return null;
+
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -270,6 +272,8 @@ export function findAll(filter: FilterFn) {
  * @returns Array of results in the same order as the passed filters
  */
 export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+    if (IS_ANTI_CRASH_TEST) return [];
+
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
@@ -341,6 +345,8 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
  * @returns string or null
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: CodeFilter) {
+    if (IS_ANTI_CRASH_TEST) return null;
+
     code = code.map(canonicalizeMatch);
 
     for (const id in wreq.m) {
@@ -595,6 +601,8 @@ function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumera
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     const exports = {} as Record<S, any>;
 
+    if (IS_ANTI_CRASH_TEST) return exports;
+
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
     if (id === null)
         return exports;
@@ -635,6 +643,8 @@ export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
  * @returns A promise that resolves with a boolean whether the chunks were loaded
  */
 export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultExtractAndLoadChunksRegex) {
+    if (IS_ANTI_CRASH_TEST) return false;
+
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
@@ -718,6 +728,8 @@ export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtr
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | PropsFilter | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    if (IS_ANTI_CRASH_TEST && filter !== "useState") return;
+
     if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
 
     if (typeof filter === "string")
