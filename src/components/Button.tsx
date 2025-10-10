@@ -9,20 +9,26 @@ import "./Button.css";
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 import type { Button as DiscordButton } from "@vencord/discord-types";
-import { ComponentPropsWithRef } from "react";
+import type { ComponentPropsWithRef } from "react";
 
 import { OpenExternalIcon } from "./Icons";
 
 const btnCls = classNameFactory("vc-btn-");
 const textBtnCls = classNameFactory("vc-text-btn-");
 
+export type ButtonVariant = "primary" | "secondary" | "dangerPrimary" | "dangerSecondary"
+    | "overlayPrimary" | "positive" | "link" | "none";
+export type ButtonSize = "min" | "xs" | "small" | "medium";
+
 export type ButtonProps = ComponentPropsWithRef<"button"> & {
-    variant?: "primary" | "secondary" | "dangerPrimary" | "dangerSecondary" | "overlayPrimary" | "positive" | "link" | "none";
-    size?: "min" | "xs" | "small" | "medium";
+    variant?: ButtonVariant;
+    size?: ButtonSize;
 };
 
+export type TextButtonVariant = "primary" | "secondary" | "danger" | "link";
+
 export type TextButtonProps = ComponentPropsWithRef<"button"> & {
-    variant?: "primary" | "secondary" | "danger" | "link";
+    variant?: TextButtonVariant;
 };
 
 export function Button({ variant = "primary", size = "medium", children, className, ...restProps }: ButtonProps) {
@@ -41,10 +47,12 @@ export function TextButton({ variant = "primary", className, ...restProps }: Tex
     );
 }
 
+// #region Old compability
+
 export const ButtonCompat: DiscordButton = function ButtonCompat({ look, color = "BRAND", size = "medium", ...restProps }) {
     return look === "link"
-        ? <TextButton variant={TextButtonPropsColorMapping[color]} {...restProps as any} />
-        : <Button variant={ButtonColorMapping[color]} size={size} {...restProps as any} />;
+        ? <TextButton variant={TextButtonPropsColorMapping[color]} {...restProps as TextButtonProps} />
+        : <Button variant={ButtonColorMapping[color]} size={size as ButtonSize} {...restProps as ButtonProps} />;
 };
 
 /** @deprecated */
@@ -96,3 +104,5 @@ ButtonCompat.Sizes = {
     NONE: "min",
     MIN: "min"
 } as const;
+
+// #endregion

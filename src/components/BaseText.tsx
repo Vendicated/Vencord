@@ -8,10 +8,10 @@ import "./BaseText.css";
 
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
-import { HeadingTag, Text as DiscordText } from "@vencord/discord-types";
+import type { Text as DiscordText } from "@vencord/discord-types";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-const cl = classNameFactory("vc-text-");
+const textCls = classNameFactory("vc-text-");
 
 const Sizes = {
     xxs: "0.625rem",
@@ -37,7 +37,8 @@ const Weights = {
 export type TextSize = keyof typeof Sizes;
 export type TextWeight = keyof typeof Weights;
 
-export type TextTag = "div" | "span" | "p" | HeadingTag;
+export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
+export type TextTag = "div" | "span" | "p" | `h${1 | 2 | 3 | 4 | 5 | 6}`;
 
 export type BaseTextProps<Tag extends TextTag = "div"> = ComponentPropsWithoutRef<Tag> & {
     size?: TextSize;
@@ -49,46 +50,53 @@ export function generateTextCss() {
     let css = "";
 
     for (const [size, value] of Object.entries(Sizes)) {
-        css += `.${cl(size)}{font-size:${value};}`;
+        css += `.${textCls(size)}{font-size:${value};}`;
     }
 
     for (const [weight, value] of Object.entries(Weights)) {
-        css += `.${cl(weight)}{font-weight:${value};}`;
+        css += `.${textCls(weight)}{font-weight:${value};}`;
     }
 
     return css;
 }
 
-export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): ReactNode {
+export function BaseText<Tag extends TextTag = "div">(props: BaseTextProps<Tag>): ReactNode {
     const {
         size = "md",
         weight = "normal",
         tag: Tag = "div",
+        children,
         className,
-        ...rest
+        ...restProps
     } = props;
 
     return (
-        <Tag className={classes(cl("base", size, weight), className)} {...rest}>
-            {props.children}
+        <Tag className={classes(textCls("base", size, weight), className)} {...restProps}>
+            {children}
         </Tag>
     );
 }
 
+// #region Old compability
+
 export const TextCompat: DiscordText = function TextCompat({ color, variant, ...restProps }) {
-    const newProps = restProps as BaseTextProps;
+    const newBaseTextProps = restProps as BaseTextProps;
+
     if (variant) {
         const [left, right] = variant.split("/");
         if (left && right) {
             const size = left.split("-").pop();
-            newProps.size = size as TextSize;
-            newProps.weight = right as TextWeight;
+            newBaseTextProps.size = size as TextSize;
+            newBaseTextProps.weight = right as TextWeight;
         }
     }
+
     if (color) {
-        newProps.style ??= {};
-        newProps.style.color = `var(--${color}, var(--text-default))`;
+        newBaseTextProps.style ??= {};
+        newBaseTextProps.style.color = `var(--${color}, var(--text-default))`;
     }
 
-    return <BaseText {...newProps} />;
+    return <BaseText {...newBaseTextProps} />;
 };
+
+// #endregion
