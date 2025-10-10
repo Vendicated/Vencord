@@ -113,7 +113,7 @@ function SettingsAboutComponent() {
     const [color2, setColor2] = useState(existingColors[1]);
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
             <Forms.FormText>
                 After enabling this plugin, you will see custom colors in
@@ -191,7 +191,7 @@ function SettingsAboutComponent() {
                     />
                 </div>
             </Forms.FormText>
-        </Forms.FormSection>);
+        </section>);
 }
 
 export default definePlugin({
