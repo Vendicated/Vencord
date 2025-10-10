@@ -77,11 +77,6 @@
     gap: 8px;
 }
 
-.vc-decor-section {
-    display: flex;
-    gap: 4px;
-}
-
 .vc-decor-section-remove-margin {
     margin-bottom: 0;
 }

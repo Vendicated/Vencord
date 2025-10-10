@@ -5,8 +5,9 @@
  */
 
 import { Button } from "@components/Button";
+import { Flex } from "@components/Flex";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, useEffect } from "@webpack/common";
+import { useEffect } from "@webpack/common";
 
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
@@ -33,24 +34,27 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
         title={!hideTitle && "Decor"}
         hasBackground={true}
         hideDivider={hideDivider}
-        className={cl("section", noMargin && "section-remove-margin")}
+        className={noMargin && cl("section-remove-margin")}
     >
-        <Button
-            onClick={() => {
-                if (!authorization.isAuthorized()) {
-                    authorization.authorize().then(openChangeDecorationModal).catch(() => { });
-                } else openChangeDecorationModal();
-            }}
-            size={Button.Sizes.SMALL}
-        >
-            Change Decoration
-        </Button>
-        {selectedDecoration && authorization.isAuthorized() && <Button
-            onClick={() => selectDecoration(null)}
-            variant="secondary"
-            size={"small"}
-        >
-            Remove Decoration
-        </Button>}
+        <Flex style={{ gap: "4px " }}>
+            <Button
+                onClick={() => {
+                    if (!authorization.isAuthorized()) {
+                        authorization.authorize().then(openChangeDecorationModal).catch(() => { });
+                    } else openChangeDecorationModal();
+                }}
+                variant="primary"
+                size="small"
+            >
+                Change Decoration
+            </Button>
+            {selectedDecoration && authorization.isAuthorized() && <Button
+                onClick={() => selectDecoration(null)}
+                variant="secondary"
+                size={"small"}
+            >
+                Remove Decoration
+            </Button>}
+        </Flex>
     </CustomizationSection>;
 }
