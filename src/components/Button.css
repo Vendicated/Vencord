@@ -3,7 +3,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    max-height: min-content;
     max-width: 100%;
     border: 1px solid transparent;
     border-radius: var(--radius-sm, 8px);

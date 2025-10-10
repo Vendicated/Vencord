@@ -49,7 +49,7 @@ export function TextButton({ variant = "primary", className, ...restProps }: Tex
 // #region Old compability
 
 export const ButtonCompat: DiscordButton = function ButtonCompat({ look, color = "BRAND", size = "medium", ...restProps }) {
-    return look === "link"
+    return look === "LINK"
         ? <TextButton variant={TextButtonPropsColorMapping[color]} {...restProps as TextButtonProps} />
         : <Button variant={ButtonColorMapping[color]} size={size as ButtonSize} {...restProps as ButtonProps} />;
 };

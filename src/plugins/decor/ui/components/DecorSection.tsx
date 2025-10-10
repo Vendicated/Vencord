@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Flex } from "@components/Flex";
+import { Button } from "@components/Button";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, useEffect } from "@webpack/common";
 
@@ -33,27 +33,24 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
         title={!hideTitle && "Decor"}
         hasBackground={true}
         hideDivider={hideDivider}
-        className={noMargin && cl("section-remove-margin")}
+        className={cl("section", noMargin && "section-remove-margin")}
     >
-        <Flex>
-            <Button
-                onClick={() => {
-                    if (!authorization.isAuthorized()) {
-                        authorization.authorize().then(openChangeDecorationModal).catch(() => { });
-                    } else openChangeDecorationModal();
-                }}
-                size={Button.Sizes.SMALL}
-            >
-                Change Decoration
-            </Button>
-            {selectedDecoration && authorization.isAuthorized() && <Button
-                onClick={() => selectDecoration(null)}
-                color={Button.Colors.PRIMARY}
-                size={Button.Sizes.SMALL}
-                look={Button.Looks.LINK}
-            >
-                Remove Decoration
-            </Button>}
-        </Flex>
+        <Button
+            onClick={() => {
+                if (!authorization.isAuthorized()) {
+                    authorization.authorize().then(openChangeDecorationModal).catch(() => { });
+                } else openChangeDecorationModal();
+            }}
+            size={Button.Sizes.SMALL}
+        >
+            Change Decoration
+        </Button>
+        {selectedDecoration && authorization.isAuthorized() && <Button
+            onClick={() => selectDecoration(null)}
+            variant="secondary"
+            size={"small"}
+        >
+            Remove Decoration
+        </Button>}
     </CustomizationSection>;
 }
