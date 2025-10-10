@@ -25,6 +25,7 @@ import definePlugin from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
+import NoBlockedUsersPlugin from "plugins/noBlockedUsers";
 
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
@@ -139,7 +140,14 @@ export default definePlugin({
         }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = [...reactions.values()].filter(Boolean);
+
+        const hasNoBlockedUsers = Vencord.Plugins.isPluginEnabled(NoBlockedUsersPlugin.name) && NoBlockedUsersPlugin.settings.store.hideUsersFromReactions;
+
+        const users = !hasNoBlockedUsers ?
+            [...reactions.values()].filter(Boolean) :
+            [...reactions.values()].filter(Boolean).filter(user => !NoBlockedUsersPlugin.shouldHide(user.id));
+
+        if (users.length === 0) return null;
 
         return (
             <div
