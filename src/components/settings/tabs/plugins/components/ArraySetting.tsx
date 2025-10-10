@@ -60,7 +60,7 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else setError(null);
-    }, [text]);
+    }, [text, items]);
 
 
     useEffect(() => {
@@ -111,6 +111,7 @@ export const ArraySetting = ErrorBoundary.wrap(function ArraySetting({
                         }}
                         disabled={text === "" || error != null}
                         look={Button.Looks.BLANK}
+                        style={{ color: "var(--interactive-normal)" }}
                     >
                         <PlusIcon />
                     </Button>

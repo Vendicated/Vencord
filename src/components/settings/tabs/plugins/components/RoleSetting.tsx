@@ -58,7 +58,7 @@ export const RoleSetting = ErrorBoundary.wrap(function RoleSetting({
         } else {
             setError("Invalid ID");
         }
-    }, [text]);
+    }, [text, items]);
 
 
     // TODO: remove this after a few months

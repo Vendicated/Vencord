@@ -64,7 +64,7 @@ export const ChannelSetting = ErrorBoundary.wrap(function ChannelSetting({
         } else {
             setError("Invalid ID");
         }
-    }, [text]);
+    }, [text, items]);
 
     // TODO: remove this after a few months
     function ensureSettingsMigrated(): string[] | undefined {

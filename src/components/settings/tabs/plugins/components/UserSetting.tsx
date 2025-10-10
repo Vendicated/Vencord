@@ -56,7 +56,7 @@ export const UserSetting = ErrorBoundary.wrap(function UserSetting({
         } else {
             setError("Invalid ID");
         }
-    }, [text]);
+    }, [text, items]);
 
     // TODO: remove this after a few months
     function ensureSettingsMigrated(): string[] | undefined {
@@ -135,7 +135,7 @@ export const UserSetting = ErrorBoundary.wrap(function UserSetting({
                     }}
                     disabled={text === "" || error != null}
                     look={Button.Looks.BLANK}
-                    color={Button.Colors.WHITE}
+                    style={{ color: "var(--interactive-normal)" }}
                 >
                     <PlusIcon/>
                 </Button>
