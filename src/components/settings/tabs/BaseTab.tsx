@@ -20,7 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
-import { Forms, Text } from "@webpack/common";
+import { Text } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
