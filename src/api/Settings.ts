@@ -146,7 +146,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
                     // normal setting with a default value
                     return (target[key] = setting.default);
 
-                else if (setting.type === OptionType.ARRAY || setting.type === OptionType.USERS || setting.type === OptionType.GUILDS || setting.type === OptionType.CHANNELS)
+                else if ([OptionType.ARRAY, OptionType.USERS, OptionType.GUILDS, OptionType.CHANNELS, OptionType.ROLES].includes(setting.type))
                     // if there is no default value we initialize it as an empty array
                     return (target[key] = []);
 
