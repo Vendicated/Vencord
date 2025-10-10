@@ -84,9 +84,9 @@ export default definePlugin({
             }
         },
         {
-            find: ".SIDEBAR,shouldShowTooltip:",
+            find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
+                match: /children:\[(?=[^[]+?\.SIDEBAR}\),\i\.bot)/,
                 replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
             }
         }
