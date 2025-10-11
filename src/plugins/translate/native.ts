@@ -27,3 +27,22 @@ export async function makeDeeplTranslateRequest(_: IpcMainInvokeEvent, pro: bool
         return { status: -1, data: String(e) };
     }
 }
+
+export async function makeGeminiTranslateRequest(_: IpcMainInvokeEvent, model: string, apiKey: string, payload: string) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: payload
+        });
+
+        const data = await res.text();
+        return { status: res.status, data };
+    } catch (e) {
+        return { status: -1, data: String(e) };
+    }
+}
