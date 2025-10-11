@@ -16,7 +16,12 @@ import { Button, Forms, Select, Slider, Text } from "@webpack/common";
 
 export function NotificationSection() {
     return (
-        <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
+        <section className={Margins.top16}>
+            <Forms.FormTitle tag="h5">Notifications</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom8}>
+                Settings for Notifications sent by Vencord.
+                This does NOT include Discord notifications (messages, etc)
+            </Forms.FormText>
             <Flex>
                 <Button onClick={openNotificationSettingsModal}>
                     {t("vencord.settings.notification.settingsButton")}
@@ -25,7 +30,7 @@ export function NotificationSection() {
                     {t("vencord.settings.notification.logButton")}
                 </Button>
             </Flex>
-        </Forms.FormSection>
+        </section>
     );
 }
 

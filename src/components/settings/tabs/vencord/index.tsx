@@ -18,6 +18,7 @@
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/index";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
@@ -31,7 +32,7 @@ import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { t, Translate } from "@utils/translation";
-import { Forms, React, useMemo, UserStore } from "@webpack/common";
+import { Alerts, Forms, React, useMemo, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { VibrancySettings } from "./MacVibrancySettings";
@@ -60,16 +61,16 @@ function Switches() {
         !IS_WEB && {
             key: "enableReactDevtools",
             title: t("vencord.settings.enableReactDevtools.title"),
-            note: t("vencord.settings.requiresFullRestart")
+            restartRequired: true
         },
         !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
             key: "frameless",
             title: t("vencord.settings.frameless.title"),
-            note: t("vencord.settings.requiresFullRestart")
+            restartRequired: true
         } : {
             key: "winNativeTitleBar",
             title: t("vencord.settings.winNativeTitleBar.title"),
-            note: t("vencord.settings.requiresFullRestart")
+            restartRequired: true
         }),
         !IS_WEB && {
             key: "transparent",
@@ -79,28 +80,49 @@ function Switches() {
         !IS_WEB && IS_WINDOWS && {
             key: "winCtrlQ",
             title: t("vencord.settings.winCtrlQ.title"),
-            note: t("vencord.settings.requiresFullRestart")
+            restartRequired: true
         },
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
             title: t("vencord.settings.disableMinSize.title"),
-            note: t("vencord.settings.requiresFullRestart")
+            restartRequired: true
         },
     ] satisfies Array<false | {
         key: KeysOfType<typeof settings, boolean>;
         title: string;
-        note: string;
+        description?: string;
+        restartRequired?: boolean;
     }>;
 
-    return Switches.map(s => s && (
-        <FormSwitch
-            key={s.key}
-            title={s.title}
-            description={s.note}
-            value={settings[s.key]}
-            onChange={v => settings[s.key] = v}
-        />
-    ));
+    return Switches.map(setting => {
+        if (!setting) {
+            return null;
+        }
+
+        const { key, title, description, restartRequired } = setting;
+
+        return (
+            <FormSwitch
+                key={key}
+                title={title}
+                description={description}
+                value={settings[key]}
+                onChange={v => {
+                    settings[key] = v;
+
+                    if (restartRequired) {
+                        Alerts.show({
+                            title: "Restart Required",
+                            body: "A restart is required to apply this change",
+                            confirmText: "Restart now",
+                            cancelText: "Later!",
+                            onConfirm: relaunch
+                        });
+                    }
+                }}
+            />
+        );
+    });
 }
 
 function VencordSettings() {
@@ -111,7 +133,7 @@ function VencordSettings() {
 
     const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
 
-    const user = UserStore.getCurrentUser();
+    const user = UserStore?.getCurrentUser();
 
     return (
         <SettingsTab title={t("vencord.tabs.settings")}>
@@ -154,7 +176,8 @@ function VencordSettings() {
                 />
             )}
 
-            <Forms.FormSection title={t("vencord.quickActions.title")}>
+            <section>
+                <Forms.FormTitle tag="h5">{t("vencord.quickActions.title")}</Forms.FormTitle>
                 <QuickActionCard>
                     <QuickAction
                         Icon={LogIcon}
@@ -186,11 +209,12 @@ function VencordSettings() {
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
                 </QuickActionCard>
-            </Forms.FormSection>
+            </section>
 
-            <Forms.FormDivider />
+            <Divider />
 
-            <Forms.FormSection className={Margins.top16} title={t("vencord.settings.title")} tag="h5">
+            <section className={Margins.top16}>
+                <Forms.FormTitle tag="h5">{t("vencord.settings.title")}</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     <Translate i18nKey="vencord.settings.hint">
                         Hint: You can change the position of this settings section in the
@@ -201,7 +225,7 @@ function VencordSettings() {
                 </Forms.FormText>
 
                 <Switches />
-            </Forms.FormSection>
+            </section>
 
             {needsVibrancySettings && <VibrancySettings />}
 
