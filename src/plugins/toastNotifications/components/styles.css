@@ -1,0 +1,75 @@
+:root {
+    /* Body */
+    --toastnotifications-background-color: var(--background-secondary-alt);
+    --toastnotifications-text-color: var(--text-normal);
+    --toastnotifications-border-radius: 6px;
+    --toastnotifications-width: fit-content;
+    --toastnotifications-min-width: 25rem;
+    --toastnotifications-max-width: 50%;
+    --toastnotifications-min-height: 10vh;
+    --toastnotifications-max-height: 50%;
+    --toastnotifications-padding: 1rem;
+
+    /* Progress Bar */
+    --toastnotifications-progressbar-height: 0.25rem;
+    --toastnotifications-progressbar-color: var(--brand-500);
+
+    /* Position Offset - Global inherited offset by all positions */
+    --toastnotifications-position-offset: 1rem;
+}
+
+.toastnotifications-notification-root {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    color: var(--toastnotifications-text-color);
+    background-color: var(--toastnotifications-background-color);
+    border-radius: var(--toastnotifications-border-radius);
+    overflow: hidden;
+    cursor: pointer;
+    position: absolute;
+    z-index: 2147483647;
+    right: 1rem;
+    min-width: var(--toastnotifications-min-width);
+    width: var(--toastnotifications-width);
+    max-width: var(--toastnotifications-max-width);
+    min-height: var(--toastnotifications-min-height);
+    max-height: var(--toastnotifications-max-height);
+}
+
+.toastnotifications-notification-content {
+    display: flex;
+    flex-direction: row;
+    padding: var(--toastnotifications-padding) 0.2rem;
+}
+
+.toastnotifications-notification-progressbar {
+    height: var(--toastnotifications-progressbar-height);
+    background-color: var(--toastnotifications-progressbar-color);
+    border-radius: 5px;
+    margin-top: auto;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+/* Notification Positioning CSS */
+.toastnotifications-position-bottom-left {
+    bottom: var(--toastnotifications-position-offset);
+    left: var(--toastnotifications-position-offset);
+}
+
+.toastnotifications-position-top-left {
+    top: var(--toastnotifications-position-offset);
+    left: var(--toastnotifications-position-offset);
+}
+
+.toastnotifications-position-top-right {
+    top: var(--toastnotifications-position-offset);
+    right: var(--toastnotifications-position-offset);
+}
+
+.toastnotifications-position-bottom-right {
+    bottom: var(--toastnotifications-position-offset);
+    right: var(--toastnotifications-position-offset);
+}

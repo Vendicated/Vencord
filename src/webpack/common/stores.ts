@@ -36,6 +36,7 @@ export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
 
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
 export let GuildMemberStore: t.GuildMemberStore;
@@ -62,6 +63,7 @@ export let StreamerModeStore: t.StreamerModeStore;
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
 waitForStore("AuthenticationStore", s => AuthenticationStore = s);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
 waitForStore("UserProfileStore", m => UserProfileStore = m);
@@ -88,3 +90,4 @@ waitForStore("ThemeStore", m => {
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.
     Vencord.QuickCss.initQuickCssThemeStore();
 });
+
