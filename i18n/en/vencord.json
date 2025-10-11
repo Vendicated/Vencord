@@ -61,20 +61,25 @@
     "plugins": {
       "contributorModal": {
         "contributorInfo": {
-          "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!",
           "one": "This person has <0>contributed</0> to 1 plugin!",
-          "other": "This person has <0>contributed</0> to {count} plugins!"
+          "other": "This person has <0>contributed</0> to {count} plugins!",
+          "zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!"
         }
       }
     },
-    "requiresFullRestart": "Requires a full restart",
+    "restartRequired": {
+      "body": "A restart is required to apply this change",
+      "cancel": "Later!",
+      "confirm": "Restart now",
+      "title": "Restart Required"
+    },
     "title": "Settings",
     "transparent": {
-      "note": "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart",
+      "description": "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart",
       "title": "Enable window transparency"
     },
     "useQuickCss": {
-      "note": "Loads your Custom CSS",
+      "description": "Loads your Custom CSS",
       "title": "Enable Custom CSS"
     },
     "winCtrlQ": {

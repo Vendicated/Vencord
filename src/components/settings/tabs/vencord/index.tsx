@@ -56,7 +56,7 @@ function Switches() {
         {
             key: "useQuickCss",
             title: t("vencord.settings.useQuickCss.title"),
-            note: t("vencord.settings.useQuickCss.note")
+            description: t("vencord.settings.useQuickCss.description")
         },
         !IS_WEB && {
             key: "enableReactDevtools",
@@ -75,7 +75,7 @@ function Switches() {
         !IS_WEB && {
             key: "transparent",
             title: t("vencord.settings.transparent.title"),
-            note: t("vencord.settings.transparent.note")
+            description: t("vencord.settings.transparent.description")
         },
         !IS_WEB && IS_WINDOWS && {
             key: "winCtrlQ",
@@ -112,10 +112,10 @@ function Switches() {
 
                     if (restartRequired) {
                         Alerts.show({
-                            title: "Restart Required",
-                            body: "A restart is required to apply this change",
-                            confirmText: "Restart now",
-                            cancelText: "Later!",
+                            title: t("vencord.settings.restartRequired.title"),
+                            body: t("vencord.settings.restartRequired.body"),
+                            confirmText: t("vencord.settings.restartRequired.confirm"),
+                            cancelText: t("vencord.settings.restartRequired.cancel"),
                             onConfirm: relaunch
                         });
                     }
