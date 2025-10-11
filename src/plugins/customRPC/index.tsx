@@ -18,6 +18,7 @@
 
 import { definePluginSettings, Settings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
@@ -422,7 +423,7 @@ export default definePlugin({
                     </Forms.FormText>
                 </Flex>
 
-                <Forms.FormDivider className={Margins.top8} />
+                <Divider className={Margins.top8} />
 
                 <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-faint)" }}>
                     {activity[0] && <ActivityView
