@@ -14,7 +14,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs, EQUIBOT_USER_ID, SUPPORT_CHANNEL_ID, VC_SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
+import { Devs, EQUIBOT_USER_ID, EquicordDevs, SUPPORT_CHANNEL_ID, VC_SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
@@ -39,6 +39,11 @@ const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessa
 
 // track messages where the user disabled diffs for this session
 const disabledDiffMessages = new Set<string>();
+
+function scheduleMicrotask(fn: () => void) {
+    if (typeof queueMicrotask === "function") queueMicrotask(fn);
+    else setTimeout(fn, 0);
+}
 
 function addDeleteStyle() {
     if (settings.store.deleteStyle === "text") {
@@ -166,6 +171,45 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (
     );
 };
 
+function applyAggregatedCustomContent(message: Message, key: string, nodes: React.ReactNode) {
+    const payload = {
+        __messageloggerDiff: true,
+        __messageloggerDiffKey: key,
+        content: React.createElement(React.Fragment, { key }, nodes),
+    };
+
+    const existingKey = (message as any).customRenderedContent?.__messageloggerDiffKey;
+    const shouldCommit = existingKey !== key;
+
+    (message as any).__messageloggerLastAppliedKey = key;
+    (message as any).customRenderedContent = payload;
+
+    scheduleMicrotask(() => {
+        if ((message as any).__messageloggerLastAppliedKey !== key) return;
+        (message as any).customRenderedContent = payload;
+        if (shouldCommit) {
+            updateMessage(message.channel_id, message.id, { customRenderedContent: payload });
+        }
+    });
+}
+
+function clearCustomRenderedContent(message: Message) {
+    const existing = (message as any).customRenderedContent;
+    if (!existing?.__messageloggerDiff) return;
+
+    const lastKey = (message as any).__messageloggerLastAppliedKey;
+    delete (message as any).__messageloggerLastAppliedKey;
+    delete (message as any).customRenderedContent;
+
+    scheduleMicrotask(() => {
+        const current = (message as any).customRenderedContent;
+        if (current?.__messageloggerDiff) return;
+        const currentKey = (message as any).__messageloggerLastAppliedKey;
+        if (typeof currentKey === "string" && currentKey !== lastKey) return;
+        updateMessage(message.channel_id, message.id, { customRenderedContent: null });
+    });
+}
+
 function createDiffSegment(part: DiffPart, message: Message, key: React.Key, highlightType?: "removed" | "added") {
     const parsedContent = Parser.parse(part.text, true, {
         channelId: message.channel_id,
@@ -191,53 +235,63 @@ function renderDiffParts(diffParts: DiffPart[], message: Message) {
     return diffParts.map((part, index) => createDiffSegment(part, message, index));
 }
 
-function renderFilteredDiffParts(diffParts: DiffPart[], message: Message, mode: "removed" | "added") {
-    const segments: React.ReactNode[] = [];
+function buildViewSegments(diffParts: DiffPart[], view: "original" | "updated"): DiffPart[] {
+    const segments: DiffPart[] = [];
 
-    diffParts.forEach((part, index) => {
-        if (mode === "removed" && part.type === "added") return;
-        if (mode === "added" && part.type === "removed") return;
-
-        segments.push(createDiffSegment(part, message, `${mode}-${index}`, mode));
-    });
+    for (const part of diffParts) {
+        if (view === "original") {
+            if (part.type === "added") continue;
+            segments.push(part);
+        } else {
+            if (part.type === "removed") continue;
+            segments.push(part);
+        }
+    }
 
     return segments;
 }
 
 export function parseEditContent(content: string, message: Message, previousContent?: string) {
     const perMessageDiffEnabled = !disabledDiffMessages.has(message.id);
+    const aggregatedState = (message as any).__messageloggerAggregated as undefined | {
+        key: string;
+        aggregatedNodes: React.ReactNode;
+    };
     if (previousContent && content !== previousContent && settings.store.showEditDiffs && perMessageDiffEnabled) {
         const diffParts = createMessageDiff(content, previousContent);
+        const originalSegments = buildViewSegments(diffParts, "original");
+        const updatedSegments = buildViewSegments(diffParts, "updated");
         const useSeparatedDiffs = settings.store.separatedDiffs;
 
         if (useSeparatedDiffs) {
             const highlightCurrent = previousContent === message.content;
-            const originalView = renderFilteredDiffParts(diffParts, message, "removed");
 
             if (highlightCurrent) {
-                (message as any).customRenderedContent = {
-                    __messageloggerDiff: true,
-                    content: renderFilteredDiffParts(diffParts, message, "added"),
-                };
-            } else if ((message as any).customRenderedContent?.__messageloggerDiff) {
-                delete (message as any).customRenderedContent;
+                if (aggregatedState) {
+                    applyAggregatedCustomContent(message, aggregatedState.key, aggregatedState.aggregatedNodes);
+                } else {
+                    const diffKey = `${message.id}:current:${message.content}:${message.editedTimestamp?.valueOf?.() ?? 0}`;
+                    applyAggregatedCustomContent(message, diffKey, renderDiffParts(updatedSegments, message));
+                }
+            } else if (!aggregatedState && (message as any).customRenderedContent?.__messageloggerDiff) {
+                clearCustomRenderedContent(message);
             }
 
             return React.createElement("div", { className: "messagelogger-diff-view" },
-                React.createElement("div", { className: "messagelogger-diff-original" }, originalView),
-                !highlightCurrent && React.createElement("div", { className: "messagelogger-diff-updated" }, renderFilteredDiffParts(diffParts, message, "added")),
+                originalSegments.length ? React.createElement("div", { className: "messagelogger-diff-original" }, renderDiffParts(originalSegments, message)) : null,
+                !highlightCurrent && updatedSegments.length ? React.createElement("div", { className: "messagelogger-diff-updated" }, renderDiffParts(updatedSegments, message)) : null,
             );
         }
 
-        if ((message as any).customRenderedContent?.__messageloggerDiff) {
-            delete (message as any).customRenderedContent;
+        if (!aggregatedState && (message as any).customRenderedContent?.__messageloggerDiff) {
+            clearCustomRenderedContent(message);
         }
 
         return renderDiffParts(diffParts, message);
     }
 
-    if ((message as any).customRenderedContent?.__messageloggerDiff) {
-        delete (message as any).customRenderedContent;
+    if (!aggregatedState && (message as any).customRenderedContent?.__messageloggerDiff) {
+        clearCustomRenderedContent(message);
     }
 
     return Parser.parse(content, true, {
@@ -334,7 +388,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, EquicordDevs.justjxke],
     dependencies: ["MessageUpdaterAPI"],
     settings,
 
@@ -363,17 +417,83 @@ export default definePlugin({
                 (oldMsg, newMsg) =>
                     oldMsg?.editHistory === newMsg?.editHistory &&
                     oldMsg?.diffViewDisabled === newMsg?.diffViewDisabled &&
-                    oldMsg === newMsg,
+                    oldMsg?.content === newMsg?.content &&
+                    (oldMsg?.editedTimestamp?.valueOf?.() ?? 0) === (newMsg?.editedTimestamp?.valueOf?.() ?? 0),
             );
 
-            const { showEditDiffs, inlineEdits } = settings.use(["showEditDiffs", "inlineEdits"]);
+            const { showEditDiffs, inlineEdits, separatedDiffs } = settings.use(["showEditDiffs", "inlineEdits", "separatedDiffs"]);
+            const history = message.editHistory ?? [];
+            const useAggregatedDiff = inlineEdits && showEditDiffs && separatedDiffs && history.length > 0;
+
+            if (useAggregatedDiff) {
+                const original = history[0];
+                const diffKey = `${message.id}:${history.length}:${message.content}:${message.editedTimestamp?.valueOf?.() ?? 0}`;
+                let aggregatedState = (message as any).__messageloggerAggregated as undefined | {
+                    key: string;
+                    originalNodes: React.ReactNode;
+                    aggregatedNodes: React.ReactNode;
+                    originalTimestamp: Date;
+                };
+
+                if (!aggregatedState || aggregatedState.key !== diffKey) {
+                    const aggregatedDiff = createMessageDiff(original.content, message.content);
+                    const originalSegments = buildViewSegments(aggregatedDiff, "original");
+                    const aggregatedSegments = buildViewSegments(aggregatedDiff, "updated");
+                    const originalNodes = originalSegments.length
+                        ? renderDiffParts(originalSegments, message)
+                        : Parser.parse(original.content, true, {
+                            channelId: message.channel_id,
+                            messageId: message.id,
+                            allowLinks: true,
+                            allowHeading: true,
+                            allowList: true,
+                            allowEmojiLinks: true,
+                            viewingChannelId: SelectedChannelStore.getChannelId(),
+                        });
+                    const aggregatedNodes = renderDiffParts(aggregatedSegments, message);
+
+                    aggregatedState = {
+                        key: diffKey,
+                        originalNodes,
+                        aggregatedNodes,
+                        originalTimestamp: original.timestamp,
+                    };
+
+                    (message as any).__messageloggerAggregated = aggregatedState;
+                }
+
+                applyAggregatedCustomContent(message, aggregatedState.key, aggregatedState.aggregatedNodes);
+
+                return (
+                    <React.Fragment key={`diff-aggregated-${messageId}`}>
+                        <div className="messagelogger-edited" key="ml-aggregated-original">
+                            {aggregatedState.originalNodes}
+                            <Timestamp
+                                timestamp={aggregatedState.originalTimestamp}
+                                isEdited={true}
+                                isInline={false}
+                            >
+                                <span className={styles.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
+                            </Timestamp>
+                        </div>
+                    </React.Fragment>
+                );
+            }
+
+            if ((message as any).__messageloggerAggregated) {
+                delete (message as any).__messageloggerAggregated;
+            }
+
+            if ((message as any).customRenderedContent?.__messageloggerDiff) {
+                clearCustomRenderedContent(message);
+            }
 
             return inlineEdits && (
                 <React.Fragment key={disabledDiffMessages.has(messageId) ? `diff-off-${messageId}` : `diff-on-${messageId}`}>
-                    {message.editHistory?.map((edit, idx) => {
-                        const nextContent = idx === (message.editHistory?.length ?? 0) - 1
+                    {history.map((edit, idx) => {
+                        const nextContent = idx === history.length - 1
                             ? message.content
-                            : message.editHistory?.[idx + 1]?.content;
+                            : history[idx + 1]?.content;
 
                         return (
                             <div key={idx} className="messagelogger-edited">
