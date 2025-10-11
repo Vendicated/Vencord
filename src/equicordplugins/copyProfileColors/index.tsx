@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { copyToClipboard } from "@utils/clipboard";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -69,10 +69,9 @@ export function ColorIcon() {
             viewBox="0 0 24 24"
             width="20"
             height="20"
-            fill="#94b3e4"
             xmlns="http://www.w3.org/2000/svg"
         >
-            <path d="M17,4H15.82A3,3,0,0,0,13,2H11A3,3,0,0,0,8.18,4H7A3,3,0,0,0,4,7V19a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V7A3,3,0,0,0,17,4ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm8,14a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V7A1,1,0,0,1,7,6H8V7A1,1,0,0,0,9,8h6a1,1,0,0,0,1-1V6h1a1,1,0,0,1,1,1Z" />
+            <path fill="currentColor" d="M17,4H15.82A3,3,0,0,0,13,2H11A3,3,0,0,0,8.18,4H7A3,3,0,0,0,4,7V19a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V7A3,3,0,0,0,17,4ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm8,14a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V7A1,1,0,0,1,7,6H8V7A1,1,0,0,0,9,8h6a1,1,0,0,0,1-1V6h1a1,1,0,0,1,1,1Z" />
         </svg>
     );
 }
@@ -83,7 +82,7 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }) =
         <Menu.MenuItem
             id="CopyProfileColors"
             icon={ColorIcon}
-            label={<span style={{ color: "rgb(148, 179, 228)" }}>Copy Profile Colors</span>}
+            label="Copy Profile Colors"
             action={() => copyProfileColors(user.id)}
         />
     );
@@ -92,16 +91,9 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }) =
 export default definePlugin({
     name: "CopyProfileColors",
     description: "A plugin to copy people's profile gradient colors to clipboard.",
-    authors: [EquicordDevs.Crxa, EquicordDevs.Cortex], // Cortex is here because he showed me how to add icons <3
-
-    start() {
-        addContextMenuPatch("user-context", userContextMenuPatch);
-        addContextMenuPatch("user-profile-actions", userContextMenuPatch);
-    },
-
-    stop() {
-        // bye bye menu options
-        removeContextMenuPatch("user-context", userContextMenuPatch);
-        removeContextMenuPatch("user-profile-actions", userContextMenuPatch);
+    authors: [EquicordDevs.Crxa, EquicordDevs.Cortex],
+    contextMenus: {
+        "user-context": userContextMenuPatch,
+        "user-profile-actions": userContextMenuPatch
     }
 });

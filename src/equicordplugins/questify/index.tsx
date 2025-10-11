@@ -1055,7 +1055,6 @@ export default definePlugin({
             find: "CLAIMED=\"claimed\",",
             group: true,
             replacement: [
-
                 {
                     // Run Questify's sort function every time due to hook requirements but return
                     // early if not applicable. If the sort method is set to "Questify", replace the
