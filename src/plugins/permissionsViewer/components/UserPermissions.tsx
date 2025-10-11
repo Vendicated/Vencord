@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { getIntlMessage } from "@utils/discord";
@@ -62,12 +63,13 @@ function FakeRole({ text, color, ...props }: FakeRoleProps) {
                 />
             </div>
             <div className={RoleClasses.roleName}>
-                <Text
+                <BaseText
+                    size="xs"
+                    weight="medium"
                     className={RoleClasses.roleNameOverflow}
-                    variant="text-xs/medium"
                 >
                     {text}
-                </Text>
+                </BaseText>
             </div>
         </div>
     );

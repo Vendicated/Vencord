@@ -10,6 +10,7 @@ import { ChatBarButton } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
 import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
@@ -180,7 +181,7 @@ function ButtonEntries() {
         return (
             <div key={entry.id} className="chatButtonsPlus-card">
                 <div className="chatButtonsPlus-header">
-                    <Forms.FormTitle tag="h5" className="chatButtonsPlus-title">Button {i + 1}</Forms.FormTitle>
+                    <Heading className="chatButtonsPlus-title">Button {i + 1}</Heading>
                     <div className="chatButtonsPlus-controls">
                         <FormSwitch
                             title="Enabled"
@@ -190,7 +191,7 @@ function ButtonEntries() {
                         />
                         <Button
                             onClick={() => removeButtonEntry(entry.id, update)}
-                            look={Button.Looks.OUTLINED}
+                            look={Button.Looks.LINK}
                             color={Button.Colors.RED}
                             size={Button.Sizes.SMALL}
                         >
@@ -243,7 +244,7 @@ function ButtonEntries() {
                 <Button onClick={() => addButtonEntry(update)}>Add Button</Button>
                 <Button
                     onClick={() => resetAllButtons(update)}
-                    look={Button.Looks.OUTLINED}
+                    look={Button.Looks.LINK}
                     color={Button.Colors.RED}
                 >
                     Reset All

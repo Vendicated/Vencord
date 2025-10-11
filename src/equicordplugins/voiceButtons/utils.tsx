@@ -31,7 +31,7 @@ function VoiceUserButton({ user, tooltip, icon, onClick }: { user: User; tooltip
                     <Button
                         size={Button.Sizes.MIN}
                         color={Button.Colors.TRANSPARENT}
-                        look={Button.Looks.BLANK}
+                        look={Button.Looks.LINK}
                         disabled={disabled}
                         onClick={e => {
                             e.preventDefault();

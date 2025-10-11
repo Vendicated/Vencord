@@ -21,6 +21,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
@@ -391,7 +392,7 @@ export default definePlugin({
                         className={classes(Margins.top16, Margins.bottom16)}
                         style={{ padding: "1em" }}
                     >
-                        <Forms.FormTitle>Notice</Forms.FormTitle>
+                        <Heading>Notice</Heading>
                         <Forms.FormText>Activity Sharing isn't enabled, people won't be able to see your custom rich presence!</Forms.FormText>
 
                         <Button

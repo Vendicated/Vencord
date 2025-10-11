@@ -19,6 +19,7 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Heading } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -186,7 +187,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
 
     return (
         <>
-            <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
+            <Heading className={Margins.top20}>Custom Name</Heading>
             <CheckedTextInput
                 value={name}
                 onChange={v => {

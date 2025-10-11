@@ -6,6 +6,7 @@
 
 // alot of the code is from LastFMRichPresence
 import { definePluginSettings } from "@api/Settings";
+import { HeadingSecondary } from "@components/Heading";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -168,7 +169,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">How to get an API key</Forms.FormTitle>
+            <HeadingSecondary>How to get an API key</HeadingSecondary>
             <Forms.FormText>
                 Auth token can be found by following these steps:
                 <ol style={{ marginTop: 8, marginBottom: 8, paddingLeft: 20 }}>
@@ -312,7 +313,7 @@ export default definePlugin({
                 break;
         }
 
-        let tmdbData: { url: string; posterPath?: string | null } | null = null;
+        let tmdbData: { url: string; posterPath?: string | null; } | null = null;
         if (settings.store.showTMDBButton) {
             tmdbData = await fetchTmdbData(mediaData.seriesName || mediaData.name);
         }

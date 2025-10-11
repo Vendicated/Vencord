@@ -7,6 +7,7 @@
 import { Button as NewButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
@@ -201,7 +202,7 @@ function ChangeDecorationModal(props: ModalProps) {
                         avatarDecorationOverride={avatarDecorationOverride}
                         user={UserStore.getCurrentUser()}
                     />
-                    {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
+                    {isActiveDecorationPreset && <Heading className="">Part of the {activeDecorationPreset.name} Preset</Heading>}
                     {typeof activeSelectedDecoration === "object" &&
                         <Text
                             variant="text-sm/semibold"

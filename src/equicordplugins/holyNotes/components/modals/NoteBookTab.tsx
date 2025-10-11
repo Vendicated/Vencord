@@ -146,8 +146,8 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
                             ref={buttonRef}
                             {...props}
                             className={"vc-notebook-overflow-chevron"}
-                            size={Button.Sizes.ICON}
-                            look={Button.Looks.BLANK}
+                            size={Button.Sizes.SMALL}
+                            look={Button.Looks.LINK}
                             onClick={() => setShow(v => !v)}
                         >
                             <SvgOverFlowIcon className={classes(overflowIcon)} width={16} height={16} />

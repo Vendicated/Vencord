@@ -11,6 +11,7 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading, HeadingTertiary } from "@components/Heading";
 import { DeleteIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -19,7 +20,7 @@ import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, Forms, Select, SelectedChannelStore, TabBar, TextInput, Tooltip, UserStore, useState } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Select, SelectedChannelStore, TabBar, TextInput, Tooltip, UserStore, useState } from "@webpack/common";
 import type { JSX, PropsWithChildren } from "react";
 
 type IconProps = JSX.IntrinsicElements["svg"];
@@ -99,8 +100,8 @@ function Collapsible({ title, children }) {
         <div>
             <Button
                 onClick={() => setIsOpen(!isOpen)}
-                look={Button.Looks.BLANK}
-                size={Button.Sizes.ICON}
+                look={Button.Looks.LINK}
+                size={Button.Sizes.SMALL}
                 className={cl("collapsible")}>
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <div style={{
@@ -108,7 +109,7 @@ function Collapsible({ title, children }) {
                         color: "var(--text-muted)",
                         paddingRight: "5px"
                     }}>{isOpen ? "▼" : "▶"}</div>
-                    <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
+                    <HeadingTertiary>{title}</HeadingTertiary>
                 </div>
             </Button>
             {isOpen && children}
@@ -144,8 +145,8 @@ function ListedIds({ listIds, setListIds }) {
                             setListIds(values);
                             update();
                         }}
-                        look={Button.Looks.BLANK}
-                        size={Button.Sizes.ICON}
+                        look={Button.Looks.LINK}
+                        size={Button.Sizes.SMALL}
                         className={cl("delete")}>
                         <DeleteIcon />
                     </Button>
@@ -220,8 +221,8 @@ function KeywordEntries() {
                         </div>
                         <Button
                             onClick={() => removeKeywordEntry(i, update)}
-                            look={Button.Looks.BLANK}
-                            size={Button.Sizes.ICON}
+                            look={Button.Looks.LINK}
+                            size={Button.Sizes.SMALL}
                             className={cl("delete")}>
                             <DeleteIcon />
                         </Button>
@@ -234,7 +235,7 @@ function KeywordEntries() {
                             setIgnoreCase(i, !values[i].ignoreCase);
                         }}
                     />
-                    <Forms.FormTitle tag="h5">Whitelist/Blacklist</Forms.FormTitle>
+                    <Heading>Whitelist/Blacklist</Heading>
                     <Flex flexDirection="row">
                         <div style={{ flexGrow: 1 }}>
                             <ListedIds listIds={values[i].listIds} setListIds={e => setListIds(i, e)} />

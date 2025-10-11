@@ -193,7 +193,7 @@ function VerifyModal({
                             }}
                             onPointerDown={startInput}
                             onPointerUp={endInput}
-                            buttonRef={buttonRef}
+                            ref={buttonRef}
                             disabled={inProgress}
                         >
                             Hold to confirm login

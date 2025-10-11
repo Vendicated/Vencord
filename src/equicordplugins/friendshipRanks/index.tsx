@@ -114,7 +114,7 @@ function getBadgeComponent(rank,) {
     // there may be a better button component to do this with
     return (
         <div style={{ transform: "scale(0.80)" }}>
-            <Button onClick={() => openRankModal(rank)} width={"21.69px"} height={"21.69px"} size={Button.Sizes.NONE} look={Button.Looks.BLANK}>
+            <Button onClick={() => openRankModal(rank)} width={"21.69px"} height={"21.69px"} size={Button.Sizes.NONE} look={Button.Looks.LINK}>
                 <rank.assetSVG height={"21.69px"} />
             </Button>
         </div>

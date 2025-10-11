@@ -6,14 +6,17 @@
 
 import "./styles.css";
 
+import { BaseText } from "@components/BaseText";
+import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
+import { Heading } from "@components/Heading";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import { getRepo, shortGitHash, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, React, Toasts } from "@webpack/common";
+import { Alerts, Button, Card, React, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -128,7 +131,7 @@ function UpdateLogCard({
                         <Button
                             size={Button.Sizes.NONE}
                             color={Button.Colors.TRANSPARENT}
-                            look={Button.Looks.BLANK}
+                            look={Button.Looks.LINK}
                             className="vc-changelog-delete-button"
                             style={{
                                 padding: "4px",
@@ -181,12 +184,9 @@ function UpdateLogCard({
 
                     {log.updatedPlugins.length > 0 && (
                         <div className="vc-changelog-log-plugins">
-                            <Forms.FormTitle
-                                tag="h6"
-                                className={Margins.bottom8}
-                            >
+                            <Heading className={Margins.bottom8}>
                                 Updated Plugins
-                            </Forms.FormTitle>
+                            </Heading>
                             <NewPluginsCompact
                                 newPlugins={log.updatedPlugins}
                                 maxDisplay={50}
@@ -197,12 +197,9 @@ function UpdateLogCard({
                     {log.newSettings &&
                         getNewSettingsSize(log.newSettings) > 0 && (
                             <div className="vc-changelog-log-plugins">
-                                <Forms.FormTitle
-                                    tag="h6"
-                                    className={Margins.bottom8}
-                                >
+                                <Heading className={Margins.bottom8}>
                                     New Settings
-                                </Forms.FormTitle>
+                                </Heading>
                                 <div className="vc-changelog-new-plugins-list">
                                     {getNewSettingsEntries(log.newSettings).map(
                                         ([pluginName, settings]) =>
@@ -494,13 +491,13 @@ function ChangelogContent() {
 
     return (
         <>
-            <Forms.FormText className={Margins.bottom16}>
+            <BaseText className={Margins.bottom16}>
                 View the most recent changes to Equicord. This fetches commits
                 directly from the repository to show you what's new.
-            </Forms.FormText>
+            </BaseText>
 
-            <Forms.FormTitle tag="h5">Repository</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16}>
+            <Heading>Repository</Heading>
+            <BaseText className={Margins.bottom16}>
                 {repoPending ? (
                     repo
                 ) : repoErr ? (
@@ -515,7 +512,7 @@ function ChangelogContent() {
                     {shortGitHash()}
                 </span>
                 )
-            </Forms.FormText>
+            </BaseText>
 
             <div className="vc-changelog-controls">
                 <Button
@@ -587,25 +584,25 @@ function ChangelogContent() {
             {error && (
                 <ErrorCard style={{ padding: "1em", marginBottom: "1em" }}>
                     <p>{error}</p>
-                    <Forms.FormText
+                    <BaseText
                         style={{
                             marginTop: "0.5em",
                             color: "var(--text-muted)",
                         }}
                     >
                         Make sure you have an internet connection and try again.
-                    </Forms.FormText>
+                    </BaseText>
                 </ErrorCard>
             )}
 
-            <Forms.FormDivider className={Margins.bottom16} />
+            <Divider className={Margins.bottom16} />
 
             {/* Current Changes Section */}
             {hasCurrentChanges ? (
                 <div className="vc-changelog-current">
-                    <Forms.FormTitle tag="h6" className={Margins.bottom8}>
+                    <Heading className={Margins.bottom8}>
                         Recent Changes
-                    </Forms.FormTitle>
+                    </Heading>
 
                     {/* New Plugins Section */}
                     {newPlugins.length > 0 && (
@@ -622,12 +619,9 @@ function ChangelogContent() {
                     {/* Updated Plugins Section */}
                     {updatedPlugins.length > 0 && (
                         <div className={Margins.bottom16}>
-                            <Forms.FormTitle
-                                tag="h6"
-                                className={Margins.bottom8}
-                            >
+                            <Heading className={Margins.bottom8}>
                                 Updated Plugins ({updatedPlugins.length})
-                            </Forms.FormTitle>
+                            </Heading>
                             <NewPluginsCompact newPlugins={updatedPlugins} />
                         </div>
                     )}
@@ -635,13 +629,10 @@ function ChangelogContent() {
                     {/* Code Changes */}
                     {changelog.length > 0 && (
                         <div>
-                            <Forms.FormTitle
-                                tag="h6"
-                                className={Margins.bottom8}
-                            >
+                            <Heading className={Margins.bottom8}>
                                 Code Changes ({changelog.length}{" "}
                                 {changelog.length === 1 ? "commit" : "commits"})
-                            </Forms.FormTitle>
+                            </Heading>
                             <div className="vc-changelog-commits-list">
                                 {changelog.map(entry => (
                                     <ChangelogCard
@@ -659,11 +650,11 @@ function ChangelogContent() {
                 !isLoading &&
                 !error && (
                     <Card className="vc-changelog-empty">
-                        <Forms.FormText>
+                        <BaseText>
                             No commits available ahead of your current version.
                             Click "Fetch from Repository" to check for new
                             changes.
-                        </Forms.FormText>
+                        </BaseText>
                     </Card>
                 )
             )}
@@ -671,18 +662,18 @@ function ChangelogContent() {
             {/* History Section */}
             {showHistory && changelogHistory.length > 0 && (
                 <div className="vc-changelog-history">
-                    <Forms.FormDivider
+                    <Divider
                         className={Margins.top16}
                         style={{ marginBottom: "1em" }}
                     />
-                    <Forms.FormTitle tag="h5" className={Margins.bottom8}>
+                    <Heading className={Margins.bottom8}>
                         Update Logs ({changelogHistory.length}{" "}
                         {changelogHistory.length === 1 ? "log" : "logs"})
-                    </Forms.FormTitle>
-                    <Forms.FormText className={Margins.bottom16}>
+                    </Heading>
+                    <BaseText className={Margins.bottom16}>
                         Previous update sessions with their commit history and
                         plugin changes.
-                    </Forms.FormText>
+                    </BaseText>
 
                     <div className="vc-changelog-history-list">
                         {changelogHistory.map(log => (

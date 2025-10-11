@@ -19,12 +19,13 @@
 import { definePluginSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
+import { HeadingTertiary } from "@components/Heading";
 import { DeleteIcon } from "@components/Icons";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, Forms, React, Select, TextInput, UserStore, useState } from "@webpack/common";
+import { Button, React, Select, TextInput, UserStore, useState } from "@webpack/common";
 
 type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "scope", string>;
 
@@ -146,7 +147,7 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
 
     return (
         <>
-            <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
+            <HeadingTertiary>{title}</HeadingTertiary>
             <Flex flexDirection="column" style={{ gap: "0.5em", paddingBottom: "1.25em" }}>
                 {
                     rulesArray.map((rule, index) =>
@@ -199,7 +200,7 @@ function TextReplaceTesting() {
     const [value, setValue] = useState("");
     return (
         <>
-            <Forms.FormTitle tag="h4">Test Rules</Forms.FormTitle>
+            <HeadingTertiary>Test Rules</HeadingTertiary>
             <TextInput placeholder="Type a message" onChange={setValue} />
             <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value, "allMessages")} />
         </>

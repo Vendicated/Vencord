@@ -5,6 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -90,7 +91,7 @@ function CreateDecorationModal(props: ModalProps) {
                     <div className={cl("create-decoration-modal-form")}>
                         {error !== null && <Text color="text-danger" variant="text-xs/normal">{error.message}</Text>}
                         <section>
-                            <Forms.FormTitle tag="h5">File</Forms.FormTitle>
+                            <Heading>File</Heading>
                             <FileUpload
                                 filename={file?.name}
                                 placeholder="Choose a file"
@@ -103,7 +104,7 @@ function CreateDecorationModal(props: ModalProps) {
                             </Forms.FormText>
                         </section>
                         <section>
-                            <Forms.FormTitle tag="h5">Name</Forms.FormTitle>
+                            <Heading>Name</Heading>
                             <TextInput
                                 placeholder="Companion Cube"
                                 value={name}

@@ -7,11 +7,12 @@
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
+import { HeadingTertiary } from "@components/Heading";
 import { DeleteIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, TextInput, useState } from "@webpack/common";
+import { Button, TextInput, useState } from "@webpack/common";
 
 const WORDS_KEY = "ContentWarning_words";
 
@@ -91,8 +92,8 @@ function FlaggedInput({ index, forceUpdate }) {
 
         <Button
             onClick={removeSelf}
-            look={Button.Looks.BLANK}
-            size={Button.Sizes.ICON}
+            look={Button.Looks.LINK}
+            size={Button.Sizes.SMALL}
             style={{
                 padding: 0,
                 color: "var(--primary-400)",
@@ -118,7 +119,7 @@ function FlaggedWords() {
     });
 
     return (<>
-        <Forms.FormTitle tag="h4">Flagged Words</Forms.FormTitle>
+        <HeadingTertiary>Flagged Words</HeadingTertiary>
         {inputs}
     </>);
 }

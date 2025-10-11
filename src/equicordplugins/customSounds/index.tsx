@@ -10,9 +10,10 @@ import { addAudioProcessor, AudioProcessor, PreprocessAudioData, removeAudioProc
 import { get as getFromDataStore } from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { Button, Forms, React, showToast, TextInput } from "@webpack/common";
+import { Button, React, showToast, TextInput } from "@webpack/common";
 
 import { getAllAudio, getAudioDataURI } from "./audioStore";
 import { SoundOverrideComponent } from "./SoundOverrideComponent";
@@ -338,7 +339,7 @@ const settings = definePluginSettings({
                     </div>
 
                     <div className={cl("search")}>
-                        <Forms.FormTitle>Search Sounds</Forms.FormTitle>
+                        <Heading>Search Sounds</Heading>
                         <TextInput
                             value={searchQuery}
                             onChange={e => setSearchQuery(e)}

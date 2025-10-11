@@ -96,7 +96,7 @@ function ModalComponent(props: { iconName: string; Icon: t.Icon; } & ModalProps)
                 Save as
             </Button>
             <Button
-                color={Button.Colors.YELLOW}
+                color={Button.Colors.LINK}
                 className={classes(Margins.right8, "vc-iv-raw-modal-button")}
                 onClick={() => openRawModal(iconName, Icon, color)}
             >

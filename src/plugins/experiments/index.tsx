@@ -8,6 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
+import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -131,7 +132,7 @@ export default definePlugin({
     settingsAboutComponent: () => {
         return (
             <React.Fragment>
-                <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
+                <HeadingSecondary>More Information</HeadingSecondary>
                 <Paragraph size="md">
                     You can open Discord's DevTools via {" "}
                     <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
@@ -146,7 +147,7 @@ export default definePlugin({
 
     WarningCard: ErrorBoundary.wrap(() => (
         <ErrorCard id="vc-experiments-warning-card" className={Margins.bottom16}>
-            <Forms.FormTitle tag="h2">Hold on!!</Forms.FormTitle>
+            <HeadingPrimary>Hold on!!</HeadingPrimary>
 
             <Forms.FormText>
                 Experiments are unreleased Discord features. They might not work, or even break your client or get your account disabled.

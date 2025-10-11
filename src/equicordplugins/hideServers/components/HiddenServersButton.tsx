@@ -23,7 +23,7 @@ function HiddenServersButton() {
             {actuallyHidden > 0 ? (
                 <Button
                     className={cl("button")}
-                    look={Button.Looks.BLANK}
+                    look={Button.Looks.LINK}
                     size={Button.Sizes.MIN}
                     onClick={() => openHiddenServersModal()}
                 >

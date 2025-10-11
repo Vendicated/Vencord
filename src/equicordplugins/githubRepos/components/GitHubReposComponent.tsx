@@ -101,7 +101,7 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
             <Button
                 className={cl("button")}
                 size={Button.Sizes.SMALL}
-                look={Button.Looks.OUTLINED}
+                look={Button.Looks.LINK}
                 color={Button.Colors.TRANSPARENT}
                 onClick={openReposModal}
             >
@@ -136,7 +136,7 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
                 <Button
                     className={cl("show-more")}
                     size={Button.Sizes.SMALL}
-                    look={Button.Looks.OUTLINED}
+                    look={Button.Looks.LINK}
                     color={Button.Colors.TRANSPARENT}
                     onClick={openReposModal}
                 >

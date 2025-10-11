@@ -5,12 +5,13 @@
  */
 
 import { Flex } from "@components/Flex";
+import { HeadingPrimary } from "@components/Heading";
 import { CopyIcon } from "@components/Icons";
 import { openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
-import { Clickable, Forms, Text, Timestamp } from "@webpack/common";
+import { Clickable, Text, Timestamp } from "@webpack/common";
 import moment from "moment";
 
 import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User, UserSummaryItem } from "../utils";
@@ -41,7 +42,7 @@ export default function UserModal({ item, user, sounds, closeModal }: { item: So
                         alt=""
                         style={{ cursor: "pointer" }}
                     />
-                    <Forms.FormTitle tag="h2" className={cl("user-name")} style={{ textTransform: "none", cursor: "pointer" }}>{user.username}</Forms.FormTitle>
+                    <HeadingPrimary className={cl("user-name")} style={{ textTransform: "none", cursor: "pointer" }}>{user.username}</HeadingPrimary>
                 </div>
             </Clickable>
             <Flex flexDirection="row" style={{ gap: "10px" }}>

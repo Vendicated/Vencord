@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Text } from "@webpack/common";
 
@@ -29,9 +30,9 @@ function ModalHeaderContent({ track }: { track: Track; }) {
                     />
                 )}
                 <div>
-                    <Text selectable variant="text-sm/semibold">{track.name}</Text>
-                    <Text selectable variant="text-sm/normal">by {track.artist}</Text>
-                    {track.album && <Text selectable variant="text-sm/normal">on {track.album}</Text>}
+                    <BaseText size="sm" weight="semibold">{track.name}</BaseText>
+                    <BaseText size="sm">by {track.artist}</BaseText>
+                    {track.album && <BaseText size="sm">on {track.album}</BaseText>}
                 </div>
             </div>
         </ModalHeader>
@@ -51,10 +52,10 @@ export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
                 <div className={cl("lyrics-modal-container") + ` ${scrollClasses.auto}`}>
                     {currentLyrics ? (
                         currentLyrics.map((line, i) => (
-                            <Text
+                            <BaseText
                                 key={i}
-                                variant={currLrcIndex === i ? "text-md/semibold" : "text-sm/normal"}
-                                selectable
+                                size={currLrcIndex === i ? "md" : "sm"}
+                                weight={currLrcIndex === i ? "semibold" : "normal"}
                                 className={currLrcIndex === i ? cl("modal-line-current") : cl("modal-line")}
                             >
                                 <span className={cl("modal-timestamp")}
@@ -109,7 +110,7 @@ export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
                                 ) : (
                                     line.text || NoteSvg(cl("modal-note"))
                                 )}
-                            </Text>
+                            </BaseText>
                         ))
                     ) : (
                         <Text variant="text-sm/normal" className={cl("modal-no-lyrics")}>No lyrics available :(</Text>

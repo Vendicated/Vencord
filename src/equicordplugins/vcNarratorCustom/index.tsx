@@ -6,6 +6,7 @@
 
 import { playAudio } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
+import { Heading } from "@components/Heading";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
@@ -397,9 +398,9 @@ export default definePlugin({
                         here
                     </a>
                 </Forms.FormText>
-                <Forms.FormTitle className={Margins.top20} tag="h3">
+                <Heading className={Margins.top20} tag="h3">
                     Play Example Sounds
-                </Forms.FormTitle>
+                </Heading>
                 <div
                     style={{
                         display: "grid",

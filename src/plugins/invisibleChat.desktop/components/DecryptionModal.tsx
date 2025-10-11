@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Heading, HeadingTertiary } from "@components/Heading";
 import {
     ModalContent,
     ModalFooter,
@@ -23,7 +24,7 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Button, React, TextInput } from "@webpack/common";
 
 import { decrypt } from "../index";
 
@@ -34,13 +35,13 @@ export function DecModal(props: any) {
     return (
         <ModalRoot {...props}>
             <ModalHeader>
-                <Forms.FormTitle tag="h4">Decrypt Message</Forms.FormTitle>
+                <HeadingTertiary>Decrypt Message</HeadingTertiary>
             </ModalHeader>
 
             <ModalContent>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Message with Encryption</Forms.FormTitle>
+                <Heading style={{ marginTop: "10px" }}>Message with Encryption</Heading>
                 <TextInput defaultValue={encryptedMessage} disabled={true}></TextInput>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
+                <Heading style={{ marginTop: "10px" }}>Password</Heading>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     onChange={setPassword}

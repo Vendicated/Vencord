@@ -5,6 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingPrimary } from "@components/Heading";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
 import { Forms, React, Tooltip } from "@webpack/common";
@@ -35,7 +36,7 @@ export function BadgeModal({ user }: { user: User; }) {
                     src={user.getAvatarURL(void 0, 512, true)}
                     alt=""
                 />
-                <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
+                <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
             </div>
             {badgeImages.length ? (
                 <Forms.FormText>

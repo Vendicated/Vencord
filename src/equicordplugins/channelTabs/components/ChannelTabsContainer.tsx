@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
 import { IS_MAC } from "@utils/constants";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
@@ -228,7 +229,7 @@ export function ChannelTabsPreview(p) {
 
     return (
         <>
-            <Forms.FormTitle>Startup tabs</Forms.FormTitle>
+            <Heading>Startup tabs</Heading>
             <Flex flexDirection="row" style={{ gap: "2px" }}>
                 {currentTabs.map(t => <>
                     <PreviewTab {...t} />

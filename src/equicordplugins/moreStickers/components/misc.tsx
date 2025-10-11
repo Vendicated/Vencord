@@ -6,7 +6,9 @@
 
 import * as DataStore from "@api/DataStore";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/common";
 import { JSX } from "react";
 
@@ -125,7 +127,7 @@ export const Settings = () => {
 
             {tab === SettingsTabsKey.ADD_STICKER_PACK_URL &&
                 <div className="section">
-                    <Forms.FormTitle tag="h5">Add Sticker Pack from URL</Forms.FormTitle>
+                    <Heading>Add Sticker Pack from URL</Heading>
                     <Forms.FormText>
                         <p>
                             Currently LINE stickers/emojis supported only. <br />
@@ -233,7 +235,7 @@ export const Settings = () => {
             }
             {tab === SettingsTabsKey.ADD_STICKER_PACK_HTML &&
                 <div className="section">
-                    <Forms.FormTitle tag="h5">Add Sticker Pack from HTML</Forms.FormTitle>
+                    <Heading>Add Sticker Pack from HTML</Heading>
                     <Forms.FormText>
                         <p>
                             When encountering errors while adding a sticker pack, you can try to add it using the HTML source code of the sticker pack page.<br />
@@ -311,7 +313,7 @@ export const Settings = () => {
             {
                 tab === SettingsTabsKey.ADD_STICKER_PACK_FILE &&
                 <div className="section">
-                    <Forms.FormTitle tag="h5">Add Sticker Pack from File</Forms.FormTitle>
+                    <Heading>Add Sticker Pack from File</Heading>
 
                     <Button
                         size={Button.Sizes.SMALL}
@@ -367,7 +369,7 @@ export const Settings = () => {
             {
                 tab === SettingsTabsKey.MISC &&
                 <div className="section">
-                    <Forms.FormTitle tag="h5">Misc tools</Forms.FormTitle>
+                    <Heading>Misc tools</Heading>
 
                     <Flex flexDirection="row" style={{
                         alignItems: "center",
@@ -412,11 +414,11 @@ export const Settings = () => {
                     </Flex>
                 </div>
             }
-            <Forms.FormDivider style={{
+            <Divider style={{
                 marginTop: "8px",
                 marginBottom: "8px"
             }} />
-            <Forms.FormTitle tag="h5">Stickers Management</Forms.FormTitle>
+            <Heading>Stickers Management</Heading>
 
             <div className="section">
                 <div style={{

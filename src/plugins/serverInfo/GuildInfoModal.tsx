@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -111,7 +112,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                 }
 
                 <div className={cl("name-and-description")}>
-                    <Forms.FormTitle tag="h5" className={cl("name")}>{guild.name}</Forms.FormTitle>
+                    <Heading className={cl("name")}>{guild.name}</Heading>
                     {guild.description && <Forms.FormText>{guild.description}</Forms.FormText>}
                 </div>
             </div>
@@ -242,7 +243,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         <div className={cl("info")}>
             {Object.entries(Fields).map(([name, node]) =>
                 <div className={cl("server-info-pair")} key={name}>
-                    <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>
+                    <Heading>{name}</Heading>
                     {typeof node === "string" ? <span>{node}</span> : node}
                 </div>
             )}

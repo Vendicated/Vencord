@@ -9,6 +9,7 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
+import { HeadingPrimary, HeadingTertiary } from "@components/Heading";
 import { OpenExternalIcon } from "@components/Icons";
 import { SettingsTab, wrapTab } from "@components/settings";
 import { Logger } from "@utils/Logger";
@@ -163,7 +164,7 @@ function ThemeTab() {
                     <>
                         {hideWarningCard ? null : (
                             <ErrorCard>
-                                <Forms.FormTitle tag="h4">Want your theme removed?</Forms.FormTitle>
+                                <HeadingTertiary>Want your theme removed?</HeadingTertiary>
                                 <Forms.FormText className={Margins.top8}>
                                     If you want your theme(s) permanently removed, please open an issue on <a href="https://github.com/Faf4a/plugins/issues/new?labels=removal&projects=&template=request_removal.yml&title=Theme+Removal">GitHub <OpenExternalIcon height={16} width={16} /></a>
                                 </Forms.FormText>
@@ -180,13 +181,13 @@ function ThemeTab() {
                             </ErrorCard>
                         )}
                         <div className={classes(Margins.bottom8, Margins.top16)}>
-                            <Forms.FormTitle tag="h2"
+                            <HeadingPrimary
                                 style={{
                                     overflowWrap: "break-word",
                                     marginTop: 8,
                                 }}>
                                 {searchValue.status === SearchStatus.LIKED ? "Most Liked" : "Newest Additions"}
-                            </Forms.FormTitle>
+                            </HeadingPrimary>
 
                             {themes.slice(0, 2).map((theme: Theme) => (
                                 <ThemeCard
@@ -199,12 +200,12 @@ function ThemeTab() {
                                 />
                             ))}
                         </div>
-                        <Forms.FormTitle tag="h2" style={{
+                        <HeadingPrimary style={{
                             overflowWrap: "break-word",
                             marginTop: 20,
                         }}>
                             Themes
-                        </Forms.FormTitle>
+                        </HeadingPrimary>
                         <div className={classes(Margins.bottom20, "vce-search-grid")}>
                             <TextInput value={searchValue.value} placeholder="Search for a theme..." onChange={onSearch} />
                             <div className={InputStyles.inputWrapper}>

@@ -21,11 +21,12 @@ import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { EquicordDevs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, Text } from "@webpack/common";
+import { Button, ChannelStore, Text } from "@webpack/common";
 
 const DecodeIcon = () => {
     return (
@@ -75,7 +76,7 @@ function openDecodedBase64Modal(decodedContent) {
                 </ModalHeader>
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
-                        <Forms.FormTitle tag="h5">Decoded Content</Forms.FormTitle>
+                        <Heading>Decoded Content</Heading>
                         {decodedContent.map((content, index) => (
                             <CodeBlock key={index} content={content} lang="" />
                         ))}

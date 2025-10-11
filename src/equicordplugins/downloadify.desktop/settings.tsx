@@ -8,6 +8,7 @@ import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { OptionType } from "@utils/types";
 import { Button, Forms, showToast, Toasts, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -39,9 +40,9 @@ function DefaultDirectorySetting(): JSX.Element {
     return (
         <ErrorBoundary>
             <section>
-                <Forms.FormTitle className={d("form-title")}>
+                <Heading className={d("form-title")}>
                     Default Directory
-                </Forms.FormTitle>
+                </Heading>
                 <Forms.FormText className={d("form-description")}>
                     Default download location. If set, the file will always be downloaded in its original format even if alternatives are available. Leave empty to pick a folder and file type each time.
                 </Forms.FormText>

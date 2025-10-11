@@ -19,6 +19,7 @@
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Heading } from "@components/Heading";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -188,7 +189,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
+                <Heading>Record Voice Message</Heading>
             </ModalHeader>
 
             <ModalContent className={cl("modal")}>
@@ -214,7 +215,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     </Button>
                 </div>
 
-                <Forms.FormTitle>Preview</Forms.FormTitle>
+                <Heading>Preview</Heading>
                 <VoicePreview
                     src={blobUrl}
                     waveform={meta.waveform}

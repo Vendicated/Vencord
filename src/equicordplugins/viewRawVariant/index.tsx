@@ -6,7 +6,9 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { CodeBlock } from "@components/CodeBlock";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -21,7 +23,7 @@ import {
 } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Forms, Menu, Text } from "@webpack/common";
+import { Menu, Text } from "@webpack/common";
 
 type CustomMessage = Message & {
     editHistory?: any;
@@ -70,20 +72,18 @@ function openViewRawModal(obj: any, type: string, isMessage?: boolean) {
                     <div style={{ padding: "16px 0" }}>
                         {isMessage && (
                             <>
-                                <Forms.FormTitle tag="h5">
+                                <Heading>
                                     Content
-                                </Forms.FormTitle>
+                                </Heading>
                                 <CodeBlock
                                     content={obj.content}
                                     lang="markdown"
                                 />
-                                <Forms.FormDivider
-                                    className={Margins.bottom20}
-                                />
+                                <Divider className={Margins.bottom20} />
                             </>
                         )}
 
-                        <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
+                        <Heading>{type} Data</Heading>
                         <CodeBlock
                             content={JSON.stringify(obj, null, 4)}
                             lang="json"

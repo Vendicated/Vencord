@@ -9,10 +9,12 @@ import "styles.css?managed";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
+import { Divider } from "@components/Divider";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, Menu, RelationshipStore, Text, TextInput, useEffect, UserStore, useState } from "@webpack/common";
+import { Button, ChannelStore, Menu, RelationshipStore, Text, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 
 const tagStoreName = "vc-friendtags-tags";
 
@@ -105,12 +107,12 @@ function TagConfigCard(props) {
 
     return (
         <>
-            <Text variant={"heading-md/normal"}>Name</Text>
+            <BaseText size="md" tag="h5">Name</BaseText>
             <TextInput value={tagName} onChange={setTagName}></TextInput>
-            <Text variant={"heading-md/normal"}>Users (Seperated by comma)</Text>
+            <BaseText size="md" tag="h5">Users (Seperated by comma)</BaseText>
             <TextInput value={userIds} onChange={setUserIDs}></TextInput>
             <div className={"vc-friend-tags-user-header-container"}>
-                <Text variant="eyebrow">User List (Click A User To Remove)</Text>
+                <BaseText>User List (Click A User To Remove)</BaseText>
                 <div className={"vc-friend-tags-user-header-btns"}>
                     {
                         userIds.split(", ").map(user => {
@@ -140,12 +142,12 @@ function TagConfigurationComponent() {
 
     return (
         <>
-            <Forms.FormDivider />
+            <Divider />
             {
                 SavedData?.map(e => (
                     <>
                         <TagConfigCard tag={e} />
-                        <Forms.FormDivider />
+                        <Divider />
                     </>
                 ))
             }

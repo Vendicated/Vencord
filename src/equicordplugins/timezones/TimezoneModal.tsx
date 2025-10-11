@@ -6,9 +6,10 @@
 
 import * as DataStore from "@api/DataStore";
 import { classNameFactory } from "@api/Styles";
+import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Button, Forms, SearchableSelect, useEffect, useMemo, useState } from "@webpack/common";
+import { Button, SearchableSelect, useEffect, useMemo, useState } from "@webpack/common";
 
 import { DATASTORE_KEY, getSystemTimezone, resolveUserTimezone, settings, timezones } from ".";
 import { setTimezone, setUserDatabaseTimezone } from "./database";
@@ -41,17 +42,17 @@ export function SetTimezoneModal({ userId, modalProps, database }: { userId: str
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
+                <HeadingPrimary>
                     Timezones
-                </Forms.FormTitle>
+                </HeadingPrimary>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent className={cl("modal-content")}>
                 <section className={Margins.bottom16}>
-                    <Forms.FormTitle tag="h3">
+                    <HeadingSecondary>
                         Select Timezone
-                    </Forms.FormTitle>
+                    </HeadingSecondary>
 
                     <SearchableSelect
                         options={options}

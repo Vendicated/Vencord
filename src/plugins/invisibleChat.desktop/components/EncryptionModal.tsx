@@ -17,6 +17,7 @@
 */
 
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading, HeadingTertiary } from "@components/Heading";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import {
     ModalContent,
@@ -26,7 +27,7 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Button, React, TextInput } from "@webpack/common";
 
 import { encrypt } from "../index";
 
@@ -41,24 +42,24 @@ function EncModal(props: ModalProps) {
     return (
         <ModalRoot {...props}>
             <ModalHeader>
-                <Forms.FormTitle tag="h4">Encrypt Message</Forms.FormTitle>
+                <HeadingTertiary>Encrypt Message</HeadingTertiary>
             </ModalHeader>
 
             <ModalContent>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Secret</Forms.FormTitle>
+                <Heading style={{ marginTop: "10px" }}>Secret</Heading>
                 <TextInput
                     onChange={(e: string) => {
                         setSecret(e);
                     }}
                 />
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Cover (2 or more Words!!)</Forms.FormTitle>
+                <Heading style={{ marginTop: "10px" }}>Cover (2 or more Words!!)</Heading>
                 <TextInput
                     disabled={noCover}
                     onChange={(e: string) => {
                         setCover(e);
                     }}
                 />
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
+                <Heading style={{ marginTop: "10px" }}>Password</Heading>
                 <TextInput
                     style={{ marginBottom: "20px" }}
                     defaultValue={"password"}

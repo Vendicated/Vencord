@@ -9,6 +9,7 @@ import "./style.css";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { EquicordDevs } from "@utils/constants";
@@ -153,7 +154,7 @@ const settings = definePluginSettings({
                         </Button>
                     </Link>
                 </Forms.FormText>
-                <Forms.FormDivider />
+                <Divider />
             </>
         )
     },

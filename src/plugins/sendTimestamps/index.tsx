@@ -21,6 +21,7 @@ import "./styles.css";
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Heading, HeadingPrimary } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { getTheme, insertTextIntoChatInputBox, Theme } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -68,9 +69,9 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
+                <HeadingPrimary className={cl("modal-title")}>
                     Timestamp Picker
-                </Forms.FormTitle>
+                </HeadingPrimary>
 
                 <ModalCloseButton onClick={close} className={cl("modal-close-button")} />
             </ModalHeader>
@@ -86,7 +87,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                     }}
                 />
 
-                <Forms.FormTitle>Timestamp Format</Forms.FormTitle>
+                <Heading>Timestamp Format</Heading>
                 <div className={cl("format-select")}>
                     <Select
                         options={
@@ -107,7 +108,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                     />
                 </div>
 
-                <Forms.FormTitle className={Margins.bottom8}>Preview</Forms.FormTitle>
+                <Heading className={Margins.bottom8}>Preview</Heading>
                 <Forms.FormText className={cl("preview-text")}>
                     {rendered} ({formatted})
                 </Forms.FormText>

@@ -6,8 +6,9 @@
 
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, ChannelStore, Forms, React, SelectedChannelStore, Slider, Text, TextArea, UploadHandler } from "@webpack/common";
+import { Button, ChannelStore, React, SelectedChannelStore, Slider, Text, TextArea, UploadHandler } from "@webpack/common";
 
 import { characters } from "../characters.json";
 import Canvas from "./Canvas";
@@ -104,19 +105,19 @@ export default function SekaiStickersModal({ modalProps, settings }: { modalProp
                 <Flex flexDirection="row" style={{ paddingTop: 12 }}>
                     <div style={{ marginRight: 30 }}>
                         <Canvas draw={draw} id="SekaiCard_Canvas" />
-                        <Forms.FormTitle>Text Y Pos</Forms.FormTitle>
+                        <Heading>Text Y Pos</Heading>
                         <Slider minValue={0} maxValue={256} asValueChanges={va => { va = Math.round(va); setPosition({ x: position.x, y: curve ? 256 + fontSize * 3 - va : 256 - va }); }} initialValue={curve ? 256 - position.y + fontSize * 3 : 256 - position.y} orientation={"vertical"} onValueRender={va => String(Math.round(va))} />
-                        <Forms.FormTitle>Text XZ Pos</Forms.FormTitle>
+                        <Heading>Text XZ Pos</Heading>
                         <Slider minValue={0} maxValue={296} asValueChanges={va => { va = Math.round(va); setPosition({ y: position.y, x: va }); }} initialValue={position.x} orientation={"horizontal"} onValueRender={(v: number) => String(Math.round(v))} />
                     </div>
                     <div style={{ marginRight: 10, width: "30vw" }}>
-                        <Forms.FormTitle>Text</Forms.FormTitle>
+                        <Heading>Text</Heading>
                         <TextArea onChange={setText} placeholder={text} rows={4} spellCheck={false} />
-                        <Forms.FormTitle>Rotation</Forms.FormTitle>
+                        <Heading>Rotation</Heading>
                         <Slider markers={[-10, -5, 0, 5, 10]} stickToMarkers={false} minValue={-10} maxValue={10} asValueChanges={val => setRotate(val)} initialValue={rotate} keyboardStep={0.2} orientation={"horizontal"} onValueRender={(v: number) => String(v.toFixed(2))} />
-                        <Forms.FormTitle>Font Size</Forms.FormTitle>
+                        <Heading>Font Size</Heading>
                         <Slider minValue={10} asValueChanges={val => setFontSize(Math.round(val))} maxValue={100} initialValue={fontSize} keyboardStep={1} orientation={"horizontal"} onValueRender={(v: number) => String(Math.round(v))} />
-                        <Forms.FormTitle>Spacing</Forms.FormTitle>
+                        <Heading>Spacing</Heading>
                         <Slider markers={[18, 36, 72, 100]} stickToMarkers={false} minValue={18} maxValue={100} initialValue={spaceSize} asValueChanges={e => setSpaceSize(e)} onValueRender={e => String(Math.round(e))} />
                         <FormSwitch title="Enable curve" value={curve} onChange={val => setCurve(val)} />
                         <Button onClick={() => openModal(props => <CharSelectModal modalProps={props} setCharacter={setChracter} />)}>Switch Character</Button>

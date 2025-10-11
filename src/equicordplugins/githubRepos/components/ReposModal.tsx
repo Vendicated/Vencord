@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { HeadingPrimary } from "@components/Heading";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@utils/modal";
-import { Button, Forms, React } from "@webpack/common";
+import { Button, React } from "@webpack/common";
 
 import { getLanguageColor } from "../colors";
 import { GitHubRepo } from "../types";
@@ -62,9 +63,9 @@ export function ReposModal({ repos, username, rootProps }: ReposModalProps) {
     return (
         <ModalRoot className="vc-github-repos-modal" size="large" {...rootProps}>
             <ModalHeader>
-                <Forms.FormTitle tag="h2" className="vc-github-repos-modal-title">
+                <HeadingPrimary className="vc-github-repos-modal-title">
                     {username}'s GitHub Repositories
-                </Forms.FormTitle>
+                </HeadingPrimary>
             </ModalHeader>
             <ModalContent className="vc-github-repos-modal-content">
                 <div className="vc-github-repos-table-container">

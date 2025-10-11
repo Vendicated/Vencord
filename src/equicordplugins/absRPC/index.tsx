@@ -6,6 +6,7 @@
 
 // alot of the code is from JellyfinRPC
 import { definePluginSettings } from "@api/Settings";
+import { HeadingSecondary } from "@components/Heading";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -90,7 +91,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">How to connect to AudioBookShelf</Forms.FormTitle>
+            <HeadingSecondary>How to connect to AudioBookShelf</HeadingSecondary>
             <Forms.FormText>
                 Enter your AudioBookShelf server URL, username, and password to display your currently playing audiobooks as Discord Rich Presence.
                 <br /><br />

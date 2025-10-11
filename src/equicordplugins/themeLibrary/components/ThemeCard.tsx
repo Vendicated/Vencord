@@ -6,6 +6,7 @@
 
 import { generateId } from "@api/Commands";
 import { Settings } from "@api/Settings";
+import { HeadingPrimary, HeadingTertiary } from "@components/Heading";
 import { OpenExternalIcon } from "@components/Icons";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
@@ -64,7 +65,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({ theme, themeLinks, likedTh
             openModal(modalProps => (
                 <ModalRoot {...modalProps} size={ModalSize.SMALL}>
                     <ModalHeader>
-                        <Forms.FormTitle tag="h4">Hold on!</Forms.FormTitle>
+                        <HeadingTertiary>Hold on!</HeadingTertiary>
                     </ModalHeader>
                     <ModalContent>
                         <Forms.FormText style={{ padding: "8px" }}>
@@ -114,9 +115,9 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({ theme, themeLinks, likedTh
 
     return (
         <Card style={{ padding: ".5rem", marginBottom: ".5em", marginTop: ".5em", display: "flex", flexDirection: "column", backgroundColor: "var(--background-base-lower-alt)" }} key={theme.id}>
-            <Forms.FormTitle tag="h2" style={{ overflowWrap: "break-word", marginTop: 8 }} className="vce-theme-text">
+            <HeadingPrimary style={{ overflowWrap: "break-word", marginTop: 8 }} className="vce-theme-text">
                 {theme.name}
-            </Forms.FormTitle>
+            </HeadingPrimary>
             <Forms.FormText className="vce-theme-text">
                 {Parser.parse(theme.description)}
             </Forms.FormText>

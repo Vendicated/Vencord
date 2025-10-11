@@ -158,7 +158,7 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                 </Button>
                 <Button
                     style={{ marginRight: "16px" }}
-                    color={Button.Colors.YELLOW}
+                    color={Button.Colors.LINK}
                     disabled={messages?.length === 0}
                     onClick={() => Alerts.show({
                         title: "Clear Logs",

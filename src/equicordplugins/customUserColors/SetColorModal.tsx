@@ -6,9 +6,10 @@
 
 import { set } from "@api/DataStore";
 import { classNameFactory } from "@api/Styles";
+import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Button, ColorPicker, Forms, useState } from "@webpack/common";
+import { Button, ColorPicker, useState } from "@webpack/common";
 
 import { colors, DATASTORE_KEY } from "./index";
 
@@ -46,16 +47,16 @@ export function SetColorModal({ id, modalProps }: { id: string, modalProps: Moda
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
+                <HeadingPrimary>
                     Custom Color
-                </Forms.FormTitle>
+                </HeadingPrimary>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
             <ModalContent className={cl("modal-content")} onKeyDown={handleKey}>
                 <section className={Margins.bottom16}>
-                    <Forms.FormTitle tag="h3">
+                    <HeadingSecondary>
                         Pick a Color
-                    </Forms.FormTitle>
+                    </HeadingSecondary>
                     <ColorPicker
                         color={colorPickerColor}
                         onChange={setUserColor}

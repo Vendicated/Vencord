@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { HeadingSecondary } from "@components/Heading";
 import { makeRange, OptionType } from "@utils/types";
 import { Button, Forms, MaskedLink, showToast, Toasts } from "@webpack/common";
 
@@ -26,7 +27,7 @@ export function toggleHoverControls(value: boolean) {
 function InstallInstructions() {
     return (
         <section>
-            <Forms.FormTitle tag="h3">How to install</Forms.FormTitle>
+            <HeadingSecondary>How to install</HeadingSecondary>
             <Forms.FormText>
                 Install <MaskedLink href="https://github.com/Inrixia/TidaLuna#installation">TidaLuna</MaskedLink> from here, then go to TidalLuna settings &rarr; Plugin stores &rarr; Install <code>@vmohammad/api</code>
             </Forms.FormText>
@@ -115,7 +116,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => (
             <section>
-                <Forms.FormTitle tag="h3">Spotify</Forms.FormTitle>
+                <HeadingSecondary>Spotify</HeadingSecondary>
             </section>
         )
     },
@@ -144,7 +145,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => (
             <section>
-                <Forms.FormTitle tag="h3">Tidal</Forms.FormTitle>
+                <HeadingSecondary>Tidal</HeadingSecondary>
             </section>
         )
     },
@@ -194,7 +195,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => (
             <section>
-                <Forms.FormTitle tag="h3">Youtube Music</Forms.FormTitle>
+                <HeadingSecondary>Youtube Music</HeadingSecondary>
             </section>
         )
     },

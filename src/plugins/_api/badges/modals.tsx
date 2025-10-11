@@ -6,10 +6,9 @@
 
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
-import { DonateButton, ErrorBoundary, VCDonateButton } from "@components/index";
+import { BaseText, DonateButton, ErrorBoundary, HeadingPrimary, VCDonateButton } from "@components/index";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
-import { Forms } from "@webpack/common";
 
 export function VencordDonorModal() {
     const modalKey = openModal(props => (
@@ -19,19 +18,18 @@ export function VencordDonorModal() {
         }}>
             <ModalRoot {...props}>
                 <ModalHeader>
-                    <Flex style={{ width: "100%", justifyContent: "center" }}>
-                        <Forms.FormTitle
-                            tag="h2"
-                            style={{
-                                width: "100%",
-                                textAlign: "center",
-                                margin: 0
-                            }}
-                        >
+                    <HeadingPrimary
+                        style={{
+                            width: "100%",
+                            textAlign: "center",
+                            margin: 0
+                        }}
+                    >
+                        <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
                             <Heart />
                             Vencord Donor
-                        </Forms.FormTitle>
-                    </Flex>
+                        </Flex>
+                    </HeadingPrimary>
                 </ModalHeader>
                 <ModalContent>
                     <Flex>
@@ -49,12 +47,12 @@ export function VencordDonorModal() {
                         />
                     </Flex>
                     <div style={{ padding: "1em" }}>
-                        <Forms.FormText>
+                        <BaseText>
                             This Badge is a special perk for Vencord Donors
-                        </Forms.FormText>
-                        <Forms.FormText className={Margins.top20}>
-                            Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!
-                        </Forms.FormText>
+                        </BaseText>
+                        <BaseText className={Margins.top20}>
+                            Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                        </BaseText>
                     </div>
                 </ModalContent>
                 <ModalFooter>
@@ -76,19 +74,18 @@ export function EquicordDonorModal() {
         }}>
             <ModalRoot {...props}>
                 <ModalHeader>
-                    <Flex style={{ width: "100%", justifyContent: "center" }}>
-                        <Forms.FormTitle
-                            tag="h2"
-                            style={{
-                                width: "100%",
-                                textAlign: "center",
-                                margin: 0
-                            }}
-                        >
+                    <HeadingPrimary
+                        style={{
+                            width: "100%",
+                            textAlign: "center",
+                            margin: 0
+                        }}
+                    >
+                        <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
                             <Heart />
                             Equicord Donor
-                        </Forms.FormTitle>
-                    </Flex>
+                        </Flex>
+                    </HeadingPrimary>
                 </ModalHeader>
                 <ModalContent>
                     <Flex>
@@ -106,12 +103,12 @@ export function EquicordDonorModal() {
                         />
                     </Flex>
                     <div style={{ padding: "1em" }}>
-                        <Forms.FormText>
+                        <BaseText>
                             This Badge is a special perk for Equicord (Not Vencord) Donors
-                        </Forms.FormText>
-                        <Forms.FormText className={Margins.top20}>
+                        </BaseText>
+                        <BaseText className={Margins.top20}>
                             Please consider supporting the development of Equicord by becoming a donor. It would mean a lot! :3
-                        </Forms.FormText>
+                        </BaseText>
                     </div>
                 </ModalContent>
                 <ModalFooter>

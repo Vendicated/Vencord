@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
@@ -11,7 +12,7 @@ import { classes, copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, Forms, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
+import { Button, Clickable, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
 
 import settings from "../settings";
 import { clearLoggedSounds, getLoggedSounds } from "../store";
@@ -128,7 +129,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                                     src={getEmojiUrl(item.emoji)}
                                     className={cl("sound-emoji")}
                                 />
-                                <Forms.FormText variant="text-xs/medium" className={cl("sound-id")}>{item.soundId}</Forms.FormText>
+                                <BaseText size="xs" weight="medium" className={cl("sound-id")}>{item.soundId}</BaseText>
                             </Flex>
                             <UserSummaryItem
                                 users={itemUsers.slice(0, avatarsMax)} // Trimmed array to the size of max
@@ -173,7 +174,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                             src="https://raw.githubusercontent.com/fres621/assets/main/shiggy.png"
                             height="200px"
                         />
-                        <Forms.FormText variant="text-sm/medium" style={{ color: "var(--text-muted)" }} className={Margins.bottom16}>No sounds logged yet. Join a voice chat to start logging!</Forms.FormText>
+                        <BaseText size="sm" weight="medium" style={{ color: "var(--text-muted)" }} className={Margins.bottom16}>No sounds logged yet. Join a voice chat to start logging!</BaseText>
                     </div>
                 }
             </ModalContent >

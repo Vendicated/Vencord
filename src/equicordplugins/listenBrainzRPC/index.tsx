@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -163,7 +164,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">About MusicBrainz API</Forms.FormTitle>
+            <HeadingSecondary>About MusicBrainz API</HeadingSecondary>
             <Forms.FormText>
                 The MusicBrainz API does not require an API key, but it does require a{" "}
                 <Link href="https://musicbrainz.org/doc/MusicBrainz_API/Rate_Limiting#Provide_meaningful_User-Agent_strings">

@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Forms, Slider, useMemo } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Slider, useMemo } from "@webpack/common";
 
 interface Props {
     label: string;
@@ -36,7 +37,7 @@ export function SettingRangeComponent({ label, name, default: def, min, max, ste
 
     return (
         <section>
-            <Forms.FormTitle tag="h5">{label}</Forms.FormTitle>
+            <Heading>{label}</Heading>
             <Slider
                 initialValue={parseInt(themeSettings[name], 10)}
                 defaultValue={def}

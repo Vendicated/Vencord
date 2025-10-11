@@ -6,12 +6,13 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading, HeadingPrimary } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, wreq } from "@webpack";
-import { Button, Flex, Forms, Text, Timestamp, useState } from "@webpack/common";
+import { Button, Flex, Text, Timestamp, useState } from "@webpack/common";
 
 import TarFile from "./tar";
 import * as Webpack from "./webpack";
@@ -97,9 +98,9 @@ function TarModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Forms.FormTitle tag="h2">
+                <HeadingPrimary>
                     Webpack Tarball
-                </Forms.FormTitle>
+                </HeadingPrimary>
                 <Text variant="text-md/normal">
                     <Timestamp timestamp={new Date(builtAt)} isInline={false}>
                         {"Build number "}
@@ -111,9 +112,9 @@ function TarModal({ modalProps, close }: { modalProps: ModalProps; close(): void
 
             <ModalContent>
                 <div style={{ marginTop: "8px", marginBottom: "24px" }}>
-                    <Forms.FormTitle>
+                    <Heading>
                         Lazy chunks
-                    </Forms.FormTitle>
+                    </Heading>
                     <Flex align={Flex.Align.CENTER}>
                         <Text
                             variant="text-md/normal"

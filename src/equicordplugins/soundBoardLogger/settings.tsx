@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Heading } from "@components/Heading";
 import { OptionType } from "@utils/types";
 import { Button, Forms, TextInput, useState } from "@webpack/common";
 
@@ -47,7 +48,7 @@ const settings = definePluginSettings({
 
             return (
                 <section>
-                    <Forms.FormTitle>The amount of soundboard ids you want to save at a time (0 lets you save infinite)</Forms.FormTitle>
+                    <Heading>The amount of soundboard ids you want to save at a time (0 lets you save infinite)</Heading>
                     <TextInput
                         type="number"
                         pattern="-?[0-9]+"

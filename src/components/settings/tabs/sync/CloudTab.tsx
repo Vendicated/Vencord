@@ -30,7 +30,7 @@ import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Alerts, Button, Forms, Tooltip, useState } from "@webpack/common";
+import { Alerts, Button, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -73,7 +73,7 @@ function SettingsSyncSection() {
 
     return (
         <section className={Margins.top16}>
-            <Forms.FormTitle tag="h5">Settings Sync</Forms.FormTitle>
+            <Heading>Settings Sync</Heading>
 
             <Paragraph size="md" className={Margins.bottom20}>
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with

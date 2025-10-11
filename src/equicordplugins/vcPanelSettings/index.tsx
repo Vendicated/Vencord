@@ -7,12 +7,13 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { identity } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, Forms, Select, Slider, Text, useEffect, useState } from "@webpack/common";
+import { FluxDispatcher, Select, Slider, Text, useEffect, useState } from "@webpack/common";
 const configModule = findByPropsLazy("getOutputVolume");
 
 const settings = definePluginSettings({
@@ -98,7 +99,7 @@ function OutputVolumeComponent() {
 
     return (
         <>
-            {settings.store.showOutputVolumeHeader && <Forms.FormTitle>Output volume</Forms.FormTitle>}
+            {settings.store.showOutputVolumeHeader && <Heading>Output volume</Heading>}
             <Slider maxValue={200} minValue={0} onValueRender={v => `${v.toFixed(0)}%`} initialValue={outputVolume} asValueChanges={volume => {
                 FluxDispatcher.dispatch({
                     type: "AUDIO_SET_OUTPUT_VOLUME",
@@ -119,7 +120,7 @@ function InputVolumeComponent() {
 
     return (
         <>
-            {settings.store.showInputVolumeHeader && <Forms.FormTitle>Input volume</Forms.FormTitle>}
+            {settings.store.showInputVolumeHeader && <Heading>Input volume</Heading>}
             <Slider maxValue={100} minValue={0} initialValue={inputVolume} asValueChanges={volume => {
                 FluxDispatcher.dispatch({
                     type: "AUDIO_SET_INPUT_VOLUME",
@@ -140,7 +141,7 @@ function OutputDeviceComponent() {
 
     return (
         <>
-            {settings.store.showOutputDeviceHeader && <Forms.FormTitle>Output device</Forms.FormTitle>}
+            {settings.store.showOutputDeviceHeader && <Heading>Output device</Heading>}
             <Select options={Object.values(configModule.getOutputDevices()).map((device: any /* i am NOT typing this*/) => {
                 return { value: device.id, label: settings.store.showOutputDeviceHeader ? device.name : `🔊 ${device.name}` };
             })}
@@ -168,7 +169,7 @@ function InputDeviceComponent() {
 
     return (
         <div style={{ marginTop: "10px" }}>
-            {settings.store.showInputDeviceHeader && <Forms.FormTitle>Input device</Forms.FormTitle>}
+            {settings.store.showInputDeviceHeader && <Heading>Input device</Heading>}
             <Select options={Object.values(configModule.getInputDevices()).map((device: any /* i am NOT typing this*/) => {
                 return { value: device.id, label: settings.store.showInputDeviceHeader ? device.name : `🎤 ${device.name}` };
             })}
@@ -196,7 +197,7 @@ function VideoDeviceComponent() {
 
     return (
         <div style={{ marginTop: "10px" }}>
-            {settings.store.showVideoDeviceHeader && <Forms.FormTitle>Camera</Forms.FormTitle>}
+            {settings.store.showVideoDeviceHeader && <Heading>Camera</Heading>}
             <Select options={Object.values(configModule.getVideoDevices()).map((device: any /* i am NOT typing this*/) => {
                 return { value: device.id, label: settings.store.showVideoDeviceHeader ? device.name : `📷 ${device.name}` };
             })}

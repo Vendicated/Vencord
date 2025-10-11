@@ -9,6 +9,7 @@ import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -17,7 +18,7 @@ import { Button, Forms, Select, Slider, Text } from "@webpack/common";
 export function NotificationSection() {
     return (
         <section className={Margins.top16}>
-            <Forms.FormTitle tag="h5">Notifications</Forms.FormTitle>
+            <Heading>Notifications</Heading>
             <Forms.FormText className={Margins.bottom8}>
                 Settings for Notifications sent by Vencord.
                 This does NOT include Discord notifications (messages, etc)
@@ -54,10 +55,10 @@ function NotificationSettings() {
 
     return (
         <div style={{ padding: "1em 0" }}>
-            <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
+            <Heading>Notification Style</Heading>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
-                    <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
+                    <Heading>Desktop Notification Permission denied</Heading>
                     <Forms.FormText>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Forms.FormText>
                 </ErrorCard>
             )}
@@ -81,7 +82,7 @@ function NotificationSettings() {
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Forms.FormTitle>
+            <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Heading>
             <Select
                 isDisabled={settings.useNative === "always"}
                 placeholder="Notification Position"
@@ -94,14 +95,14 @@ function NotificationSettings() {
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Missed Notification Count</Forms.FormTitle>
+            <Heading className={Margins.top16 + " " + Margins.bottom8}>Missed Notification Count</Heading>
             <FormSwitch
                 title="When refocusing discord a notification will popup with how you missed"
                 value={settings.missed}
                 onChange={(v: boolean) => settings.missed = v}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Forms.FormTitle>
+            <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Heading>
             <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
             <Slider
                 disabled={settings.useNative === "always"}
@@ -115,7 +116,7 @@ function NotificationSettings() {
                 stickToMarkers={false}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Forms.FormTitle>
+            <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Heading>
             <Forms.FormText className={Margins.bottom16}>
                 The amount of notifications to save in the log until old ones are removed.
                 Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications

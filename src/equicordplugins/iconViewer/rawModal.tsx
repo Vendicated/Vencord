@@ -53,7 +53,7 @@ function ModalComponent(props: { func: Function; iconName: string; color: number
                 Copy
             </Button>
             <Button
-                color={Button.Colors.YELLOW}
+                color={Button.Colors.LINK}
                 className={classes(Margins.right8, "vc-iv-log-to-console-button")}
                 onClick={() => { console.log(func); }}
             >

@@ -18,6 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -188,7 +189,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">How to get an API key</Forms.FormTitle>
+            <HeadingSecondary>How to get an API key</HeadingSecondary>
             <Forms.FormText>
                 An API key is required to fetch your current track. To get one, you can
                 visit <Link href="https://www.last.fm/api/account/create">this page</Link> and

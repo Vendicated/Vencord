@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Heading } from "@components/Heading";
 import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -51,14 +52,14 @@ export function EditModal({ modalProps, modalKey, bookmark, onSave }: {
                 <Text variant="heading-lg/semibold">Edit Bookmark</Text>
             </ModalHeader>
             <ModalContent>
-                <Forms.FormTitle className={Margins.top16}>Bookmark Name</Forms.FormTitle>
+                <Heading className={Margins.top16}>Bookmark Name</Heading>
                 <TextInput
                     value={name === placeholder ? undefined : name}
                     placeholder={placeholder}
                     onChange={v => setName(v)}
                 />
                 {isBookmarkFolder(bookmark) && <>
-                    <Forms.FormTitle className={Margins.top16}>Folder Color</Forms.FormTitle>
+                    <Heading className={Margins.top16}>Folder Color</Heading>
                     <Select
                         options={
                             Object.entries(bookmarkFolderColors).map(([name, value]) => ({
@@ -101,7 +102,7 @@ function AddToFolderModal({ modalProps, modalKey, bookmarks, onSave }: {
                 <Text variant="heading-lg/semibold">Add Bookmark to Folder</Text>
             </ModalHeader>
             <ModalContent>
-                <Forms.FormTitle className={Margins.top16}>Select a folder</Forms.FormTitle>
+                <Heading className={Margins.top16}>Select a folder</Heading>
                 <Select
                     options={[...Object.entries(bookmarks)
                         .filter(([, bookmark]) => isBookmarkFolder(bookmark))

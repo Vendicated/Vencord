@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Heading } from "@components/Heading";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
@@ -93,7 +94,7 @@ function ScreenSetting() {
 function SettingSection() {
     return (
         <section>
-            <Forms.FormTitle>Media source to stream</Forms.FormTitle>
+            <Heading>Media source to stream</Heading>
             <Forms.FormText>Resets to main screen if not found</Forms.FormText>
             <ScreenSetting />
         </section>

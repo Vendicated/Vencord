@@ -8,6 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading, HeadingSecondary } from "@components/Heading";
 import { EquicordDevs } from "@utils/constants";
 import { getIntlMessage, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -47,7 +48,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
         <div className={cl("content")}>
             {userIds.length ?
                 (<>
-                    <Forms.FormTitle>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Forms.FormTitle>
+                    <Heading>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Heading>
                     <Flex flexDirection="column" style={{ gap: 6 }} >
                         {users.map(user => (
                             <Flex key={user.id} flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
@@ -118,9 +119,9 @@ export default definePlugin({
             <>
                 <div {...props}>{props.children}</div>
                 <div className={classes(cl("spectators_panel"), Margins.top8)}>
-                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
+                    <HeadingSecondary style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
                         {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
-                    </Forms.FormTitle>
+                    </HeadingSecondary>
                     {users.length ?
                         <>
                             <UserSummaryItem

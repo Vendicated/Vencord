@@ -9,6 +9,7 @@ import "./ContributorModal.css";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
 import { EquicordDevsById, VencordDevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
@@ -70,7 +71,7 @@ function ContributorModal({ user }: { user: User; }) {
                     src={user.getAvatarURL(void 0, 512, true)}
                     alt=""
                 />
-                <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
+                <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
 
                 <div className={classes("vc-settings-modal-links", cl("links"))}>
                     {website && (

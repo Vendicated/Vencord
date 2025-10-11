@@ -22,6 +22,7 @@ import "./style.css";
 import { definePluginSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingSecondary } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -115,7 +116,7 @@ function SettingsAboutComponent() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
+            <HeadingSecondary>Usage</HeadingSecondary>
             <Forms.FormText>
                 After enabling this plugin, you will see custom colors in
                 the profiles of other people using compatible plugins.{" "}
@@ -131,7 +132,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
+                <HeadingSecondary>Color pickers</HeadingSecondary>
                 <Flex
                     direction={Flex.Direction.HORIZONTAL}
                     style={{ gap: "1rem" }}
@@ -178,7 +179,7 @@ function SettingsAboutComponent() {
                 <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
-                <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
+                <HeadingSecondary>Preview</HeadingSecondary>
                 <div className="vc-fpt-preview">
                     <ProfileModal
                         user={UserStore.getCurrentUser()}

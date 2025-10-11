@@ -10,6 +10,7 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
 import { DonateButton, InviteButton } from "@components/settings/DonateButton";
@@ -157,7 +158,7 @@ function EquicordSettings() {
             )}
 
             <section>
-                <Forms.FormTitle tag="h5">Quick Actions</Forms.FormTitle>
+                <Heading>Quick Actions</Heading>
 
                 <QuickActionCard>
                     <QuickAction
@@ -199,7 +200,7 @@ function EquicordSettings() {
             <Divider />
 
             <section className={Margins.top16}>
-                <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
+                <Heading>Settings</Heading>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <Button
@@ -239,9 +240,9 @@ function EquicordSettings() {
 
             {needsVibrancySettings && (
                 <>
-                    <Forms.FormTitle tag="h5">
+                    <Heading>
                         Window vibrancy style (requires restart)
-                    </Forms.FormTitle>
+                    </Heading>
                     <Select
                         className={Margins.bottom20}
                         placeholder="Window vibrancy style"

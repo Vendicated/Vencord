@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Heading } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
@@ -53,7 +54,7 @@ function Match({ matchResult }: { matchResult: RegExpMatchArray | null; }) {
 
     return (
         <>
-            <Forms.FormTitle>Match</Forms.FormTitle>
+            <Heading>Match</Heading>
             <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
             <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
         </>
@@ -83,7 +84,7 @@ function Diff({ diff }: { diff: Change[] | null; }) {
 
     return (
         <>
-            <Forms.FormTitle>Diff</Forms.FormTitle>
+            <Heading>Diff</Heading>
             {diffLines}
         </>
     );
@@ -118,7 +119,7 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
 
     return (
         <>
-            <Forms.FormTitle>Module {id}</Forms.FormTitle>
+            <Heading>Module {id}</Heading>
 
             <Match matchResult={matchResult} />
             <Diff diff={diff} />

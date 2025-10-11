@@ -18,11 +18,12 @@
 
 import "./IconsTab.css";
 
+import { Heading } from "@components/Heading";
 import { SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import * as t from "@vencord/discord-types";
-import { Button, Clickable, Forms, React, TextInput, TooltipContainer } from "@webpack/common";
+import { Button, Clickable, React, TextInput, TooltipContainer } from "@webpack/common";
 
 import { openIconModal } from "./IconModal";
 import { getNameByIcon } from "./names";
@@ -55,7 +56,7 @@ function RenderIcons({ search, searchbyFunction }: { search: string; searchbyFun
                             <Icon className="vc-icon-icon" size="xxl" />
                         </div>
                     </Clickable>
-                    <Forms.FormTitle className="vc-icon-title" tag="h3">{iconName}</Forms.FormTitle>
+                    <Heading className="vc-icon-title" tag="h3">{iconName}</Heading>
                 </div>
             </React.Fragment>
         )}</div>;

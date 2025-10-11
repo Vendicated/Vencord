@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { HeadingSecondary } from "@components/Heading";
 import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -90,7 +91,7 @@ export const ModalHeaderTitle = ({ iconName, color, name }: { iconName: string; 
 
 export function SettingsAbout() {
     return <>
-        <Forms.FormTitle tag="h3">Features</Forms.FormTitle>
+        <HeadingSecondary>Features</HeadingSecondary>
         <Forms.FormText>
             <Text variant="heading-sm/normal">
                 <ul className="vc-ic-unordered-list">
@@ -103,7 +104,7 @@ export function SettingsAbout() {
                 </ul>
             </Text>
         </Forms.FormText>
-        <Forms.FormTitle tag="h3">Special thanks</Forms.FormTitle>
+        <HeadingSecondary>Special thanks</HeadingSecondary>
         <Forms.FormText>
             <Text variant="heading-sm/normal" className="vc-ic-unordered-list">
                 <ul>

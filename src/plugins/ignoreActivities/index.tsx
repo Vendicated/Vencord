@@ -8,6 +8,7 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { HeadingSecondary } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
@@ -132,7 +133,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
 
     return (
         <section>
-            <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
+            <HeadingSecondary>Filter List</HeadingSecondary>
             <Forms.FormText className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
             <TextInput
                 type="text"

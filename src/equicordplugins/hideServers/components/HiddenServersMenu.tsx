@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
 import { getGuildAcronym } from "@utils/discord";
 import { classes } from "@utils/misc";
 import {
@@ -19,7 +20,7 @@ import {
 } from "@utils/modal";
 import { Guild } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Button, Forms, IconUtils, Text, useStateFromStores } from "@webpack/common";
+import { Button, IconUtils, Text, useStateFromStores } from "@webpack/common";
 
 import { SortedGuildStore } from "..";
 import { HiddenServersStore } from "../HiddenServersStore";
@@ -92,9 +93,9 @@ function GuildRow({ guild }) {
                     </div>
                 )}
             </div>
-            <Forms.FormTitle className={cl("name")}>
+            <Heading className={cl("name")}>
                 {guild.name}
-            </Forms.FormTitle>
+            </Heading>
             <Button
                 className="row-button"
                 color={Button.Colors.PRIMARY}
@@ -135,7 +136,7 @@ export function HiddenServersMenu({ guilds }: { guilds: Guild[]; }) {
                             onClick={() => {
                                 folderGuilds.forEach(g => restoreGuild(g, SortedGuildStore));
                             }}
-                            size={Button.Sizes.TINY}
+                            size={Button.Sizes.SMALL}
                             className={cl("restore-all")}
                         >
                             Remove All

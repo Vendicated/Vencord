@@ -5,10 +5,11 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember } from "@vencord/discord-types";
-import { ChannelStore, GuildMemberStore, GuildRoleStore, RelationshipStore, Text, UserStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildRoleStore, RelationshipStore, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings(
     {
@@ -108,7 +109,7 @@ function isRoleAllBlockedMembers(roleId, guildId) {
 function hiddenReplyComponent() {
     switch (settings.store.blockedReplyDisplay) {
         case "displayText":
-            return <Text tag="p" selectable={false} variant="text-sm/normal" style={{ marginTop: "0px", marginBottom: "0px" }}><i>↓ Replying to blocked message</i></Text>;
+            return <BaseText size="sm" tag="p" style={{ marginTop: "0px", marginBottom: "0px" }}><i>↓ Replying to blocked message</i></BaseText>;
         case "hideReply":
             return null;
     }

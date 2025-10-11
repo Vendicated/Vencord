@@ -6,6 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import { ErrorCard } from "@components/ErrorCard";
+import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ColorPicker, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
@@ -67,7 +68,7 @@ export function ThemeSettingsComponent() {
         <div className={cl("settings")}>
             <div className={cl("container")}>
                 <div className={cl("settings-labels")}>
-                    <Forms.FormTitle tag="h3">Theme Color</Forms.FormTitle>
+                    <HeadingSecondary>Theme Color</HeadingSecondary>
                     <Forms.FormText>Add a color to your Discord client theme</Forms.FormText>
                 </div>
                 <ColorPicker
@@ -79,7 +80,7 @@ export function ThemeSettingsComponent() {
             </div>
             {(contrastWarning || nitroThemeEnabled) && (<>
                 <ErrorCard className={Margins.top8}>
-                    <Forms.FormTitle tag="h2">Your theme won't look good!</Forms.FormTitle>
+                    <HeadingPrimary>Your theme won't look good!</HeadingPrimary>
 
                     {contrastWarning && <Forms.FormText>{">"} Selected color won't contrast well with text</Forms.FormText>}
                     {nitroThemeEnabled && <Forms.FormText>{">"} Nitro themes aren't supported</Forms.FormText>}

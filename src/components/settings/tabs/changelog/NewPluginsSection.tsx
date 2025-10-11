@@ -6,6 +6,7 @@
 
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
 import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { ChangeList } from "@utils/ChangeList";
 import { Margins } from "@utils/margins";
@@ -74,9 +75,9 @@ export function NewPluginsSection({
 
     return (
         <div className={cl("new-plugins-section")}>
-            <Forms.FormTitle tag="h5" className={Margins.bottom8}>
+            <Heading className={Margins.bottom8}>
                 New Plugins ({sortedPlugins.length})
-            </Forms.FormTitle>
+            </Heading>
 
             <Forms.FormText className={Margins.bottom16}>
                 The following plugins have been added in recent updates:
@@ -162,7 +163,7 @@ export function NewPluginsSection({
                         {tooltipProps => (
                             <Button
                                 {...tooltipProps}
-                                color={Button.Colors.YELLOW}
+                                color={Button.Colors.LINK}
                                 size={Button.Sizes.SMALL}
                                 onClick={() => location.reload()}
                                 className={Margins.top16}

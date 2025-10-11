@@ -7,7 +7,9 @@
 import "./style.css";
 
 import { definePluginSettings, useSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading, HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -112,7 +114,7 @@ const TimeRow = (props: TimeRowProps) => {
 
     return (
         <>
-            <Forms.FormTitle tag="h5">{props.format.name}</Forms.FormTitle>
+            <Heading>{props.format.name}</Heading>
             <Forms.FormText>{props.format.description}</Forms.FormText>
             <TextInput value={state} onChange={handleChange} />
         </>
@@ -198,8 +200,8 @@ const settings = definePluginSettings({
                         <section key={key}>
                             {key === "sameDayFormat" && (
                                 <div className={Margins.bottom20}>
-                                    <Forms.FormDivider style={{ marginBottom: "10px" }} />
-                                    <Forms.FormTitle tag="h1">Calendar formats</Forms.FormTitle>
+                                    <Divider style={{ marginBottom: "10px" }} />
+                                    <Heading tag="h1">Calendar formats</Heading>
                                     <Forms.FormText>
                                         How to format the [calendar] value if used in the above timestamps.
                                     </Forms.FormText>
@@ -236,7 +238,7 @@ export default definePlugin({
     settings,
     settingsAboutComponent: () => (
         <div className={"vc-cmt-info-card"}>
-            <Forms.FormTitle tag="h2">How to use:</Forms.FormTitle>
+            <HeadingPrimary>How to use:</HeadingPrimary>
             <Forms.FormText>
                 <Link href="https://momentjs.com/docs/#/displaying/format/">Moment.js formatting documentation</Link>
                 <div className={Margins.top8}>

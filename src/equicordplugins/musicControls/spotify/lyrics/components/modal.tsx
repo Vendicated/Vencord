@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { openImageModal } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { React, Text } from "@webpack/common";
@@ -21,7 +22,7 @@ function ModalHeaderContent({ track }: { track: Track | null; }) {
     if (!track) {
         return (
             <ModalHeader>
-                <Text variant="text-sm/semibold">No track playing</Text>
+                <BaseText size="sm" weight="semibold">No track playing</BaseText>
             </ModalHeader>
         );
     }
@@ -41,9 +42,9 @@ function ModalHeaderContent({ track }: { track: Track | null; }) {
                     />
                 )}
                 <div>
-                    <Text selectable variant="text-sm/semibold">{track.name}</Text>
-                    <Text selectable variant="text-sm/normal">by {track.artists.map(a => a.name).join(", ")}</Text>
-                    <Text selectable variant="text-sm/normal">on {track.album.name}</Text>
+                    <BaseText size="sm" weight="semibold">{track.name}</BaseText>
+                    <BaseText size="sm">by {track.artists.map(a => a.name).join(", ")}</BaseText>
+                    <BaseText size="sm">on {track.album.name}</BaseText>
                 </div>
             </div>
         </ModalHeader>
@@ -64,17 +65,17 @@ export function LyricsModal({ props }: { props: ModalProps; }) {
                 <div className={`${cl("lyrics-modal-container")} ${scrollClasses.auto}`}>
                     {currentLyrics ? (
                         currentLyrics.map((line, i) => (
-                            <Text
+                            <BaseText
                                 key={i}
-                                variant={currLrcIndex === i ? "text-md/semibold" : "text-sm/normal"}
-                                selectable
+                                size={currLrcIndex === i ? "md" : "sm"}
+                                weight={currLrcIndex === i ? "semibold" : "normal"}
                                 className={currLrcIndex === i ? modalCurrentLine : modalLine}
                             >
                                 <span className={cl("modal-timestamp")} onClick={() => SpotifyStore.seek(line.time * 1000)}>
                                     {formatTime(line.time)}
                                 </span>
                                 {line.text || NoteSvg()}
-                            </Text>
+                            </BaseText>
                         ))
                     ) : (
                         <Text variant="text-sm/normal" className={cl("modal-no-lyrics")}>

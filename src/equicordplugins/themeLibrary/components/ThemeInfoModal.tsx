@@ -5,6 +5,7 @@
  */
 
 import { CodeBlock } from "@components/CodeBlock";
+import { Heading, HeadingTertiary } from "@components/Heading";
 import { Heart } from "@components/Heart";
 import { copyToClipboard } from "@utils/clipboard";
 import { openInviteModal } from "@utils/discord";
@@ -48,10 +49,10 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
     return (
         <ModalRoot {...props}>
             <ModalHeader>
-                <Forms.FormTitle tag="h4">{type} Details</Forms.FormTitle>
+                <HeadingTertiary>{type} Details</HeadingTertiary>
             </ModalHeader>
             <ModalContent>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>{authors.length > 1 ? "Authors" : "Author"}</Forms.FormTitle>
+                <Heading style={{ marginTop: "10px" }}>{authors.length > 1 ? "Authors" : "Author"}</Heading>
                 <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
                     <div>
                         <div style={{ display: "flex", alignItems: "center" }}>
@@ -72,19 +73,19 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                         </div>
                         {version && (
                             <>
-                                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Version</Forms.FormTitle>
+                                <Heading style={{ marginTop: "10px" }}>Version</Heading>
                                 <Forms.FormText>
                                     {version}
                                 </Forms.FormText>
                             </>
                         )}
-                        <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Likes</Forms.FormTitle>
+                        <Heading style={{ marginTop: "10px" }}>Likes</Heading>
                         <Forms.FormText>
                             {likes === 0 ? `Nobody liked this ${type} yet.` : `${likes} users liked this ${type}!`}
                         </Forms.FormText>
                         {donate && (
                             <>
-                                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Donate</Forms.FormTitle>
+                                <Heading style={{ marginTop: "10px" }}>Donate</Heading>
                                 <Forms.FormText>
                                     You can support the author by donating below!
                                 </Forms.FormText>
@@ -98,7 +99,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                         )}
                         {(guild || invite) && (
                             <>
-                                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Support Server</Forms.FormTitle>
+                                <Heading style={{ marginTop: "10px" }}>Support Server</Heading>
                                 {guild && (
                                     <Forms.FormText>
                                         {guild.name}
@@ -106,7 +107,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                 )}
                                 <Forms.FormText>
                                     <Button
-                                        color={Button.Colors.BRAND_NEW}
+                                        color={Button.Colors.BRAND}
                                         look={Button.Looks.FILLED}
                                         className={Margins.top8}
                                         onClick={async e => {
@@ -120,14 +121,14 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                 </Forms.FormText>
                             </>
                         )}
-                        <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Source</Forms.FormTitle>
+                        <Heading style={{ marginTop: "10px" }}>Source</Heading>
                         <Forms.FormText>
                             <Button
                                 disabled={!theme.content || theme.id === "preview"}
                                 onClick={() => openModal(modalProps => (
                                     <ModalRoot {...modalProps} size={ModalSize.LARGE}>
                                         <ModalHeader>
-                                            <Forms.FormTitle tag="h4">Theme Source</Forms.FormTitle>
+                                            <HeadingTertiary>Theme Source</HeadingTertiary>
                                         </ModalHeader>
                                         <ModalContent>
                                             <Forms.FormText style={{
@@ -139,7 +140,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                         <ModalFooter>
                                             <Button
                                                 color={Button.Colors.RED}
-                                                look={Button.Looks.OUTLINED}
+                                                look={Button.Looks.LINK}
                                                 onClick={() => modalProps.onClose()}
                                             >
                                                 Close
@@ -158,7 +159,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                         </Forms.FormText>
                         {tags && (
                             <>
-                                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Tags</Forms.FormTitle>
+                                <Heading style={{ marginTop: "10px" }}>Tags</Heading>
                                 <Forms.FormText>
                                     {tags.map(tag => (
                                         <span className="vce-theme-info-tag" key={"vce-theme-info-tag"}>
@@ -184,14 +185,14 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
             <ModalFooter>
                 <Button
                     color={Button.Colors.RED}
-                    look={Button.Looks.OUTLINED}
+                    look={Button.Looks.LINK}
                     onClick={() => props.onClose()}
                 >
                     Close
                 </Button>
                 <Button
                     color={Button.Colors.GREEN}
-                    look={Button.Looks.OUTLINED}
+                    look={Button.Looks.LINK}
                     className={classes("vce-button", Margins.right8)}
                     disabled={!theme.content || theme.id === "preview"}
                     onClick={async () => {
@@ -205,7 +206,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                             openModal(modalProps => (
                                 <ModalRoot {...modalProps} size={ModalSize.SMALL}>
                                     <ModalHeader>
-                                        <Forms.FormTitle tag="h4">Conflict!</Forms.FormTitle>
+                                        <HeadingTertiary>Conflict!</HeadingTertiary>
                                     </ModalHeader>
                                     <ModalContent>
                                         <Forms.FormText style={{

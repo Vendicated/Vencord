@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Heading } from "@components/Heading";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { Forms, SearchableSelect, useState } from "@webpack/common";
@@ -84,7 +85,7 @@ function AnimationSettings(): JSX.Element {
 
     return (
         <section>
-            <Forms.FormTitle>Animation Controls</Forms.FormTitle>
+            <Heading>Animation Controls</Heading>
             <Forms.FormText>
                 Enable or disable specific animations for channel tabs. Each option can be toggled independently.
             </Forms.FormText>
