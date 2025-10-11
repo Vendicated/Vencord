@@ -363,12 +363,14 @@ export default definePlugin({
                 buttons.push(
                     <Button
                         key="vc-dbg"
+                        color={Button.Colors.PRIMARY}
                         onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                     >
                         Run /equicord-debug
                     </Button>,
                     <Button
                         key="vc-plg-list"
+                        color={Button.Colors.PRIMARY}
                         onClick={async () => {
                             const pluginList = generatePluginList();
                             if (typeof pluginList === "string") {

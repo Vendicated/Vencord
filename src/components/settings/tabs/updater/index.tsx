@@ -17,6 +17,7 @@
 */
 
 import { useSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
@@ -235,7 +236,7 @@ function Updater() {
                 {" "}(<HashLink hash={shortGitHash()} repo={repo} disabled={repoPending} longHash={gitHash} />)
             </Forms.FormText>
 
-            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
+            <Divider className={Margins.top8 + " " + Margins.bottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 

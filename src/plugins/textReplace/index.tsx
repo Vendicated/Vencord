@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -150,24 +151,22 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
                 {
                     rulesArray.map((rule, index) =>
                         <React.Fragment key={`${rule.find}-${index}`}>
-                            <Flex flexDirection="row" style={{ gap: 0 }}>
-                                <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <Input
-                                        placeholder="Find"
-                                        initialValue={rule.find}
-                                        onChange={e => onChange(e, index, "find")}
-                                    />
-                                    <Input
-                                        placeholder="Replace"
-                                        initialValue={rule.replace}
-                                        onChange={e => onChange(e, index, "replace")}
-                                    />
-                                    <Input
-                                        placeholder="Only if includes"
-                                        initialValue={rule.onlyIfIncludes}
-                                        onChange={e => onChange(e, index, "onlyIfIncludes")}
-                                    />
-                                </Flex>
+                            <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
+                                <Input
+                                    placeholder="Find"
+                                    initialValue={rule.find}
+                                    onChange={e => onChange(e, index, "find")}
+                                />
+                                <Input
+                                    placeholder="Replace"
+                                    initialValue={rule.replace}
+                                    onChange={e => onChange(e, index, "replace")}
+                                />
+                                <Input
+                                    placeholder="Only if includes"
+                                    initialValue={rule.onlyIfIncludes}
+                                    onChange={e => onChange(e, index, "onlyIfIncludes")}
+                                />
                             </Flex>
                             {(index !== rulesArray.length - 1) && <Flex flexDirection="row" style={{ gap: "0.5em" }}>
                                 <div style={{ flex: 0.9 }}>
@@ -186,7 +185,7 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
                                     <DeleteIcon style={{ verticalAlign: "middle" }} />
                                 </Button>
                             </Flex>}
-                            {(index !== rulesArray.length - 1) && <Forms.FormDivider style={{ width: "unset", margin: "0.5em 0" }}></Forms.FormDivider>}
+                            {(index !== rulesArray.length - 1) && <Divider style={{ width: "unset", margin: "0.5em 0" }}></Divider>}
                             {isRegexRules && renderFindError(rule.find)}
                         </React.Fragment>
                     )

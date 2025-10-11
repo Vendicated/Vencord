@@ -441,30 +441,34 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        const {
-            ignoreBots,
-            ignoreSelf,
-            ignoreUsers,
-            ignoreChannels,
-            ignoreGuilds,
-            logEdits,
-            logDeletes,
-        } = settings.store;
-        const myId = UserStore.getCurrentUser().id;
+        try {
+            const {
+                ignoreBots,
+                ignoreSelf,
+                ignoreUsers,
+                ignoreChannels,
+                ignoreGuilds,
+                logEdits,
+                logDeletes,
+            } = settings.store;
+            const myId = UserStore.getCurrentUser().id;
 
-        return (
-            (ignoreBots && message.author?.bot) ||
-            (ignoreSelf && message.author?.id === myId) ||
-            ignoreUsers.includes(message.author?.id) ||
-            ignoreChannels.includes(message.channel_id) ||
-            ignoreChannels.includes(
-                ChannelStore.getChannel(message.channel_id)?.parent_id,
-            ) ||
-            (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
-            // Ignore Venbot in the support channels (love you venbot!!!)
-            (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === VC_SUPPORT_CATEGORY_ID) ||
-            (message.author?.id === EQUIBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.id === SUPPORT_CHANNEL_ID));
+            return (
+                (ignoreBots && message.author?.bot) ||
+                (ignoreSelf && message.author?.id === myId) ||
+                ignoreUsers.includes(message.author?.id) ||
+                ignoreChannels.includes(message.channel_id) ||
+                ignoreChannels.includes(
+                    ChannelStore.getChannel(message.channel_id)?.parent_id,
+                ) ||
+                (isEdit ? !logEdits : !logDeletes) ||
+                ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+                // Ignore Venbot in the support channels (love you venbot!!!)
+                (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === VC_SUPPORT_CATEGORY_ID) ||
+                (message.author?.id === EQUIBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.id === SUPPORT_CHANNEL_ID));
+        } catch (e) {
+            return false;
+        }
     },
 
     EditMarker({ message, className, children, ...props }: any) {

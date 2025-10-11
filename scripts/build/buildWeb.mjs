@@ -23,7 +23,7 @@ import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import path, { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_COMPANION_TEST, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_COMPANION_TEST, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues, IS_ANTI_CRASH_TEST } from "./common.mjs";
 import AdmZip from "adm-zip";
 
 /**
@@ -48,6 +48,7 @@ const commonOptions = {
         IS_DEV,
         IS_REPORTER,
         IS_COMPANION_TEST,
+        IS_ANTI_CRASH_TEST,
         IS_DISCORD_DESKTOP: false,
         IS_VESKTOP: false,
         IS_EQUIBOP: false,
@@ -185,7 +186,7 @@ async function buildExtension(target, files) {
 
 const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
     const cssRuntime = `
-;document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(
+;document.addEventListener("DOMContentLoaded", () => document.body.insertAdjacentElement("afterend",
     Object.assign(document.createElement("style"), {
         textContent: \`${content.replaceAll("`", "\\`")}\`,
         id: "vencord-css-core"

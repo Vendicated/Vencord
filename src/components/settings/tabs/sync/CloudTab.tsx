@@ -18,10 +18,14 @@
 
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
@@ -71,10 +75,10 @@ function SettingsSyncSection() {
         <section className={Margins.top16}>
             <Forms.FormTitle tag="h5">Settings Sync</Forms.FormTitle>
 
-            <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+            <Paragraph size="md" className={Margins.bottom20}>
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
                 minimal effort.
-            </Forms.FormText>
+            </Paragraph>
             <FormSwitch
                 key="cloud-sync"
                 title="Settings Sync"
@@ -134,9 +138,9 @@ function CloudTab() {
     return (
         <SettingsTab title="Equicord Cloud">
             <section className={Margins.top16}>
-                <Forms.FormTitle tag="h5">Cloud Settings</Forms.FormTitle>
+                <Heading>Cloud Settings</Heading>
 
-                <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+                <Paragraph size="md" className={Margins.bottom20}>
                     Equicord comes with a cloud integration allowing settings to be synced across apps and devices.
                     <br />
                     We use our own <Link href="https://github.com/Equicord/Equicloud">Equicloud backend</Link> to provide our cloud instance with enhanced features.
@@ -146,7 +150,7 @@ function CloudTab() {
                     Equicloud is BSD 3.0 licensed so you can host it yourself if you would like.
                     <br />
                     You can swap between Equicord and Vencord's different cloud instances below if needed.
-                </Forms.FormText>
+                </Paragraph>
                 <FormSwitch
                     key="backend"
                     title="Enable Cloud Integrations"
@@ -159,10 +163,10 @@ function CloudTab() {
                             settings.cloud.authenticated = v;
                     }}
                 />
-                <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
-                <Forms.FormText className={Margins.bottom8}>
+                <Heading>Backend URL</Heading>
+                <BaseText className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
-                </Forms.FormText>
+                </BaseText>
                 <CheckedTextInput
                     key={`backendUrl-${inputKey}`}
                     value={settings.cloud.url}
@@ -209,7 +213,7 @@ function CloudTab() {
                     </Button>
                 </Grid>
 
-                <Forms.FormDivider className={Margins.top16} />
+                <Divider className={Margins.top16} />
             </section >
             <SettingsSyncSection />
         </SettingsTab>

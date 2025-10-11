@@ -8,6 +8,7 @@ import "./VencordTab.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
@@ -49,25 +50,26 @@ function EquicordSettings() {
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
 
-    const user = UserStore.getCurrentUser();
+    const user = UserStore?.getCurrentUser();
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
         title: string;
-        note: string;
+        description?: string;
+        restartRequired?: boolean;
         warning: { enabled: boolean; message?: string; };
     }
     > = [
             {
                 key: "useQuickCss",
                 title: "Enable Custom CSS",
-                note: "Loads your Custom CSS",
+                restartRequired: true,
                 warning: { enabled: false },
             },
             !IS_WEB && {
                 key: "enableReactDevtools",
                 title: "Enable React Developer Tools",
-                note: "Requires a full restart",
+                restartRequired: true,
                 warning: { enabled: false },
             },
             !IS_WEB &&
@@ -75,37 +77,38 @@ function EquicordSettings() {
                 ? {
                     key: "frameless",
                     title: "Disable the Window Frame",
-                    note: "Requires a full restart",
+                    restartRequired: true,
                     warning: { enabled: false },
                 }
                 : {
                     key: "winNativeTitleBar",
                     title:
                         "Use Windows' native title bar instead of Discord's custom one",
-                    note: "Requires a full restart",
+                    restartRequired: true,
                     warning: { enabled: false },
                 }),
             !IS_WEB && {
                 key: "transparent",
                 title: "Enable Window Transparency",
-                note: "You need a theme that supports transparency or this will do nothing. Requires a full restart!",
+                description: "A theme that supports transparency is required or this will do nothing. Stops the window from being resizable as a side effect",
+                restartRequired: true,
                 warning: {
                     enabled: isWindows,
                     message: "Enabling this will prevent you from snapping this window.",
                 },
+            },
+            IS_DISCORD_DESKTOP && {
+                key: "disableMinSize",
+                title: "Disable Minimum Window Size",
+                restartRequired: true,
+                warning: { enabled: false },
             },
             !IS_WEB &&
             isWindows && {
                 key: "winCtrlQ",
                 title:
                     "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
-                note: "Requires a full restart",
-                warning: { enabled: false },
-            },
-            IS_DISCORD_DESKTOP && {
-                key: "disableMinSize",
-                title: "Disable Minimum Window Size",
-                note: "Requires a full restart",
+                restartRequired: true,
                 warning: { enabled: false },
             },
         ];
@@ -193,14 +196,14 @@ function EquicordSettings() {
                 </QuickActionCard>
             </section>
 
-            <Forms.FormDivider />
+            <Divider />
 
             <section className={Margins.top16}>
                 <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <Button
-                        look={Button.Looks.BLANK}
+                        look={Button.Looks.LINK}
                         style={{ color: "var(--text-link)", display: "inline-block" }}
                         onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}
                     >
@@ -220,13 +223,13 @@ function EquicordSettings() {
                                 description={
                                     s.warning.enabled ? (
                                         <>
-                                            {s.note}
+                                            {s.description}
                                             <div className="form-switch-warning">
                                                 {s.warning.message}
                                             </div>
                                         </>
                                     ) : (
-                                        s.note
+                                        s.description
                                     )
                                 }
                             />
