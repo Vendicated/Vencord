@@ -35,6 +35,7 @@
         "testTsc": "tsc --noEmit"
     },
     "dependencies": {
+        "@fluent/langneg": "^0.7.0",
         "@intrnl/xxhash64": "^0.1.2",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
