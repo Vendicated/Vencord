@@ -6,7 +6,7 @@
 
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
-import { BaseText, DonateButton, ErrorBoundary, HeadingPrimary, VCDonateButton } from "@components/index";
+import { DonateButton, ErrorBoundary, HeadingPrimary, Paragraph, VCDonateButton } from "@components/index";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 
@@ -47,12 +47,12 @@ export function VencordDonorModal() {
                         />
                     </Flex>
                     <div style={{ padding: "1em" }}>
-                        <BaseText>
+                        <Paragraph>
                             This Badge is a special perk for Vencord Donors
-                        </BaseText>
-                        <BaseText className={Margins.top20}>
+                        </Paragraph>
+                        <Paragraph className={Margins.top20}>
                             Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
-                        </BaseText>
+                        </Paragraph>
                     </div>
                 </ModalContent>
                 <ModalFooter>
@@ -103,12 +103,12 @@ export function EquicordDonorModal() {
                         />
                     </Flex>
                     <div style={{ padding: "1em" }}>
-                        <BaseText>
+                        <Paragraph>
                             This Badge is a special perk for Equicord (Not Vencord) Donors
-                        </BaseText>
-                        <BaseText className={Margins.top20}>
+                        </Paragraph>
+                        <Paragraph className={Margins.top20}>
                             Please consider supporting the development of Equicord by becoming a donor. It would mean a lot! :3
-                        </BaseText>
+                        </Paragraph>
                     </div>
                 </ModalContent>
                 <ModalFooter>

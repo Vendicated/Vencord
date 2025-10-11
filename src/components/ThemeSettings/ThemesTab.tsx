@@ -20,13 +20,13 @@ import "./themesStyles.css";
 
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { BaseText } from "@components/BaseText";
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { CogWheel, DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PluginIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { AddonCard, openPluginModal, QuickAction, QuickActionCard, SettingsTab, wrapTab } from "@components/settings";
 import { OnlineThemeCard } from "@components/settings/OnlineThemeCard";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
@@ -470,7 +470,7 @@ function ThemesTab() {
                 <section>
                     <Heading>Online Themes</Heading>
                     <Card className="vc-settings-theme-add-card">
-                        <BaseText>Make sure to use direct links to files (raw or github.io)!</BaseText>
+                        <Paragraph>Make sure to use direct links to files (raw or github.io)!</Paragraph>
                         <Flex flexDirection="row">
                             <TextInput placeholder="Theme Link" className="vc-settings-theme-link-input" value={currentThemeLink} onChange={setCurrentThemeLink} />
                             <Button onClick={() => addThemeLink(currentThemeLink)} disabled={!themeLinkValid}>Add</Button>
@@ -584,11 +584,11 @@ export function CspErrorCard() {
     return (
         <ErrorCard className="vc-settings-card">
             <Heading>Blocked Resources</Heading>
-            <BaseText>Some images, styles, or fonts were blocked because they come from disallowed domains.</BaseText>
-            <BaseText>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</BaseText>
-            <BaseText>
+            <Paragraph>Some images, styles, or fonts were blocked because they come from disallowed domains.</Paragraph>
+            <Paragraph>It is highly recommended to move them to GitHub or Imgur. But you may also allow domains if you fully trust them.</Paragraph>
+            <Paragraph>
                 After allowing a domain, you have to fully close (from tray / task manager) and restart {IS_DISCORD_DESKTOP ? "Discord" : IS_EQUIBOP ? "Equibop" : "Vesktop"} to apply the change.
-            </BaseText>
+            </Paragraph>
 
             <Heading className={classes(Margins.top16, Margins.bottom8)}>Blocked URLs</Heading>
             <div className="vc-settings-csp-list">
@@ -608,10 +608,10 @@ export function CspErrorCard() {
             {hasImgurHtmlDomain && (
                 <>
                     <Divider className={classes(Margins.top8, Margins.bottom16)} />
-                    <BaseText>
+                    <Paragraph>
                         Imgur links should be direct links in the form of <code>https://i.imgur.com/...</code>
-                    </BaseText>
-                    <BaseText>To obtain a direct link, right-click the image and select "Copy image address".</BaseText>
+                    </Paragraph>
+                    <Paragraph>To obtain a direct link, right-click the image and select "Copy image address".</Paragraph>
                 </>
             )}
         </ErrorCard>
@@ -624,9 +624,9 @@ function UserscriptThemesTab() {
             <Card className="vc-settings-card">
                 <Heading>Themes are not supported on the Userscript!</Heading>
 
-                <BaseText>
+                <Paragraph>
                     You can instead install themes with the <Link href={getStylusWebStoreUrl()}>Stylus extension</Link>!
-                </BaseText>
+                </Paragraph>
             </Card>
         </SettingsTab>
     );

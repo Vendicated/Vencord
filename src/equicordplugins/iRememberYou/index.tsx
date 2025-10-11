@@ -8,8 +8,8 @@ import "styles.css?managed";
 
 import { DataStore } from "@api/index";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { BaseText } from "@components/BaseText";
 import { Heart } from "@components/Heart";
+import { Paragraph } from "@components/Paragraph";
 import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import * as Modal from "@utils/modal";
@@ -246,13 +246,13 @@ class DataUI {
                     {this.renderUserAvatar(user)}
                     <Tooltip text={this.userTooltipText(user)}>
                         {props =>
-                            <BaseText {...props}>{user.tag} {allowExtra.owner && user.extra?.isOwner && "(owner)"}</BaseText>
+                            <Paragraph {...props}>{user.tag} {allowExtra.owner && user.extra?.isOwner && "(owner)"}</Paragraph>
                         }
                     </Tooltip>
                 </Flex>
             </span>
 
-            <span style={{ height: "min-content" }}><BaseText style={{ opacity: 0.75 }}>{user.id}</BaseText></span>
+            <span style={{ height: "min-content" }}><Paragraph style={{ opacity: 0.75 }}>{user.id}</Paragraph></span>
         </Flex>;
     }
 
@@ -280,7 +280,7 @@ class DataUI {
                         <TextArea value={JSON.stringify(usersCollection, null, "\t")} onChange={() => { }} rows={20} />
                     </Modal.ModalContent>
                 </Modal.ModalRoot>)}>
-                    <BaseText style={{ cursor: "pointer" }}>Open editor</BaseText>
+                    <Paragraph style={{ cursor: "pointer" }}>Open editor</Paragraph>
                 </Clickable>
 
                 <Clickable onClick={

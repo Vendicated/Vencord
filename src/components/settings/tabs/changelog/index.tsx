@@ -6,12 +6,12 @@
 
 import "./styles.css";
 
-import { BaseText } from "@components/BaseText";
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Heading } from "@components/Heading";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
@@ -491,13 +491,13 @@ function ChangelogContent() {
 
     return (
         <>
-            <BaseText className={Margins.bottom16}>
+            <Paragraph className={Margins.bottom16}>
                 View the most recent changes to Equicord. This fetches commits
                 directly from the repository to show you what's new.
-            </BaseText>
+            </Paragraph>
 
             <Heading>Repository</Heading>
-            <BaseText className={Margins.bottom16}>
+            <Paragraph className={Margins.bottom16}>
                 {repoPending ? (
                     repo
                 ) : repoErr ? (
@@ -512,7 +512,7 @@ function ChangelogContent() {
                     {shortGitHash()}
                 </span>
                 )
-            </BaseText>
+            </Paragraph>
 
             <div className="vc-changelog-controls">
                 <Button
@@ -584,14 +584,14 @@ function ChangelogContent() {
             {error && (
                 <ErrorCard style={{ padding: "1em", marginBottom: "1em" }}>
                     <p>{error}</p>
-                    <BaseText
+                    <Paragraph
                         style={{
                             marginTop: "0.5em",
                             color: "var(--text-muted)",
                         }}
                     >
                         Make sure you have an internet connection and try again.
-                    </BaseText>
+                    </Paragraph>
                 </ErrorCard>
             )}
 
@@ -650,11 +650,11 @@ function ChangelogContent() {
                 !isLoading &&
                 !error && (
                     <Card className="vc-changelog-empty">
-                        <BaseText>
+                        <Paragraph>
                             No commits available ahead of your current version.
                             Click "Fetch from Repository" to check for new
                             changes.
-                        </BaseText>
+                        </Paragraph>
                     </Card>
                 )
             )}
@@ -670,10 +670,10 @@ function ChangelogContent() {
                         Update Logs ({changelogHistory.length}{" "}
                         {changelogHistory.length === 1 ? "log" : "logs"})
                     </Heading>
-                    <BaseText className={Margins.bottom16}>
+                    <Paragraph className={Margins.bottom16}>
                         Previous update sessions with their commit history and
                         plugin changes.
-                    </BaseText>
+                    </Paragraph>
 
                     <div className="vc-changelog-history-list">
                         {changelogHistory.map(log => (

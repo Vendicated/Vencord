@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember } from "@vencord/discord-types";
@@ -109,7 +109,7 @@ function isRoleAllBlockedMembers(roleId, guildId) {
 function hiddenReplyComponent() {
     switch (settings.store.blockedReplyDisplay) {
         case "displayText":
-            return <BaseText size="sm" tag="p" style={{ marginTop: "0px", marginBottom: "0px" }}><i>↓ Replying to blocked message</i></BaseText>;
+            return <Paragraph style={{ marginTop: "0px", marginBottom: "0px" }}><i>↓ Replying to blocked message</i></Paragraph>;
         case "hideReply":
             return null;
     }

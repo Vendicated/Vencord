@@ -18,7 +18,6 @@
 
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
@@ -164,9 +163,9 @@ function CloudTab() {
                     }}
                 />
                 <Heading>Backend URL</Heading>
-                <BaseText className={Margins.bottom8}>
+                <Paragraph className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
-                </BaseText>
+                </Paragraph>
                 <CheckedTextInput
                     key={`backendUrl-${inputKey}`}
                     value={settings.cloud.url}
