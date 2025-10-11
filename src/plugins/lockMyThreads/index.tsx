@@ -17,6 +17,10 @@ function CreateLockContext(): NavContextMenuPatchCallback {
         const threadActions = children.find(child => {
             return child?.key === "thread-actions";
         });
+        const lockButton = threadActions?.props.children.find(child => {
+            return child?.props.id === "lock-thread" || child?.props.id === "unlock-thread";
+        });
+        if (lockButton) return;
         const archiveButton = threadActions?.props.children.find(child => {
             return child?.props.id === "archive-thread" || child?.props.id === "unarchive-thread";
         });
