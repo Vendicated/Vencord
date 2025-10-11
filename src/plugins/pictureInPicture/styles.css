@@ -1,8 +1,0 @@
-.vc-pip-button {
-    color: var(--interactive-normal);
-}
-
-.vc-pip-button:hover {
-    background-color: var(--background-modifier-hover);
-    color: var(--interactive-hover);
-}
