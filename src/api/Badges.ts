@@ -58,17 +58,14 @@ const Badges = new Set<ProfileBadge>();
  * Register a new badge with the Badges API
  * @param badge The badge to register
  */
-export function addProfileBadge(badge: ProfileBadge) {
-    badge.component &&= ErrorBoundary.wrap(badge.component, { noop: true });
-    Badges.add(badge);
-}
+export function addProfileBadge(_badge: ProfileBadge) { }
 
 /**
  * Unregister a badge from the Badges API
  * @param badge The badge to remove
  */
-export function removeProfileBadge(badge: ProfileBadge) {
-    return Badges.delete(badge);
+export function removeProfileBadge(_badge: ProfileBadge) {
+    return true;
 }
 
 /**

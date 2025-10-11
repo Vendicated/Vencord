@@ -140,14 +140,14 @@ export default definePlugin({
     userProfileBadge: ContributorBadge,
 
     async start() {
-        await loadBadges();
+        //await loadBadges();
 
-        clearInterval(intervalId);
-        intervalId = setInterval(loadBadges, 1000 * 60 * 30); // 30 minutes
+        //clearInterval(intervalId);
+        //intervalId = setInterval(loadBadges, 1000 * 60 * 30); // 30 minutes
     },
 
     async stop() {
-        clearInterval(intervalId);
+        //clearInterval(intervalId);
     },
 
     getBadges(props: { userId: string; user?: User; guildId: string; }) {
