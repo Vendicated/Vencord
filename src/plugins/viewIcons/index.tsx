@@ -62,6 +62,7 @@ const settings = definePluginSettings({
     },
     imgSize: {
         type: OptionType.SELECT,
+        displayName: "Image Size",
         description: "The image size to use",
         options: ["128", "256", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "1024" }))
     }

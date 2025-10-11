@@ -37,7 +37,7 @@ export function TextSetting({ option, pluginSettings, definedSettings, id, onCha
     }
 
     return (
-        <SettingsSection name={id} description={option.description} error={error}>
+        <SettingsSection name={option.displayName} id={id} description={option.description} error={error}>
             <TextInput
                 type="text"
                 placeholder={option.placeholder ?? "Enter a value"}

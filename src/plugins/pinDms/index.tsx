@@ -48,11 +48,13 @@ export const settings = definePluginSettings({
     },
     canCollapseDmSection: {
         type: OptionType.BOOLEAN,
+        displayName: "Can Collapse DM Section",
         description: "Allow uncategorised DMs section to be collapsable",
         default: false
     },
     dmSectionCollapsed: {
         type: OptionType.BOOLEAN,
+        displayName: "DM Section Collapsed",
         description: "Collapse DM section",
         default: false,
         hidden: true
