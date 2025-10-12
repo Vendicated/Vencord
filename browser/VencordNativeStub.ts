@@ -19,14 +19,21 @@
 /// <reference path="../src/modules.d.ts" />
 /// <reference path="../src/globals.d.ts" />
 
+import monacoHtmlLocal from "file://monacoWin.html?minify";
 import * as DataStore from "../src/api/DataStore";
-import { localStorage } from "../src/utils";
+import { debounce, localStorage } from "../src/utils";
+import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
+import { getTheme, Theme } from "../src/utils/discord";
 import { getThemeInfo } from "../src/main/themes";
 import { Settings } from "../src/Vencord";
+import { getStylusWebStoreUrl } from "@utils/web";
 
 // listeners for ipc.on
+const cssListeners = new Set<(css: string) => void>();
 const NOOP = () => { };
 const NOOP_ASYNC = async () => { };
+
+const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
 
 const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
 
@@ -50,10 +57,49 @@ window.VencordNative = {
     },
 
     updater: {
-        getRepo: async () => ({ ok: true, value: "https://github.com/wont-stream/Slimcord" }),
+        getRepo: async () => ({ ok: true, value: "https://github.com/Vendicated/Vencord" }),
         getUpdates: async () => ({ ok: true, value: [] }),
         update: async () => ({ ok: true, value: false }),
         rebuild: async () => ({ ok: true, value: true }),
+    },
+
+    quickCss: {
+        get: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
+        set: async (css: string) => {
+            await DataStore.set("VencordQuickCss", css);
+            cssListeners.forEach(l => l(css));
+        },
+        addChangeListener(cb) {
+            cssListeners.add(cb);
+        },
+        addThemeChangeListener: NOOP,
+        openFile: NOOP_ASYNC,
+        async openEditor() {
+            if (IS_USERSCRIPT) {
+                const shouldOpenWebStore = confirm("QuickCSS is not supported on the Userscript. You can instead use the Stylus extension.\n\nDo you want to open the Stylus web store page?");
+                if (shouldOpenWebStore) {
+                    window.open(getStylusWebStoreUrl(), "_blank");
+                }
+                return;
+            }
+
+            const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
+            const win = open("about:blank", "VencordQuickCss", features);
+            if (!win) {
+                alert("Failed to open QuickCSS popup. Make sure to allow popups!");
+                return;
+            }
+
+            win.baseUrl = EXTENSION_BASE_URL;
+            win.setCss = setCssDebounced;
+            win.getCurrentCss = () => VencordNative.quickCss.get();
+            win.getTheme = () =>
+                getTheme() === Theme.Light
+                    ? "vs-light"
+                    : "vs-dark";
+
+            win.document.write(monacoHtmlLocal);
+        },
     },
 
     settings: {

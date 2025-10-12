@@ -24,6 +24,8 @@ import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@c
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
+import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { IS_MAC, IS_WINDOWS } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -47,9 +49,13 @@ type KeysOfType<Object, Type> = {
 }[keyof Object];
 
 function Switches() {
-    const settings = useSettings(["enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
+    const settings = useSettings(["useQuickCss", "enableReactDevtools", "frameless", "winNativeTitleBar", "transparent", "winCtrlQ", "disableMinSize"]);
 
     const Switches = [
+        {
+            key: "useQuickCss",
+            title: "Enable Custom CSS",
+        },
         !IS_WEB && {
             key: "enableReactDevtools",
             title: "Enable React Developer Tools",
@@ -165,6 +171,7 @@ function VencordSettings() {
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
                     buttonTitle="See what you've contributed to"
+                    buttonOnClick={() => openContributorModal(user)}
                 />
             )}
 
@@ -176,6 +183,11 @@ function VencordSettings() {
                         Icon={LogIcon}
                         text="Notification Log"
                         action={openNotificationLogModal}
+                    />
+                    <QuickAction
+                        Icon={PaintbrushIcon}
+                        text="Edit QuickCSS"
+                        action={() => VencordNative.quickCss.openEditor()}
                     />
                     {!IS_WEB && (
                         <>
@@ -205,7 +217,7 @@ function VencordSettings() {
                 <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
-                    <a>
+                    <a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
                         settings of the Settings plugin
                     </a>!
                 </Forms.FormText>

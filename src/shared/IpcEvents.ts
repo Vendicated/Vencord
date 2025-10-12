@@ -17,6 +17,10 @@
 */
 
 export const enum IpcEvents {
+    OPEN_QUICKCSS = "VencordOpenQuickCss",
+    GET_QUICK_CSS = "VencordGetQuickCss",
+    SET_QUICK_CSS = "VencordSetQuickCss",
+    QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
 
     GET_SETTINGS = "VencordGetSettings",
     SET_SETTINGS = "VencordSetSettings",
@@ -36,6 +40,8 @@ export const enum IpcEvents {
     GET_REPO = "VencordGetRepo",
     UPDATE = "VencordUpdate",
     BUILD = "VencordBuild",
+
+    OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
 
     GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
 

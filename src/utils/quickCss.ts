@@ -38,6 +38,12 @@ async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
             style = createAndAppendStyle("vencord-custom-css");
+            VencordNative.quickCss.addChangeListener(css => {
+                style.textContent = css;
+                // At the time of writing this, changing textContent resets the disabled state
+                style.disabled = !Settings.useQuickCss;
+            });
+            style.textContent = await VencordNative.quickCss.get();
         }
     } else
         style.disabled = !isEnabled;
@@ -84,6 +90,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initSystemValues();
     initThemes();
+
+    toggle(Settings.useQuickCss);
+    SettingsStore.addChangeListener("useQuickCss", toggle);
+
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+
+    if (!IS_WEB) {
+        VencordNative.quickCss.addThemeChangeListener(initThemes);
+    }
 }, { once: true });
+
+export function initQuickCssThemeStore() {
+    if (IS_USERSCRIPT) return;
+
+    initThemes();
+
+    let currentTheme = ThemeStore.theme;
+    ThemeStore.addChangeListener(() => {
+        if (currentTheme === ThemeStore.theme) return;
+
+        currentTheme = ThemeStore.theme;
+        initThemes();
+    });
+}

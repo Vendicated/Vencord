@@ -40,6 +40,7 @@ function BackupAndRestoreTab() {
             <Text variant="text-md/normal" className={Margins.bottom8}>
                 Settings Export contains:
                 <ul>
+                    <li>&mdash; Custom QuickCSS</li>
                     <li>&mdash; Theme Links</li>
                     <li>&mdash; Plugin Settings</li>
                 </ul>

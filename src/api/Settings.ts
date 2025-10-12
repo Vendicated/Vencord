@@ -31,6 +31,7 @@ const logger = new Logger("Settings");
 export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean,
+    useQuickCss: boolean;
     eagerPatches: boolean;
     enabledThemes: string[];
     enableReactDevtools: boolean;
@@ -79,6 +80,7 @@ export interface Settings {
 const DefaultSettings: Settings = {
     autoUpdate: true,
     autoUpdateNotification: true,
+    useQuickCss: true,
     themeLinks: [],
     eagerPatches: IS_REPORTER,
     enabledThemes: [],

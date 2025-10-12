@@ -57,4 +57,8 @@ if (location.protocol !== "data:") {
     }
 } // Monaco popout
 else {
+    contextBridge.exposeInMainWorld("setCss", debounce(VencordNative.quickCss.set));
+    contextBridge.exposeInMainWorld("getCurrentCss", VencordNative.quickCss.get);
+    // shrug
+    contextBridge.exposeInMainWorld("getTheme", () => "vs-dark");
 }
