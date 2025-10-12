@@ -181,7 +181,7 @@ export default definePlugin({
                 const template = settings.store[type + "Message"];
                 const user = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
-                const nickname = user && (GuildMemberStore.getNick(myGuildId!, userId) ?? user);
+                const nickname = user && (GuildMemberStore.getNick(myGuildId!, userId) ?? displayName);
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel, displayName, nickname));
