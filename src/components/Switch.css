@@ -1,0 +1,57 @@
+.vc-switch-container {
+    background: var(--primary-400);
+    border: 1px solid transparent;
+    border-radius: 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+    height: 28px;
+    position: relative;
+    width: 44px;
+
+    .high-contrast-mode & {
+        border-color: var(--border-strong);
+    }
+}
+
+.vc-switch-checked {
+    background: var(--brand-500);
+    border-color: var(--control-border-primary-default);
+}
+
+.vc-switch-disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.vc-switch-focusVisible {
+    /* stylelint-disable-next-line custom-property-pattern */
+    box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--focus-primary, #00b0f4));
+}
+
+.vc-switch-slider {
+    display: block;
+    height: 20px;
+    left: 0;
+    margin: 3px;
+    position: absolute;
+    width: 28px;
+    transition: 100ms transform ease-in-out;
+    overflow: visible;
+}
+
+.vc-switch-input {
+    border-radius: 14px;
+    cursor: pointer;
+    height: 100%;
+    left: 0;
+    margin: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    &:disabled {
+        pointer-events: none;
+        cursor: not-allowed
+    }
+}

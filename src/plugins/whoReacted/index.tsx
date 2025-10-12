@@ -24,7 +24,7 @@ import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
 
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
@@ -71,24 +71,6 @@ function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
     }
 
     return cache.users;
-}
-
-function makeRenderMoreUsers(users: User[]) {
-    return function renderMoreUsers(_label: string, _count: number) {
-        return (
-            <Tooltip text={users.slice(4).map(u => u.username).join(", ")} >
-                {({ onMouseEnter, onMouseLeave }) => (
-                    <div
-                        className={AvatarStyles.moreUsers}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                    >
-                        +{users.length - 4}
-                    </div>
-                )}
-            </Tooltip >
-        );
-    };
 }
 
 function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
@@ -148,7 +130,7 @@ export default definePlugin({
 
         useEffect(() => {
             const cb = (e: any) => {
-                if (e.messageId === message.id)
+                if (e?.messageId === message.id)
                     forceUpdate();
             };
             FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
@@ -163,7 +145,7 @@ export default definePlugin({
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                <div onClick={handleClickAvatar} onKeyPress={handleClickAvatar}>
+                <div onClick={handleClickAvatar} onKeyDown={handleClickAvatar}>
                     <UserSummaryItem
                         users={users}
                         guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
@@ -171,7 +153,6 @@ export default definePlugin({
                         max={5}
                         showDefaultAvatarsForNullUsers
                         showUserPopout
-                        renderMoreUsers={makeRenderMoreUsers(users)}
                     />
                 </div>
             </div>

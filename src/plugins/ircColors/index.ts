@@ -74,8 +74,8 @@ export default definePlugin({
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=roleName:\i,)color:/,
-                replace: "color:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
+                match: /(?<=roleName:\i,)colorString:/,
+                replace: "colorString:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }

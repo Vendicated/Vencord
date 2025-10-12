@@ -21,38 +21,10 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
+import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
+import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
-
-interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-}
-
-
-interface ActivityButton {
-    label: string;
-    url: string;
-}
-
-interface Activity {
-    state: string;
-    details?: string;
-    timestamps?: {
-        start?: number;
-    };
-    assets?: ActivityAssets;
-    buttons?: Array<string>;
-    name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: Array<string>;
-    };
-    type: number;
-    flags: number;
-}
 
 interface TrackData {
     name: string;
@@ -60,16 +32,6 @@ interface TrackData {
     artist: string;
     url: string;
     imageUrl?: string;
-}
-
-// only relevant enum values
-const enum ActivityType {
-    PLAYING = 0,
-    LISTENING = 2,
-}
-
-const enum ActivityFlag {
-    INSTANCE = 1 << 0,
 }
 
 const enum NameFormat {
@@ -133,6 +95,25 @@ const settings = definePluginSettings({
         description: "custom status text",
         type: OptionType.STRING,
         default: "some music",
+    },
+    statusDisplayType: {
+        description: "Show the track / artist name in the member list",
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Don't show (shows generic listening message)",
+                value: "off",
+                default: true
+            },
+            {
+                label: "Show artist name",
+                value: "artist"
+            },
+            {
+                label: "Show track name",
+                value: "track"
+            }
+        ]
     },
     nameFormat: {
         description: "Show name of song and artist in status name",
@@ -346,6 +327,11 @@ export default definePlugin({
 
             details: trackData.name,
             state: trackData.artist,
+            status_display_type: {
+                "off": ActivityStatusDisplayType.NAME,
+                "artist": ActivityStatusDisplayType.STATE,
+                "track": ActivityStatusDisplayType.DETAILS
+            }[settings.store.statusDisplayType],
             assets,
 
             buttons: buttons.length ? buttons.map(v => v.label) : undefined,
@@ -354,7 +340,7 @@ export default definePlugin({
             },
 
             type: settings.store.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
-            flags: ActivityFlag.INSTANCE,
+            flags: ActivityFlags.INSTANCE,
         };
     }
 });
