@@ -42,7 +42,6 @@ export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
     const { track, lyrics, currLrcIndex } = useLyrics({ scroll: false });
     const currentLyrics = lyrics || null;
     const position = track ? TidalStore.mPosition : 0;
-    const { TidalSyncMode: SyncMode } = settings.use(["TidalSyncMode"]);
 
     return (
         <ModalRoot {...rootProps}>
@@ -62,38 +61,7 @@ export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
                                 >
                                     {formatTime(line.time)}
                                 </span>
-                                {SyncMode === "character" && line.characters && line.characters.length > 0 && line.words && line.words.length > 0 ? (
-                                    line.words.map((word, wIdx) => (
-                                        <span key={wIdx}>
-                                            {word.characters.map((char, j) => {
-                                                const charActive = position / 1000 >= char.time && position / 1000 < char.endTime;
-                                                return (
-                                                    <span
-                                                        key={j}
-                                                        className={charActive ? cl("char-active") : cl("char")}
-                                                        style={{ opacity: charActive ? 1 : 0.5 }}
-                                                    >
-                                                        {char.char}
-                                                    </span>
-                                                );
-                                            })}
-                                            {wIdx < line.words.length - 1 && <span> </span>}
-                                        </span>
-                                    ))
-                                ) : SyncMode === "character" && line.characters && line.characters.length > 0 ? (
-                                    line.characters.map((char, j) => {
-                                        const charActive = position / 1000 >= char.time && position / 1000 < char.endTime;
-                                        return (
-                                            <span
-                                                key={j}
-                                                className={charActive ? cl("char-active") : cl("char")}
-                                                style={{ opacity: charActive ? 1 : 0.5 }}
-                                            >
-                                                {char.char}
-                                            </span>
-                                        );
-                                    })
-                                ) : SyncMode === "word" && line.words && line.words.length > 0 ? (
+                                {(
                                     line.words.map((word, j) => {
                                         const wordActive = position / 1000 >= word.time && position / 1000 < word.endTime;
                                         return (
@@ -107,7 +75,7 @@ export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
                                         );
                                     })
                                 ) : (
-                                    line.text || NoteSvg(cl("modal-note"))
+                                line.text || NoteSvg(cl("modal-note"))
                                 )}
                             </BaseText>
                         ))

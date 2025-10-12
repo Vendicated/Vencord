@@ -7,6 +7,9 @@
 export interface EnhancedLyric {
     time: number;
     text: string;
+    words?: Word[];
+    confidence?: null;
+    characters?: Character[];
 }
 
 interface Character {
