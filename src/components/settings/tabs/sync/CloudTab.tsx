@@ -19,9 +19,11 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { authorizeCloud, checkCloudUrlCsp, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
@@ -70,11 +72,13 @@ function SettingsSyncSection() {
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
-        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
-            <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+        <section className={Margins.top16}>
+            <Forms.FormTitle tag="h5">Settings Sync</Forms.FormTitle>
+
+            <Paragraph size="md" className={Margins.bottom20}>
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
                 minimal effort.
-            </Forms.FormText>
+            </Paragraph>
             <FormSwitch
                 key="cloud-sync"
                 title="Settings Sync"
@@ -113,7 +117,7 @@ function SettingsSyncSection() {
                     Delete Cloud Settings
                 </Button>
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }
 
@@ -122,13 +126,15 @@ function CloudTab() {
 
     return (
         <SettingsTab title="Vencord Cloud">
-            <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
-                <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+            <section className={Margins.top16}>
+                <Forms.FormTitle tag="h5">Cloud Settings</Forms.FormTitle>
+
+                <Paragraph size="md" className={Margins.bottom20}>
                     Vencord comes with a cloud integration that adds goodies like settings sync across devices.
                     It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
                     the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
                     can host it yourself.
-                </Forms.FormText>
+                </Paragraph>
                 <FormSwitch
                     key="backend"
                     title="Enable Cloud Integrations"
@@ -185,8 +191,8 @@ function CloudTab() {
                     </Button>
                 </Grid>
 
-                <Forms.FormDivider className={Margins.top16} />
-            </Forms.FormSection >
+                <Divider className={Margins.top16} />
+            </section >
             <SettingsSyncSection />
         </SettingsTab>
     );
