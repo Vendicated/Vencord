@@ -17,7 +17,7 @@ export default definePlugin({
             find: ".stickers,previewSticker:",
             replacement: {
                 match: /if\(\i\.\i\.getUploadCount/,
-                replace: "try { return true; } finally { if (arguments[2]?.stickers) arguments[2].stickers.length = 0; }$&",
+                replace: "if (arguments[2]?.stickers) arguments[2].stickers.length = 0; return true; $&",
             }
         }
     ]
