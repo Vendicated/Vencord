@@ -220,7 +220,8 @@ export default definePlugin({
             replacement: {
                 match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
                 // We have to check that icon is not an unread GDM in the server bar
-                replace: (m, iconUrl) => `${m},onClick:()=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl})`
+                // stop propagation to avoid opening the edit gdm name/icon modal
+                replace: (m, iconUrl) => `${m},onClick:(e)=>arguments[0]?.size!=="SIZE_48"&&($self.openAvatar(${iconUrl}), e?.stopPropagation?.())`
             }
         },
         // User DMs top small icon
