@@ -517,6 +517,39 @@ export default definePlugin({
             return child;
         };
 
+        const transformTextChild = (child: string) => {
+            if (settings.store.transformEmojis) {
+                const fakeNitroMatch = child.match(fakeNitroEmojiRegex);
+                if (fakeNitroMatch) {
+                    let url: URL | null = null;
+                    try {
+                        url = new URL(child);
+                    } catch { }
+
+                    const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
+
+                    return Parser.defaultRules.customEmoji.react({
+                        jumboable: !inline && content.length === 1,
+                        animated: fakeNitroMatch[2] === "gif",
+                        emojiId: fakeNitroMatch[1],
+                        name: emojiName,
+                        fake: true
+                    }, void 0, { key: String(nextIndex++) });
+                }
+            }
+
+            if (settings.store.transformStickers) {
+                if (fakeNitroStickerRegex.test(child)) return null;
+
+                const gifMatch = child.match(fakeNitroGifStickerRegex);
+                if (gifMatch) {
+                    if (StickersStore.getStickerById(gifMatch[1])) return null;
+                }
+            }
+
+            return child;
+        };
+
         const transformChild = (child: ReactElement<any>) => {
             if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
@@ -529,6 +562,8 @@ export default definePlugin({
                 if (child.props.children.length === 0) return null;
                 return child;
             }
+
+            if (typeof child === "string") return transformTextChild(child);
 
             return child;
         };
@@ -560,8 +595,18 @@ export default definePlugin({
             return newChild;
         };
 
-        const modifyChildren = (children: Array<ReactElement<any>>) => {
-            for (const [index, child] of children.entries()) children[index] = modifyChild(child);
+        const modifyTextChild = (child: string) => {
+            return transformTextChild(child);
+        };
+
+        const modifyChildren = (children: Array<ReactElement<any> | string>) => {
+            for (const [index, child] of children.entries()) {
+                if (typeof child === "string") {
+                    children[index] = modifyTextChild(child);
+                } else {
+                    children[index] = modifyChild(child);
+                }
+            }
 
             children = this.clearEmptyArrayItems(children);
 
@@ -621,6 +666,40 @@ export default definePlugin({
                     fake: true
                 });
             }
+
+            // Handle plain URLs for stickers
+            if (item.startsWith("http")) {
+                const plainImgMatch = item.match(fakeNitroStickerRegex);
+                if (plainImgMatch) {
+                    let url: URL | null = null;
+                    try {
+                        url = new URL(item);
+                    } catch { }
+
+                    const stickerName = StickersStore.getStickerById(plainImgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
+                    stickers.push({
+                        format_type: 1,
+                        id: plainImgMatch[1],
+                        name: stickerName,
+                        fake: true
+                    });
+
+                    continue;
+                }
+
+                const plainGifMatch = item.match(fakeNitroGifStickerRegex);
+                if (plainGifMatch) {
+                    if (!StickersStore.getStickerById(plainGifMatch[1])) continue;
+
+                    const stickerName = StickersStore.getStickerById(plainGifMatch[1])?.name ?? "FakeNitroSticker";
+                    stickers.push({
+                        format_type: 2,
+                        id: plainGifMatch[1],
+                        name: stickerName,
+                        fake: true
+                    });
+                }
+            }
         }
 
         return stickers;
@@ -651,6 +730,23 @@ export default definePlugin({
                         if (gifMatch) {
                             // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
                             if (StickersStore.getStickerById(gifMatch[1])) return true;
+                        }
+                    }
+
+                    // Handle plain URLs in message content
+                    const plainUrl = contentItems.find(item => item === url || item.match(hyperLinkRegex)?.[1] === url);
+                    if (plainUrl) {
+                        if (settings.store.transformEmojis) {
+                            if (fakeNitroEmojiRegex.test(plainUrl)) return true;
+                        }
+
+                        if (settings.store.transformStickers) {
+                            if (fakeNitroStickerRegex.test(plainUrl)) return true;
+
+                            const plainGifMatch = plainUrl.match(fakeNitroGifStickerRegex);
+                            if (plainGifMatch) {
+                                if (StickersStore.getStickerById(plainGifMatch[1])) return true;
+                            }
                         }
                     }
 
@@ -871,7 +967,7 @@ export default definePlugin({
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
-                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}`;
+                    messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${url}`;
                     extra.stickers!.length = 0;
                 }
             }
@@ -891,16 +987,13 @@ export default definePlugin({
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
                     messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + match.length)}`;
                     });
                 }
             }
 
-            if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
-                if (!await cannotEmbedNotice()) {
-                    return { cancel: true };
-                }
-            }
+            // Since we're now sending plain URLs, they will be embedded by Discord if embeds are allowed
+            // No need for embed permission check as Discord handles embedding
 
             return { cancel: false };
         });
@@ -923,14 +1016,11 @@ export default definePlugin({
 
                 const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+                return `${getWordBoundary(origStr, offset - 1)}${url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
             });
 
-            if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
-                if (!await cannotEmbedNotice()) {
-                    return { cancel: true };
-                }
-            }
+            // Since we're now sending plain URLs, they will be embedded by Discord if embeds are allowed
+            // No need for embed permission check as Discord handles embedding
 
             return { cancel: false };
         });
