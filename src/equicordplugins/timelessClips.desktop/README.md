@@ -1,3 +1,0 @@
-# TimelessClips
-
-Custom clip length
