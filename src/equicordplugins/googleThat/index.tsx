@@ -57,7 +57,7 @@ const settings = definePluginSettings({
     customEngineURL: {
         description: "The URL of the Engine you wish to use",
         type: OptionType.STRING,
-        placeholder: "https://search.vmohammad.dev/?q="
+        placeholder: ""
     }
 });
 

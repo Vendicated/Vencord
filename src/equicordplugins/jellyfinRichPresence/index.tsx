@@ -142,27 +142,6 @@ function setActivity(activity: Activity | null) {
     });
 }
 
-async function fetchTmdbData(query: string) {
-    try {
-        const res = await fetch(`https://api.vmohammad.dev/tmdb/search/multi?q=${encodeURIComponent(query)}`);
-        if (!res.ok) throw `${res.status} ${res.statusText}`;
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-            const topResult = data.results[0];
-            return {
-                url: `https://www.themoviedb.org/${topResult.media_type}/${topResult.id}`,
-                posterPath: topResult.poster_path
-                    ? `https://image.tmdb.org/t/p/original${topResult.poster_path}`
-                    : null
-            };
-        }
-        return null;
-    } catch (e) {
-        console.error("Failed to fetch TMDb data:", e);
-        return null;
-    }
-}
-
 export default definePlugin({
     name: "JellyfinRichPresence",
     description: "Rich presence for Jellyfin media server",
@@ -314,32 +293,14 @@ export default definePlugin({
                 break;
         }
 
-        let tmdbData: { url: string; posterPath?: string | null; } | null = null;
-        if (settings.store.showTMDBButton) {
-            tmdbData = await fetchTmdbData(mediaData.seriesName || mediaData.name);
-        }
-
         const assets: ActivityAssets = {
-            large_image:
-                settings.store.posterSource === "tmdb"
-                    ? (tmdbData?.posterPath
-                        ? await getApplicationAsset(tmdbData.posterPath)
-                        : undefined)
-                    : (mediaData.imageUrl
-                        ? await getApplicationAsset(mediaData.imageUrl)
-                        : undefined),
+            large_image: (mediaData.imageUrl
+                ? await getApplicationAsset(mediaData.imageUrl)
+                : undefined),
             large_text: mediaData.seriesName || mediaData.album || undefined,
         };
 
         const buttons: ActivityButton[] = [];
-        if (settings.store.showTMDBButton) {
-            const result = await fetchTmdbData(mediaData.seriesName || mediaData.name);
-            if (result?.url) tmdbData = { url: result.url };
-            buttons.push({
-                label: "View on TheMovieDB",
-                url: `${tmdbData?.url}`
-            });
-        }
 
         const getDetails = () => {
             if (mediaData.type === "Episode" && mediaData.seriesName) {

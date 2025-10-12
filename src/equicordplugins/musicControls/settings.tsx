@@ -164,33 +164,6 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
-    TidalLyricFetch: {
-        description: "Custom URL for fetching lyrics",
-        type: OptionType.STRING,
-        default: "https://api.vmohammad.dev/",
-        placeholder: "https://api.vmohammad.dev/",
-        onChange: (value: string) => {
-            if (!value.endsWith("/")) {
-                value += "/";
-            }
-            if (URL.canParse(value)) {
-                settings.store.TidalLyricFetch = value;
-            } else {
-                showToast("Invalid URL format for CustomUrl: " + value, Toasts.Type.FAILURE);
-                settings.store.TidalLyricFetch = "https://api.vmohammad.dev/";
-            }
-        }
-    },
-    TidalSyncMode: {
-        description: "Lyrics sync mode",
-        type: OptionType.SELECT,
-        options: [
-            { value: "line", label: "Line", default: true },
-            { value: "word", label: "Word" },
-            { value: "character", label: "Character" },
-        ],
-        default: "line",
-    },
 
     YtmSectionTitle: {
         type: OptionType.COMPONENT,
