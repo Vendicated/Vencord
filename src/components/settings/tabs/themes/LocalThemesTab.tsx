@@ -134,11 +134,6 @@ export function LocalThemesTab() {
                             action={refreshLocalThemes}
                             Icon={RestartIcon}
                         />
-                        <QuickAction
-                            text="Edit QuickCSS"
-                            action={() => VencordNative.quickCss.openEditor()}
-                            Icon={PaintbrushIcon}
-                        />
 
                         {Vencord.Plugins.isPluginEnabled(ClientThemePlugin.name) && (
                             <QuickAction

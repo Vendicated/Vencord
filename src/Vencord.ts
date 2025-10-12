@@ -23,13 +23,11 @@ export * as Api from "./api";
 export * as Components from "./components";
 export * as Plugins from "./plugins";
 export * as Util from "./utils";
-export * as QuickCss from "./utils/quickCss";
 export * as Updater from "./utils/updater";
 export * as Webpack from "./webpack";
 export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
-import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
 import { addVencordUiStyles } from "@components/css";
