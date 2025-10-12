@@ -7,27 +7,4 @@
 export interface EnhancedLyric {
     time: number;
     text: string;
-    words?: Word[];
-    confidence?: null;
-    characters?: Character[];
-}
-
-interface Character {
-    time: number;
-    char: string;
-    endTime: number;
-    isVowel: boolean;
-    isSilent: boolean;
-    confidence: number | null;
-    phoneme: string;
-}
-
-interface Word {
-    time: number;
-    word: string;
-    endTime: number;
-    isParenthetical: boolean;
-    confidence: null;
-    syllableCount: number;
-    characters: Character[];
 }
