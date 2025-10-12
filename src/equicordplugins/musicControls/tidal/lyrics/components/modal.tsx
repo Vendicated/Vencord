@@ -7,7 +7,6 @@
 import { BaseText } from "@components/BaseText";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 
-import { settings } from "../../../settings";
 import { TidalStore, Track } from "../../TidalStore";
 import { cl, NoteSvg, scrollClasses, useLyrics } from "./util";
 
@@ -61,22 +60,7 @@ export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
                                 >
                                     {formatTime(line.time)}
                                 </span>
-                                {(
-                                    line.words.map((word, j) => {
-                                        const wordActive = position / 1000 >= word.time && position / 1000 < word.endTime;
-                                        return (
-                                            <span
-                                                key={j}
-                                                className={wordActive ? cl("word-active") : cl("word")}
-                                                style={{ opacity: wordActive ? 1 : 0.5, marginRight: 2 }}
-                                            >
-                                                {word.word}
-                                            </span>
-                                        );
-                                    })
-                                ) : (
-                                line.text || NoteSvg(cl("modal-note"))
-                                )}
+                                {line.text || NoteSvg(cl("modal-note"))}
                             </BaseText>
                         ))
                     ) : (
