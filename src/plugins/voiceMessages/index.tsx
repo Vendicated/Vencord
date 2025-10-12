@@ -22,6 +22,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Heading } from "@components/Heading";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -31,7 +32,7 @@ import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Card, Constants, FluxDispatcher, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { lastState as silentMessageEnabled } from "../silentMessageToggle";
@@ -224,11 +225,11 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
                 {isUnsupportedFormat && (
                     <Card className={`vc-warning-card ${Margins.top16}`}>
-                        <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+                        <Paragraph>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Paragraph>
 
-                        <Forms.FormText className={Margins.top8}>
+                        <Paragraph className={Margins.top8}>
                             To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
-                        </Forms.FormText>
+                        </Paragraph>
                     </Card>
                 )}
 

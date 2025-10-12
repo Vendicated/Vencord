@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { React, ScrollerThin, Text, TextInput } from "@webpack/common";
+import { React, ScrollerThin, TextInput } from "@webpack/common";
 
 import { characters } from "../characters.json";
 
@@ -32,7 +33,7 @@ export default function CharSelectModal({ modalProps, setCharacter }: { modalPro
     return (
         <ModalRoot {...modalProps} size={ModalSize.DYNAMIC}>
             <ModalHeader>
-                <Text variant="heading-lg/bold" style={{ flexGrow: 1 }}>Select character menu</Text>
+                <BaseText size="lg" weight="bold" style={{ flexGrow: 1 }}>Select character menu</BaseText>
                 <ModalCloseButton onClick={modalProps.onClose} ></ModalCloseButton>
             </ModalHeader>
             <ModalContent>

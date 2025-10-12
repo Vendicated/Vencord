@@ -5,11 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import { Activity } from "@vencord/discord-types";
 import { ActivityFlags, ActivityType } from "@vencord/discord-types/enums";
-import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
 
 
 const Native = VencordNative.pluginHelpers.GensokyoRadioRPC as PluginNative<typeof import("./native")>;
@@ -46,9 +47,9 @@ export default definePlugin({
 
     settingsAboutComponent() {
         return <>
-            <Forms.FormText>
+            <Paragraph>
                 Discord rich presence for Gensokyo Radio!
-            </Forms.FormText>
+            </Paragraph>
         </>;
     },
 

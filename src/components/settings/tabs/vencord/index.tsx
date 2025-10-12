@@ -12,6 +12,7 @@ import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
 import { DonateButton, InviteButton } from "@components/settings/DonateButton";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
@@ -21,7 +22,7 @@ import { DONOR_ROLE_ID, GUILD_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/c
 import { Margins } from "@utils/margins";
 import { identity, isAnyPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { Button, Flex, Forms, GuildMemberStore, React, Select, UserStore } from "@webpack/common";
+import { Button, Flex, GuildMemberStore, React, Select, UserStore } from "@webpack/common";
 import BadgeAPI from "plugins/_api/badges";
 
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -201,7 +202,7 @@ function EquicordSettings() {
 
             <section className={Margins.top16}>
                 <Heading>Settings</Heading>
-                <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
+                <Paragraph className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <Button
                         look={Button.Looks.LINK}
@@ -211,7 +212,7 @@ function EquicordSettings() {
                         settings of the Settings plugin
                     </Button>
                     !
-                </Forms.FormText>
+                </Paragraph>
 
                 {Switches.map(
                     s =>

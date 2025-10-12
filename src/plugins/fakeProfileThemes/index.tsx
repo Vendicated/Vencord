@@ -20,9 +20,11 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingSecondary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -31,7 +33,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { User, UserProfile } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, ColorPicker, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
+import { Button, ColorPicker, Flex, React, UserProfileStore, UserStore, useState } from "@webpack/common";
 import virtualMerge from "virtual-merge";
 
 interface Colors {
@@ -117,7 +119,7 @@ function SettingsAboutComponent() {
     return (
         <section>
             <HeadingSecondary>Usage</HeadingSecondary>
-            <Forms.FormText>
+            <Paragraph>
                 After enabling this plugin, you will see custom colors in
                 the profiles of other people using compatible plugins.{" "}
                 <br />
@@ -140,12 +142,12 @@ function SettingsAboutComponent() {
                     <ColorPicker
                         color={color1}
                         label={
-                            <Text
-                                variant={"text-xs/normal"}
+                            <BaseText
+                                size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Primary
-                            </Text>
+                            </BaseText>
                         }
                         onChange={(color: number) => {
                             setColor1(color);
@@ -154,12 +156,12 @@ function SettingsAboutComponent() {
                     <ColorPicker
                         color={color2}
                         label={
-                            <Text
-                                variant={"text-xs/normal"}
+                            <BaseText
+                                size="xs"
                                 style={{ marginTop: "4px" }}
                             >
                                 Accent
-                            </Text>
+                            </BaseText>
                         }
                         onChange={(color: number) => {
                             setColor2(color);
@@ -192,8 +194,9 @@ function SettingsAboutComponent() {
                         isTryItOutFlow={true}
                     />
                 </div>
-            </Forms.FormText>
-        </section>);
+            </Paragraph>
+        </section>
+    );
 }
 
 export default definePlugin({

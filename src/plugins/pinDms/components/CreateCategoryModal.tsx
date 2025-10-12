@@ -5,11 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, ColorPicker, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
+import { Button, ColorPicker, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 
 import { DEFAULT_COLOR, SWATCHES } from "../constants";
 import { categoryLen, createCategory, getCategory } from "../data";
@@ -77,7 +78,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</Text>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</BaseText>
             </ModalHeader>
 
             {/* form is here so when you press enter while in the text input it submits */}

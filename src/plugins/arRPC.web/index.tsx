@@ -20,10 +20,11 @@ import { popNotice, showNotice } from "@api/Notices";
 import { migratePluginSettings } from "@api/Settings";
 import { HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, Toasts } from "@webpack/common";
 
 const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
 
@@ -58,9 +59,9 @@ export default definePlugin({
     settingsAboutComponent: () => (
         <>
             <HeadingSecondary>How to use arRPC</HeadingSecondary>
-            <Forms.FormText>
+            <Paragraph>
                 <Link href="https://github.com/OpenAsar/arrpc/tree/main#server">Follow the instructions in the GitHub repo</Link> to get the server running, and then enable the plugin.
-            </Forms.FormText>
+            </Paragraph>
         </>
     ),
 

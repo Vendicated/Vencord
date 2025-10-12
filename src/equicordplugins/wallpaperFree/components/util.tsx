@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { openModal } from "@utils/modal";
 import { makeCodeblock } from "@utils/text";
-import { Button, FluxDispatcher, Parser, Text } from "@webpack/common";
+import { Button, FluxDispatcher, Parser } from "@webpack/common";
 
 import { WallpaperFreeStore } from "../store";
 import { SetWallpaperModal } from "./modal";
@@ -65,9 +66,9 @@ export function TipsComponent() {
         <div style={{ userSelect: "text" }}>
             {!IS_WEB && (
                 <>
-                    <Text>
+                    <BaseText>
                         you can use local files by having them in the vencord theme directory, and using the url <code>vencord:///themes/filename.ext</code>
-                    </Text>
+                    </BaseText>
                     <Button onClick={() => VencordNative.themes.openFolder()}>
                         Open Theme Directory
                     </Button>

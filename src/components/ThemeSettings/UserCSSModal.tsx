@@ -5,11 +5,12 @@
  */
 
 import { Settings, useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { CopyIcon, PasteIcon, ResetIcon } from "@components/Icons";
 import { copyWithToast } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { showToast, Text, Toasts, Tooltip } from "@webpack/common";
+import { showToast, Toasts, Tooltip } from "@webpack/common";
 import { type ReactNode } from "react";
 import { UserstyleHeader } from "usercss-meta";
 
@@ -187,7 +188,7 @@ export function UserCSSSettingsModal({ modalProps, theme, onSettingsReset }: Use
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader separator={false}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Settings for {theme.name}</Text>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Settings for {theme.name}</BaseText>
                 <Flex style={{ gap: 4, marginRight: 4 }} className="vc-settings-usercss-ie-buttons">
                     <ExportButton themeSettings={themeVars} />
                     <ImportButton themeSettings={themeVars} />

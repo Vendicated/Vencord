@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { openModal } from "@utils/modal";
-import { ContextMenuApi, Text, TooltipContainer, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, TooltipContainer, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "../../../settings";
 import { TidalStore } from "../../TidalStore";
@@ -47,8 +48,8 @@ function LyricsDisplay({ scroll = true }: { scroll?: boolean; }) {
         >
             {currentLyrics.map((line, i) => (
                 <div ref={lyricRefs[i]} key={i}>
-                    <Text
-                        variant={currLrcIndex === i ? "text-sm/normal" : "text-xs/normal"}
+                    <BaseText
+                        size={currLrcIndex === i ? "sm" : "xs"}
                         className={makeClassName(i)}
                     >
                         {SyncMode === "character" && line.characters && line.characters.length > 0 && line.words && line.words.length > 0 ? (
@@ -98,7 +99,7 @@ function LyricsDisplay({ scroll = true }: { scroll?: boolean; }) {
                         ) : (
                             line.text || NoteElement
                         )}
-                    </Text>
+                    </BaseText>
                 </div>
             ))}
         </div>

@@ -5,9 +5,9 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { Text } from "@webpack/common";
 import { ReactNode } from "react";
 
 import ExampleWiggle from "./ui/components/ExampleWiggle";
@@ -115,14 +115,14 @@ export default definePlugin({
     authors: [EquicordDevs.nexpid],
     settings,
     settingsAboutComponent: () => (
-        <Text>
+        <BaseText>
             You can make text wiggle with the following:<br />
             <ul className="wiggle-example">
                 <li><ExampleWiggle wiggle="x">left and right</ExampleWiggle> by typing <code>&lt;~text~&gt;</code></li>
                 <li><ExampleWiggle wiggle="y">up and down</ExampleWiggle> by typing <code>^~text~^</code></li>
                 <li><ExampleWiggle wiggle="xy">in a circle</ExampleWiggle> by typing <code>)~text~(</code></li>
             </ul>
-        </Text>
+        </BaseText>
     ),
 
     patches: [

@@ -6,7 +6,6 @@
 
 import { BaseText } from "@components/BaseText";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Text } from "@webpack/common";
 
 import { settings } from "../../../settings";
 import { TidalStore, Track } from "../../TidalStore";
@@ -113,7 +112,7 @@ export function LyricsModal({ rootProps }: { rootProps: ModalProps; }) {
                             </BaseText>
                         ))
                     ) : (
-                        <Text variant="text-sm/normal" className={cl("modal-no-lyrics")}>No lyrics available :(</Text>
+                        <BaseText size="sm" className={cl("modal-no-lyrics")}>No lyrics available :(</BaseText>
                     )}
                 </div>
             </ModalContent>

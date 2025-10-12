@@ -11,12 +11,13 @@ import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading, HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, moment, TextInput, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { moment, TextInput, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 type TimeFormat = {
     name: string;
@@ -115,7 +116,7 @@ const TimeRow = (props: TimeRowProps) => {
     return (
         <>
             <Heading>{props.format.name}</Heading>
-            <Forms.FormText>{props.format.description}</Forms.FormText>
+            <Paragraph>{props.format.description}</Paragraph>
             <TextInput value={state} onChange={handleChange} />
         </>
     );
@@ -151,10 +152,10 @@ const DemoMessage = (props: { msgId, compact, message, date: Date | undefined, i
             />
         </div>
     ) : <div className="vc-cmt-demo-message">
-        <Forms.FormText>
+        <Paragraph>
             {/* @ts-ignore */}
             <b>Preview:</b> {Vencord.Plugins.plugins.CustomTimestamps.renderTimestamp(date, "cozy")}
-        </Forms.FormText>
+        </Paragraph>
     </div>;
 };
 
@@ -202,9 +203,9 @@ const settings = definePluginSettings({
                                 <div className={Margins.bottom20}>
                                     <Divider style={{ marginBottom: "10px" }} />
                                     <Heading tag="h1">Calendar formats</Heading>
-                                    <Forms.FormText>
+                                    <Paragraph>
                                         How to format the [calendar] value if used in the above timestamps.
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 </div>
                             )}
                             <TimeRow
@@ -239,7 +240,7 @@ export default definePlugin({
     settingsAboutComponent: () => (
         <div className={"vc-cmt-info-card"}>
             <HeadingPrimary>How to use:</HeadingPrimary>
-            <Forms.FormText>
+            <Paragraph>
                 <Link href="https://momentjs.com/docs/#/displaying/format/">Moment.js formatting documentation</Link>
                 <div className={Margins.top8}>
                     Additionally you can use these in your inputs:<br />
@@ -247,7 +248,7 @@ export default definePlugin({
                     as &quot;Today&quot; or &quot;Yesterday&quot;.<br />
                     <b>[relative]</b> gives you times such as &quot;4 hours ago&quot;.<br />
                 </div>
-            </Forms.FormText>
+            </Paragraph>
         </div>
     ),
     patches: [

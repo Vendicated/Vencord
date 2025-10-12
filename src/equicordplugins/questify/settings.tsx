@@ -6,10 +6,10 @@
 
 import { defaultAudioNames, playAudio } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
-import { Divider, ErrorBoundary, Heading } from "@components/index";
+import { Divider, ErrorBoundary, Heading, Paragraph } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { Button, ColorPicker, ContextMenuApi, Menu, Select, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
@@ -528,9 +528,9 @@ function QuestButtonSettings(): JSX.Element {
                             <Heading className={q("form-title")}>
                                 Quest Button
                             </Heading>
-                            <Forms.FormText className={q("form-description")}>
+                            <Paragraph className={q("form-description")}>
                                 Show a Quest button in the server list with an optional indicator for unclaimed Quests.
-                            </Forms.FormText>
+                            </Paragraph>
                         </div>
                         <div className={q("dummy-quest-button")}>
                             <DummyQuestButton
@@ -636,10 +636,10 @@ function QuestButtonSettings(): JSX.Element {
                             <Heading className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Included Reward Types
                             </Heading>
-                            <Forms.FormText className={q("form-description")}>
+                            <Paragraph className={q("form-description")}>
                                 Only count Quests with these reward types as unclaimed when determining button
                                 visibility, badge count, and when playing the alert sound.
-                            </Forms.FormText>
+                            </Paragraph>
                             <DynamicDropdown
                                 placeholder="Select which reward types to include in the unclaimed count..."
                                 feedback="There's no supported Quest feature by that name."
@@ -775,7 +775,7 @@ function DisableQuestsSetting(): JSX.Element {
                     <Heading className={q("form-title")}>
                         Quest Features
                     </Heading>
-                    <Forms.FormText className={q("form-description")}>
+                    <Paragraph className={q("form-description")}>
                         Modify specific Quest features.
                         <br /><br />
                         The <span className={q("inline-code-block")}>Disable Quest Popup Above Account Panel</span> option
@@ -793,7 +793,7 @@ function DisableQuestsSetting(): JSX.Element {
                         can open the context menu on the Quest tile and select <span className={q("inline-code-block")}>Stop Auto-Complete</span>.
                         <br /><br />
                         Using either of those options is against Discord's TOS. Use at your own risk.
-                    </Forms.FormText>
+                    </Paragraph>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."
                         feedback="There's no supported Quest feature by that name."
@@ -954,11 +954,11 @@ function RestyleQuestsSetting() {
                         <Heading className={q("form-title")}>
                             Restyle Quests
                         </Heading>
-                        <Forms.FormText className={q("form-description")}>
+                        <Paragraph className={q("form-description")}>
                             Highlight Quests with optional theme colors for visibility.
                             <br /><br />
                             Claimed and Expired Quest styles will take precedence even if a Quest is ignored.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("gradient-setting-group", "inline-group-item", "flex-35")}>
@@ -1090,11 +1090,11 @@ function ReorderQuestsSetting(): JSX.Element {
                         <Heading className={q("form-title")}>
                             Reorder Quests
                         </Heading>
-                        <Forms.FormText className={q("form-description")}>
+                        <Paragraph className={q("form-description")}>
                             Sort Quests by their status. Applied when the "Questify" sort option is selected on the Quest page.
                             <br /><br />
                             Comma-separated list must contain all of: <span className={q("inline-code-block")}>UNCLAIMED, CLAIMED, IGNORED, EXPIRED</span>.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                     <div>
                         <TextInput
@@ -1239,11 +1239,11 @@ function ReorderQuestsSetting(): JSX.Element {
                         </div>
                     </div>
                     <div className={q("main-inline-group")}>
-                        <Forms.FormText className={q("form-description")}>
+                        <Paragraph className={q("form-description")}>
                             This sort and filter choice refers to the built-in sort and filter options on the Quest page.
                             The custom sorting above is only applied when the "Questify" sort option is selected on the Quest page.
                             If remembering is disabled, the sort or filter options will be reset each time you open the Quest page.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                 </section>
             </div>
@@ -1468,7 +1468,7 @@ function FetchingQuestsSetting(): JSX.Element {
                         <Heading className={q("form-title")}>
                             Fetching Quests
                         </Heading>
-                        <Forms.FormText className={q("form-description")}>
+                        <Paragraph className={q("form-description")}>
                             Configure how often to fetch Quests from Discord and set up alerts for new Quests.
                             <br /><br />
                             By default, Discord only fetches Quests on load and when visiting the Quests page.
@@ -1479,7 +1479,7 @@ function FetchingQuestsSetting(): JSX.Element {
                             unclaimed <span className={q("inline-code-block")}>Pill</span>, <span className={q("inline-code-block")}>Badge</span>, or <span className={q("inline-code-block")}>Both</span> indicators enabled. Otherwise, there is no reason to periodically fetch Quests.
                             <br /><br />
                             Also, if <span className={q("inline-code-block")}>Fetching Quests</span> is blocked in the <span className={q("inline-code-block")}>Quest Features</span> setting, this will not work.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                     <div>
                         <div>

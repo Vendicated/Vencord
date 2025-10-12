@@ -18,18 +18,18 @@
 
 import "@equicordplugins/_misc/styles.css";
 
+import { Paragraph } from "@components/Paragraph";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Forms } from "@webpack/common";
 
 export default definePlugin({
     name: "NeverPausePreviews",
     description: "Prevents in-call/PiP previews (screenshare, streams, etc) from pausing even if the client loses focus",
     authors: [EquicordDevs.vappstar],
     settingsAboutComponent: () => <>
-        <Forms.FormText className="plugin-warning">
+        <Paragraph className="plugin-warning">
             This plugin will cause discord to use more resources than normal
-        </Forms.FormText>
+        </Paragraph>
     </>,
     patches: [
         {

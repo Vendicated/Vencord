@@ -11,12 +11,13 @@ import { Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { HeadingPrimary, HeadingTertiary } from "@components/Heading";
 import { OpenExternalIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
-import { Button, Forms, React, SearchableSelect, TabBar, TextInput, useEffect, useState } from "@webpack/common";
+import { Button, React, SearchableSelect, TabBar, TextInput, useEffect, useState } from "@webpack/common";
 
 import { SearchStatus, TabItem, Theme, ThemeLikeProps } from "../types";
 import { ThemeCard } from "./ThemeCard";
@@ -165,9 +166,9 @@ function ThemeTab() {
                         {hideWarningCard ? null : (
                             <ErrorCard>
                                 <HeadingTertiary>Want your theme removed?</HeadingTertiary>
-                                <Forms.FormText className={Margins.top8}>
+                                <Paragraph className={Margins.top8}>
                                     If you want your theme(s) permanently removed, please open an issue on <a href="https://github.com/Faf4a/plugins/issues/new?labels=removal&projects=&template=request_removal.yml&title=Theme+Removal">GitHub <OpenExternalIcon height={16} width={16} /></a>
-                                </Forms.FormText>
+                                </Paragraph>
                                 <Button
                                     onClick={() => {
                                         Settings.plugins.ThemeLibrary.hideWarningCard = true;

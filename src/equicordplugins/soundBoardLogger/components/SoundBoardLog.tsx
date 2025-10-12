@@ -12,7 +12,7 @@ import { classes, copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
+import { Button, Clickable, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
 
 import settings from "../settings";
 import { clearLoggedSounds, getLoggedSounds } from "../store";
@@ -112,7 +112,7 @@ export default function SoundBoardLog({ data, closeModal }) {
     return (
         <>
             <ModalHeader className={cl("modal-header")}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>SoundBoard log</Text>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>SoundBoard log</BaseText>
                 <ModalCloseButton onClick={closeModal} />
             </ModalHeader>
             <ModalContent className={classes(cl("modal-content"), Margins.top8)}>

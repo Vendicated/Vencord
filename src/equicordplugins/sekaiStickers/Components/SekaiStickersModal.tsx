@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, ChannelStore, React, SelectedChannelStore, Slider, Text, TextArea, UploadHandler } from "@webpack/common";
+import { Button, ChannelStore, React, SelectedChannelStore, Slider, TextArea, UploadHandler } from "@webpack/common";
 
 import { characters } from "../characters.json";
 import Canvas from "./Canvas";
@@ -98,7 +99,7 @@ export default function SekaiStickersModal({ modalProps, settings }: { modalProp
     return (
         <ModalRoot {...modalProps} size={ModalSize.DYNAMIC}>
             <ModalHeader>
-                <Text variant="heading-lg/bold" style={{ flexGrow: 1 }}>Sekai Stickers</Text>
+                <BaseText size="lg" weight="bold" style={{ flexGrow: 1 }}>Sekai Stickers</BaseText>
                 <ModalCloseButton onClick={modalProps.onClose} ></ModalCloseButton>
             </ModalHeader>
             <ModalContent>

@@ -7,6 +7,7 @@
 import { CodeBlock } from "@components/CodeBlock";
 import { Heading, HeadingTertiary } from "@components/Heading";
 import { Heart } from "@components/Heart";
+import { Paragraph } from "@components/Paragraph";
 import { copyToClipboard } from "@utils/clipboard";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -14,7 +15,7 @@ import { classes } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import type { PluginNative } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Forms, Parser, React, showToast, Toasts } from "@webpack/common";
+import { Button, Parser, React, showToast, Toasts } from "@webpack/common";
 
 import { Theme, ThemeInfoModalProps } from "../types";
 import { ClockIcon, DownloadIcon, WarningIcon } from "../utils/Icons";
@@ -67,45 +68,45 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                 showUserPopout
                                 className={Margins.right8}
                             />
-                            <Forms.FormText style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            <Paragraph style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                 {authors.map(author => author.username).join(", ")}
-                            </Forms.FormText>
+                            </Paragraph>
                         </div>
                         {version && (
                             <>
                                 <Heading style={{ marginTop: "10px" }}>Version</Heading>
-                                <Forms.FormText>
+                                <Paragraph>
                                     {version}
-                                </Forms.FormText>
+                                </Paragraph>
                             </>
                         )}
                         <Heading style={{ marginTop: "10px" }}>Likes</Heading>
-                        <Forms.FormText>
+                        <Paragraph>
                             {likes === 0 ? `Nobody liked this ${type} yet.` : `${likes} users liked this ${type}!`}
-                        </Forms.FormText>
+                        </Paragraph>
                         {donate && (
                             <>
                                 <Heading style={{ marginTop: "10px" }}>Donate</Heading>
-                                <Forms.FormText>
+                                <Paragraph>
                                     You can support the author by donating below!
-                                </Forms.FormText>
-                                <Forms.FormText style={{ marginTop: "10px" }}>
+                                </Paragraph>
+                                <Paragraph style={{ marginTop: "10px" }}>
                                     <Button onClick={() => VencordNative.native.openExternal(donate)}>
                                         <Heart />
                                         Donate
                                     </Button>
-                                </Forms.FormText>
+                                </Paragraph>
                             </>
                         )}
                         {(guild || invite) && (
                             <>
                                 <Heading style={{ marginTop: "10px" }}>Support Server</Heading>
                                 {guild && (
-                                    <Forms.FormText>
+                                    <Paragraph>
                                         {guild.name}
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 )}
-                                <Forms.FormText>
+                                <Paragraph>
                                     <Button
                                         color={Button.Colors.BRAND}
                                         look={Button.Looks.FILLED}
@@ -118,11 +119,11 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                     >
                                         Join Discord Server
                                     </Button>
-                                </Forms.FormText>
+                                </Paragraph>
                             </>
                         )}
                         <Heading style={{ marginTop: "10px" }}>Source</Heading>
-                        <Forms.FormText>
+                        <Paragraph>
                             <Button
                                 disabled={!theme.content || theme.id === "preview"}
                                 onClick={() => openModal(modalProps => (
@@ -131,11 +132,11 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                             <HeadingTertiary>Theme Source</HeadingTertiary>
                                         </ModalHeader>
                                         <ModalContent>
-                                            <Forms.FormText style={{
+                                            <Paragraph style={{
                                                 padding: "8px",
                                             }}>
                                                 <CodeBlock lang="css" content={themeContent} />
-                                            </Forms.FormText>
+                                            </Paragraph>
                                         </ModalContent>
                                         <ModalFooter>
                                             <Button
@@ -156,28 +157,28 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                             >
                                 View Theme Source
                             </Button>
-                        </Forms.FormText>
+                        </Paragraph>
                         {tags && (
                             <>
                                 <Heading style={{ marginTop: "10px" }}>Tags</Heading>
-                                <Forms.FormText>
+                                <Paragraph>
                                     {tags.map(tag => (
                                         <span className="vce-theme-info-tag" key={"vce-theme-info-tag"}>
                                             {tag}
                                         </span>
                                     ))}
-                                </Forms.FormText>
+                                </Paragraph>
                             </>
                         )}
                         {requiresThemeAttributes && (
-                            <Forms.FormText style={{ marginTop: "10px" }}>
+                            <Paragraph style={{ marginTop: "10px" }}>
                                 <WarningIcon /> This theme requires the <b>ThemeAttributes</b> plugin!
-                            </Forms.FormText>
+                            </Paragraph>
                         )}
                         {last_updated && (
-                            <Forms.FormText style={{ marginTop: "10px" }}>
+                            <Paragraph style={{ marginTop: "10px" }}>
                                 <ClockIcon /> This theme was last updated {Parser.parse("<t:" + lastUpdated + ":F>")} ({Parser.parse("<t:" + lastUpdated + ":R>")})
-                            </Forms.FormText>
+                            </Paragraph>
                         )}
                     </div>
                 </div>
@@ -209,7 +210,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                         <HeadingTertiary>Conflict!</HeadingTertiary>
                                     </ModalHeader>
                                     <ModalContent>
-                                        <Forms.FormText style={{
+                                        <Paragraph style={{
                                             padding: "8px",
                                         }}>
                                             <div style={{ display: "flex", flexDirection: "column" }}>
@@ -220,7 +221,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                                     </code>
                                                 </div>
                                             </div>
-                                        </Forms.FormText>
+                                        </Paragraph>
                                     </ModalContent>
                                     <ModalFooter>
                                         <Button

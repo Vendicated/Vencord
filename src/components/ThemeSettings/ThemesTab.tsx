@@ -41,7 +41,7 @@ import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { findLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { Alerts, Button, Card, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 import type { UserstyleHeader } from "usercss-meta";
 
@@ -78,9 +78,9 @@ function Validator({ link, onValidate }: { link: string; onValidate: (valid: boo
             ? `Error: ${err instanceof Error ? err.message : String(err)}`
             : "Valid!";
 
-    return <Forms.FormText style={{
+    return <Paragraph style={{
         color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--status-positive)"
-    }}>{text}</Forms.FormText>;
+    }}>{text}</Paragraph>;
 }
 
 interface OtherThemeCardProps {
@@ -331,7 +331,7 @@ function ThemesTab() {
                         </Link>
                         <Link href="https://github.com/search?q=discord+theme">GitHub</Link>
                     </div>
-                    <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
+                    <Paragraph>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Paragraph>
                 </Card>
 
                 <section>

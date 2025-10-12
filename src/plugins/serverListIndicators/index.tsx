@@ -21,11 +21,12 @@ import "./styles.css";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { GuildStore, PresenceStore, RelationshipStore, Text, Tooltip, useStateFromStores } from "@webpack/common";
+import { GuildStore, PresenceStore, RelationshipStore, Tooltip, useStateFromStores } from "@webpack/common";
 
 const enum IndicatorType {
     SERVER = 1 << 0,
@@ -74,11 +75,11 @@ function FriendsIndicator() {
                     </path>
                 </svg>
             }
-            <Text
-                variant="text-xs/normal"
+            <BaseText
+                size="xs"
                 id="vc-friendcount-text">{onlineFriendsCount}
-            </Text>
-            {!!settings.store.useCompact && <Text variant="text-xs/normal" id="vc-friendcount-text-compact">Friends</Text>}
+            </BaseText>
+            {!!settings.store.useCompact && <BaseText size="xs" id="vc-friendcount-text-compact">Friends</BaseText>}
         </div>
     );
 }
@@ -110,11 +111,11 @@ function ServersIndicator() {
                     </path>
                 </svg>
             }
-            <Text
-                variant="text-xs/normal"
+            <BaseText
+                size="xs"
                 id="vc-guildcount-text">{guildCount}
-            </Text>
-            {!!settings.store.useCompact && <Text variant="text-xs/normal" id="vc-guildcount-text-compact">Servers</Text>}
+            </BaseText>
+            {!!settings.store.useCompact && <BaseText size="xs" id="vc-guildcount-text-compact">Servers</BaseText>}
         </div>
     );
 }

@@ -8,13 +8,14 @@ import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Guild, User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, GuildChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from ".";
 
@@ -113,7 +114,7 @@ function GuildInfoModal({ guild }: GuildProps) {
 
                 <div className={cl("name-and-description")}>
                     <Heading className={cl("name")}>{guild.name}</Heading>
-                    {guild.description && <Forms.FormText>{guild.description}</Forms.FormText>}
+                    {guild.description && <Paragraph>{guild.description}</Paragraph>}
                 </div>
             </div>
 

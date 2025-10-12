@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
-import { Paginator, Text, useRef, useState } from "@webpack/common";
+import { Paginator, useRef, useState } from "@webpack/common";
 
 import { Auth } from "../auth";
 import { ReviewType } from "../entities";
@@ -42,10 +43,10 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
         <ErrorBoundary>
             <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" className={cl("modal-header")}>
+                    <BaseText size="lg" weight="semibold" className={cl("modal-header")}>
                         {name}'s Reviews
                         {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
-                    </Text>
+                    </BaseText>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
 

@@ -11,11 +11,12 @@ import { DataStore } from "@api/index";
 import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Button, React, TextInput } from "@webpack/common";
 
 type ButtonEntry = {
     id: string;
@@ -201,7 +202,7 @@ function ButtonEntries() {
                 </div>
 
                 <div className="chatButtonsPlus-field">
-                    <Forms.FormText className="chatButtonsPlus-label">Button Label (Tooltip)</Forms.FormText>
+                    <Paragraph className="chatButtonsPlus-label">Button Label (Tooltip)</Paragraph>
                     <TextInput
                         placeholder="Button label/tooltip"
                         value={entry.label}
@@ -210,7 +211,7 @@ function ButtonEntries() {
                 </div>
 
                 <div className="chatButtonsPlus-field">
-                    <Forms.FormText className="chatButtonsPlus-label">Message to Send</Forms.FormText>
+                    <Paragraph className="chatButtonsPlus-label">Message to Send</Paragraph>
                     <textarea
                         className="chatButtonsPlus-textarea"
                         placeholder="Message to send when clicked"
@@ -221,7 +222,7 @@ function ButtonEntries() {
                 </div>
 
                 <div className="chatButtonsPlus-field">
-                    <Forms.FormText className="chatButtonsPlus-label">Custom SVG Path (24x24 viewBox)</Forms.FormText>
+                    <Paragraph className="chatButtonsPlus-label">Custom SVG Path (24x24 viewBox)</Paragraph>
                     <textarea
                         className="chatButtonsPlus-textarea"
                         placeholder='<path fill="currentColor" d="..."/>'
@@ -229,9 +230,9 @@ function ButtonEntries() {
                         onChange={e => setSvg(entry.id, e.target.value)}
                         rows={3}
                     />
-                    <Forms.FormText className="chatButtonsPlus-description">
+                    <Paragraph className="chatButtonsPlus-description">
                         Enter SVG path elements for a 24x24 viewBox. Use "currentColor" for the fill to match Discord's theme.
-                    </Forms.FormText>
+                    </Paragraph>
                 </div>
             </div>
         );

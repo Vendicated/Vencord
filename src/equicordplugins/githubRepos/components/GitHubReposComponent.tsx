@@ -5,8 +5,9 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import { openModal } from "@utils/modal";
-import { Button, React, Text, useEffect, UserProfileStore, useState } from "@webpack/common";
+import { Button, React, useEffect, UserProfileStore, useState } from "@webpack/common";
 
 import { settings } from "..";
 import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "../githubApi";
@@ -88,11 +89,11 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
         fetchData();
     }, [id]);
 
-    if (loading) return <Text variant="text-xs/semibold" className={cl("loading")} style={{ color: "var(--header-secondary)" }}>
-        Loading repositories...</Text>;
+    if (loading) return <BaseText size="xs" weight="semibold" className={cl("loading")} style={{ color: "var(--header-secondary)" }}>
+        Loading repositories...</BaseText>;
 
-    if (error) return <Text variant="text-xs/semibold" className={cl("error")} style={{ color: "var(--text-danger)" }}>
-        Error: {error}</Text>;
+    if (error) return <BaseText size="xs" weight="semibold" className={cl("error")} style={{ color: "var(--text-danger)" }}>
+        Error: {error}</BaseText>;
 
     if (!repos.length) return null;
 
@@ -114,14 +115,14 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
 
     return (
         <div className={cl("container")}>
-            <Text variant="text-xs/semibold" className={cl("header")} style={{ color: "var(--header-secondary)" }}>
+            <BaseText size="xs" weight="semibold" className={cl("header")} style={{ color: "var(--header-secondary)" }}>
                 GitHub Repositories
                 {userInfo && (
                     <span className={cl("count")} style={{ color: "var(--text-muted)" }}>
                         {` (Showing only top ${topRepos.length}/${userInfo.totalRepos})`}
                     </span>
                 )}
-            </Text>
+            </BaseText>
             <div className={cl("list")}>
                 {topRepos.map(repo => (
                     <RepoCard

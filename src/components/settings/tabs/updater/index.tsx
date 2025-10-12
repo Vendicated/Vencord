@@ -23,6 +23,7 @@ import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { handleSettingsTabError, SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -30,7 +31,7 @@ import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openM
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, shortGitHash, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Parser, React, Toasts } from "@webpack/common";
+import { Alerts, Button, Card, Parser, React, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -162,15 +163,15 @@ function Updatable(props: CommonProps) {
             </Flex>
             {!updates && updateError ? (
                 <>
-                    <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
+                    <Paragraph>Failed to check updates. Check the console for more info</Paragraph>
                     <ErrorCard style={{ padding: "1em" }}>
                         <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
                     </ErrorCard>
                 </>
             ) : (
-                <Forms.FormText className={Margins.bottom8}>
+                <Paragraph className={Margins.bottom8}>
                     {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
-                </Forms.FormText>
+                </Paragraph>
             )}
 
             {isOutdated && <Changes updates={updates} {...props} />}
@@ -181,9 +182,9 @@ function Updatable(props: CommonProps) {
 function Newer(props: CommonProps) {
     return (
         <>
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 Your local copy has more recent commits. Please stash or reset them.
-            </Forms.FormText>
+            </Paragraph>
             <Changes {...props} updates={changes} />
         </>
     );
@@ -223,7 +224,7 @@ function Updater() {
 
             <Heading>Repo</Heading>
 
-            <Forms.FormText>
+            <Paragraph>
                 {repoPending
                     ? repo
                     : err
@@ -235,7 +236,7 @@ function Updater() {
                         )
                 }
                 {" "}(<HashLink hash={shortGitHash()} repo={repo} disabled={repoPending} longHash={gitHash} />)
-            </Forms.FormText>
+            </Paragraph>
 
             <Divider className={Margins.top8 + " " + Margins.bottom8} />
 

@@ -6,10 +6,11 @@
 
 import { DataStore } from "@api/index";
 import { Flex } from "@components/Flex";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Alerts, Button, FluxDispatcher, Forms, Toasts, UserProfileStore, UserStore } from "@webpack/common";
+import { Alerts, Button, FluxDispatcher, Toasts, UserProfileStore, UserStore } from "@webpack/common";
 const native = VencordNative.pluginHelpers.Identity as PluginNative<typeof import("./native")>;
 
 const CustomizationSection = findComponentByCodeLazy(".customizationSectionBackground");
@@ -83,12 +84,12 @@ function ResetCard() {
                         Alerts.show({
                             title: "Hold on!",
                             body: <div>
-                                <Forms.FormText>
+                                <Paragraph>
                                     Saving your base profile will allow you to have a backup of your actual profile
-                                </Forms.FormText>
-                                <Forms.FormText>
+                                </Paragraph>
+                                <Paragraph>
                                     If you save, it will overwrite your previous data.
-                                </Forms.FormText>
+                                </Paragraph>
                             </div>,
                             confirmText: "Save Anyway",
                             cancelText: "Cancel",
@@ -104,12 +105,12 @@ function ResetCard() {
                         Alerts.show({
                             title: "Hold on!",
                             body: <div>
-                                <Forms.FormText>
+                                <Paragraph>
                                     Loading your base profile will restore your actual profile settings
-                                </Forms.FormText>
-                                <Forms.FormText>
+                                </Paragraph>
+                                <Paragraph>
                                     If you load, it will overwrite your current profile configuration.
-                                </Forms.FormText>
+                                </Paragraph>
                             </div>,
                             confirmText: "Load Anyway",
                             cancelText: "Cancel",

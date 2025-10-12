@@ -5,12 +5,13 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { TabBar, Text, Timestamp, TooltipContainer, useState } from "@webpack/common";
+import { TabBar, Timestamp, TooltipContainer, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 
@@ -38,7 +39,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader className={cl("head")}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Message Edit History</Text>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Message Edit History</BaseText>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 

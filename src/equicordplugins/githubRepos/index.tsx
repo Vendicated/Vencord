@@ -7,12 +7,13 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
-import { React, Text } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import { GitHubReposComponent } from "./components/GitHubReposComponent";
 
@@ -49,9 +50,9 @@ const ProfilePopoutComponent = ErrorBoundary.wrap(
     },
     {
         noop: true,
-        fallback: () => <Text variant="text-xs/semibold" className="vc-github-repos-error" style={{ color: "var(--text-danger)" }}>
+        fallback: () => <BaseText size="xs" weight="semibold" className="vc-github-repos-error" style={{ color: "var(--text-danger)" }}>
             Error, Failed to render GithubRepos
-        </Text>
+        </BaseText>
     }
 );
 

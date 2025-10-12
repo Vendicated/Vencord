@@ -8,12 +8,13 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { HeadingSecondary, HeadingTertiary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
 import { EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Card, Forms, React, TextInput } from "@webpack/common";
+import { Card, React, TextInput } from "@webpack/common";
 
 interface GoogleFontMetadata {
     family: string;
@@ -133,7 +134,7 @@ function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) =
     return (
         <section>
             <HeadingSecondary>Search Google Fonts</HeadingSecondary>
-            <Forms.FormText>Click on any font to apply it.</Forms.FormText>
+            <Paragraph>Click on any font to apply it.</Paragraph>
 
             <TextInput
                 value={query}
@@ -153,12 +154,12 @@ function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) =
                         >
                             <div className="eq-googlefonts-preview" style={{ fontFamily: font.family }}>
                                 <HeadingTertiary>{font.displayName}</HeadingTertiary>
-                                <Forms.FormText>The quick brown fox jumps over the lazy dog</Forms.FormText>
+                                <Paragraph>The quick brown fox jumps over the lazy dog</Paragraph>
                             </div>
                             {font.authors?.length && (
-                                <Forms.FormText className={Margins.top8} style={{ opacity: 0.7 }}>
+                                <Paragraph className={Margins.top8} style={{ opacity: 0.7 }}>
                                     by {font.authors.join(", ")}
-                                </Forms.FormText>
+                                </Paragraph>
                             )}
                         </Card>
                     ))}

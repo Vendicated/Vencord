@@ -7,9 +7,10 @@
 import "@equicordplugins/_misc/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Paragraph } from "@components/Paragraph";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Forms, UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     platform: {
@@ -51,9 +52,9 @@ export default definePlugin({
     description: "Spoof what platform or device you're on",
     authors: [EquicordDevs.Drag],
     settingsAboutComponent: () => <>
-        <Forms.FormText className="plugin-warning">
+        <Paragraph className="plugin-warning">
             We can't guarantee this plugin won't get you warned or banned.
-        </Forms.FormText>
+        </Paragraph>
     </>,
     settings: settings,
     patches: [

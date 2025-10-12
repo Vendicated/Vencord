@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/settings";
-import { Button, Forms, Select, Slider, useEffect, useState } from "@webpack/common";
+import { Button, Select, Slider, useEffect, useState } from "@webpack/common";
 
 import { BrushTool } from "../tools/brush";
 import { CropTool, resetBounds } from "../tools/crop";
@@ -129,7 +130,7 @@ export const Toolbar = () => {
                             }
                         />
 
-                        <Forms.FormText className="vc-remix-setting-switch">Fill <Switch checked={fill} onChange={setFill} /></Forms.FormText>
+                        <Paragraph className="vc-remix-setting-switch">Fill <Switch checked={fill} onChange={setFill} /></Paragraph>
                     </>)}
                 </div>
             </div>

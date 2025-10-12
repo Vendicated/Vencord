@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -25,7 +26,7 @@ import { EquicordDevs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Text } from "@webpack/common";
+import { Button, ChannelStore } from "@webpack/common";
 
 function DecodeIcon() {
     return (
@@ -69,7 +70,7 @@ function openDecodedBase64Modal(decodedContent) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Decoded Base64 Content</Text>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Decoded Base64 Content</BaseText>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
                 <ModalContent>

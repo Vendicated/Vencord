@@ -7,10 +7,11 @@
 // alot of the code is from JellyfinRPC
 import { definePluginSettings } from "@api/Settings";
 import { HeadingSecondary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, showToast } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, showToast } from "@webpack/common";
 
 
 interface ActivityAssets {
@@ -92,11 +93,11 @@ export default definePlugin({
     settingsAboutComponent: () => (
         <>
             <HeadingSecondary>How to connect to AudioBookShelf</HeadingSecondary>
-            <Forms.FormText>
+            <Paragraph>
                 Enter your AudioBookShelf server URL, username, and password to display your currently playing audiobooks as Discord Rich Presence.
                 <br /><br />
                 The plugin will automatically authenticate and fetch your listening progress.
-            </Forms.FormText>
+            </Paragraph>
         </>
     ),
 

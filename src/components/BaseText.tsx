@@ -65,15 +65,21 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
         tag: Tag = "div",
         children,
         className,
+        style,
         ...restProps
     } = props;
 
     return (
-        <Tag className={classes(textCls("base", size, weight), className)} {...restProps}>
+        <Tag
+            className={classes(textCls("base", size, weight), className)}
+            style={style}
+            {...restProps}
+        >
             {children}
         </Tag>
     );
 }
+
 
 // #region Old compability
 

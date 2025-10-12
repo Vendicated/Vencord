@@ -20,13 +20,14 @@ import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
 import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
 
 interface TrackData {
     name: string;
@@ -190,7 +191,7 @@ export default definePlugin({
     settingsAboutComponent: () => (
         <>
             <HeadingSecondary>How to get an API key</HeadingSecondary>
-            <Forms.FormText>
+            <Paragraph>
                 An API key is required to fetch your current track. To get one, you can
                 visit <Link href="https://www.last.fm/api/account/create">this page</Link> and
                 fill in the following information: <br /> <br />
@@ -199,7 +200,7 @@ export default definePlugin({
                 Application description: (personal use) <br /> <br />
 
                 And copy the API key (not the shared secret!)
-            </Forms.FormText>
+            </Paragraph>
         </>
     ),
 

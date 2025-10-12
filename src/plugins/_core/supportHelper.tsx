@@ -19,9 +19,11 @@
 import { sendBotMessage } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_IDS, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -33,7 +35,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, shortGitHash, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, SelectedChannelStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, SelectedChannelStore, showToast, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -177,10 +179,10 @@ function generatePluginList() {
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
                     <img src="https://media.tenor.com/QtGqjwBpRzwAAAAi/wumpus-dancing.gif" />
                 </div>
-                <Forms.FormText>Before you ask for help,</Forms.FormText>
-                <Forms.FormText>We do not handle support for users who use 100+ plugins</Forms.FormText>
-                <Forms.FormText>issue could be plugin confliction</Forms.FormText>
-                <Forms.FormText>try removing some plugins and see if it fixes!</Forms.FormText>
+                <Paragraph>Before you ask for help,</Paragraph>
+                <Paragraph>We do not handle support for users who use 100+ plugins</Paragraph>
+                <Paragraph>issue could be plugin confliction</Paragraph>
+                <Paragraph>try removing some plugins and see if it fixes!</Paragraph>
             </div>
         });
 
@@ -252,9 +254,9 @@ export default definePlugin({
                         <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
                             <img src="https://media.tenor.com/QtGqjwBpRzwAAAAi/wumpus-dancing.gif" />
                         </div>
-                        <Forms.FormText>Before you ask for help,</Forms.FormText>
-                        <Forms.FormText>Check for updates and if this</Forms.FormText>
-                        <Forms.FormText>issue could be caused by Equicord!</Forms.FormText>
+                        <Paragraph>Before you ask for help,</Paragraph>
+                        <Paragraph>Check for updates and if this</Paragraph>
+                        <Paragraph>issue could be caused by Equicord!</Paragraph>
                     </div>,
                     confirmText: "Go to Equicord Support",
                     onConfirm() {
@@ -275,10 +277,10 @@ export default definePlugin({
                     return Alerts.show({
                         title: "Hold on!",
                         body: <div>
-                            <Forms.FormText>You are using an outdated version of Equicord! Chances are, your issue is already fixed.</Forms.FormText>
-                            <Forms.FormText className={Margins.top8}>
+                            <Paragraph>You are using an outdated version of Equicord! Chances are, your issue is already fixed.</Paragraph>
+                            <Paragraph className={Margins.top8}>
                                 Please first update before asking for support!
-                            </Forms.FormText>
+                            </Paragraph>
                         </div>,
                         onCancel: () => openUpdaterModal!(),
                         cancelText: "View Updates",
@@ -296,11 +298,11 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using an externally updated Equicord version, the ability to help you here may be limited.</Forms.FormText>
-                        <Forms.FormText className={Margins.top8}>
+                        <Paragraph>You are using an externally updated Equicord version, the ability to help you here may be limited.</Paragraph>
+                        <Paragraph className={Margins.top8}>
                             Please join the <Link href="https://equicord.org/discord">Equicord Server</Link> for support,
                             or if this issue persists on Vencord, continue on.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                 });
             }
@@ -309,14 +311,14 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using a custom build of Equicord, which we do not provide support for!</Forms.FormText>
+                        <Paragraph>You are using a custom build of Equicord, which we do not provide support for!</Paragraph>
 
-                        <Forms.FormText className={Margins.top8}>
+                        <Paragraph className={Margins.top8}>
                             We only provide support for <Link href="https://github.com/Equicord/Equicord">official builds</Link>.
                             Either <Link href="https://github.com/Equicord/Equilotl">switch to an official build</Link> or figure your issue out yourself.
-                        </Forms.FormText>
+                        </Paragraph>
 
-                        <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
+                        <BaseText size="md" weight="bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</BaseText>
                     </div>,
                     confirmText: "Understood",
                     secondaryConfirmText: "Don't show again",

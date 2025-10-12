@@ -5,11 +5,13 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { BaseText } from "@components/BaseText";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
-import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/common";
+import { Paragraph } from "@components/Paragraph";
+import { Button, React, TabBar, TextArea, Toasts } from "@webpack/common";
 import { JSX } from "react";
 
 import { convert as convertLineEP, getIdFromUrl as getLineEmojiPackIdFromUrl, getStickerPackById as getLineEmojiPackById, isLineEmojiPackHtml, parseHtml as getLineEPFromHtml } from "../lineEmojis";
@@ -84,7 +86,7 @@ const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPack
                     <path d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" />
                 </svg>
             </button>
-            <Text className={cl("pack-title")} tag="span">{meta.title}</Text>
+            <BaseText className={cl("pack-title")} tag="span">{meta.title}</BaseText>
         </div>
     );
 };
@@ -128,13 +130,13 @@ export const Settings = () => {
             {tab === SettingsTabsKey.ADD_STICKER_PACK_URL &&
                 <div className="section">
                     <Heading>Add Sticker Pack from URL</Heading>
-                    <Forms.FormText>
+                    <Paragraph>
                         <p>
                             Currently LINE stickers/emojis supported only. <br />
 
                             Get Telegram stickers with <a href="#" onClick={() => VencordNative.native.openExternal("https://github.com/lekoOwO/MoreStickersConverter")}> MoreStickersConverter</a>.
                         </p>
-                    </Forms.FormText>
+                    </Paragraph>
                     <Flex flexDirection="row" style={{
                         alignItems: "center",
                         justifyContent: "center"
@@ -236,13 +238,13 @@ export const Settings = () => {
             {tab === SettingsTabsKey.ADD_STICKER_PACK_HTML &&
                 <div className="section">
                     <Heading>Add Sticker Pack from HTML</Heading>
-                    <Forms.FormText>
+                    <Paragraph>
                         <p>
                             When encountering errors while adding a sticker pack, you can try to add it using the HTML source code of the sticker pack page.<br />
                             This applies to stickers which are region locked / OS locked / etc.<br />
                             The region LINE recognized may vary from the region you are in due to the CORS proxy we're using.
                         </p>
-                    </Forms.FormText>
+                    </Paragraph>
                     <Flex flexDirection="row" style={{
                         alignItems: "center",
                         justifyContent: "center"

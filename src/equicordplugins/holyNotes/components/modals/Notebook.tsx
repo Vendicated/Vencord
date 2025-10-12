@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, Text, TextInput } from "@webpack/common";
+import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, TextInput } from "@webpack/common";
 
 import noteHandler from "../../NoteHandler";
 import { HolyNotes } from "../../types";
@@ -79,12 +80,13 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                 <Flex className={classes("vc-notebook-flex")} direction={Flex.Direction.VERTICAL} style={{ width: "100%" }}>
                     <div className={classes("vc-notebook-top-section")}>
                         <ModalHeader className={classes("vc-notebook-header-main")}>
-                            <Text
-                                variant="heading-lg/semibold"
+                            <BaseText
+                                size="lg"
+                                weight="semibold"
                                 style={{ flexGrow: 1 }}
                                 className={classes("vc-notebook-heading")}>
                                 NOTEBOOK
-                            </Text>
+                            </BaseText>
                             <div className={classes("vc-notebook-flex", "vc-help-icon")} onClick={() => openModal(HelpModal)}>
                                 <HelpIcon />
                             </div>
@@ -158,12 +160,12 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                                 ));
                             }}
                         >
-                            <Text className={quickSelectLabel}>Change Sorting:</Text>
+                            <BaseText className={quickSelectLabel}>Change Sorting:</BaseText>
                             <Flex grow={0} align={Flex.Align.CENTER} className={quickSelectQuick}>
-                                <Text className={quickSelectValue}>
+                                <BaseText className={quickSelectValue}>
                                     {sortDirection ? "Ascending" : "Descending"} /{" "}
                                     {sortType ? "Date Added" : "Message Date"}
-                                </Text>
+                                </BaseText>
                                 <div className={quickSelectArrow} />
                             </Flex>
                         </Flex>

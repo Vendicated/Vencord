@@ -5,7 +5,8 @@
  */
 
 import { Heading } from "@components/Heading";
-import { Forms, SearchableSelect, useMemo, useState } from "@webpack/common";
+import { Paragraph } from "@components/Paragraph";
+import { SearchableSelect, useMemo, useState } from "@webpack/common";
 
 import { getCurrentVoice, settings } from "./settings";
 
@@ -107,7 +108,7 @@ function VoiceSetting() {
     const { voice } = settings.use(["voice"]);
 
     if (!voices.length)
-        return <Forms.FormText>No voices found.</Forms.FormText>;
+        return <Paragraph>No voices found.</Paragraph>;
 
     // espeak on Linux has a ridiculous amount of voices (26k for me).
     // If there are more than 20 voices, we split it up into two pickers, one for language, then one with only the voices for that language.

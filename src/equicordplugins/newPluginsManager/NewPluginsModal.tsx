@@ -8,14 +8,16 @@ import "./styles.css";
 
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { ChangeList } from "@utils/ChangeList";
 import { classes, Margins } from "@utils/index";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Flex, Forms, React, Text, Tooltip, useMemo } from "@webpack/common";
+import { Button, Flex, React, Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins from "~plugins";
@@ -108,7 +110,7 @@ export function NewPluginsModal({ modalProps, newPlugins, newSettings }: { modal
 
     return <ModalRoot {...modalProps} size={ModalSize.MEDIUM} >
         <ModalHeader>
-            <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>New Plugins and Settings ({[...plugins, ...requiredPlugins].length})</Text>
+            <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>New Plugins and Settings ({[...plugins, ...requiredPlugins].length})</BaseText>
             <Tooltip text="Dismiss for this session">
                 {tooltipProps =>
                     <div {...tooltipProps}>
@@ -142,7 +144,7 @@ export function NewPluginsModal({ modalProps, newPlugins, newSettings }: { modal
                             Settings.plugins.NewPluginsManager.enabled = !settings?.plugins?.NewPluginsManager?.enabled;
                         }}
                     >
-                        <Text>Don't show this again</Text>
+                        <BaseText>Don't show this again</BaseText>
                     </Checkbox>
                 </div>
             </Flex>
@@ -183,8 +185,8 @@ function ContinueButton(props: { callback: (update: () => void) => void; changes
 function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
-            <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
+            <Paragraph>This plugin is required by:</Paragraph>
+            {deps.map((dep: string) => <Paragraph key={dep} className={cl("dep-text")}>{dep}</Paragraph>)}
         </React.Fragment>
     );
 }

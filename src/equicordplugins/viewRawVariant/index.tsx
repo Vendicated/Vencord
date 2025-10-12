@@ -5,6 +5,7 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { BaseText } from "@components/BaseText";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -23,7 +24,7 @@ import {
 } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Menu, Text } from "@webpack/common";
+import { Menu } from "@webpack/common";
 
 type CustomMessage = Message & {
     editHistory?: any;
@@ -63,9 +64,9 @@ function openViewRawModal(obj: any, type: string, isMessage?: boolean) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>
                         View Raw {type}
-                    </Text>
+                    </BaseText>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
                 <ModalContent>

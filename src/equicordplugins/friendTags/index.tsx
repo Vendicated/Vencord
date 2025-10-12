@@ -14,7 +14,7 @@ import { Divider } from "@components/Divider";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Menu, RelationshipStore, Text, TextInput, useEffect, UserStore, useState } from "@webpack/common";
+import { Button, ChannelStore, Menu, RelationshipStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 
 const tagStoreName = "vc-friendtags-tags";
 
@@ -121,7 +121,7 @@ function TagConfigCard(props) {
                             return (
                                 <div style={{ display: "flex" }} key={user.id}>
                                     <img src={userData.getAvatarURL()} style={{ height: "20px", borderRadius: "50%", marginRight: "5px" }}></img>
-                                    <Text style={{ cursor: "pointer" }} variant={"text-md/normal"} onClick={() => setUserIDs(userIds.replace(`, ${user}`, "").replace(user, ""))}>{userData.globalName || userData.username}</Text>
+                                    <BaseText style={{ cursor: "pointer" }} size="md" onClick={() => setUserIDs(userIds.replace(`, ${user}`, "").replace(user, ""))}>{userData.globalName || userData.username}</BaseText>
                                 </div>
                             );
                         })

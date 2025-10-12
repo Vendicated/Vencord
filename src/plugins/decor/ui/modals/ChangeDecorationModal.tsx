@@ -4,17 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { Button as NewButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Queue } from "@utils/Queue";
 import { User } from "@vencord/discord-types";
-import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
 import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
@@ -85,9 +87,9 @@ function SectionHeader({ section }: SectionHeaderProps) {
             />}
         </Flex>
         {hasSubtitle &&
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 {section.subtitle}
-            </Forms.FormText>
+            </Paragraph>
         }
     </div>;
 }
@@ -144,14 +146,15 @@ function ChangeDecorationModal(props: ModalProps) {
         className={DecorationModalStyles.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
+            <BaseText
+                size="lg"
+                weight="semibold"
                 color="header-primary"
-                variant="heading-lg/semibold"
                 tag="h1"
                 style={{ flexGrow: 1 }}
             >
                 Change Decoration
-            </Text>
+            </BaseText>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>
         <ModalContent
@@ -204,17 +207,18 @@ function ChangeDecorationModal(props: ModalProps) {
                     />
                     {isActiveDecorationPreset && <Heading className="">Part of the {activeDecorationPreset.name} Preset</Heading>}
                     {typeof activeSelectedDecoration === "object" &&
-                        <Text
-                            variant="text-sm/semibold"
+                        <BaseText
+                            size="sm"
+                            weight="semibold"
                             color="header-primary"
                         >
                             {activeSelectedDecoration?.alt}
-                        </Text>
+                        </BaseText>
                     }
                     {activeDecorationHasAuthor && (
-                        <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>
+                        <BaseText key={`createdBy-${activeSelectedDecoration.authorId}`}>
                             Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}
-                        </Text>
+                        </BaseText>
                     )}
                     {isActiveDecorationPreset && (
                         <Button onClick={() => copyWithToast(activeDecorationPreset.id)}>

@@ -7,6 +7,7 @@
 import { playAudio } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
@@ -16,7 +17,6 @@ import definePlugin, {
 import {
     Button,
     ChannelStore,
-    Forms,
     GuildMemberStore,
     React,
     SelectedChannelStore,
@@ -375,11 +375,11 @@ export default definePlugin({
 
         return (
             <section>
-                <Forms.FormText>
+                <Paragraph>
                     You can customise the spoken messages below. You can disable
                     specific messages by setting them to nothing
-                </Forms.FormText>
-                <Forms.FormText>
+                </Paragraph>
+                <Paragraph>
                     The special placeholders <code>{"{{USER}}"}</code>,{" "}
                     <code>{"{{DISPLAY_NAME}}"}</code>,{" "}
                     <code>{"{{NICKNAME}}"}</code> and{" "}
@@ -387,8 +387,8 @@ export default definePlugin({
                     user's name (nothing if it's yourself), the user's display
                     name, the user's nickname on current server and the
                     channel's name respectively
-                </Forms.FormText>
-                <Forms.FormText>
+                </Paragraph>
+                <Paragraph>
                     You can find a list of custom voices (tiktok only for now){" "}
                     <a
                         href="https://github.com/oscie57/tiktok-voice/wiki/Voice-Codes"
@@ -397,7 +397,7 @@ export default definePlugin({
                     >
                         here
                     </a>
-                </Forms.FormText>
+                </Paragraph>
                 <Heading className={Margins.top20} tag="h3">
                     Play Example Sounds
                 </Heading>

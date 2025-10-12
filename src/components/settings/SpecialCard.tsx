@@ -21,7 +21,8 @@ import "./SpecialCard.css";
 import { classNameFactory } from "@api/Styles";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
-import { Card, Clickable, Forms, React } from "@webpack/common";
+import { Paragraph } from "@components/Paragraph";
+import { Card, Clickable, React } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-special-");
@@ -48,8 +49,8 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
             <div className={cl("card-flex")}>
                 <div className={cl("card-flex-main")}>
                     <Heading className={cl("title")} tag="h5">{title}</Heading>
-                    <Forms.FormText className={cl("subtitle")}>{subtitle}</Forms.FormText>
-                    <Forms.FormText className={cl("text")}>{description}</Forms.FormText>
+                    <Paragraph className={cl("subtitle")}>{subtitle}</Paragraph>
+                    <Paragraph className={cl("text")}>{description}</Paragraph>
 
                     {children}
                 </div>
@@ -68,9 +69,9 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
                 <>
                     <Divider className={cl("seperator")} />
                     <Clickable onClick={onClick} className={cl("hyperlink")}>
-                        <Forms.FormText className={cl("hyperlink-text")}>
+                        <Paragraph className={cl("hyperlink-text")}>
                             {buttonTitle}
-                        </Forms.FormText>
+                        </Paragraph>
                     </Clickable>
                 </>
             )}

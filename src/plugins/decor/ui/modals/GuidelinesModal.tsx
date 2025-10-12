@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, Text } from "@webpack/common";
+import { Button } from "@webpack/common";
 
 import { settings } from "../../settings";
 import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "../";
@@ -20,26 +22,27 @@ function GuidelinesModal(props: ModalProps) {
         className={DecorationModalStyles.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
+            <BaseText
+                size="lg"
+                weight="semibold"
                 color="header-primary"
-                variant="heading-lg/semibold"
                 tag="h1"
                 style={{ flexGrow: 1 }}
             >
                 Hold on
-            </Text>
+            </BaseText>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>
         <ModalContent
             scrollbarType="none"
         >
-            <Forms.FormText>
+            <Paragraph>
                 By submitting a decoration, you agree to <Link
                     href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
                 >
                     the guidelines
                 </Link>. Not reading these guidelines may get your account suspended from creating more decorations in the future.
-            </Forms.FormText>
+            </Paragraph>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
             <Flex style={{ gap: "4px" }}>

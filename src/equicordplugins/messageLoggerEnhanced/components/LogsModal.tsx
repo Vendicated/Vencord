@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { InfoIcon } from "@components/Icons";
 import { openUserProfile } from "@utils/discord";
@@ -13,7 +14,7 @@ import { closeAllModals, ModalContent, ModalFooter, ModalHeader, ModalProps, Mod
 import { LazyComponent } from "@utils/react";
 import { User } from "@vencord/discord-types";
 import { find, findByCode, findByCodeLazy } from "@webpack";
-import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React, TabBar, Text, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React, TabBar, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 
 import { clearMessagesIDB, DBMessageRecord, deleteMessageIDB, deleteMessagesBulkIDB } from "../db";
 import { settings } from "../index";
@@ -251,12 +252,12 @@ function NoResults({ tab }: { tab: LogTabs; }) {
 
     return (
         <div className={cl("empty-logs", "content-inner")} style={{ textAlign: "center" }}>
-            <Text variant="text-lg/normal">
+            <BaseText size="lg">
                 No results in <b>{tab}</b>.
-            </Text>
-            <Text variant="text-lg/normal" style={{ marginTop: "0.2rem" }}>
+            </BaseText>
+            <BaseText size="lg" style={{ marginTop: "0.2rem" }}>
                 Maybe try <b>{nextTab}</b> or <b>{lastTab}</b>
-            </Text>
+            </BaseText>
         </div>
     );
 }
@@ -266,9 +267,9 @@ function EmptyLogs({ hasQuery, reset: forceUpdate }: { hasQuery: boolean; reset:
         <div className={cl("empty-logs", "content-inner")} style={{ textAlign: "center" }}>
             <Flex flexDirection="column" style={{ position: "relative" }}>
 
-                <Text variant="text-lg/normal">
+                <BaseText size="lg">
                     Empty eh
-                </Text>
+                </BaseText>
 
                 {!hasQuery && (
                     <>

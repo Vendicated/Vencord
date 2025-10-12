@@ -7,11 +7,12 @@
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading, HeadingSecondary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { Activity } from "@vencord/discord-types";
 import { ActivityFlags, ActivityType } from "@vencord/discord-types/enums";
-import { Card, Forms, PresenceStore, React, Select, SnowflakeUtils, TextInput, UserStore } from "@webpack/common";
+import { Card, PresenceStore, React, Select, SnowflakeUtils, TextInput, UserStore } from "@webpack/common";
 
 import { AppIdSetting, makeEmptyAppId } from ".";
 
@@ -33,31 +34,31 @@ export function ReplaceTutorial() {
             <HeadingSecondary>IDs of currently running activities</HeadingSecondary>
             {
                 activities.length === 0
-                    ? <Forms.FormText>No running activities</Forms.FormText>
+                    ? <Paragraph>No running activities</Paragraph>
                     : activities.map(activity => {
                         const isSpotify = (activity.flags & (ActivityFlags.SYNC | ActivityFlags.PLAY)) === (ActivityFlags.SYNC | ActivityFlags.PLAY);
                         return !isSpotify
-                            ? <Forms.FormText>{activity.name}: {activity.application_id}</Forms.FormText>
+                            ? <Paragraph>{activity.name}: {activity.application_id}</Paragraph>
                             : null;
                     })
             }
             <HeadingSecondary className={Margins.top8}>Available variables</HeadingSecondary>
-            <Forms.FormText>
+            <Paragraph>
                 In all fields (except stream URL), you can put in variables that'll automatically be replaced by their original content:
                 <pre style={{ fontFamily: "monospace" }}>
                     :name:, :details:, :state:
                     <br />
                     :large_image:, :large_text:, :small_image:, :small_text:
                 </pre>
-            </Forms.FormText>
+            </Paragraph>
             <HeadingSecondary className={Margins.top8}>More details</HeadingSecondary>
-            <Forms.FormText>
+            <Paragraph>
                 Leave a field empty to leave it as is.
                 <br />
                 Set a field to "null" to hide it on the presence.
                 <br />
                 You may need to reload Discord for changes to apply.
-            </Forms.FormText>
+            </Paragraph>
         </>
     );
 }
@@ -166,7 +167,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                 {
                                     !setting.disableAssets &&
                                     <>
-                                        <Forms.FormText style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Large image</Forms.FormText>
+                                        <Paragraph style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Large image</Paragraph>
                                         <Heading className={Margins.top8}>Text {setting.newActivityType !== ActivityType.PLAYING && "(also third line)"}</Heading>
                                         <TextInput
                                             className={Margins.top8}
@@ -183,7 +184,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                                 onChange(v, i, "newLargeImageUrl");
                                             }}
                                         />
-                                        <Forms.FormText style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Small image</Forms.FormText>
+                                        <Paragraph style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Small image</Paragraph>
                                         <Heading className={Margins.top8}>Text</Heading>
                                         <TextInput
                                             className={Margins.top8}

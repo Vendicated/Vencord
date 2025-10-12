@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { Button, Text } from "@webpack/common";
+import { Button } from "@webpack/common";
 
 import { sendRemix } from ".";
 import { brushCanvas, canvas, cropCanvas, ctx, exportImg, shapeCanvas } from "./editor/components/Canvas";
@@ -39,7 +40,7 @@ export default function RemixModal({ modalProps, close, url }: Props) {
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Remix</Text>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Remix</BaseText>
                 <ModalCloseButton onClick={() => closeModal(close)} />
             </ModalHeader>
             <ModalContent>

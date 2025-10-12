@@ -7,19 +7,20 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { identity } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, Select, Slider, Text, useEffect, useState } from "@webpack/common";
+import { FluxDispatcher, Select, Slider, useEffect, useState } from "@webpack/common";
 const configModule = findByPropsLazy("getOutputVolume");
 
 const settings = definePluginSettings({
     title1: {
         type: OptionType.COMPONENT,
-        component: () => <Text style={{ fontWeight: "bold", fontSize: "1.27rem" }}>Appearance</Text>,
+        component: () => <BaseText weight="bold" style={{ fontSize: "1.27rem" }}>Appearance</BaseText>,
         description: ""
     },
     uncollapseSettingsByDefault: {
@@ -29,7 +30,7 @@ const settings = definePluginSettings({
     },
     title2: {
         type: OptionType.COMPONENT,
-        component: () => <Text style={{ fontWeight: "bold", fontSize: "1.27rem" }}>Settings to show</Text>,
+        component: () => <BaseText weight="bold" style={{ fontSize: "1.27rem" }}>Settings to show</BaseText>,
         description: ""
     },
     outputVolume: {
@@ -59,7 +60,7 @@ const settings = definePluginSettings({
     },
     title3: {
         type: OptionType.COMPONENT,
-        component: () => <Text style={{ fontWeight: "bold", fontSize: "1.27rem" }}>Headers to show</Text>,
+        component: () => <BaseText weight="bold" style={{ fontSize: "1.27rem" }}>Headers to show</BaseText>,
         description: ""
     },
     showOutputVolumeHeader: {

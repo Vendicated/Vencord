@@ -5,8 +5,9 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { OptionType } from "@utils/types";
-import { Text, useEffect, UserStore, useState } from "@webpack/common";
+import { useEffect, UserStore, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     showEquicordDonor: {
@@ -168,10 +169,10 @@ const BadgeSettings = () => {
 
     return (
         <>
-            <Text>Drag the badges to reorder them, you can click to enable/disable a specific badge type.</Text>
+            <BaseText>Drag the badges to reorder them, you can click to enable/disable a specific badge type.</BaseText>
             <div className="vc-sbic-badge-settings">
                 <img className="vc-sbic-settings-avatar" src={UserStore.getCurrentUser().getAvatarURL()}></img>
-                <Text className="vc-sbic-settings-username">{(UserStore.getCurrentUser() as any).globalName}</Text>
+                <BaseText className="vc-sbic-settings-username">{(UserStore.getCurrentUser() as any).globalName}</BaseText>
                 {images
                     .sort((a, b) => a.position - b.position)
                     .map((image, index) => (

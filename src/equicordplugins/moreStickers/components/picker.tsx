@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { HeadingPrimary } from "@components/Heading";
 import { debounce } from "@shared/debounce";
 import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { React, Text, TextInput } from "@webpack/common";
+import { React, TextInput } from "@webpack/common";
 import { JSX } from "react";
 
 import { PickerContent, PickerContentHeader, PickerContentRow, PickerContentRowGrid, PickerHeaderProps, SidebarProps, Sticker, StickerCategoryType, StickerPack } from "../types";
@@ -73,7 +74,7 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                             return (
                                 <ModalRoot size={ModalSize.LARGE} {...modalProps}>
                                     <ModalHeader>
-                                        <Text tag="h2">Stickers+</Text>
+                                        <HeadingPrimary>Stickers+</HeadingPrimary>
                                     </ModalHeader>
                                     <ModalContent>
                                         <Settings />

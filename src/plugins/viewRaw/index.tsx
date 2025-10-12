@@ -18,6 +18,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -30,7 +31,7 @@ import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, ChannelStore, GuildRoleStore, Menu, Text } from "@webpack/common";
+import { Button, ChannelStore, GuildRoleStore, Menu } from "@webpack/common";
 
 
 const CopyIcon = () => {
@@ -68,7 +69,7 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>View Raw</BaseText>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
                 <ModalContent>

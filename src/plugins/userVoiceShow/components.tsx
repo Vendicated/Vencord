@@ -5,11 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
+import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-uvs-");
@@ -102,8 +103,8 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     const Icon = isLocked ? LockedSpeakerIcon : SpeakerIcon;
     return (
         <>
-            <Text variant="text-sm/bold">In Voice Chat</Text>
-            <Text variant="text-sm/bold">{Parser.parse(`<#${channel.id}>`)}</Text>
+            <BaseText size="sm" weight="bold">In Voice Chat</BaseText>
+            <BaseText size="sm" weight="bold">{Parser.parse(`<#${channel.id}>`)}</BaseText>
             <div className={cl("vc-members")}>
                 <Icon size={18} />
                 <UserSummaryItem

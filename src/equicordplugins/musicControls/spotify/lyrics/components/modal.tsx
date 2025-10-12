@@ -7,7 +7,7 @@
 import { BaseText } from "@components/BaseText";
 import { openImageModal } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { React, Text } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import { SpotifyStore, Track } from "../../SpotifyStore";
 import { cl, NoteSvg, scrollClasses, useLyrics } from "./util";
@@ -78,9 +78,9 @@ export function LyricsModal({ props }: { props: ModalProps; }) {
                             </BaseText>
                         ))
                     ) : (
-                        <Text variant="text-sm/normal" className={cl("modal-no-lyrics")}>
+                        <BaseText size="sm" className={cl("modal-no-lyrics")}>
                             No lyrics available :(
-                        </Text>
+                        </BaseText>
                     )}
                 </div>
             </ModalContent>

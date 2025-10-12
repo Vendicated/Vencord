@@ -17,9 +17,10 @@
 */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { Paragraph } from "@components/Paragraph";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { Alerts, Forms, Tooltip, useEffect, useState } from "@webpack/common";
+import { Alerts, Tooltip, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateModal } from "./TranslateModal";
@@ -58,9 +59,9 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
             Alerts.show({
                 title: "Vencord Auto-Translate Enabled",
                 body: <>
-                    <Forms.FormText>
+                    <Paragraph>
                         You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
-                    </Forms.FormText>
+                    </Paragraph>
                 </>,
                 confirmText: "Disable Auto-Translate",
                 cancelText: "Got it",

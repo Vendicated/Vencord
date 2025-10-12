@@ -11,12 +11,13 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { EquicordDevsById, VencordDevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
-import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -90,13 +91,13 @@ function ContributorModal({ user }: { user: User; }) {
             </div>
 
             {plugins.length ? (
-                <Forms.FormText>
+                <Paragraph>
                     {user.username} has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Forms.FormText>
+                </Paragraph>
             ) : (
-                <Forms.FormText>
+                <Paragraph>
                     {user.username} has not made any plugins. They likely {ContributedHyperLink} in other ways!
-                </Forms.FormText>
+                </Paragraph>
             )}
 
             {!!plugins.length && (

@@ -7,8 +7,9 @@
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { HeadingSecondary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { makeRange, OptionType } from "@utils/types";
-import { Button, Forms, MaskedLink, showToast, Toasts } from "@webpack/common";
+import { Button, MaskedLink, showToast, Toasts } from "@webpack/common";
 
 import hoverOnlyStyle from "./hoverOnly.css?managed";
 import { clearLyricsCache, removeTranslations } from "./spotify/lyrics/api";
@@ -28,9 +29,9 @@ function InstallInstructions() {
     return (
         <section>
             <HeadingSecondary>How to install</HeadingSecondary>
-            <Forms.FormText>
+            <Paragraph>
                 Install <MaskedLink href="https://github.com/Inrixia/TidaLuna#installation">TidaLuna</MaskedLink> from here, then go to TidalLuna settings &rarr; Plugin stores &rarr; Install <code>@vmohammad/api</code>
-            </Forms.FormText>
+            </Paragraph>
         </section>
     );
 }

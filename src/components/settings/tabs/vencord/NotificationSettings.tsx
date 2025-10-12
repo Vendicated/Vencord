@@ -6,23 +6,25 @@
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, Select, Slider, Text } from "@webpack/common";
+import { Button, Select, Slider } from "@webpack/common";
 
 export function NotificationSection() {
     return (
         <section className={Margins.top16}>
             <Heading>Notifications</Heading>
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 Settings for Notifications sent by Vencord.
                 This does NOT include Discord notifications (messages, etc)
-            </Forms.FormText>
+            </Paragraph>
             <Flex>
                 <Button onClick={openNotificationSettingsModal}>
                     Notification Settings
@@ -39,7 +41,7 @@ export function openNotificationSettingsModal() {
     openModal(props => (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Settings</Text>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Notification Settings</BaseText>
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
 
@@ -59,16 +61,16 @@ function NotificationSettings() {
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
                     <Heading>Desktop Notification Permission denied</Heading>
-                    <Forms.FormText>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Forms.FormText>
+                    <Paragraph>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Paragraph>
                 </ErrorCard>
             )}
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 Some plugins may show you notifications. These come in two styles:
                 <ul>
                     <li><strong>Equicord Notifications</strong>: These are in-app notifications</li>
                     <li><strong>Desktop Notifications</strong>: Native Desktop notifications (like when you get a ping)</li>
                 </ul>
-            </Forms.FormText>
+            </Paragraph>
             <Select
                 placeholder="Notification Style"
                 options={[
@@ -103,7 +105,7 @@ function NotificationSettings() {
             />
 
             <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Heading>
-            <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
+            <Paragraph className={Margins.bottom16}>Set to 0s to never automatically time out</Paragraph>
             <Slider
                 disabled={settings.useNative === "always"}
                 markers={[0, 1000, 2500, 5000, 10_000, 20_000]}
@@ -117,10 +119,10 @@ function NotificationSettings() {
             />
 
             <Heading className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Heading>
-            <Forms.FormText className={Margins.bottom16}>
+            <Paragraph className={Margins.bottom16}>
                 The amount of notifications to save in the log until old ones are removed.
                 Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications
-            </Forms.FormText>
+            </Paragraph>
             <Slider
                 markers={[0, 25, 50, 75, 100, 200]}
                 minValue={0}

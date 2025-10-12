@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { FormSwitch } from "@components/FormSwitch";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { OptionType } from "@utils/types";
 import { Card, Flex, Forms, TextInput, Tooltip } from "@webpack/common";
@@ -55,9 +56,9 @@ function SettingsComponent() {
                         </Forms.FormTitle>
 
                         <div style={{ marginBottom: "10px" }}>
-                            <Forms.FormText style={{ fontSize: "13px" }}>
+                            <Paragraph style={{ fontSize: "13px" }}>
                                 Example:
-                            </Forms.FormText>
+                            </Paragraph>
                             <Tag type={localTags[t.name]} />
                         </div>
 

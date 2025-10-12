@@ -7,11 +7,12 @@
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { ChangeList } from "@utils/ChangeList";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
-import { Button, Card, Forms, React, Tooltip } from "@webpack/common";
+import { Button, Card, React, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -63,11 +64,11 @@ export function NewPluginsSection({
         if (!deps) return null;
         return (
             <React.Fragment>
-                <Forms.FormText>This plugin is required by:</Forms.FormText>
+                <Paragraph>This plugin is required by:</Paragraph>
                 {deps.map((dep: string) => (
-                    <Forms.FormText key={dep} className="vc-changelog-dep-text">
+                    <Paragraph key={dep} className="vc-changelog-dep-text">
                         {dep}
-                    </Forms.FormText>
+                    </Paragraph>
                 ))}
             </React.Fragment>
         );
@@ -79,9 +80,9 @@ export function NewPluginsSection({
                 New Plugins ({sortedPlugins.length})
             </Heading>
 
-            <Forms.FormText className={Margins.bottom16}>
+            <Paragraph className={Margins.bottom16}>
                 The following plugins have been added in recent updates:
-            </Forms.FormText>
+            </Paragraph>
 
             <div className={cl("new-plugins-grid")}>
                 {sortedPlugins.map(plugin => {

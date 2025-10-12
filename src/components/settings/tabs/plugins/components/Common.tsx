@@ -5,10 +5,10 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import { classes } from "@utils/misc";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { DefinedSettings, PluginOptionBase } from "@utils/types";
-import { Text } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 export const cl = classNameFactory("vc-plugins-setting-");
@@ -46,12 +46,12 @@ export function SettingsSection({ tag: Tag = "div", name, description, error, in
         <Tag className={cl("section")}>
             <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
                 <div className={cl("label")}>
-                    {name && <Text className={cl("title")} variant="text-md/medium">{wordsToTitle(wordsFromCamel(name))}</Text>}
-                    {description && <Text className={cl("description")} variant="text-sm/normal">{description}</Text>}
+                    {name && <BaseText className={cl("title")} size="md" weight="medium">{wordsToTitle(wordsFromCamel(name))}</BaseText>}
+                    {description && <BaseText className={cl("description")} size="sm">{description}</BaseText>}
                 </div>
                 {children}
             </div>
-            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+            {error && <BaseText className={cl("error")} size="sm">{error}</BaseText>}
         </Tag>
     );
 }

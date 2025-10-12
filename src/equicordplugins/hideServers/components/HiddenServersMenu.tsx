@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import { Heading } from "@components/Heading";
 import { getGuildAcronym } from "@utils/discord";
 import { classes } from "@utils/misc";
@@ -20,7 +21,7 @@ import {
 } from "@utils/modal";
 import { Guild } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Button, IconUtils, Text, useStateFromStores } from "@webpack/common";
+import { Button, IconUtils, useStateFromStores } from "@webpack/common";
 
 import { SortedGuildStore } from "..";
 import { HiddenServersStore } from "../HiddenServersStore";
@@ -33,9 +34,9 @@ function HiddenServersModal({ modalProps, close }: { modalProps: ModalProps; clo
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>
                     Hidden Servers
-                </Text>
+                </BaseText>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
@@ -130,7 +131,7 @@ export function HiddenServersMenu({ guilds }: { guilds: Guild[]; }) {
             return (
                 <div key={folderId} className={cl("folder")}>
                     <div className={cl("folder-header")}>
-                        <Text variant="heading-sm/medium">{folder.folderName || "Folder"}</Text>
+                        <BaseText size="sm" weight="medium">{folder.folderName || "Folder"}</BaseText>
                         <Button
                             color={Button.Colors.PRIMARY}
                             onClick={() => {
@@ -152,7 +153,7 @@ export function HiddenServersMenu({ guilds }: { guilds: Guild[]; }) {
             );
         })}
 
-        <Text variant="heading-sm/medium">Guilds</Text>
+        <BaseText size="sm" weight="medium">Guilds</BaseText>
         {guildsWithoutFolder.map(guild => (
             <GuildRow
                 key={guild.id}
@@ -160,7 +161,7 @@ export function HiddenServersMenu({ guilds }: { guilds: Guild[]; }) {
             />
         ))}
 
-        {hiddenGuilds.length === 0 && <Text variant="heading-sm/medium">No hidden servers</Text>}
+        {hiddenGuilds.length === 0 && <BaseText size="sm" weight="medium">No hidden servers</BaseText>}
     </div>;
 }
 

@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { Button, Text, useEffect, useState } from "@webpack/common";
+import { Button, useEffect, useState } from "@webpack/common";
 
 export function DependencyModal({ props, options: { key, checkytdlp, checkffmpeg } }: {
     props: ModalProps;
@@ -30,12 +31,12 @@ export function DependencyModal({ props, options: { key, checkytdlp, checkffmpeg
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>MediaDownloader: Missing dependencies</Text>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>MediaDownloader: Missing dependencies</BaseText>
                 <ModalCloseButton onClick={() => closeModal(key)} />
             </ModalHeader>
             <ModalContent>
                 <div style={{ padding: "16px 0" }}>
-                    <Text variant="text-md/normal" >
+                    <BaseText size="md">
                         The MediaDownloader plugin requires a working version of yt-dlp to be installed on your system. For extra features such as higher quality videos and gifs, you can also optionally install ffmpeg.
                         <br /><br />
                         If you don't know how to install yt-dlp or ffmpeg, check the installation guides below (if you <i>do</i> know how to install it, make sure it's in your PATH).
@@ -50,7 +51,7 @@ export function DependencyModal({ props, options: { key, checkytdlp, checkffmpeg
                                 <a href="https://phoenixnap.com/kb/ffmpeg-windows" target="_blank" rel="noreferrer">Unofficial ffmpeg installation guide</a>
                             </li>
                         </ul>
-                    </Text>
+                    </BaseText>
                     <div style={{
                         marginTop: "16px",
                         display: "grid",
@@ -67,9 +68,9 @@ export function DependencyModal({ props, options: { key, checkytdlp, checkffmpeg
                                 justifyContent: "center"
                             }}
                         >
-                            <Text variant="text-md/bold">
+                            <BaseText size="md" weight="bold">
                                 yt-dlp status: {ytdlpStatus}
-                            </Text>
+                            </BaseText>
                         </div>
                         <Button
                             onClick={async () => {
@@ -91,9 +92,9 @@ export function DependencyModal({ props, options: { key, checkytdlp, checkffmpeg
 
                             }}
                         >
-                            <Text variant="text-md/bold">
+                            <BaseText size="md" weight="bold">
                                 ffmpeg status: {ffmpegStatus}
-                            </Text>
+                            </BaseText>
                         </div>
                         <Button
                             onClick={async () => {

@@ -18,12 +18,13 @@
 
 import { ErrorCard } from "@components/ErrorCard";
 import { HeadingSecondary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_LINUX } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
+import { Button, ChannelStore, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore, VoiceStateStore } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { getCurrentVoice, settings } from "./settings";
@@ -229,13 +230,13 @@ export default definePlugin({
 
         return (
             <section>
-                <Forms.FormText>
+                <Paragraph>
                     You can customise the spoken messages below. You can disable specific messages by setting them to nothing
-                </Forms.FormText>
-                <Forms.FormText>
+                </Paragraph>
+                <Paragraph>
                     The special placeholders <code>{"{{USER}}"}</code>, <code>{"{{DISPLAY_NAME}}"}</code>, <code>{"{{NICKNAME}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
                     will be replaced with the user's name (nothing if it's yourself), the user's display name, the user's nickname on current server and the channel's name respectively
-                </Forms.FormText>
+                </Paragraph>
                 {hasEnglishVoices && (
                     <>
                         <HeadingSecondary className={Margins.top20}>Play Example Sounds</HeadingSecondary>

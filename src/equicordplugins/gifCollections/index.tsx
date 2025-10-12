@@ -12,11 +12,12 @@ import { definePluginSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { copyToClipboard } from "@utils/clipboard";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, Button, ContextMenuApi, FluxDispatcher, Forms, Menu, React, showToast, TextInput, Toasts, useCallback, useState } from "@webpack/common";
+import { Alerts, Button, ContextMenuApi, FluxDispatcher, Menu, React, showToast, TextInput, Toasts, useCallback, useState } from "@webpack/common";
 
 import { addToCollection, cache_collections, createCollection, DATA_COLLECTION_NAME, deleteCollection, fixPrefix, getCollections, getGifById, getItemCollectionNameFromId, moveGifToCollection, refreshCacheCollection, removeFromCollection, renameCollection, updateGif } from "./utils/collectionManager";
 import { getFormat } from "./utils/getFormat";
@@ -177,12 +178,12 @@ export const settings = definePluginSettings({
                 <div className="collections-sort-container">
                     <Heading className="collections-sort-title">Sort Collections</Heading>
                     <Divider className="collections-sort-divider" />
-                    <Forms.FormText className="collections-sort-description">
+                    <Paragraph className="collections-sort-description">
                         Choose a sorting criteria for your collections
-                    </Forms.FormText>
+                    </Paragraph>
                     <Divider className="collections-sort-divider" />
                     <div className="collections-sort-section">
-                        <Forms.FormText className="collections-sort-section-title">Sort By</Forms.FormText>
+                        <Paragraph className="collections-sort-section-title">Sort By</Paragraph>
                         <div className="collections-sort-option">
                             <label className="collections-sort-label">
                                 <input
@@ -225,7 +226,7 @@ export const settings = definePluginSettings({
                     </div>
                     <Divider className="collections-sort-divider" />
                     <div className="collections-sort-section">
-                        <Forms.FormText className="collections-sort-section-title">Order</Forms.FormText>
+                        <Paragraph className="collections-sort-section-title">Order</Paragraph>
                         <div className="collections-sort-option">
                             <label className="collections-sort-label">
                                 <input
@@ -460,25 +461,25 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                 className="custom-modal"
                             >
                                 <ModalHeader separator={false} className="custom-modal-header">
-                                    <Forms.FormText className="custom-modal-title">Collection Information</Forms.FormText>
+                                    <Paragraph className="custom-modal-title">Collection Information</Paragraph>
                                 </ModalHeader>
                                 <ModalContent className="custom-modal-content">
                                     <section>
                                         <Flex className="collection-info">
                                             <Heading className="collection-info-title">Name</Heading>
-                                            <Forms.FormText className="collection-info-text">{collection.name.replace(/.+?:/, "")}</Forms.FormText>
+                                            <Paragraph className="collection-info-text">{collection.name.replace(/.+?:/, "")}</Paragraph>
                                         </Flex>
                                         <Flex className="collection-info">
                                             <Heading className="collection-info-title">Gifs</Heading>
-                                            <Forms.FormText className="collection-info-text">{collection.gifs.length}</Forms.FormText>
+                                            <Paragraph className="collection-info-text">{collection.gifs.length}</Paragraph>
                                         </Flex>
                                         <Flex className="collection-info">
                                             <Heading className="collection-info-title">Created At</Heading>
-                                            <Forms.FormText className="collection-info-text">{collection.createdAt ? new Date(collection.createdAt).toLocaleString() : "Unknown"}</Forms.FormText>
+                                            <Paragraph className="collection-info-text">{collection.createdAt ? new Date(collection.createdAt).toLocaleString() : "Unknown"}</Paragraph>
                                         </Flex>
                                         <Flex className="collection-info">
                                             <Heading className="collection-info-title">Last Updated</Heading>
-                                            <Forms.FormText className="collection-info-text">{collection.lastUpdated ? new Date(collection.lastUpdated).toLocaleString() : "Unknown"}</Forms.FormText>
+                                            <Paragraph className="collection-info-text">{collection.lastUpdated ? new Date(collection.lastUpdated).toLocaleString() : "Unknown"}</Paragraph>
                                         </Flex>
                                     </section>
                                 </ModalContent>
@@ -521,21 +522,21 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                 className="custom-modal"
                             >
                                 <ModalHeader separator={false} className="custom-modal-header">
-                                    <Forms.FormText className="custom-modal-title">Information</Forms.FormText>
+                                    <Paragraph className="custom-modal-title">Information</Paragraph>
                                 </ModalHeader>
                                 <ModalContent className="custom-modal-content">
                                     <section>
                                         <Flex className="gif-info">
                                             <Heading className="gif-info-title">Added At</Heading>
-                                            <Forms.FormText className="gif-info-text">{gifInfo.addedAt ? new Date(gifInfo.addedAt).toLocaleString() : "Unknown"}</Forms.FormText>
+                                            <Paragraph className="gif-info-text">{gifInfo.addedAt ? new Date(gifInfo.addedAt).toLocaleString() : "Unknown"}</Paragraph>
                                         </Flex>
                                         <Flex className="gif-info">
                                             <Heading className="gif-info-title">Width</Heading>
-                                            <Forms.FormText className="gif-info-text">{gifInfo.width}</Forms.FormText>
+                                            <Paragraph className="gif-info-text">{gifInfo.width}</Paragraph>
                                         </Flex>
                                         <Flex className="gif-info">
                                             <Heading className="gif-info-title">Height</Heading>
-                                            <Forms.FormText className="gif-info-text">{gifInfo.height}</Forms.FormText>
+                                            <Paragraph className="gif-info-text">{gifInfo.height}</Paragraph>
                                         </Flex>
                                     </section>
                                 </ModalContent>
@@ -605,7 +606,7 @@ const RemoveItemContextMenu = ({ type, nameOrId, instance }) => (
                                 className="custom-modal"
                             >
                                 <ModalHeader separator={false} className="custom-modal-header">
-                                    <Forms.FormText className="custom-modal-title">Move To Collection</Forms.FormText>
+                                    <Paragraph className="custom-modal-title">Move To Collection</Paragraph>
                                 </ModalHeader>
                                 <ModalContent className="custom-modal-content">
                                     <Heading className="custom-modal-text">
@@ -757,7 +758,7 @@ function CreateCollectionModal({ gif, onClose, modalProps }) {
         <ModalRoot {...modalProps}>
             <form onSubmit={onSubmit}>
                 <ModalHeader>
-                    <Forms.FormText>Create Collection</Forms.FormText>
+                    <Paragraph>Create Collection</Paragraph>
                 </ModalHeader>
                 <ModalContent>
                     <Heading style={{ marginTop: "10px" }}>Collection Name</Heading>
@@ -796,12 +797,12 @@ function RenameCollectionModal({ name, onClose, modalProps }) {
         <ModalRoot {...modalProps}>
             <form onSubmit={onSubmit}>
                 <ModalHeader>
-                    <Forms.FormText>Rename Collection</Forms.FormText>
+                    <Paragraph>Rename Collection</Paragraph>
                 </ModalHeader>
                 <ModalContent>
-                    <Forms.FormText className="rename-collection-text">New Collection Name</Forms.FormText>
+                    <Paragraph className="rename-collection-text">New Collection Name</Paragraph>
                     <TextInput value={newName} className={`rename-collection-input ${newName.length >= 25 ? "input-warning" : ""}`} onChange={e => setNewName(e)} />
-                    {newName.length >= 25 && <Forms.FormText className="warning-text">Name can't be longer than 24 characters</Forms.FormText>}
+                    {newName.length >= 25 && <Paragraph className="warning-text">Name can't be longer than 24 characters</Paragraph>}
                 </ModalContent>
                 <div style={{ marginTop: "1rem" }}>
                     <ModalFooter>

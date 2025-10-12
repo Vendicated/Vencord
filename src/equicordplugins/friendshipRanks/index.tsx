@@ -7,6 +7,7 @@
 import { BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import { Badges } from "@api/index";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -100,9 +101,9 @@ function openRankModal(rank: rankInfo) {
                 <ModalContent>
                     <div style={{ padding: "1em", textAlign: "center" }}>
                         <rank.assetSVG height="150px"></rank.assetSVG>
-                        <Forms.FormText className={Margins.top16}>
+                        <Paragraph className={Margins.top16}>
                             {rank.description}
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                 </ModalContent>
             </ModalRoot>

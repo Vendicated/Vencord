@@ -23,7 +23,7 @@ import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import type { Guild, GuildMember } from "@vencord/discord-types";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
+import { PermissionsBits, Tooltip, useMemo, UserStore } from "@webpack/common";
 
 import { PermissionsSortOrder, settings } from "..";
 import { cl, getGuildPermissionSpecMap, getSortedRolesForMember, sortUserRoles } from "../utils";
@@ -83,7 +83,7 @@ interface GrantedByTooltipProps {
 function GrantedByTooltip({ roleName, roleColor }: GrantedByTooltipProps) {
     return (
         <>
-            <Text variant="text-sm/medium">Granted By</Text>
+            <BaseText size="sm">Granted By</BaseText>
             <FakeRole text={roleName} color={roleColor} />
         </>
     );

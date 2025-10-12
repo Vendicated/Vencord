@@ -5,8 +5,9 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingSecondary } from "@components/Heading";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { Button, React, Text } from "@webpack/common";
+import { Button, React } from "@webpack/common";
 
 import noteHandler from "../../NoteHandler";
 import Error from "./Error";
@@ -27,7 +28,7 @@ export default ({ onClose, notebook, onChangeTab, ...props }: ModalProps & { onC
             className="vc-delete-notebook"
             size={ModalSize.LARGE}>
             <ModalHeader>
-                <Text tag="h3">Confirm Deletion</Text>
+                <HeadingSecondary>Confirm Deletion</HeadingSecondary>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent>
