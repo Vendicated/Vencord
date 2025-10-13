@@ -53,9 +53,7 @@ export default definePlugin({
         RUNNING_GAMES_CHANGE({ games }) {
             const status = StatusSettings.getSetting();
 
-            if (settings.store.excludeInvisible && status === "invisible") {
-                return;
-            }
+            if (settings.store.excludeInvisible && (savedStatus ?? status) === "invisible") return;
 
             if (games.length > 0) {
                 if (status !== settings.store.statusToSet) {
