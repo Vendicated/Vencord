@@ -28,8 +28,8 @@ export default definePlugin({
         {
             find: ".CREATE_FORUM_POST||",
             replacement: {
-                match: /(textValue:(\i).{0,50}channelId:\i\.id\}\)),\i/,
-                replace: "$1,$self.getCharCounter($2)"
+                match: /(textValue:.{0,50}channelId:\i\.id\}\)),\i/,
+                replace: "$1,$self.getCharCounter(arguments[0].textValue)"
             }
         },
         {
