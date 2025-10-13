@@ -48,6 +48,7 @@ interface PluginData {
     target: "discordDesktop" | "vesktop" | "equibop" | "desktop" | "web" | "dev";
     filePath: string;
     dirName: string;
+    isModified: boolean;
 }
 
 const devs = {} as Record<string, Dev>;
@@ -150,6 +151,7 @@ async function parseFile(fileName: string) {
             hasCommands: false,
             enabledByDefault: false,
             required: false,
+            isModified: false,
             tags: [] as string[]
         } as PluginData;
 
@@ -219,6 +221,7 @@ async function parseFile(fileName: string) {
                     data.dependencies = (elements as NodeArray<StringLiteral>).map(e => e.text);
                     break;
                 case "required":
+                case "isModified":
                 case "enabledByDefault":
                     data[key] = value.kind === SyntaxKind.TrueKeyword;
                     break;

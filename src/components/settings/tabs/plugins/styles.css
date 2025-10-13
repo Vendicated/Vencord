@@ -279,3 +279,10 @@
     justify-content: center;
     gap: 8px;
 }
+
+.vc-plugins-source {
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+    margin-right: 8px;
+}

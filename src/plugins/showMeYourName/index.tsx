@@ -780,6 +780,7 @@ export default definePlugin({
     name: "ShowMeYourName",
     description: "Display any permutation of nicknames, display names, and usernames in chat.",
     authors: [Devs.Rini, Devs.TheKodeToad, EquicordDevs.Etorix, Devs.sadan],
+    isModified: true,
     settings,
 
     patches: [

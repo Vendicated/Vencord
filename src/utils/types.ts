@@ -187,6 +187,11 @@ export interface PluginDef {
     renderNicknameIcon?: NicknameIconFactory;
 
     renderChatBarButton?: ChatBarButtonFactory;
+
+    /**
+     * A Vencord plugin that is modified for extra features in Equicord
+     */
+    isModified?: boolean;
 }
 
 export const enum StartAt {

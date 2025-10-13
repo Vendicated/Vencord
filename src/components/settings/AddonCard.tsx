@@ -22,7 +22,7 @@ import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
 import { AddonBadge } from "@components/settings/PluginBadge";
 import { Switch } from "@components/Switch";
-import { useRef } from "@webpack/common";
+import { Tooltip, useRef } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
 import { useTruncatedText } from "./tabs/plugins/components/truncateText";
@@ -37,6 +37,7 @@ interface Props {
     disabled?: boolean;
     isNew?: boolean;
     sourceBadge?: ReactNode;
+    tooltip?: string;
     onMouseEnter?: MouseEventHandler<HTMLDivElement>;
     onMouseLeave?: MouseEventHandler<HTMLDivElement>;
 
@@ -45,7 +46,7 @@ interface Props {
     author?: ReactNode;
 }
 
-export function AddonCard({ disabled, isNew, sourceBadge, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
+export function AddonCard({ disabled, isNew, sourceBadge, tooltip, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContainerRef = useRef<HTMLDivElement>(null);
     const { truncated, containerRef } = useTruncatedText(description ? description.toString() : "");
@@ -75,7 +76,6 @@ export function AddonCard({ disabled, isNew, sourceBadge, name, infoButton, foot
                             </div>
                         </div>
                         {isNew && <AddonBadge text="NEW" color="#ED4245" />}
-                        {sourceBadge}
                     </BaseText>
 
                     {!!author && (
@@ -84,6 +84,18 @@ export function AddonCard({ disabled, isNew, sourceBadge, name, infoButton, foot
                         </BaseText>
                     )}
                 </div>
+
+                <Tooltip text={tooltip}>
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <div
+                            className={cl("source")}
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                        >
+                            {sourceBadge}
+                        </div>
+                    )}
+                </Tooltip>
 
                 {infoButton}
 
