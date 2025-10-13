@@ -169,7 +169,7 @@ export default definePlugin({
             if (guildId == null) return null;
 
             const member = GuildMemberStore.getMember(guildId, userId);
-            return member?.colorStrings ?? { primaryColor: member?.colorString, secondaryColor: null, tertiaryColor: null } ?? null;
+            return member?.colorStrings ?? { primaryColor: member?.colorString, secondaryColor: null, tertiaryColor: null };
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get color string", e);
         }
