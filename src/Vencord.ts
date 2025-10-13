@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
+import "~plugins";
+
 export * as Api from "./api";
 export * as Components from "./components";
 export * as Plugins from "./plugins";
@@ -29,7 +32,10 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
-import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
+import { addVencordUiStyles } from "@components/css";
+import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { IS_WINDOWS } from "@utils/constants";
+import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";
@@ -159,12 +165,12 @@ startAllPlugins(StartAt.Init);
 init();
 
 document.addEventListener("DOMContentLoaded", () => {
+    addVencordUiStyles();
+
     startAllPlugins(StartAt.DOMContentLoaded);
 
-    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
-        document.head.append(Object.assign(document.createElement("style"), {
-            id: "vencord-native-titlebar-style",
-            textContent: "[class*=titleBar]{display: none!important}"
-        }));
+    // FIXME
+    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
+        createAndAppendStyle("vencord-native-titlebar-style").textContent = "[class*=titleBar]{display: none!important}";
     }
 }, { once: true });

@@ -6,9 +6,8 @@
 
 import { Notices } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -41,7 +40,7 @@ export default definePlugin({
                     replace: "$self.getIdleTimeout()||"
                 },
                 {
-                    match: /Math\.min\((\i\.\i\.getSetting\(\)\*\i\.\i\.\i\.SECOND),\i\.\i\)/,
+                    match: /Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,
                     replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting or 10 min maximum)
                 },
                 {

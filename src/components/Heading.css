@@ -1,0 +1,65 @@
+.vc-h1,
+.vc-h2 {
+    color: var(--header-primary);
+    font-weight: 600;
+}
+
+.vc-h3,
+.vc-h4,
+.vc-h5 {
+    color: var(--header-secondary);
+}
+
+.vc-h1 {
+    font-size: 20px;
+    line-height: 24px
+}
+
+.vc-h2 {
+    font-size: 16px;
+    line-height: 20px
+}
+
+.vc-h3 {
+    font-weight: 500;
+    line-height: 24px
+}
+
+.vc-h3,
+.vc-h4 {
+    font-size: 16px
+}
+
+.vc-h4 {
+    font-weight: 600;
+    letter-spacing: .3px
+}
+
+.vc-h4,
+.vc-h5 {
+    line-height: 20px
+}
+
+.vc-h5 {
+    color: var(--header-primary);
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: unset
+}
+
+.vc-h1-defaultMargin,
+.vc-h2-defaultMargin {
+    margin-bottom: 20px
+}
+
+/* This is copied from Discord, don't ask me why 0 margin */
+.vc-h4-defaultMargin {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.vc-h3-defaultMargin,
+.vc-h5-defaultMargin {
+    margin-bottom: 8px
+}

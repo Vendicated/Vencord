@@ -17,7 +17,7 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { Channel, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
+import { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
@@ -100,7 +100,11 @@ export const enum Theme {
 }
 
 export function getTheme(): Theme {
-    return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
+    try {
+        return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
+    } catch {
+        return Theme.Dark;
+    }
 }
 
 export function insertTextIntoChatInputBox(text: string) {
@@ -110,20 +114,34 @@ export function insertTextIntoChatInputBox(text: string) {
     });
 }
 
-interface MessageExtra {
+interface MessageOptions {
     messageReference: Message["messageReference"];
     allowedMentions: {
         parse: string[];
         replied_user: boolean;
     };
     stickerIds: string[];
+    attachmentsToUpload: CloudUpload[];
+    poll: {
+        allow_multiselect: boolean;
+        answers: Array<{
+            poll_media: {
+                text: string;
+                attachment_ids?: unknown;
+                emoji?: { name: string; id?: string; };
+            };
+        }>;
+        duration: number;
+        layout_type: number;
+        question: { text: string; };
+    };
 }
 
 export function sendMessage(
     channelId: string,
     data: Partial<MessageObject>,
-    waitForChannelReady?: boolean,
-    extra?: Partial<MessageExtra>
+    waitForChannelReady = true,
+    options: Partial<MessageOptions> = {}
 ) {
     const messageData = {
         content: "",
@@ -133,7 +151,7 @@ export function sendMessage(
         ...data
     };
 
-    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
+    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, options);
 }
 
 /**
