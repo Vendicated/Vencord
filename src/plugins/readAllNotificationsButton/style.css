@@ -2,6 +2,8 @@
     color: var(--interactive-normal);
     padding: 0 0.5em;
     width: 100%;
+    font-size: 14px;
+    white-space: nowrap;
     box-sizing: border-box;
 }
 
