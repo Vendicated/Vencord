@@ -153,6 +153,7 @@ export default definePlugin({
     description: "Automatically mute new servers and change various other settings upon joining",
     tags: ["MuteNewGuild", "mute", "server"],
     authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
+    isModified: true,
     contextMenus: {
         "guild-context": makeContextMenuPatch(false),
         "guild-header-popout": makeContextMenuPatch(true)

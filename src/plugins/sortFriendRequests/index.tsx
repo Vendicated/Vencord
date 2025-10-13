@@ -54,6 +54,7 @@ export default definePlugin({
     name: "SortFriends",
     authors: [Devs.Megu, EquicordDevs.CallMeGii],
     description: "Sorts friend requests by date of receipt",
+    isModified: true,
     settings,
 
     patches: [

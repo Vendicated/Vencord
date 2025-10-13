@@ -53,6 +53,7 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.Nuckyz, EquicordDevs.Z1xus],
     dependencies: ["DynamicImageModalAPI"],
     tags: ["guild", "info", "ServerProfile"],
+    isModified: true,
     contextMenus: {
         "guild-context": Patch,
         "guild-header-popout": Patch

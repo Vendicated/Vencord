@@ -36,7 +36,12 @@ const settings = definePluginSettings({
                 value: "invisible",
             }
         ]
-    }
+    },
+    excludeInvisible: {
+        type: OptionType.BOOLEAN,
+        description: "Prevent automatic status changes while your status is set to invisible",
+        default: false
+    },
 });
 
 migratePluginSettings("AutoDNDWhilePlaying", "StatusWhilePlaying");
@@ -44,10 +49,13 @@ export default definePlugin({
     name: "AutoDNDWhilePlaying",
     description: "Automatically updates your online status (online, idle, dnd) when launching games",
     authors: [Devs.thororen],
+    isModified: true,
     settings,
     flux: {
         RUNNING_GAMES_CHANGE({ games }) {
             const status = StatusSettings.getSetting();
+
+            if (settings.store.excludeInvisible && (savedStatus ?? status) === "invisible") return;
 
             if (games.length > 0) {
                 if (status !== settings.store.statusToSet) {
