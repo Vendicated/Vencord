@@ -116,7 +116,9 @@ export default definePlugin({
         },
     ],
 
-    hideSuppressedMessage(userId: string) {
+    // true = keep message
+    // false = hide message
+    keepSuppressedMessage(userId: string) {
         const overrideUsers = settings.store.overrideUsers.split(",").map(id => id.trim()).filter(id => id.length > 0);
 
         if (settings.store.defaultHideUsers) {
@@ -133,8 +135,8 @@ export default definePlugin({
         const replyToSuppressed = this.isReplyToSuppressed(message);
 
         if (message.type === 24 && settings.store.allowAutoModMessages) return [true, suppressed];
-        if (suppressed) return [this.hideSuppressedMessage(message.author.id), true];
-        if (replyToSuppressed) return [this.hideSuppressedMessage(replyToSuppressed.author.id), true];
+        if (suppressed.suppressed) return [!suppressed.hide, true];
+        if (replyToSuppressed.suppressed) return [!replyToSuppressed.hide, true];
 
         // [Message Visible, Author Blocked/Ignored]
         return [true, false];
@@ -226,8 +228,8 @@ export default definePlugin({
         return newChannelStream;
     },
 
-    isReplyToSuppressed(message: Message) {
-        if (!settings.store.hideBlockedUserReplies) return false;
+    isReplyToSuppressed(message: Message): { suppressed: boolean, hide: boolean; } {
+        if (!settings.store.hideBlockedUserReplies) return { suppressed: false, hide: false };
 
         try {
             // Messages received from the non-focused channel may have a referenced_message property.
@@ -238,20 +240,44 @@ export default definePlugin({
                 repliedMessage = messageReference ? MessageStore.getMessage(messageReference.channel_id, messageReference.message_id) : null;
             }
 
-            return repliedMessage && this.isSuppressed(repliedMessage) ? repliedMessage : false;
+            return repliedMessage ? this.isSuppressed(repliedMessage) : { suppressed: false, hide: false };
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked or ignored:", e);
+            return { suppressed: false, hide: false };
         }
     },
 
-    isSuppressed(message: Message) {
+    isSuppressed(message: Message): { suppressed: boolean, hide: boolean; } {
         try {
             const { BlockKeywords } = Settings.plugins;
             const blockedContent = BlockKeywords?.enabled && BlockKeywords?.ignoreBlockedMessages && containsBlockedKeywords(message);
-            const relationship = this.getRelationshipStatus(message.author);
-            return blockedContent || relationship.blocked || (relationship.ignored && settings.store.alsoHideIgnoredUsers);
+            const authorRelationship = this.getRelationshipStatus(message.author);
+            const interactionUserRelationship = message.interaction && this.getRelationshipStatus((message.interaction as any).user);
+            const prefixCMDReferenceData = message.author.bot && (message.messageReference || (message as any).message_reference);
+            const prefixCMDReference = prefixCMDReferenceData && MessageStore.getMessage(prefixCMDReferenceData.channel_id, prefixCMDReferenceData.message_id);
+            const prefixCMDUserRelationship = prefixCMDReference && this.getRelationshipStatus(prefixCMDReference.author);
+            const suppressed = (
+                blockedContent || authorRelationship.blocked || (
+                    authorRelationship.ignored && settings.store.alsoHideIgnoredUsers
+                ) || (
+                    interactionUserRelationship && (interactionUserRelationship.blocked || (
+                        interactionUserRelationship.ignored && settings.store.alsoHideIgnoredUsers
+                    ))
+                ) || (
+                    prefixCMDUserRelationship && (prefixCMDUserRelationship.blocked || (
+                        prefixCMDUserRelationship.ignored && settings.store.alsoHideIgnoredUsers
+                    ))
+                )
+            );
+            const hide = !this.keepSuppressedMessage(message.author.id) || (
+                message.interaction && !this.keepSuppressedMessage((message.interaction as any).user.id)
+            ) || (
+                    prefixCMDReference && !this.keepSuppressedMessage(prefixCMDReference.author.id)
+                );
+            return { suppressed, hide };
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if message is blocked or ignored:", e);
+            return { suppressed: false, hide: false };
         }
     },
 
