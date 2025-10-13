@@ -24,7 +24,7 @@ import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Guild, User } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
-import type * as React from "react";
+import { MouseEvent } from "react";
 
 
 interface UserContextProps {
@@ -68,10 +68,10 @@ const settings = definePluginSettings({
     }
 });
 
-const openAvatar = (url: string, ev?: React.MouseEvent) => openImage(url, 512, 512, ev);
-const openBanner = (url: string, ev?: React.MouseEvent) => openImage(url, 1024, undefined, ev);
+const openAvatar = (url: string, ev?: MouseEvent) => openImage(url, 512, 512, ev);
+const openBanner = (url: string, ev?: MouseEvent) => openImage(url, 1024, undefined, ev);
 
-function openImage(url: string, width: number, height?: number, ev?: React.MouseEvent) {
+function openImage(url: string, width: number, height?: number, ev?: MouseEvent) {
     ev?.stopPropagation();
     const u = new URL(url, window.location.href);
 
