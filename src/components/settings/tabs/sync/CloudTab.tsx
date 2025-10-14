@@ -19,13 +19,16 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Divider } from "@components/Divider";
+import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { authorizeCloud, checkCloudUrlCsp, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
+import { Alerts, Button, Forms, Tooltip } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -69,19 +72,20 @@ function SettingsSyncSection() {
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
-        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
-            <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+        <section className={Margins.top16}>
+            <Forms.FormTitle tag="h5">Settings Sync</Forms.FormTitle>
+
+            <Paragraph size="md" className={Margins.bottom20}>
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
                 minimal effort.
-            </Forms.FormText>
-            <Switch
+            </Paragraph>
+            <FormSwitch
                 key="cloud-sync"
-                disabled={!cloud.authenticated}
+                title="Settings Sync"
                 value={cloud.settingsSync}
                 onChange={v => { cloud.settingsSync = v; }}
-            >
-                Settings Sync
-            </Switch>
+                disabled={!cloud.authenticated}
+            />
             <div className="vc-cloud-settings-sync-grid">
                 <Button
                     size={Button.Sizes.SMALL}
@@ -113,7 +117,7 @@ function SettingsSyncSection() {
                     Delete Cloud Settings
                 </Button>
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }
 
@@ -122,15 +126,19 @@ function CloudTab() {
 
     return (
         <SettingsTab title="Vencord Cloud">
-            <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
-                <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+            <section className={Margins.top16}>
+                <Forms.FormTitle tag="h5">Cloud Settings</Forms.FormTitle>
+
+                <Paragraph size="md" className={Margins.bottom20}>
                     Vencord comes with a cloud integration that adds goodies like settings sync across devices.
                     It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
                     the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
                     can host it yourself.
-                </Forms.FormText>
-                <Switch
+                </Paragraph>
+                <FormSwitch
                     key="backend"
+                    title="Enable Cloud Integrations"
+                    description="This will request authorization if you have not yet set up cloud integrations."
                     value={settings.cloud.authenticated}
                     onChange={v => {
                         if (v)
@@ -138,10 +146,7 @@ function CloudTab() {
                         else
                             settings.cloud.authenticated = v;
                     }}
-                    note="This will request authorization if you have not yet set up cloud integrations."
-                >
-                    Enable Cloud Integrations
-                </Switch>
+                />
                 <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
@@ -186,8 +191,8 @@ function CloudTab() {
                     </Button>
                 </Grid>
 
-                <Forms.FormDivider className={Margins.top16} />
-            </Forms.FormSection >
+                <Divider className={Margins.top16} />
+            </section >
             <SettingsSyncSection />
         </SettingsTab>
     );

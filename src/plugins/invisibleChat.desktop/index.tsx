@@ -72,7 +72,6 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         <ChatBarButton
             tooltip="Encrypt Message"
             onClick={() => buildEncModal()}
-
             buttonProps={{
                 "aria-haspopup": "dialog",
             }}

@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
-import { RelationshipStore } from "@webpack/common";
+import { RelationshipStore, StreamerModeStore } from "@webpack/common";
 
 interface UsernameProps {
     author: { nick: string; authorId: string; };
@@ -74,7 +74,9 @@ export default definePlugin({
             const { mode, friendNicknames, displayNames, inReplies } = settings.store;
 
             const user = userOverride ?? message.author;
-            let { username } = user;
+            let username = StreamerModeStore.enabled
+                ? user.username[0] + "…"
+                : user.username;
 
             if (displayNames)
                 username = user.globalName || username;
