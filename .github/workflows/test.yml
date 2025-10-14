@@ -9,8 +9,6 @@ on:
             - main
             - dev
 
-permissions: write-all
-
 jobs:
     Test:
         name: Test

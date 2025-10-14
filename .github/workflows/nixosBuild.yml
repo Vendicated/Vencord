@@ -7,7 +7,8 @@ env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-permissions: write-all
+permissions:
+    contents: write
 
 jobs:
     Build:
@@ -36,10 +37,10 @@ jobs:
 
             - name: Generate plugin lists
               run: |
-                pnpm generatePluginJson dist/plugins.json
-                pnpm generateEquicordPluginJson dist/equicordplugins.json
-                pnpm generateVencordPluginJson dist/vencordplugins.json
-                pnpm generateDevsList dist/devs.json
+                  pnpm generatePluginJson dist/plugins.json
+                  pnpm generateEquicordPluginJson dist/equicordplugins.json
+                  pnpm generateVencordPluginJson dist/vencordplugins.json
+                  pnpm generateDevsList dist/devs.json
 
             - name: Collect files to be released
               run: |

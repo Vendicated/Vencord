@@ -9,7 +9,7 @@ import { HeadingSecondary } from "@components/Heading";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, React } from "@webpack/common";
 
-import noteHandler from "../../NoteHandler";
+import { noteHandler } from "../../NoteHandler";
 import Error from "./Error";
 import { RenderMessage } from "./RenderMessage";
 

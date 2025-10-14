@@ -1,88 +1,89 @@
 name: Release Browser Extension
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 env:
     FORCE_COLOR: true
 
-permissions: write-all
+permissions:
+    contents: write
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+    release:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: Get package.json version
-        id: pkg
-        run: echo "version=v$(jq -r .version < package.json)" >> $GITHUB_OUTPUT
+            - name: Get package.json version
+              id: pkg
+              run: echo "version=v$(jq -r .version < package.json)" >> $GITHUB_OUTPUT
 
-      - name: Get latest Git tag
-        id: tag
-        run: |
-          latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n 1 || echo "v0.0.0")
-          echo "latest=$latest_tag" >> $GITHUB_OUTPUT
+            - name: Get latest Git tag
+              id: tag
+              run: |
+                  latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n 1 || echo "v0.0.0")
+                  echo "latest=$latest_tag" >> $GITHUB_OUTPUT
 
-      - name: Check if package.json version is newer
-        id: check
-        run: |
-          pkg="${{ steps.pkg.outputs.version }}"
-          latest="${{ steps.tag.outputs.latest }}"
+            - name: Check if package.json version is newer
+              id: check
+              run: |
+                  pkg="${{ steps.pkg.outputs.version }}"
+                  latest="${{ steps.tag.outputs.latest }}"
 
-          echo "Latest tag: $latest"
-          echo "Package version: $pkg"
+                  echo "Latest tag: $latest"
+                  echo "Package version: $pkg"
 
-          if [ "$pkg" != "$latest" ] && [ "$(sort -V <<<"$latest"$'\n'"$pkg" | tail -n1)" = "$pkg" ]; then
-            echo "release=true" >> $GITHUB_OUTPUT
-          else
-            echo "release=false" >> $GITHUB_OUTPUT
-          fi
+                  if [ "$pkg" != "$latest" ] && [ "$(sort -V <<<"$latest"$'\n'"$pkg" | tail -n1)" = "$pkg" ]; then
+                    echo "release=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "release=false" >> $GITHUB_OUTPUT
+                  fi
 
-      - name: Stop if not newer
-        if: steps.check.outputs.release == 'false'
-        run: |
-          echo "No new version to release (package.json ${{ steps.pkg.outputs.version }} <= latest tag ${{ steps.tag.outputs.latest }})"
-          exit 0
+            - name: Stop if not newer
+              if: steps.check.outputs.release == 'false'
+              run: |
+                  echo "No new version to release (package.json ${{ steps.pkg.outputs.version }} <= latest tag ${{ steps.tag.outputs.latest }})"
+                  exit 0
 
-      - name: Create Tag
-        if: steps.check.outputs.release == 'true'
-        uses: butlerlogic/action-autotag@1.1.2
-        env:
-            GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        with:
-            tag_prefix: "v"
+            - name: Create Tag
+              if: steps.check.outputs.release == 'true'
+              uses: butlerlogic/action-autotag@1.1.2
+              env:
+                  GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+              with:
+                  tag_prefix: "v"
 
-      - name: Setup PNPM
-        if: steps.check.outputs.release == 'true'
-        uses: pnpm/action-setup@v3
+            - name: Setup PNPM
+              if: steps.check.outputs.release == 'true'
+              uses: pnpm/action-setup@v3
 
-      - name: Use Node.js 20
-        if: steps.check.outputs.release == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
+            - name: Use Node.js 20
+              if: steps.check.outputs.release == 'true'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "pnpm"
 
-      - name: Install dependencies
-        if: steps.check.outputs.release == 'true'
-        run: pnpm install --frozen-lockfile
+            - name: Install dependencies
+              if: steps.check.outputs.release == 'true'
+              run: pnpm install --frozen-lockfile
 
-      - name: Build web
-        if: steps.check.outputs.release == 'true'
-        run: pnpm buildWebStandalone
+            - name: Build web
+              if: steps.check.outputs.release == 'true'
+              run: pnpm buildWebStandalone
 
-      - name: Publish extension
-        if: steps.check.outputs.release == 'true'
-        run: |
-          cd dist/browser/chromium-unpacked
-          pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
-        env:
-          EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
-          CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
-          REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+            - name: Publish extension
+              if: steps.check.outputs.release == 'true'
+              run: |
+                  cd dist/browser/chromium-unpacked
+                  pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
+              env:
+                  EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+                  CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+                  CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+                  REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}

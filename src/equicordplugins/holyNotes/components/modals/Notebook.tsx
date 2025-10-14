@@ -11,7 +11,7 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, M
 import { findByProps } from "@webpack";
 import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, TextInput } from "@webpack/common";
 
-import noteHandler from "../../NoteHandler";
+import { noteHandler } from "../../NoteHandler";
 import { HolyNotes } from "../../types";
 import HelpIcon from "../icons/HelpIcon";
 import Errors from "./Error";

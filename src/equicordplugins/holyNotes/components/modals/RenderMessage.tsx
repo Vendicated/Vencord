@@ -12,7 +12,7 @@ import { ModalProps } from "@utils/modal";
 import { findByCodeLazy, findByProps, findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 
-import noteHandler from "../../NoteHandler";
+import { noteHandler } from "../../NoteHandler";
 import { HolyNotes } from "../../types";
 
 export const RenderMessage = ({
