@@ -138,13 +138,17 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         guild_id
     } = channel;
 
+    // permissionOverwrites from runtime can be untyped; use the shared PermissionOverwrite shim
+    const overwrites = permissionOverwrites as Record<string, PermissionOverwrite>;
+
     useEffect(() => {
         const membersToFetch: Array<string> = [];
 
         const guildOwnerId = GuildStore.getGuild(guild_id).ownerId;
         if (!GuildMemberStore.getMember(guild_id, guildOwnerId)) membersToFetch.push(guildOwnerId);
 
-        Object.values(permissionOverwrites).forEach(({ type, id: userId }) => {
+        Object.values(overwrites).forEach((ow) => {
+            const { type, id: userId } = ow;
             if (type === 1 && !GuildMemberStore.getMember(guild_id, userId)) {
                 membersToFetch.push(userId);
             }
@@ -159,11 +163,11 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
         }
 
         if (Settings.plugins.PermissionsViewer.enabled) {
-            setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
+            setPermissions(sortPermissionOverwrites(Object.values(overwrites).map(overwrite => ({
                 type: overwrite.type as PermissionType,
                 id: overwrite.id,
-                overwriteAllow: overwrite.allow,
-                overwriteDeny: overwrite.deny
+                overwriteAllow: BigInt(overwrite.allow ?? 0),
+                overwriteDeny: BigInt(overwrite.deny ?? 0)
             })), guild_id));
         }
     }, [channelId]);

@@ -30,21 +30,24 @@ export let BUILT_IN: VencordCommand[];
 export const commands = {} as Record<string, VencordCommand>;
 
 // hack for plugins being evaluated before we can grab these from webpack
-const OptPlaceholder = Symbol("OptionalMessageOption") as any as CommandOption;
-const ReqPlaceholder = Symbol("RequiredMessageOption") as any as CommandOption;
+const OptPlaceholder = Symbol("OptionalMessageOption");
+const ReqPlaceholder = Symbol("RequiredMessageOption");
+
+// placeholders may be the runtime Symbols until _init runs; allow symbol until replaced
+export type PlaceholderOrOption = CommandOption | symbol;
 
 /**
  * Optional message option named "message" you can use in commands.
  * Used in "tableflip" or "shrug"
  * @see {@link RequiredMessageOption}
  */
-export let OptionalMessageOption: CommandOption = OptPlaceholder;
+export let OptionalMessageOption: PlaceholderOrOption = OptPlaceholder;
 /**
  * Required message option named "message" you can use in commands.
  * Used in "me"
  * @see {@link OptionalMessageOption}
  */
-export let RequiredMessageOption: CommandOption = ReqPlaceholder;
+export let RequiredMessageOption: PlaceholderOrOption = ReqPlaceholder;
 
 // Discord's command list has random gaps for some reason, which can cause issues while rendering the commands
 // Add this offset to every added command to keep them unique
@@ -94,14 +97,16 @@ export const _handleCommand = function (cmd: VencordCommand, args: CommandArgume
  * @param opt
  */
 export function prepareOption<O extends CommandOption | VencordCommand>(opt: O): O {
-    opt.displayName ||= opt.name;
-    opt.displayDescription ||= opt.description;
-    opt.options?.forEach((opt, i, opts) => {
-        // See comment above Placeholders
-        if (opt === OptPlaceholder) opts[i] = OptionalMessageOption;
-        else if (opt === ReqPlaceholder) opts[i] = RequiredMessageOption;
+    const o: any = opt;
+    o.displayName ||= o.name;
+    o.displayDescription ||= o.description;
+    o.options?.forEach((opt, i, opts) => {
+        // See comment above Placeholders. When a placeholder is present we know
+        // it will be replaced on _init; narrow the union before assigning to
+        // the CommandOption-typed array to satisfy the compiler.
+        if (opt === OptPlaceholder) opts[i] = OptionalMessageOption as CommandOption;
+        else if (opt === ReqPlaceholder) opts[i] = RequiredMessageOption as CommandOption;
         opt.choices?.forEach(x => x.displayName ||= x.name);
-
         prepareOption(opts[i]);
     });
     return opt;
@@ -129,7 +134,9 @@ function registerSubCommands(cmd: VencordCommand, plugin: string) {
             }],
             rootCommand: cmd
         };
-        registerCommand(subCmd as any, plugin);
+        // constructed object matches VencordCommand shape at runtime; assert
+        // through unknown to preserve stronger typing elsewhere.
+        registerCommand(subCmd as unknown as VencordCommand, plugin);
     });
 }
 
@@ -146,14 +153,17 @@ export function registerCommand<C extends VencordCommand>(command: C, plugin: st
     if (BUILT_IN.some(c => c.name === command.name))
         throw new Error(`Command '${command.name}' already exists.`);
 
-    command.isVencordCommand = true;
-    command.untranslatedName ??= command.name;
-    command.untranslatedDescription ??= command.description;
-    command.id ??= `-${BUILT_IN.length + commandIdOffset + 1}`;
-    command.applicationId ??= "-1"; // BUILT_IN;
-    command.type ??= ApplicationCommandType.CHAT_INPUT;
-    command.inputType ??= ApplicationCommandInputType.BUILT_IN_TEXT;
-    command.plugin ||= plugin;
+    // Keep a narrow writable view of the command for runtime augmentation.
+    const c = command as VencordCommand & Record<string, unknown>;
+    // Use bracket notation to assign runtime-only augmentation fields without leaking `any`.
+    c["isVencordCommand"] = true;
+    c["untranslatedName"] ??= (c as VencordCommand).name;
+    c["untranslatedDescription"] ??= (c as VencordCommand).description;
+    c["id"] ??= `-${BUILT_IN.length + commandIdOffset + 1}`;
+    c["applicationId"] ??= "-1"; // BUILT_IN;
+    c["type"] ??= ApplicationCommandType.CHAT_INPUT;
+    c["inputType"] ??= ApplicationCommandInputType.BUILT_IN_TEXT;
+    c["plugin"] ||= plugin;
 
     prepareOption(command);
 

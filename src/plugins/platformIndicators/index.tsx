@@ -121,11 +121,11 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
         component: () => (
             <span className="vc-platform-indicator">
                 <PlatformIcon
-                    key={platform}
-                    platform={platform as Platform}
-                    status={status}
-                    small={false}
-                />
+                        key={platform}
+                        platform={platform as Platform}
+                        status={status as string}
+                        small={false}
+                    />
             </span>
         ),
         key: `vc-platform-indicator-${platform}`
@@ -142,7 +142,7 @@ const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolea
         <PlatformIcon
             key={platform}
             platform={platform as Platform}
-            status={status}
+            status={status as string}
             small={small}
         />
     ));

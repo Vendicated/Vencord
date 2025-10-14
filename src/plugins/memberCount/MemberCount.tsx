@@ -63,7 +63,10 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
     }
 
     if (!isTooltip && threadGroups && !isObjectEmpty(threadGroups)) {
-        onlineCount = Object.values(threadGroups).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
+        onlineCount = Object.values(threadGroups).reduce((total, curr) => {
+            const c: any = curr;
+            return total + (c.sectionId === "offline" ? 0 : (c.userIds?.length || 0));
+        }, 0);
     }
 
     useEffect(() => {

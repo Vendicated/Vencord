@@ -53,10 +53,19 @@ export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = ma
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
-export const i18n = mapMangledModuleLazy('defaultLocale:"en-US"', {
-    t: m => m?.[Symbol.toStringTag] === "IntlMessagesProxy",
-    intl: m => m != null && Object.getPrototypeOf(m)?.withFormatters != null
-}, true);
+export interface I18nShim {
+    t?: (...args: any[]) => string;
+    intl?: { withFormatters?: boolean } | null;
+}
+
+export const i18n: I18nShim = (mapMangledModuleLazy as unknown as <T>(code: string, filters: Record<string, (m: unknown) => boolean>, single?: boolean) => T)(
+    'defaultLocale:"en-US"',
+    {
+        t: (m: any) => m?.[Symbol.toStringTag] === "IntlMessagesProxy",
+        intl: (m: any) => m != null && Object.getPrototypeOf(m)?.withFormatters != null
+    },
+    true
+) as unknown as I18nShim;
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);

@@ -38,15 +38,18 @@ let metaData = {
     buildHash: "Unknown Build Hash"
 };
 
-const browser = await pup.launch({
-    headless: true,
-    executablePath: process.env.CHROMIUM_BIN,
-    args: ["--no-sandbox"]
-});
+(async () => {
+    const browser = await pup.launch({
+        headless: true,
+        executablePath: process.env.CHROMIUM_BIN,
+        args: ["--no-sandbox"]
+    });
 
-const page = await browser.newPage();
-await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
-await page.setBypassCSP(true);
+    const page = await browser.newPage();
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
+    await page.setBypassCSP(true);
+
+    // the rest of the file uses page/browser; move the rest of the top-level code into the IIFE
 
 async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
     return await (handle as JSHandle<Error>)?.getProperty("message")
@@ -246,7 +249,9 @@ page.on("console", async e => {
     const isReporterMeta = firstArg === "[REPORTER_META]";
 
     if (isReporterMeta) {
-        metaData = await rawArgs[1].jsonValue() as any;
+        const md = (await rawArgs[1].jsonValue()) as Partial<{ buildNumber: string; buildHash: string }> | null;
+        metaData.buildNumber = md?.buildNumber ?? metaData.buildNumber;
+        metaData.buildHash = md?.buildHash ?? metaData.buildHash;
         return;
     }
 
@@ -357,3 +362,5 @@ await page.evaluateOnNewDocument(`
 `);
 
 await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
+
+})();

@@ -118,13 +118,21 @@ export async function putCloudSettings(manual?: boolean) {
     if (!await checkCloudUrlCsp()) return;
 
     try {
+        const payload = deflateSync(new TextEncoder().encode(settings));
+        // deflateSync may return a Uint8Array or an ArrayLike<number>. Normalize to Uint8Array safely.
+        const uint8 = payload instanceof Uint8Array ? payload : new Uint8Array(payload as ArrayLike<number>);
+        const arrayBuffer = uint8.buffer.slice(uint8.byteOffset, uint8.byteOffset + uint8.byteLength);
+    // Make a copy to guarantee we have an ArrayBuffer-backed Uint8Array (avoids SharedArrayBuffer issues),
+    // then use its buffer for the Blob which expects an ArrayBuffer/ArrayBufferView with a real ArrayBuffer.
+    const uint8Copy = new Uint8Array(uint8);
+    const body: BodyInit = new Blob([uint8Copy.buffer]);
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
             method: "PUT",
             headers: {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
             },
-            body: deflateSync(new TextEncoder().encode(settings))
+            body
         });
 
         if (!res.ok) {

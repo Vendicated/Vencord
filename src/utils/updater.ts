@@ -20,7 +20,7 @@ import gitHash from "~git-hash";
 
 import { Logger } from "./Logger";
 import { relaunch } from "./native";
-import { IpcRes } from "./types";
+// IpcRes is declared in src/types/runtime-shims.d.ts (global)
 
 export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
 export let isOutdated = false;
@@ -30,11 +30,25 @@ export let changes: Record<"hash" | "author" | "message", string>[];
 
 async function Unwrap<T>(p: Promise<IpcRes<T>>) {
     const res = await p;
-
     if (res.ok) return res.value;
 
-    updateError = res.error;
-    throw res.error;
+    // Type guard to narrow the union to the error branch.
+    // We avoid casting to `any` by checking the 'ok' property explicitly.
+    function isIpcError<R>(r: IpcRes<R>): r is { ok: false; error: any } {
+        // If the 'ok' property exists and is strictly false, it's the error shape.
+        if (typeof r === "object" && r !== null && "ok" in r) {
+            return (r as { ok: boolean }).ok === false;
+        }
+        // If 'ok' isn't present, conservatively treat it as an error to preserve safety.
+        return true;
+    }
+
+    if (isIpcError(res)) {
+        updateError = res.error;
+        throw res.error;
+    }
+    // Fallback: should be unreachable but keep defensive behavior
+    throw new Error("Unknown IpcRes shape");
 }
 
 export async function checkForUpdates() {

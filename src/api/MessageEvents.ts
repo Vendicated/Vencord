@@ -59,7 +59,8 @@ export async function _handlePreSend(channelId: string, messageObj: MessageObjec
     for (const listener of sendListeners) {
         try {
             const result = await listener(channelId, messageObj, options);
-            if (result?.cancel) {
+                const _r: any = result;
+                if (_r?.cancel) {
                 return true;
             }
         } catch (e) {
@@ -73,7 +74,8 @@ export async function _handlePreEdit(channelId: string, messageId: string, messa
     for (const listener of editListeners) {
         try {
             const result = await listener(channelId, messageId, messageObj);
-            if (result?.cancel) {
+            const _r: any = result;
+            if (_r?.cancel) {
                 return true;
             }
         } catch (e) {

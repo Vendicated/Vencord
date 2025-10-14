@@ -202,7 +202,7 @@ export default definePlugin({
                                     description: Object.values(getTags())
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
-                                    // @ts-expect-error
+                                    // @ts-ignore
                                     color: 0xd77f7f,
                                     type: "rich",
                                 }

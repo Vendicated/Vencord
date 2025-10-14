@@ -94,7 +94,7 @@ export const ListScrollerAuto = LazyComponent(() => createListScroller(listScrol
 
 export const FocusLock = waitForComponent<t.FocusLock>("FocusLock", filters.componentByCode(".containerRef,{keyboardModeEnabled:"));
 
-export let useToken: t.useToken;
+export let useToken: typeof t.useToken;
 waitFor(m => {
     if (typeof m !== "function") {
         return false;

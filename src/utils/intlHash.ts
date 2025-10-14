@@ -39,7 +39,8 @@ function numberToBytes(number: number | bigint) {
  * `@discord/intl-loader-core`, to be able to hash names at runtime.
  */
 export function runtimeHashMessageKey(key: string): string {
-    const hash = h64(key, 0);
+    // call h64 with the key and coerce to bigint (some builds expose a one-arg API)
+    const hash = BigInt(h64(key));
     const bytes = numberToBytes(hash);
     return [
         BASE64_TABLE[bytes[0] >> 2],

@@ -56,7 +56,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                 if (filePath) {
                     const buf = await Native.readRecording(filePath);
                     if (buf)
-                        setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
+                        setAudioBlob(new Blob([buf as unknown as ArrayBuffer], { type: "audio/ogg; codecs=opus" }));
                     else
                         showToast("Failed to finish recording", Toasts.Type.FAILURE);
                 }

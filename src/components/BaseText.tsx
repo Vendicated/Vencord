@@ -8,7 +8,7 @@ import "./BaseText.css";
 
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
-import type { Text as DiscordText } from "@vencord/discord-types";
+import { Text as DiscordText } from "@vencord/discord-types";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 const textCls = classNameFactory("vc-text-");
@@ -77,7 +77,7 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
 
 // #region Old compability
 
-export const TextCompat: DiscordText = function TextCompat({ color, variant, ...restProps }) {
+export const TextCompat: typeof DiscordText = function TextCompat({ color, variant, ...restProps }) {
     const newBaseTextProps = restProps as BaseTextProps;
 
     if (variant) {
