@@ -28,7 +28,7 @@ import { openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { extractAndLoadChunksLazy, findByPropsLazy, findComponentByCodeLazy, findModuleId, wreq } from "@webpack";
-import { Clickable, Menu, Toasts, UserStore, useState } from "@webpack/common";
+import { Clickable, Menu, OverridePremiumTypeStore, Toasts, useState } from "@webpack/common";
 
 import managedStyle from "./fixActionBar.css?managed";
 
@@ -126,8 +126,7 @@ const RenderStatusMenuItem = ({ status, update, disabled }: { status: DiscordSta
 
 
 const StatusSubMenuComponent = () => {
-    // @ts-ignore
-    const premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
+    const premiumType = OverridePremiumTypeStore.getState().premiumTypeActual ?? 0;
     const update = useForceUpdater();
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) => status != null ? <Menu.MenuItem

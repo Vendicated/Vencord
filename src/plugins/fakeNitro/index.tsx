@@ -27,12 +27,9 @@ import definePlugin, { OptionType, Patch } from "@utils/types";
 import type { Emoji, Message } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, GuildMemberStore, lodash, OverridePremiumTypeStore, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
-
-// @ts-ignore
-const premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
@@ -389,16 +386,17 @@ export default definePlugin({
     },
 
     get canUseEmotes() {
-        return (premiumType) > 0;
+        return (OverridePremiumTypeStore.getState().premiumTypeActual ?? 0) > 0;
     },
 
     get canUseStickers() {
-        return (premiumType) > 1;
+        return (OverridePremiumTypeStore.getState().premiumTypeActual ?? 0) > 1;
     },
 
     handleProtoChange(proto: any, user: any) {
         try {
             if (proto == null || typeof proto === "string") return;
+            const premiumType = OverridePremiumTypeStore.getState().premiumTypeActual ?? 0;
 
             if (premiumType !== 2) {
                 proto.appearance ??= AppearanceSettingsActionCreators.create();
@@ -419,6 +417,7 @@ export default definePlugin({
     },
 
     handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
+        const premiumType = OverridePremiumTypeStore.getState().premiumTypeActual ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
         if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !BINARY_READ_OPTIONS) return;

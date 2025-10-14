@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { OverridePremiumTypeStore } from "@webpack/common";
 
 export const settings = definePluginSettings({
     superReactByDefault: {
@@ -77,7 +77,6 @@ export default definePlugin({
     },
 
     get shouldSuperReactByDefault() {
-        // @ts-ignore
-        return settings.store.superReactByDefault && (UserStore.getCurrentUser()?._realPremiumType ?? UserStore.getCurrentUser().premiumType != null);
+        return settings.store.superReactByDefault && (OverridePremiumTypeStore.getState().premiumTypeActual != null);
     }
 });
