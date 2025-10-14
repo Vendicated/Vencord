@@ -55,8 +55,13 @@ export default definePlugin({
         if (settings.store.preferNitro && user.avatar?.startsWith("a_")) return original(user, animated, size);
         if (!data.avatars[user.id]) return original(user, animated, size);
 
-        const res = data.avatars[user.id];
-        return animated ? res : res.replace(".gif", ".png");
+        const res = new URL(data.avatars[user.id]);
+        res.searchParams.set("animated", animated ? "true" : "false");
+        if (res && !animated) {
+            res.pathname = res.pathname.replaceAll(/\.gifv?/g, ".png");
+        }
+
+        return res.toString();
     },
     async start() {
         await fetch(API_URL)
