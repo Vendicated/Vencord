@@ -40,4 +40,8 @@ export interface Activity {
         button_urls?: Array<string>;
     };
     platform?: string;
+    party?: {
+        id?: string;
+        size?: [number, number];
+    };
 }
