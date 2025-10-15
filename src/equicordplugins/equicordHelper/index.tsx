@@ -70,7 +70,7 @@ export default definePlugin({
         },
         // Remove DM Context Menu
         {
-            find: "#{intl::d+e27u::raw}",
+            find: "#{intl::DM_OPTIONS}",
             predicate: () => settings.store.disableDMContextMenu,
 
             replacement: {
