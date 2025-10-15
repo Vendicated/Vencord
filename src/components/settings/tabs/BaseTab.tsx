@@ -16,26 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Margins } from "@utils/margins";
 import { onlyOnce } from "@utils/onlyOnce";
-import { Forms, Text } from "@webpack/common";
 import type { ComponentType, PropsWithChildren } from "react";
 
 export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
     return (
-        <Forms.FormSection>
-            <Text
-                variant="heading-lg/semibold"
-                tag="h2"
-                className={Margins.bottom16}
-            >
-                {title}
-            </Text>
-
+        <section>
+            <BaseText tag="h2" size="xl" weight="semibold" className={Margins.bottom16}>{title}</BaseText>
             {children}
-        </Forms.FormSection>
+        </section>
     );
 }
 
