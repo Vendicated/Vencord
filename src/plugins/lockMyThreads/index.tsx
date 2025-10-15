@@ -6,6 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Menu, UserStore } from "@webpack/common";
@@ -28,8 +29,8 @@ function CreateLockContext(): NavContextMenuPatchCallback {
         const { ownerId } = props.channel;
         const currentUser = UserStore.getCurrentUser();
         if (ownerId !== currentUser.id) return;
-        let lockLabel = "Lock Thread";
-        if (props.channel.parentChannelThreadType === 15 || props.channel.parentChannelThreadType === 16) lockLabel = "Lock Post";
+        let lockLabel = getIntlMessage("LOCK_THREAD");
+        if (props.channel.parentChannelThreadType === 15 || props.channel.parentChannelThreadType === 16) lockLabel = getIntlMessage("LOCK_FORUM_POST");
         const archiveButtonIndex = threadActions?.props.children.indexOf(archiveButton);
         threadActions?.props.children.splice(archiveButtonIndex + 1, 0,
             <Menu.MenuItem
