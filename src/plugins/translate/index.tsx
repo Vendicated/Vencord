@@ -63,7 +63,7 @@ let tooltipTimeout: any;
 
 export default definePlugin({
     name: "Translate",
-    description: "Translate messages with Google Translate or DeepL",
+    description: "Translate your and others' messages with Google Translate or DeepL. Press on the translation button in the chat bar to customize the languages or enable auto translation.",
     authors: [Devs.Ven, Devs.AshtonMemer],
     settings,
     contextMenus: {
