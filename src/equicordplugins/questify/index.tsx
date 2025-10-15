@@ -1172,6 +1172,11 @@ export default definePlugin({
                     match: /(\i.intl.string\(\i.\i#{intl::QUESTS_SEE_CODE}\)}\)}},\[)/,
                     replace: "$1questRerenderTrigger,"
                 },
+                {
+                    // Stop Play Activity Quests from launching the activity.
+                    match: /(?<=,)(\i\(\))(\)}};)/,
+                    replace: "startingAutoComplete&&$1$2"
+                }
             ]
         },
         // This patch covers the new entry point blocked in the above group.
@@ -1204,7 +1209,7 @@ export default definePlugin({
                     replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1),"
                 },
                 {
-                    // Does the above for Play Activity Quests.
+                    // Does the above for resuming Play Activity Quests.
                     match: /(?<=icon:.{0,15}?onClick:.{0,20}?,text:(\i),fullWidth:!0)/,
                     replace: ",...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1)"
                 }
