@@ -166,16 +166,11 @@ export default definePlugin({
             let isDmChannel: boolean;
             channelStream.forEach(elem => {
                 if (elem.type === "MESSAGE_GROUP_BLOCKED" || (settings.store.applyToIgnoredUsers && elem.type === "MESSAGE_GROUP_IGNORED")) {
-                    // "x" blocked messages -> normal messages if DM and should be shown
                     if (isDmChannel == null) {
                         const checkMsg = elem.content[0].content;
                         isDmChannel = ChannelStore.getChannel(checkMsg?.channel_id)?.isDM(); // can apparently be undefined
                     }
-                    // if not in DM channel, hide the blocked message group
                     if (!isDmChannel) return;
-                    // A message group blocked has ChannelStreamProps[] as content, with the blocked messages
-                    // themselves inside (elem.type is MESSAGE), therefore we can just spread them into the
-                    // stream as non-blocked messages, and they will be rendered as normal messages
                     else return newStream.push(...elem.content);
                 }
                 return newStream.push(elem);
