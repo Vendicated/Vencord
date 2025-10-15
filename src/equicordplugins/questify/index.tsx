@@ -728,6 +728,7 @@ function shouldDisableQuestAcceptedButton(quest: Quest): boolean | null {
 
 function getQuestAcceptedButtonText(quest: Quest): string | null {
     const { completeGameQuestsInBackground, completeVideoQuestsInBackground } = settings.store;
+    const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : null;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
     const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO || quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE;
     const taskType = playType || watchType;
@@ -740,7 +741,7 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
     const timeRemaining = Math.max(0, duration - progress);
     const progressFormatted = `${String(Math.floor(timeRemaining / 60)).padStart(2, "0")}:${String(timeRemaining % 60).padStart(2, "0")}`;
 
-    if ((playType && completeGameQuestsInBackground) || (watchType && completeVideoQuestsInBackground)) {
+    if (questEnrolledAt && ((playType && completeGameQuestsInBackground) || (watchType && completeVideoQuestsInBackground))) {
         if (!!intervalData) {
             return getIntlMessage("QUESTS_VIDEO_WATCH_RESUME_WITH_TIME_CTA", { remainTime: progressFormatted })[0].replace(getIntlMessage("GAME_LIBRARY_UPDATES_ACTION_RESUME"), getIntlMessage(playType ? "USER_ACTIVITY_PLAYING" : "USER_ACTIVITY_WATCHING"));
         } else if (watchType || (playType && IS_DISCORD_DESKTOP)) {
@@ -832,7 +833,8 @@ function getQuestAcceptedButtonProps(quest: Quest, text: string) {
     return {
         disabled: shouldDisableQuestAcceptedButton(quest) ?? true,
         text: getQuestAcceptedButtonText(quest) ?? text,
-        onClick: () => { processQuestForAutoComplete(quest); }
+        onClick: () => { processQuestForAutoComplete(quest); },
+        icon: () => { }
     };
 }
 
@@ -1059,7 +1061,7 @@ export default definePlugin({
                     // Run Questify's sort function every time due to hook requirements but return
                     // early if not applicable. If the sort method is set to "Questify", replace the
                     // quests with the sorted ones. Also, setup a trigger to rerender the memo.
-                    match: /(?<=function \i\((\i),\i,\i\){let \i=\i.useRef.{0,100}?;)(return \i.useMemo\(\(\)=>{)/,
+                    match: /(?<=function \i\((\i),\i\){let \i=\i.useRef.{0,100}?;)(return \i.useMemo\(\(\)=>{)/,
                     replace: "const questRerenderTrigger=$self.useQuestRerender();const questifySorted=$self.sortQuests($1,arguments[1].sortMethod!==\"questify\");$2if(arguments[1].sortMethod===\"questify\"){$1=questifySorted;};"
                 },
                 {
@@ -1074,7 +1076,7 @@ export default definePlugin({
                 },
                 {
                     // Add the trigger to the memo for rerendering Quests order due to progress changes, etc.
-                    match: /(?<=id\);.{0,100}?,\i},\[\i,\i,\i)/,
+                    match: /(?<=id\);.{0,100}?,\i},\[\i,\i)/,
                     replace: ",questRerenderTrigger,questifySorted"
                 }
             ]
@@ -1198,8 +1200,13 @@ export default definePlugin({
                     // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress but not active.
                     // Then, when the Quest Accepted button is clicked, resume the automatic completion of the
                     // Quest and disable the button again.
-                    match: /(?<=fullWidth:!0}\)}\):.{0,150}?secondary",)disabled:!0,text:(.{0,30}?\["9KoPyM"\]\)),/,
+                    match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0,text:(.{0,30}?\["9KoPyM"\]\)),/,
                     replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1),"
+                },
+                {
+                    // Does the above for Play Activity Quests.
+                    match: /(?<=icon:.{0,15}?onClick:.{0,20}?,text:(\i),fullWidth:!0)/,
+                    replace: ",...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1)"
                 }
             ]
         },
