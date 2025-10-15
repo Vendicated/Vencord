@@ -45,7 +45,7 @@ function blockedComponentRender(sticker) {
 
     if (showGif) {
         elements.push(
-            <img key="gif" src="https://images.equicord.org/api/v1/files/raw/0199d8a2-2887-7000-a4b8-0c825f4a1728" style={{ width: "160px", borderRadius: "20px" }} />
+            <img key="gif" src="https://images.equicord.org/api/v1/files/raw/0199e730-70cd-7001-ab3b-4c0ff258ec79" style={{ width: "160px", borderRadius: "20px" }} />
         );
     }
 
