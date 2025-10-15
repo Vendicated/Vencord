@@ -74,8 +74,8 @@ export function ReplacementInput({ replacement, setReplacement, replacementError
                 className={Margins.top16}
                 value={isFunc}
                 onChange={setIsFunc}
-                title={"Treat as Function"}
-                description="'replacement' will be evaled if this is toggled"
+                title={"Treat Replacement as function"}
+                description='"Replacement" will be evaluated as a function if this is enabled'
                 hideBorder
             />
         </>
