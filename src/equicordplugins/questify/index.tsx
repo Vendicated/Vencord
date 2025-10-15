@@ -1205,7 +1205,7 @@ export default definePlugin({
                     // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress but not active.
                     // Then, when the Quest Accepted button is clicked, resume the automatic completion of the
                     // Quest and disable the button again.
-                    match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0,text:(.{0,30}?\["9KoPyM"\]\)),/,
+                    match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0,text:(.{0,30}?#{intl::QUEST_ACCEPTED}\)),/,
                     replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1),"
                 },
                 {
