@@ -16,8 +16,8 @@ export default definePlugin({
         {
             find: "#{intl::APP_TAG::hash}\":",
             replacement: {
-                match: /(#{intl::APP_TAG::hash}"):".*?"/,
-                replace: '$1:"BOT"'
+                match: /(9RNkeF":\[)"APP"/,
+                replace: '$1"BOT"'
             }
         }
     ],
