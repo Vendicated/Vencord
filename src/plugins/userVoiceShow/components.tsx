@@ -95,7 +95,10 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     const voiceStates = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStatesForChannel(channel.id));
 
     const users = useMemo(
-        () => Object.values(voiceStates).map(voiceState => UserStore.getUser(voiceState.userId)).filter(user => user != null),
+        () => Object.values(voiceStates).map(voiceState => {
+            const vs: any = voiceState;
+            return UserStore.getUser(vs.userId);
+        }).filter(user => user != null),
         [voiceStates]
     );
 

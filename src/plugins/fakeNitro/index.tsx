@@ -38,8 +38,9 @@ function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
     if (!field) return;
 
-    const fieldGetter = Object.values(field).find(value => typeof value === "function") as any;
-    return fieldGetter?.();
+    const fieldGetter = Object.values(field).find(value => typeof value === "function");
+    if (typeof fieldGetter === "function") return (fieldGetter as Function)();
+    return undefined;
 }
 
 const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
@@ -757,7 +758,7 @@ export default definePlugin({
 
         gif.finish();
 
-        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+    const file = new File([gif.bytesView() as unknown as ArrayBuffer], `${stickerId}.gif`, { type: "image/gif" });
         UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DraftType.ChannelMessage);
     },
 

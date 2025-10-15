@@ -8,7 +8,7 @@ import "./Button.css";
 
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
-import type { Button as DiscordButton } from "@vencord/discord-types";
+import { Button as DiscordButton } from "@vencord/discord-types";
 import type { ComponentPropsWithRef } from "react";
 
 import { OpenExternalIcon } from "./Icons";
@@ -48,7 +48,7 @@ export function TextButton({ variant = "primary", className, ...restProps }: Tex
 
 // #region Old compability
 
-export const ButtonCompat: DiscordButton = function ButtonCompat({ look, color = "BRAND", size = "medium", ...restProps }) {
+export const ButtonCompat: typeof DiscordButton = function ButtonCompat({ look, color = "BRAND", size = "medium", ...restProps }) {
     return look === "LINK"
         ? <TextButton variant={TextButtonPropsColorMapping[color]} {...restProps as TextButtonProps} />
         : <Button variant={ButtonColorMapping[color]} size={size as ButtonSize} {...restProps as ButtonProps} />;

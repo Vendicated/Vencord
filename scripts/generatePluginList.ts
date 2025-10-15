@@ -22,7 +22,18 @@ import { join, sep } from "path";
 import { normalize as posixNormalize, sep as posixSep } from "path/posix";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
-import { getPluginTarget } from "./utils.mjs";
+// utils.mjs is an ESM module; importing it statically from a CommonJS/ts file
+// triggers TS1479. Use a dynamic import where needed instead.
+let getPluginTarget: (file: string) => string | undefined;
+(async () => {
+    try {
+        const mod = await import("./utils.mjs");
+        getPluginTarget = mod.getPluginTarget;
+    } catch (e) {
+        // If dynamic import fails at build-time, leave undefined — callers already guard
+        getPluginTarget = () => undefined;
+    }
+})();
 
 interface Dev {
     name: string;

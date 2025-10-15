@@ -68,8 +68,8 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
             action={() => {
                 const guild = GuildStore.getGuild(guildId);
 
-                const { permissions, header } = match(type)
-                    .returnType<{ permissions: RoleOrUserPermission[], header: string; }>()
+                const rawResult = match(type)
+                    .returnType<any>()
                     .with(MenuItemParentType.User, () => {
                         const member = GuildMemberStore.getMember(guildId, id!)!;
 
@@ -117,7 +117,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                             header: guild.name
                         };
                     });
-
+                const { permissions, header } = rawResult as { permissions: RoleOrUserPermission[]; header: string };
                 openRolesAndUsersPermissionsModal(permissions, guild, header);
             }}
         />

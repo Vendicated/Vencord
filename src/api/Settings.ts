@@ -84,7 +84,7 @@ const DefaultSettings: Settings = {
     themeLinks: [],
     eagerPatches: IS_REPORTER,
     enabledThemes: [],
-    enableReactDevtools: false,
+    enableReactDevtools: true,
     frameless: false,
     transparent: false,
     winCtrlQ: false,

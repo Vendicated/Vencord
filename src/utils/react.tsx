@@ -93,7 +93,8 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
     const opts: Required<AwaiterOpts<T | null>> = Object.assign({
         fallbackValue: null,
         deps: [],
-        onError: null,
+        onError: () => {},
+        onSuccess: () => {}
     }, providedOpts);
     const [state, setState] = useState({
         value: opts.fallbackValue,

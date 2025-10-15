@@ -53,12 +53,14 @@ export const getBuildNumber = makeLazy(() => {
     }
 });
 
-export function getFactoryPatchedSource(moduleId: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
-    return webpackRequire.m[moduleId]?.[SYM_PATCHED_SOURCE];
+export function getFactoryPatchedSource(moduleId: PropertyKey, webpackRequire?: AnyWebpackRequire) {
+    const req = webpackRequire ?? wreq;
+    return req.m[moduleId]?.[SYM_PATCHED_SOURCE];
 }
 
-export function getFactoryPatchedBy(moduleId: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
-    return webpackRequire.m[moduleId]?.[SYM_PATCHED_BY];
+export function getFactoryPatchedBy(moduleId: PropertyKey, webpackRequire?: AnyWebpackRequire) {
+    const req = webpackRequire ?? wreq;
+    return req.m[moduleId]?.[SYM_PATCHED_BY];
 }
 
 const logger = new Logger("WebpackPatcher", "#8caaee");
@@ -372,8 +374,8 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
     const originalFactory = patchedFactory[SYM_ORIGINAL_FACTORY];
 
     if (patchedFactory === originalFactory) {
-        // @ts-expect-error Clear up ORIGINAL_FACTORY if the factory did not have any patch applied
-        delete patchedFactory[SYM_ORIGINAL_FACTORY];
+    // @ts-ignore Clear up ORIGINAL_FACTORY if the factory did not have any patch applied
+    delete patchedFactory[SYM_ORIGINAL_FACTORY];
     }
 
     let [module, exports, require] = argArray;

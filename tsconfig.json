@@ -1,46 +1,40 @@
 {
-    "compilerOptions": {
-        "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "skipLibCheck": false,
-        "allowJs": true,
-        "lib": [
-            "DOM",
-            "DOM.Iterable",
-            "esnext",
-            "esnext.array",
-            "esnext.asynciterable",
-            "esnext.symbol"
-        ],
-        "module": "esnext",
-        "moduleResolution": "node",
-        "strict": true,
-        "noImplicitAny": false,
-        "target": "ESNEXT",
-        "jsx": "preserve",
-
-        "baseUrl": "./src/",
-        "paths": {
-            "@main/*": ["./main/*"],
-            "@api/*": ["./api/*"],
-            "@components/*": ["./components/*"],
-            "@utils/*": ["./utils/*"],
-            "@shared/*": ["./shared/*"],
-            "@webpack/common": ["./webpack/common"],
-            "@webpack": ["./webpack/webpack"],
-            "@webpack/patcher": ["./webpack/patchWebpack"],
-            "@webpack/wreq.d": ["./webpack/wreq.d"],
-        },
-
-        "plugins": [
-            // Transform paths in output .d.ts files (Include this line if you output declarations files)
-            {
-                "transform": "typescript-transform-paths",
-                "afterDeclarations": true
-            }
-        ],
-        "outDir": "who-fucking-cares-dude"
-    },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+  "allowJs": false,
+  "noEmit": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@main/*": ["src/main/*"],
+      "@api/*": ["src/api/*"],
+      "@components/*": ["src/components/*"],
+      "@utils/*": ["src/utils/*"],
+      "@shared/*": ["src/shared/*"],
+      "@webpack/common": ["src/webpack/common"],
+      "@webpack": ["src/webpack/webpack"],
+      "@webpack/patcher": ["src/webpack/patchWebpack"],
+      "@webpack/wreq.d": ["src/webpack/wreq.d"],
+      "@api/Buttplug": ["src/types/buttplug"],
+      "@api/buttplug": ["src/types/buttplug"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "packages/**/*",
+    "src/types/**/*"
+  ],
+  "exclude": [
+    "**/*.js",
+    "**/*.mjs"
+  ]
 }
