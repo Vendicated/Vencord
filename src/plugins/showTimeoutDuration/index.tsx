@@ -18,7 +18,7 @@ import { ChannelStore, GuildMemberStore, Text, TooltipContainer } from "@webpack
 import { ReactNode } from "react";
 
 const countDownFilter = canonicalizeMatch(/#{intl::MAX_AGE_NEVER}/);
-const CountDown = findComponentLazy(m => countDownFilter.test(m.prototype?.render?.toString()));
+const CountDown = findComponentLazy(m => m.prototype?.render && countDownFilter.test(m.prototype.render.toString()));
 
 const enum DisplayStyle {
     Tooltip = "tooltip",
