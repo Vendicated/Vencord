@@ -51,7 +51,7 @@ migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessag
 migratePluginSettings("NoBlockedUsers", "NoBlockedMessages");
 
 const settings = definePluginSettings({
-    ignoreMessagesFromBlockedUsers: {
+    ignoreMessages: {
         description: "Prevents the client from receiving messages from blocked users (if you disable this, you will see invisible unread messages)",
         type: OptionType.BOOLEAN,
         // default to true because it hides unreads from appearing, which is preferred
