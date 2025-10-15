@@ -8,9 +8,10 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Menu } from "@webpack/common";
+import { Menu, UserStore } from "@webpack/common";
 
 const ThreadActions = findByPropsLazy("lockThread", "archiveThread");
+
 
 function CreateLockContext(): NavContextMenuPatchCallback {
     return (children, props) => {
@@ -24,9 +25,11 @@ function CreateLockContext(): NavContextMenuPatchCallback {
         const archiveButton = threadActions?.props.children.find(child => {
             return child?.props.id === "archive-thread" || child?.props.id === "unarchive-thread";
         });
-        if (!archiveButton) return;
+        const { ownerId } = props.channel;
+        const currentUser = UserStore.getCurrentUser();
+        if (ownerId !== currentUser.id) return;
         let lockLabel = "Lock Thread";
-        if (archiveButton.props?.label?.includes("Post")) lockLabel = "Lock Post";
+        if (props.channel.parentChannelThreadType === 15 || props.channel.parentChannelThreadType === 16) lockLabel = "Lock Post";
         const archiveButtonIndex = threadActions?.props.children.indexOf(archiveButton);
         threadActions?.props.children.splice(archiveButtonIndex + 1, 0,
             <Menu.MenuItem
