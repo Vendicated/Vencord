@@ -1,0 +1,106 @@
+.members-resizable {
+    position: relative;
+    min-width: 200px;
+    max-width: 400px;
+    width: 240px;
+    transition: width 0.1s ease;
+}
+
+.members-resizable[data-width="narrow"] .childContainer__91a9d {
+    width: 100%;
+    max-width: 180px;
+}
+
+.members-resizable[data-width="narrow"] .member__5d473 {
+    padding: 6px 8px;
+}
+
+.members-resizable[data-width="narrow"] .wrapper__44b0c {
+    width: 28px !important;
+    height: 28px !important;
+}
+
+.members-resizable[data-width="narrow"] .name__5d473 {
+    font-size: 13px;
+}
+
+.members-resizable[data-width="narrow"] .subText__91a9d {
+    font-size: 11px;
+}
+
+.members-resizable[data-width="medium"] .childContainer__91a9d {
+    width: 100%;
+    max-width: 220px;
+}
+
+.members-resizable[data-width="medium"] .member__5d473 {
+    padding: 8px 12px;
+}
+
+.members-resizable[data-width="medium"] .wrapper__44b0c {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.members-resizable[data-width="medium"] .name__5d473 {
+    font-size: 14px;
+}
+
+.members-resizable[data-width="medium"] .subText__91a9d {
+    font-size: 12px;
+}
+
+.members-resizable[data-width="wide"] .childContainer__91a9d {
+    width: 100%;
+    max-width: 360px;
+}
+
+.members-resizable[data-width="wide"] .member__5d473 {
+    padding: 10px 16px;
+}
+
+.members-resizable[data-width="wide"] .wrapper__44b0c {
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.members-resizable[data-width="wide"] .name__5d473 {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.members-resizable[data-width="wide"] .subText__91a9d {
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+.member-list-resizable {
+    width: 100%;
+    height: 100%;
+}
+
+.member-list-resize-handle {
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 10px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.members-resizable:hover .member-list-resize-handle {
+    opacity: 1;
+}
+
+.member-list-resize-handle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.member-list-resize-handle:active {
+    background: rgba(255, 255, 255, 0.2);
+    opacity: 1;
+}
