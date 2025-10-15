@@ -28,11 +28,6 @@
     justify-content: space-between;
 }
 
-.vc-decor-change-decoration-modal-footer-btn-container {
-    display: flex;
-    flex-direction: row-reverse;
-}
-
 .vc-decor-create-decoration-modal-content {
     display: flex;
     flex-direction: column;
@@ -53,6 +48,12 @@
     padding: 16px;
 }
 
+.vc-decor-modal-footer-btn-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+}
+
 .vc-decor-create-decoration-modal-form {
     display: flex;
     flex-direction: column;
@@ -65,8 +66,10 @@
     flex-direction: column;
     overflow: hidden scroll;
     max-height: 512px;
-    width: 352px; /* ((80 + 8 (grid gap)) * desired columns) (scrolled takes the extra 8 padding off conveniently) */
     gap: 12px;
+
+    /* ((80 + 8 (grid gap)) * desired columns) (scrolled takes the extra 8 padding off conveniently) */
+    width: 352px;
 }
 
 .vc-decor-sectioned-grid-list-grid {
