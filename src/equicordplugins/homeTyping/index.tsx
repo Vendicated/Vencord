@@ -38,8 +38,8 @@ export default definePlugin({
                     },
                     // define isTyping earlier in the function so i dont bReAk ThE rUlEs Of HoOkS
                     {
-                        match: /(clearTimeout\(\i\)};)if\(null==\i\)return null;/,
-                        replace: "$1 let vcIsTyping = $self.isTyping();"
+                        match: /if\(null==\i\)return null;/,
+                        replace: "let vcIsTyping = $self.isTyping();$&"
                     }
                 ],
             group: true

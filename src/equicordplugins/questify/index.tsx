@@ -1220,7 +1220,7 @@ export default definePlugin({
             // DM button highlight logic while the Quest button is visible.
             find: "GLOBAL_DISCOVERY),",
             replacement: {
-                match: /(pathname:(\i)}.{0,250}?return )/,
+                match: /((\i)!==\i\.\i\.ME_ACTIVITY;return )/,
                 replace: "$1$self.disguiseHomeButton($2)?false:"
             }
         }
