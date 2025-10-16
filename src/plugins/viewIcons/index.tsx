@@ -24,7 +24,7 @@ import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Guild, User } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
-import { MouseEvent } from "react";
+import type { MouseEvent } from "react";
 
 
 interface UserContextProps {
@@ -210,7 +210,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
-                    replace: '$&style:{cursor:"pointer"},onClick:(e)=>{$self.openAvatar($1, e)},',
+                    replace: '$&style:{cursor:"pointer"},onClick:e=>{$self.openAvatar($1,e)},',
                 }
             ],
             all: true
@@ -220,7 +220,7 @@ export default definePlugin({
             find: 'backgroundColor:"COMPLETE"',
             replacement: {
                 match: /(\.banner,.+?),style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\2,)/,
-                replace: (_, rest, bannerSrc) => `${rest},onClick:(e)=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}, e),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
+                replace: (_, rest, bannerSrc) => `${rest},onClick:e=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc},e),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
@@ -229,7 +229,7 @@ export default definePlugin({
             replacement: {
                 match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
                 // We have to check that icon is not an unread GDM in the server bar
-                replace: (m, iconUrl) => `${m},onClick:(e)=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl}, e)`
+                replace: (m, iconUrl) => `${m},onClick:e=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl},e)`
             }
         },
         // User DMs top small icon
@@ -237,7 +237,7 @@ export default definePlugin({
             find: ".cursorPointer:null,children",
             replacement: {
                 match: /(?=,src:(\i.getAvatarURL\(.+?[)]))/,
-                replace: (_, avatarUrl) => `,onClick:(e)=>$self.openAvatar(${avatarUrl},e)`
+                replace: (_, avatarUrl) => `,onClick:e=>$self.openAvatar(${avatarUrl},e)`
             }
         },
         // User Dms top large icon
@@ -245,7 +245,7 @@ export default definePlugin({
             find: 'experimentLocation:"empty_messages"',
             replacement: {
                 match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
-                replace: (_, avatarUrl) => `onClick:(e)=>$self.openAvatar(${avatarUrl},e),`
+                replace: (_, avatarUrl) => `onClick:e=>$self.openAvatar(${avatarUrl},e),`
             }
         }
     ]
