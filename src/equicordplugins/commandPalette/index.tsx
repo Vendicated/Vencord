@@ -1,142 +1,157 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
-import { Devs } from "@utils/constants";
-import { closeAllModals } from "@utils/modal";
+import { EquicordDevs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { SettingsRouter, useState } from "@webpack/common";
 
-import { registerAction } from "./commands";
-import { openCommandPalette } from "./components/CommandPalette";
+import { cleanupCommandPaletteRuntime, registerBuiltInCommands, wrapChatBarChildren } from "./registry";
+import { CommandPaletteSettingsPanel } from "./settingsPanel";
+import { openCommandPalette } from "./ui";
 
-const cl = classNameFactory("vc-command-palette-");
-let isRecordingGlobal: boolean = false;
+const DEFAULT_KEYS = IS_MAC ? ["Meta", "Shift", "P"] : ["Control", "Shift", "P"];
+const DEFAULT_HOTKEY = DEFAULT_KEYS.join("+");
+
+let openScheduled = false;
 
 export const settings = definePluginSettings({
     hotkey: {
-        description: "The hotkey to open the command palette.",
-        type: OptionType.COMPONENT,
-        default: ["Control", "Shift", "P"],
-        component: () => {
-            const [isRecording, setIsRecording] = useState(false);
-
-            const recordKeybind = (setIsRecording: (value: boolean) => void) => {
-                const keys: Set<string> = new Set();
-                const keyLists: string[][] = [];
-
-                setIsRecording(true);
-                isRecordingGlobal = true;
-
-                const updateKeys = () => {
-                    if (keys.size === 0 || !document.querySelector(`.${cl("key-recorder-button")}`)) {
-                        const longestArray = keyLists.reduce((a, b) => a.length > b.length ? a : b);
-                        if (longestArray.length > 0) {
-                            settings.store.hotkey = longestArray.map(key => key.toLowerCase());
-                        }
-                        setIsRecording(false);
-                        isRecordingGlobal = false;
-                        document.removeEventListener("keydown", keydownListener);
-                        document.removeEventListener("keyup", keyupListener);
-                    }
-                    keyLists.push(Array.from(keys));
-                };
-
-                const keydownListener = (e: KeyboardEvent) => {
-                    const { key } = e;
-                    if (!keys.has(key)) {
-                        keys.add(key);
-                    }
-                    updateKeys();
-                };
-
-                const keyupListener = (e: KeyboardEvent) => {
-                    keys.delete(e.key);
-                    updateKeys();
-                };
-
-                document.addEventListener("keydown", keydownListener);
-                document.addEventListener("keyup", keyupListener);
-            };
-
-            return (
-                <>
-                    <div className={cl("key-recorder-container")} onClick={() => recordKeybind(setIsRecording)}>
-                        <div className={`${cl("key-recorder")} ${isRecording ? cl("recording") : ""}`}>
-                            {settings.store.hotkey.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" + ")}
-                            <button className={`${cl("key-recorder-button")} ${isRecording ? cl("recording-button") : ""}`} disabled={isRecording}>
-                                {isRecording ? "Recording..." : "Record keybind"}
-                            </button>
-                        </div>
-                    </div>
-                </>
-            );
-        }
+        description: "Hotkey used to open the command palette (format: Ctrl+Shift+P)",
+        type: OptionType.STRING,
+        default: DEFAULT_HOTKEY
     },
-    allowMouseControl: {
-        description: "Allow the mouse to control the command palette.",
+    visualStyle: {
+        description: "Palette appearance",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Classic", value: "classic", default: true },
+            { label: "Polished", value: "polished" }
+        ]
+    },
+    showTags: {
+        description: "Display tag chips for commands",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    enableTagFilter: {
+        description: "Show the tag filter bar",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    customCommands: {
+        description: "Manage custom command palette entries",
+        type: OptionType.COMPONENT,
+        component: CommandPaletteSettingsPanel
     }
 });
 
+function getConfiguredHotkey() {
+    const raw = settings.store.hotkey;
+    const hotkeyString = typeof raw === "string" ? raw.trim() : "";
+
+    if (!hotkeyString) return DEFAULT_KEYS;
+
+    const parts = hotkeyString
+        .split("+")
+        .map(part => part.trim())
+        .filter(Boolean);
+
+    return parts.length > 0 ? parts : DEFAULT_KEYS;
+}
+
+function matchesHotkey(e: KeyboardEvent) {
+    const current = getConfiguredHotkey().map(key => key.toLowerCase());
+    const pressed = e.key.toLowerCase();
+    let nonModifierMatched = false;
+
+    for (const key of current) {
+        switch (key) {
+            case "control":
+            case "ctrl":
+                if (!(e.ctrlKey || (IS_MAC && e.metaKey))) return false;
+                continue;
+            case "meta":
+            case "cmd":
+            case "command":
+                if (!e.metaKey) return false;
+                continue;
+            case "shift":
+                if (!e.shiftKey) return false;
+                continue;
+            case "alt":
+            case "option":
+                if (!e.altKey) return false;
+                continue;
+            default:
+                if (pressed !== key) return false;
+                nonModifierMatched = true;
+        }
+    }
+
+    return nonModifierMatched || current.every(key => ["control", "ctrl", "meta", "cmd", "command", "shift", "alt", "option"].includes(key));
+}
+
+function shouldIgnoreTarget(target: EventTarget | null) {
+    if (!(target instanceof HTMLElement)) return false;
+    if (target.isContentEditable) return true;
+    const tag = target.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+}
+
+function hotkeyUsesModifiers() {
+    const keys = getConfiguredHotkey();
+    return keys.some(key => {
+        const lower = key.toLowerCase();
+        return lower === "control"
+            || lower === "ctrl"
+            || lower === "meta"
+            || lower === "cmd"
+            || lower === "command"
+            || lower === "alt"
+            || lower === "option";
+    });
+}
 
 export default definePlugin({
     name: "CommandPalette",
-    description: "Allows you to navigate the UI with a keyboard.",
-    authors: [Devs.Ethan],
+    description: "Quickly run actions through a searchable command palette",
+    authors: [EquicordDevs.justjxke],
     settings,
+    patches: [
+        {
+            find: '"sticker")',
+            replacement: {
+                match: /(\.buttons,children:)(\i)/,
+                replace: "$1$self.wrapChatBarChildren($2)"
+            }
+        }
+    ],
 
     start() {
-        document.addEventListener("keydown", this.event);
-
-        registerAction({
-            id: "openDevSettings",
-            label: "Open Dev tab",
-            callback: () => SettingsRouter.open("EquicordPatchHelper"),
-            registrar: "Equicord"
-        });
+        registerBuiltInCommands();
+        window.addEventListener("keydown", this.handleKeydown);
     },
 
     stop() {
-        document.removeEventListener("keydown", this.event);
+        window.removeEventListener("keydown", this.handleKeydown);
+        openScheduled = false;
+        cleanupCommandPaletteRuntime();
     },
 
+    handleKeydown(e: KeyboardEvent) {
+        if (!matchesHotkey(e)) return;
+        if (shouldIgnoreTarget(e.target) && !hotkeyUsesModifiers()) return;
+        e.preventDefault();
+        if (openScheduled) return;
+        openScheduled = true;
+        requestAnimationFrame(() => {
+            openScheduled = false;
+            openCommandPalette();
+        });
+    },
 
-    event(e: KeyboardEvent) {
-
-        enum Modifiers {
-            control = "ctrlKey",
-            shift = "shiftKey",
-            alt = "altKey",
-            meta = "metaKey"
-        }
-
-        const { hotkey } = settings.store;
-        const pressedKey = e.key.toLowerCase();
-
-        if (isRecordingGlobal) return;
-
-        for (let i = 0; i < hotkey.length; i++) {
-            const lowercasedRequiredKey = hotkey[i].toLowerCase();
-
-            if (lowercasedRequiredKey in Modifiers && !e[Modifiers[lowercasedRequiredKey]]) {
-                return;
-            }
-
-            if (!(lowercasedRequiredKey in Modifiers) && pressedKey !== lowercasedRequiredKey) {
-                return;
-            }
-        }
-
-        closeAllModals();
-
-        if (document.querySelector(`.${cl("root")}`)) return;
-
-        openCommandPalette();
-    }
+    wrapChatBarChildren,
 });
