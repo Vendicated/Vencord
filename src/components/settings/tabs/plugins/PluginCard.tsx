@@ -8,9 +8,8 @@ import { showNotice } from "@api/Notices";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { proxyLazy } from "@utils/lazy";
-import { classes, isObjectEmpty } from "@utils/misc";
+import { isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { React, showToast, Toasts } from "@webpack/common";
 import { Settings } from "Vencord";
 
@@ -19,8 +18,6 @@ import { openPluginModal } from "./PluginModal";
 
 // Avoid circular dependency
 const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } = proxyLazy(() => require("plugins") as typeof import("plugins"));
-
-export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
@@ -98,7 +95,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 <button
                     role="switch"
                     onClick={() => openPluginModal(plugin, onRestartNeeded)}
-                    className={classes(ButtonClasses.button, cl("info-button"))}
+                    className={cl("info-button")}
                 >
                     {plugin.options && !isObjectEmpty(plugin.options)
                         ? <CogWheel className={cl("info-icon")} />

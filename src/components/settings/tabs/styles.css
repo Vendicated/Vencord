@@ -54,7 +54,7 @@
 }
 
 .vc-settings-theme-links:focus {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-lowest);
 }
 
 .vc-cloud-settings-sync-grid {
