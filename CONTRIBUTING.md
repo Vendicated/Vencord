@@ -1,6 +1,6 @@
-# Contributing to Vencord
+# Contributing to Equicord
 
-Vencord is a community project and welcomes any kind of contribution from anyone!
+Equicord is a community project and welcomes any kind of contribution from anyone!
 
 We have development documentation for new contributors, which can be found at <https://docs.equicord.org>.
 
