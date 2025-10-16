@@ -83,7 +83,7 @@ export default definePlugin({
         {
             find: '"sticker")',
             replacement: {
-                match: /(.buttons,children:)(\i)\}/,
+                match: /(.buttons,children:)(.+?)\}/,
                 replace: "$1$self.buttonsInner($2)}"
             }
         }

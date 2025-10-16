@@ -124,8 +124,8 @@ export default definePlugin({
         {
             find: '"sticker")',
             replacement: {
-                match: /(\.buttons,children:)(\i)/,
-                replace: "$1$self.wrapChatBarChildren($2)"
+                match: /(\.buttons,children:)(.+?)\}/,
+                replace: "$1$self.wrapChatBarChildren($2)}"
             }
         }
     ],
