@@ -26,7 +26,7 @@ export interface FormSwitchProps {
 
 export function FormSwitch({ onChange, title, value, description, disabled, className, hideBorder }: FormSwitchProps) {
     return (
-        <div className="vc-form-switch-wrapper">
+        <label className="vc-form-switch-wrapper">
             <div className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
                 <div className={"vc-form-switch-text"}>
                     <Span size="md" weight="medium">{title}</Span>
@@ -36,7 +36,7 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
                 <Switch checked={value} onChange={onChange} disabled={disabled} />
             </div>
             {!hideBorder && <Divider className="vc-form-switch-border" />}
-        </div>
+        </label>
     );
 }
 

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
@@ -32,6 +32,8 @@ import { Activity } from "@vencord/discord-types";
 import { ActivityType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, React, UserStore } from "@webpack/common";
+
+import { RPCSettings } from "./RpcSettings";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityView = findComponentByCodeLazy(".party?(0", ".card");
@@ -49,209 +51,32 @@ export const enum TimestampMode {
     CUSTOM,
 }
 
-const settings = definePluginSettings({
-    appID: {
-        type: OptionType.STRING,
-        description: "Application ID (required)",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (!value) return "Application ID is required.";
-            if (value && !/^\d+$/.test(value)) return "Application ID must be a number.";
-            return true;
-        }
+export const settings = definePluginSettings({
+    config: {
+        type: OptionType.COMPONENT,
+        component: RPCSettings
     },
-    appName: {
-        type: OptionType.STRING,
-        description: "Application name (required)",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (!value) return "Application name is required.";
-            if (value.length > 128) return "Application name must be not longer than 128 characters.";
-            return true;
-        }
-    },
-    details: {
-        type: OptionType.STRING,
-        description: "Details (line 1)",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (value && value.length > 128) return "Details (line 1) must be not longer than 128 characters.";
-            return true;
-        }
-    },
-    state: {
-        type: OptionType.STRING,
-        description: "State (line 2)",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (value && value.length > 128) return "State (line 2) must be not longer than 128 characters.";
-            return true;
-        }
-    },
-    type: {
-        type: OptionType.SELECT,
-        description: "Activity type",
-        onChange: onChange,
-        options: [
-            {
-                label: "Playing",
-                value: ActivityType.PLAYING,
-                default: true
-            },
-            {
-                label: "Streaming",
-                value: ActivityType.STREAMING
-            },
-            {
-                label: "Listening",
-                value: ActivityType.LISTENING
-            },
-            {
-                label: "Watching",
-                value: ActivityType.WATCHING
-            },
-            {
-                label: "Competing",
-                value: ActivityType.COMPETING
-            }
-        ]
-    },
-    streamLink: {
-        type: OptionType.STRING,
-        description: "Twitch.tv or Youtube.com link (only for Streaming activity type)",
-        onChange: onChange,
-        disabled: isStreamLinkDisabled,
-        isValid: isStreamLinkValid
-    },
-    timestampMode: {
-        type: OptionType.SELECT,
-        description: "Timestamp mode",
-        onChange: onChange,
-        options: [
-            {
-                label: "None",
-                value: TimestampMode.NONE,
-                default: true
-            },
-            {
-                label: "Since discord open",
-                value: TimestampMode.NOW
-            },
-            {
-                label: "Same as your current time (not reset after 24h)",
-                value: TimestampMode.TIME
-            },
-            {
-                label: "Custom",
-                value: TimestampMode.CUSTOM
-            }
-        ]
-    },
-    startTime: {
-        type: OptionType.NUMBER,
-        description: "Start timestamp in milliseconds (only for custom timestamp mode)",
-        onChange: onChange,
-        disabled: isTimestampDisabled,
-        isValid: (value: number) => {
-            if (value && value < 0) return "Start timestamp must be greater than 0.";
-            return true;
-        }
-    },
-    endTime: {
-        type: OptionType.NUMBER,
-        description: "End timestamp in milliseconds (only for custom timestamp mode)",
-        onChange: onChange,
-        disabled: isTimestampDisabled,
-        isValid: (value: number) => {
-            if (value && value < 0) return "End timestamp must be greater than 0.";
-            return true;
-        }
-    },
-    imageBig: {
-        type: OptionType.STRING,
-        description: "Big image key/link",
-        onChange: onChange,
-        isValid: isImageKeyValid
-    },
-    imageBigTooltip: {
-        type: OptionType.STRING,
-        description: "Big image tooltip",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (value && value.length > 128) return "Big image tooltip must be not longer than 128 characters.";
-            return true;
-        }
-    },
-    imageSmall: {
-        type: OptionType.STRING,
-        description: "Small image key/link",
-        onChange: onChange,
-        isValid: isImageKeyValid
-    },
-    imageSmallTooltip: {
-        type: OptionType.STRING,
-        description: "Small image tooltip",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (value && value.length > 128) return "Small image tooltip must be not longer than 128 characters.";
-            return true;
-        }
-    },
-    buttonOneText: {
-        type: OptionType.STRING,
-        description: "Button 1 text",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (value && value.length > 31) return "Button 1 text must be not longer than 31 characters.";
-            return true;
-        }
-    },
-    buttonOneURL: {
-        type: OptionType.STRING,
-        description: "Button 1 URL",
-        onChange: onChange
-    },
-    buttonTwoText: {
-        type: OptionType.STRING,
-        description: "Button 2 text",
-        onChange: onChange,
-        isValid: (value: string) => {
-            if (value && value.length > 31) return "Button 2 text must be not longer than 31 characters.";
-            return true;
-        }
-    },
-    buttonTwoURL: {
-        type: OptionType.STRING,
-        description: "Button 2 URL",
-        onChange: onChange
-    }
-});
-
-function onChange() {
-    setRpc(true);
-    if (Settings.plugins.CustomRPC.enabled) setRpc();
-}
-
-function isStreamLinkDisabled() {
-    return settings.store.type !== ActivityType.STREAMING;
-}
-
-function isStreamLinkValid(value: string) {
-    if (!isStreamLinkDisabled() && !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(value)) return "Streaming link must be a valid URL.";
-    if (value && value.length > 512) return "Streaming link must be not longer than 512 characters.";
-    return true;
-}
-
-function isTimestampDisabled() {
-    return settings.store.timestampMode !== TimestampMode.CUSTOM;
-}
-
-function isImageKeyValid(value: string) {
-    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//.test(value)) return "Don't use a Discord link. Use an Imgur image link instead.";
-    if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image (e.g. https://i.imgur.com/...). Right click the image and click 'Copy image address'";
-    if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image (e.g. https://media.tenor.com/...). Right click the GIF and click 'Copy image address'";
-    return true;
-}
+}).withPrivateSettings<{
+    appID?: string;
+    appName?: string;
+    details?: string;
+    state?: string;
+    type?: ActivityType;
+    streamLink?: string;
+    timestampMode?: TimestampMode;
+    startTime?: number;
+    endTime?: number;
+    imageBig?: string;
+    imageBigTooltip?: string;
+    imageSmall?: string;
+    imageSmallTooltip?: string;
+    buttonOneText?: string;
+    buttonOneURL?: string;
+    buttonTwoText?: string;
+    buttonTwoURL?: string;
+    partySize?: number;
+    partyMaxSize?: number;
+}>();
 
 async function createActivity(): Promise<Activity | undefined> {
     const {
@@ -270,7 +95,10 @@ async function createActivity(): Promise<Activity | undefined> {
         buttonOneText,
         buttonOneURL,
         buttonTwoText,
-        buttonTwoURL
+        buttonTwoURL,
+        partyMaxSize,
+        partySize,
+        timestampMode
     } = settings.store;
 
     if (!appName) return;
@@ -280,13 +108,13 @@ async function createActivity(): Promise<Activity | undefined> {
         name: appName,
         state,
         details,
-        type,
+        type: type ?? ActivityType.PLAYING,
         flags: 1 << 0,
     };
 
     if (type === ActivityType.STREAMING) activity.url = streamLink;
 
-    switch (settings.store.timestampMode) {
+    switch (timestampMode) {
         case TimestampMode.NOW:
             activity.timestamps = {
                 start: Date.now()
@@ -338,6 +166,11 @@ async function createActivity(): Promise<Activity | undefined> {
         };
     }
 
+    if (partyMaxSize && partySize) {
+        activity.party = {
+            size: [partySize, partyMaxSize]
+        };
+    }
 
     for (const k in activity) {
         if (k === "type") continue;
@@ -349,7 +182,7 @@ async function createActivity(): Promise<Activity | undefined> {
     return activity;
 }
 
-async function setRpc(disable?: boolean) {
+export async function setRpc(disable?: boolean) {
     const activity: Activity | undefined = await createActivity();
 
     FluxDispatcher.dispatch({
@@ -380,7 +213,7 @@ export default definePlugin({
     ],
 
     settingsAboutComponent: () => {
-        const activity = useAwaiter(createActivity);
+        const [activity] = useAwaiter(createActivity, { fallbackValue: undefined, deps: Object.values(settings.store) });
         const gameActivityEnabled = ShowCurrentGame.useSetting();
         const { profileThemeStyle } = useProfileThemeStyle({});
 
@@ -426,8 +259,8 @@ export default definePlugin({
                 <Divider className={Margins.top8} />
 
                 <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-faint)" }}>
-                    {activity[0] && <ActivityView
-                        activity={activity[0]}
+                    {activity && <ActivityView
+                        activity={activity}
                         user={UserStore.getCurrentUser()}
                         currentUser={UserStore.getCurrentUser()}
                     />}
