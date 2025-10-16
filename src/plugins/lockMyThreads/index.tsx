@@ -16,6 +16,7 @@ const ThreadActions = findByPropsLazy("lockThread", "archiveThread");
 
 function CreateLockContext(): NavContextMenuPatchCallback {
     return (children, props) => {
+        if (props.channel.threadMetadata.locked) return;
         const threadActions = children.find(child => {
             return child?.key === "thread-actions";
         });
