@@ -68,11 +68,18 @@ const settings = definePluginSettings({
     }
 });
 
-const openAvatar = (url: string, ev?: MouseEvent) => openImage(url, 512, 512, ev);
-const openBanner = (url: string, ev?: MouseEvent) => openImage(url, 1024, undefined, ev);
+const openAvatar = (url: string, event?: MouseEvent) => openImage({ url, width: 512, height: 512, event });
+const openBanner = (url: string, event?: MouseEvent) => openImage({ url, width: 1024, event });
 
-function openImage(url: string, width: number, height?: number, ev?: MouseEvent) {
-    ev?.stopPropagation();
+interface OpenImageProps {
+    url: string;
+    width: number;
+    height?: number;
+    event?: MouseEvent;
+}
+
+function openImage({ url, width, height, event }: OpenImageProps) {
+    event?.stopPropagation();
     const u = new URL(url, window.location.href);
 
     const format = url.startsWith("/")
