@@ -174,7 +174,7 @@ export default definePlugin({
         // @ts-expect-error
         toWrap.map = function (render: (item: SettingsEntry) => ReactElement<any>) {
             return this
-                .filter(a => a.items.length > 0)
+                .filter(a => a.items.length > 0 && !a.items.some(i => ["Developer Education", "Log Out"].includes(i.label)))
                 .map(({ label, items }) => {
                     const children = items.map(render);
                     if (label) {
