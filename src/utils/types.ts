@@ -214,7 +214,28 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
-    CUSTOM
+    CUSTOM,
+    ARRAY,
+    /**
+     * Array of users.
+     * A user context menu will be automatically added for this setting.
+     */
+    USERS,
+    /**
+     * Array of channels.
+     * A channel context menu will be automatically added for this setting.
+     */
+    CHANNELS,
+    /**
+     * Array of guilds.
+     * A guild context menu will be automatically added for this setting.
+     */
+    GUILDS,
+    /**
+     * Array of roles.
+     * A role context menu will be automatically added for this setting.
+     */
+    ROLES,
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -231,8 +252,9 @@ export type PluginSettingDef =
         | PluginSettingBooleanDef
         | PluginSettingSelectDef
         | PluginSettingSliderDef
-        | PluginSettingBigIntDef
-    ) & PluginSettingCommon);
+    | PluginSettingBigIntDef
+    | PluginSettingArrayDef
+) & PluginSettingCommon);
 
 export interface PluginSettingCommon {
     description: string;
@@ -316,6 +338,29 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
+export interface PluginSettingArrayDef {
+    type: OptionType.ARRAY | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS | OptionType.ROLES;
+    /**
+     * The text to show in the context-menu.
+     * If not specified, the setting name will be used.
+     * Only applies to User, Channel, Guild and Role arrays.
+     */
+    popoutText?: string | (() => string);
+    /**
+     * If the context-menu entry should be hidden.
+     * Only applies to User, Channel, Guild and Role arrays.
+     */
+    hidePopout?: boolean;
+    default?: string[];
+    /**
+     * If the setting used to be a string with a custom delimiter, you can specify the delimiter or a function to split the string
+     * @default ","
+     */
+    oldStringSeparator?: string | ((value: string) => string[]) | RegExp;
+
+    onChange?(newValue: string[]): void;
+}
+
 export interface IPluginOptionComponentProps {
     /**
      * Run this when the value changes.
@@ -344,9 +389,10 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? O extends { default: infer Default; } ? Default : any :
     O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
+    O extends PluginSettingArrayDef ? any[] :
     never;
 
-type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
+type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingArrayDef ? any[] : O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
 ) : O extends { default: infer T; } ? T : undefined;
 
@@ -398,7 +444,8 @@ export type PluginOptionsItem =
     | PluginOptionSelect
     | PluginOptionSlider
     | PluginOptionComponent
-    | PluginOptionCustom;
+    | PluginOptionCustom
+    | PluginOptionArray;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
@@ -406,6 +453,7 @@ export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & 
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
+export type PluginOptionArray = PluginSettingArrayDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:
