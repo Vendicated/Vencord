@@ -42,6 +42,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { m
             label="Translate"
             icon={TranslateIcon}
             action={async () => {
+                handleTranslate(message.id, { text: "Translating...", sourceLanguage: "..." });
                 const trans = await translate("received", content);
                 handleTranslate(message.id, trans);
             }}
@@ -86,6 +87,7 @@ export default definePlugin({
             message,
             channel: ChannelStore.getChannel(message.channel_id),
             onClick: async () => {
+                handleTranslate(message.id, { text: "Translating...", sourceLanguage: "..." });
                 const trans = await translate("received", content);
                 handleTranslate(message.id, trans);
             }
