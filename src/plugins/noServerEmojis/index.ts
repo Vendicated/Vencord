@@ -30,7 +30,7 @@ export default definePlugin({
         {
             find: "}searchWithoutFetchingLatest(",
             replacement: {
-                match: /\.get\((\i)\)\.nameMatchesChain\(\i\)\.reduce\(\((\i),(\i)\)=>\{/,
+                match: /\.get\((\i)\).{0,25}\.reduce\(\((\i),(\i)\)=>\{/,
                 replace: "$& if ($self.shouldSkip($1, $3)) return $2;"
             }
         }
