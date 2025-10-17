@@ -314,6 +314,12 @@ export interface PluginSettingSliderDef {
      * If false, allow users to select values in-between your markers.
      */
     stickToMarkers?: boolean;
+    /**
+     * If true, only allow integers to be selected.
+     *
+     * If {@link stickToMarkers} is enabled this will have no effect
+     */
+    onlyInts?: boolean;
 }
 
 export interface IPluginOptionComponentProps {
