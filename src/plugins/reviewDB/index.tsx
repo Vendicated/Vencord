@@ -26,7 +26,7 @@ import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Menu, Parser, TooltipContainer } from "@webpack/common";
+import { Alerts, Clickable, Menu, Parser, TooltipContainer } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
@@ -35,7 +35,7 @@ import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
+const BannerButtonClasses = findByPropsLazy("bannerButton");
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
@@ -84,9 +84,9 @@ export default definePlugin({
             }
         },
         {
-            find: ".SIDEBAR,shouldShowTooltip:",
+            find: ".SIDEBAR,disableToolbar:",
             replacement: {
-                match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
+                match: /children:\[(?=[^[]+?\.SIDEBAR}\),\i\.bot)/,
                 replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
             }
         }
@@ -149,16 +149,12 @@ export default definePlugin({
     BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: User; }) => {
         return (
             <TooltipContainer text="View Reviews">
-                <Button
+                <Clickable
                     onClick={() => openReviewsModal(user.id, user.username, ReviewType.User)}
-                    look={Button.Looks.FILLED}
-                    size={Button.Sizes.NONE}
-                    color={RoleButtonClasses.bannerColor}
-                    className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
-                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
+                    className={classes(BannerButtonClasses.bannerButton)}
                 >
                     <NotesIcon height={16} width={16} />
-                </Button>
+                </Clickable>
             </TooltipContainer>
         );
     }, { noop: true })

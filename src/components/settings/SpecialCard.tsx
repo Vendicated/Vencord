@@ -19,6 +19,7 @@
 import "./SpecialCard.css";
 
 import { classNameFactory } from "@api/Styles";
+import { Divider } from "@components/Divider";
 import { Card, Clickable, Forms, React } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
@@ -64,7 +65,7 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
             </div>
             {buttonTitle && (
                 <>
-                    <Forms.FormDivider className={cl("seperator")} />
+                    <Divider className={cl("seperator")} />
                     <Clickable onClick={onClick} className={cl("hyperlink")}>
                         <Forms.FormText className={cl("hyperlink-text")}>
                             {buttonTitle}

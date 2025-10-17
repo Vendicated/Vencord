@@ -38,11 +38,12 @@ interface SettingsSectionProps extends PropsWithChildren {
     description: string;
     error?: string | null;
     inlineSetting?: boolean;
+    tag?: "label" | "div";
 }
 
-export function SettingsSection({ name, description, error, inlineSetting, children }: SettingsSectionProps) {
+export function SettingsSection({ tag: Tag = "div", name, description, error, inlineSetting, children }: SettingsSectionProps) {
     return (
-        <div className={cl("section")}>
+        <Tag className={cl("section")}>
             <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
                 <div className={cl("label")}>
                     {name && <Text className={cl("title")} variant="text-md/medium">{wordsToTitle(wordsFromCamel(name))}</Text>}
@@ -51,6 +52,6 @@ export function SettingsSection({ name, description, error, inlineSetting, child
                 {children}
             </div>
             {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
-        </div>
+        </Tag>
     );
 }

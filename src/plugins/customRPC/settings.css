@@ -1,0 +1,31 @@
+.vc-customRPC-settings-root {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+
+    & h5 {
+        margin: 0;
+    }
+}
+
+.vc-customRPC-settings-pair {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+    gap: 0.5em;
+    width: 100%;
+}
+
+.vc-customRPC-settings-single {
+    display: grid;
+    gap: 0.5em;
+}
+
+.vc-customRPC-settings-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.vc-customRPC-settings-error {
+    color: var(--text-danger);
+}

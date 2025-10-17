@@ -29,6 +29,12 @@
     padding: 0;
     background: transparent;
     margin-right: 8px;
+    color: var(--icon-secondary);
+    transition: background-color .2s ease;
+
+    &:hover {
+        color: var(--interactive-hover)
+    }
 }
 
 .vc-plugins-settings-button:hover {

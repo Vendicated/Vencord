@@ -10,7 +10,7 @@ style.href = browser.runtime.getURL("dist/Vencord.css");
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-        document.documentElement.append(style);
+        document.body.insertAdjacentElement("afterend", style);
         window.postMessage({
             type: "vencord:meta",
             meta: {

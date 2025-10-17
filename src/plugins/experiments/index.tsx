@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
+import { Paragraph } from "@components/Paragraph";
 import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
@@ -72,13 +73,13 @@ export default definePlugin({
             }
         },
         {
-            find: 'H1,title:"Experiments"',
+            find: 'placeholder:"Search experiments"',
             replacement: {
-                match: 'title:"Experiments",children:[',
-                replace: "$&$self.WarningCard(),"
+                match: /(?<=children:\[)(?=\(0,\i\.jsx?\)\(\i\.\i,{placeholder:"Search experiments")/,
+                replace: "$self.WarningCard(),"
             }
         },
-        // Change top right chat toolbar button from the help one to the dev one
+        // Change top right toolbar button from the help one to the dev one
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
@@ -87,7 +88,14 @@ export default definePlugin({
             },
             predicate: () => settings.store.toolbarDevMenu
         },
-
+        // Disable opening the bug report menu when clicking the top right toolbar dev button
+        {
+            find: 'navId:"staff-help-popout"',
+            replacement: {
+                match: /(isShown.+?)onClick:\i/,
+                replace: (_, rest) => `${rest}onClick:()=>{}`
+            }
+        },
         // Make the Favourites Server experiment allow favouriting DMs and threads
         {
             find: "useCanFavoriteChannel",
@@ -137,14 +145,14 @@ export default definePlugin({
         return (
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
-                <Forms.FormText variant="text-md/normal">
+                <Paragraph size="md">
                     You can open Discord's DevTools via {" "}
                     <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
                         <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
                         <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
                         <kbd className={KbdStyles.key}>O</kbd>{" "}
                     </div>
-                </Forms.FormText>
+                </Paragraph>
             </React.Fragment>
         );
     },

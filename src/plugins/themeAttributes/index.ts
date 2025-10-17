@@ -5,6 +5,7 @@
  */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
@@ -66,12 +67,17 @@ export default definePlugin({
     },
 
     getMessageProps(props: { message: Message; }) {
-        const author = props.message?.author;
-        const authorId = author?.id;
-        return {
-            "data-author-id": authorId,
-            "data-author-username": author?.username,
-            "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
-        };
+        try {
+            const author = props.message?.author;
+            const authorId = author?.id;
+            return {
+                "data-author-id": authorId,
+                "data-author-username": author?.username,
+                "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
+            };
+        } catch (e) {
+            new Logger("ThemeAttributes").error("Error in getMessageProps", e);
+            return {};
+        }
     }
 });

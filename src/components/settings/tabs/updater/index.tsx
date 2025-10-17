@@ -17,6 +17,7 @@
 */
 
 import { useSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Link } from "@components/Link";
 import { handleSettingsTabError, SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
@@ -78,7 +79,7 @@ function Updater() {
                 (<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
             </Forms.FormText>
 
-            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
+            <Divider className={Margins.top8 + " " + Margins.bottom8} />
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 

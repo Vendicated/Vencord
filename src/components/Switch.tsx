@@ -18,28 +18,40 @@
 
 import "./Switch.css";
 
+import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
+import { useState } from "@webpack/common";
+import type { FocusEvent } from "react";
 
-interface SwitchProps {
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-    disabled?: boolean;
-}
+const switchCls = classNameFactory("vc-switch-");
 
 const SWITCH_ON = "var(--brand-500)";
 const SWITCH_OFF = "var(--primary-400)";
-const SwitchClasses = findByPropsLazy("slider", "input", "container");
+
+export interface SwitchProps {
+    disabled?: boolean;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+}
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
+    const [focusVisible, setFocusVisible] = useState(false);
+
+    // Due to how we wrap the invisible input, there is no good way to do this with css.
+    // We need it on the parent, not the input itself. For this, you can use either:
+    // - :focus-within ~ this shows also when clicking, not just on keyboard focus => SUCKS
+    // - :has(:focus-visible) ~ works but :has performs terribly inside Discord
+    // - JS event handlers ~ what we are using now
+    const handleFocusChange = (event: FocusEvent<HTMLInputElement>) => {
+        const target = event.currentTarget;
+        setFocusVisible(target.matches(":focus-visible"));
+    };
+
     return (
         <div>
-            <div className={classes(SwitchClasses.container, "default-colors", checked ? SwitchClasses.checked : void 0)} style={{
-                backgroundColor: checked ? SWITCH_ON : SWITCH_OFF,
-                opacity: disabled ? 0.3 : 1
-            }}>
+            <div className={classes(switchCls("container", { checked, disabled, focusVisible }))}>
                 <svg
-                    className={SwitchClasses.slider + " vc-switch-slider"}
+                    className={switchCls("slider")}
                     viewBox="0 0 28 20"
                     preserveAspectRatio="xMinYMid meet"
                     aria-hidden="true"
@@ -64,9 +76,11 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
                     </svg>
                 </svg>
                 <input
+                    onFocus={handleFocusChange}
+                    onBlur={handleFocusChange}
                     disabled={disabled}
                     type="checkbox"
-                    className={SwitchClasses.input}
+                    className={switchCls("input")}
                     tabIndex={0}
                     checked={checked}
                     onChange={e => onChange(e.currentTarget.checked)}
