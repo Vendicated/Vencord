@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Channel, Emoji } from "@vencord/discord-types";
 
 const settings = definePluginSettings({
     shownEmojis: {
@@ -26,25 +27,30 @@ export default definePlugin({
     authors: [Devs.UlyssesZhan],
     description: "Do not show server emojis in the autocomplete menu.",
     settings,
+
     patches: [
         {
             find: "}searchWithoutFetchingLatest(",
             replacement: {
-                match: /\.get\((\i)\)\.nameMatchesChain\(\i\)\.reduce\(\((\i),(\i)\)=>\{/,
-                replace: "$& if ($self.shouldSkip($1, $3)) return $2;"
+                match: /\.nameMatchesChain\(\i\)\.reduce\(\((\i),(\i)\)=>\{(?<=channel:(\i).+?)/,
+                replace: "$&if($self.shouldSkip($3,$2))return $1;"
             }
         }
     ],
-    shouldSkip(guildId: string, emoji: any) {
+
+    shouldSkip(channel: Channel | undefined | null, emoji: Emoji) {
         if (emoji.type !== 1) {
             return false;
         }
+
         if (settings.store.shownEmojis === "onlyUnicode") {
             return true;
         }
+
         if (settings.store.shownEmojis === "currentServer") {
-            return emoji.guildId !== guildId;
+            return emoji.guildId !== (channel != null ? channel.getGuildId() : null);
         }
+
         return false;
     }
 });
