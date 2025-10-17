@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Devs } from "@utils/constants";
+import { Devs, IS_LINUX } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { VoiceState } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
@@ -40,6 +40,7 @@ export default definePlugin({
     description: "Instantly screenshare when joining a voice channel",
     authors: [Devs.HAHALOSAH, Devs.thororen],
     settings,
+    hidden: IS_LINUX,
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const myId = UserStore.getCurrentUser().id;
@@ -60,5 +61,6 @@ export default definePlugin({
             }
         }
     },
+    getCurrentMedia,
 });
 
