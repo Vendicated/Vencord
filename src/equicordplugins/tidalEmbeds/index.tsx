@@ -18,27 +18,37 @@ export default definePlugin({
             find: "}renderEmbeds(",
             replacement: {
                 match: /(?<=renderEmbeds\(\i\){.+?embeds\.map\(\((\i),\i\)?=>{)/,
-                replace: '$&if($1?.provider?.name === "TIDAL")return null;'
+                replace: "$&if($self.isTidalEmbed($1))return null;"
             }
         }
     ],
 
+    isTidalEmbed(embed) {
+        return [
+            "https://tidal.com/album",
+            "https://tidal.com/track",
+            "https://tidal.com/browse/album",
+            "https://tidal.com/browse/track"
+        ].some(prefix => embed?.url?.startsWith?.(prefix));
+    },
+
     renderMessageAccessory({ message }) {
-        const tidalEmbed = message.embeds?.find(embed => embed.provider?.name === "TIDAL");
+        const tidalEmbed = message.embeds?.find(embed => this.isTidalEmbed(embed));
         if (!tidalEmbed) return null;
+
         const { url } = tidalEmbed;
-        const id = url.split("/").pop().split("?")[0];
-        const isAlbum = url.includes("/album/");
-        if (!id) {
-            console.warn("Tidal embed found without song ID", tidalEmbed);
-            return null;
-        }
-        const width = isAlbum ? 800 : 400;
+        const match = url.match(/\/(album|track)\/([0-9]+)/);
+        if (!match || !match[2]) return null;
+
+        const isAlbum = match[1] === "album";
+        const id = match[2];
+        const width = isAlbum ? 700 : 400;
         const height = isAlbum ? 300 : 100;
+        const src = `https://embed.tidal.com/${isAlbum ? "albums" : "tracks"}/${id}?disableAnalytics=true`;
         return (
             <div className="tidal-embed">
                 <iframe
-                    src={`https://embed.tidal.com/${isAlbum ? "albums" : "tracks"}/${id}?disableAnalytics=true`}
+                    src={src}
                     width={width}
                     height={height}
                     allow="encrypted-media"
