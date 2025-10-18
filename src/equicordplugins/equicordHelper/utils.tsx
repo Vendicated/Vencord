@@ -5,8 +5,8 @@
  */
 
 import { showNotice } from "@api/Notices";
+import { Settings } from "@api/Settings";
 import { Alerts, Toasts } from "@webpack/common";
-import { Settings } from "Vencord";
 
 function showErrorToast(message: string) {
     Toasts.show({

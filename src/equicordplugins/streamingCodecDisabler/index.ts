@@ -9,13 +9,15 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { MediaEngineStore } from "@webpack/common";
 
-const originalCodecStatuses: {
-    AV1: boolean,
+interface Codecs {
+    AV1: boolean;
     H265: boolean,
     H264: boolean;
     VP8: boolean;
     VP9: boolean;
-} = {
+}
+
+const originalCodecStatuses: Codecs = {
     AV1: true,
     H265: true,
     H264: true,
