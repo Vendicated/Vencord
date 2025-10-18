@@ -19,8 +19,6 @@
 import "./style.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
-import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
@@ -55,23 +53,16 @@ export default definePlugin({
         "message": messageCtxPatch
     },
 
-    start() {
-        addMessageAccessory("ec-translation", props => <Accessory message={props.message} />);
+    renderMessageAccessory: props => <Accessory message={props.message} />,
+    renderMessagePopoverButton: message => {
+        if (!message.content) return null;
 
-        addMessagePopoverButton("ec-translate", message => {
-            if (!message.content) return null;
-
-            return {
-                label: "Translate",
-                icon: Icon,
-                message: message,
-                channel: ChannelStore.getChannel(message.channel_id),
-                onClick: () => handleTranslate(message),
-            };
-        });
+        return {
+            label: "Translate",
+            icon: Icon,
+            message: message,
+            channel: ChannelStore.getChannel(message.channel_id),
+            onClick: () => handleTranslate(message),
+        };
     },
-    stop() {
-        removeMessagePopoverButton("ec-translate");
-        removeMessageAccessory("ec-translation");
-    }
 });

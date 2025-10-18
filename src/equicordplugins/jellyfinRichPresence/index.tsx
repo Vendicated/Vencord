@@ -89,14 +89,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
-    posterSource: {
-        description: "Choose which poster to display in Rich Presence",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Jellyfin", value: "jellyfin", default: true },
-            { label: "TheMovieDB", value: "tmdb" },
-        ],
-    },
     overrideRichPresenceType: {
         description: "Override the rich presence type",
         type: OptionType.SELECT,
