@@ -17,6 +17,7 @@
 */
 
 import { Heart } from "@components/Heart";
+import { t } from "@utils/translation";
 import { ButtonProps } from "@vencord/discord-types";
 import { Button } from "@webpack/common";
 
@@ -34,7 +35,7 @@ export default function DonateButton({
             className="vc-donate-button"
         >
             <Heart />
-            Donate
+            {t("vencord.donate")}
         </Button>
     );
 }
