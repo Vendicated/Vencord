@@ -1254,6 +1254,11 @@ export default definePlugin({
             validateAndOverwriteIgnoredQuests();
         },
 
+        QUESTS_USER_STATUS_UPDATE(data) {
+            QuestifyLogger.info(`[${getFormattedNow()}] [QUESTS_USER_STATUS_UPDATE]\n`, data);
+            validateAndOverwriteIgnoredQuests();
+        },
+
         // Stops any Game Quest background completion intervals for running games to prevent duplicate heartbeats.
         // This will also update the button text back to "Quest Accepted" from "Resume" if the Quest is in progress.
         RUNNING_GAMES_CHANGE(data) {
