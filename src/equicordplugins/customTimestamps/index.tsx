@@ -257,18 +257,18 @@ export default definePlugin({
             replacement: [
                 {
                     // Aria label on timestamps
-                    match: /\i.useMemo\(\(\)=>\(0,\i\.\i\)\((\i)\),\[\i]\),/,
-                    replace: "$self.renderTimestamp($1,'ariaLabel'),"
+                    match: /\i.useMemo\(.{0,10}\i\.\i\)\(.{0,10}\]\)/,
+                    replace: "$self.renderTimestamp(arguments[0].timestamp,'ariaLabel')"
                 },
                 {
                     // Timestamps on messages
-                    match: /\i\.useMemo\(\(\)=>null!=\i\?\(0,\i\.\i\)\(\i,\i\):(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\),\[\i,\i,\i]\)/,
-                    replace: "$self.renderTimestamp($2,$1?'compact':'cozy')",
+                    match: /\i\.useMemo\(.{0,50}"LT".{0,30}\]\)/,
+                    replace: "$self.renderTimestamp(arguments[0].timestamp,arguments[0].compact?'compact':'cozy')",
                 },
                 {
                     // Tooltips when hovering over message timestamps
-                    match: /__unsupportedReactNodeAsText:\(0,\i.\i\)\((\i),"LLLL"\)/,
-                    replace: "text:$self.renderTimestamp($1,'tooltip')",
+                    match: /(__unsupportedReactNodeAsText:).{0,25}"LLLL"\)/,
+                    replace: "$1$self.renderTimestamp(arguments[0].timestamp,'tooltip')",
                 },
             ]
         },
@@ -276,8 +276,8 @@ export default definePlugin({
             find: ".full,children:",
             replacement: {
                 // Tooltips for timestamp markdown (e.g. <t:1234567890>)
-                match: /(\i).full/,
-                replace: "$self.renderTimestamp(new Date($1.timestamp*1000),'tooltip')"
+                match: /(__unsupportedReactNodeAsText:)\i.full/,
+                replace: "$1$self.renderTimestamp(new Date(arguments[0].node.timestamp*1000),'tooltip')"
             }
         }
     ],
