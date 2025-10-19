@@ -9,7 +9,6 @@ import { isPluginEnabled, startDependenciesRecursive, startPlugin, stopPlugin } 
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { isObjectEmpty } from "@utils/misc";
-import { proxyLazy } from "@utils/lazy";
 import { Plugin } from "@utils/types";
 import { React, showToast, Toasts } from "@webpack/common";
 import { Settings } from "Vencord";
