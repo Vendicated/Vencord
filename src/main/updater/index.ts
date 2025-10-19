@@ -23,6 +23,9 @@ import gitRemote from "~git-remote";
 
 import { serializeErrors } from "./common";
 
-ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
-
-if (!IS_UPDATER_DISABLED) require(IS_STANDALONE ? "./http" : "./git");
+if (!IS_UPDATER_DISABLED) {
+    require(IS_STANDALONE ? "./http" : "./git");
+} else {
+    ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
+    ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(() => []));
+}
