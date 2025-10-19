@@ -7,11 +7,12 @@
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { Settings } from "Vencord";
 
 let accountId: string = "";
 let accessToken: string = "";
 let SpotifyAPI: any = null;
-let delay = 1000;
+let delay = Settings.plugins.SpotifyEpisodePresence.requestDelay;
 
 export default definePlugin({
 	name: "SpotifyEpisodePresence",
