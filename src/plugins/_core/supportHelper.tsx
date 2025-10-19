@@ -96,7 +96,6 @@ async function generateDebugInfoMessage() {
     }
 
     const commonIssues = {
-        "NoRPC enabled": isPluginEnabled("NoRPC"),
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
         "Vencord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
