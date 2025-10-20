@@ -1211,7 +1211,7 @@ export default definePlugin({
                 },
                 {
                     // Does the above for resuming Play Activity Quests.
-                    match: /(?<=icon:.{0,15}?onClick:.{0,20}?,text:(\i),fullWidth:!0)/,
+                    match: /(?<=icon:.{0,35}?onClick:.{0,20}?,text:(\i),fullWidth:!0)/,
                     replace: ",...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1)"
                 }
             ]
