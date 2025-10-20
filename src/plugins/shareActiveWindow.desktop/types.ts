@@ -74,3 +74,10 @@ export interface WindowDescriptor {
     readonly icon: string;
     readonly name: string;
 }
+
+export interface RtcConnectionStateEvent {
+    readonly channelId: string;
+    readonly context: string;
+    readonly hostname: string;
+    readonly state: "RTC_DISCONNECTED";
+}
