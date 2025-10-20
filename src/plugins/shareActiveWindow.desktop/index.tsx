@@ -12,7 +12,7 @@ import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
-import { CandidateGame, MediaEngineSetGoLiveSourceEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent, WindowDescriptor } from "./types";
+import { CandidateGame, MediaEngineSetGoLiveSourceEvent, RtcConnectionStateEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent, WindowDescriptor } from "./types";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 const logger = new Logger("ShareActiveWindow");
@@ -287,6 +287,14 @@ export default definePlugin({
                 sharingSettings.soundshareEnabled = sound;
             }
         },
+
+        RTC_CONNECTION_STATE(event: RtcConnectionStateEvent): void {
+            if (event.state === "RTC_DISCONNECTED") {
+                isSharingWindow = false;
+                sharingSettings = {};
+                stopActiveWindowLoop();
+            }
+        }
     },
 
     async start() {
