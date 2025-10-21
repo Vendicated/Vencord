@@ -68,8 +68,8 @@ export default definePlugin({
         {
             find: "voiceChannelEffect]:",
             replacement: {
-                match: /(?<=participantUserId:(\i).{0,2000}participantType:\i,platform:)(\i)(?=,className:\i\(\))/,
-                replace: "$self.getPlatform(false, $1)?.vcIcon||$2"
+                match: /(?<=participantUserId:(\i).{0,250}platform:(\i).*?muted:\i\}\);)/,
+                replace: "$2=$self.getPlatform(false, $1)?.vcIcon||$2;"
             }
         }
     ],
