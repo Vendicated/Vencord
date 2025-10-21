@@ -35,22 +35,15 @@ export default definePlugin({
         {
             find: "streamerPaused()",
             replacement: {
-                match: /return null![^}]+/,
-                replace: "return false"
+                match: /streamerPaused\(\)\{/,
+                replace: "$&return false;"
             }
         },
         {
-            find: "emptyPreviewWrapper,children",
+            find: "StreamTile",
             replacement: {
-                match: /paused:\i([^=])/,
-                replace: "paused:false$1"
-            }
-        },
-        {
-            find: "let{mainText:",
-            replacement: {
-                match: /let{[^;]+/,
-                replace: "return"
+                match: /\i\.\i\.isFocused\(\)/,
+                replace: "true"
             }
         }
     ],
