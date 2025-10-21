@@ -35,6 +35,12 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "1234567890123445,1234567890123445",
     },
+    channelList: {
+        description:
+            "List of channels to allow pings regardless of roles/users (separated by commas or spaces)",
+        type: OptionType.STRING,
+        default: "1234567890123445,1234567890123445",
+    },
     shouldPingListed: {
         description: "Behaviour",
         type: OptionType.SELECT,
@@ -60,20 +66,23 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoReplyMention",
     description: "Disables reply pings by default",
-    authors: [Devs.DustyAngel47, Devs.rae, Devs.pylix, Devs.outfoxxed],
+    authors: [Devs.DustyAngel47, Devs.rae, Devs.pylix, Devs.outfoxxed, Devs.fafa],
     settings,
 
     shouldMention(message: Message, isHoldingShift: boolean) {
-        let isListed = settings.store.userList.includes(message.author.id);
+        const { userList, roleList, channelList, shouldPingListed, inverseShiftReply } = settings.store;
+
+        let isListed = userList.includes(message.author.id);
 
         const channel = ChannelStore.getChannel(message.channel_id);
+
         if (channel?.guild_id && !isListed) {
             const roles = GuildMemberStore.getMember(channel.guild_id, message.author.id)?.roles;
-            isListed = !!roles && roles.some(role => settings.store.roleList.includes(role));
+            isListed = (!!roles && roles.some(role => roleList.includes(role))) || (channelList.includes(channel.id) || (!!channel?.parent_id && channelList.includes(channel?.parent_id)));
         }
 
-        const isExempt = settings.store.shouldPingListed ? isListed : !isListed;
-        return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
+        const isExempt = shouldPingListed ? isListed : !isListed;
+        return inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
     },
 
     patches: [
