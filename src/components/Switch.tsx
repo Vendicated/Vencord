@@ -20,6 +20,8 @@ import "./Switch.css";
 
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
+import { useState } from "@webpack/common";
+import type { FocusEvent } from "react";
 
 const switchCls = classNameFactory("vc-switch-");
 
@@ -33,9 +35,21 @@ export interface SwitchProps {
 }
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
+    const [focusVisible, setFocusVisible] = useState(false);
+
+    // Due to how we wrap the invisible input, there is no good way to do this with css.
+    // We need it on the parent, not the input itself. For this, you can use either:
+    // - :focus-within ~ this shows also when clicking, not just on keyboard focus => SUCKS
+    // - :has(:focus-visible) ~ works but :has performs terribly inside Discord
+    // - JS event handlers ~ what we are using now
+    const handleFocusChange = (event: FocusEvent<HTMLInputElement>) => {
+        const target = event.currentTarget;
+        setFocusVisible(target.matches(":focus-visible"));
+    };
+
     return (
         <div>
-            <div className={classes(switchCls("container"), "default-colors", switchCls({ checked, disabled }))}>
+            <div className={classes(switchCls("container", { checked, disabled, focusVisible }))}>
                 <svg
                     className={switchCls("slider")}
                     viewBox="0 0 28 20"
@@ -62,6 +76,8 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
                     </svg>
                 </svg>
                 <input
+                    onFocus={handleFocusChange}
+                    onBlur={handleFocusChange}
                     disabled={disabled}
                     type="checkbox"
                     className={switchCls("input")}
