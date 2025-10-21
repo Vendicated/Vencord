@@ -113,7 +113,19 @@ export default definePlugin({
                 match: /null==\i\|\|/,
                 replace: "true||$&"
             },
-        }
+        },
+        ...[
+            ".DEVELOPER_SECTION,",
+            '"LegacySettingsSidebarItem"'
+        ].map(find => ({
+            find,
+            replacement: [
+                {
+                    match: /\i\.\i\.isDeveloper/,
+                    replace: "true"
+                },
+            ]
+        })),
     ],
     renderMessageAccessory(props) {
         return (

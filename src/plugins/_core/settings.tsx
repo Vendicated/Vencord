@@ -68,15 +68,6 @@ export default definePlugin({
                 },
             ],
         },
-        {
-            find: ".DEVELOPER_SECTION,",
-            replacement: [
-                {
-                    match: /\i\.\i\.isDeveloper/,
-                    replace: "true"
-                },
-            ]
-        },
         // Fix the settings cog context menu to work properly
         {
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
