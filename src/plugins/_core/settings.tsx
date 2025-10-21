@@ -21,7 +21,7 @@ import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, U
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { React } from "@webpack/common";
+import { React, Text } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -71,8 +71,52 @@ export default definePlugin({
                 match: /(?<=function\((\i),(\i),\i\)\{)(?=let \i=Object.values\(\i\.\i\).+?(\(0,\i\.openUserSettings\))\()/,
                 replace: (_, settingsPanel, section, openUserSettings) => `${openUserSettings}(${settingsPanel},{section:${section}});return;`
             }
+        },
+        {
+            find: ".buildLayout().map",
+            replacement: {
+                match: /(\i)\.buildLayout\(\)(?=\.map)/,
+                replace: "$self.buildLayout($1)"
+            }
         }
     ],
+
+    buildLayout(originalLayoutBuilder: any) {
+        const layout = originalLayoutBuilder.buildLayout();
+        if (originalLayoutBuilder.key !== "$Root") return layout;
+
+        console.log({ originalLayoutBuilder, layout });
+        layout.unshift({
+            key: "vencord_section",
+            type: 1,
+            useLabel: () => "Vencord Settings",
+            buildLayout: () => [
+                {
+                    key: "vencord_settings",
+                    legacySearchKey: "VENCORD SETTINGS",
+                    type: 2,
+                    useTitle: () => "Vencord Settings",
+                    icon: () => null,
+                    buildLayout: () => [
+                        {
+                            key: "vencord_settings_panel",
+                            type: 3,
+                            useTitle: () => "Vencord Settings Panel",
+                            buildLayout: () => [{
+                                key: "vencord_settings_pane",
+                                type: 4,
+                                buildLayout: () => [],
+                                render: () => <Text>Hi</Text>,
+                                useTitle: () => "Vencord Settings Pane"
+                            }]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        return layout;
+    },
 
     customSections: [] as ((SectionTypes: SectionTypes) => any)[],
 
