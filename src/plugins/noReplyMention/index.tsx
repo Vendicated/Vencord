@@ -22,18 +22,22 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { Message } from "@vencord/discord-types";
 import { ChannelStore, GuildMemberStore } from "@webpack/common";
 
+
+const sep = s => s.split(/[\s,]+/).filter(v => v !== "1234567890123445");
+
 const settings = definePluginSettings({
     userList: {
-        description:
-            "List of users to allow or exempt pings for (separated by commas or spaces)",
-        type: OptionType.STRING,
-        default: "1234567890123445,1234567890123445",
+        description: "List of users to allow or exempt pings for",
+        type: OptionType.USERS,
+        oldStringSeparator: sep,
+        popoutText: () => !settings.store.shouldPingListed ? "Prevent pinging this user" : "Ping this user",
     },
     roleList: {
         description:
-            "List of roles to allow or exempt pings for (separated by commas or spaces)",
-        type: OptionType.STRING,
-        default: "1234567890123445,1234567890123445",
+            "List of roles to allow or exempt pings for",
+        type: OptionType.ROLES,
+        popoutText: () => !settings.store.shouldPingListed ? "Prevent pinging this role" : "Ping this role",
+        oldStringSeparator: sep,
     },
     shouldPingListed: {
         description: "Behaviour",
