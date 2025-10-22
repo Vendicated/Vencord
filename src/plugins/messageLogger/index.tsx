@@ -259,6 +259,22 @@ export default definePlugin({
                 const msg = cache.get(id);
                 if (!msg) return;
 
+                const isModalResponse = Boolean(
+                    (!msg.content || msg.content.trim() === "") &&
+                    (!msg.attachments || msg.attachments.length === 0) &&
+                    (!msg.embeds || msg.embeds.length === 0) &&
+                    (!msg.stickerItems || msg.stickerItems.length === 0) &&
+                    (!msg.components || msg.components.length === 0) &&
+                    !msg.poll &&
+                    !msg.call &&
+                    !msg.role_subscription_data &&
+                    !msg.activity);
+
+                if (isModalResponse) {
+                    cache = cache.remove(id);
+                    return;
+                }
+
                 const EPHEMERAL = 64;
                 const shouldIgnore = data.mlDeleted ||
                     (msg.flags & EPHEMERAL) === EPHEMERAL ||
