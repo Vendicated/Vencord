@@ -2,6 +2,10 @@
     flex: none !important;
 }
 
+.voice-user-button-container {
+    padding-right: 4px;
+}
+
 div[class^='list_'][class*='collapsed_'] .voice-user-buttons {
     display: none;
 }

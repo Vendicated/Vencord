@@ -5,3 +5,7 @@
     line-clamp: 1;
     white-space: unset;
 }
+
+[class^="page_"] > * {
+    min-width: 0;
+}
