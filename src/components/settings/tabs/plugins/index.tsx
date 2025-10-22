@@ -203,7 +203,7 @@ function PluginSettings() {
 
     const plugins = [] as JSX.Element[];
     const requiredPlugins = [] as JSX.Element[];
-    const userPlugins = Object.values(PluginMeta).some(p => p.userPlugin);
+    const userPlugins = !IS_STANDALONE && Object.values(PluginMeta).some(p => p.userPlugin);
 
     const showApi = searchValue.value.includes("API");
     for (const p of sortedPlugins) {
@@ -263,7 +263,7 @@ function PluginSettings() {
                         <Select
                             options={[
                                 { label: "Show All", value: SearchStatus.ALL, default: true },
-                                ...(userPlugins && !IS_STANDALONE ? [{ label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS }] : []),
+                                ...(userPlugins ? [{ label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS }] : []),
                                 { label: "Show Enabled", value: SearchStatus.ENABLED },
                                 { label: "Show Disabled", value: SearchStatus.DISABLED },
                                 { label: "Show New", value: SearchStatus.NEW }
