@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Forms, Text } from "@webpack/common";
@@ -41,22 +42,24 @@ function GuidelinesModal(props: ModalProps) {
             </Forms.FormText>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
-            <Button
-                onClick={() => {
-                    settings.store.agreedToGuidelines = true;
-                    props.onClose();
-                    openCreateDecorationModal();
-                }}
-            >
-                Continue
-            </Button>
-            <Button
-                onClick={props.onClose}
-                color={Button.Colors.PRIMARY}
-                look={Button.Looks.LINK}
-            >
-                Go Back
-            </Button>
+            <Flex style={{ gap: "4px" }}>
+                <Button
+                    onClick={() => {
+                        settings.store.agreedToGuidelines = true;
+                        props.onClose();
+                        openCreateDecorationModal();
+                    }}
+                >
+                    Continue
+                </Button>
+                <Button
+                    onClick={props.onClose}
+                    color={Button.Colors.PRIMARY}
+                    look={Button.Looks.LINK}
+                >
+                    Go Back
+                </Button>
+            </Flex>
         </ModalFooter>
     </ModalRoot>;
 }
