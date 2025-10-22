@@ -29,3 +29,6 @@ ExtensionCache/
 
 # vencord companion module cache
 .modules
+
+# wakatime related stuff
+.wakatime-project
