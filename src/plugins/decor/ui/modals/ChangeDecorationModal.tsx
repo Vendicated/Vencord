@@ -7,9 +7,8 @@
 import { Button as NewButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { openInviteModal } from "@utils/discord";
+import { copyWithToast, openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Queue } from "@utils/Queue";
 import { User } from "@vencord/discord-types";
