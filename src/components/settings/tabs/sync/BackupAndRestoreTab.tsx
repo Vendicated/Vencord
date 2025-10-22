@@ -36,7 +36,7 @@ function BackupAndRestoreTab() {
             <BaseText size="md" className={Margins.bottom8}>
                 You can import and export your Equicord settings as a JSON file.
                 This allows you to easily transfer your settings to another device,
-                or recover your settings after reinstalling Vencord or Discord.
+                or recover your settings after reinstalling Equicord or Discord.
             </BaseText>
             <BaseText size="md" className={Margins.bottom8}>
                 Settings Export contains:
