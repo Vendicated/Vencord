@@ -84,7 +84,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const [selectedItemIndex, selectItem] = useState(0);
     const selectedItem = permissions[selectedItemIndex];
 
-    const roles = GuildRoleStore.getRoles(guild.id);
+    const roles = GuildRoleStore.getRolesSnapshot(guild.id);
 
     return (
         <ModalRoot
@@ -92,7 +92,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             size={ModalSize.LARGE}
         >
             <ModalHeader>
-                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} permissions:</Text>
+                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} Permissions</Text>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
