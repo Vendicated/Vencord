@@ -18,7 +18,7 @@
 
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { runtimeHashMessageKey } from "@utils/intlHash";
+import { runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
@@ -92,14 +92,11 @@ export default definePlugin({
     shouldHide(props: MessageDeleteProps): boolean {
         try {
             const collapsedReason = props.collapsedReason();
-            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
-            const ignoredReason = settings.store.applyToIgnoredUsers
-                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
-                : null;
+            const is = (key: string) => collapsedReason === i18n.t[runtimeHashMessageKey(key)]() || collapsedReason === i18n.t[runtimeHashMessageKeyLegacy(key)]();
 
-            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
+            return is("BLOCKED_MESSAGE_COUNT") || (settings.store.applyToIgnoredUsers && is("IGNORED_MESSAGE_COUNT"));
         } catch (e) {
-            console.error(e);
+            new Logger("NoBlockedMessages").error("Failed to check if message should be hidden:", e);
             return false;
         }
     }
