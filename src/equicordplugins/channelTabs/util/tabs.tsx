@@ -113,7 +113,43 @@ let clearGhostTabs = () => {
     logger.warn("Clear ghost tab function not set");
 };
 
-export function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string, save = true) {
+export function createTab(props: BasicChannelTabsProps | ChannelTabsProps, switchToTab?: boolean, messageId?: string, save = true, bypassOneTabPerServer = false) {
+    // Important for the "One tab per server" feature, has to be before the maxOpenTabs check!
+    if (!bypassOneTabPerServer && settings.store.oneTabPerServer && props.guildId && props.guildId !== "@me") {
+        const existingTab = openTabs.find(tab => tab.guildId === props.guildId);
+        if (existingTab) {
+            existingTab.channelId = props.channelId;
+            existingTab.messageId = messageId;
+            existingTab.compact = "compact" in props ? props.compact : settings.store.openNewTabsInCompactMode;
+            if (switchToTab) {
+                moveToTab(existingTab.id);
+            } else {
+                update(save);
+            }
+            return;
+        }
+    }
+
+    const maxTabs = settings.store.maxOpenTabs;
+    const isLimitEnabled = maxTabs > 0;
+    const wouldExceedLimit = isLimitEnabled && openTabs.length >= maxTabs;
+
+    if (wouldExceedLimit) {
+        const currentTab = openTabs.find(t => t.id === currentlyOpenTab);
+        if (currentTab) {
+            currentTab.channelId = props.channelId;
+            currentTab.guildId = props.guildId;
+            currentTab.messageId = messageId;
+            currentTab.compact = "compact" in props ? props.compact : settings.store.openNewTabsInCompactMode;
+            if (switchToTab) {
+                update(save);
+            } else {
+                moveToTab(currentTab.id);
+            }
+        }
+        return;
+    }
+
     const id = genId();
     openTabs.push({ ...props, id, messageId, compact: "compact" in props ? props.compact : settings.store.openNewTabsInCompactMode });
     if (switchToTab) moveToTab(id);

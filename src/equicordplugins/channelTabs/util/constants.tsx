@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Logger } from "@utils/Logger";
-import { OptionType } from "@utils/types";
+import { makeRange, OptionType } from "@utils/types";
 import { SearchableSelect, useState } from "@webpack/common";
 import { JSX } from "react";
 
@@ -223,7 +223,7 @@ export const settings = definePluginSettings({
     hotkeyCount: {
         type: OptionType.SLIDER,
         description: "Number of tabs accessible via keyboard shortcuts",
-        markers: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        markers: makeRange(1, 9, 1),
         default: 3,
         stickToMarkers: true,
     },
@@ -356,6 +356,20 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Open all newly created tabs in compact mode by default",
         default: false,
+        restartNeeded: false
+    },
+    oneTabPerServer: {
+        type: OptionType.BOOLEAN,
+        description: "Limit to one tab per server, so opening a new channel in that server will use the existing tab.",
+        default: false,
+        restartNeeded: false
+    },
+    maxOpenTabs: {
+        type: OptionType.SLIDER,
+        description: "Maximum number of open tabs (0 = unlimited)",
+        markers: makeRange(0, 20, 1),
+        default: 0,
+        stickToMarkers: true,
         restartNeeded: false
     }
 });
