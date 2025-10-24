@@ -28,6 +28,11 @@ const settings = definePluginSettings({
         onChange: (value: string) => {
             setLocale(value || i18n.intl.currentLocale);
         }
+    },
+    showMissingKeys: {
+        type: OptionType.BOOLEAN,
+        description: t("translation.settings.showMissingKeys"),
+        default: false
     }
 });
 

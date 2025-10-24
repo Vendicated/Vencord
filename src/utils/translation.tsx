@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Settings } from "@api/Settings";
 import { negotiateLanguages } from "@fluent/langneg";
 import { React } from "@webpack/common";
 import type { JSX } from "react";
@@ -84,11 +85,11 @@ const dotProp = (key: string, object: any) =>
 function _t(key: string, bundle: TranslationBundle): string | undefined {
     const translation = dotProp(key, bundle);
 
-    if (typeof translation !== "string")
-        return undefined;
+    if (translation && typeof translation !== "string")
+        throw new Error(`Translation for key "${key}" is not a string!`);
 
     if (!translation) {
-        if (bundle !== translations.en) {
+        if (bundle !== translations.en && !Settings.plugins.Translation.showMissingKeys) {
             return _t(key, translations.en);
         } else {
             return undefined;

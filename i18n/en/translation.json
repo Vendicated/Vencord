@@ -4,6 +4,7 @@
     "forceLocale": {
       "description": "Force a different locale for Vencord to use",
       "followDiscord": "Default (follow Discord)"
-    }
+    },
+    "showMissingKeys": "If the current locale is missing translations, this will show the keys instead of falling back to English."
   }
 }
