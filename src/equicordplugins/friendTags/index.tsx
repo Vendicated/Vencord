@@ -38,9 +38,11 @@ function parseUsertags(text: string): string[] {
 
 function queryFriendTags(query) {
     GetData();
-    const tags = parseUsertags(query).map(e => e.toLowerCase());
+    const tags = parseUsertags(query);
 
-    const filteredTagObjects = SavedData.filter(data => data.tagName.length && data.userIds.length).filter(data => tags.some(tag => tag === data.tagName));
+    const filteredTagObjects = SavedData
+        .filter(data => data.tagName.length && data.userIds.length)
+        .filter(data => tags.some(tag => tag.toLowerCase() === data.tagName.toLowerCase()));
 
     if (filteredTagObjects.length === 0) return [];
 
