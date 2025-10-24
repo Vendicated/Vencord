@@ -25,9 +25,10 @@ let SavedData: UserTagData[] = [];
 const tagStoreName = "vc-friendtags-tags";
 
 function parseUsertags(text: string): string[] {
-    const match = text.match(/&(.+)/);
-    if (!match) return [];
-    return [match[1].trim()];
+    const matches = text.match(/&([^&]+)/g);
+    if (!matches) return [];
+    const tags = matches.map(match => match.substring(1).trim());
+    return tags.filter(tag => tag !== "");
 }
 
 function queryFriendTags(query) {
@@ -40,7 +41,7 @@ function queryFriendTags(query) {
     if (!filteredTagObjects.length) return [];
 
     const users = Array.from(new Set([...ChannelStore.getDMUserIds(), ...RelationshipStore.getFriendIDs()]))
-        .filter(user => filteredTagObjects.every(tag => tag.userIds.includes(user)));
+        .filter(user => filteredTagObjects.some(tag => tag.userIds.includes(user)));
 
     return users.map(user => {
         const userObject: any = UserStore.getUser(user);
@@ -183,7 +184,6 @@ function UserToTagID(user, tag, remove) {
 }
 
 const userPatch: NavContextMenuPatchCallback = (children, { user }) => {
-
     const buttonElement =
         <Menu.MenuItem
             id="vc-tag-group"
