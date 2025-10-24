@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: '"SystemMessageUtils.stringify(...) could not convert"',
             replacement: {
-                match: /{icon:.{0,45}body:\i}/,
+                match: /{icon:.{0,50}emoji:\i}/,
                 replace: "($self.makeTitle($&,...arguments))",
             }
         },
