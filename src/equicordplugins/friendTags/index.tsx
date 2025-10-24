@@ -25,42 +25,33 @@ let SavedData: UserTagData[] = [];
 const tagStoreName = "vc-friendtags-tags";
 
 function parseUsertags(text: string): string[] {
-    const regex = /&(\w+)/g;
-    const matches = text.match(regex);
-
-    if (matches) {
-        const tags = matches.map(match => match.substring(1));
-        return tags.filter(tag => tag !== "");
-    } else {
-        return [];
-    }
+    const match = text.match(/&(.+)/);
+    if (!match) return [];
+    return [match[1].trim()];
 }
 
 function queryFriendTags(query) {
-    GetData();
     const tags = parseUsertags(query);
+    if (!tags.length) return [];
 
     const filteredTagObjects = SavedData
         .filter(data => data.tagName.length && data.userIds.length)
         .filter(data => tags.some(tag => tag.toLowerCase() === data.tagName.toLowerCase()));
+    if (!filteredTagObjects.length) return [];
 
-    if (filteredTagObjects.length === 0) return [];
+    const users = Array.from(new Set([...ChannelStore.getDMUserIds(), ...RelationshipStore.getFriendIDs()]))
+        .filter(user => filteredTagObjects.every(tag => tag.userIds.includes(user)));
 
-    const users = Array.from(new Set([...ChannelStore.getDMUserIds(), ...RelationshipStore.getFriendIDs()])).filter(user => filteredTagObjects.every(tag => tag.userIds.includes(user)));
-
-    const response = users.map(user => {
+    return users.map(user => {
         const userObject: any = UserStore.getUser(user);
-        return (
-            {
-                "type": "USER",
-                "record": userObject,
-                "score": 20,
-                "comparator": userObject.globalName || userObject.username,
-                "sortable": userObject.globalName || userObject.username
-            }
-        );
+        return {
+            type: "USER",
+            record: userObject,
+            score: 20,
+            comparator: userObject.globalName || userObject.username,
+            sortable: userObject.globalName || userObject.username
+        };
     });
-    return response;
 }
 
 async function SetData() {
@@ -167,9 +158,7 @@ function TagConfigurationComponent() {
             }}>Add</Button>
         </>
     );
-
 }
-
 
 const settings = definePluginSettings({
     tagConfiguration: {
