@@ -16,6 +16,12 @@ import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ChannelStore, Menu, RelationshipStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 
+interface UserTagData {
+    tagName: string;
+    userIds: string[];
+}
+
+let SavedData: UserTagData[] = [];
 const tagStoreName = "vc-friendtags-tags";
 
 function parseUsertags(text: string): string[] {
@@ -29,7 +35,6 @@ function parseUsertags(text: string): string[] {
         return [];
     }
 }
-
 
 function queryFriendTags(query) {
     GetData();
@@ -54,13 +59,6 @@ function queryFriendTags(query) {
         );
     });
     return response;
-}
-
-let SavedData: UserTagData[] = [];
-
-interface UserTagData {
-    tagName: string;
-    userIds: string[];
 }
 
 async function SetData() {
@@ -128,16 +126,21 @@ function TagConfigCard(props) {
                     }
                 </div>
             </div>
-            <Button onClick={async () => {
-                SavedData = SavedData.filter(data => (data.tagName !== tagName));
-                await SetData();
-                update();
-            }} color={Button.Colors.RED}>Remove</Button>
+            <Button
+                onClick={async () => {
+                    SavedData = SavedData.filter(data => (data.tagName !== tagName));
+                    await SetData();
+                    update();
+                }}
+                color={Button.Colors.RED}
+            >
+                Remove
+            </Button>
         </>
     );
 }
-function TagConfigurationComponent() {
 
+function TagConfigurationComponent() {
     const update = useForceUpdater();
 
     return (
@@ -166,18 +169,17 @@ function TagConfigurationComponent() {
 }
 
 
-const settings = definePluginSettings(
-    {
-        tagConfiguration: {
-            type: OptionType.COMPONENT,
-            description: "The tag configuration component",
-            component: () => {
-                return (
-                    <TagConfigurationComponent />
-                );
-            }
+const settings = definePluginSettings({
+    tagConfiguration: {
+        type: OptionType.COMPONENT,
+        description: "The tag configuration component",
+        component: () => {
+            return (
+                <TagConfigurationComponent />
+            );
         }
-    });
+    }
+});
 
 function UserToTagID(user, tag, remove) {
     if (remove) {
@@ -200,22 +202,27 @@ const userPatch: NavContextMenuPatchCallback = (children, { user }) => {
                 const isTagged = SavedData.filter(e => e.tagName === tag.tagName)[0].userIds.includes(user.id);
 
                 return (
-                    <Menu.MenuItem label={`${isTagged ? "Remove from" : "Add to"} ${tag.tagName}`} key={`vc-tag-${tag.tagName}`} id={`vc-tag-${tag.tagName}`} action={() => { UserToTagID(user.id, tag.tagName, isTagged); }} />
+                    <Menu.MenuItem
+                        label={`${isTagged ? "Remove from" : "Add to"} ${tag.tagName}`}
+                        key={`vc-tag-${tag.tagName}`}
+                        id={`vc-tag-${tag.tagName}`}
+                        action={() => { UserToTagID(user.id, tag.tagName, isTagged); }}
+                    />
                 );
             })}
         </Menu.MenuItem>;
 
     children.push({ ...buttonElement });
-
 };
-
 
 export default definePlugin({
     name: "FriendTags",
-    description: "Allows you to filter by custom tags in the quick switcher",
+    description: "Allows you to filter by custom tags in the quick switcher by starting a search with &",
     authors: [Devs.Samwich],
     settings,
-    queryFriendTags: queryFriendTags,
+    contextMenus: {
+        "user-context": userPatch
+    },
     patches: [
         {
             find: "#{intl::QUICKSWITCHER_PLACEHOLDER}",
@@ -228,8 +235,5 @@ export default definePlugin({
     async start() {
         GetData();
     },
-    contextMenus:
-    {
-        "user-context": userPatch
-    }
+    queryFriendTags,
 });
