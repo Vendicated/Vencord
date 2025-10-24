@@ -80,17 +80,18 @@ function format(source: string, variables: Record<string, any>) {
 const dotProp = (key: string, object: any) =>
     key.split(".").reduce((obj, key) => obj?.[key], object);
 
-type MaybePluralTranslation = string | ({ [rule in Intl.LDMLPluralRule]?: string } & { other: string; });
-
 // translation retrieval function
-function _t(key: string, bundle: TranslationBundle): MaybePluralTranslation {
+function _t(key: string, bundle: TranslationBundle): string | undefined {
     const translation = dotProp(key, bundle);
+
+    if (typeof translation !== "string")
+        return undefined;
 
     if (!translation) {
         if (bundle !== translations.en) {
             return _t(key, translations.en);
         } else {
-            return key;
+            return undefined;
         }
     }
 
@@ -101,28 +102,34 @@ function _t(key: string, bundle: TranslationBundle): MaybePluralTranslation {
  * Translates a key. Soft-fails and returns the key if it is not valid.
  * @param key The key to translate.
  * @param variables The variables to interpolate into the resultant string. If dealing with plurals, `count` must be set.
- * @returns A translated string.
+ * @returns A translated string, or the translation key if it is not valid.
  */
 export function t(key: string, variables?: Record<string, any>): string {
     const getter = (): string => {
-        const translation = _t(key, loadedLocale);
-
-        if (typeof translation !== "string") {
-            if (!translation.other)
-                throw new Error(`translation key ${key} is an object, not a string or a plural`);
-
-            if (typeof variables?.count !== "number")
-                throw new Error(`translation key ${key} is plural and requires a numeric 'count' variable`);
-
+        if (typeof variables?.count === "number") {
+            // this seems plural!
             const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
                 new Intl.PluralRules(bestLocale).select(variables.count);
 
-            if (translation[pluralTag]) {
-                return format(translation[pluralTag]!, variables);
-            } else {
-                return format(translation.other, variables);
+            const translation = _t(`${key}_${pluralTag}`, loadedLocale);
+
+            if (typeof translation === "string") {
+                return format(translation, variables);
             }
+
+            // ...okay, maybe this form just isn't in this translation, try the "other" tag
+            const otherTranslation = _t(`${key}_other`, loadedLocale);
+
+            if (typeof otherTranslation === "string") {
+                return format(otherTranslation, variables);
+            }
+
+            // okay then, nevermind...
         }
+
+        const translation = _t(key, loadedLocale);
+
+        if (!translation) return key; // for easier debugging
 
         if (!variables) return translation;
 
@@ -132,7 +139,7 @@ export function t(key: string, variables?: Record<string, any>): string {
     // top level support hax (thank you vee!!)
     // tl;dr: this lets you use t at the top level in objects by simulating a string, a la:
     // {
-    //    description: t("clientTheme.description")
+    //    description: t("somePlugin.description")
     // }
     // and any future accesses of the description prop will result in an up to date translation
     const descriptor = {
@@ -168,12 +175,12 @@ interface TranslateProps {
  * @example
  * ```
  * // you can either do it plainly:
- * <Translate i18nKey="some.key">
+ * <Translate i18nKey="vencord.website">
  *     <Link href="https://vencord.dev" />
  * </Translate>
  *
  * // or, if you want to add some context:
- * <Translate i18nKey="some.key">
+ * <Translate i18nKey="vencord.website">
  *     Would you like to see our <Link href="https://vencord.dev">website</Link>?
  * </Translate>
  *
