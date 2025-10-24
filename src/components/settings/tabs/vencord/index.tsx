@@ -142,7 +142,7 @@ function VencordSettings() {
                     <SpecialCard
                         title={t("vencord.donorCard.donated.title")}
                         subtitle={t("vencord.donorCard.donated.subtitle")}
-                        description={t("vencord.donorCard.donated.description")}
+                        description={t("vencord.donorCard.donated.description", { v: "vending.machine" })}
                         cardImage={VENNIE_DONATOR_IMAGE}
                         backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"

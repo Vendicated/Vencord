@@ -21,7 +21,7 @@
   "donate": "Donate",
   "donorCard": {
     "donated": {
-      "description": "You can manage your perks at any time by messaging @vending.machine.",
+      "description": "You can manage your perks at any time by messaging @{v}.",
       "subtitle": "Thank you for donating!",
       "title": "Donations"
     },
