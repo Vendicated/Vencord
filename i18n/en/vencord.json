@@ -5,7 +5,7 @@
   "cloud": {
     "integrations": {
       "header": "Cloud Integrations",
-      "reauthenticateOtherClient": "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will \" + \"need to re-authenticate to continue using them. Click here to go to the settings page to do so!"
+      "reauthenticateOtherClient": "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will need to re-authenticate to continue using them. Click here to go to the settings page to do so!"
     },
     "settings": {
       "header": "Cloud Settings",
