@@ -14,6 +14,8 @@ export const ImageSrc = [...ConnectSrc, "img-src"];
 export const CssSrc = ["style-src", "font-src"];
 export const ImageAndCssSrc = [...ImageSrc, ...CssSrc];
 export const ImageScriptsAndCssSrc = [...ImageAndCssSrc, "script-src", "worker-src"];
+export const FrameSrc = ["frame-src"];
+export const FrameImageScriptsAndCssSrc = [...FrameSrc, ...ImageScriptsAndCssSrc];
 
 // Plugins can whitelist their own domains by importing this object in their native.ts
 // script and just adding to it. But generally, you should just edit this file instead
@@ -63,6 +65,7 @@ export const CspPolicies: PolicyMap = {
     "dearrow-thumb.ajay.app": ImageSrc, // Dearrow Thumbnail CDN
     "usrbg.is-hardly.online": ImageSrc, // USRBG API
     "icons.duckduckgo.com": ImageSrc, // DuckDuckGo Favicon API (Reverse Image Search)
+    "*.youtube-nocookie.com/": FrameImageScriptsAndCssSrc, // FixYoutubeEmbeds plugin
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
