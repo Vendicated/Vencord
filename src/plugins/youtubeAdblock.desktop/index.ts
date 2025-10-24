@@ -11,5 +11,5 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "YoutubeAdblock",
     description: "Block ads in YouTube embeds and the WatchTogether activity via AdGuard",
-    authors: [Devs.ImLvna, Devs.Ven],
+    authors: [Devs.ImLvna, Devs.Ven, Devs.cutestbunny],
 });
