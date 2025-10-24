@@ -18,6 +18,8 @@ const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typ
 const logger = new Logger("ShareActiveWindow");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
+let activeWindowPid: number | undefined;
+let activeWindowTitle: string | undefined;
 let isSharingWindow: boolean = false;
 let sharingSettings: StreamSettings = {};
 
@@ -36,6 +38,14 @@ const shareWindow: (
     window: WindowDescriptor,
     settings: StreamSettings,
 ) => void = findByCodeLazy(',"no permission"]');
+
+function stopSharingWindow(): void {
+    stopActiveWindowLoop();
+    activeWindowPid = undefined;
+    activeWindowTitle = undefined;
+    isSharingWindow = false;
+    sharingSettings = {};
+}
 
 function stopActiveWindowLoop(): void {
     if (activeWindowInterval !== undefined) {
@@ -64,12 +74,16 @@ function initActiveWindowLoop(): void {
             return;
         }
 
-        const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
-        const newSourceId = `window:${activeWindowHandle}`;
-        const curSourceId = sharingSettings.sourceId;
-        if (curSourceId === newSourceId) {
+        // Don't update stream if window hasn't changed
+        if (activeWindowPid === activeWindow.pid && activeWindowTitle === activeWindow.title) {
             return;
         }
+
+        activeWindowPid = activeWindow.pid;
+        activeWindowTitle = activeWindow.title;
+
+        const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
+        const newSourceId = `window:${activeWindowHandle}`;
 
         switch (settings.store.shareableWindows) {
             case "all":
@@ -243,9 +257,7 @@ export default definePlugin({
         },
 
         STREAM_STOP(_event: any): void {
-            isSharingWindow = false;
-            sharingSettings = {};
-            stopActiveWindowLoop();
+            stopSharingWindow();
         },
 
         STREAM_UPDATE_SETTINGS(event: StreamUpdateSettingsEvent): void {
@@ -290,9 +302,7 @@ export default definePlugin({
 
         RTC_CONNECTION_STATE(event: RtcConnectionStateEvent): void {
             if (event.state === "RTC_DISCONNECTED") {
-                isSharingWindow = false;
-                sharingSettings = {};
-                stopActiveWindowLoop();
+                stopSharingWindow();
             }
         }
     },
@@ -303,6 +313,6 @@ export default definePlugin({
     },
 
     stop() {
-        stopActiveWindowLoop();
+        stopSharingWindow();
     },
 });
