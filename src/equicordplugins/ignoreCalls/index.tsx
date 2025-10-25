@@ -130,7 +130,6 @@ export default definePlugin({
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
                             onClick={() => {
-                                ignoredChannelIds.add(channel.id);
                                 FluxDispatcher.dispatch({
                                     type: "CALL_UPDATE",
                                     channelId: channel.id,
