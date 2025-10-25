@@ -53,11 +53,11 @@ export default definePlugin({
             find: 'tutorialId:"direct-messages"',
             replacement: [
                 {
-                    match: /"premium"\)/,
+                    match: /NAVIGATION_LINK\}\}\}.{0,15}\)(?=,\i&&\()/,
                     replace: "$&&&undefined",
                 },
                 {
-                    match: /"discord-shop"\)/,
+                    match: /NAVIGATION_LINK\}\}\}.{0,20}\)(?=,\i&&!\i)/,
                     replace: "$&&&undefined",
                 },
             ],
