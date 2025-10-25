@@ -30,9 +30,9 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
+import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
-import { FluxEvents } from "@webpack/types";
 
 import Plugins from "~plugins";
 
@@ -222,7 +222,7 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
         for (const [event, handler] of Object.entries(p.flux)) {
             const wrappedHandler = p.flux[event] = function () {
                 try {
-                    const res = handler.apply(p, arguments as any);
+                    const res = handler!.apply(p, arguments as any);
                     return res instanceof Promise
                         ? res.catch(e => logger.error(`${p.name}: Error while handling ${event}\n`, e))
                         : res;
@@ -242,7 +242,7 @@ export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Fl
 
         logger.debug("Unsubscribing from flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
-            fluxDispatcher.unsubscribe(event as FluxEvents, handler);
+            fluxDispatcher.unsubscribe(event as FluxEvents, handler!);
         }
     }
 }

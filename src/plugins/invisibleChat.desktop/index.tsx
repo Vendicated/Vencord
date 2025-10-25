@@ -23,8 +23,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, Tooltip } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import { buildDecModal } from "./components/DecryptionModal";
 import { buildEncModal } from "./components/EncryptionModal";
@@ -72,7 +72,6 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         <ChatBarButton
             tooltip="Encrypt Message"
             onClick={() => buildEncModal()}
-
             buttonProps={{
                 "aria-haspopup": "dialog",
             }}
@@ -110,7 +109,7 @@ export default definePlugin({
     patches: [
         {
             // Indicator
-            find: "#{intl::MESSAGE_EDITED}",
+            find: ".SEND_FAILED,",
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"

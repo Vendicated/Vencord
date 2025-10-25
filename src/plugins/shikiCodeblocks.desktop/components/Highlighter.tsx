@@ -41,7 +41,6 @@ export interface HighlighterProps {
     lang?: string;
     content: string;
     isPreview: boolean;
-    tempSettings?: Record<string, any>;
 }
 
 export const createHighlighter = (props: HighlighterProps) => (
@@ -55,13 +54,12 @@ export const Highlighter = ({
     lang,
     content,
     isPreview,
-    tempSettings,
 }: HighlighterProps) => {
     const {
         tryHljs,
         useDevIcon,
         bgOpacity,
-    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"], tempSettings);
+    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const shikiLang = lang ? resolveLang(lang) : null;
@@ -78,12 +76,12 @@ export const Highlighter = ({
     });
 
     const themeBase: ThemeBase = {
-        plainColor: currentTheme?.fg || "var(--text-normal)",
+        plainColor: currentTheme?.fg || "var(--text-default)",
         accentBgColor:
             currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
         backgroundColor:
-            currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
+            currentTheme?.colors?.["editor.background"] || "var(--background-base-lower)",
     };
 
     let langName;
