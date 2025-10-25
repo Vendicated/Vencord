@@ -9,14 +9,17 @@ import "./styles.css";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Button } from "@components/Button";
 import { ErrorBoundary } from "@components/index";
-import { EquicordDevs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
-import { FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { FluxDispatcher, Menu, React, Tooltip, UserStore } from "@webpack/common";
 
 const ignoredChannelIds = new Set<string>();
 const cl = classNameFactory("vc-ignore-calls-");
+const Deafen = findComponentByCodeLazy("0-1.02-.1H3.05a9");
 
 const ContextMenuPatch: NavContextMenuPatchCallback = (children, { channel }: { channel: Channel; }) => {
     if (!channel || (!channel.isDM() && !channel.isGroupDM())) return;
@@ -72,17 +75,23 @@ const settings = definePluginSettings({
     },
 });
 
+const args = {
+    ringing: [],
+    messageId: "",
+    region: "",
+};
+
 export default definePlugin({
     name: "IgnoreCalls",
     description: "Allows you to ignore calls from specific users or dm groups.",
-    authors: [EquicordDevs.TheArmagan],
+    authors: [EquicordDevs.TheArmagan, Devs.thororen],
     settings,
     patches: [
         {
             find: "#{intl::INCOMING_CALL_ELLIPSIS}",
             replacement: {
-                match: /(?<=channel:(\i).{0,50}INCOMING_CALL_MODAL\).*?\}\)\]\}\))\]/,
-                replace: ",$self.renderIgnore($1)]"
+                match: /actionButton\}\)/,
+                replace: "$&,$self.renderIgnore(arguments[0].channel)"
             }
         }
     ],
@@ -91,32 +100,50 @@ export default definePlugin({
         "gdm-context": ContextMenuPatch,
     },
     flux: {
-        async CALL_UPDATE({ channelId, ringing, messageId, region }: { channelId: string; ringing: string[]; messageId: string; region: string; }) {
-            const permanentlyIgnoredUsers = settings.store.permanentlyIgnoredUsers.split(",").map(s => s.trim()).filter(Boolean);
-            setTimeout(() => {
-                if (!ignoredChannelIds.has(channelId) && !permanentlyIgnoredUsers.includes(channelId)) return;
-                const currentUserId = UserStore.getCurrentUser().id;
-                if (ringing.includes(currentUserId)) {
-                    return FluxDispatcher.dispatch({
-                        type: "CALL_UPDATE",
-                        channelId,
-                        ringing: ringing.filter((id: string) => id !== currentUserId),
-                        messageId,
-                        region
-                    });
-                }
-            }, 30000);
+        async CALL_UPDATE({ ringing, messageId, region }) {
+            args.ringing = ringing;
+            args.messageId = messageId;
+            args.region = region;
         }
     },
     renderIgnore(channel) {
+        const currentUserId = UserStore.getCurrentUser().id;
+        const permanentlyIgnoredUsers = settings.store.permanentlyIgnoredUsers.split(",").map(s => s.trim()).filter(Boolean);
+        if (ignoredChannelIds.has(channel.id) || permanentlyIgnoredUsers.includes(channel.id)) {
+            FluxDispatcher.dispatch({
+                type: "CALL_UPDATE",
+                channelId: channel.id,
+                ringing: args.ringing.filter((id: string) => id !== currentUserId),
+                messageId: args.messageId,
+                region: args.region
+            });
+            return null;
+        }
+
         return (
             <ErrorBoundary>
-                <span
-                    className={cl("render")}
-                    onClick={() => ignoredChannelIds.add(channel.id)}
-                >
-                    Ignore
-                </span>
+                <Tooltip text="Ignore">
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <Button
+                            className={cl("render")}
+                            size="small"
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                            onClick={() => {
+                                ignoredChannelIds.add(channel.id);
+                                FluxDispatcher.dispatch({
+                                    type: "CALL_UPDATE",
+                                    channelId: channel.id,
+                                    ringing: args.ringing.filter((id: string) => id !== currentUserId),
+                                    messageId: args.messageId,
+                                    region: args.region
+                                });
+                            }}
+                        >
+                            <Deafen />
+                        </Button>
+                    )}
+                </Tooltip>
             </ErrorBoundary >
         );
     }
