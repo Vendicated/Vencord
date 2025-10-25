@@ -125,7 +125,7 @@ export default definePlugin({
                 <Tooltip text="Ignore">
                     {({ onMouseEnter, onMouseLeave }) => (
                         <Button
-                            className={cl("render")}
+                            className={cl("button")}
                             size="small"
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
@@ -140,7 +140,7 @@ export default definePlugin({
                                 });
                             }}
                         >
-                            <Deafen />
+                            <Deafen color={"var(--interactive-active)"} />
                         </Button>
                     )}
                 </Tooltip>
