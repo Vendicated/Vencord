@@ -32,6 +32,11 @@ const settings = definePluginSettings({
         description: "The URL of your Engine",
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="
+    },
+    setAsDefaultEngine: {
+        description: "Set your custom engine as the default search engine",
+        type: OptionType.BOOLEAN,
+        default: false,
     }
 });
 
@@ -42,43 +47,52 @@ function search(src: string, engine: string) {
 function makeSearchItem(src: string) {
     let Engines = {};
 
-    if (settings.store.customEngineName && settings.store.customEngineURL) {
-        Engines[settings.store.customEngineName] = settings.store.customEngineURL;
+    const { customEngineName, customEngineURL, setAsDefaultEngine: setDefaultEngine } = settings.store;
+    if (customEngineName && customEngineURL) {
+        Engines[customEngineName] = customEngineURL;
     }
 
     Engines = { ...Engines, ...DefaultEngines };
 
     return (
-        <Menu.MenuItem
-            label="Search Text"
-            key="search-text"
-            id="vc-search-text"
-        >
-            {Object.keys(Engines).map(engine => {
-                const key = "vc-search-content-" + engine;
-                return (
-                    <Menu.MenuItem
-                        key={key}
-                        id={key}
-                        label={
-                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
-                                <img
-                                    style={{
-                                        borderRadius: "50%"
-                                    }}
-                                    aria-hidden="true"
-                                    height={16}
-                                    width={16}
-                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
-                                />
-                                {engine}
-                            </Flex>
-                        }
-                        action={() => search(src, Engines[engine])}
-                    />
-                );
-            })}
-        </Menu.MenuItem>
+        setDefaultEngine && customEngineName && customEngineURL ? (
+            <Menu.MenuItem
+                label={`Search with ${customEngineName}`}
+                key="search-custom-engine"
+                id="vc-search-custom-engine"
+                action={() => search(src, customEngineURL)}
+            />
+        ) :
+            <Menu.MenuItem
+                label="Search Text"
+                key="search-text"
+                id="vc-search-text"
+            >
+                {Object.keys(Engines).map(engine => {
+                    const key = "vc-search-content-" + engine;
+                    return (
+                        <Menu.MenuItem
+                            key={key}
+                            id={key}
+                            label={
+                                <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                                    <img
+                                        style={{
+                                            borderRadius: "50%"
+                                        }}
+                                        aria-hidden="true"
+                                        height={16}
+                                        width={16}
+                                        src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
+                                    />
+                                    {engine}
+                                </Flex>
+                            }
+                            action={() => search(src, Engines[engine])}
+                        />
+                    );
+                })}
+            </Menu.MenuItem>
     );
 }
 
@@ -95,7 +109,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) 
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
-    description: "Replaces the Google search with different Engines",
+    description: "Replaces the Google search with different Engine(s)",
     authors: [Devs.Moxxie, Devs.Ethan],
 
     settings,
