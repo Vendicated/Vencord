@@ -33,7 +33,7 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="
     },
-    setAsDefaultEngine: {
+    setDefaultEngine: {
         description: "Set your custom engine as the default search engine",
         type: OptionType.BOOLEAN,
         default: false,
@@ -47,7 +47,7 @@ function search(src: string, engine: string) {
 function makeSearchItem(src: string) {
     let Engines = {};
 
-    const { customEngineName, customEngineURL, setAsDefaultEngine: setDefaultEngine } = settings.store;
+    const { customEngineName, customEngineURL, setDefaultEngine } = settings.store;
     if (customEngineName && customEngineURL) {
         Engines[customEngineName] = customEngineURL;
     }
