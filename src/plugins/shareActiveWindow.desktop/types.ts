@@ -4,19 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export interface CandidateGame {
-    readonly cmdLine: string;
-    readonly elevated: boolean;
-    readonly exeName: string;
-    readonly exePath: string;
-    readonly fullscreenType: number;
-    readonly hidden: boolean;
-    readonly isLauncher: boolean;
+export interface DesktopCaptureSource {
+    readonly id: string;
     readonly name: string;
-    readonly pid: number;
-    readonly pidPath: number[];
-    readonly sandboxed: boolean;
-    readonly windowHandle: string;
+    readonly icon: string;
+    readonly url?: string;
 }
 
 export interface StreamSettings {
@@ -66,13 +58,6 @@ export interface MediaEngineSetGoLiveSourceEvent {
             readonly resolution?: number;
         };
     };
-}
-
-export interface WindowDescriptor {
-    readonly id: string;
-    readonly url?: string;
-    readonly icon: string;
-    readonly name: string;
 }
 
 export interface RtcConnectionStateEvent {
