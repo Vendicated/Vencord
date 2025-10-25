@@ -12,14 +12,12 @@ import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
-import { CandidateGame, MediaEngineSetGoLiveSourceEvent, RtcConnectionStateEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent, WindowDescriptor } from "./types";
+import { DesktopCaptureSource, MediaEngineSetGoLiveSourceEvent, RtcConnectionStateEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent } from "./types";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 const logger = new Logger("ShareActiveWindow");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
-let activeWindowPid: number | undefined;
-let activeWindowTitle: string | undefined;
 let isSharingWindow: boolean = false;
 let sharingSettings: StreamSettings = {};
 
@@ -35,16 +33,20 @@ function patchFluxDispatcher(): void {
 }
 
 const shareWindow: (
-    window: WindowDescriptor,
+    source: DesktopCaptureSource,
     settings: StreamSettings,
 ) => void = findByCodeLazy(',"no permission"]');
 
+async function getDesktopCaptureSources(): Promise<DesktopCaptureSource[]> {
+    return await DiscordNative.desktopCapture.getDesktopCaptureSources({
+        types: ["window"]
+    });
+}
+
 function stopSharingWindow(): void {
-    stopActiveWindowLoop();
-    activeWindowPid = undefined;
-    activeWindowTitle = undefined;
     isSharingWindow = false;
     sharingSettings = {};
+    stopActiveWindowLoop();
 }
 
 function stopActiveWindowLoop(): void {
@@ -61,11 +63,7 @@ function initActiveWindowLoop(): void {
     }
 
     const discordUtils: {
-        setCandidateGamesCallback(
-            callback: (games: CandidateGame[]) => void
-        ): void;
-        clearCandidateGamesCallback(): void;
-        getWindowHandleFromPid(pid: number): string;
+        getWindowHandleFromPid(pid: number): string | undefined;
     } = DiscordNative.nativeModules.requireModule("discord_utils");
 
     activeWindowInterval = setInterval(async () => {
@@ -74,60 +72,28 @@ function initActiveWindowLoop(): void {
             return;
         }
 
+        const sources = await getDesktopCaptureSources();
         const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
-        const newSourceId = `window:${activeWindowHandle}`;
-
-        switch (settings.store.shareableWindows) {
-            case "all":
-                {
-                    const curSourceId = sharingSettings.sourceId;
-                    const isWindowChanged = newSourceId !== curSourceId;
-
-                    if (!isWindowChanged) {
-                        return;
-                    }
-
-                    sharingSettings.sourceId = newSourceId;
-                    shareWindow({
-                        id: newSourceId,
-                        icon: activeWindow.icon,
-                        name: activeWindow.title,
-                    }, sharingSettings);
-                    break;
-                }
-            case "preview":
-                {
-                    const isWindowChanged = false
-                        || (activeWindowPid !== activeWindow.pid)
-                        || (activeWindowTitle !== activeWindow.title);
-
-                    if (!isWindowChanged) {
-                        return;
-                    }
-
-                    discordUtils.setCandidateGamesCallback(games => {
-                        const window = games.find(game => game.pid === activeWindow.pid);
-                        if (window && sharingSettings) {
-                            sharingSettings.sourceId = newSourceId;
-                            shareWindow({
-                                id: newSourceId,
-                                icon: activeWindow.icon,
-                                name: activeWindow.title,
-                            }, sharingSettings);
-                        }
-                        discordUtils.clearCandidateGamesCallback();
-                    });
-                    break;
-                }
-            default:
-                logger.debug(
-                    `Unsupported "shareableWindows" value: ${settings.store.shareableWindows}`
-                );
-                break;
+        if (activeWindowHandle === undefined) {
+            return;
         }
 
-        activeWindowPid = activeWindow.pid;
-        activeWindowTitle = activeWindow.title;
+        const activeWindowSource = sources.find(s => s.id.includes(activeWindowHandle));
+        if (activeWindowSource === undefined) {
+            return;
+        }
+
+        const curSourceId = sharingSettings.sourceId;
+        const newSourceId = activeWindowSource.id;
+        if (curSourceId === newSourceId) {
+            return;
+        }
+
+        sharingSettings.sourceId = newSourceId;
+
+        if (isSharingWindow) {
+            shareWindow(activeWindowSource, sharingSettings);
+        }
     }, settings.store.checkInterval);
 }
 
@@ -192,14 +158,6 @@ const settings = definePluginSettings({
                 initActiveWindowLoop();
             }
         },
-    },
-    shareableWindows: {
-        description: "What windows can be shared",
-        type: OptionType.SELECT,
-        options: [
-            { label: "All", value: "all" },
-            { label: "Preview list", value: "preview", default: true },
-        ],
     },
     checkInterval: {
         description: "How often to check for active window, in milliseconds",
