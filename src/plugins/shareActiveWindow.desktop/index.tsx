@@ -74,46 +74,60 @@ function initActiveWindowLoop(): void {
             return;
         }
 
-        // Don't update stream if window hasn't changed
-        if (activeWindowPid === activeWindow.pid && activeWindowTitle === activeWindow.title) {
-            return;
-        }
-
-        activeWindowPid = activeWindow.pid;
-        activeWindowTitle = activeWindow.title;
-
         const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
         const newSourceId = `window:${activeWindowHandle}`;
 
         switch (settings.store.shareableWindows) {
             case "all":
-                sharingSettings.sourceId = newSourceId;
-                shareWindow({
-                    id: newSourceId,
-                    icon: activeWindow.icon,
-                    name: activeWindow.title,
-                }, sharingSettings);
-                break;
-            case "preview":
-                discordUtils.setCandidateGamesCallback(games => {
-                    const window = games.find(game => game.pid === activeWindow.pid);
-                    if (window && sharingSettings) {
-                        sharingSettings.sourceId = newSourceId;
-                        shareWindow({
-                            id: newSourceId,
-                            icon: activeWindow.icon,
-                            name: activeWindow.title,
-                        }, sharingSettings);
+                {
+                    const curSourceId = sharingSettings.sourceId;
+                    const isWindowChanged = newSourceId !== curSourceId;
+
+                    if (!isWindowChanged) {
+                        return;
                     }
-                    discordUtils.clearCandidateGamesCallback();
-                });
-                break;
+
+                    sharingSettings.sourceId = newSourceId;
+                    shareWindow({
+                        id: newSourceId,
+                        icon: activeWindow.icon,
+                        name: activeWindow.title,
+                    }, sharingSettings);
+                    break;
+                }
+            case "preview":
+                {
+                    const isWindowChanged = false
+                        || (activeWindowPid !== activeWindow.pid)
+                        || (activeWindowTitle !== activeWindow.title);
+
+                    if (!isWindowChanged) {
+                        return;
+                    }
+
+                    discordUtils.setCandidateGamesCallback(games => {
+                        const window = games.find(game => game.pid === activeWindow.pid);
+                        if (window && sharingSettings) {
+                            sharingSettings.sourceId = newSourceId;
+                            shareWindow({
+                                id: newSourceId,
+                                icon: activeWindow.icon,
+                                name: activeWindow.title,
+                            }, sharingSettings);
+                        }
+                        discordUtils.clearCandidateGamesCallback();
+                    });
+                    break;
+                }
             default:
                 logger.debug(
                     `Unsupported "shareableWindows" value: ${settings.store.shareableWindows}`
                 );
                 break;
         }
+
+        activeWindowPid = activeWindow.pid;
+        activeWindowTitle = activeWindow.title;
     }, settings.store.checkInterval);
 }
 
