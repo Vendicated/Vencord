@@ -9,13 +9,15 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
 import { DesktopCaptureSource, MediaEngineSetGoLiveSourceEvent, RtcConnectionStateEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent } from "./types";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 const logger = new Logger("ShareActiveWindow");
+
+export const MediaEngineStore = findStoreLazy("MediaEngineStore");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
 let isSharingWindow: boolean = false;
@@ -38,9 +40,8 @@ const shareWindow: (
 ) => void = findByCodeLazy(',"no permission"]');
 
 async function getDesktopCaptureSources(): Promise<DesktopCaptureSource[]> {
-    return await DiscordNative.desktopCapture.getDesktopCaptureSources({
-        types: ["window"]
-    });
+    const defaultSize = 150;
+    return await MediaEngineStore.getMediaEngine().getWindowPreviews(defaultSize, defaultSize);
 }
 
 function stopSharingWindow(): void {
@@ -63,7 +64,7 @@ function initActiveWindowLoop(): void {
     }
 
     const discordUtils: {
-        getWindowHandleFromPid(pid: number): string | undefined;
+        getPidFromWindowHandle(handle: string): number | undefined;
     } = DiscordNative.nativeModules.requireModule("discord_utils");
 
     activeWindowInterval = setInterval(async () => {
@@ -73,18 +74,40 @@ function initActiveWindowLoop(): void {
         }
 
         const sources = await getDesktopCaptureSources();
-        const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
-        if (activeWindowHandle === undefined) {
+        const pidSourcesMap = new Map<number, DesktopCaptureSource[]>();
+        for (const source of sources) {
+            const sourceHandle = source.id.split(":")[1];
+            if (sourceHandle === undefined) {
+                continue;
+            }
+
+            const sourcePid = discordUtils.getPidFromWindowHandle(sourceHandle);
+            if (sourcePid === undefined) {
+                continue;
+            }
+
+            const pidSources = pidSourcesMap.get(sourcePid) ?? [];
+            pidSources.push(source);
+            pidSourcesMap.set(sourcePid, pidSources);
+        }
+
+        const pidSources = pidSourcesMap.get(activeWindow.pid);
+        if (pidSources === undefined) {
             return;
         }
 
-        const activeWindowSource = sources.find(s => s.id.includes(activeWindowHandle));
-        if (activeWindowSource === undefined) {
+        const activeWindowSources = pidSources.filter(
+            ps => (ps.name === activeWindow.title),
+        );
+
+        if (activeWindowSources.length !== 1) {
             return;
         }
 
-        const curSourceId = sharingSettings.sourceId;
+        const activeWindowSource = activeWindowSources[0];
         const newSourceId = activeWindowSource.id;
+        const curSourceId = sharingSettings.sourceId;
+
         if (curSourceId === newSourceId) {
             return;
         }
