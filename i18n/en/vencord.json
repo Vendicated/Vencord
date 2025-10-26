@@ -60,9 +60,11 @@
     },
     "plugins": {
       "contributorModal": {
-        "contributorInfo_one": "This person has <0>contributed</0> to 1 plugin!",
-        "contributorInfo_other": "This person has <0>contributed</0> to {count} plugins!",
-        "contributorInfo_zero": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!"
+        "contributorInfo": {
+          "noPlugins": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!",
+          "plugins_one": "This person has <0>contributed</0> to {count} plugin!",
+          "plugins_other": "This person has <0>contributed</0> to {count} plugins!"
+        }
       }
     },
     "restartRequired": {

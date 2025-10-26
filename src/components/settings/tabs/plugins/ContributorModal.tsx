@@ -61,8 +61,6 @@ function ContributorModal({ user }: { user: User; }) {
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
-    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
-
     return (
         <>
             <div className={cl("header")}>
@@ -90,9 +88,18 @@ function ContributorModal({ user }: { user: User; }) {
             </div>
 
             <Forms.FormText>
-                <Translate i18nKey="vencord.settings.plugins.contributorModal.contributorInfo" variables={{ count: plugins.length }}>
-                    This person has <Link href="https://vencord.dev/source">contributed</Link> to some plugins!
-                </Translate>
+                {plugins.length > 0 ? (
+                    <Translate
+                        i18nKey="vencord.settings.plugins.contributorModal.contributorInfo.plugins"
+                        variables={{ count: plugins.length }}>
+                        This person has <Link href="https://vencord.dev/source">contributed</Link> to some plugins!
+                    </Translate>
+                ) : (
+                    <Translate i18nKey="vencord.settings.plugins.contributorModal.contributorInfo.noPlugins">
+                        This person has not made any plugins. They likely <Link href="https://vencord.dev/source">contributed</Link>
+                        to Vencord in other ways!
+                    </Translate>
+                )}
             </Forms.FormText>
 
             {!!plugins.length && (
