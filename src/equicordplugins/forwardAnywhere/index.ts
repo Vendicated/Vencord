@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "@vencord/discord-types";
+import { Channel, Message } from "@vencord/discord-types";
 
 // Taken From Signature :)
 const settings = definePluginSettings({
@@ -43,11 +43,21 @@ export default definePlugin({
             }
         },
     ],
-    sendForward(channels: any, message: Message) {
-        for (const c of channels) {
-            sendMessage(c.id, {
-                content: `${message.content}\n${settings.store.forwardPreface} Forwarded from <#${message.channel_id}>`
-            });
-        }
+
+    sendForward(channels: Channel[], message: Message) {
+        const chunkSize = 5;
+        channels.forEach(c => {
+            if (message.attachments.length) {
+                for (let i = 0; i < message.attachments.length; i += chunkSize) {
+                    const group = message.attachments.slice(i, i + chunkSize);
+                    const text = `${message.content}\nAttachments:\n${group.map(a => a.url).join("\n")}\n${settings.store.forwardPreface} Forwarded from <#${message.channel_id}>`;
+                    sendMessage(c.id, { content: text });
+                }
+            } else {
+                sendMessage(c.id, {
+                    content: `${message.content}\n${settings.store.forwardPreface} Forwarded from <#${message.channel_id}>`
+                });
+            }
+        });
     }
 });
