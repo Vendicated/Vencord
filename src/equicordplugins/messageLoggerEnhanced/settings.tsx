@@ -111,6 +111,12 @@ export const settings = definePluginSettings({
         restartNeeded: true,
     },
 
+    ShowWhereMessageIsFrom: {
+        default: false,
+        type: OptionType.BOOLEAN,
+        description: "Show message channel/author name and server name",
+    },
+
     messagesToDisplayAtOnceInLogs: {
         default: 100,
         type: OptionType.NUMBER,

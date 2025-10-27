@@ -420,13 +420,13 @@ function LMessage({ log, isGroupStart, reset, }: LMessageProps) {
                     />
                 }
             />
-            {channel?.isDM() && message?.author && (
+            {settings.store.ShowWhereMessageIsFrom && channel?.isDM() && message?.author && (
                 <span className={`${cl("from")} ${message.deleted ? cl("from-deleted") : cl("from-edited")}`}>From {message.author.username}'s DMs</span>
             )}
-            {channel?.isGroupDM() && channel?.name && (
+            {settings.store.ShowWhereMessageIsFrom && channel?.isGroupDM() && channel?.name && (
                 <span className={`${cl("from")} ${message.deleted ? cl("from-deleted") : cl("from-edited")}`}>From {channel.name} Group DM</span>
             )}
-            {!channel?.isDM() && !channel?.isGroupDM() && channel?.name && guild?.name && (
+            {settings.store.ShowWhereMessageIsFrom && !channel?.isDM() && !channel?.isGroupDM() && channel?.name && guild?.name && (
                 <span className={`${cl("from")} ${message.deleted ? cl("from-deleted") : cl("from-edited")}`}>From {channel.name} in {guild.name}</span>
             )}
         </div>
