@@ -9,18 +9,23 @@
     width: 44px;
 
     .high-contrast-mode & {
-        border-color: var(--border-strong)
+        border-color: var(--border-strong);
     }
 }
 
 .vc-switch-checked {
     background: var(--brand-500);
-    border-color: var(--control-border-primary-default)
+    border-color: var(--control-border-primary-default);
 }
 
 .vc-switch-disabled {
     cursor: not-allowed;
     opacity: 0.3;
+}
+
+.vc-switch-focusVisible {
+    /* stylelint-disable-next-line custom-property-pattern */
+    box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--focus-primary, #00b0f4));
 }
 
 .vc-switch-slider {
@@ -31,9 +36,8 @@
     position: absolute;
     width: 28px;
     transition: 100ms transform ease-in-out;
-    overflow: visible
+    overflow: visible;
 }
-
 
 .vc-switch-input {
     border-radius: 14px;
@@ -46,7 +50,8 @@
     top: 0;
     width: 100%;
 
-    &[disabled] {
-        pointer-events: none
+    &:disabled {
+        pointer-events: none;
+        cursor: not-allowed
     }
 }
