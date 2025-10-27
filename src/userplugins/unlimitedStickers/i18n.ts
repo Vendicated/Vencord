@@ -17,6 +17,7 @@ export const translations = {
         "NO_FILES_FOUND_BODY": "No supported image files found in any of your sticker sub-folders.",
         "FAVORITES": "Favorites",
         "STICKER_UPLOAD_FAILED": "Sticker Upload Failed",
+        "RECENTLY_USED": "Recently Used",
     },
     "ja": {
         "STICKERS": "無限スタンプパネル",
@@ -30,5 +31,7 @@ export const translations = {
         "NO_FILES_FOUND_BODY": "スタンプのサブフォルダに対応している画像ファイルが見つかりませんでした。",
         "FAVORITES": "お気に入り",
         "STICKER_UPLOAD_FAILED": "スタンプのアップロードに失敗しました",
+        "RECENTLY_USED": "よく使うスタンプ",
     }
 };
+

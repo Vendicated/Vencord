@@ -15,6 +15,8 @@ import { getPluginIntlMessage } from "./intl";
 import * as DataStore from "@api/DataStore";
 
 export const FAVORITES_KEY = "UnlimitedStickers_Favorites";
+export const RECENT_KEY = "UnlimitedStickers_Recent";
+export const RECENT_LIMIT = 10;
 
 export const settings = definePluginSettings({
     stickerPath: {
@@ -33,6 +35,24 @@ export async function getFavorites(): Promise<string[]> {
 
 export async function saveFavorites(favorites: string[]): Promise<void> {
     await DataStore.set(FAVORITES_KEY, favorites);
+}
+
+export async function getRecentStickers(): Promise<string[]> {
+    return (await DataStore.get<string[]>(RECENT_KEY)) ?? [];
+}
+
+export async function addRecentSticker(stickerPath: string): Promise<void> {
+    await DataStore.update<string[]>(RECENT_KEY, (recents = []) => {
+        const index = recents.indexOf(stickerPath);
+        if (index > -1) {
+            recents.splice(index, 1);
+        }
+        recents.unshift(stickerPath);
+        if (recents.length > RECENT_LIMIT) {
+            recents.length = RECENT_LIMIT;
+        }
+        return recents;
+    });
 }
 
 

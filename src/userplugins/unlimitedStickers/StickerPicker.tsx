@@ -17,7 +17,7 @@ import { findByCodeLazy } from "@webpack";
 import { Alerts, Clickable, GuildStore, MessageActions, React, RestAPI, ScrollerThin, Toasts } from "@webpack/common";
 import type { IpcMainInvokeEvent } from "electron";
 
-import { settings, getFavorites, saveFavorites, FAVORITES_KEY } from "./index"; // Import favorites functions
+import { settings, getFavorites, saveFavorites, getRecentStickers, addRecentSticker, FAVORITES_KEY, RECENT_KEY } from "./index";
 import { getPluginIntlMessage } from "./intl";
 
 interface StickerFile {
@@ -65,7 +65,6 @@ const StarIcon: React.FC<{ className?: string; width?: number; height?: number; 
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
     </svg>
 );
-
 
 async function ensureStickerGuild(): Promise<string | null> {
     let guildId = settings.store.stickerGuildId;
@@ -123,7 +122,7 @@ async function uploadAndReplaceSticker(guildId: string, stickerName: string, bas
     } catch (error) {
         logger.error("Failed to upload new sticker:", error);
         const errorMessage = (error as any)?.body?.message || (error as Error).message || getIntlMessage("UNKNOWN_ERROR");
-        Toasts.show({ message: `${getIntlMessage("STICKER_UPLOAD_FAILED")}: ${errorMessage}`, id: Toasts.genId(), type: Toasts.Type.FAILURE });
+        Toasts.show({ message: `${getPluginIntlMessage("STICKER_UPLOAD_FAILED")}: ${errorMessage}`, id: Toasts.genId(), type: Toasts.Type.FAILURE });
         return null;
     }
 }
@@ -135,7 +134,8 @@ const StickerGridItem: React.FC<{
     closePopout: () => void;
     isFavorite: boolean;
     onToggleFavorite: (file: StickerFileWithPreview) => void;
-}> = ({ file, guildId, channel, closePopout, isFavorite, onToggleFavorite }) => {
+    onStickerSent: (file: StickerFileWithPreview) => void;
+}> = ({ file, guildId, channel, closePopout, isFavorite, onToggleFavorite, onStickerSent }) => {
     const [isSending, setIsSending] = React.useState(false);
 
     const handleStickerClick = async () => {
@@ -152,6 +152,7 @@ const StickerGridItem: React.FC<{
                     false,
                     { stickerIds: [newStickerId] }
                 );
+                onStickerSent(file);
                 closePopout();
             } else {
                 setIsSending(false);
@@ -212,6 +213,7 @@ interface StickerCategoryProps {
     scrollerNode: HTMLDivElement | null;
     favoritePaths: Set<string>;
     onToggleFavorite: (file: StickerFileWithPreview) => void;
+    onStickerSent: (file: StickerFileWithPreview) => void;
     initialExpanded?: boolean;
     alwaysShow?: boolean;
 }
@@ -224,16 +226,15 @@ const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
     closePopout,
     favoritePaths,
     onToggleFavorite,
+    onStickerSent,
     initialExpanded = true,
     alwaysShow = false,
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(initialExpanded);
 
-    // Conditionally render based on files length OR alwaysShow prop
     if (files.length === 0 && !alwaysShow) {
         return null;
     }
-
 
     return (
         <div className="unlimited-stickers-category">
@@ -265,6 +266,7 @@ const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
                                 closePopout={closePopout}
                                 isFavorite={favoritePaths.has(file.path)}
                                 onToggleFavorite={onToggleFavorite}
+                                onStickerSent={onStickerSent}
                             />
                         ))
                     )}
@@ -283,7 +285,8 @@ const LazyStickerCategory: React.FC<{
     scrollerNode: HTMLDivElement | null;
     favoritePaths: Set<string>;
     onToggleFavorite: (file: StickerFileWithPreview) => void;
-}> = ({ category, guildId, channel, closePopout, scrollerNode, favoritePaths, onToggleFavorite }) => {
+    onStickerSent: (file: StickerFileWithPreview) => void;
+}> = ({ category, guildId, channel, closePopout, scrollerNode, favoritePaths, onToggleFavorite, onStickerSent }) => {
     const [filesWithPreviews, setFilesWithPreviews] = React.useState<StickerFileWithPreview[]>(() =>
         category.files.map(file => ({ ...file, base64: null }))
     );
@@ -291,7 +294,6 @@ const LazyStickerCategory: React.FC<{
     const hasLoadedRef = React.useRef(false);
 
     React.useEffect(() => {
-        // Ensure refs are current
         const currentCategoryRef = categoryRef.current;
         if (!currentCategoryRef || !scrollerNode || hasLoadedRef.current) return;
 
@@ -342,12 +344,12 @@ const LazyStickerCategory: React.FC<{
                 scrollerNode={scrollerNode}
                 favoritePaths={favoritePaths}
                 onToggleFavorite={onToggleFavorite}
+                onStickerSent={onStickerSent}
                 initialExpanded={true}
             />
         </div>
     );
 };
-
 
 interface StickerPickerModalProps {
     rootProps: ModalProps;
@@ -359,6 +361,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
     const [localCategories, setLocalCategories] = React.useState<StickerCategory[]>([]);
     const [favoriteFiles, setFavoriteFiles] = React.useState<StickerFileWithPreview[]>([]);
     const [favoritePaths, setFavoritePaths] = React.useState<Set<string>>(new Set());
+    const [recentFiles, setRecentFiles] = React.useState<StickerFileWithPreview[]>([]);
     const [guildId, setGuildIdState] = React.useState<string | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [scrollerNode, setScrollerNode] = React.useState<HTMLDivElement | null>(null);
@@ -371,48 +374,65 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
         }
     }, []);
 
-    React.useEffect(() => {
-        async function loadInitialData() {
-            setIsLoading(true);
-            if (!stickerPath) {
-                Toasts.show({ message: getPluginIntlMessage("SET_STICKER_PATH_PROMPT_BODY"), id: Toasts.genId(), type: Toasts.Type.FAILURE });
-                setIsLoading(false);
-                return;
-            }
-            try {
-                const id = await ensureStickerGuild();
-                setGuildIdState(id);
-
-                const favPaths = await getFavorites();
-                const favPathsSet = new Set(favPaths);
-                setFavoritePaths(favPathsSet);
-
-                const favFilePromises = favPaths.map(async (path) => {
-                    const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? "Unknown";
-                    const base64 = await Native.getFileAsBase64(path);
-                    return { name, path, base64 };
-                });
-                const resolvedFavoriteFiles = await Promise.all(favFilePromises);
-                resolvedFavoriteFiles.sort((a, b) => a.name.localeCompare(b.name));
-                setFavoriteFiles(resolvedFavoriteFiles.filter(f => f.base64));
-
-
-                const { categories: fetchedCategories, debug } = await Native.getStickerFiles(stickerPath);
-                if (debug) logger.warn(debug);
-                fetchedCategories.sort((a, b) => a.name.localeCompare(b.name));
-                setLocalCategories(fetchedCategories);
-
-            } catch (e) {
-                logger.error("Failed to load stickers:", e);
-                setLocalCategories([]);
-                setFavoriteFiles([]);
-                setFavoritePaths(new Set());
-            } finally {
-                setIsLoading(false);
-            }
+    const loadInitialData = React.useCallback(async () => {
+        setIsLoading(true);
+        if (!stickerPath) {
+            Toasts.show({ message: getPluginIntlMessage("SET_STICKER_PATH_PROMPT_BODY"), id: Toasts.genId(), type: Toasts.Type.FAILURE });
+            setIsLoading(false);
+            return;
         }
-        loadInitialData();
+        try {
+            const id = await ensureStickerGuild();
+            setGuildIdState(id);
+
+            const [favPaths, recentPaths, { categories: fetchedCategories, debug }] = await Promise.all([
+                getFavorites(),
+                getRecentStickers(),
+                Native.getStickerFiles(stickerPath),
+            ]);
+
+            const favPathsSet = new Set(favPaths);
+            setFavoritePaths(favPathsSet);
+
+            const favFilePromises = favPaths.map(async (path) => {
+                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? "Unknown";
+                const base64 = await Native.getFileAsBase64(path);
+                return { name, path, base64 };
+            });
+            const recentFilePromises = recentPaths.map(async (path) => {
+                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? "Unknown";
+                const base64 = await Native.getFileAsBase64(path);
+                return { name, path, base64 };
+            });
+
+            const [resolvedFavoriteFiles, resolvedRecentFiles] = await Promise.all([
+                Promise.all(favFilePromises),
+                Promise.all(recentFilePromises),
+            ]);
+
+            resolvedFavoriteFiles.sort((a, b) => a.name.localeCompare(b.name));
+            setFavoriteFiles(resolvedFavoriteFiles.filter(f => f.base64));
+
+            setRecentFiles(resolvedRecentFiles.filter(f => f.base64));
+
+            if (debug) logger.warn(debug);
+            fetchedCategories.sort((a, b) => a.name.localeCompare(b.name));
+            setLocalCategories(fetchedCategories);
+
+        } catch (e) {
+            logger.error("Failed to load stickers:", e);
+            setLocalCategories([]);
+            setFavoriteFiles([]);
+            setFavoritePaths(new Set());
+            setRecentFiles([]);
+        } finally {
+            setIsLoading(false);
+        }
     }, [stickerPath]);
+
+    React.useEffect(() => {
+        loadInitialData();
+    }, [loadInitialData]);
 
     const handleToggleFavorite = React.useCallback(async (file: StickerFileWithPreview) => {
         const newFavoritePaths = new Set(favoritePaths);
@@ -429,14 +449,8 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                 const base64 = await Native.getFileAsBase64(file.path);
                 if (base64) {
                     currentBase64 = base64;
-                    setLocalCategories(prevCategories =>
-                        prevCategories.map(cat => ({
-                            ...cat,
-                            files: cat.files.map(f =>
-                                f.path === file.path ? { ...f, base64: currentBase64 } : f
-                            ),
-                        }))
-                    );
+                    setLocalCategories(prev => prev.map(cat => ({ ...cat, files: cat.files.map(f => f.path === file.path ? { ...f, base64 } : f) })));
+                    setRecentFiles(prev => prev.map(f => f.path === file.path ? { ...f, base64 } : f));
                 } else {
                     logger.error("Failed to load sticker preview for adding to favorites:", file.path);
                     Toasts.show({ message: "Failed to load sticker preview.", id: Toasts.genId(), type: Toasts.Type.FAILURE });
@@ -457,6 +471,22 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
         }
     }, [favoritePaths, favoriteFiles]);
 
+    const handleStickerSent = React.useCallback(async (file: StickerFileWithPreview) => {
+        await addRecentSticker(file.path);
+        setRecentFiles(prevRecents => {
+            const existingIndex = prevRecents.findIndex(f => f.path === file.path);
+            const newRecents = [...prevRecents];
+            if (existingIndex > -1) {
+                newRecents.splice(existingIndex, 1);
+            }
+            newRecents.unshift(file);
+            if (newRecents.length > 30) {
+                newRecents.length = 30;
+            }
+            return newRecents;
+        });
+    }, []);
+
 
     const renderContent = () => {
         if (!stickerPath) {
@@ -473,8 +503,9 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
 
         const noLocalCategories = localCategories.length === 0;
         const noFavorites = favoriteFiles.length === 0;
+        const noRecents = recentFiles.length === 0;
 
-        if (noLocalCategories && noFavorites) {
+        if (noLocalCategories && noFavorites && noRecents) {
             return (
                 <p style={{ padding: 20, textAlign: 'center' }}>
                     {getPluginIntlMessage("NO_FILES_FOUND_BODY")}
@@ -497,6 +528,23 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                             scrollerNode={scrollerNode}
                             favoritePaths={favoritePaths}
                             onToggleFavorite={handleToggleFavorite}
+                            onStickerSent={handleStickerSent}
+                            initialExpanded={true}
+                        />
+                    )}
+
+                    {recentFiles.length > 0 && (
+                        <StickerCategoryComponent
+                            key="recent-category"
+                            categoryName={getPluginIntlMessage("RECENTLY_USED")}
+                            files={recentFiles}
+                            guildId={guildId!}
+                            channel={channel}
+                            closePopout={rootProps.onClose}
+                            scrollerNode={scrollerNode}
+                            favoritePaths={favoritePaths}
+                            onToggleFavorite={handleToggleFavorite}
+                            onStickerSent={handleStickerSent}
                             initialExpanded={true}
                         />
                     )}
@@ -511,6 +559,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                             scrollerNode={scrollerNode}
                             favoritePaths={favoritePaths}
                             onToggleFavorite={handleToggleFavorite}
+                            onStickerSent={handleStickerSent}
                         />
                     ))}
                 </ScrollerThin>
