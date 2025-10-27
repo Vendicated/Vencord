@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { IpcMainInvokeEvent } from "electron";
 import { Dirent, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -28,8 +29,11 @@ const stickerFilter = (dirent: Dirent) =>
 /**
  * Lists all valid sticker files in subdirectories of the provided folder path.
  * This is now called with the path from the plugin's settings.
+ * @param _ Unused IPC event from Vencord Native.
+ * @param stickerPath The absolute path to the root sticker folder.
+ * @returns An object containing the categorized sticker files.
  */
-export function getStickerFiles(_, stickerPath: string): StickerResponse {
+export function getStickerFiles(_: IpcMainInvokeEvent, stickerPath: string): StickerResponse {
     if (!stickerPath) return { categories: [] };
 
     try {
@@ -70,7 +74,10 @@ export function getStickerFiles(_, stickerPath: string): StickerResponse {
 }
 
 /**
- * Reads a file and converts its content to a Base64 encoded string.
+ * Reads a file and converts its content to a Base64 encoded data URL.
+ * @param _ Unused IPC event from Vencord Native.
+ * @param path The absolute path to the file.
+ * @returns A base64 data URL string, or null if reading fails.
  */
 export function getFileAsBase64(_, path: string): string | null {
     try {

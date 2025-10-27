@@ -31,18 +31,36 @@ export const settings = definePluginSettings({
     stickerSlotId: string | null;
 }>();
 
+/**
+ * Retrieves the list of favorite sticker paths from storage.
+ * @returns A promise that resolves to an array of sticker paths.
+ */
 export async function getFavorites(): Promise<string[]> {
     return (await DataStore.get<string[]>(FAVORITES_KEY)) ?? [];
 }
 
+/**
+ * Saves the list of favorite sticker paths to storage.
+ * @param favorites An array of sticker paths to save.
+ * @returns A promise that resolves when the data is saved.
+ */
 export async function saveFavorites(favorites: string[]): Promise<void> {
     await DataStore.set(FAVORITES_KEY, favorites);
 }
 
+/**
+ * Retrieves the list of recently used sticker paths from storage.
+ * @returns A promise that resolves to an array of sticker paths.
+ */
 export async function getRecentStickers(): Promise<string[]> {
     return (await DataStore.get<string[]>(RECENT_KEY)) ?? [];
 }
 
+/**
+ * Adds a sticker path to the top of the recently used list.
+ * @param stickerPath The path of the sticker to add.
+ * @returns A promise that resolves when the list is updated.
+ */
 export async function addRecentSticker(stickerPath: string): Promise<void> {
     await DataStore.update<string[]>(RECENT_KEY, (recents = []) => {
         const index = recents.indexOf(stickerPath);
@@ -57,10 +75,21 @@ export async function addRecentSticker(stickerPath: string): Promise<void> {
     });
 }
 
+/**
+ * Retrieves the expansion state for a given category key.
+ * @param key The key for the expansion state.
+ * @returns A promise resolving to true if expanded, false otherwise. Defaults to true.
+ */
 export async function getExpansionState(key: string): Promise<boolean> {
     return (await DataStore.get<boolean>(key)) ?? true;
 }
 
+/**
+ * Saves the expansion state for a category.
+ * @param key The key for the expansion state.
+ * @param isExpanded The new expansion state.
+ * @returns A promise that resolves when the state is saved.
+ */
 export async function saveExpansionState(
     key: string,
     isExpanded: boolean,
@@ -75,6 +104,7 @@ export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
 
     const handleButtonClick = () => {
         const currentUser = UserStore.getCurrentUser();
+        // Require Nitro to use plugin (since you can't really use the stickers without it)
         if (currentUser?.premiumType != null) {
             openStickerPicker(channel);
         } else {

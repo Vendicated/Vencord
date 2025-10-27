@@ -25,11 +25,13 @@
 
 .unlimited-stickers-category-arrow {
     flex-shrink: 0;
+    /* Default state: collapsed (pointing up, rotated to look left) */
     transform: rotate(-90deg);
     transition: transform 0.2s ease-in-out;
 }
 
 .unlimited-stickers-category-arrow--expanded {
+    /* Expanded state: pointing down */
     transform: rotate(0deg);
 }
 
@@ -79,6 +81,7 @@
     opacity: 1;
 }
 
+/* A placeholder with a pulsing animation for images that are still loading */
 .unlimited-stickers-grid-item--placeholder::before {
     content: "";
     position: absolute;

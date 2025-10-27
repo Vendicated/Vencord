@@ -76,6 +76,10 @@ const StarIcon: React.FC<{ className?: string; width?: number; height?: number; 
     </svg>
 );
 
+/**
+ * Ensures the sticker guild exists, creating it if necessary.
+ * @returns The ID of the sticker guild, or null if creation failed.
+ */
 async function ensureStickerGuild(): Promise<string | null> {
     let guildId = settings.store.stickerGuildId;
 
@@ -105,9 +109,17 @@ async function ensureStickerGuild(): Promise<string | null> {
     }
 }
 
+/**
+ * Uploads a sticker by replacing the one in the single, reusable sticker slot.
+ * @param guildId The ID of the sticker guild.
+ * @param stickerName The name for the sticker.
+ * @param base64File The base64 data URL of the sticker file.
+ * @returns The ID of the newly uploaded sticker, or null on failure.
+ */
 async function uploadAndReplaceSticker(guildId: string, stickerName: string, base64File: string): Promise<string | null> {
     const currentStickerId = settings.store.stickerSlotId;
 
+    // Delete the old sticker before uploading a new one to avoid filling the server with stickers.
     if (currentStickerId) {
         try {
             await RestAPI.del({ url: `/guilds/${guildId}/stickers/${currentStickerId}` });
@@ -119,6 +131,7 @@ async function uploadAndReplaceSticker(guildId: string, stickerName: string, bas
     try {
         const blob = await fetch(base64File).then(res => res.blob());
         const formData = new FormData();
+        // Sanitize sticker names.
         const safeStickerName = stickerName.replace(/[^a-zA-Z0-9_]/g, '_').substring(0, 30).padEnd(2, '_');
         formData.append('name', safeStickerName);
         formData.append('description', getPluginIntlMessage("EPHEMERAL_STICKER_DESC"));
@@ -295,7 +308,6 @@ const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
     );
 };
 
-
 const LazyStickerCategory: React.FC<{
     category: StickerCategory;
     guildId: string;
@@ -316,6 +328,7 @@ const LazyStickerCategory: React.FC<{
         const currentCategoryRef = categoryRef.current;
         if (!currentCategoryRef || !scrollerNode || hasLoadedRef.current) return;
 
+        // Only load previews for categories that are visible or about to be visible.
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting && !hasLoadedRef.current) {
