@@ -628,7 +628,6 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                         favoritePaths={favoritePaths}
                         onToggleFavorite={handleToggleFavorite}
                         onStickerSent={handleStickerSent}
-                        alwaysShow={!searchQuery}
                         isExpandedOverride={favoritesExpanded}
                         onToggleExpanded={handleToggleFavoritesExpanded}
                     />
@@ -644,7 +643,6 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                         favoritePaths={favoritePaths}
                         onToggleFavorite={handleToggleFavorite}
                         onStickerSent={handleStickerSent}
-                        alwaysShow={!searchQuery}
                         isExpandedOverride={recentsExpanded}
                         onToggleExpanded={handleToggleRecentsExpanded}
                     />
@@ -695,7 +693,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                     autoFocus
                 />
             </div>
-            <Divider style={{ margin: "0 16px 8px" }} />
+            <Divider style={{ margin: "8px 0 8px" }} />
             <ModalContent style={{ paddingTop: 0 }}>
                 {renderContent()}
             </ModalContent>
