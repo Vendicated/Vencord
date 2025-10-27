@@ -14,7 +14,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ope
 import { PluginNative } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
-import { Alerts, Clickable, GuildStore, MessageActions, React, RestAPI, ScrollerThin, Toasts } from "@webpack/common";
+import { Alerts, Clickable, GuildStore, MessageActions, React, RestAPI, ScrollerThin, TextInput, Toasts } from "@webpack/common";
 import type { IpcMainInvokeEvent } from "electron";
 
 import {
@@ -202,7 +202,6 @@ const StickerGridItem: React.FC<{
                     onLoad={e => e.currentTarget.classList.add("loaded")}
                 />
             )}
-
             {file.base64 && !isSending && (
                 <Clickable
                     onClick={handleFavoriteToggle}
@@ -230,6 +229,7 @@ interface StickerCategoryProps {
     alwaysShow?: boolean;
     isExpandedOverride?: boolean;
     onToggleExpanded?: () => void;
+    hideHeader?: boolean;
 }
 
 const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
@@ -350,7 +350,7 @@ const LazyStickerCategory: React.FC<{
         return () => {
             observer.disconnect();
         };
-    }, [scrollerNode, category.name]);
+    }, [scrollerNode, category.name, filesWithPreviews]);
 
     return (
         <div ref={categoryRef}>
@@ -384,6 +384,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
     const [guildId, setGuildIdState] = React.useState<string | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [scrollerNode, setScrollerNode] = React.useState<HTMLDivElement | null>(null);
+    const [searchQuery, setSearchQuery] = React.useState("");
     const [favoritesExpanded, setFavoritesExpanded] = React.useState(true);
     const [recentsExpanded, setRecentsExpanded] = React.useState(true);
 
@@ -481,8 +482,10 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                 const base64 = await Native.getFileAsBase64(file.path);
                 if (base64) {
                     currentBase64 = base64;
-                    setLocalCategories(prev => prev.map(cat => ({ ...cat, files: cat.files.map(f => f.path === file.path ? { ...f, base64 } : f) })));
-                    setRecentFiles(prev => prev.map(f => f.path === file.path ? { ...f, base64 } : f));
+                    const updatedFile = { ...file, base64 };
+                    setLocalCategories(prev => prev.map(cat => ({ ...cat, files: cat.files.map(f => f.path === file.path ? updatedFile : f) })));
+                    setRecentFiles(prev => prev.map(f => f.path === file.path ? updatedFile : f));
+                    file = updatedFile;
                 } else {
                     logger.error("Failed to load sticker preview for adding to favorites:", file.path);
                     Toasts.show({ message: "Failed to load sticker preview.", id: Toasts.genId(), type: Toasts.Type.FAILURE });
@@ -491,7 +494,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
             }
 
             newFavoritePaths.add(file.path);
-            updatedFavoriteFiles = [...updatedFavoriteFiles, { ...file, base64: currentBase64 }];
+            updatedFavoriteFiles = [...updatedFavoriteFiles, file];
             needsSave = true;
         }
 
@@ -519,6 +522,56 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
         });
     }, []);
 
+
+    const {
+        filteredFavorites,
+        filteredRecents,
+        filteredLocalCategories,
+        individualStickerCategory
+    } = React.useMemo(() => {
+        if (!searchQuery) {
+            return {
+                filteredFavorites: favoriteFiles,
+                filteredRecents: recentFiles,
+                filteredLocalCategories: localCategories,
+                individualStickerCategory: null
+            };
+        }
+
+        const lowerQuery = searchQuery.toLowerCase();
+
+        const filteredFavorites = favoriteFiles.filter(f => f.name.toLowerCase().includes(lowerQuery));
+        const filteredRecents = recentFiles.filter(f => f.name.toLowerCase().includes(lowerQuery));
+
+        const filteredLocalCategories: StickerCategory[] = [];
+        const individualStickerMatches: StickerFile[] = [];
+        const matchedStickerPaths = new Set<string>();
+
+        for (const category of localCategories) {
+            const categoryNameMatches = category.name.toLowerCase().includes(lowerQuery);
+            const matchingFilesInCategory = category.files
+                .filter(file => file.name.toLowerCase().includes(lowerQuery));
+
+
+            if (categoryNameMatches) {
+                filteredLocalCategories.push(category);
+                category.files.forEach(file => matchedStickerPaths.add(file.path));
+            } else if (matchingFilesInCategory.length > 0) {
+                individualStickerMatches.push(...matchingFilesInCategory);
+            }
+        }
+
+        const finalIndividualStickers = individualStickerMatches.filter(sticker => !matchedStickerPaths.has(sticker.path));
+
+        const individualStickerCategory: StickerCategory | null = finalIndividualStickers.length > 0 ? {
+            name: "Search Results",
+            files: finalIndividualStickers
+        } : null;
+
+        return { filteredFavorites, filteredRecents, filteredLocalCategories, individualStickerCategory };
+
+    }, [localCategories, favoriteFiles, recentFiles, searchQuery]);
+
     const handleToggleFavoritesExpanded = React.useCallback(() => {
         const newState = !favoritesExpanded;
         setFavoritesExpanded(newState);
@@ -545,27 +598,61 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
             return <p style={{ padding: 10 }}>{getPluginIntlMessage("STICKER_GUILD_CREATE_FAILED_BODY")}</p>;
         }
 
-        const noLocalCategories = localCategories.length === 0;
-        const noFavorites = favoriteFiles.length === 0;
-        const noRecents = recentFiles.length === 0;
+        const noLocalCategoriesFound = filteredLocalCategories.length === 0;
+        const noIndividualMatches = !individualStickerCategory;
+        const noFavoritesFound = filteredFavorites.length === 0;
+        const noRecentsFound = filteredRecents.length === 0;
 
-        if (noLocalCategories && noFavorites && noRecents) {
+        if (noLocalCategoriesFound && noIndividualMatches && noFavoritesFound && noRecentsFound) {
             return (
                 <p style={{ padding: 20, textAlign: 'center' }}>
-                    {getPluginIntlMessage("NO_FILES_FOUND_BODY")}
+                    {searchQuery
+                        ? `No stickers found matching "${searchQuery}".`
+                        : getPluginIntlMessage("NO_FILES_FOUND_BODY")}
                 </p>
             );
         }
 
         return (
             <div className="unlimited-stickers-modal-content">
-                {/* @ts-expect-error: ScrollerThin types are incorrect */}
+                {/* @ts-expect-error Type mismatch */}
                 <ScrollerThin ref={scrollerCallbackRef} className="unlimited-stickers-scroller">
-                    {favoriteFiles.length > 0 && (
-                        <StickerCategoryComponent
-                            key="favorites-category"
-                            categoryName={getPluginIntlMessage("FAVORITES")}
-                            files={favoriteFiles}
+                    <StickerCategoryComponent
+                        key="favorites-category"
+                        categoryName={getPluginIntlMessage("FAVORITES")}
+                        files={filteredFavorites}
+                        guildId={guildId!}
+                        channel={channel}
+                        closePopout={rootProps.onClose}
+                        scrollerNode={scrollerNode}
+                        favoritePaths={favoritePaths}
+                        onToggleFavorite={handleToggleFavorite}
+                        onStickerSent={handleStickerSent}
+                        alwaysShow={!searchQuery}
+                        isExpandedOverride={favoritesExpanded}
+                        onToggleExpanded={handleToggleFavoritesExpanded}
+                    />
+
+                    <StickerCategoryComponent
+                        key="recent-category"
+                        categoryName={getPluginIntlMessage("RECENTLY_USED")}
+                        files={filteredRecents}
+                        guildId={guildId!}
+                        channel={channel}
+                        closePopout={rootProps.onClose}
+                        scrollerNode={scrollerNode}
+                        favoritePaths={favoritePaths}
+                        onToggleFavorite={handleToggleFavorite}
+                        onStickerSent={handleStickerSent}
+                        alwaysShow={!searchQuery}
+                        isExpandedOverride={recentsExpanded}
+                        onToggleExpanded={handleToggleRecentsExpanded}
+                    />
+
+                    {individualStickerCategory && (
+                        <LazyStickerCategory
+                            key={individualStickerCategory.name}
+                            category={individualStickerCategory}
                             guildId={guildId!}
                             channel={channel}
                             closePopout={rootProps.onClose}
@@ -573,29 +660,10 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                             favoritePaths={favoritePaths}
                             onToggleFavorite={handleToggleFavorite}
                             onStickerSent={handleStickerSent}
-                            isExpandedOverride={favoritesExpanded}
-                            onToggleExpanded={handleToggleFavoritesExpanded}
                         />
                     )}
 
-                    {recentFiles.length > 0 && (
-                        <StickerCategoryComponent
-                            key="recent-category"
-                            categoryName={getPluginIntlMessage("RECENTLY_USED")}
-                            files={recentFiles}
-                            guildId={guildId!}
-                            channel={channel}
-                            closePopout={rootProps.onClose}
-                            scrollerNode={scrollerNode}
-                            favoritePaths={favoritePaths}
-                            onToggleFavorite={handleToggleFavorite}
-                            onStickerSent={handleStickerSent}
-                            isExpandedOverride={recentsExpanded}
-                            onToggleExpanded={handleToggleRecentsExpanded}
-                        />
-                    )}
-
-                    {localCategories.map(category => (
+                    {filteredLocalCategories.map(category => (
                         <LazyStickerCategory
                             key={category.name}
                             category={category}
@@ -619,7 +687,15 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                 <Heading tag="h2" style={{ flexGrow: 1 }}>{getPluginIntlMessage("STICKERS")}</Heading>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
-            <ModalContent>
+            <div style={{ padding: '0 16px 8px 16px' }}>
+                <TextInput
+                    placeholder="Search stickers by name or category..."
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    autoFocus
+                />
+            </div>
+            <ModalContent style={{ paddingTop: 0 }}>
                 {renderContent()}
             </ModalContent>
         </ModalRoot>
