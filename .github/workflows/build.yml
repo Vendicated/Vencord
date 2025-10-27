@@ -51,7 +51,7 @@ jobs:
                   mkdir release
 
                   cp browser/browser.* release
-                  cp Vencord.user.{js,js.LEGAL.txt} release
+                  cp Equicord.user.{js,js.LEGAL.txt} release
 
                   # copy the plugin data jsons, the extension zips and the desktop/vesktop asars
                   cp *.{json,zip,asar} release

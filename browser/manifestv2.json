@@ -3,7 +3,7 @@
     "minimum_chrome_version": "91",
     "name": "Equicord Web",
     "description": "The other cutest Discord mod now in your browser",
-    "author": "Thororen",
+    "author": "Equicord",
     "homepage_url": "https://github.com/Equicord/Equicord",
     "icons": {
         "128": "icon.png"
@@ -32,7 +32,7 @@
                 "*://*.discord.com/*"
             ],
             "js": [
-                "dist/Vencord.js"
+                "dist/Equicord.js"
             ],
             "all_frames": true,
             "world": "MAIN"
@@ -44,12 +44,12 @@
         ]
     },
     "web_accessible_resources": [
-        "dist/Vencord.js",
-        "dist/Vencord.css"
+        "dist/Equicord.js",
+        "dist/Equicord.css"
     ],
     "browser_specific_settings": {
         "gecko": {
-            "id": "vencord-firefox@vendicated.dev",
+            "id": "equicord-firefox@equicord.org",
             "strict_min_version": "128.0"
         }
     }
