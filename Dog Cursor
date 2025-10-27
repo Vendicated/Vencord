@@ -1,0 +1,8 @@
+.custom-cursor-follow {
+    background: url("https://cdn.discordapp.com/attachments/1285990882218086472/1432280778418421810/Dogs.png?ex=69007aec&is=68ff296c&hm=4f97ee1d86cc58fdd2d102e92ed8669085365f337fa747beff76c711f7dff612&");
+    width: 32px;
+    height: 32px;
+    position: fixed;
+    pointer-events: none;
+    z-index: 99999;
+}
