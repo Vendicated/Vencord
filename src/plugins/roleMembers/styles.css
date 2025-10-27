@@ -1,0 +1,56 @@
+.popout-role-members {
+    background: var(--background-floating);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    box-shadow: var(--elevation-high);
+    min-width: 240px;
+    max-width: 320px;
+    padding: 12px;
+    position: fixed;
+    z-index: 1000;
+}
+
+.role-members-popout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.role-member {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+.role-member:hover {
+    background: var(--background-modifier-hover);
+}
+
+.role-member .itemCheckbox__97e86 {
+    margin-right: 8px;
+}
+
+.role-member .itemLabel__97e86 {
+    flex: 1;
+    overflow: hidden;
+}
+
+.role-member .username {
+    color: var(--text-normal);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.interactive.mention.role {
+    cursor: pointer;
+}
+
+.interactive.mention.role:hover {
+    background: var(--background-modifier-hover);
+}
