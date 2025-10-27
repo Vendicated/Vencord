@@ -171,10 +171,11 @@ export default definePlugin({
     },
 
     wrapMap(toWrap: any[]) {
+        const otherOptions = getIntlMessage("OTHER_OPTIONS");
         // @ts-expect-error
         toWrap.map = function (render: (item: SettingsEntry) => ReactElement<any>) {
             return this
-                .filter(a => a.items.length > 0)
+                .filter(a => a.items.length > 0 && a.label !== otherOptions)
                 .map(({ label, items }) => {
                     const children = items.map(render);
                     if (label) {
