@@ -23,8 +23,8 @@ export const RECENT_EXPANDED_KEY = "UnlimitedStickers_RecentExpanded";
 export const settings = definePluginSettings({
     stickerPath: {
         type: OptionType.STRING,
-        description: "The absolute path to your local stickers folder. This folder should contain sub-folders for each sticker category.",
-        placeholder: "e.g., /home/user/Pictures/Stickers or C:\\Users\\User\\Pictures\\Stickers",
+        description: getPluginIntlMessage("SETTING_STICKER_PATH_DESC"),
+        placeholder: getPluginIntlMessage("SETTING_STICKER_PATH_PLACEHOLDER"),
     },
 }).withPrivateSettings<{
     stickerGuildId: string | null;

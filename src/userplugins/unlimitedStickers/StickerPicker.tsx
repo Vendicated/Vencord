@@ -86,7 +86,7 @@ async function ensureStickerGuild(): Promise<string | null> {
     try {
         const newGuild = await RestAPI.post({
             url: "/guilds",
-            body: { name: "Vencord Local Stickers", icon: null, channels: [] }
+            body: { name: getPluginIntlMessage("STICKER_GUILD_NAME"), icon: null, channels: [] }
         });
 
         guildId = newGuild.body.id;
@@ -121,7 +121,7 @@ async function uploadAndReplaceSticker(guildId: string, stickerName: string, bas
         const formData = new FormData();
         const safeStickerName = stickerName.replace(/[^a-zA-Z0-9_]/g, '_').substring(0, 30).padEnd(2, '_');
         formData.append('name', safeStickerName);
-        formData.append('description', 'Ephemeral Vencord Sticker');
+        formData.append('description', getPluginIntlMessage("EPHEMERAL_STICKER_DESC"));
         formData.append('tags', 'vencord');
         formData.append('file', blob, `${safeStickerName}.${blob.type.split('/')[1]}`);
 
@@ -206,7 +206,7 @@ const StickerGridItem: React.FC<{
                 <Clickable
                     onClick={handleFavoriteToggle}
                     className="unlimited-stickers-favorite-button"
-                    aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    aria-label={isFavorite ? getPluginIntlMessage("REMOVE_FROM_FAVORITES") : getPluginIntlMessage("ADD_TO_FAVORITES")}
                 >
                     <StarIcon filled={isFavorite} />
                 </Clickable>
@@ -274,7 +274,7 @@ const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
             {isExpanded && (
                 <div className="unlimited-stickers-grid">
                     {files.length === 0 ? (
-                        <p className="unlimited-stickers-empty-category">No stickers here yet!</p>
+                        <p className="unlimited-stickers-empty-category">{getPluginIntlMessage("NO_STICKERS_IN_CATEGORY")}</p>
                     ) : (
                         files.map(file => (
                             <StickerGridItem
@@ -428,12 +428,12 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
             setFavoritePaths(favPathsSet);
 
             const favFilePromises = favPaths.map(async (path) => {
-                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? "Unknown";
+                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? getPluginIntlMessage("UNKNOWN_STICKER_NAME");
                 const base64 = await Native.getFileAsBase64(path);
                 return { name, path, base64 };
             });
             const recentFilePromises = recentPaths.map(async (path) => {
-                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? "Unknown";
+                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? getPluginIntlMessage("UNKNOWN_STICKER_NAME");
                 const base64 = await Native.getFileAsBase64(path);
                 return { name, path, base64 };
             });
@@ -488,7 +488,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                     file = updatedFile;
                 } else {
                     logger.error("Failed to load sticker preview for adding to favorites:", file.path);
-                    Toasts.show({ message: "Failed to load sticker preview.", id: Toasts.genId(), type: Toasts.Type.FAILURE });
+                    Toasts.show({ message: getPluginIntlMessage("LOAD_PREVIEW_FAILED"), id: Toasts.genId(), type: Toasts.Type.FAILURE });
                     return;
                 }
             }
@@ -564,7 +564,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
         const finalIndividualStickers = individualStickerMatches.filter(sticker => !matchedStickerPaths.has(sticker.path));
 
         const individualStickerCategory: StickerCategory | null = finalIndividualStickers.length > 0 ? {
-            name: "Search Results",
+            name: getPluginIntlMessage("SEARCH_RESULTS"),
             files: finalIndividualStickers
         } : null;
 
@@ -587,11 +587,11 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
 
     const renderContent = () => {
         if (!stickerPath) {
-            return <p style={{ padding: 20, textAlign: 'center' }}>{getPluginIntlMessage("SET_STICKER_PATH_PROMPT_BODY")}</p>;
+            return <p style={{ padding: 20, textAlign: 'center', color: 'white' }}>{getPluginIntlMessage("SET_STICKER_PATH_PROMPT_BODY")}</p>;
         }
 
         if (isLoading) {
-            return <p style={{ padding: 20, textAlign: 'center' }}>{getPluginIntlMessage("LOADING_STICKER_PREVIEWS_BODY").replace("previews...", "stickers...")}</p>;
+            return <p style={{ padding: 20, textAlign: 'center', color: 'white' }}>{getPluginIntlMessage("LOADING_STICKERS_BODY")}</p>;
         }
 
         if (!guildId) {
@@ -605,9 +605,9 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
 
         if (noLocalCategoriesFound && noIndividualMatches && noFavoritesFound && noRecentsFound) {
             return (
-                <p style={{ padding: 20, textAlign: 'center' }}>
+                <p style={{ padding: 20, textAlign: 'center', color: 'white' }}>
                     {searchQuery
-                        ? `No stickers found matching "${searchQuery}".`
+                        ? getPluginIntlMessage("NO_STICKERS_FOUND_QUERY").replace("{query}", searchQuery)
                         : getPluginIntlMessage("NO_FILES_FOUND_BODY")}
                 </p>
             );
@@ -689,7 +689,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
             </ModalHeader>
             <div style={{ padding: '0 16px 8px 16px' }}>
                 <TextInput
-                    placeholder="Search stickers by name or category..."
+                    placeholder={getPluginIntlMessage("SEARCH_STICKERS_PLACEHOLDER")}
                     value={searchQuery}
                     onChange={setSearchQuery}
                     autoFocus
