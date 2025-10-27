@@ -15,6 +15,8 @@ export const translations = {
         "SET_STICKER_PATH_PROMPT_BODY": "Please set your sticker folder path in the plugin settings.",
         "LOADING_STICKER_PREVIEWS_BODY": "Loading sticker previews...",
         "NO_FILES_FOUND_BODY": "No supported image files found in any of your sticker sub-folders.",
+        "FAVORITES": "Favorites",
+        "STICKER_UPLOAD_FAILED": "Sticker Upload Failed",
     },
     "ja": {
         "STICKERS": "無限スタンプパネル",
@@ -26,5 +28,7 @@ export const translations = {
         "SET_STICKER_PATH_PROMPT_BODY": "プラグイン設定でスタンプフォルダのパスを設定してください。",
         "LOADING_STICKER_PREVIEWS_BODY": "スタンプのプレビューを読み込み中...",
         "NO_FILES_FOUND_BODY": "スタンプのサブフォルダに対応している画像ファイルが見つかりませんでした。",
+        "FAVORITES": "お気に入り",
+        "STICKER_UPLOAD_FAILED": "スタンプのアップロードに失敗しました",
     }
 };

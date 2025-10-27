@@ -12,6 +12,9 @@ import { ImageIcon } from "@components/Icons";
 import { ChannelStore } from "@webpack/common";
 import { definePluginSettings } from "@api/Settings";
 import { getPluginIntlMessage } from "./intl";
+import * as DataStore from "@api/DataStore";
+
+export const FAVORITES_KEY = "UnlimitedStickers_Favorites";
 
 export const settings = definePluginSettings({
     stickerPath: {
@@ -23,6 +26,15 @@ export const settings = definePluginSettings({
     stickerGuildId: string | null;
     stickerSlotId: string | null;
 }>();
+
+export async function getFavorites(): Promise<string[]> {
+    return (await DataStore.get<string[]>(FAVORITES_KEY)) ?? [];
+}
+
+export async function saveFavorites(favorites: string[]): Promise<void> {
+    await DataStore.set(FAVORITES_KEY, favorites);
+}
+
 
 export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
     const channel = ChannelStore.getChannel(props.channel.id);
