@@ -75,7 +75,7 @@ async function readDirectoryEntry(entry: FileSystemDirectoryEntry): Promise<Reco
 
         const readBatch = async (): Promise<void> => {
             return new Promise((resolve, reject) => {
-                reader.readEntries(async (entries) => {
+                reader.readEntries(async entries => {
                     if (entries.length === 0) {
                         resolve();
                         return;

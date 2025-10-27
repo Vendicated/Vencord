@@ -25,6 +25,7 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { platformName } from "@equicordplugins/equicordHelper/utils";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_IDS, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -71,41 +72,20 @@ async function forceUpdate() {
     return outdated;
 }
 
-function getWindowsName(release: string) {
-    const build = parseInt(release.split(".")[2]);
-    if (build >= 22000) return "Windows 11";
-    if (build >= 10240) return "Windows 10";
-    if (build >= 9200) return "Windows 8.1";
-    if (build >= 7600) return "Windows 7";
-    return `Windows (${release})`;
-}
-
-function getMacOSName(release: string) {
-    const major = parseInt(release.split(".")[0]);
-    if (major === 24) return "MacOS 15 (Sequoia)";
-    if (major === 23) return "MacOS 14 (Sonoma)";
-    if (major === 22) return "MacOS 13 (Ventura)";
-    if (major === 21) return "MacOS 12 (Monterey)";
-    if (major === 20) return "MacOS 11 (Big Sur)";
-    if (major === 19) return "MacOS 10.15 (Catalina)";
-    return `MacOS (${release})`;
-}
-
-function platformName() {
-    if (typeof DiscordNative === "undefined") return navigator.platform;
-    if (DiscordNative.process.platform === "win32") return `${getWindowsName(DiscordNative.os.release)}`;
-    if (DiscordNative.process.platform === "darwin") return `${getMacOSName(DiscordNative.os.release)} (${DiscordNative.process.arch === "arm64" ? "Apple Silicon" : "Intel Silicon"})`;
-    if (DiscordNative.process.platform === "linux") return `Linux (${DiscordNative.os.release})`;
-    return DiscordNative.process.platform;
-}
-
 async function generateDebugInfoMessage() {
     const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
     const client = (() => {
         if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
         if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
-        if (IS_EQUIBOP) return `Equibop v${VesktopNative.app.getVersion()}`;
+        if (IS_EQUIBOP) {
+            const equibopGitHash = tryOrElse(() => VesktopNative.app.getGitHash?.(), null);
+            if (equibopGitHash) {
+                const shortHash = equibopGitHash.slice(0, 7);
+                return `Equibop v${VesktopNative.app.getVersion()} • [${shortHash}](<https://github.com/Equicord/Equibop/commit/${equibopGitHash}>)`;
+            }
+            return `Equibop v${VesktopNative.app.getVersion()}`;
+        }
         if ("legcord" in window) return `LegCord v${window.legcord.version}`;
 
         // @ts-expect-error
@@ -116,7 +96,7 @@ async function generateDebugInfoMessage() {
     const info = {
         Equicord:
             `v${VERSION} • [${shortGitHash()}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
-            `${SettingsPlugin.getVersionInfo()} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
+            `${IS_EQUIBOP ? "" : SettingsPlugin.getVersionInfo()} - ${Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
         Platform: platformName()
     };
@@ -138,6 +118,7 @@ async function generateDebugInfoMessage() {
         "Activity Sharing Disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
         "Link Embeds Disabled": tryOrElse(() => !ShowEmbeds.getSetting(), false),
         "Equicord DevBuild": !IS_STANDALONE,
+        "Equibop DevBuild": IS_EQUIBOP && tryOrElse(() => VesktopNative.app.isDevBuild?.(), false),
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
         ">2 Weeks Outdated": BUILD_TIMESTAMP < Date.now() - 12096e5,
         [`Potentially Problematic Plugins: ${potentiallyProblematicPlugins.join(", ")}`]: potentiallyProblematicPlugins.length

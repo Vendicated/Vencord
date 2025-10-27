@@ -119,18 +119,24 @@ export function tryOrElse<T>(func: () => T, fallback: T): T {
     }
 }
 
-export function isEquicordGuild(id: string, isGuildId: boolean = false): boolean {
+export function isEquicordGuild(id: string | null | undefined, isGuildId: boolean = false): boolean {
+    if (!id) return false;
+
     if (isGuildId) return id === GUILD_ID;
 
     const channel = ChannelStore.getChannel(id);
     return channel.guild_id === GUILD_ID;
 }
 
-export function isSupportChannel(channelId: string): boolean {
+export function isSupportChannel(channelId: string | null | undefined): boolean {
+    if (channelId) return false;
+
     return channelId === SUPPORT_CHANNEL_ID;
 }
 
-export function isEquicordSupport(userId: string): boolean {
+export function isEquicordSupport(userId: string | null | undefined): boolean {
+    if (!userId) return false;
+
     const member = GuildMemberStore.getMember(GUILD_ID, userId);
     return member?.roles?.includes(EQUICORD_HELPERS) || false;
 }

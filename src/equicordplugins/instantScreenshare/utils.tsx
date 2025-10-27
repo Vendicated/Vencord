@@ -20,6 +20,7 @@ interface PickerProps {
 const getDesktopSources = findByCodeLazy("desktop sources");
 const configModule = findByPropsLazy("getOutputVolume");
 const log = new Logger("InstantScreenShare");
+
 export const settings = definePluginSettings({
     streamMedia: {
         type: OptionType.COMPONENT,
