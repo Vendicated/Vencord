@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import definePlugin, { OptionType } from "@utils/types";
-import { Devs } from "@utils/constants";
-import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
-import { openStickerPicker } from "./StickerPicker";
-import { ImageIcon } from "@components/Icons";
-import { ChannelStore } from "@webpack/common";
-import { definePluginSettings } from "@api/Settings";
-import { getPluginIntlMessage } from "./intl";
+import { ChatBarButton, type ChatBarButtonFactory } from "@api/ChatButtons";
 import * as DataStore from "@api/DataStore";
+import { definePluginSettings } from "@api/Settings";
+import { ImageIcon } from "@components/Icons";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { ChannelStore } from "@webpack/common";
+import { getPluginIntlMessage } from "./intl";
+import { openStickerPicker } from "./StickerPicker";
 
 export const FAVORITES_KEY = "UnlimitedStickers_Favorites";
 export const RECENT_KEY = "UnlimitedStickers_Recent";
@@ -23,8 +23,8 @@ export const RECENT_EXPANDED_KEY = "UnlimitedStickers_RecentExpanded";
 export const settings = definePluginSettings({
     stickerPath: {
         type: OptionType.STRING,
-        description: getPluginIntlMessage("SETTING_STICKER_PATH_DESC"),
-        placeholder: getPluginIntlMessage("SETTING_STICKER_PATH_PLACEHOLDER"),
+        description: "The absolute path to your local stickers folder. This folder should contain sub-folders for each sticker category.",
+        placeholder: "e.g., /home/user/Pictures/Stickers or C:\\Users\\User\\Pictures\\Stickers",
     },
 }).withPrivateSettings<{
     stickerGuildId: string | null;
@@ -61,10 +61,12 @@ export async function getExpansionState(key: string): Promise<boolean> {
     return (await DataStore.get<boolean>(key)) ?? true;
 }
 
-export async function saveExpansionState(key: string, isExpanded: boolean): Promise<void> {
+export async function saveExpansionState(
+    key: string,
+    isExpanded: boolean,
+): Promise<void> {
     await DataStore.set(key, isExpanded);
 }
-
 
 export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
     const channel = ChannelStore.getChannel(props.channel.id);
@@ -83,8 +85,9 @@ export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
 
 export default definePlugin({
     name: "UnlimitedStickers",
-    description: "Send local images as stickers by temporarily uploading them to a private server.",
+    description:
+        "Send local images as stickers by temporarily uploading them to a private server.",
     authors: [Devs.chev],
     settings,
-    renderChatBarButton: UnlimitedStickersChatBarIcon
+    renderChatBarButton: UnlimitedStickersChatBarIcon,
 });
