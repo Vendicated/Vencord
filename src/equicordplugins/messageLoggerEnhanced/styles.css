@@ -59,12 +59,16 @@
 }
 
 .msg-logger-modal-from {
-    font-size: 12px;
+    font-size: 14px;
     margin-left: 12px;
 }
 
 .msg-logger-modal-from-deleted {
     color: var(--status-danger);
+}
+
+.msg-logger-modal-from-edited {
+    color: var(--white-600);
 }
 
 .vc-log-toolbox-btn svg {
