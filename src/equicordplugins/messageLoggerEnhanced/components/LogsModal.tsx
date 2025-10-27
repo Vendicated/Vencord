@@ -14,7 +14,7 @@ import { closeAllModals, ModalContent, ModalFooter, ModalHeader, ModalProps, Mod
 import { LazyComponent } from "@utils/react";
 import { User } from "@vencord/discord-types";
 import { find, findByCode, findByCodeLazy } from "@webpack";
-import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React, TabBar, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Menu, NavigationRouter, React, TabBar, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 
 import { clearMessagesIDB, DBMessageRecord, deleteMessageIDB, deleteMessagesBulkIDB } from "../db";
 import { settings } from "../index";
@@ -308,6 +308,9 @@ function LMessage({ log, isGroupStart, reset, }: LMessageProps) {
 
     if (!message) return null;
 
+    const channel = ChannelStore.getChannel(message?.channel_id);
+    const guild = GuildStore.getGuild(channel?.guild_id);
+
     return (
         <div
             onContextMenu={e => {
@@ -416,8 +419,16 @@ function LMessage({ log, isGroupStart, reset, }: LMessageProps) {
                         isAutomodBlockedMessage={false}
                     />
                 }
-
             />
+            {channel?.isDM() && message?.author && (
+                <span className={`${cl("from")} ${message.deleted ? cl("from-deleted") : ""}`}>From {message.author.username}'s DMs</span>
+            )}
+            {channel?.isGroupDM() && channel?.name && (
+                <span className={`${cl("from")} ${message.deleted ? cl("from-deleted") : ""}`}>From {channel.name} Group DM</span>
+            )}
+            {!channel?.isDM() && !channel?.isGroupDM() && channel?.name && guild?.name && (
+                <span className={`${cl("from")} ${message.deleted ? cl("from-deleted") : ""}`}>From {channel.name} in {guild.name}</span>
+            )}
         </div>
     );
 }
