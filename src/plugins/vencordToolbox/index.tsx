@@ -131,8 +131,7 @@ export default definePlugin({
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                // TODO: (?:\.button) is for stable compat and should be removed soon:tm:
-                match: /focusSectionProps:"HELP".{0,20},className:(\i(?:\.button)?)\}\),/,
+                match: /canShowReminder:.+?className:(\i).*?\}\),/,
                 replace: "$& $self.renderVencordPopoutButton($1),"
             }
         }
