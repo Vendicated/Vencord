@@ -16,7 +16,9 @@ import * as DataStore from "@api/DataStore";
 
 export const FAVORITES_KEY = "UnlimitedStickers_Favorites";
 export const RECENT_KEY = "UnlimitedStickers_Recent";
-export const RECENT_LIMIT = 10;
+export const RECENT_LIMIT = 16;
+export const FAVORITES_EXPANDED_KEY = "UnlimitedStickers_FavoritesExpanded";
+export const RECENT_EXPANDED_KEY = "UnlimitedStickers_RecentExpanded";
 
 export const settings = definePluginSettings({
     stickerPath: {
@@ -53,6 +55,14 @@ export async function addRecentSticker(stickerPath: string): Promise<void> {
         }
         return recents;
     });
+}
+
+export async function getExpansionState(key: string): Promise<boolean> {
+    return (await DataStore.get<boolean>(key)) ?? true;
+}
+
+export async function saveExpansionState(key: string, isExpanded: boolean): Promise<void> {
+    await DataStore.set(key, isExpanded);
 }
 
 

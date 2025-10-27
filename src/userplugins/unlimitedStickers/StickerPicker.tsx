@@ -17,7 +17,17 @@ import { findByCodeLazy } from "@webpack";
 import { Alerts, Clickable, GuildStore, MessageActions, React, RestAPI, ScrollerThin, Toasts } from "@webpack/common";
 import type { IpcMainInvokeEvent } from "electron";
 
-import { settings, getFavorites, saveFavorites, getRecentStickers, addRecentSticker, FAVORITES_KEY, RECENT_KEY } from "./index";
+import {
+    settings,
+    getFavorites,
+    saveFavorites,
+    getRecentStickers,
+    addRecentSticker,
+    FAVORITES_EXPANDED_KEY,
+    RECENT_EXPANDED_KEY,
+    getExpansionState,
+    saveExpansionState
+} from "./index";
 import { getPluginIntlMessage } from "./intl";
 
 interface StickerFile {
@@ -216,6 +226,8 @@ interface StickerCategoryProps {
     onStickerSent: (file: StickerFileWithPreview) => void;
     initialExpanded?: boolean;
     alwaysShow?: boolean;
+    isExpandedOverride?: boolean;
+    onToggleExpanded?: () => void;
 }
 
 const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
@@ -229,8 +241,13 @@ const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
     onStickerSent,
     initialExpanded = true,
     alwaysShow = false,
+    isExpandedOverride,
+    onToggleExpanded,
 }) => {
-    const [isExpanded, setIsExpanded] = React.useState(initialExpanded);
+    const [internalExpanded, setInternalExpanded] = React.useState(initialExpanded);
+
+    const isExpanded = isExpandedOverride ?? internalExpanded;
+    const handleToggle = onToggleExpanded ?? (() => setInternalExpanded(!internalExpanded));
 
     if (files.length === 0 && !alwaysShow) {
         return null;
@@ -240,7 +257,7 @@ const StickerCategoryComponent: React.FC<StickerCategoryProps> = ({
         <div className="unlimited-stickers-category">
             <Clickable
                 className="unlimited-stickers-category-header"
-                onClick={() => setIsExpanded(!isExpanded)}
+                onClick={handleToggle}
                 aria-expanded={isExpanded}
             >
                 <Heading tag="h5">
@@ -365,6 +382,8 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
     const [guildId, setGuildIdState] = React.useState<string | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [scrollerNode, setScrollerNode] = React.useState<HTMLDivElement | null>(null);
+    const [favoritesExpanded, setFavoritesExpanded] = React.useState(true);
+    const [recentsExpanded, setRecentsExpanded] = React.useState(true);
 
     const scrollerCallbackRef = React.useCallback((instance: any) => {
         if (instance) {
@@ -385,11 +404,22 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
             const id = await ensureStickerGuild();
             setGuildIdState(id);
 
-            const [favPaths, recentPaths, { categories: fetchedCategories, debug }] = await Promise.all([
+            const [
+                favPaths,
+                recentPaths,
+                { categories: fetchedCategories, debug },
+                favExpanded,
+                recExpanded
+            ] = await Promise.all([
                 getFavorites(),
                 getRecentStickers(),
                 Native.getStickerFiles(stickerPath),
+                getExpansionState(FAVORITES_EXPANDED_KEY),
+                getExpansionState(RECENT_EXPANDED_KEY),
             ]);
+
+            setFavoritesExpanded(favExpanded);
+            setRecentsExpanded(recExpanded);
 
             const favPathsSet = new Set(favPaths);
             setFavoritePaths(favPathsSet);
@@ -480,12 +510,24 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                 newRecents.splice(existingIndex, 1);
             }
             newRecents.unshift(file);
-            if (newRecents.length > 30) {
-                newRecents.length = 30;
+            if (newRecents.length > 16) {
+                newRecents.length = 16;
             }
             return newRecents;
         });
     }, []);
+
+    const handleToggleFavoritesExpanded = React.useCallback(() => {
+        const newState = !favoritesExpanded;
+        setFavoritesExpanded(newState);
+        saveExpansionState(FAVORITES_EXPANDED_KEY, newState);
+    }, [favoritesExpanded]);
+
+    const handleToggleRecentsExpanded = React.useCallback(() => {
+        const newState = !recentsExpanded;
+        setRecentsExpanded(newState);
+        saveExpansionState(RECENT_EXPANDED_KEY, newState);
+    }, [recentsExpanded]);
 
 
     const renderContent = () => {
@@ -529,7 +571,8 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                             favoritePaths={favoritePaths}
                             onToggleFavorite={handleToggleFavorite}
                             onStickerSent={handleStickerSent}
-                            initialExpanded={true}
+                            isExpandedOverride={favoritesExpanded}
+                            onToggleExpanded={handleToggleFavoritesExpanded}
                         />
                     )}
 
@@ -545,7 +588,8 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                             favoritePaths={favoritePaths}
                             onToggleFavorite={handleToggleFavorite}
                             onStickerSent={handleStickerSent}
-                            initialExpanded={true}
+                            isExpandedOverride={recentsExpanded}
+                            onToggleExpanded={handleToggleRecentsExpanded}
                         />
                     )}
 
