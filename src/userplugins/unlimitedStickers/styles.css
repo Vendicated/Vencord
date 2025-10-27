@@ -1,0 +1,117 @@
+.unlimited-stickers-category {
+    margin-bottom: 20px;
+}
+
+.unlimited-stickers-category-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--header-primary);
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.1s ease;
+}
+
+.unlimited-stickers-category-header:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.unlimited-stickers-category-header > h5 {
+    margin: 0;
+}
+
+.unlimited-stickers-category-arrow {
+    flex-shrink: 0;
+    transform: rotate(-90deg);
+    transition: transform 0.2s ease-in-out;
+}
+
+.unlimited-stickers-category-arrow--expanded {
+    transform: rotate(0deg);
+}
+
+.unlimited-stickers-scroller {
+    max-height: 400px;
+}
+
+.unlimited-stickers-grid-item {
+    box-sizing: border-box;
+    padding: 5px;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: var(--background-secondary);
+    position: relative;
+}
+
+.unlimited-stickers-grid-item:hover {
+    background-color: var(--background-secondary-alt);
+}
+
+.unlimited-stickers-grid-item-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.unlimited-stickers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 80px);
+    gap: 10px;
+    justify-content: center;
+}
+
+.unlimited-stickers-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.unlimited-stickers-grid-item--loading {
+    cursor: progress;
+    pointer-events: none;
+}
+
+.unlimited-stickers-grid-item--loading > .unlimited-stickers-grid-item-img,
+.unlimited-stickers-grid-item--loading > p {
+    opacity: 0.3;
+}
+
+.unlimited-stickers-loading-spinner-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.unlimited-stickers-grid-item--placeholder {
+    animation: unlimited-stickers-pulse 1.5s infinite ease-in-out;
+    cursor: default;
+}
+
+@keyframes unlimited-stickers-pulse {
+    0% {
+        background-color: var(--background-secondary);
+    }
+
+    50% {
+        background-color: var(--background-secondary-alt);
+    }
+
+    100% {
+        background-color: var(--background-secondary);
+    }
+}
