@@ -32,7 +32,8 @@ const settings = definePluginSettings({
     organizeMenu: {
         description: "Organizes the settings cog context menu into categories",
         type: OptionType.BOOLEAN,
-        default: true
+        default: true,
+        restartNeeded: true
     },
     eagerLoad: {
         description: "Removes the loading delay when opening the menu for the first time",
@@ -101,8 +102,8 @@ export default definePlugin({
             find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
-                    match: /\(0,\i\.useTransition\)\((\i)/,
-                    replace: "(_cb=>_cb(void 0,$1))||$&"
+                    match: /(?=\(0,\i\.\i\)\((\i),\{from:\{position:"absolute")/,
+                    replace: "(_cb=>_cb(void 0,$1))||"
                 },
                 {
                     match: /\i\.animated\.div/,
@@ -114,17 +115,19 @@ export default definePlugin({
         { // Load menu TOC eagerly
             find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
             replacement: {
-                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
+                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)).*?,(?=\1\(this)/,
                 replace: "$&(async ()=>$2)(),"
             },
             predicate: () => settings.store.eagerLoad
         },
-        { // Settings cog context menu
+        {
+            // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                    replace: "$1$self.wrapMenu($2)"
+                    match: /=\[\];return (\i)(?=\.forEach)/,
+                    replace: "=$self.wrapMap([]);return $self.transformSettingsEntries($1)",
+                    predicate: () => settings.store.organizeMenu
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
@@ -139,11 +142,11 @@ export default definePlugin({
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
     //
-    // Thus, we sanity check webpack modules & do this really hacky try catch to hopefully prevent hard crashes if something goes wrong.
-    // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
-    // not in children
+    // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
-        if (!FocusLock || !ComponentDispatch || !Classes) {
+        try {
+            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch, Classes].forEach(e => e.test);
+        } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;
         }
@@ -151,9 +154,7 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    wrapMenu(list: SettingsEntry[]) {
-        if (!settings.store.organizeMenu) return list;
-
+    transformSettingsEntries(list: SettingsEntry[]) {
         const items = [{ label: null as string | null, items: [] as SettingsEntry[] }];
 
         for (const item of list) {
@@ -166,31 +167,32 @@ export default definePlugin({
             }
         }
 
-        return {
-            filter(predicate: (item: SettingsEntry) => boolean) {
-                for (const category of items) {
-                    category.items = category.items.filter(predicate);
-                }
-                return this;
-            },
-            map(render: (item: SettingsEntry) => ReactElement) {
-                return items
-                    .filter(a => a.items.length > 0)
-                    .map(({ label, items }) => {
-                        const children = items.map(render);
-                        if (label) {
-                            return (
-                                <Menu.MenuItem
-                                    id={label.replace(/\W/, "_")}
-                                    label={label}
-                                    children={children}
-                                    action={children[0].props.action}
-                                />);
-                        } else {
-                            return children;
-                        }
-                    });
-            }
+        return items;
+    },
+
+    wrapMap(toWrap: any[]) {
+        // @ts-expect-error
+        toWrap.map = function (render: (item: SettingsEntry) => ReactElement<any>) {
+            return this
+                .filter(a => a.items.length > 0)
+                .map(({ label, items }) => {
+                    const children = items.map(render);
+                    if (label) {
+                        return (
+                            <Menu.MenuItem
+                                key={label}
+                                id={label.replace(/\W/, "_")}
+                                label={label}
+                            >
+                                {children}
+                            </Menu.MenuItem>
+                        );
+                    } else {
+                        return children;
+                    }
+                });
         };
+
+        return toWrap;
     }
 });

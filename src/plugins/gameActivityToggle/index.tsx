@@ -17,16 +17,15 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 
-import style from "./style.css?managed";
+import managedStyle from "./style.css?managed";
 
-const Button = findComponentByCodeLazy("Button.Sizes.NONE,disabled:");
+const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -61,7 +60,7 @@ function makeIcon(showCurrentGame?: boolean) {
     };
 }
 
-function GameActivityToggleButton() {
+function GameActivityToggleButton(props: { nameplate?: any; }) {
     const showCurrentGame = ShowCurrentGame.useSetting();
 
     return (
@@ -70,6 +69,8 @@ function GameActivityToggleButton() {
             icon={makeIcon(showCurrentGame)}
             role="switch"
             aria-checked={!showCurrentGame}
+            redGlow={!showCurrentGame}
+            plated={props?.nameplate != null}
             onClick={() => ShowCurrentGame.updateSetting(old => !old)}
         />
     );
@@ -90,23 +91,18 @@ export default definePlugin({
     dependencies: ["UserSettingsAPI"],
     settings,
 
+    managedStyle,
+
     patches: [
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
-                match: /this\.renderNameZone\(\).+?children:\[/,
-                replace: "$&$self.GameActivityToggleButton(),"
+                match: /className:\i\.buttons,.{0,50}children:\[/,
+                replace: "$&$self.GameActivityToggleButton(arguments[0]),"
             }
         }
     ],
 
     GameActivityToggleButton: ErrorBoundary.wrap(GameActivityToggleButton, { noop: true }),
 
-    start() {
-        enableStyle(style);
-    },
-
-    stop() {
-        disableStyle(style);
-    }
 });

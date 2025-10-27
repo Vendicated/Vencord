@@ -8,10 +8,11 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
+import { Channel } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
-import { Channel } from "discord-types/general";
-import { HTMLProps, MouseEventHandler, ReactNode } from "react";
+import { ButtonWrapperClasses, Clickable, Tooltip } from "@webpack/common";
+import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
 waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
@@ -74,9 +75,9 @@ export interface ChatBarProps {
     };
 }
 
-export type ChatBarButton = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
+export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
 
-const buttonFactories = new Map<string, ChatBarButton>();
+const buttonFactories = new Map<string, ChatBarButtonFactory>();
 const logger = new Logger("ChatButtons");
 
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
@@ -91,38 +92,36 @@ export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     }
 }
 
-export const addChatBarButton = (id: string, button: ChatBarButton) => buttonFactories.set(id, button);
+export const addChatBarButton = (id: string, button: ChatBarButtonFactory) => buttonFactories.set(id, button);
 export const removeChatBarButton = (id: string) => buttonFactories.delete(id);
 
 export interface ChatBarButtonProps {
     children: ReactNode;
     tooltip: string;
-    onClick: MouseEventHandler<HTMLButtonElement>;
-    onContextMenu?: MouseEventHandler<HTMLButtonElement>;
-    onAuxClick?: MouseEventHandler<HTMLButtonElement>;
-    buttonProps?: Omit<HTMLProps<HTMLButtonElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
+    onClick: MouseEventHandler;
+    onContextMenu?: MouseEventHandler;
+    onAuxClick?: MouseEventHandler;
+    buttonProps?: Omit<HTMLProps<HTMLDivElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
 }
 export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
         <Tooltip text={props.tooltip}>
             {({ onMouseEnter, onMouseLeave }) => (
                 <div className={`expression-picker-chat-input-button ${ChannelTextAreaClasses?.buttonContainer ?? ""} vc-chatbar-button`}>
-                    <Button
+                    <Clickable
                         aria-label={props.tooltip}
-                        size=""
-                        look={ButtonLooks.BLANK}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
-                        innerClassName={`${ButtonWrapperClasses.button} ${ChannelTextAreaClasses?.button}`}
+                        className={classes(ButtonWrapperClasses?.button, ChannelTextAreaClasses?.button)}
                         onClick={props.onClick}
                         onContextMenu={props.onContextMenu}
                         onAuxClick={props.onAuxClick}
                         {...props.buttonProps}
                     >
-                        <div className={ButtonWrapperClasses.buttonWrapper}>
+                        <div className={ButtonWrapperClasses?.buttonWrapper}>
                             {props.children}
                         </div>
-                    </Button>
+                    </Clickable>
                 </div>
             )}
         </Tooltip>

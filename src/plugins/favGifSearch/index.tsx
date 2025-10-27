@@ -20,22 +20,21 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
 
 interface SearchBarComponentProps {
-    ref?: React.MutableRefObject<any>;
+    ref?: React.RefObject<any>;
     autoFocus: boolean;
-    className: string;
     size: string;
     onChange: (query: string) => void;
     onClear: () => void;
     query: string;
     placeholder: string;
+    className?: string;
 }
 
 type TSearchBarComponent =
-    React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
+    React.FC<SearchBarComponentProps>;
 
 interface Gif {
     format: number;
@@ -58,9 +57,6 @@ interface Instance {
     },
     forceUpdate: () => void;
 }
-
-
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchBarFullRow");
 
 export const settings = definePluginSettings({
     searchOption: {
@@ -118,7 +114,7 @@ export default definePlugin({
     renderSearchBar(instance: Instance, SearchBarComponent: TSearchBarComponent) {
         this.instance = instance;
         return (
-            <ErrorBoundary noop={true}>
+            <ErrorBoundary noop>
                 <SearchBar instance={instance} SearchBarComponent={SearchBarComponent} />
             </ErrorBoundary>
         );
@@ -136,7 +132,7 @@ export default definePlugin({
 
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
-    const ref = useRef<{ containerRef?: React.MutableRefObject<HTMLDivElement>; } | null>(null);
+    const ref = useRef<{ containerRef?: React.RefObject<HTMLDivElement>; } | null>(null);
 
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
@@ -152,7 +148,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
         // scroll back to top
         ref.current?.containerRef?.current
-            .closest("#gif-picker-tab-panel")
+            ?.closest("#gif-picker-tab-panel")
             ?.querySelector("[class|=\"content\"]")
             ?.firstElementChild?.scrollTo(0, 0);
 
@@ -181,8 +177,8 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         <SearchBarComponent
             ref={ref}
             autoFocus={true}
-            className={containerClasses.searchBar}
-            size={SearchBarComponent.Sizes.MEDIUM}
+            size="md"
+            className=""
             onChange={onChange}
             onClear={() => {
                 setQuery("");
