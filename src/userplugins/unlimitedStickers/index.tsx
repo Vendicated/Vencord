@@ -10,7 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore } from "@webpack/common";
+import { ChannelStore, Toasts, UserStore } from "@webpack/common";
 import { getPluginIntlMessage } from "./intl";
 import { openStickerPicker } from "./StickerPicker";
 
@@ -73,10 +73,23 @@ export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
     if (!channel) return null;
     if (props.disabled) return null;
 
+    const handleButtonClick = () => {
+        const currentUser = UserStore.getCurrentUser();
+        if (currentUser?.premiumType != null) {
+            openStickerPicker(channel);
+        } else {
+            Toasts.show({
+                message: getPluginIntlMessage("NITRO_REQUIRED_BODY"),
+                id: Toasts.genId(),
+                type: Toasts.Type.FAILURE,
+            });
+        }
+    };
+
     return (
         <ChatBarButton
             tooltip={getPluginIntlMessage("OPEN_LOCAL_STICKER_PICKER")}
-            onClick={() => openStickerPicker(channel)}
+            onClick={handleButtonClick}
         >
             <ImageIcon width={24} height={24} />
         </ChatBarButton>
