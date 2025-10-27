@@ -199,8 +199,10 @@ const StickerGridItem: React.FC<{
                     alt={file.name}
                     className="unlimited-stickers-grid-item-img"
                     loading="lazy"
+                    onLoad={e => e.currentTarget.classList.add("loaded")}
                 />
             )}
+
             {file.base64 && !isSending && (
                 <Clickable
                     onClick={handleFavoriteToggle}
