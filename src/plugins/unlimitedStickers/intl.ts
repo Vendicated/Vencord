@@ -18,8 +18,8 @@ type AvailableLocales = keyof typeof translations;
  * @param key The translation key.
  * @returns The translated string.
  */
-export function getPluginIntlMessage(key: TranslationKey): string {
+export const getPluginIntlMessage = (key: TranslationKey): string => {
     const locale = i18nModule.getLocale();
     const availableTranslations = translations[locale as AvailableLocales];
     return availableTranslations?.[key] ?? translations["en"][key] ?? key;
-}
+};

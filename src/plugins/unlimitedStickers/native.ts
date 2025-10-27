@@ -33,7 +33,7 @@ const stickerFilter = (dirent: Dirent) =>
  * @param stickerPath The absolute path to the root sticker folder.
  * @returns An object containing the categorized sticker files.
  */
-export function getStickerFiles(_: IpcMainInvokeEvent, stickerPath: string): StickerResponse {
+export const getStickerFiles = (_: IpcMainInvokeEvent, stickerPath: string): StickerResponse => {
     if (!stickerPath) return { categories: [] };
 
     try {
@@ -71,7 +71,7 @@ export function getStickerFiles(_: IpcMainInvokeEvent, stickerPath: string): Sti
         console.error(`[UnlimitedStickers] Failed to read sticker directory at path: ${stickerPath}`, e);
         throw e;
     }
-}
+};
 
 /**
  * Reads a file and converts its content to a Base64 encoded data URL.
@@ -79,7 +79,7 @@ export function getStickerFiles(_: IpcMainInvokeEvent, stickerPath: string): Sti
  * @param path The absolute path to the file.
  * @returns A base64 data URL string, or null if reading fails.
  */
-export function getFileAsBase64(_, path: string): string | null {
+export const getFileAsBase64 = (_, path: string): string | null => {
     try {
         const fileContent = readFileSync(path);
         const lowerPath = path.toLowerCase();
@@ -100,4 +100,4 @@ export function getFileAsBase64(_, path: string): string | null {
         console.error(`[UnlimitedStickers] Failed to read file for Base64 conversion: ${path}`, e);
         return null;
     }
-}
+};

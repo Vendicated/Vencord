@@ -80,7 +80,7 @@ const StarIcon: React.FC<{ className?: string; width?: number; height?: number; 
  * Ensures the sticker guild exists, creating it if necessary.
  * @returns The ID of the sticker guild, or null if creation failed.
  */
-async function ensureStickerGuild(): Promise<string | null> {
+const ensureStickerGuild = async (): Promise<string | null> => {
     let guildId = settings.store.stickerGuildId;
 
     if (guildId && GuildStore.getGuild(guildId)) {
@@ -107,7 +107,7 @@ async function ensureStickerGuild(): Promise<string | null> {
         Toasts.show({ message: getPluginIntlMessage("STICKER_GUILD_CREATE_FAILED_BODY"), id: Toasts.genId(), type: Toasts.Type.FAILURE });
         return null;
     }
-}
+};
 
 /**
  * Uploads a sticker by replacing the one in the single, reusable sticker slot.
@@ -116,7 +116,7 @@ async function ensureStickerGuild(): Promise<string | null> {
  * @param base64File The base64 data URL of the sticker file.
  * @returns The ID of the newly uploaded sticker, or null on failure.
  */
-async function uploadAndReplaceSticker(guildId: string, stickerName: string, base64File: string): Promise<string | null> {
+const uploadAndReplaceSticker = async (guildId: string, stickerName: string, base64File: string): Promise<string | null> => {
     const currentStickerId = settings.store.stickerSlotId;
 
     // Delete the old sticker before uploading a new one to avoid filling the server with stickers.
@@ -148,7 +148,7 @@ async function uploadAndReplaceSticker(guildId: string, stickerName: string, bas
         Toasts.show({ message: `${getPluginIntlMessage("STICKER_UPLOAD_FAILED")}: ${errorMessage}`, id: Toasts.genId(), type: Toasts.Type.FAILURE });
         return null;
     }
-}
+};
 
 const StickerGridItem: React.FC<{
     file: StickerFileWithPreview;
@@ -335,7 +335,7 @@ const LazyStickerCategory: React.FC<{
                     hasLoadedRef.current = true;
                     observer.disconnect();
 
-                    async function loadPreviews() {
+                    const loadPreviews = async () => {
                         try {
                             const updatedFiles = await Promise.all(
                                 filesWithPreviews.map(async file => {
@@ -348,7 +348,7 @@ const LazyStickerCategory: React.FC<{
                         } catch (error) {
                             logger.error(`Error loading previews for category ${category.name}:`, error);
                         }
-                    }
+                    };
                     loadPreviews();
                 }
             },
