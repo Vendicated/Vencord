@@ -159,7 +159,7 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                 </Button>
                 <Button
                     style={{ marginRight: "16px" }}
-                    color={Button.Colors.LINK}
+                    color={Button.Colors.BRAND}
                     disabled={messages?.length === 0}
                     onClick={() => Alerts.show({
                         title: "Clear Logs",
@@ -176,7 +176,7 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                     Clear Visible Logs
                 </Button>
                 <Button
-                    look={Button.Looks.LINK}
+                    style={{ marginRight: "16px" }}
                     color={Button.Colors.PRIMARY}
                     onClick={() => {
                         setSortNewest(e => {

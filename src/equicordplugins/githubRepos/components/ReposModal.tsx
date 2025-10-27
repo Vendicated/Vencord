@@ -91,7 +91,7 @@ export function ReposModal({ repos, username, rootProps }: ReposModalProps) {
                 </Button>
                 <Button
                     color={Button.Colors.TRANSPARENT}
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     onClick={rootProps.onClose}
                 >
                     Close

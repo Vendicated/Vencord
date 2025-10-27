@@ -42,7 +42,7 @@ export function IconWithTooltip({ text, icon, onClick }) {
                     aria-haspopup="dialog"
                     aria-label={text}
                     size=""
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     className={ButtonWrapperClasses.button}

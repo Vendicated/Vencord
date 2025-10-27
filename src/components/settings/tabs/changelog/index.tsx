@@ -131,7 +131,7 @@ function UpdateLogCard({
                         <Button
                             size={Button.Sizes.NONE}
                             color={Button.Colors.TRANSPARENT}
-                            look={Button.Looks.LINK}
+                            look={Button.Looks.FILLED}
                             className="vc-changelog-delete-button"
                             style={{
                                 padding: "4px",

@@ -42,7 +42,7 @@ function ReasonsComponent() {
                             reasons.splice(i, 1);
                             settings.store.reasons = reasons;
                         }}
-                        look={Button.Looks.LINK}
+                        look={Button.Looks.FILLED}
                         size={Button.Sizes.MIN}
                     >
                         <DeleteIcon />

@@ -100,7 +100,7 @@ function Collapsible({ title, children }) {
         <div>
             <Button
                 onClick={() => setIsOpen(!isOpen)}
-                look={Button.Looks.LINK}
+                look={Button.Looks.FILLED}
                 size={Button.Sizes.SMALL}
                 className={cl("collapsible")}>
                 <div style={{ display: "flex", alignItems: "center" }}>
@@ -145,7 +145,7 @@ function ListedIds({ listIds, setListIds }) {
                             setListIds(values);
                             update();
                         }}
-                        look={Button.Looks.LINK}
+                        look={Button.Looks.FILLED}
                         size={Button.Sizes.SMALL}
                         className={cl("delete")}>
                         <DeleteIcon />
@@ -221,7 +221,7 @@ function KeywordEntries() {
                         </div>
                         <Button
                             onClick={() => removeKeywordEntry(i, update)}
-                            look={Button.Looks.LINK}
+                            look={Button.Looks.FILLED}
                             size={Button.Sizes.SMALL}
                             className={cl("delete")}>
                             <DeleteIcon />

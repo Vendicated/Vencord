@@ -205,7 +205,7 @@ function EquicordSettings() {
                 <Paragraph className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the{" "}
                     <Button
-                        look={Button.Looks.LINK}
+                        look={Button.Looks.FILLED}
                         style={{ color: "var(--text-link)", display: "inline-block" }}
                         onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}
                     >

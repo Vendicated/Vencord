@@ -102,7 +102,7 @@ function FlaggedInput({ index, forceUpdate }) {
 
         <Button
             onClick={removeSelf}
-            look={Button.Looks.LINK}
+            look={Button.Looks.FILLED}
             size={Button.Sizes.SMALL}
             style={{
                 padding: 0,

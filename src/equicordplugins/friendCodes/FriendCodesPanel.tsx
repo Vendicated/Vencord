@@ -99,7 +99,7 @@ export default function FriendCodesPanel() {
                         <Button
                             style={{ marginLeft: "8px" }}
                             color={Button.Colors.RED}
-                            look={Button.Looks.LINK}
+                            look={Button.Looks.FILLED}
                             disabled={!invites.length}
                             onClick={() => revokeFriendInvites().then(setInvites([]))}
                         >

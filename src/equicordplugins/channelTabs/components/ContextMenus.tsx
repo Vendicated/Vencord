@@ -82,7 +82,7 @@ export function EditModal({ modalProps, modalKey, bookmark, onSave }: {
                 >Save</Button>
                 <Button
                     color={Button.Colors.TRANSPARENT}
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     onClick={() => closeModal(modalKey)}
                 >Cancel</Button>
             </ModalFooter>
@@ -128,7 +128,7 @@ function AddToFolderModal({ modalProps, modalKey, bookmarks, onSave }: {
                 >Save</Button>
                 <Button
                     color={Button.Colors.TRANSPARENT}
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     onClick={() => closeModal(modalKey)}
                 >Cancel</Button>
             </ModalFooter>
@@ -156,7 +156,7 @@ function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }) {
                 </Button>
                 <Button
                     color={Button.Colors.TRANSPARENT}
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     onClick={() => closeModal(modalKey)}
                 >
                     Cancel

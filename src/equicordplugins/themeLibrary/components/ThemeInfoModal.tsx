@@ -141,7 +141,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                         <ModalFooter>
                                             <Button
                                                 color={Button.Colors.RED}
-                                                look={Button.Looks.LINK}
+                                                look={Button.Looks.FILLED}
                                                 onClick={() => modalProps.onClose()}
                                             >
                                                 Close
@@ -186,14 +186,14 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
             <ModalFooter>
                 <Button
                     color={Button.Colors.RED}
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     onClick={() => props.onClose()}
                 >
                     Close
                 </Button>
                 <Button
                     color={Button.Colors.GREEN}
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     className={classes("vce-button", Margins.right8)}
                     disabled={!theme.content || theme.id === "preview"}
                     onClick={async () => {

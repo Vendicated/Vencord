@@ -192,7 +192,7 @@ function ButtonEntries() {
                         />
                         <Button
                             onClick={() => removeButtonEntry(entry.id, update)}
-                            look={Button.Looks.LINK}
+                            look={Button.Looks.FILLED}
                             color={Button.Colors.RED}
                             size={Button.Sizes.SMALL}
                         >
@@ -245,7 +245,7 @@ function ButtonEntries() {
                 <Button onClick={() => addButtonEntry(update)}>Add Button</Button>
                 <Button
                     onClick={() => resetAllButtons(update)}
-                    look={Button.Looks.LINK}
+                    look={Button.Looks.FILLED}
                     color={Button.Colors.RED}
                 >
                     Reset All

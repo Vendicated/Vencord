@@ -82,7 +82,7 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
             <Button onClick={() => handleLikeClick(themeId)}
                 size={Button.Sizes.MEDIUM}
                 color={Button.Colors.PRIMARY}
-                look={Button.Looks.LINK}
+                look={Button.Looks.FILLED}
                 disabled={themeId === "preview"}
                 style={{ marginLeft: "8px" }}
             >
