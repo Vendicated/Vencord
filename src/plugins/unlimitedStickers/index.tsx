@@ -97,6 +97,64 @@ export const saveExpansionState = async (
     await DataStore.set(key, isExpanded);
 };
 
+const UnlimitedStickerIcon: React.FC<{ className?: string; width?: number; height?: number; }> = ({
+    className,
+    width = 20,
+    height = 20,
+}) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 24 24"
+        width={width}
+        height={height}
+        className={className}
+    >
+        <defs>
+            <clipPath id="c">
+                <path d="M0 0h24v24H0z" />
+            </clipPath>
+            <clipPath id="d">
+                <path d="M0 0h600v600H0z" />
+            </clipPath>
+            <filter id="a" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+                <feComponentTransfer in="SourceGraphic">
+                    <feFuncA type="table" tableValues="1.0 0.0" />
+                </feComponentTransfer>
+            </filter>
+            <path
+                fill="#C4C5C9"
+                d="M-5.5-2a1.5 1.5 0 1 0-.001-3.001A1.5 1.5 0 0 0-5.5-2M7-3.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 7-3.5M-2.911-.556A1.001 1.001 0 0 0-4.573.556 5.5 5.5 0 0 0 0 3 5.5 5.5 0 0 0 4.573.556 1 1 0 1 0 2.911-.556 3.5 3.5 0 0 1 0 1 3.5 3.5 0 0 1-2.911-.556"
+                transform="matrix(25 0 0 25 300 300)"
+                style={{ display: 'block' }}
+                id="b"
+            />
+            <mask id="e" style={{ maskType: 'alpha' }}>
+                <g filter="url(#a)">
+                    <path fill="#fff" opacity="0" d="M0 0h600v600H0z" />
+                    <use href="#b" />
+                </g>
+            </mask>
+        </defs>
+        <g clipPath="url(#c)">
+            <g clipPath="url(#d)" transform="rotate(.012) scale(.04)" style={{ display: 'block' }}>
+                <g mask="url(#e)" style={{ display: 'block' }}>
+                    <path
+                        fill="#C4C5C9"
+                        d="M150 50h300a100 100 0 0 1 100 100v187.5a12.5 12.5 0 0 1-12.5 12.5H475a125 125 0 0 0-125 125v62.5a12.5 12.5 0 0 1-12.5 12.5H150A100 100 0 0 1 50 450V150A100 100 0 0 1 150 50"
+                    />
+                </g>
+                <g transform="translate(355 355) scale(10)">
+                    <path
+                        d="m8.121 9.879 2.083 2.083.007-.006 1.452 1.452.006.006 2.122 2.122a5 5 0 1 0 0-7.072l-.714.714 1.415 1.414.713-.713a3 3 0 1 1 0 4.242l-2.072-2.072-.007.006-3.59-3.59a5 5 0 1 0 0 7.07l.713-.713-1.414-1.414-.714.713a3 3 0 1 1 0-4.242"
+                        fill="#C4C5C9"
+                    />
+                </g>
+            </g>
+        </g>
+    </svg>
+);
+
 export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
     const channel = ChannelStore.getChannel(props.channel.id);
     if (!channel) return null;
@@ -121,7 +179,7 @@ export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
             tooltip={getPluginIntlMessage("OPEN_LOCAL_STICKER_PICKER")}
             onClick={handleButtonClick}
         >
-            <ImageIcon width={24} height={24} />
+            <UnlimitedStickerIcon width={20} height={20} />
         </ChatBarButton>
     );
 };
