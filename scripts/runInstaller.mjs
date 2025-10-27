@@ -47,7 +47,6 @@ function getFilename() {
 
 async function ensureBinary() {
     const filename = getFilename();
-    console.log("Downloading " + filename);
 
     mkdirSync(FILE_DIR, { recursive: true });
 
@@ -56,7 +55,14 @@ async function ensureBinary() {
         ? join(FILE_DIR, "VencordInstaller")
         : downloadName;
 
-    const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
+    if (existsSync(outputFile)) {
+        console.log("Installer already exists, use existing file: " + outputFile);
+        return outputFile;
+    }
+
+    console.log("Downloading " + filename);
+
+    const etag = existsSync(ETAG_FILE)
         ? readFileSync(ETAG_FILE, "utf-8")
         : null;
 
