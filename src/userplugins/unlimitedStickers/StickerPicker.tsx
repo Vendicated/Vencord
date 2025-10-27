@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { Heading } from "@components/index";
+import { Divider, Heading } from "@components/index";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
@@ -695,6 +695,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                     autoFocus
                 />
             </div>
+            <Divider style={{ margin: "0 16px 8px" }} />
             <ModalContent style={{ paddingTop: 0 }}>
                 {renderContent()}
             </ModalContent>
