@@ -4,10 +4,17 @@ import { findByPropsLazy } from "@webpack";
 import { Devs } from "@utils/constants";
 
 const PrivateChannelActions = findByPropsLazy("closePrivateChannel");
+const PrivateChannelUtils = findByPropsLazy("openPrivateChannelConfirmModal");
 
 function closePrivateChannel(channelId: string) {
     if (PrivateChannelActions?.closePrivateChannel) {
         PrivateChannelActions.closePrivateChannel(channelId);
+    }
+}
+
+function leaveGroupDM(channelId: string) {
+    if (PrivateChannelUtils?.openPrivateChannelConfirmModal) {
+        PrivateChannelUtils.openPrivateChannelConfirmModal(channelId);
     }
 }
 
@@ -21,14 +28,13 @@ export default definePlugin({
             if (e.ctrlKey && e.key.toLowerCase() === "w") {
                 e.preventDefault();
 
-                console.log("Control + W detected");
-
                 const channelId = SelectedChannelStore.getChannelId();
                 const channel = ChannelStore.getChannel(channelId);
 
                 if (channel?.isDM()) {
                     closePrivateChannel(channelId);
-                    console.log(`[closeWithCtrlW] Closed DM ${channelId}`);
+                } else if (channel?.isGroupDM()) {
+                    leaveGroupDM(channelId);
                 }
             }
         };
