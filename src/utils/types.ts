@@ -17,13 +17,13 @@
 */
 
 import { ProfileBadge } from "@api/Badges";
-import { ChatBarButtonFactory } from "@api/ChatButtons";
+import { ChatBarButtonData } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import { MessagePopoverButtonFactory } from "@api/MessagePopover";
+import { MessagePopoverButtonData } from "@api/MessagePopover";
 import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
@@ -95,6 +95,8 @@ export interface Plugin extends PluginDef {
     isDependency?: boolean;
 }
 
+export type IconComponent = (props: IconProps & Record<string, any>) => ReactNode;
+export type IconProps = { height?: number | string; width?: number | string; className?: string; };
 export interface PluginDef {
     name: string;
     description: string;
@@ -173,17 +175,27 @@ export interface PluginDef {
 
     userProfileBadge?: ProfileBadge;
 
+    messagePopoverButton?: MessagePopoverButtonData;
+    chatBarButton?: ChatBarButtonData;
+
     onMessageClick?: MessageClickListener;
     onBeforeMessageSend?: MessageSendListener;
     onBeforeMessageEdit?: MessageEditListener;
 
-    renderMessagePopoverButton?: MessagePopoverButtonFactory;
     renderMessageAccessory?: MessageAccessoryFactory;
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
 
-    renderChatBarButton?: ChatBarButtonFactory;
+    // TODO: Remove by November 2025
+    /**
+     * @deprecated Use {@link chatBarButton} instead
+     */
+    renderChatBarButton?: never;
+    /**
+     * @deprecated Use {@link messagePopoverButton} instead
+     */
+    renderMessagePopoverButton?: never;
 }
 
 export const enum StartAt {
@@ -413,3 +425,5 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
     ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
     : never;
 };
+
+export type AllOrNothing<T> = T | { [K in keyof T]?: never; };
