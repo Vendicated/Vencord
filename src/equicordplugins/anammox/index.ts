@@ -53,7 +53,7 @@ export default definePlugin({
             find: 'tutorialId:"direct-messages"',
             replacement: [
                 {
-                    match: /NAVIGATION_LINK\}\}\}.{0,15}\)(?=,\i&&\()/,
+                    match: /NAVIGATION_LINK\}\}\}\)(?=,\i(&&\(|\]))/,
                     replace: "$&&&undefined",
                 },
                 {
