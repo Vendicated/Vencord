@@ -45,9 +45,20 @@ function search(src: string, engine: string) {
 }
 
 function makeSearchItem(src: string) {
+    const { customEngineName, customEngineURL, setDefaultEngine } = settings.store;
+    if (setDefaultEngine && customEngineName && customEngineURL) {
+        return (
+            <Menu.MenuItem
+                label={`Search with ${customEngineName}`}
+                key="search-custom-engine"
+                id="vc-search-custom-engine"
+                action={() => search(src, customEngineURL)}
+            />
+        );
+    }
+
     let Engines = {};
 
-    const { customEngineName, customEngineURL, setDefaultEngine } = settings.store;
     if (customEngineName && customEngineURL) {
         Engines[customEngineName] = customEngineURL;
     }
@@ -55,44 +66,36 @@ function makeSearchItem(src: string) {
     Engines = { ...Engines, ...DefaultEngines };
 
     return (
-        setDefaultEngine && customEngineName && customEngineURL ? (
-            <Menu.MenuItem
-                label={`Search with ${customEngineName}`}
-                key="search-custom-engine"
-                id="vc-search-custom-engine"
-                action={() => search(src, customEngineURL)}
-            />
-        ) :
-            <Menu.MenuItem
-                label="Search Text"
-                key="search-text"
-                id="vc-search-text"
-            >
-                {Object.keys(Engines).map(engine => {
-                    const key = "vc-search-content-" + engine;
-                    return (
-                        <Menu.MenuItem
-                            key={key}
-                            id={key}
-                            label={
-                                <Flex style={{ alignItems: "center", gap: "0.5em" }}>
-                                    <img
-                                        style={{
-                                            borderRadius: "50%"
-                                        }}
-                                        aria-hidden="true"
-                                        height={16}
-                                        width={16}
-                                        src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
-                                    />
-                                    {engine}
-                                </Flex>
-                            }
-                            action={() => search(src, Engines[engine])}
-                        />
-                    );
-                })}
-            </Menu.MenuItem>
+        <Menu.MenuItem
+            label="Search Text"
+            key="search-text"
+            id="vc-search-text"
+        >
+            {Object.keys(Engines).map(engine => {
+                const key = "vc-search-content-" + engine;
+                return (
+                    <Menu.MenuItem
+                        key={key}
+                        id={key}
+                        label={
+                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                                <img
+                                    style={{
+                                        borderRadius: "50%"
+                                    }}
+                                    aria-hidden="true"
+                                    height={16}
+                                    width={16}
+                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
+                                />
+                                {engine}
+                            </Flex>
+                        }
+                        action={() => search(src, Engines[engine])}
+                    />
+                );
+            })}
+        </Menu.MenuItem>
     );
 }
 
