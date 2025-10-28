@@ -5,7 +5,7 @@ if (typeof browser === "undefined") {
 const style = document.createElement("link");
 style.type = "text/css";
 style.rel = "stylesheet";
-style.href = browser.runtime.getURL("dist/Vencord.css");
+style.href = browser.runtime.getURL("dist/Equicord.css");
 
 document.addEventListener(
     "DOMContentLoaded",
