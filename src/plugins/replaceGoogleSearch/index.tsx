@@ -34,9 +34,12 @@ const settings = definePluginSettings({
         placeholder: "https://google.com/search?q="
     },
     setDefaultEngine: {
-        description: "Set your custom engine as the default search engine",
-        type: OptionType.BOOLEAN,
-        default: false,
+        description: "Set a default search engine instead of the search menu",
+        type: OptionType.SELECT,
+        options: [
+            { label: "OFF", value: false, default: true }, { label: "Custom Engine", value: true },
+            ...Object.keys(DefaultEngines).map(engine => ({ label: engine, value: engine }))
+        ],
     }
 });
 
@@ -46,24 +49,27 @@ function search(src: string, engine: string) {
 
 function makeSearchItem(src: string) {
     const { customEngineName, customEngineURL, setDefaultEngine } = settings.store;
-    if (setDefaultEngine && customEngineName && customEngineURL) {
-        return (
-            <Menu.MenuItem
-                label={`Search with ${customEngineName}`}
-                key="search-custom-engine"
-                id="vc-search-custom-engine"
-                action={() => search(src, customEngineURL)}
-            />
-        );
-    }
 
+    let defaultEngine: string | null = typeof setDefaultEngine === "string" ? setDefaultEngine : null;
     let Engines = {};
 
     if (customEngineName && customEngineURL) {
         Engines[customEngineName] = customEngineURL;
+        if (setDefaultEngine === true) defaultEngine = customEngineName;
     }
 
     Engines = { ...Engines, ...DefaultEngines };
+
+    if (defaultEngine) {
+        return (
+            <Menu.MenuItem
+                label={`Search with ${defaultEngine}`}
+                key="search-custom-engine"
+                id="vc-search-custom-engine"
+                action={() => search(src, Engines[defaultEngine])}
+            />
+        );
+    }
 
     return (
         <Menu.MenuItem
