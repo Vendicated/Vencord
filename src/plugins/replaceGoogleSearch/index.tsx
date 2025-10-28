@@ -22,6 +22,11 @@ const DefaultEngines = {
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
 } as const;
 
+const enum ReplacementEngineValue {
+    OFF = "off",
+    CUSTOM = "custom",
+}
+
 const settings = definePluginSettings({
     customEngineName: {
         description: "Name of the custom search engine",
@@ -33,13 +38,14 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="
     },
-    setDefaultEngine: {
-        description: "Set a default search engine instead of the search menu",
+    replacementEngine: {
+        description: "Replace with a specific search engine instead of adding a menu",
         type: OptionType.SELECT,
         options: [
-            { label: "OFF", value: false, default: true }, { label: "Custom Engine", value: true },
+            { label: "Off", value: ReplacementEngineValue.OFF, default: true },
+            { label: "Custom Engine", value: ReplacementEngineValue.CUSTOM },
             ...Object.keys(DefaultEngines).map(engine => ({ label: engine, value: engine }))
-        ],
+        ]
     }
 });
 
@@ -48,25 +54,28 @@ function search(src: string, engine: string) {
 }
 
 function makeSearchItem(src: string) {
-    const { customEngineName, customEngineURL, setDefaultEngine } = settings.store;
+    const { customEngineName, customEngineURL, replacementEngine } = settings.store;
 
-    let defaultEngine: string | null = typeof setDefaultEngine === "string" ? setDefaultEngine : null;
-    let Engines = {};
+    const hasCustomEngine = Boolean(customEngineName && customEngineURL);
+    const hasValidReplacementEngine = replacementEngine !== ReplacementEngineValue.OFF && !(replacementEngine === ReplacementEngineValue.CUSTOM && !hasCustomEngine);
 
-    if (customEngineName && customEngineURL) {
-        Engines[customEngineName] = customEngineURL;
-        if (setDefaultEngine === true) defaultEngine = customEngineName;
+    const Engines = { ...DefaultEngines };
+
+    if (hasCustomEngine) {
+        Engines[customEngineName!] = customEngineURL;
     }
 
-    Engines = { ...Engines, ...DefaultEngines };
+    if (hasValidReplacementEngine) {
+        const name = replacementEngine === ReplacementEngineValue.CUSTOM && hasCustomEngine
+            ? customEngineName
+            : replacementEngine;
 
-    if (defaultEngine) {
         return (
             <Menu.MenuItem
-                label={`Search with ${defaultEngine}`}
+                label={`Search with ${name}`}
                 key="search-custom-engine"
                 id="vc-search-custom-engine"
-                action={() => search(src, Engines[defaultEngine])}
+                action={() => search(src, Engines[name!])}
             />
         );
     }
