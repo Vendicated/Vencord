@@ -347,8 +347,7 @@ const LazyStickerCategory: React.FC<{
                     const loadPreviews = async () => {
                         try {
                             const updatedFiles = await Promise.all(
-                                filesWithPreviews.map(async file => {
-                                    if (file.base64) return file;
+                                category.files.map(async file => {
                                     const base64 = await Native.getFileAsBase64(file.path);
                                     return { ...file, base64 };
                                 })
@@ -372,7 +371,7 @@ const LazyStickerCategory: React.FC<{
         return () => {
             observer.disconnect();
         };
-    }, [scrollerNode, category.name, filesWithPreviews]);
+    }, [scrollerNode, category]);
 
     return (
         <div ref={categoryRef}>
@@ -405,6 +404,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
     const [recentFiles, setRecentFiles] = React.useState<StickerFileWithPreview[]>([]);
     const [guildId, setGuildIdState] = React.useState<string | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [isLoadingLocal, setIsLoadingLocal] = React.useState(true);
     const [scrollerNode, setScrollerNode] = React.useState<HTMLDivElement | null>(null);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [favoritesExpanded, setFavoritesExpanded] = React.useState(true);
@@ -418,76 +418,94 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
         }
     }, []);
 
-    const loadInitialData = React.useCallback(async () => {
-        setIsLoading(true);
-        if (!stickerPath) {
-            Toasts.show({ message: getPluginIntlMessage("SET_STICKER_PATH_PROMPT_BODY"), id: Toasts.genId(), type: Toasts.Type.FAILURE });
-            setIsLoading(false);
-            return;
-        }
-        try {
-            const id = await ensureStickerGuild();
-            setGuildIdState(id);
+    React.useEffect(() => {
+        const loadPrimaryData = async () => {
+            setIsLoading(true);
+            if (!stickerPath) {
+                Toasts.show({ message: getPluginIntlMessage("SET_STICKER_PATH_PROMPT_BODY"), id: Toasts.genId(), type: Toasts.Type.FAILURE });
+                setIsLoading(false);
+                return;
+            }
+            try {
+                const id = await ensureStickerGuild();
+                setGuildIdState(id);
+                if (!id) {
+                    setIsLoading(false);
+                    return;
+                }
 
-            const [
-                favPaths,
-                recentPaths,
-                { categories: fetchedCategories, debug },
-                favExpanded,
-                recExpanded
-            ] = await Promise.all([
-                getFavorites(),
-                getRecentStickers(),
-                Native.getStickerFiles(stickerPath),
-                getExpansionState(FAVORITES_EXPANDED_KEY),
-                getExpansionState(RECENT_EXPANDED_KEY),
-            ]);
+                const [
+                    favPaths,
+                    recentPaths,
+                    favExpanded,
+                    recExpanded
+                ] = await Promise.all([
+                    getFavorites(),
+                    getRecentStickers(),
+                    getExpansionState(FAVORITES_EXPANDED_KEY),
+                    getExpansionState(RECENT_EXPANDED_KEY),
+                ]);
 
-            setFavoritesExpanded(favExpanded);
-            setRecentsExpanded(recExpanded);
+                setFavoritesExpanded(favExpanded);
+                setRecentsExpanded(recExpanded);
 
-            const favPathsSet = new Set(favPaths);
-            setFavoritePaths(favPathsSet);
+                const favPathsSet = new Set(favPaths);
+                setFavoritePaths(favPathsSet);
 
-            const favFilePromises = favPaths.map(async (path) => {
-                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? getPluginIntlMessage("UNKNOWN_STICKER_NAME");
-                const base64 = await Native.getFileAsBase64(path);
-                return { name, path, base64 };
-            });
-            const recentFilePromises = recentPaths.map(async (path) => {
-                const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? getPluginIntlMessage("UNKNOWN_STICKER_NAME");
-                const base64 = await Native.getFileAsBase64(path);
-                return { name, path, base64 };
-            });
+                const favFilePromises = favPaths.map(async (path) => {
+                    const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? getPluginIntlMessage("UNKNOWN_STICKER_NAME");
+                    const base64 = await Native.getFileAsBase64(path);
+                    return { name, path, base64 };
+                });
+                const recentFilePromises = recentPaths.map(async (path) => {
+                    const name = path.split(/[\\/]/).pop()?.replace(/\.(png|apng|gif|jpe?g)$/i, "") ?? getPluginIntlMessage("UNKNOWN_STICKER_NAME");
+                    const base64 = await Native.getFileAsBase64(path);
+                    return { name, path, base64 };
+                });
 
-            const [resolvedFavoriteFiles, resolvedRecentFiles] = await Promise.all([
-                Promise.all(favFilePromises),
-                Promise.all(recentFilePromises),
-            ]);
+                const [resolvedFavoriteFiles, resolvedRecentFiles] = await Promise.all([
+                    Promise.all(favFilePromises),
+                    Promise.all(recentFilePromises),
+                ]);
 
-            resolvedFavoriteFiles.sort((a, b) => a.name.localeCompare(b.name));
-            setFavoriteFiles(resolvedFavoriteFiles.filter(f => f.base64));
+                resolvedFavoriteFiles.sort((a, b) => a.name.localeCompare(b.name));
+                setFavoriteFiles(resolvedFavoriteFiles.filter(f => f.base64));
+                setRecentFiles(resolvedRecentFiles.filter(f => f.base64));
 
-            setRecentFiles(resolvedRecentFiles.filter(f => f.base64));
+            } catch (e) {
+                logger.error("Failed to load primary sticker data:", e);
+                setFavoriteFiles([]);
+                setFavoritePaths(new Set());
+                setRecentFiles([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-            if (debug) logger.warn(debug);
-            fetchedCategories.sort((a, b) => a.name.localeCompare(b.name));
-            setLocalCategories(fetchedCategories);
-
-        } catch (e) {
-            logger.error("Failed to load stickers:", e);
-            setLocalCategories([]);
-            setFavoriteFiles([]);
-            setFavoritePaths(new Set());
-            setRecentFiles([]);
-        } finally {
-            setIsLoading(false);
-        }
+        loadPrimaryData();
     }, [stickerPath]);
 
     React.useEffect(() => {
-        loadInitialData();
-    }, [loadInitialData]);
+        if (isLoading || !stickerPath) return;
+
+        const loadLocalCategories = async () => {
+            setIsLoadingLocal(true);
+            try {
+                const { categories: fetchedCategories, debug } = await Native.getStickerFiles(stickerPath);
+                if (debug) logger.warn(debug);
+                fetchedCategories.sort((a, b) => a.name.localeCompare(b.name));
+                setLocalCategories(fetchedCategories);
+            } catch (e) {
+                logger.error("Failed to load local sticker categories:", e);
+                setLocalCategories([]);
+            } finally {
+                setIsLoadingLocal(false);
+            }
+        };
+
+        loadLocalCategories();
+    }, [isLoading, stickerPath]);
+
 
     const handleToggleFavorite = React.useCallback(async (file: StickerFileWithPreview) => {
         const newFavoritePaths = new Set(favoritePaths);
@@ -611,7 +629,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
             return <p style={{ padding: 10 }}>{getPluginIntlMessage("STICKER_GUILD_CREATE_FAILED_BODY")}</p>;
         }
 
-        const noLocalCategoriesFound = filteredLocalCategories.length === 0;
+        const noLocalCategoriesFound = !isLoadingLocal && filteredLocalCategories.length === 0;
         const noFavoritesFound = filteredFavorites.length === 0;
         const noRecentsFound = filteredRecents.length === 0;
 
@@ -659,7 +677,11 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                         onToggleExpanded={handleToggleRecentsExpanded}
                     />
 
-                    {filteredLocalCategories.map(category => (
+                    {isLoadingLocal && (
+                        <p style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>{getPluginIntlMessage("LOADING_STICKERS_BODY")}</p>
+                    )}
+
+                    {!isLoadingLocal && filteredLocalCategories.map(category => (
                         <LazyStickerCategory
                             key={category.name}
                             category={category}
