@@ -548,15 +548,13 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
     const {
         filteredFavorites,
         filteredRecents,
-        filteredLocalCategories,
-        individualStickerCategory
+        filteredLocalCategories
     } = React.useMemo(() => {
         if (!searchQuery) {
             return {
                 filteredFavorites: favoriteFiles,
                 filteredRecents: recentFiles,
-                filteredLocalCategories: localCategories,
-                individualStickerCategory: null
+                filteredLocalCategories: localCategories
             };
         }
 
@@ -565,33 +563,26 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
         const filteredFavorites = favoriteFiles.filter(f => f.name.toLowerCase().includes(lowerQuery));
         const filteredRecents = recentFiles.filter(f => f.name.toLowerCase().includes(lowerQuery));
 
-        const filteredLocalCategories: StickerCategory[] = [];
-        const individualStickerMatches: StickerFile[] = [];
-        const matchedStickerPaths = new Set<string>();
+        const filteredLocalCategories = localCategories
+            .map((category): StickerCategory | null => {
+                const categoryNameMatches = category.name.toLowerCase().includes(lowerQuery);
+                if (categoryNameMatches) {
+                    return category;
+                }
 
-        for (const category of localCategories) {
-            const categoryNameMatches = category.name.toLowerCase().includes(lowerQuery);
-            const matchingFilesInCategory = category.files
-                .filter(file => file.name.toLowerCase().includes(lowerQuery));
+                const matchingFiles = category.files.filter(file =>
+                    file.name.toLowerCase().includes(lowerQuery)
+                );
 
+                if (matchingFiles.length > 0) {
+                    return { ...category, files: matchingFiles };
+                }
 
-            if (categoryNameMatches) {
-                filteredLocalCategories.push(category);
-                category.files.forEach(file => matchedStickerPaths.add(file.path));
-            } else if (matchingFilesInCategory.length > 0) {
-                individualStickerMatches.push(...matchingFilesInCategory);
-            }
-        }
+                return null;
+            })
+            .filter((category): category is StickerCategory => category !== null);
 
-        const finalIndividualStickers = individualStickerMatches.filter(sticker => !matchedStickerPaths.has(sticker.path));
-
-        const individualStickerCategory: StickerCategory | null = finalIndividualStickers.length > 0 ? {
-            name: getPluginIntlMessage("SEARCH_RESULTS"),
-            files: finalIndividualStickers
-        } : null;
-
-        return { filteredFavorites, filteredRecents, filteredLocalCategories, individualStickerCategory };
-
+        return { filteredFavorites, filteredRecents, filteredLocalCategories };
     }, [localCategories, favoriteFiles, recentFiles, searchQuery]);
 
     const handleToggleFavoritesExpanded = React.useCallback(() => {
@@ -621,11 +612,10 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
         }
 
         const noLocalCategoriesFound = filteredLocalCategories.length === 0;
-        const noIndividualMatches = !individualStickerCategory;
         const noFavoritesFound = filteredFavorites.length === 0;
         const noRecentsFound = filteredRecents.length === 0;
 
-        if (noLocalCategoriesFound && noIndividualMatches && noFavoritesFound && noRecentsFound) {
+        if (noLocalCategoriesFound && noFavoritesFound && noRecentsFound) {
             return (
                 <p style={{ padding: 20, textAlign: 'center', color: 'white' }}>
                     {searchQuery
@@ -668,20 +658,6 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({ rootProps, chan
                         isExpandedOverride={recentsExpanded}
                         onToggleExpanded={handleToggleRecentsExpanded}
                     />
-
-                    {individualStickerCategory && (
-                        <LazyStickerCategory
-                            key={individualStickerCategory.name}
-                            category={individualStickerCategory}
-                            guildId={guildId!}
-                            channel={channel}
-                            closePopout={rootProps.onClose}
-                            scrollerNode={scrollerNode}
-                            favoritePaths={favoritePaths}
-                            onToggleFavorite={handleToggleFavorite}
-                            onStickerSent={handleStickerSent}
-                        />
-                    )}
 
                     {filteredLocalCategories.map(category => (
                         <LazyStickerCategory

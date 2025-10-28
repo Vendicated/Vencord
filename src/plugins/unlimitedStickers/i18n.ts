@@ -28,7 +28,6 @@ export const translations = {
         "NO_STICKERS_IN_CATEGORY": "No stickers here yet!",
         "UNKNOWN_STICKER_NAME": "Unknown",
         "LOAD_PREVIEW_FAILED": "Failed to load sticker preview.",
-        "SEARCH_RESULTS": "Search Results",
         "SEARCH_STICKERS_PLACEHOLDER": "Search stickers by name or category...",
         "LOADING_STICKERS_BODY": "Loading stickers...",
         "NITRO_REQUIRED_BODY": "This plugin requires a Discord Nitro subscription to upload and send stickers."
@@ -56,7 +55,6 @@ export const translations = {
         "NO_STICKERS_IN_CATEGORY": "ここにはまだスタンプがありません！",
         "UNKNOWN_STICKER_NAME": "不明",
         "LOAD_PREVIEW_FAILED": "スタンプのプレビューの読み込みに失敗しました。",
-        "SEARCH_RESULTS": "検索結果",
         "SEARCH_STICKERS_PLACEHOLDER": "名前またはカテゴリでスタンプを検索...",
         "LOADING_STICKERS_BODY": "スタンプを読み込み中...",
         "NITRO_REQUIRED_BODY": "このプラグインは、スタンプをアップロードして送信するためにDiscord Nitroのサブスクリプションが必要です。"
