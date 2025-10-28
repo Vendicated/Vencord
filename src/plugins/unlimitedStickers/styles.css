@@ -127,11 +127,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--interactive-normal);
     cursor: pointer;
     transition: color 0.1s ease, background-color 0.1s ease;
     opacity: 0;
     z-index: 3;
+    color: var(--interactive-normal);
 }
 
 .unlimited-stickers-grid-item:hover .unlimited-stickers-favorite-button {
@@ -139,7 +139,6 @@
 }
 
 .unlimited-stickers-favorite-button:hover {
-    color: var(--interactive-hover);
     background: rgba(0, 0, 0, 0.7);
 }
 
@@ -147,12 +146,12 @@
     display: block;
 }
 
-.unlimited-stickers-favorite-button[aria-label*="Remove"] {
+.unlimited-stickers-favorite-button:not(.is-favorited):hover {
     color: var(--yellow-300);
 }
 
-.unlimited-stickers-favorite-button[aria-label*="Remove"]:hover {
-    color: var(--yellow-200);
+.unlimited-stickers-favorite-button.is-favorited {
+    color: var(--yellow-300);
 }
 
 .unlimited-stickers-empty-category {

@@ -14,7 +14,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ope
 import { PluginNative } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
-import { Alerts, Clickable, GuildStore, MessageActions, React, RestAPI, ScrollerThin, TextInput, Toasts } from "@webpack/common";
+import { Alerts, Clickable, GuildStore, MessageActions, React, RestAPI, ScrollerThin, TextInput, Toasts, Tooltip } from "@webpack/common";
 import type { IpcMainInvokeEvent } from "electron";
 
 import {
@@ -192,39 +192,48 @@ const StickerGridItem: React.FC<{
     };
 
     return (
-        <Clickable
-            className={classes(
-                "unlimited-stickers-grid-item",
-                isSending && "unlimited-stickers-grid-item--loading",
-                !file.base64 && !isSending && "unlimited-stickers-grid-item--placeholder"
-            )}
-            title={file.name}
-            onClick={handleStickerClick}
-        >
-            {isSending && (
-                <div className="unlimited-stickers-loading-spinner-container">
-                    <Spinner type={Spinner.Type.SPINNING_CIRCLE} />
-                </div>
-            )}
-            {file.base64 && (
-                <img
-                    src={file.base64}
-                    alt={file.name}
-                    className="unlimited-stickers-grid-item-img"
-                    loading="lazy"
-                    onLoad={e => e.currentTarget.classList.add("loaded")}
-                />
-            )}
-            {file.base64 && !isSending && (
+        <Tooltip text={file.name}>
+            {props => (
                 <Clickable
-                    onClick={handleFavoriteToggle}
-                    className="unlimited-stickers-favorite-button"
-                    aria-label={isFavorite ? getPluginIntlMessage("REMOVE_FROM_FAVORITES") : getPluginIntlMessage("ADD_TO_FAVORITES")}
+                    {...props}
+                    className={classes(
+                        "unlimited-stickers-grid-item",
+                        isSending && "unlimited-stickers-grid-item--loading",
+                        !file.base64 && !isSending && "unlimited-stickers-grid-item--placeholder"
+                    )}
+                    onClick={handleStickerClick}
                 >
-                    <StarIcon filled={isFavorite} />
+                    {isSending && (
+                        <div className="unlimited-stickers-loading-spinner-container">
+                            <Spinner type={Spinner.Type.SPINNING_CIRCLE} />
+                        </div>
+                    )}
+                    {file.base64 && (
+                        <img
+                            src={file.base64}
+                            alt={file.name}
+                            className="unlimited-stickers-grid-item-img"
+                            loading="lazy"
+                            onLoad={e => e.currentTarget.classList.add("loaded")}
+                        />
+                    )}
+                    {file.base64 && !isSending && (
+                        <Tooltip text={isFavorite ? getPluginIntlMessage("REMOVE_FROM_FAVORITES") : getPluginIntlMessage("ADD_TO_FAVORITES")}>
+                            {props => (
+                                <Clickable
+                                    {...props}
+                                    onClick={handleFavoriteToggle}
+                                    className={classes("unlimited-stickers-favorite-button", isFavorite && "is-favorited")}
+                                    aria-label={isFavorite ? getPluginIntlMessage("REMOVE_FROM_FAVORITES") : getPluginIntlMessage("ADD_TO_FAVORITES")}
+                                >
+                                    <StarIcon filled={isFavorite} />
+                                </Clickable>
+                            )}
+                        </Tooltip>
+                    )}
                 </Clickable>
             )}
-        </Clickable>
+        </Tooltip>
     );
 };
 
