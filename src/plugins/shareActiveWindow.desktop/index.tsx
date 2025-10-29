@@ -17,7 +17,11 @@ import { DesktopCaptureSource, MediaEngineSetGoLiveSourceEvent, RtcConnectionSta
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 const logger = new Logger("ShareActiveWindow");
 
-export const MediaEngineStore = findStoreLazy("MediaEngineStore");
+const MediaEngineStore: {
+    getMediaEngine(): {
+        getWindowPreviews(width: number, height: number): Promise<DesktopCaptureSource[]>;
+    };
+} = findStoreLazy("MediaEngineStore");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
 let isSharingWindow: boolean = false;
@@ -39,10 +43,29 @@ const shareWindow: (
     settings: StreamSettings,
 ) => void = findByCodeLazy(',"no permission"]');
 
-async function getDesktopCaptureSources(): Promise<DesktopCaptureSource[]> {
-    const defaultSize = 150;
-    return await MediaEngineStore.getMediaEngine().getWindowPreviews(defaultSize, defaultSize);
-}
+const getDesktopCaptureSources: () => Promise<DesktopCaptureSource[]> = (() => {
+    let mediaEngine: {
+        getWindowPreviews(width: number, height: number): Promise<DesktopCaptureSource[]>;
+    } | undefined = undefined;
+
+    let oldResult: Promise<DesktopCaptureSource[]> | undefined = undefined;
+    let newResult: Promise<DesktopCaptureSource[]> | undefined = undefined;
+
+    return () => {
+        if (newResult === undefined) {
+            mediaEngine ??= MediaEngineStore.getMediaEngine();
+
+            const previewSize = 0;
+            newResult = mediaEngine.getWindowPreviews(previewSize, previewSize);
+            newResult?.then(_ => {
+                oldResult = newResult;
+                newResult = undefined;
+            });
+        }
+
+        return oldResult ?? newResult;
+    };
+})();
 
 function stopSharingWindow(): void {
     isSharingWindow = false;
@@ -64,57 +87,38 @@ function initActiveWindowLoop(): void {
     }
 
     const discordUtils: {
-        getPidFromWindowHandle(handle: string): number | undefined;
+        getWindowHandleFromPid(pid: number): string | undefined;
     } = DiscordNative.nativeModules.requireModule("discord_utils");
 
     activeWindowInterval = setInterval(async () => {
+        if (!isSharingWindow) {
+            return;
+        }
+
         const activeWindow = await Native.getActiveWindow();
-        if (!activeWindow) {
+        if (activeWindow === undefined) {
             return;
         }
 
-        const sources = await getDesktopCaptureSources();
-        const pidSourcesMap = new Map<number, DesktopCaptureSource[]>();
-        for (const source of sources) {
-            const sourceHandle = source.id.split(":")[1];
-            if (sourceHandle === undefined) {
-                continue;
-            }
-
-            const sourcePid = discordUtils.getPidFromWindowHandle(sourceHandle);
-            if (sourcePid === undefined) {
-                continue;
-            }
-
-            const pidSources = pidSourcesMap.get(sourcePid) ?? [];
-            pidSources.push(source);
-            pidSourcesMap.set(sourcePid, pidSources);
-        }
-
-        const pidSources = pidSourcesMap.get(activeWindow.pid);
-        if (pidSources === undefined) {
+        const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
+        if (activeWindowHandle === undefined) {
             return;
         }
 
-        const activeWindowSources = pidSources.filter(
-            ps => (ps.name === activeWindow.title),
-        );
-
-        if (activeWindowSources.length !== 1) {
-            return;
-        }
-
-        const activeWindowSource = activeWindowSources[0];
-        const newSourceId = activeWindowSource.id;
+        const newSourceId = `window:${activeWindowHandle}`;
         const curSourceId = sharingSettings.sourceId;
-
         if (curSourceId === newSourceId) {
             return;
         }
 
-        sharingSettings.sourceId = newSourceId;
+        const sources = await getDesktopCaptureSources();
+        const activeWindowSource = sources.find(source => source.id.includes(activeWindowHandle));
+        if (activeWindowSource === undefined) {
+            return;
+        }
 
         if (isSharingWindow) {
+            sharingSettings.sourceId = newSourceId;
             shareWindow(activeWindowSource, sharingSettings);
         }
     }, settings.store.checkInterval);
