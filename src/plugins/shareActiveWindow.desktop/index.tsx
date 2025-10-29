@@ -91,44 +91,56 @@ function initActiveWindowLoop(): void {
     } = DiscordNative.nativeModules.requireModule("discord_utils");
 
     let desktopCaptureSources: DesktopCaptureSource[] = [];
+    let isIntervalCallbackRunning = false;
 
     activeWindowInterval = setInterval(async () => {
-        if (!isSharingWindow) {
+        if (isIntervalCallbackRunning) {
             return;
         }
 
-        const activeWindow = await Native.getActiveWindow();
-        if (activeWindow === undefined) {
-            return;
-        }
+        isIntervalCallbackRunning = true;
 
-        const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
-        if (activeWindowHandle === undefined) {
-            return;
-        }
-
-        const newSourceId = `window:${activeWindowHandle}`;
-        const curSourceId = sharingSettings.sourceId;
-        if (curSourceId === newSourceId) {
-            return;
-        }
-
-        // Try to find in the cache at first
-        let activeWindowSource = desktopCaptureSources.find(source => source.id.includes(activeWindowHandle));
-        if (activeWindowSource === undefined) {
-            // Invalidate the cache
-            desktopCaptureSources = await getDesktopCaptureSources();
-
-            // Try to find again
-            activeWindowSource = desktopCaptureSources.find(source => source.id.includes(activeWindowHandle));
-            if (activeWindowSource === undefined) {
+        try {
+            if (!isSharingWindow) {
                 return;
             }
-        }
 
-        if (isSharingWindow) {
-            sharingSettings.sourceId = newSourceId;
-            shareWindow(activeWindowSource, sharingSettings);
+            const activeWindow = await Native.getActiveWindow();
+            if (activeWindow === undefined) {
+                return;
+            }
+
+            const activeWindowHandle = discordUtils.getWindowHandleFromPid(activeWindow.pid);
+            if (activeWindowHandle === undefined) {
+                return;
+            }
+
+            const newSourceId = `window:${activeWindowHandle}`;
+            const curSourceId = sharingSettings.sourceId;
+            if (curSourceId === newSourceId) {
+                return;
+            }
+
+            // Try to find in the cache at first
+            let activeWindowSource = desktopCaptureSources.find(source => source.id.includes(activeWindowHandle));
+            if (activeWindowSource === undefined) {
+                // Invalidate the cache
+                desktopCaptureSources = await getDesktopCaptureSources();
+
+                // Try to find again
+                activeWindowSource = desktopCaptureSources.find(source => source.id.includes(activeWindowHandle));
+                if (activeWindowSource === undefined) {
+                    return;
+                }
+            }
+
+            if (isSharingWindow) {
+                sharingSettings.sourceId = newSourceId;
+                shareWindow(activeWindowSource, sharingSettings);
+            }
+        }
+        finally {
+            isIntervalCallbackRunning = false;
         }
     }, settings.store.checkInterval);
 }
