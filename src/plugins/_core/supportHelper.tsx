@@ -342,7 +342,7 @@ export default definePlugin({
             );
         }
 
-        if (isSupportChannel(props.channel.id) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
+        if (isSupportChannel(props.channel.id) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel) && equicordSupport) {
             if (props.message.content.includes("/equicord-debug") || props.message.content.includes("/equicord-plugins")) {
                 buttons.push(
                     <Button

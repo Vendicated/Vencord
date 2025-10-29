@@ -129,7 +129,7 @@ export function isEquicordGuild(id: string | null | undefined, isGuildId: boolea
 }
 
 export function isSupportChannel(channelId: string | null | undefined): boolean {
-    if (channelId) return false;
+    if (!channelId) return false;
 
     return channelId === SUPPORT_CHANNEL_ID;
 }
