@@ -26,13 +26,20 @@ export function SliderSetting({ option, pluginSettings, definedSettings, id, onC
 
     const [error, setError] = useState<string | null>(null);
 
+    function getValue(value: number): number {
+        if (option.onlyInts) {
+            return Math.round(value);
+        }
+        return value;
+    }
+
     function handleChange(newValue: number): void {
-        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
+        const isValid = option.isValid?.call(definedSettings, getValue(newValue)) ?? true;
 
         setError(resolveError(isValid));
 
         if (isValid === true) {
-            onChange(newValue);
+            onChange(getValue(newValue));
         }
     }
 
@@ -44,7 +51,9 @@ export function SliderSetting({ option, pluginSettings, definedSettings, id, onC
                 maxValue={option.markers[option.markers.length - 1]}
                 initialValue={def}
                 onValueChange={handleChange}
-                onValueRender={(v: number) => String(v.toFixed(2))}
+                keyboardStep={option.onlyInts ? 1 : undefined}
+                onValueRender={(v: number) => String(option.onlyInts ? Math.round(v) : v.toFixed(2))}
+                onMarkerRender={(v: number) => option.markers.includes(v) ? String(getValue(v)) : null}
                 stickToMarkers={option.stickToMarkers ?? true}
                 disabled={option.disabled?.call(definedSettings) ?? false}
                 {...option.componentProps}
