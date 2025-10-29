@@ -48,22 +48,22 @@ const getDesktopCaptureSources: () => Promise<DesktopCaptureSource[]> = (() => {
         getWindowPreviews(width: number, height: number): Promise<DesktopCaptureSource[]>;
     } | undefined = undefined;
 
-    let oldResult: Promise<DesktopCaptureSource[]> | undefined = undefined;
-    let newResult: Promise<DesktopCaptureSource[]> | undefined = undefined;
+    let result: Promise<DesktopCaptureSource[]> | undefined = undefined;
 
-    return () => {
-        if (newResult === undefined) {
+    return (): Promise<DesktopCaptureSource[]> => {
+        if (result === undefined) {
             mediaEngine ??= MediaEngineStore.getMediaEngine();
 
             const previewSize = 0;
-            newResult = mediaEngine.getWindowPreviews(previewSize, previewSize);
-            newResult?.then(_ => {
-                oldResult = newResult;
-                newResult = undefined;
+            result = mediaEngine.getWindowPreviews(
+                previewSize, previewSize
+            ).then(r => {
+                result = undefined;
+                return r;
             });
         }
 
-        return oldResult ?? newResult;
+        return result;
     };
 })();
 
