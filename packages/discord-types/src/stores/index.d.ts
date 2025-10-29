@@ -4,6 +4,7 @@ export * from "./ChannelStore";
 export * from "./DraftStore";
 export * from "./EmojiStore";
 export * from "./FluxStore";
+export * from "./GuildChannelStore";
 export * from "./GuildMemberStore";
 export * from "./GuildRoleStore";
 export * from "./GuildStore";
