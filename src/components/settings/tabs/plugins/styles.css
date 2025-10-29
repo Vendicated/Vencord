@@ -58,6 +58,7 @@
     line-height: 16px;
     color: var(--white-500);
     text-align: center;
+    margin-right: 8px;
 }
 
 .vc-plugins-dep-name {
