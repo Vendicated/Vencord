@@ -13,13 +13,15 @@ import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { gitHashShort } from "@shared/vencordUserAgent";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
-import { getRepo, shortGitHash, UpdateLogger } from "@utils/updater";
+import { getRepo, UpdateLogger } from "@utils/updater";
 import { Alerts, Button, Card, React, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
+import { HashLink } from "../updater/Components";
 import {
     ChangelogEntry,
     ChangelogHistory,
@@ -39,22 +41,6 @@ import {
     UpdateSession,
 } from "./changelogManager";
 import { NewPluginsCompact, NewPluginsSection } from "./NewPluginsSection";
-
-function HashLink({
-    repo,
-    hash,
-    disabled = false,
-}: {
-    repo: string;
-    hash: string;
-    disabled?: boolean;
-}) {
-    return (
-        <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
-            {hash}
-        </Link>
-    );
-}
 
 function ChangelogCard({
     entry,
@@ -78,7 +64,7 @@ function ChangelogCard({
                     <code className="vc-changelog-entry-hash">
                         <HashLink
                             repo={repo}
-                            hash={entry.hash.slice(0, 7)}
+                            hash={entry.hash}
                             disabled={repoPending}
                         />
                     </code>
@@ -509,7 +495,7 @@ function ChangelogContent() {
                 )}{" "}
                 (Current:{" "}
                 <span className="vc-changelog-current-hash">
-                    {shortGitHash()}
+                    {gitHashShort}
                 </span>
                 )
             </Paragraph>

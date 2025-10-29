@@ -6,9 +6,10 @@
 
 import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
+import { gitHashShort } from "@shared/vencordUserAgent";
 import { copyToClipboard } from "@utils/clipboard";
 import { relaunch, showItemInFolder } from "@utils/native";
-import { checkForUpdates, getRepo, shortGitHash } from "@utils/updater";
+import { checkForUpdates, getRepo } from "@utils/updater";
 import { GuildStore, NavigationRouter, SettingsRouter, Toasts } from "@webpack/common";
 
 import gitRemote from "~git-remote";
@@ -115,7 +116,7 @@ export const actions: ButtonAction[] = [
 
     {
         id: "copyGitInfo", label: "Copy Git Info", callback: async () => {
-            copyToClipboard(`gitHash: ${shortGitHash()}\ngitRemote: ${gitRemote}`);
+            copyToClipboard(`gitHash: ${gitHashShort}\ngitRemote: ${gitRemote}`);
 
             Toasts.show({
                 message: "Copied git info to clipboard!",

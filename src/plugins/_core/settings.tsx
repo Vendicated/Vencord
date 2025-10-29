@@ -15,10 +15,10 @@ import {
     VencordTab,
 } from "@components/settings";
 import ThemesTab from "@components/ThemeSettings/ThemesTab";
+import { gitHashShort } from "@shared/vencordUserAgent";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { shortGitHash } from "@utils/updater";
 import { React } from "@webpack/common";
 
 type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
@@ -285,7 +285,7 @@ export default definePlugin({
     getInfoRows() {
         const { electronVersion, chromiumVersion, getVersionInfo } = this;
 
-        const rows = [`Equicord ${shortGitHash()}${getVersionInfo()}`];
+        const rows = [`Equicord ${gitHashShort}${getVersionInfo()}`];
 
         if (electronVersion) rows.push(`Electron ${electronVersion}`);
         if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);

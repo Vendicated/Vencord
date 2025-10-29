@@ -30,10 +30,12 @@ import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { changes, checkForUpdates, getRepo, isNewer, shortGitHash, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Parser, React, Toasts } from "@webpack/common";
+import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
+import { Alerts, Button, Parser, React, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
+
+import { Changes, HashLink } from "./Components";
 
 function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
     return async () => {
@@ -78,31 +80,6 @@ function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>
 interface CommonProps {
     repo: string;
     repoPending: boolean;
-}
-
-function HashLink({ repo, hash, disabled = false, longHash = hash }: { repo: string, hash: string, disabled?: boolean; longHash?: string; }) {
-    return <Link href={`${repo}/commit/${longHash}`} disabled={disabled}>
-        {hash}
-    </Link>;
-}
-
-function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
-    return (
-        <Card style={{ padding: "0 0.5em" }}>
-            {updates.map(({ hash, author, message }) => (
-                <div key={hash} style={{
-                    marginTop: "0.5em",
-                    marginBottom: "0.5em"
-                }}>
-                    <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
-                    <span style={{
-                        marginLeft: "0.5em",
-                        color: "var(--text-default)"
-                    }}>{message} - {author}</span>
-                </div>
-            ))}
-        </Card>
-    );
 }
 
 function Updatable(props: CommonProps) {
@@ -235,7 +212,7 @@ function Updater() {
                             </Link>
                         )
                 }
-                {" "}(<HashLink hash={shortGitHash()} repo={repo} disabled={repoPending} longHash={gitHash} />)
+                {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
             </Paragraph>
 
             <Divider className={Margins.top8 + " " + Margins.bottom8} />

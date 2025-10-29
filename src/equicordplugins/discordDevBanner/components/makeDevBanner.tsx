@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { shortGitHash } from "@utils/updater";
+import { gitHashShort } from "@shared/vencordUserAgent";
 import { React } from "@webpack/common";
 import SettingsPlugin from "plugins/_core/settings";
 import { JSX } from "react";
@@ -26,7 +26,7 @@ export function makeDevBanner(state?: string): string | JSX.Element {
         .replace(/{buildHash}/g, VERSION_HASH.slice(0, 9))
         .replace(/{equicordName}/g, "Equicord")
         .replace(/{equicordVersion}/g, VERSION)
-        .replace(/{equicordHash}/g, shortGitHash())
+        .replace(/{equicordHash}/g, gitHashShort)
         .replace(/{equicordPlatform}/g, getVersionInfo(false))
         .replace(/{electronName}/g, "Electron")
         .replace(/{electronVersion}/g, electronVersion)
