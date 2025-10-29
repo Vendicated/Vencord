@@ -9,19 +9,13 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
 import { DesktopCaptureSource, MediaEngineSetGoLiveSourceEvent, RtcConnectionStateEvent, StreamSettings, StreamStartEvent, StreamUpdateSettingsEvent } from "./types";
 
 const Native = VencordNative.pluginHelpers.ShareActiveWindow as PluginNative<typeof import("./native")>;
 const logger = new Logger("ShareActiveWindow");
-
-const MediaEngineStore: {
-    getMediaEngine(): {
-        getWindowPreviews(width: number, height: number): Promise<DesktopCaptureSource[]>;
-    };
-} = findStoreLazy("MediaEngineStore");
 
 let activeWindowInterval: NodeJS.Timeout | undefined;
 let isSharingWindow: boolean = false;
@@ -44,20 +38,29 @@ const shareWindow: (
 ) => void = findByCodeLazy(',"no permission"]');
 
 const getDesktopCaptureSources: () => Promise<DesktopCaptureSource[]> = (() => {
-    let mediaEngine: {
-        getWindowPreviews(width: number, height: number): Promise<DesktopCaptureSource[]>;
-    } | undefined = undefined;
-
     let result: Promise<DesktopCaptureSource[]> | undefined = undefined;
 
     return (): Promise<DesktopCaptureSource[]> => {
-        if (result === undefined) {
-            mediaEngine ??= MediaEngineStore.getMediaEngine();
+        const { desktopCapture }: {
+            desktopCapture: {
+                getDesktopCaptureSources(x: {
+                    types: string[],
+                    thumbnailSize: {
+                        width: number;
+                        height: number;
+                    };
+                }): Promise<DesktopCaptureSource[]>;
+            };
+        } = DiscordNative;
 
-            const previewSize = 0;
-            result = mediaEngine.getWindowPreviews(
-                previewSize, previewSize
-            ).then(r => {
+        if (result === undefined) {
+            result = desktopCapture.getDesktopCaptureSources({
+                types: ["window"],
+                thumbnailSize: {
+                    width: 0,
+                    height: 0,
+                },
+            }).then(r => {
                 result = undefined;
                 return r;
             });
