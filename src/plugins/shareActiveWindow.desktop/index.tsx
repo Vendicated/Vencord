@@ -90,6 +90,8 @@ function initActiveWindowLoop(): void {
         getWindowHandleFromPid(pid: number): string | undefined;
     } = DiscordNative.nativeModules.requireModule("discord_utils");
 
+    let desktopCaptureSources: DesktopCaptureSource[] = [];
+
     activeWindowInterval = setInterval(async () => {
         if (!isSharingWindow) {
             return;
@@ -111,10 +113,17 @@ function initActiveWindowLoop(): void {
             return;
         }
 
-        const sources = await getDesktopCaptureSources();
-        const activeWindowSource = sources.find(source => source.id.includes(activeWindowHandle));
+        // Try to find in the cache at first
+        let activeWindowSource = desktopCaptureSources.find(source => source.id.includes(activeWindowHandle));
         if (activeWindowSource === undefined) {
-            return;
+            // Invalidate the cache
+            desktopCaptureSources = await getDesktopCaptureSources();
+
+            // Try to find again
+            activeWindowSource = desktopCaptureSources.find(source => source.id.includes(activeWindowHandle));
+            if (activeWindowSource === undefined) {
+                return;
+            }
         }
 
         if (isSharingWindow) {
