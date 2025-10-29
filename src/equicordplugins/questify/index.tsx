@@ -6,6 +6,7 @@
 
 import "./styles.css";
 
+import { showNotification } from "@api/Notifications";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { ErrorBoundary, openPluginModal } from "@components/index";
 import { EquicordDevs } from "@utils/constants";
@@ -558,6 +559,15 @@ async function startVideoProgressTracking(quest: Quest, questDuration: number): 
 
         if (success) {
             QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
+
+            if (settings.store.notifyOnQuestComplete) {
+                showNotification({
+                    title: "Quest Completed!",
+                    body: `The ${questName} Quest has completed.`,
+                    dismissOnClick: true,
+                    onClick: () => NavigationRouter.transitionTo(`${questPath}#${quest.id}`)
+                });
+            }
         } else {
             QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
         }
@@ -642,6 +652,15 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
             if (success) {
                 QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
+
+                if (settings.store.notifyOnQuestComplete) {
+                    showNotification({
+                        title: "Quest Completed!",
+                        body: `The ${questName} Quest has completed.`,
+                        dismissOnClick: true,
+                        onClick: () => NavigationRouter.transitionTo(`${questPath}#${quest.id}`),
+                    });
+                }
             } else {
                 QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
             }
@@ -655,6 +674,15 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
                 if (success) {
                     QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
+
+                    if (settings.store.notifyOnQuestComplete) {
+                        showNotification({
+                            title: "Quest Completed!",
+                            body: `The ${questName} Quest has completed.`,
+                            dismissOnClick: true,
+                            onClick: () => NavigationRouter.transitionTo(`${questPath}#${quest.id}`),
+                        });
+                    }
                 } else {
                     QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
                 }
@@ -1114,14 +1142,6 @@ export default definePlugin({
                     replace: "$1$self.setLastSortChoice($2);$self.setLastFilterChoices($3);$4"
                 }
             ]
-        },
-        {
-            // Prevent scrolling to a sponsored Quest.
-            find: "Id(\"quest-tile-\".concat",
-            replacement: {
-                match: /(?=document.getElementById)/,
-                replace: "null&&"
-            }
         },
         {
             // Whether preloading assets is enabled or not, the placeholders loading
