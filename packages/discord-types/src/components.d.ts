@@ -183,11 +183,27 @@ export type TextInput = ComponentType<PropsWithChildren<{
     Sizes: Record<"DEFAULT" | "MINI", string>;
 };
 
-// FIXME: this is wrong, it's not actually just HTMLTextAreaElement
-export type TextArea = ComponentType<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
-    onChange(v: string): void;
+/**
+ * fixed: align TextArea typing with controlled wrapper semantics.
+ * - Replace native onChange(event) with onChange(value: string)
+ * - Expose value/defaultValue for controlled vs. uncontrolled usage
+ * - Keep inputRef to access the inner <textarea> DOM node
+ * Rationale: matches TextInput’s controlled API and prevents prop conflicts.
+ */
+type NativeTextAreaProps = Omit<
+    HTMLProps<HTMLTextAreaElement>,
+    "onChange" | "value" | "defaultValue"
+>;
+
+export type TextAreaProps = NativeTextAreaProps & {
+    value?: string;                 // controlled
+    defaultValue?: string;          // uncontrolled init
+    onChange(value: string): void;  // string payload, not DOM event
     inputRef?: Ref<HTMLTextAreaElement>;
-}>;
+};
+
+export type TextArea = ComponentType<TextAreaProps>;
+
 
 interface SelectOption {
     disabled?: boolean;
