@@ -120,7 +120,7 @@ function initActiveWindowLoop(): void {
 
             const newSourceId = `window:${activeWindowHandle}`;
             const curSourceId = sharingSettings.sourceId;
-            if (curSourceId === newSourceId) {
+            if (curSourceId?.includes(newSourceId)) {
                 return;
             }
 
