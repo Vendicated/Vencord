@@ -15,6 +15,11 @@ export class RelationshipStore extends FluxStore {
     isFriend(userId: string): boolean;
     isBlocked(userId: string): boolean;
     isIgnored(userId: string): boolean;
+    /**
+     * @see {@link isBlocked}
+     * @see {@link isIgnored}
+     */
+    isBlockedOrIgnored(userId: string): boolean;
     getSince(userId: string): string;
 
     getMutableRelationships(): Map<string, number>;

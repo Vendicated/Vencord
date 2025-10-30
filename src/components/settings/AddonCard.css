@@ -1,6 +1,7 @@
 .vc-addon-card {
-    background-color: var(--background-base-lower-alt);
+    background-color: var(--card-primary-bg);
     color: var(--interactive-active);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
     display: block;
     height: 100%;
@@ -11,24 +12,13 @@
     box-sizing: border-box;
 }
 
-.visual-refresh .vc-addon-card {
-    background-color: var(--card-primary-bg);
-    border: 1px solid var(--border-subtle);
-}
-
 .vc-addon-card-disabled {
     opacity: 0.6;
 }
 
 .vc-addon-card:hover {
-    background-color: var(--background-tertiary);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
-}
-
-.visual-refresh .vc-addon-card:hover {
-    /* same as non-hover, here to overwrite the non-refresh hover background */
-    background-color: var(--card-primary-bg);
 }
 
 .vc-addon-header {
