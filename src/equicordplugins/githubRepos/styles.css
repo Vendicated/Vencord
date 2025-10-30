@@ -28,8 +28,9 @@
 
 .vc-github-repos-button,
 .vc-github-repos-show-more {
+    color: var(--text-default);
+    background-color: var(--control-background-primary-default);
     width: 100%;
-    border: 1px solid var(--profile-body-divider-color, var(--input-border)) !important;
 }
 
 .vc-github-repo-card {
@@ -180,5 +181,10 @@
 }
 
 .vc-github-repos-table-star-icon {
-    color: var(--text-warning);
+    color: var(--info-warning-foreground);
+    fill: var(--info-warning-foreground);
+}
+
+.vc-github-repos-modal-footer-close {
+    margin-right: 5px;
 }

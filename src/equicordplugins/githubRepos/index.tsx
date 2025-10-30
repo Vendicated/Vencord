@@ -63,18 +63,28 @@ export default definePlugin({
     settings,
 
     patches: [
+        // User Popout
         {
             find: ".hasAvatarForGuild(null==",
             replacement: {
-                match: /(?<=user:(\i),bio:null==(\i)\?.+?currentUser:\i,guild:\i}\))/,
-                replace: ",$self.ProfilePopoutComponent({ user: $1, displayProfile: $2 })"
+                match: /currentUser:\i,guild:\i\}\)(?=\])/,
+                replace: "$&,$self.ProfilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile })"
             }
         },
+        // User Profile Modal v1
         {
-            find: "appsConnections,applicationRoleConnection",
+            find: ".connections,userId:",
             replacement: {
-                match: /(?<=user:(\i).{0,15}displayProfile:(\i).*?application\.id\)\)\}\))/,
-                replace: ",$self.ProfilePopoutComponent({ user: $1, displayProfile: $2 })"
+                match: /user:(\i).{0,15}displayProfile:(\i).*?application\.id\)\)\}\)/,
+                replace: "$&,$self.ProfilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile }),"
+            }
+        },
+        // User Profile Modal v2
+        {
+            find: ".MODAL_V2,onClose:",
+            replacement: {
+                match: /displayProfile:(\i).*?profileAppConnections\}\)\}\)/,
+                replace: "$&,$self.ProfilePopoutComponent({ user: arguments[0].user, displayProfile: $1 }),"
             }
         }
     ],

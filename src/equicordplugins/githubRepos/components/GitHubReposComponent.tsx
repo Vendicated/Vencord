@@ -6,8 +6,9 @@
 
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
+import { Button, TextButton } from "@components/Button";
 import { openModal } from "@utils/modal";
-import { Button, React, useEffect, UserProfileStore, useState } from "@webpack/common";
+import { React, useEffect, UserProfileStore, useState } from "@webpack/common";
 
 import { settings } from "..";
 import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "../githubApi";
@@ -15,14 +16,14 @@ import { GitHubRepo } from "../types";
 import { RepoCard } from "./RepoCard";
 import { ReposModal } from "./ReposModal";
 
+export const cl = classNameFactory("vc-github-repos-");
+
 export function GitHubReposComponent({ id, theme }: { id: string, theme: string; }) {
     const [repos, setRepos] = useState<GitHubRepo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userInfo, setUserInfo] = useState<GitHubUserInfo | null>(null);
     const [returnJustButton, setReturnJustButton] = useState(false);
-
-    const cl = classNameFactory("vc-github-repos-");
 
     const openReposModal = () => {
         if (!userInfo) return;
@@ -101,9 +102,8 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
         return (
             <Button
                 className={cl("button")}
-                size={Button.Sizes.SMALL}
-                look={Button.Looks.LINK}
-                color={Button.Colors.TRANSPARENT}
+                size="small"
+                variant="secondary"
                 onClick={openReposModal}
             >
                 Show GitHub Repositories
@@ -134,15 +134,13 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
                 }
             </div>
             <div className={cl("footer")}>
-                <Button
+                <TextButton
                     className={cl("show-more")}
-                    size={Button.Sizes.SMALL}
-                    look={Button.Looks.LINK}
-                    color={Button.Colors.TRANSPARENT}
+                    color="secondary"
                     onClick={openReposModal}
                 >
                     Show More
-                </Button>
+                </TextButton>
             </div>
         </div>
     );

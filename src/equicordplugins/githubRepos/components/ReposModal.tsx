@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
 import { HeadingPrimary } from "@components/Heading";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@utils/modal";
-import { Button, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import { getLanguageColor } from "../colors";
 import { GitHubRepo } from "../types";
+import { cl } from "./GitHubReposComponent";
 import { Star } from "./Star";
 
 interface ReposModalProps {
@@ -33,18 +35,18 @@ export function ReposModal({ repos, username, rootProps }: ReposModalProps) {
     const renderTableRow = (repo: GitHubRepo) => (
         <tr key={repo.id} onClick={() => window.open(repo.html_url, "_blank")}>
             <td>
-                <div className="vc-github-repos-table-name">{repo.name}</div>
+                <div className={cl("table-name")}>{repo.name}</div>
             </td>
             <td>
-                <div className="vc-github-repos-table-description">
+                <div className={cl("table-description")}>
                     {repo.description || ""}
                 </div>
             </td>
             <td>
                 {repo.language && (
-                    <div className="vc-github-repos-table-language">
+                    <div className={cl("table-language")}>
                         <span
-                            className="vc-github-repos-table-language-color"
+                            className={cl("table-language-color")}
                             style={{ backgroundColor: getLanguageColor(repo.language) }}
                         />
                         <span>{repo.language}</span>
@@ -52,8 +54,8 @@ export function ReposModal({ repos, username, rootProps }: ReposModalProps) {
                 )}
             </td>
             <td>
-                <div className="vc-github-repos-table-stars">
-                    <Star className="vc-github-repos-table-star-icon" />
+                <div className={cl("table-stars")}>
+                    <Star className={cl("table-star-icon")} />
                     <span>{repo.stargazers_count.toLocaleString()}</span>
                 </div>
             </td>
@@ -61,15 +63,15 @@ export function ReposModal({ repos, username, rootProps }: ReposModalProps) {
     );
 
     return (
-        <ModalRoot className="vc-github-repos-modal" size="large" {...rootProps}>
+        <ModalRoot className={cl("modal")} size="large" {...rootProps}>
             <ModalHeader>
-                <HeadingPrimary className="vc-github-repos-modal-title">
+                <HeadingPrimary className={cl("modal-title")}>
                     {username}'s GitHub Repositories
                 </HeadingPrimary>
             </ModalHeader>
-            <ModalContent className="vc-github-repos-modal-content">
-                <div className="vc-github-repos-table-container">
-                    <table className="vc-github-repos-table">
+            <ModalContent className={cl("modal-content")}>
+                <div className={cl("table-container")}>
+                    <table className={cl("table")}>
                         <colgroup>
                             <col style={{ width: "20%" }} />
                             <col style={{ width: "45%" }} />
@@ -85,13 +87,15 @@ export function ReposModal({ repos, username, rootProps }: ReposModalProps) {
             </ModalContent>
             <ModalFooter>
                 <Button
+                    className={cl("modal-footer-github")}
+                    variant="primary"
                     onClick={() => window.open(`https://github.com/${username}?tab=repositories`, "_blank")}
                 >
                     View on GitHub
                 </Button>
                 <Button
-                    color={Button.Colors.TRANSPARENT}
-                    look={Button.Looks.FILLED}
+                    className={cl("modal-footer-close")}
+                    variant="secondary"
                     onClick={rootProps.onClose}
                 >
                     Close
