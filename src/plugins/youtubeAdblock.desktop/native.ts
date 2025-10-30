@@ -5,6 +5,7 @@
  */
 
 import { RendererSettings } from "@main/settings";
+import { Logger } from "@utils/Logger";
 import { app } from "electron";
 import adguard from "file://adguard.js?minify";
 
@@ -13,11 +14,23 @@ app.on("browser-window-created", (_, win) => {
         frame?.once("dom-ready", () => {
             if (!RendererSettings.store.plugins?.YoutubeAdblock?.enabled) return;
 
-            if (frame.url.includes("youtube.com/embed/")) {
-                frame.executeJavaScript(adguard);
-            } else if (frame.parent?.url.includes("youtube.com/embed/")) {
-                frame.parent.executeJavaScript(adguard);
+            for (const context of [frame, frame.parent]) {
+                if (context !== null) {
+                    for (const domain of ["youtube.com/embed/", "youtube-nocookie.com/embed/"]) {
+                        if (context.url.includes(domain) && typeof hiddenCSS === "undefined") {
+                            context.executeJavaScript(
+                                `
+                            if(typeof hiddenCSS === "undefined"){
+                                ${adguard}
+                            }
+                            `);
+                            return;
+                        }
+                    }
+                }
             }
+
+            new Logger("YoutubeAdblock").error("Unable to load adguard script");
         });
     });
 });
