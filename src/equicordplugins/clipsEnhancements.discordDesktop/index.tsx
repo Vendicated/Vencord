@@ -63,7 +63,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "clipMethod:\"manual\"",
+            find: "#{intl::CLIPS_UNKNOWN_SOURCE}",
             replacement: {
                 match: /(applicationName:)(.{0,50})(,applicationId:)(\i)/,
                 replace: "$1$2$3$self.getApplicationId($2)??$4"

@@ -31,7 +31,7 @@ export default definePlugin({
         {
             find: "#{intl::MESSAGE_FORWARDING_NSFW_NOT_ALLOWED}",
             replacement: {
-                match: /if\(.*?\)(return.{0,25}#{intl::MESSAGE_FORWARDING_NSFW_NOT_ALLOWED})/,
+                match: /if\(.{0,50}\)(return.{0,25}#{intl::MESSAGE_FORWARDING_NSFW_NOT_ALLOWED})/,
                 replace: "if(false)$1",
             }
         },
