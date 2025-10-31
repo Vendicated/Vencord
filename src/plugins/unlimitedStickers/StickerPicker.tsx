@@ -18,7 +18,7 @@ import {
     openModal,
 } from "@utils/modal";
 import type { Channel } from "@vencord/discord-types";
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import {
     Alerts,
     Clickable,
@@ -30,6 +30,7 @@ import {
     TextInput,
     Toasts,
     Tooltip,
+    FluxDispatcher,
 } from "@webpack/common";
 import "./styles.css";
 
@@ -181,6 +182,8 @@ const uploadAndReplaceSticker = async (
     }
 };
 
+const PendingReplyStore = findByPropsLazy("getPendingReply");
+
 const StickerGridItem: React.FC<{
     file: StickerFile;
     guildId: string;
@@ -230,9 +233,20 @@ const StickerGridItem: React.FC<{
                 );
 
                 if (newStickerId) {
-                    await MessageActions.sendMessage(channel.id, { content: "" }, false, {
-                        stickerIds: [newStickerId],
-                    });
+                    const reply = PendingReplyStore.getPendingReply(channel.id);
+                    let sendOptions: any = { stickerIds: [newStickerId] };
+
+                    if (reply) {
+                        const replyOptions = MessageActions.getSendMessageOptionsForReply(reply);
+                        sendOptions = { ...replyOptions, ...sendOptions };
+                    }
+
+                    await MessageActions.sendMessage(channel.id, { content: "" }, false, sendOptions);
+
+                    if (reply) {
+                        FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });
+                    }
+
                     onStickerSent(file);
                     closePopout();
                 } else {
