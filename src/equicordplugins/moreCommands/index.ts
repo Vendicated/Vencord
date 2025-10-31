@@ -18,7 +18,6 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
 import { addMessagePreEditListener, addMessagePreSendListener, MessageObject, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -26,7 +25,6 @@ import { UserStore } from "@webpack/common";
 
 import { fromMorse, getCuteAnimeBoys, getCuteNeko, getCutePats, isMorse, makeFreaky, mock, settings, toMorse, uwuify, uwuifyArray } from "./utils";
 
-migratePluginSettings("MoreCommands", "CuteAnimeBoys", "CuteNekos", "CutePats", "Slap");
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",

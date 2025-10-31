@@ -5,7 +5,6 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { PaintbrushIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
@@ -71,7 +70,6 @@ export function sendRemix(blob: Blob) {
     UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage);
 }
 
-migratePluginSettings("RemixRevived", "Remix");
 export default definePlugin({
     name: "RemixRevived",
     description: "Revives Remix and breings it to Desktop",

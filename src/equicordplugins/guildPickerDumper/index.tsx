@@ -5,7 +5,6 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Guild } from "@vencord/discord-types";
@@ -93,7 +92,6 @@ async function zipGuildAssets(guild: Guild, type: "emojis" | "stickers") {
         .catch(console.error);
 }
 
-migratePluginSettings("GuildPickerDumper", "EmojiDumper");
 export default definePlugin({
     name: "GuildPickerDumper",
     description: "Context menu to dump and download a server's emojis and stickers.",

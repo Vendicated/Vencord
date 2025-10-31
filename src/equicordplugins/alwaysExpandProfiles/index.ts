@@ -4,13 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { User } from "@vencord/discord-types";
 
-migratePluginSettings("AlwaysExpandProfiles", "AlwaysExpandProfile");
 export default definePlugin({
     name: "AlwaysExpandProfiles",
     description: "Always expands profile popouts to the full modal",

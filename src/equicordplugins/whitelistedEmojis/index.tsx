@@ -8,7 +8,7 @@ import "./style.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { CustomEmoji, UnicodeEmoji } from "@vencord/discord-types";
@@ -595,7 +595,6 @@ const settings = definePluginSettings({
     }
 });
 
-migratePluginSettings("WhitelistedEmojis", "NoDefaultEmojis");
 export default definePlugin({
     name: "WhitelistedEmojis",
     description: "Adds the ability to disable all message emojis except for a whitelisted set.",
