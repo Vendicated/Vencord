@@ -33,7 +33,7 @@ export default definePlugin({
             ]
         },
         {
-            find: 'id:"pin"',
+            find: 'id:"pin",action',
             replacement: [
                 {
                     match: /(\i\.\i\.pinMessage\(\i,\i\.id\)):\i\.\i\.confirmPin\(\i,\i\)/,
