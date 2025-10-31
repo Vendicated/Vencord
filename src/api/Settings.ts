@@ -225,6 +225,20 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
     return SettingsStore.store;
 }
 
+export function migratePluginToSetting(newName: string, oldName: string, settingName: string) {
+    const { plugins } = SettingsStore.plain;
+    const newPlugin = plugins[newName];
+    const oldPlugin = plugins[oldName];
+
+    if (!newPlugin || !oldPlugin) return;
+
+    if (oldPlugin?.enabled) {
+        newPlugin[settingName] = true;
+        oldPlugin.enabled = false;
+        SettingsStore.markAsChanged();
+    }
+}
+
 export function migratePluginSettings(name: string, ...oldNames: string[]) {
     const { plugins } = SettingsStore.plain;
     if (name in plugins) return;

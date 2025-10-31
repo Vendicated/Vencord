@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { showNotification } from "@api/Notifications";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginToSetting } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { copyToClipboard } from "@utils/clipboard";
 import { EquicordDevs } from "@utils/constants";
@@ -19,6 +19,7 @@ import { Menu, Toasts } from "@webpack/common";
 
 import { ContactsList } from "./types";
 
+migratePluginToSetting("ExportMessages", "ExportContacts", "exportContacts");
 const settings = definePluginSettings({
     openFileAfterExport: {
         type: OptionType.BOOLEAN,
@@ -155,12 +156,6 @@ export default definePlugin({
             }
         }
     ],
-    start() {
-        if (Settings.plugins?.ExportContacts?.enabled) {
-            Settings.plugins.ExportContacts.enabled = false;
-            settings.store.exportContacts = true;
-        }
-    },
     getContacts(contacts: ContactsList[]) {
         this.contactList = {
             friendsAdded: [...getUsernames(contacts, 1)],
