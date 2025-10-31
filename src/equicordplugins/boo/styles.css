@@ -1,0 +1,16 @@
+.vc-boo-icon {
+    height: 42px;
+}
+
+#vc-boo-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-primary);
+    height: 30px;
+    width: 48px;
+    margin-left: 8px;
+    color: var(--text-default);
+    fill: var(--text-default);
+}
