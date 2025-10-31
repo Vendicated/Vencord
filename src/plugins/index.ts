@@ -176,13 +176,12 @@ for (const p of pluginsValues) {
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
     logger.info(`Starting plugins (stage ${target})`);
     for (const name in Plugins) {
-        if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(Plugins[name], ReporterTestable.Start))) {
-            const p = Plugins[name];
-
+        const p = Plugins[name];
+        if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(p, ReporterTestable.Start))) {
             const startAt = p.startAt ?? StartAt.WebpackReady;
             if (startAt !== target) continue;
 
-            startPlugin(Plugins[name]);
+            startPlugin(p);
         }
     }
 });
@@ -252,7 +251,8 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
     for (const name in Plugins) {
         if (!isPluginEnabled(name)) continue;
-        subscribePluginFluxEvents(Plugins[name], fluxDispatcher);
+        const p = Plugins[name];
+        subscribePluginFluxEvents(p, fluxDispatcher);
     }
 }
 

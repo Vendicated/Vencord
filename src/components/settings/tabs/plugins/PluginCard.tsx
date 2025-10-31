@@ -26,7 +26,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     isNew?: boolean;
 }
 
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
+function PluginCardComponent({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => isPluginEnabled(plugin.name);
@@ -105,3 +105,10 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             } />
     );
 }
+
+export const PluginCard = React.memo(PluginCardComponent, (prevProps, nextProps) => {
+    if (prevProps.plugin.name !== nextProps.plugin.name) return false;
+    if (prevProps.disabled !== nextProps.disabled) return false;
+    if (prevProps.isNew !== nextProps.isNew) return false;
+    return true;
+});

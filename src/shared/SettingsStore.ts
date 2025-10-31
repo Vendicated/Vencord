@@ -155,23 +155,35 @@ export class SettingsStore<T extends object> {
     private notifyListeners(pathStr: string, value: any, root: T) {
         const paths = pathStr.split(".");
 
-        // Because we support any type of settings with OptionType.CUSTOM, and those objects get proxied recursively,
-        // the path ends up including all the nested paths (plugins.pluginName.settingName.example.one).
-        // So, we need to extract the top-level setting path (plugins.pluginName.settingName),
-        // to be able to notify globalListeners and top-level setting name listeners (let { settingName } = settings.use(["settingName"]),
-        // with the new value
-        if (paths.length > 3 && paths[0] === "plugins") {
-            const settingPath = paths.slice(0, 3);
-            const settingPathStr = settingPath.join(".");
-            const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
+        const globalListeners = this.globalListeners;
+        const pathListenersMap = this.pathListeners;
 
-            this.globalListeners.forEach(cb => cb(root, settingPathStr));
-            this.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
+        if (paths.length > 3 && paths[0] === "plugins") {
+            const settingPathStr = `${paths[0]}.${paths[1]}.${paths[2]}`;
+            const settingValue = root[paths[0]]?.[paths[1]]?.[paths[2]];
+
+            for (const cb of globalListeners) {
+                cb(root, settingPathStr);
+            }
+            
+            const settingListeners = pathListenersMap.get(settingPathStr);
+            if (settingListeners && settingValue !== undefined) {
+                for (const cb of settingListeners) {
+                    cb(settingValue);
+                }
+            }
         } else {
-            this.globalListeners.forEach(cb => cb(root, pathStr));
+            for (const cb of globalListeners) {
+                cb(root, pathStr);
+            }
         }
 
-        this.pathListeners.get(pathStr)?.forEach(cb => cb(value));
+        const directListeners = pathListenersMap.get(pathStr);
+        if (directListeners) {
+            for (const cb of directListeners) {
+                cb(value);
+            }
+        }
     }
 
     /**

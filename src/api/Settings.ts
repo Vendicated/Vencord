@@ -23,7 +23,7 @@ import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
-import { React, useEffect } from "@webpack/common";
+import { React, useEffect, useMemo, useRef } from "@webpack/common";
 
 import plugins from "~plugins";
 
@@ -193,16 +193,19 @@ export const Settings = SettingsStore.store;
 // TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
 export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
+    
+    const pathsKey = paths?.join(",") ?? "";
+    const stablePaths = useMemo(() => paths, [pathsKey]);
 
     useEffect(() => {
-        if (paths) {
-            paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
-            return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
+        if (stablePaths) {
+            stablePaths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
+            return () => stablePaths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
         } else {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
         }
-    }, [paths]);
+    }, [stablePaths, forceUpdate]);
 
     return SettingsStore.store;
 }

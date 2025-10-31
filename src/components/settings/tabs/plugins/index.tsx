@@ -74,7 +74,7 @@ const enum SearchStatus {
     NEW
 }
 
-function ExcludedPluginsList({ search }: { search: string; }) {
+const ExcludedPluginsList = React.memo(function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
 
@@ -103,7 +103,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
             }
         </Paragraph>
     );
-}
+});
 
 function PluginSettings() {
     const settings = useSettings();
