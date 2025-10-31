@@ -11,7 +11,7 @@ import { Button } from "@components/Button";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, ChannelStore, React, Toasts, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, React, Toasts, UserStore, Checkbox, ScrollerThin } from "@webpack/common";
 import { nanoid } from "nanoid";
 
 import { getPluginIntlMessage } from "./intl";
@@ -45,6 +45,30 @@ interface FileWithRelativePath extends File {
 
 const StickerManagementSetting: React.FC = () => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [categories, setCategories] = React.useState<StickerCategory[]>([]);
+    const [selectedCategories, setSelectedCategories] = React.useState<Set<string>>(new Set());
+    const [loading, setLoading] = React.useState(true);
+
+    const fetchCategories = async () => {
+        setLoading(true);
+        const cats = (await DataStore.get<StickerCategory[]>(LIBRARY_KEY)) ?? [];
+        setCategories(cats);
+        setLoading(false);
+    };
+
+    React.useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const handleSelectionChange = (categoryName: string) => {
+        const newSelection = new Set(selectedCategories);
+        if (newSelection.has(categoryName)) {
+            newSelection.delete(categoryName);
+        } else {
+            newSelection.add(categoryName);
+        }
+        setSelectedCategories(newSelection);
+    };
 
     const handleFolderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -116,8 +140,47 @@ const StickerManagementSetting: React.FC = () => {
 
         const totalStickers = stickerDataToSave.length;
         Toasts.show({ message: `Added ${totalStickers} stickers across ${newCategories.length} categories.`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
-
         if (event.target) event.target.value = "";
+        fetchCategories();
+    };
+
+    const deleteStickerData = async (stickerIds: string[]) => {
+        const keysToDelete = [
+            ...stickerIds.map(id => `${STICKER_DATA_KEY_PREFIX}${id}`)
+        ];
+        await Promise.all(keysToDelete.map(key => DataStore.del(key)));
+    };
+
+    const handleBatchDelete = async (categoryNames: string[]) => {
+        const deletedStickerIds: string[] = [];
+        const remainingCategories = categories.filter(cat => {
+            if (categoryNames.includes(cat.name)) {
+                deletedStickerIds.push(...cat.files.map(f => f.id));
+                return false;
+            }
+            return true;
+        });
+
+        await deleteStickerData(deletedStickerIds);
+        await DataStore.set(LIBRARY_KEY, remainingCategories);
+
+        await DataStore.update<string[]>(FAVORITES_KEY, (favs = []) => favs.filter(id => !deletedStickerIds.includes(id)));
+        await DataStore.update<string[]>(RECENT_KEY, (recents = []) => recents.filter(id => !deletedStickerIds.includes(id)));
+
+        Toasts.show({ message: `Deleted ${categoryNames.length} categories and their stickers.`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
+        fetchCategories();
+        setSelectedCategories(new Set());
+    };
+
+    const handleDeleteSelected = () => {
+        if (selectedCategories.size === 0) return;
+        Alerts.show({
+            title: "Delete Selected Categories",
+            body: `Are you sure you want to delete ${selectedCategories.size} selected categories and all their stickers? This cannot be undone.`,
+            confirmText: "Delete",
+            cancelText: "Cancel",
+            onConfirm: () => handleBatchDelete(Array.from(selectedCategories))
+        });
     };
 
     const clearAllStickers = () => {
@@ -126,20 +189,7 @@ const StickerManagementSetting: React.FC = () => {
             body: "Are you sure you want to delete all your uploaded stickers? This cannot be undone.",
             confirmText: "Delete",
             cancelText: "Cancel",
-            onConfirm: async () => {
-                const library = await DataStore.get<StickerCategory[]>(LIBRARY_KEY) ?? [];
-                const stickerIds = library.flatMap(category => category.files.map(file => file.id));
-
-                const keysToDelete = [
-                    LIBRARY_KEY,
-                    FAVORITES_KEY,
-                    RECENT_KEY,
-                    ...stickerIds.map(id => `${STICKER_DATA_KEY_PREFIX}${id}`)
-                ];
-
-                await Promise.all(keysToDelete.map(key => DataStore.del(key)));
-                Toasts.show({ message: "All stickers cleared.", type: Toasts.Type.SUCCESS, id: Toasts.genId() });
-            }
+            onConfirm: () => handleBatchDelete(categories.map(c => c.name))
         });
     };
 
@@ -153,17 +203,37 @@ const StickerManagementSetting: React.FC = () => {
     return (
         <div>
             <input ref={fileInputRef} {...inputProps} />
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: '16px' }}>
                 <Button onClick={() => fileInputRef.current?.click()} size="small">
                     Upload Sticker Folder(s)
                 </Button>
-                <Button onClick={clearAllStickers} size="small" variant="dangerPrimary">
-                    Clear All Stickers
+                <Button onClick={handleDeleteSelected} size="small" variant="dangerPrimary" disabled={selectedCategories.size === 0}>
+                    Delete Selected
+                </Button>
+                <Button onClick={clearAllStickers} size="small" variant="dangerPrimary" disabled={categories.length === 0}>
+                    Delete All
                 </Button>
             </div>
-            <Paragraph style={{ marginTop: '8px' }}>
-                Upload folders containing your stickers, or a folder containing folders of stickers. Each folder will become a category. If you upload individual files, they will be placed in an "Uploaded Stickers" category.
-            </Paragraph>
+            {loading ? <Paragraph>Loading categories...</Paragraph> : categories.length > 0 ? (
+                <ScrollerThin style={{ maxHeight: "40vh" }}>
+                    {categories.map(category => (
+                        <div key={category.name} style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}>
+                            <Checkbox value={selectedCategories.has(category.name)} onChange={() => handleSelectionChange(category.name)} />
+                            <span style={{ marginLeft: '8px', flexGrow: 1, color: 'var(--text-muted)' }}>{category.name} ({category.files.length} stickers)</span>
+                            <Button size="min" variant="dangerSecondary" onClick={() => Alerts.show({
+                                title: `Delete ${category.name}`,
+                                body: `Are you sure you want to delete the "${category.name}" category and all its stickers? This cannot be undone.`,
+                                onConfirm: () => handleBatchDelete([category.name]),
+                                confirmText: "Delete"
+                            })}>Delete</Button>
+                        </div>
+                    ))}
+                </ScrollerThin>
+            ) : (
+                <Paragraph>
+                    Upload folders containing your stickers. Each folder will become a category.
+                </Paragraph>
+            )}
         </div>
     );
 };
