@@ -111,6 +111,13 @@ export default definePlugin({
                     replace: "...$self.getBadgeMouseEventHandlers($1),$&"
                 }
             ]
+        },
+        {
+            find: "profileCardUsernameRow,children:",
+            replacement: {
+                match: /badges:(\i)(?<=displayProfile:(\i).+?)/,
+                replace: "badges:[...$self.getBadges($2),...$1]"
+            }
         }
     ],
 
@@ -197,19 +204,19 @@ export default definePlugin({
                     }}>
                         <ModalRoot {...props}>
                             <ModalHeader>
-                                <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <Forms.FormTitle
-                                        tag="h2"
-                                        style={{
-                                            width: "100%",
-                                            textAlign: "center",
-                                            margin: 0
-                                        }}
-                                    >
+                                <Forms.FormTitle
+                                    tag="h2"
+                                    style={{
+                                        width: "100%",
+                                        textAlign: "center",
+                                        margin: 0
+                                    }}
+                                >
+                                    <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
                                         <Heart />
                                         Vencord Donor
-                                    </Forms.FormTitle>
-                                </Flex>
+                                    </Flex>
+                                </Forms.FormTitle>
                             </ModalHeader>
                             <ModalContent>
                                 <Flex>
