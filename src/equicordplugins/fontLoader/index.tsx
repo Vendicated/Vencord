@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { HeadingSecondary, HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
@@ -93,7 +93,7 @@ const applyFont = async (fontFamily: string) => {
                 --font-primary: '${fontFamily}', sans-serif !important;
                 --font-display: '${fontFamily}', sans-serif !important;
                 --font-headline: '${fontFamily}', sans-serif !important;
-                ${settings.store.applyOnClodeBlocks ? "--font-code: '${fontFamily}', monospace !important;" : ""}
+                ${settings.store.applyOnCodeBlocks ? "--font-code: '${fontFamily}', monospace !important;" : ""}
             }
         `;
     } catch (err) {
@@ -169,6 +169,7 @@ function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) =
     );
 }
 
+migratePluginSetting("FontLoader", "applyOnCodeBlocks", "applyOnClodeBlocks");
 const settings = definePluginSettings({
     selectedFont: {
         type: OptionType.STRING,
@@ -188,7 +189,7 @@ const settings = definePluginSettings({
             />
         )
     },
-    applyOnClodeBlocks: {
+    applyOnCodeBlocks: {
         type: OptionType.BOOLEAN,
         description: "Apply the font to code blocks",
         default: false
