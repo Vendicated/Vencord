@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useTimer } from "@utils/react";
@@ -26,32 +26,33 @@ import { React } from "@webpack/common";
 
 import alignedChatInputFix from "./alignedChatInputFix.css?managed";
 
+const settings = definePluginSettings({
+    format: {
+        type: OptionType.SELECT,
+        description: "The timer format. This can be any valid moment.js format",
+        options: [
+            {
+                label: "30d 23:00:42",
+                value: "stopwatch",
+                default: true
+            },
+            {
+                label: "30d 23h 00m 42s",
+                value: "human"
+            }
+        ]
+    },
+});
+
 export default definePlugin({
     name: "CallTimer",
     description: "Adds a timer to vcs",
     authors: [Devs.Ven],
     managedStyle: alignedChatInputFix,
+    settings,
 
     startTime: 0,
     interval: void 0 as NodeJS.Timeout | undefined,
-
-    options: {
-        format: {
-            type: OptionType.SELECT,
-            description: "The timer format. This can be any valid moment.js format",
-            options: [
-                {
-                    label: "30d 23:00:42",
-                    value: "stopwatch",
-                    default: true
-                },
-                {
-                    label: "30d 23h 00m 42s",
-                    value: "human"
-                }
-            ]
-        }
-    },
 
     patches: [{
         find: "renderConnectionStatus(){",
@@ -73,6 +74,6 @@ export default definePlugin({
             deps: [channelId]
         });
 
-        return <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>{formatDurationMs(time, Settings.plugins.CallTimer.format === "human")}</p>;
+        return <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>{formatDurationMs(time, settings.store.format === "human")}</p>;
     }
 });

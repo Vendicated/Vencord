@@ -17,6 +17,7 @@
 */
 
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -52,12 +53,12 @@ function findReplies(message: Message) {
         if (other.messageReference?.message_id === message.id) {
             found.push(other);
         }
-        if (Vencord.Settings.plugins.FindReply.includePings) {
+        if (settings.store.includePings) {
             if (other.content?.includes(`<@${message.author.id}>`)) {
                 found.push(other);
             }
         }
-        if (Vencord.Settings.plugins.FindReply.includeAuthor) {
+        if (settings.store.includeAuthor) {
             if (messages.find(m => m.id === other.messageReference?.message_id)?.author.id === message.author.id) {
                 found.push(other);
             }
@@ -66,16 +67,39 @@ function findReplies(message: Message) {
     return found;
 }
 
+const settings = definePluginSettings({
+    includePings: {
+        type: OptionType.BOOLEAN,
+        description: "Will also search for messages that @ the author directly",
+        default: false,
+        restartNeeded: false
+    },
+    includeAuthor: {
+        type: OptionType.BOOLEAN,
+        description: "Will also search for messages that reply to the author in general, not just that exact message",
+        default: false,
+        restartNeeded: false
+    },
+    hideButtonIfNoReply: {
+        type: OptionType.BOOLEAN,
+        description: "Hides the button if there are no replies to the message",
+        default: true,
+        restartNeeded: true
+    }
+});
+
+
 export default definePlugin({
     name: "FindReply",
     description: "Jumps to the earliest reply to a message in a channel (lets you follow past conversations more easily).",
     authors: [Devs.newwares],
+    settings,
     start() {
         enableStyle(styles);
         addMessagePopoverButton("vc-findreply", message => {
             if (!message.id) return null;
             const replies = findReplies(message);
-            if (Vencord.Settings.plugins.FindReply.hideButtonIfNoReply && !replies.length) return null;
+            if (settings.store.hideButtonIfNoReply && !replies.length) return null;
             return {
                 label: "Jump to Reply",
                 icon: FindReplyIcon,
@@ -132,24 +156,4 @@ export default definePlugin({
         element?.remove();
         disableStyle(styles);
     },
-    options: {
-        includePings: {
-            type: OptionType.BOOLEAN,
-            description: "Will also search for messages that @ the author directly",
-            default: false,
-            restartNeeded: false
-        },
-        includeAuthor: {
-            type: OptionType.BOOLEAN,
-            description: "Will also search for messages that reply to the author in general, not just that exact message",
-            default: false,
-            restartNeeded: false
-        },
-        hideButtonIfNoReply: {
-            type: OptionType.BOOLEAN,
-            description: "Hides the button if there are no replies to the message",
-            default: true,
-            restartNeeded: true
-        }
-    }
 });

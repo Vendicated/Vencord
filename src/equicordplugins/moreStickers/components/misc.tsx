@@ -91,7 +91,7 @@ const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPack
     );
 };
 
-export const Settings = () => {
+export const Packs = () => {
     const [stickerPackMetas, setstickerPackMetas] = React.useState<StickerPackMeta[]>([]);
     const [addStickerUrl, setAddStickerUrl] = React.useState<string>("");
     const [addStickerHtml, setAddStickerHtml] = React.useState<string>("");

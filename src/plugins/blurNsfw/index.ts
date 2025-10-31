@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -14,7 +14,7 @@ function setCss() {
     style.textContent = `
         .vc-nsfw-img [class^=imageContainer],
         .vc-nsfw-img [class^=wrapperPaused] {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            filter: blur(${settings.store.blurAmount}px);
             transition: filter 0.2s;
 
             &:hover {
@@ -24,35 +24,36 @@ function setCss() {
         `;
 }
 
+const settings = definePluginSettings({
+    blurAmount: {
+        type: OptionType.NUMBER,
+        description: "Blur Amount (in pixels)",
+        default: 10,
+        onChange: setCss
+    },
+    blurAllChannels: {
+        type: OptionType.BOOLEAN,
+        description: "Blur attachments in all channels (not just NSFW)",
+        default: false
+    },
+});
+
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
     authors: [Devs.Ven],
     isModified: true,
+    settings,
 
     patches: [
         {
             find: "}renderEmbeds(",
             replacement: [{
                 match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw || Vencord.Settings.plugins.BlurNSFW.blurAllChannels ? ' vc-nsfw-img': '')"
+                replace: "$&+(this.props.channel.nsfw || $self.settings.store.blurAllChannels ? ' vc-nsfw-img': '')"
             }]
         }
     ],
-
-    options: {
-        blurAmount: {
-            type: OptionType.NUMBER,
-            description: "Blur Amount (in pixels)",
-            default: 10,
-            onChange: setCss
-        },
-        blurAllChannels: {
-            type: OptionType.BOOLEAN,
-            description: "Blur attachments in all channels (not just NSFW)",
-            default: false
-        }
-    },
 
     start() {
         style = document.createElement("style");

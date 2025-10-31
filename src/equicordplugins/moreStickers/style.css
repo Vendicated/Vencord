@@ -17,7 +17,7 @@
     width: 100%;
 }
 
-.vc-more-stickers-picker-container>div:first-child {
+.vc-more-stickers-picker-container > div:first-child {
     display: flex;
     flex: 1 1 auto;
     flex-flow: wrap;
@@ -45,7 +45,7 @@
     margin-right: 8px;
 }
 
-.vc-more-stickers-foreign-object>img {
+.vc-more-stickers-foreign-object > img {
     text-indent: -9999px;
     align-items: center;
     background-color: var(--background-primary);
@@ -99,13 +99,13 @@
     flex: 1 1 auto;
 }
 
-.vc-more-stickers-category-scroller> :first-child {
+.vc-more-stickers-category-scroller > :first-child {
     inset: 8px;
     contain: layout;
     position: absolute;
 }
 
-.vc-more-stickers-category-scroller> :last-child {
+.vc-more-stickers-category-scroller > :last-child {
     position: absolute;
     pointer-events: none;
     min-height: 0;
@@ -430,7 +430,7 @@
     background-color: var(--green-300);
 }
 
-.vc-more-stickers-picker-settings-cog>svg {
+.vc-more-stickers-picker-settings-cog > svg {
     color: var(--green-360) !important;
     width: 100%;
     height: 100%;
@@ -438,7 +438,7 @@
 }
 
 /* prettier-ignore */
-.vc-more-stickers-picker-settings-cog-active>svg {
+.vc-more-stickers-picker-settings-cog-active > svg {
     color: var(--white-360) !important;
 }
 
@@ -492,9 +492,8 @@
 }
 
 .vc-more-stickers-settings .tab-bar-item {
-    margin-right: 16px;
+    margin-right: 2px;
     padding-bottom: 4px;
-    margin-bottom: -4px;
 }
 
 .vc-more-stickers-pack-title {

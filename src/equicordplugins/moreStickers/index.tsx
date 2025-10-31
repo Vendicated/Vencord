@@ -6,29 +6,31 @@
 
 import "./style.css";
 
+import { definePluginSettings } from "@api/Settings";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { React } from "@webpack/common";
 
-import { PickerContent, PickerHeader, PickerSidebar, Settings, Wrapper } from "./components";
+import { Packs, PickerContent, PickerHeader, PickerSidebar, Wrapper } from "./components";
 import { getStickerPack, getStickerPackMetas } from "./stickers";
 import { StickerPack, StickerPackMeta } from "./types";
 import { cl, FFmpegStateContext, loadFFmpeg } from "./utils";
+
+const settings = definePluginSettings({
+    packs: {
+        type: OptionType.COMPONENT,
+        description: "Packs",
+        component: Packs
+    }
+});
 
 export default definePlugin({
     name: "MoreStickers",
     description: "Adds sticker packs from other social media platforms. (e.g. LINE)",
     authors: [EquicordDevs.Leko, Devs.Arjix],
-
-    options: {
-        settings: {
-            type: OptionType.COMPONENT,
-            description: "Packs",
-            component: Settings
-        }
-    },
+    settings,
 
     patches: [
         {

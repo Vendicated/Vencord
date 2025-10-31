@@ -15,7 +15,7 @@ import { sendSticker } from "../upload";
 import { clPicker, FFmpegStateContext } from "../utils";
 import { CategoryImage, CategoryScroller, CategoryWrapper, StickerCategory } from "./categories";
 import { CancelIcon, CogIcon, IconContainer, RecentlyUsedIcon, SearchIcon } from "./icons";
-import { addRecentSticker, getRecentStickers, Header, RECENT_STICKERS_ID, RECENT_STICKERS_TITLE, Settings } from "./misc";
+import { addRecentSticker, getRecentStickers, Header, Packs, RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./misc";
 
 const debounceQueryChange = debounce((cb: Function, ...args: any) => cb(...args), 150);
 
@@ -77,7 +77,7 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                                         <HeadingPrimary>Stickers+</HeadingPrimary>
                                     </ModalHeader>
                                     <ModalContent>
-                                        <Settings />
+                                        <Packs />
                                     </ModalContent>
                                 </ModalRoot>
                             );
