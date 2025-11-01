@@ -66,6 +66,7 @@ export const CspPolicies: PolicyMap = {
     "coverartarchive.org": ConnectSrc, // Cover Art Archive API (Jellyfin Rich Presence)
     "archive.org": ConnectSrc, // Cover Art Archive API (Jellyfin Rich Presence)
     "*.archive.org": ConnectSrc, // Cover Art Archive API (Jellyfin Rich Presence)
+    "api.themoviedb.org": ConnectSrc, // TMDB API (Jellyfin Rich Presence)
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {

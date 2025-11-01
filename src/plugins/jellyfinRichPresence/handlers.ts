@@ -4,7 +4,7 @@ export const audioHandler = {
     icon: "audio",
 
     getActivity(item) {
-        const metadataProviders = item.ProviderIds;
+        const providers = item.ProviderIds;
 
         return {
             type: ActivityType.LISTENING,
@@ -19,7 +19,6 @@ export const audioHandler = {
 
     async getImage(item) {
         const release = item.ProviderIds.MusicBrainzAlbum;
-
         if (release) {
             const data = await fetch(`https://coverartarchive.org/release/${release}`).then(response => response.json());
 
@@ -34,6 +33,33 @@ export const audioHandler = {
     },
 };
 
+export const movieHandler = {
+    icon: "movie",
+
+    getActivity(item) {
+        return {
+            type: ActivityType.WATCHING,
+            statusType: ActivityStatusDisplayType.DETAILS,
+            details: item.Name,
+            detailsURL: item.ExternalUrls[0]?.Url,
+            state: item.ProductionYear,
+        };
+    },
+
+    async getImage(item, settings) {
+        if (settings.store.tmdbAPIKey) {
+            const tmdb = item.ProviderIds.Tmdb;
+            if (tmdb) {
+                const details = await fetch(`https://api.themoviedb.org/3/movie/${tmdb}?api_key=${settings.store.tmdbAPIKey}`).then(response => response.json());
+                return "http://image.tmdb.org/t/p/w500" + details.poster_path;
+            }
+        }
+
+        return null;
+    },
+};
+
 export default {
     Audio: audioHandler,
+    Movie: movieHandler,
 };

@@ -45,9 +45,21 @@ const settings = definePluginSettings({
 
     // Items
     audio: {
-        description: "Should Audio items be displayed on your profile?",
+        description: "Should Audio be displayed on your profile?",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    movies: {
+        description: "Should Movies be displayed on your profile?",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
+
+    // API
+    tmdbAPIKey: {
+        description: "For movie covers",
+        type: OptionType.STRING,
+        restartNeeded: true,
     },
 
     // Discord
@@ -128,10 +140,12 @@ export default definePlugin({
 
         return sessions.filter(session => {
             if (session.UserName !== settings.store.jellyfinUsername) return false;
+            if (session.PlayState.IsPaused) return false;
 
             const item = session.NowPlayingItem;
             if (!item) return false;
             if (item.Type === "Audio" && !settings.store.audio) return false;
+            if (item.Type === "Movie" && !settings.store.movies) return false;
 
             return true;
         });
@@ -143,12 +157,12 @@ export default definePlugin({
         const handler = handlers[item.Type];
 
         if (handler) {
-            const result = handler.getActivity(item);
+            const result = handler.getActivity(item, settings);
 
             let imageURL = this.imageCache[item.Id];
             if (!imageURL) {
                 try {
-                    imageURL = await handler.getImage(item);
+                    imageURL = await handler.getImage(item, settings);
                 } catch (error) {
                     logger.error(`Failed to fetch image for ${item.Name}`, error);
                     imageURL = null;
