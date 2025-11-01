@@ -84,6 +84,8 @@ export default definePlugin({
         let users = [];
         let roles = [];
 
+        console.dir(p);
+
         if (settings.store.suppressByDefault) {
             const prefix_regex = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const user_regex = RegExp(`${prefix_regex}(<@!?(\\d+)>)`, 'g');
@@ -116,6 +118,9 @@ export default definePlugin({
         if (!p.allowed_mentions) p.allowed_mentions = {};
         p.allowed_mentions.users = users;
         p.allowed_mentions.roles = roles;
+
+        if (p.allowed_mentions.replied_user === undefined)
+            p.allowed_mentions.replied_user = true;
 
         p.content = content;
 
