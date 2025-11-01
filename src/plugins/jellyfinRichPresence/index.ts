@@ -145,21 +145,21 @@ export default definePlugin({
         if (handler) {
             const result = handler.getActivity(item);
 
-            let imageUrl = this.imageCache[item.Id];
-            if (!imageUrl) {
+            let imageURL = this.imageCache[item.Id];
+            if (!imageURL) {
                 try {
-                    imageUrl = await handler.getImage(item);
+                    imageURL = await handler.getImage(item);
                 } catch (error) {
                     logger.error(`Failed to fetch image for ${item.Name}`, error);
-                    imageUrl = null;
+                    imageURL = null;
                 }
-                this.imageCache[item.Id] = imageUrl;
+                this.imageCache[item.Id] = imageURL;
             }
 
             const startTime = Date.now() - session.PlayState.PositionTicks / 10000;
             const endTime = startTime + item.RunTimeTicks / 10000;
 
-            const [imageAsset] = await ApplicationAssetUtils.fetchAssetIds(settings.store.applicationID, [imageUrl ?? handler.icon]);
+            const [imageAsset] = await ApplicationAssetUtils.fetchAssetIds(settings.store.applicationID, [imageURL ?? handler.icon]);
 
             return {
                 application_id: settings.store.applicationID,
@@ -169,9 +169,9 @@ export default definePlugin({
                 type: result.type,
                 status_display_type: result.statusType,
                 details: result.details,
-                details_url: result.detailsUrl,
+                details_url: result.detailsURL,
                 state: result.state,
-                state_url: result.stateUrl,
+                state_url: result.stateURL,
                 timestamps: { start: startTime, end: endTime },
                 assets: {
                     large_image: imageAsset,

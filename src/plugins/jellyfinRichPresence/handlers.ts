@@ -10,9 +10,9 @@ export const audioHandler = {
             type: ActivityType.LISTENING,
             statusType: ActivityStatusDisplayType.STATE,
             details: item.Name,
-            detailsUrl: metadataProviders.MusicBrainzRecording ? `https://musicbrainz.org/recording/${metadataProviders.MusicBrainzRecording}` : undefined,
+            detailsURL: providers.MusicBrainzRecording ? `https://musicbrainz.org/recording/${providers.MusicBrainzRecording}` : undefined,
             state: item.Artists.join(", "),
-            stateUrl: metadataProviders.MusicBrainzArtist ? `https://musicbrainz.org/artist/${metadataProviders.MusicBrainzArtist}` : undefined,
+            stateURL: providers.MusicBrainzArtist ? `https://musicbrainz.org/artist/${providers.MusicBrainzArtist}` : undefined,
             image: item.Album,
         };
     },
