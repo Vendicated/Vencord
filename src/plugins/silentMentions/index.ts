@@ -29,7 +29,7 @@ const settings = definePluginSettings({
     inversionPrefix: {
         type: OptionType.STRING,
         default: "@",
-        description: "Prefix a mention with this to override the default (autocomplete will work!)"
+        description: "Prefix a mention with this to override the default (autocomplete will work)"
     },
 });
 
@@ -83,8 +83,6 @@ export default definePlugin({
 
         let users = [];
         let roles = [];
-
-        console.dir(p);
 
         if (settings.store.suppressByDefault) {
             const prefix_regex = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
