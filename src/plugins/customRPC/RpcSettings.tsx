@@ -183,6 +183,11 @@ export function RPCSettings() {
             <SingleSetting settingsKey="details" label="Detail (line 1)" isValid={maxLength128} />
             <SingleSetting settingsKey="state" label="State (line 2)" isValid={maxLength128} />
 
+            <PairSetting data={[
+                { settingsKey: "detailsURL", label: "Detail URL" },
+                { settingsKey: "stateURL", label: "State URL" },
+            ]} />
+
             <SingleSetting
                 settingsKey="streamLink"
                 label="Stream Link (Twitch or YouTube, only if activity type is Streaming)"
@@ -215,6 +220,11 @@ export function RPCSettings() {
             <PairSetting data={[
                 { settingsKey: "imageSmall", label: "Small Image URL/Key", isValid: isImageKeyValid },
                 { settingsKey: "imageSmallTooltip", label: "Small Image Text", isValid: maxLength128 },
+            ]} />
+
+            <PairSetting data={[
+                { settingsKey: "imageBigURL", label: "Big Image clickable URL"},
+                { settingsKey: "imageSmallURL", label: "Small Image clickable URL"},
             ]} />
 
             <Divider />
