@@ -1,6 +1,6 @@
 import { ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 
-export default {
+export const audioHandler = {
     icon: "audio",
 
     getActivity(item) {
@@ -32,4 +32,8 @@ export default {
 
         return null;
     },
+};
+
+export default {
+    Audio: audioHandler,
 };
