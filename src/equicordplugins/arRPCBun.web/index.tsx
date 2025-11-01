@@ -11,7 +11,7 @@ import { Logger } from "@utils/Logger";
 import { isAnyPluginDev, isEquicordGuild } from "@utils/misc";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Toasts, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, FluxDispatcher, UserStore } from "@webpack/common";
 
 const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
 const logger = new Logger("arRPCBun");
@@ -28,6 +28,8 @@ async function lookupApp(applicationId: string): Promise<string> {
 }
 
 let ws: WebSocket;
+let reconnectTimer: NodeJS.Timeout | null = null;
+const RECONNECT_INTERVAL = 5000;
 
 export const settings = definePluginSettings({
     oldVerNotice: {
@@ -145,6 +147,43 @@ export default definePlugin({
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
     },
 
+    connect() {
+        const arrpcStatus = IS_EQUIBOP ? VesktopNative.arrpc?.getStatus?.() : null;
+        const host = arrpcStatus?.host || "127.0.0.1";
+        const port = arrpcStatus?.port || 1337;
+
+        const wsUrl = `ws://${host}:${port}`;
+        logger.info(`Connecting to arRPCBun at ${wsUrl}${arrpcStatus?.host ? "" : " (using defaults)"}`);
+
+        if (ws) ws.close();
+        ws = new WebSocket(wsUrl);
+
+        ws.onmessage = this.handleEvent;
+
+        ws.onerror = error => {
+            logger.error("WebSocket error:", error);
+        };
+
+        ws.onclose = () => {
+            logger.info("WebSocket closed, will attempt reconnect in 5s");
+            FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null });
+
+            if (reconnectTimer) clearTimeout(reconnectTimer);
+            reconnectTimer = setTimeout(() => {
+                logger.info("Attempting to reconnect...");
+                this.connect();
+            }, RECONNECT_INTERVAL);
+        };
+
+        ws.onopen = () => {
+            logger.info("Successfully connected to arRPCBun");
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+        };
+    },
+
     async start() {
         // only works on 3.0.8+
         if (IS_EQUIBOP) {
@@ -181,48 +220,14 @@ export default definePlugin({
             return;
         }
 
-        const host = arrpcStatus?.host || "127.0.0.1";
-        const port = arrpcStatus?.port || 1337;
-
-        const wsUrl = `ws://${host}:${port}`;
-        logger.info(`Connecting to arRPCBun at ${wsUrl}${arrpcStatus?.host ? "" : " (using defaults)"}`);
-
-        if (ws) ws.close();
-        ws = new WebSocket(wsUrl);
-
-        ws.onmessage = this.handleEvent;
-
-        ws.onerror = error => {
-            logger.error("WebSocket error:", error);
-        };
-
-        ws.onclose = () => {
-            logger.info("WebSocket closed");
-        };
-
-        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 5000));
-        if (!connectionSuccessful) {
-            logger.error("Failed to connect to arRPCBun");
-            showNotice("Failed to connect to arRPCBun, is it running?", "Retry", () => {
-                popNotice();
-                this.start();
-            });
-            return;
-        }
-
-        logger.info("Successfully connected to arRPCBun");
-        Toasts.show({
-            message: "Connected to arRPCBun",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
+        this.connect();
     },
 
     stop() {
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null });
         ws?.close();
         logger.info("Stopped arRPCBun connection");
