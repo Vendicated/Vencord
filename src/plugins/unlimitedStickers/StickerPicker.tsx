@@ -192,6 +192,7 @@ const StickerGridItem: React.FC<{
     isFavorite: boolean;
     onToggleFavorite: (file: StickerFile) => void;
     onStickerSent: (file: StickerFile) => void;
+    isClosing: boolean;
 }> = ({
     file,
     guildId,
@@ -200,29 +201,51 @@ const StickerGridItem: React.FC<{
     isFavorite,
     onToggleFavorite,
     onStickerSent,
+    isClosing,
 }) => {
         const [isSending, setIsSending] = React.useState(false);
         const [base64, setBase64] = React.useState<string | null>(null);
         const itemRef = React.useRef<HTMLDivElement>(null);
+        const observerRef = React.useRef<IntersectionObserver | null>(null);
+        const isClosingRef = React.useRef(isClosing);
 
         React.useEffect(() => {
+            isClosingRef.current = isClosing;
+            if (isClosing && observerRef.current) {
+                observerRef.current.disconnect();
+                observerRef.current = null;
+            }
+        }, [isClosing]);
+
+        React.useEffect(() => {
+            if (isClosing) return;
+
             const observer = new IntersectionObserver(
                 ([entry]) => {
-                    if (entry.isIntersecting) {
+                    if (entry.isIntersecting && !isClosingRef.current) {
                         observer.disconnect();
+                        observerRef.current = null;
                         DataStore.get<string>(`${STICKER_DATA_KEY_PREFIX}${file.id}`).then(
-                            (data) => data && setBase64(data),
+                            (data) => {
+                                if (!isClosingRef.current && data) setBase64(data);
+                            },
                         );
                     }
                 },
                 { rootMargin: "200px" },
             );
+            observerRef.current = observer;
             if (itemRef.current) observer.observe(itemRef.current);
-            return () => observer.disconnect();
-        }, [file.id]);
+            return () => {
+                if (observerRef.current) {
+                    observerRef.current.disconnect();
+                    observerRef.current = null;
+                }
+            };
+        }, [file.id, isClosing]);
 
         const handleStickerClick = async () => {
-            if (isSending || !base64) return;
+            if (isSending || !base64 || isClosingRef.current) return;
             setIsSending(true);
 
             try {
@@ -231,6 +254,11 @@ const StickerGridItem: React.FC<{
                     file.name,
                     base64,
                 );
+
+                if (isClosingRef.current) {
+                    setIsSending(false);
+                    return;
+                }
 
                 if (newStickerId) {
                     const reply = PendingReplyStore.getPendingReply(channel.id);
@@ -243,6 +271,11 @@ const StickerGridItem: React.FC<{
 
                     await MessageActions.sendMessage(channel.id, { content: "" }, false, sendOptions);
 
+                    if (isClosingRef.current) {
+                        setIsSending(false);
+                        return;
+                    }
+
                     if (reply) {
                         FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel.id });
                     }
@@ -254,7 +287,7 @@ const StickerGridItem: React.FC<{
                 }
             } catch (error) {
                 logger.error("Error sending sticker:", error);
-                setIsSending(false);
+                if (!isClosingRef.current) setIsSending(false);
             }
         };
 
@@ -364,8 +397,14 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
         if (storageKey) saveExpansionState(storageKey, isExpanded);
     }, [isExpanded, storageKey]);
 
+    const observerRef = React.useRef<IntersectionObserver | null>(null);
+
     React.useEffect(() => {
         if (isContentLoaded || !categoryRef.current || isClosing) {
+            if (isClosing && observerRef.current) {
+                observerRef.current.disconnect();
+                observerRef.current = null;
+            }
             return;
         }
 
@@ -375,12 +414,19 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
                     setIsContentLoaded(true);
                     setIsExpanded(true);
                     observer.disconnect();
+                    observerRef.current = null;
                 }
             },
             { rootMargin: "100px" },
         );
+        observerRef.current = observer;
         observer.observe(categoryRef.current);
-        return () => observer.disconnect();
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+                observerRef.current = null;
+            }
+        };
     }, [isContentLoaded, isClosing]);
 
     return (
@@ -402,7 +448,7 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
                     height={20}
                 />
             </Clickable>
-            {isExpanded && isContentLoaded && (
+            {isExpanded && isContentLoaded && !isClosing && (
                 <div className="unlimited-stickers-grid">
                     {files.length > 0 ? (
                         files.map((file) => (
@@ -410,6 +456,7 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
                                 key={file.id}
                                 file={file}
                                 isFavorite={rest.favoriteIds.has(file.id)}
+                                isClosing={isClosing}
                                 {...rest}
                             />
                         ))
@@ -444,13 +491,21 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
     const [searchQuery, setSearchQuery] = React.useState("");
 
     const initialExpansionState = React.useRef<Record<string, boolean>>({});
+    const isClosingRef = React.useRef(false);
 
     const isClosing = rootProps.transitionState === 2;
 
     React.useEffect(() => {
+        isClosingRef.current = isClosing;
+    }, [isClosing]);
+
+    React.useEffect(() => {
+        if (isClosing) return;
+
         const loadStickerData = async () => {
             try {
                 const id = await ensureStickerGuild();
+                if (isClosingRef.current) return;
                 setGuildIdState(id);
                 if (!id) return;
 
@@ -465,6 +520,8 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                     DataStore.get<boolean>(RECENT_EXPANDED_KEY),
                 ]);
 
+                if (isClosingRef.current) return;
+
                 initialExpansionState.current[FAVORITES_EXPANDED_KEY] = favExpanded ?? true;
                 initialExpansionState.current[RECENT_EXPANDED_KEY] = recExpanded ?? true;
 
@@ -474,7 +531,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             } catch (e) {
                 logger.error("Failed to load sticker data:", e);
             } finally {
-                setIsLoading(false);
+                if (!isClosingRef.current) setIsLoading(false);
             }
         };
 
@@ -482,7 +539,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             setHasStartedLoading(true);
             loadStickerData();
         }
-    }, [rootProps.transitionState, hasStartedLoading]);
+    }, [rootProps.transitionState, hasStartedLoading, isClosing]);
 
     const allStickersMap = React.useMemo(() => {
         const map = new Map<string, StickerFile>();
@@ -508,6 +565,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
 
     const handleToggleFavorite = React.useCallback(
         async (file: StickerFile) => {
+            if (isClosing) return;
             const newFavoriteIds = new Set(favoriteIds);
             if (newFavoriteIds.has(file.id)) {
                 newFavoriteIds.delete(file.id);
@@ -517,15 +575,16 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             setFavoriteIds(newFavoriteIds);
             await saveFavorites(Array.from(newFavoriteIds));
         },
-        [favoriteIds],
+        [favoriteIds, isClosing],
     );
 
     const handleStickerSent = React.useCallback(async (file: StickerFile) => {
+        if (isClosing) return;
         await addRecentSticker(file.id);
         setRecentIds((prev) =>
             [file.id, ...prev.filter((id) => id !== file.id)].slice(0, 16),
         );
-    }, []);
+    }, [isClosing]);
 
     const { filteredFavorites, filteredRecents, filteredLocalCategories } =
         React.useMemo(() => {
@@ -561,6 +620,10 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
         }, [allCategories, favoriteFiles, recentFiles, searchQuery]);
 
     const renderContent = () => {
+        if (isClosing) {
+            return null;
+        }
+
         if (isLoading)
             return (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
@@ -648,7 +711,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                 </Heading>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
-            {!isLoading && (
+            {!isLoading && !isClosing && (
                 <>
                     <div style={{ padding: "0 16px 8px 16px" }}>
                         <TextInput
