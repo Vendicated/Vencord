@@ -73,6 +73,11 @@ function isNumberValid(value: number) {
     return true;
 }
 
+function isUrlValid(value: string) {
+    if (value && !/^https?:\/\/.+/.test(value)) return "Must be a valid URL.";
+    return true;
+}
+
 function isImageKeyValid(value: string) {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//.test(value)) return "Don't use a Discord link. Use an Imgur image link instead.";
     if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image (e.g. https://i.imgur.com/...). Right click the image and click 'Copy image address'";
@@ -180,8 +185,15 @@ export function RPCSettings() {
                 { settingsKey: "appName", label: "Application Name", isValid: makeValidator(128, true) },
             ]} />
 
-            <SingleSetting settingsKey="details" label="Detail (line 1)" isValid={maxLength128} />
-            <SingleSetting settingsKey="state" label="State (line 2)" isValid={maxLength128} />
+            <PairSetting data={[
+                { settingsKey: "details", label: "Detail (line 1)", isValid: maxLength128 },
+                { settingsKey: "detailsURL", label: "Detail URL", isValid: isUrlValid },
+            ]} />
+
+            <PairSetting data={[
+                { settingsKey: "state", label: "State (line 2)", isValid: maxLength128 },
+                { settingsKey: "stateURL", label: "State URL", isValid: isUrlValid },
+            ]} />
 
             <SingleSetting
                 settingsKey="streamLink"
@@ -195,13 +207,15 @@ export function RPCSettings() {
                     settingsKey: "partySize",
                     label: "Party Size",
                     transform: parseNumber,
-                    isValid: isNumberValid
+                    isValid: isNumberValid,
+                    disabled: s.type !== ActivityType.PLAYING,
                 },
                 {
                     settingsKey: "partyMaxSize",
                     label: "Maximum Party Size",
                     transform: parseNumber,
-                    isValid: isNumberValid
+                    isValid: isNumberValid,
+                    disabled: s.type !== ActivityType.PLAYING,
                 },
             ]} />
 
@@ -211,21 +225,23 @@ export function RPCSettings() {
                 { settingsKey: "imageBig", label: "Large Image URL/Key", isValid: isImageKeyValid },
                 { settingsKey: "imageBigTooltip", label: "Large Image Text", isValid: maxLength128 },
             ]} />
+            <SingleSetting settingsKey="imageBigURL" label="Large Image clickable URL" isValid={isUrlValid} />
 
             <PairSetting data={[
                 { settingsKey: "imageSmall", label: "Small Image URL/Key", isValid: isImageKeyValid },
                 { settingsKey: "imageSmallTooltip", label: "Small Image Text", isValid: maxLength128 },
             ]} />
+            <SingleSetting settingsKey="imageSmallURL" label="Small Image clickable URL" isValid={isUrlValid} />
 
             <Divider />
 
             <PairSetting data={[
                 { settingsKey: "buttonOneText", label: "Button1 Text", isValid: makeValidator(31) },
-                { settingsKey: "buttonOneURL", label: "Button1 URL" },
+                { settingsKey: "buttonOneURL", label: "Button1 URL", isValid: isUrlValid },
             ]} />
             <PairSetting data={[
                 { settingsKey: "buttonTwoText", label: "Button2 Text", isValid: makeValidator(31) },
-                { settingsKey: "buttonTwoURL", label: "Button2 URL" },
+                { settingsKey: "buttonTwoURL", label: "Button2 URL", isValid: isUrlValid },
             ]} />
 
             <Divider />
