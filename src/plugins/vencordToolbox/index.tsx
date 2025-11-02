@@ -71,7 +71,10 @@ function VencordPopout(onClose: () => void) {
                                     key={key}
                                     label={toolboxAction.label}
                                     checked={toolboxAction.checked ?? false}
-                                    action={() => toolboxAction.action?.(!(toolboxAction.checked ?? false))}
+                                    action={() => {
+                                        const currentChecked = toolboxAction.checked ?? false;
+                                        toolboxAction.action?.(!currentChecked);
+                                    }}
                                     disabled={toolboxAction.disabled}
                                 />
                             );
