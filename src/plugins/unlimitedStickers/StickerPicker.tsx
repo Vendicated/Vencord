@@ -12,6 +12,7 @@ import { classes } from "@utils/misc";
 import {
     ModalCloseButton,
     ModalContent,
+    ModalFooter,
     ModalHeader,
     type ModalProps,
     ModalRoot,
@@ -21,8 +22,12 @@ import type { Channel } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import {
     Alerts,
+    Button,
     Clickable,
+    ContextMenuApi,
+    Forms,
     GuildStore,
+    Menu,
     MessageActions,
     React,
     RestAPI,
@@ -184,6 +189,96 @@ const uploadAndReplaceSticker = async (
 
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 
+const RenameModal: React.FC<{
+    currentName: string;
+    onSave: (newName: string) => Promise<boolean>;
+    type: "category" | "sticker";
+    onClose: () => void;
+    transitionState: number;
+}> = ({ transitionState, onClose, currentName, onSave, type }) => {
+    const [value, setValue] = React.useState(currentName);
+    const [error, setError] = React.useState<string>("");
+
+    const handleSave = async () => {
+        setError("");
+        if (value.trim() === "") {
+            const errorMessage = type === "category"
+                ? "Category name cannot be empty"
+                : "Sticker name cannot be empty";
+            setError(errorMessage);
+            return;
+        }
+
+        const success = await onSave(value.trim());
+        if (!success) {
+            if (type === "category") {
+                setError(getPluginIntlMessage("CATEGORY_NAME_EXISTS").replace("{name}", value.trim()));
+            }
+        } else {
+            onClose();
+        }
+    };
+
+    const handleChange = (newValue: string) => {
+        setValue(newValue);
+        setError("");
+    };
+
+    return (
+        <ModalRoot transitionState={transitionState}>
+            <ModalHeader>
+                <Heading tag="h4" style={{ flexGrow: 1 }}>
+                    {type === "category"
+                        ? getPluginIntlMessage("RENAME_CATEGORY")
+                        : getPluginIntlMessage("RENAME_STICKER")}
+                </Heading>
+                <ModalCloseButton onClick={onClose} />
+            </ModalHeader>
+            <ModalContent>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>
+                    {getPluginIntlMessage("NEW_NAME")}
+                </Forms.FormTitle>
+                <TextInput
+                    style={{
+                        marginBottom: "10px",
+                        borderColor: error ? "var(--status-danger)" : undefined
+                    }}
+                    placeholder={currentName}
+                    value={value}
+                    onChange={handleChange}
+                    autoFocus
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            handleSave();
+                        }
+                    }}
+                />
+                {error && (
+                    <div style={{ color: "var(--status-danger)", fontSize: "12px", marginTop: "4px", marginBottom: "10px" }}>
+                        {error}
+                    </div>
+                )}
+            </ModalContent>
+            <ModalFooter>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", width: "100%" }}>
+                    <Button
+                        color={Button.Colors.PRIMARY}
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color={Button.Colors.BRAND}
+                        onClick={handleSave}
+                    >
+                        Save
+                    </Button>
+                </div>
+            </ModalFooter>
+        </ModalRoot>
+    );
+};
+
 const StickerGridItem: React.FC<{
     file: StickerFile;
     guildId: string;
@@ -192,6 +287,7 @@ const StickerGridItem: React.FC<{
     isFavorite: boolean;
     onToggleFavorite: (file: StickerFile) => void;
     onStickerSent: (file: StickerFile) => void;
+    onStickerRename: (stickerId: string, newName: string) => Promise<boolean>;
     isClosing: boolean;
 }> = ({
     file,
@@ -201,6 +297,7 @@ const StickerGridItem: React.FC<{
     isFavorite,
     onToggleFavorite,
     onStickerSent,
+    onStickerRename,
     isClosing,
 }) => {
         const [isSending, setIsSending] = React.useState(false);
@@ -296,6 +393,33 @@ const StickerGridItem: React.FC<{
             onToggleFavorite(file);
         };
 
+        const handleContextMenu = (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            ContextMenuApi.openContextMenu(e, () => (
+                <Menu.Menu
+                    navId="sticker-item-context-menu"
+                    onClose={ContextMenuApi.closeContextMenu}
+                >
+                    <Menu.MenuItem
+                        id="rename-sticker"
+                        label={getPluginIntlMessage("RENAME")}
+                        action={() => {
+                            openModal(props => (
+                                <RenameModal
+                                    {...props}
+                                    currentName={file.name}
+                                    onSave={(newName) => onStickerRename(file.id, newName)}
+                                    type="sticker"
+                                />
+                            ));
+                        }}
+                    />
+                </Menu.Menu>
+            ));
+        };
+
         const tooltipContent = base64 ? (
             <div className="unlimited-stickers-tooltip-preview">
                 <img
@@ -323,6 +447,7 @@ const StickerGridItem: React.FC<{
                                 "unlimited-stickers-grid-item--placeholder",
                             )}
                             onClick={handleStickerClick}
+                            onContextMenu={handleContextMenu}
                         >
                             {isSending && (
                                 <div className="unlimited-stickers-loading-spinner-container">
@@ -376,6 +501,8 @@ interface StickerCategoryWrapperProps {
     favoriteIds: Set<string>;
     onToggleFavorite: (file: StickerFile) => void;
     onStickerSent: (file: StickerFile) => void;
+    onCategoryRename: (oldName: string, newName: string) => Promise<boolean>;
+    onStickerRename: (stickerId: string, newName: string) => Promise<boolean>;
     initialIsExpanded: boolean;
     storageKey?: string;
     isInitiallyLoaded?: boolean;
@@ -389,6 +516,7 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
     files,
     isInitiallyLoaded = false,
     isClosing,
+    onCategoryRename,
     ...rest
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(initialIsExpanded);
@@ -401,6 +529,35 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
         () => setIsExpanded((prev) => !prev),
         [],
     );
+
+    const handleContextMenu = React.useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (storageKey) return;
+
+        ContextMenuApi.openContextMenu(e, () => (
+            <Menu.Menu
+                navId="sticker-category-context-menu"
+                onClose={ContextMenuApi.closeContextMenu}
+            >
+                <Menu.MenuItem
+                    id="rename-category"
+                    label={getPluginIntlMessage("RENAME")}
+                    action={() => {
+                        openModal(props => (
+                            <RenameModal
+                                {...props}
+                                currentName={categoryName}
+                                onSave={(newName) => onCategoryRename(categoryName, newName)}
+                                type="category"
+                            />
+                        ));
+                    }}
+                />
+            </Menu.Menu>
+        ));
+    }, [categoryName, onCategoryRename, storageKey]);
 
     React.useEffect(() => {
         if (isInitialMount.current) {
@@ -447,6 +604,7 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
             <Clickable
                 className="unlimited-stickers-category-header"
                 onClick={handleToggleExpanded}
+                onContextMenu={handleContextMenu}
                 aria-expanded={isExpanded}
             >
                 <Heading tag="h5">
@@ -524,7 +682,27 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
 
                 const libraryData =
                     (await DataStore.get<StickerCategory[]>(LIBRARY_KEY)) ?? [];
-                libraryData.sort((a, b) => a.name.localeCompare(b.name));
+
+                const mergedCategories: StickerCategory[] = [];
+                const categoryMap = new Map<string, StickerCategory>();
+
+                for (const category of libraryData) {
+                    const existingCategory = categoryMap.get(category.name);
+                    if (existingCategory) {
+                        const existingFileIds = new Set(existingCategory.files.map(f => f.id));
+                        const uniqueNewFiles = category.files.filter(f => !existingFileIds.has(f.id));
+                        existingCategory.files.push(...uniqueNewFiles);
+                    } else {
+                        categoryMap.set(category.name, { ...category, files: [...category.files] });
+                        mergedCategories.push(categoryMap.get(category.name)!);
+                    }
+                }
+
+                if (mergedCategories.length !== libraryData.length) {
+                    await DataStore.set(LIBRARY_KEY, mergedCategories);
+                }
+
+                mergedCategories.sort((a, b) => a.name.localeCompare(b.name));
 
                 const [favIds, recentIdsData, favExpanded, recExpanded] = await Promise.all([
                     getFavorites(),
@@ -538,7 +716,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                 initialExpansionState.current[FAVORITES_EXPANDED_KEY] = favExpanded ?? true;
                 initialExpansionState.current[RECENT_EXPANDED_KEY] = recExpanded ?? true;
 
-                setAllCategories(libraryData);
+                setAllCategories(mergedCategories);
                 setFavoriteIds(new Set(favIds));
                 setRecentIds(recentIdsData);
             } catch (e) {
@@ -598,6 +776,37 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             [file.id, ...prev.filter((id) => id !== file.id)].slice(0, 16),
         );
     }, [isClosing]);
+
+    const handleCategoryRename = React.useCallback(async (oldName: string, newName: string): Promise<boolean> => {
+        if (isClosing) return false;
+        if (oldName === newName) return true;
+
+        const categoryExists = allCategories.some(cat => cat.name === newName);
+        if (categoryExists) {
+            return false;
+        }
+
+        const updatedCategories = allCategories.map(cat =>
+            cat.name === oldName ? { ...cat, name: newName } : cat
+        );
+        setAllCategories(updatedCategories);
+        await DataStore.set(LIBRARY_KEY, updatedCategories);
+        return true;
+    }, [allCategories, isClosing]);
+
+    const handleStickerRename = React.useCallback(async (stickerId: string, newName: string): Promise<boolean> => {
+        if (isClosing) return false;
+
+        const updatedCategories = allCategories.map(cat => ({
+            ...cat,
+            files: cat.files.map(file =>
+                file.id === stickerId ? { ...file, name: newName } : file
+            )
+        }));
+        setAllCategories(updatedCategories);
+        await DataStore.set(LIBRARY_KEY, updatedCategories);
+        return true;
+    }, [allCategories, isClosing]);
 
     const { filteredFavorites, filteredRecents, filteredLocalCategories } =
         React.useMemo(() => {
@@ -672,6 +881,8 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             favoriteIds,
             onToggleFavorite: handleToggleFavorite,
             onStickerSent: handleStickerSent,
+            onCategoryRename: handleCategoryRename,
+            onStickerRename: handleStickerRename,
             isClosing,
         };
         const isSearching = !!searchQuery;

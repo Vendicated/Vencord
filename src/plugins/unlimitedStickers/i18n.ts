@@ -30,7 +30,12 @@ export const translations = {
         "LOAD_PREVIEW_FAILED": "Failed to load sticker preview.",
         "SEARCH_STICKERS_PLACEHOLDER": "Search stickers by name or category...",
         "LOADING_STICKERS_BODY": "Loading stickers...",
-        "NITRO_REQUIRED_BODY": "This plugin requires a Discord Nitro subscription to upload and send stickers."
+        "NITRO_REQUIRED_BODY": "This plugin requires a Discord Nitro subscription to upload and send stickers.",
+        "RENAME": "Rename",
+        "RENAME_CATEGORY": "Rename Category",
+        "RENAME_STICKER": "Rename Sticker",
+        "NEW_NAME": "New name",
+        "CATEGORY_NAME_EXISTS": "A category named \"{name}\" already exists."
     },
     "ja": {
         "STICKERS": "無限スタンプパネル",
@@ -57,6 +62,11 @@ export const translations = {
         "LOAD_PREVIEW_FAILED": "スタンプのプレビューの読み込みに失敗しました。",
         "SEARCH_STICKERS_PLACEHOLDER": "名前またはカテゴリでスタンプを検索...",
         "LOADING_STICKERS_BODY": "スタンプを読み込み中...",
-        "NITRO_REQUIRED_BODY": "このプラグインは、スタンプをアップロードして送信するためにDiscord Nitroのサブスクリプションが必要です。"
+        "NITRO_REQUIRED_BODY": "このプラグインは、スタンプをアップロードして送信するためにDiscord Nitroのサブスクリプションが必要です。",
+        "RENAME": "名前を変更",
+        "RENAME_CATEGORY": "カテゴリの名前を変更",
+        "RENAME_STICKER": "スタンプの名前を変更",
+        "NEW_NAME": "新しい名前",
+        "CATEGORY_NAME_EXISTS": "名前が「{name}」のカテゴリは既に存在します。"
     }
 };
