@@ -180,11 +180,13 @@ export function RPCSettings() {
                 { settingsKey: "appName", label: "Application Name", isValid: makeValidator(128, true) },
             ]} />
 
-            <SingleSetting settingsKey="details" label="Detail (line 1)" isValid={maxLength128} />
-            <SingleSetting settingsKey="state" label="State (line 2)" isValid={maxLength128} />
+            <PairSetting data={[
+                { settingsKey: "details", label: "Detail (line 1)", isValid: maxLength128 },
+                { settingsKey: "detailsURL", label: "Detail URL" },
+            ]} />
 
             <PairSetting data={[
-                { settingsKey: "detailsURL", label: "Detail URL" },
+                { settingsKey: "state", label: "State (line 2)", isValid: maxLength128 },
                 { settingsKey: "stateURL", label: "State URL" },
             ]} />
 
