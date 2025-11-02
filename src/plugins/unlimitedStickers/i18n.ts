@@ -35,7 +35,12 @@ export const translations = {
         "RENAME_CATEGORY": "Rename Category",
         "RENAME_STICKER": "Rename Sticker",
         "NEW_NAME": "New name",
-        "CATEGORY_NAME_EXISTS": "A category named \"{name}\" already exists."
+        "CATEGORY_NAME_EXISTS": "A category named \"{name}\" already exists.",
+        "DELETE_STICKER": "Delete Sticker",
+        "DELETE_STICKER_CONFIRM_TITLE": "Delete Sticker",
+        "DELETE_STICKER_CONFIRM_BODY": "Are you sure you want to delete this sticker? This cannot be undone.",
+        "SAVE": "Save",
+        "CANCEL": "Cancel"
     },
     "ja": {
         "STICKERS": "無限スタンプパネル",
@@ -67,6 +72,11 @@ export const translations = {
         "RENAME_CATEGORY": "カテゴリの名前を変更",
         "RENAME_STICKER": "スタンプの名前を変更",
         "NEW_NAME": "新しい名前",
-        "CATEGORY_NAME_EXISTS": "名前が「{name}」のカテゴリは既に存在します。"
+        "CATEGORY_NAME_EXISTS": "名前が「{name}」のカテゴリは既に存在します。",
+        "DELETE_STICKER": "スタンプを削除",
+        "DELETE_STICKER_CONFIRM_TITLE": "スタンプを削除",
+        "DELETE_STICKER_CONFIRM_BODY": "本当にこのスタンプを削除しますか？この操作は取り消せません。",
+        "SAVE": "保存",
+        "CANCEL": "キャンセル"
     }
 };

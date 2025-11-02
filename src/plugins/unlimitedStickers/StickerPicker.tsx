@@ -5,6 +5,7 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { DeleteIcon } from "@components/Icons";
 import { Divider, Heading } from "@components/index";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -46,6 +47,7 @@ import {
     getRecentStickers,
     LIBRARY_KEY,
     RECENT_EXPANDED_KEY,
+    RECENT_KEY,
     STICKER_DATA_KEY_PREFIX,
     type StickerCategory,
     type StickerFile,
@@ -265,13 +267,13 @@ const RenameModal: React.FC<{
                         color={Button.Colors.PRIMARY}
                         onClick={onClose}
                     >
-                        Cancel
+                        {getPluginIntlMessage("CANCEL")}
                     </Button>
                     <Button
                         color={Button.Colors.BRAND}
                         onClick={handleSave}
                     >
-                        Save
+                        {getPluginIntlMessage("SAVE")}
                     </Button>
                 </div>
             </ModalFooter>
@@ -288,6 +290,7 @@ const StickerGridItem: React.FC<{
     onToggleFavorite: (file: StickerFile) => void;
     onStickerSent: (file: StickerFile) => void;
     onStickerRename: (stickerId: string, newName: string) => Promise<boolean>;
+    onStickerDelete: (stickerId: string) => void;
     isClosing: boolean;
 }> = ({
     file,
@@ -298,6 +301,7 @@ const StickerGridItem: React.FC<{
     onToggleFavorite,
     onStickerSent,
     onStickerRename,
+    onStickerDelete,
     isClosing,
 }) => {
         const [isSending, setIsSending] = React.useState(false);
@@ -416,6 +420,21 @@ const StickerGridItem: React.FC<{
                             ));
                         }}
                     />
+                    <Menu.MenuItem
+                        id="delete-sticker"
+                        label={getPluginIntlMessage("DELETE_STICKER")}
+                        color="danger"
+                        icon={DeleteIcon}
+                        action={() => {
+                            Alerts.show({
+                                title: getPluginIntlMessage("DELETE_STICKER_CONFIRM_TITLE"),
+                                body: getPluginIntlMessage("DELETE_STICKER_CONFIRM_BODY"),
+                                confirmText: getPluginIntlMessage("DELETE_STICKER"),
+                                cancelText: getIntlMessage("CANCEL"),
+                                onConfirm: () => onStickerDelete(file.id)
+                            });
+                        }}
+                    />
                 </Menu.Menu>
             ));
         };
@@ -503,6 +522,7 @@ interface StickerCategoryWrapperProps {
     onStickerSent: (file: StickerFile) => void;
     onCategoryRename: (oldName: string, newName: string) => Promise<boolean>;
     onStickerRename: (stickerId: string, newName: string) => Promise<boolean>;
+    onStickerDelete: (stickerId: string) => void;
     initialIsExpanded: boolean;
     storageKey?: string;
     isInitiallyLoaded?: boolean;
@@ -808,6 +828,27 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
         return true;
     }, [allCategories, isClosing]);
 
+    const handleStickerDelete = React.useCallback(async (stickerId: string) => {
+        if (isClosing) return;
+
+        const newFavoriteIds = Array.from(favoriteIds).filter(id => id !== stickerId);
+        setFavoriteIds(new Set(newFavoriteIds));
+        await saveFavorites(newFavoriteIds);
+
+        const newRecentIds = recentIds.filter(id => id !== stickerId);
+        setRecentIds(newRecentIds);
+        await DataStore.update<string[]>(RECENT_KEY, (recents = []) => recents.filter(id => id !== stickerId));
+
+        const updatedCategories = allCategories.map(cat => ({
+            ...cat,
+            files: cat.files.filter(file => file.id !== stickerId)
+        })).filter(cat => cat.files.length > 0);
+
+        setAllCategories(updatedCategories);
+        await DataStore.set(LIBRARY_KEY, updatedCategories);
+        await DataStore.del(`${STICKER_DATA_KEY_PREFIX}${stickerId}`);
+    }, [allCategories, favoriteIds, recentIds, isClosing]);
+
     const { filteredFavorites, filteredRecents, filteredLocalCategories } =
         React.useMemo(() => {
             if (!searchQuery)
@@ -883,6 +924,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             onStickerSent: handleStickerSent,
             onCategoryRename: handleCategoryRename,
             onStickerRename: handleStickerRename,
+            onStickerDelete: handleStickerDelete,
             isClosing,
         };
         const isSearching = !!searchQuery;
