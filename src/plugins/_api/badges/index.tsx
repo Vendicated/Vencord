@@ -127,13 +127,17 @@ export default definePlugin({
     },
 
     toolboxActions: {
-        async "Refetch Badges"() {
-            await loadBadges(true);
-            Toasts.show({
-                id: Toasts.genId(),
-                message: "Successfully refetched badges!",
-                type: Toasts.Type.SUCCESS
-            });
+        "Refetch Badges": {
+            type: "button",
+            label: "Refetch Badges",
+            async action() {
+                await loadBadges(true);
+                Toasts.show({
+                    id: Toasts.genId(),
+                    message: "Successfully refetched badges!",
+                    type: Toasts.Type.SUCCESS
+                });
+            }
         }
     },
 

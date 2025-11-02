@@ -89,6 +89,40 @@ export interface PluginAuthor {
     id: BigInt;
 }
 
+export interface ToolboxAction {
+    /**
+     * The type of action to render
+     * @default "button"
+     */
+    type?: "button" | "checkbox" | "custom";
+    /**
+     * The label/text to display
+     */
+    label: string;
+    /**
+     * For button type: the action to perform when clicked
+     * For checkbox type: the action to perform when toggled
+     */
+    action?: (checked?: boolean) => void;
+    /**
+     * For checkbox type: whether the checkbox is checked
+     */
+    checked?: boolean;
+    /**
+     * For custom type: render function that returns a ReactNode
+     * Receives the key for the menu item
+     */
+    render?: (key: string) => ReactNode;
+    /**
+     * Optional icon component
+     */
+    icon?: React.ComponentType<any>;
+    /**
+     * Whether the action is disabled
+     */
+    disabled?: boolean;
+}
+
 export interface Plugin extends PluginDef {
     patches?: Patch[];
     started: boolean;
@@ -162,7 +196,7 @@ export interface PluginDef {
      * Allows you to add custom actions to the Vencord Toolbox.
      * The key will be used as text for the button
      */
-    toolboxActions?: Record<string, () => void>;
+    toolboxActions?: Record<string, (() => void) | ToolboxAction>;
 
     tags?: string[];
 

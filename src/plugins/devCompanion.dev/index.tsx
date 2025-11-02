@@ -250,6 +250,16 @@ export default definePlugin({
         "Reconnect"() {
             socket?.close(1000, "Reconnecting");
             initWs(true);
+        },
+        "Auto-connect on Start": {
+            type: "checkbox",
+            label: "Auto-connect on Start",
+            get checked() {
+                return settings.store.notifyOnAutoConnect;
+            },
+            action(checked) {
+                settings.store.notifyOnAutoConnect = checked ?? false;
+            }
         }
     },
 
