@@ -296,8 +296,21 @@ const StickerGridItem: React.FC<{
             onToggleFavorite(file);
         };
 
+        const tooltipContent = base64 ? (
+            <div className="unlimited-stickers-tooltip-preview">
+                <img
+                    src={base64}
+                    alt={file.name}
+                    className="unlimited-stickers-tooltip-preview-img"
+                />
+                <div className="unlimited-stickers-tooltip-preview-name">
+                    {file.name}
+                </div>
+            </div>
+        ) : file.name;
+
         return (
-            <Tooltip text={file.name}>
+            <Tooltip text={tooltipContent} tooltipClassName="unlimited-stickers-tooltip">
                 {(props) => (
                     <div ref={itemRef}>
                         <Clickable
