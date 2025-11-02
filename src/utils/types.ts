@@ -89,6 +89,61 @@ export interface PluginAuthor {
     id: BigInt;
 }
 
+/**
+ * Defines an action for the Vencord Toolbox.
+ *
+ * @example
+ * // Simple button (backward compatible)
+ * toolboxActions: {
+ *     "My Action"() {
+ *         console.log("Action clicked");
+ *     }
+ * }
+ *
+ * @example
+ * // Button with explicit type
+ * toolboxActions: {
+ *     "My Action": {
+ *         type: "button",
+ *         label: "My Action",
+ *         action() {
+ *             console.log("Action clicked");
+ *         }
+ *     }
+ * }
+ *
+ * @example
+ * // Checkbox item
+ * toolboxActions: {
+ *     "Toggle Feature": {
+ *         type: "checkbox",
+ *         label: "Enable Feature",
+ *         get checked() {
+ *             return settings.store.featureEnabled;
+ *         },
+ *         action(checked) {
+ *             settings.store.featureEnabled = checked;
+ *         }
+ *     }
+ * }
+ *
+ * @example
+ * // Custom component
+ * toolboxActions: {
+ *     "Custom": {
+ *         type: "custom",
+ *         label: "Custom Item",
+ *         render: (key) => (
+ *             <Menu.MenuItem
+ *                 id={key}
+ *                 key={key}
+ *                 label="Custom Item"
+ *                 action={() => console.log("Custom action")}
+ *             />
+ *         )
+ *     }
+ * }
+ */
 export interface ToolboxAction {
     /**
      * The type of action to render
@@ -194,7 +249,31 @@ export interface PluginDef {
     contextMenus?: Record<string, NavContextMenuPatchCallback>;
     /**
      * Allows you to add custom actions to the Vencord Toolbox.
-     * The key will be used as text for the button
+     * Supports simple functions (legacy), button items, checkbox items, and custom components.
+     * The key will be used as the identifier and default text for the button.
+     *
+     * @example
+     * toolboxActions: {
+     *     // Legacy format (still supported)
+     *     "Simple Action"() {
+     *         console.log("Clicked");
+     *     },
+     *     // Checkbox
+     *     "Toggle Setting": {
+     *         type: "checkbox",
+     *         label: "Enable Setting",
+     *         checked: settings.store.enabled,
+     *         action(checked) {
+     *             settings.store.enabled = checked;
+     *         }
+     *     },
+     *     // Custom render
+     *     "Custom": {
+     *         type: "custom",
+     *         label: "Custom",
+     *         render: (key) => <Menu.MenuItem id={key} label="Custom" action={() => {}} />
+     *     }
+     * }
      */
     toolboxActions?: Record<string, (() => void) | ToolboxAction>;
 
