@@ -104,15 +104,6 @@ export default definePlugin({
                 replace: "false",
             }
         },
-        // Enable option to always record clips even if you are not streaming
-        {
-            find: "isDecoupledGameClippingEnabled(){",
-            replacement: {
-                match: /\i\.isStaff\(\)/,
-                replace: "true"
-            }
-        },
-
         // Enable experiment embed on sent experiment links
         {
             find: "dev://experiment/",
