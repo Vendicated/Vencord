@@ -60,7 +60,7 @@ async function openCompleteQuestUI() {
             title: "Quest Completer",
             body: "No Quests To Complete. Click to navigate to the quests tab",
             onClick() {
-                NavigationRouter.transitionTo("/discovery/quests");
+                NavigationRouter.transitionTo("/quest-home");
             },
         });
     } else {
