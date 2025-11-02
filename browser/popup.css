@@ -1,0 +1,63 @@
+body {
+    margin: 0;
+}
+#content {
+    margin: 15px 10px;
+    min-width: 200px;
+}
+
+hr {
+    height: 1px;
+    background-color: gray;
+    border: none;
+    margin: 10px 0;
+}
+
+h1,
+h2 {
+    margin: 0;
+}
+
+#version {
+    margin: 5px 0;
+    font-size: 0.8rem;
+}
+
+#commit-url {
+    font-family: monospace;
+}
+
+#logo {
+    width: 1.2rem;
+}
+
+p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+#buttons {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    a {
+        text-decoration: none;
+        color: white;
+        border-radius: 5px;
+        padding: 5px 0;
+        background-color: #515ceb;
+        text-align: center;
+        flex: 1;
+        font-weight: 500;
+    }
+    a.secondary {
+        color: black;
+        background-color: #cccccc;
+    }
+    a.danger {
+        color: white;
+        background-color: #ce2732;
+    }
+}

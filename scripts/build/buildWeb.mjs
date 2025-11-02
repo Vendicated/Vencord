@@ -24,7 +24,9 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues, gitHash } from "./common.mjs";
+import { promisify } from "util";
+import { exec } from "child_process";
 
 /**
  * @type {import("esbuild").BuildOptions}
@@ -148,6 +150,21 @@ async function buildExtension(target, files) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
+        "metadata.json": JSON.stringify({
+            version: VERSION,
+            gitHash,
+            remote: await (async () => {
+                let remote = process.env.VENCORD_REMOTE;
+                if (!remote) {
+                    const res = await promisify(exec)(
+                        "git remote get-url origin",
+                        { encoding: "utf-8" }
+                    );
+                    remote = res.stdout;
+                }
+                return remote.replace(/.git$/, "").replace(/\/$/, "").trim();
+            })(),
+        }),
         ...await loadDir("dist/vendor/monaco", "dist/"),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
@@ -191,7 +208,7 @@ const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content
 if (!process.argv.includes("--skip-extension")) {
     await Promise.all([
         appendCssRuntime,
-        buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png"]),
+        buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png", ...["html", "css", "js"].map(e => `popup.${e}`)]),
         buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
     ]);
 

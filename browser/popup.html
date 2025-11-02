@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Vencord Web</title>
+        <link rel="stylesheet" href="popup.css" />
+    </head>
+    <body>
+        <div id="content">
+            <h1>
+                <img id="logo" alt="Vencord logo" />
+                Vencord
+            </h1>
+            <div id="version">
+                <span id="local-version"></span> (<a
+                    id="commit-url"
+                    href="#"
+                    target="_blank"
+                ></a
+                >)
+            </div>
+            <p>
+                To configure Vencord and enable plugins, open Discord Settings.
+            </p>
+            <hr />
+            <h2>Recovery Actions</h2>
+            <div id="buttons">
+                <a id="clear-css" target="_blank">Clear QuickCSS/Themes</a>
+                <a id="disable-plugins" target="_blank">Disable All Plugins</a>
+                <a id="reset" target="_blank" class="danger">Reset Vencord</a>
+            </div>
+            <hr />
+            <div id="buttons">
+                <a id="view-source" target="_blank" class="secondary"
+                    >Source Code</a
+                >
+                <a
+                    href="https://vencord.dev/discord"
+                    class="secondary"
+                    target="_blank"
+                    >Support Server</a
+                >
+            </div>
+        </div>
+        <script src="popup.js"></script>
+    </body>
+</html>

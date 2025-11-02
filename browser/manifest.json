@@ -9,6 +9,9 @@
     "icons": {
         "128": "icon.png"
     },
+    "action": {
+        "default_popup": "popup.html"
+    },
 
     "host_permissions": [
         "*://*.discord.com/*",
