@@ -932,28 +932,32 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
         return (
             <div className="unlimited-stickers-modal-content">
                 <ScrollerThin className="unlimited-stickers-scroller">
-                    <StickerCategoryWrapper
-                        key="favorites-category"
-                        categoryName={getPluginIntlMessage("FAVORITES")}
-                        files={filteredFavorites}
-                        initialIsExpanded={
-                            initialExpansionState.current[FAVORITES_EXPANDED_KEY] ?? true
-                        }
-                        storageKey={FAVORITES_EXPANDED_KEY}
-                        isInitiallyLoaded={true}
-                        {...commonProps}
-                    />
-                    <StickerCategoryWrapper
-                        key="recent-category"
-                        categoryName={getPluginIntlMessage("RECENTLY_USED")}
-                        files={filteredRecents}
-                        initialIsExpanded={
-                            initialExpansionState.current[RECENT_EXPANDED_KEY] ?? true
-                        }
-                        storageKey={RECENT_EXPANDED_KEY}
-                        isInitiallyLoaded={true}
-                        {...commonProps}
-                    />
+                    {filteredFavorites.length > 0 && (
+                        <StickerCategoryWrapper
+                            key="favorites-category"
+                            categoryName={getPluginIntlMessage("FAVORITES")}
+                            files={filteredFavorites}
+                            initialIsExpanded={
+                                initialExpansionState.current[FAVORITES_EXPANDED_KEY] ?? true
+                            }
+                            storageKey={FAVORITES_EXPANDED_KEY}
+                            isInitiallyLoaded={true}
+                            {...commonProps}
+                        />
+                    )}
+                    {filteredRecents.length > 0 && (
+                        <StickerCategoryWrapper
+                            key="recent-category"
+                            categoryName={getPluginIntlMessage("RECENTLY_USED")}
+                            files={filteredRecents}
+                            initialIsExpanded={
+                                initialExpansionState.current[RECENT_EXPANDED_KEY] ?? true
+                            }
+                            storageKey={RECENT_EXPANDED_KEY}
+                            isInitiallyLoaded={true}
+                            {...commonProps}
+                        />
+                    )}
                     {filteredLocalCategories.map((category, index) => (
                         <StickerCategoryWrapper
                             key={category.name}
