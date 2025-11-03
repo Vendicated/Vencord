@@ -18,7 +18,7 @@
         "https://raw.githubusercontent.com/*"
     ],
 
-    "permissions": ["declarativeNetRequest"],
+    "permissions": ["scripting", "declarativeNetRequest"],
 
     "content_scripts": [
         {

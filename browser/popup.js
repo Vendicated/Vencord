@@ -25,4 +25,88 @@ document.addEventListener("DOMContentLoaded", async () => {
     commitUrlElement.href = `${metadata.remote}/commit/${metadata.gitHash}`;
 
     if (!(await getDiscordTab())) document.querySelector(".buttons").remove();
+
+    document.querySelector("#clear-css").addEventListener("click", async () => {
+        if (
+            confirm(
+                "This will disable QuickCSS, any added themes and will remove all online themes. Do you want to continue?"
+            )
+        ) {
+            const tab = await getDiscordTab();
+            await chrome.scripting.executeScript({
+                target: {
+                    tabId: tab.id
+                },
+                func: () => {
+                    const rawSettings = localStorage.getItem("VencordSettings");
+                    if (!rawSettings) return;
+                    const settings = JSON.parse(rawSettings);
+                    settings.useQuickCss = false;
+                    localStorage.setItem(
+                        "VencordSettings",
+                        JSON.stringify(settings)
+                    );
+                    localStorage.setItem("Vencord_settingsDirty", "true");
+
+                    window.location.reload();
+                },
+                args: []
+            });
+        }
+    });
+    document
+        .querySelector("#disable-plugins")
+        .addEventListener("click", async () => {
+            if (
+                confirm(
+                    "This will disable all plugins and reload Discord. Do you want to continue?"
+                )
+            ) {
+                const tab = await getDiscordTab();
+                await chrome.scripting.executeScript({
+                    target: {
+                        tabId: tab.id
+                    },
+                    func: () => {
+                        const rawSettings =
+                            localStorage.getItem("VencordSettings");
+                        if (!rawSettings) return;
+                        const settings = JSON.parse(rawSettings);
+                        for (const name in settings.plugins) {
+                            settings.plugins[name].enabled = false;
+                        }
+                        localStorage.setItem(
+                            "VencordSettings",
+                            JSON.stringify(settings)
+                        );
+                        localStorage.setItem("Vencord_settingsDirty", "true");
+
+                        window.location.reload();
+                    },
+                    args: []
+                });
+            }
+        });
+    document.querySelector("#reset").addEventListener("click", async () => {
+        if (
+            prompt(
+                'This will clear all your Vencord settings in this browser, including plugins, themes and QuickCSS! Make sure that you have a backup before continuing. To continue, type "YES".'
+            ) === "YES"
+        ) {
+            const tab = await getDiscordTab();
+            await chrome.scripting.executeScript({
+                target: {
+                    tabId: tab.id
+                },
+                func: () => {
+                    localStorage.removeItem("VencordSettings");
+                    localStorage.removeItem("Vencord_settingsDirty");
+                    indexedDB.deleteDatabase("VencordData");
+                    indexedDB.deleteDatabase("VencordThemes");
+                    window.location.reload();
+                },
+                args: []
+            });
+        }
+    });
 });
