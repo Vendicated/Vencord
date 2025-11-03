@@ -5,12 +5,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         (r) => r.json()
     );
 
-    document.querySelector("#logo").src = api.runtime.getURL("icon.png");
     document.querySelector(
         "#local-version"
     ).textContent = `v${metadata.version}`;
     document.querySelector("#view-source").href = metadata.remote;
     const commitUrlElement = document.querySelector("#commit-url");
-    commitUrlElement.textContent = metadata.gitHash;
+    commitUrlElement.textContent = `${metadata.gitHash}`;
     commitUrlElement.href = `${metadata.remote}/commit/${metadata.gitHash}`;
 });

@@ -1,63 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+    background: black;
+    color: #9b8c7d;
+    font-size: .8em;
+}
+
 body {
+    width: 305px;
+    height: 100vh;
+    background: #282828;
+    padding: 10px;
+    font-family: "Inter", system-ui;
     margin: 0;
-}
-#content {
-    margin: 15px 10px;
-    min-width: 200px;
-}
-
-hr {
-    height: 1px;
-    background-color: gray;
-    border: none;
-    margin: 10px 0;
-}
-
-h1,
-h2 {
-    margin: 0;
-}
-
-#version {
-    margin: 5px 0;
-    font-size: 0.8rem;
-}
-
-#commit-url {
-    font-family: monospace;
-}
-
-#logo {
-    width: 1.2rem;
 }
 
 p {
-    font-size: 1rem;
     margin: 0;
+    line-height: 1.5;
 }
 
-#buttons {
-    margin-top: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+a {
+    color: #cd879c;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
 
-    a {
-        text-decoration: none;
-        color: white;
-        border-radius: 5px;
-        padding: 5px 0;
-        background-color: #515ceb;
-        text-align: center;
+h1 {
+    display: flex;
+    align-items: center;
+    line-height: 0;
+    font-weight: 500;
+    margin: 0;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #D4BE98;
+    p {
+        font-size: 1.3rem;
+        line-height: 0;
+        flex-grow: 1;
+    }
+    #version {
+        font-weight: 400;
+        font-size: 0.8rem;
+        margin-right: -2px;
+        margin-top: 2px;
+        flex-grow: 0;
+    }
+    #commit {
+        font-family: monospace;
+        font-size: 0.8rem;
+        margin-top: 2px;
+    }
+}
+
+hr {
+    all: unset;
+}
+hr::before {
+    content: "                                    ";
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: #655c55;
+    font-size: 1.325rem !important;
+    display: block;
+    transform: translateY(-50%);
+    color: transparent;
+    user-select: none;
+}
+
+.grow {
+    flex: 1;
+}
+
+.buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+    button {
         flex: 1;
-        font-weight: 500;
-    }
-    a.secondary {
-        color: black;
-        background-color: #cccccc;
-    }
-    a.danger {
-        color: white;
-        background-color: #ce2732;
+        font-family: inherit;
+        padding: 0.7rem 0;
+        font-size: 0.9rem;
+        border-radius: 0.6rem;
+        border: none;
+        background: #e9686870;
+        color: #f69393;
+        font-weight: 600;
+        &:nth-child(3) {
+            flex-basis: 100%;
+        }
     }
 }
