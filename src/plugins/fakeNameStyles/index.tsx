@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./index.css";
-
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
@@ -173,11 +171,11 @@ function decode(bio: string): DisplayNameStyle | null {
 
 const settings = definePluginSettings({
     stylePriority: {
-        description: "default style source if both are present",
+        description: "Default style source if both are present",
         type: OptionType.SELECT,
         options: [
-            { label: "nitro styles", value: true, default: true },
-            { label: "fake styles", value: false },
+            { label: "Nitro Styles", value: true, default: true },
+            { label: "Fake Styles", value: false },
         ]
     }
 });
@@ -243,7 +241,7 @@ function StyleEditorModal({ modalProps }: { modalProps: ModalProps; }) {
     const animated = ["pop", "neon", "toon"].includes(EFFECT_IDS[effect]);
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.MEDIUM} className="vc-fns-modal">
+        <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
             <ModalHeader>
                 <Forms.FormTitle tag="h2" style={{ margin: 0, flexGrow: 1 }}>
                     Style Editor
@@ -427,11 +425,11 @@ export default definePlugin({
     styleDecodeHook(user: User) {
         if (!user) return user;
 
-        const bio = UserProfileStore.getUserProfile(user.id)?.bio;
-        if (bio) {
+        /* const bio = UserProfileStore.getUserProfile(user.id)?.bio; */
+        if (user?.bio) {
             if (settings.store.stylePriority && user.displayNameStyles !== null && user.displayNameStyles !== undefined) return user;
 
-            const style = decode(bio);
+            const style = decode(user.bio);
             if (style) {
                 const mergedStyle = {
                     fontId: style.fontId || 11,
