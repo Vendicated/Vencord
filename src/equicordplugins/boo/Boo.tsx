@@ -12,7 +12,25 @@ import { cl } from ".";
 import { IconGhost } from "./IconGhost";
 
 const countedChannels = new Set<string>();
-export let booCount = 0;
+
+let _booCount = 0;
+const listeners = new Set<(n: number) => void>();
+
+export function getBooCount() {
+    return _booCount;
+}
+
+export function setBooCount(n: number) {
+    _booCount = n;
+    for (const l of listeners) l(_booCount);
+}
+
+export function onBooCountChange(cb: (n: number) => void) {
+    listeners.add(cb);
+    return () => {
+        listeners.delete(cb);
+    };
+}
 
 const ChannelWrapperStyles = findByPropsLazy("muted", "wrapper");
 
@@ -43,23 +61,28 @@ export function Boo({ channel }: { channel: Channel; }) {
         });
     }, [lastMessage, currentUserId]);
 
-    if (countedChannels.has(id) && state.isCurrentUser) {
-        countedChannels.delete(id);
-        booCount--;
-    }
+    useEffect(() => {
+        if (!state.isDataProcessed) return;
 
-    if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser) return null;
+        if (!state.isCurrentUser) {
+            if (!countedChannels.has(id)) {
+                countedChannels.add(id);
+                setBooCount(getBooCount() + 1);
+            }
+        } else {
+            if (countedChannels.has(id)) {
+                countedChannels.delete(id);
+                setBooCount(getBooCount() - 1);
+            }
+        }
+    }, [state.isCurrentUser, state.isDataProcessed]);
 
-    if (!countedChannels.has(id)) {
-        countedChannels.add(id);
-        booCount++;
-    }
+    if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser)
+        return null;
 
     return (
         <div className={cl("icon", ChannelWrapperStyles.wrapper)}>
-            {state.containsQuestionMark
-                ? <IconGhost fill="#ff8000" />
-                : <IconGhost fill="currentColor" />}
+            <IconGhost fill={state.containsQuestionMark ? "#ff8000" : "currentColor"} />
         </div>
     );
 }
