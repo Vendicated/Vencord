@@ -5,6 +5,7 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { Button, TextButton } from "@components/Button";
 import { getIntlMessage } from "@utils/discord";
 import {
     ModalContent,
@@ -16,7 +17,6 @@ import {
 } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 import {
-    Button,
     RestAPI,
     useEffect,
     useRef,
@@ -138,7 +138,7 @@ function VerifyModal({
                             size="md"
                             weight="semibold"
                             color="text-normal"
-                            style={{ width: "30rem" }}
+                            style={{ width: "30rem", textAlign: "center" }}
                         >
                             {getIntlMessage("QR_CODE_LOGIN_SUCCESS_FLAVOR")}
                         </BaseText>
@@ -190,8 +190,8 @@ function VerifyModal({
                             Never scan a login QR code from another user or application.
                         </BaseText>
                         <Button
-                            size={Button.Sizes.LARGE}
-                            color={Button.Colors.RED}
+                            size="medium"
+                            variant="dangerPrimary"
                             className={cl("device-confirm")}
                             style={{
                                 ["--duration" as any]: `${holdDuration}ms`,
@@ -212,15 +212,14 @@ function VerifyModal({
                         {getIntlMessage("QR_CODE_LOGIN_FINISH_BUTTON")}
                     </Button>
                 ) : (
-                    <Button
-                        color={Button.Colors.LINK}
-                        look={Button.Looks.FILLED}
+                    <TextButton
+                        variant="link"
                         onClick={props.onClose}
                     >
                         {state === VerifyState.NotFound
                             ? getIntlMessage("CLOSE")
                             : getIntlMessage("CANCEL")}
-                    </Button>
+                    </TextButton>
                 )}
             </ModalFooter>
         </ModalRoot>
