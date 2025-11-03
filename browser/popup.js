@@ -10,6 +10,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     ).textContent = `v${metadata.version}`;
     document.querySelector("#view-source").href = metadata.remote;
     const commitUrlElement = document.querySelector("#commit-url");
-    commitUrlElement.textContent = `${metadata.gitHash}`;
+    commitUrlElement.textContent = `(${metadata.gitHash})`;
     commitUrlElement.href = `${metadata.remote}/commit/${metadata.gitHash}`;
 });
