@@ -11,6 +11,11 @@ export class User extends DiscordRecord {
     bot: boolean;
     desktop: boolean;
     discriminator: string;
+    displayNameStyles: {
+        fontId: number;
+        effectId: number;
+        colors: Array<number>;
+    } | null | undefined;
     email: string | undefined;
     flags: number;
     globalName: string | undefined;
