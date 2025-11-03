@@ -236,14 +236,14 @@ export default definePlugin({
             find: ".platformSelectorPrimary,",
             replacement: {
                 match: /(?<=questId:(\i\.id).*?"secondary",)disabled:!0/,
-                replace: "onClick: () => $self.mobileQuestPatch($1)"
+                replace: "onClick:()=>$self.mobileQuestPatch($1)"
             },
         },
         {
-            find: '"BACK_FORWARD_NAVIGATION"',
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[)/,
-                replace: "$self.renderQuestButton(),"
+                match: /"HELP".{0,100}className:\i\}\)(?=\])/,
+                replace: "$&,$self.renderTitleBar()"
             },
             predicate: () => !settings.store.useNavBar
         },
@@ -251,7 +251,7 @@ export default definePlugin({
             find: ".controlButtonWrapper,",
             replacement: {
                 match: /(function \i\(\i\){)(.{1,200}toolbar.{1,200}mobileToolbar)/,
-                replace: "$1$self.toolbarAction(arguments[0]);$2"
+                replace: "$1$self.renderNavBar(arguments[0]);$2"
             },
             predicate: () => settings.store.useNavBar
         }
@@ -266,23 +266,25 @@ export default definePlugin({
             }
         });
     },
-    renderQuestButton() {
+    renderTitleBar() {
         return (
-            <Tooltip text="Complete Quest">
-                {tooltipProps => (
-                    <Button style={{ backgroundColor: "transparent", border: "none" }}
-                        {...tooltipProps}
-                        size={Button.Sizes.SMALL}
-                        className={"vc-quest-completer-icon"}
-                        onClick={openCompleteQuestUI}
-                    >
-                        <QuestIcon width={20} height={20} size={Button.Sizes.SMALL} />
-                    </Button>
-                )}
-            </Tooltip>
+            <ErrorBoundary noop>
+                <Tooltip text="Complete Quest">
+                    {tooltipProps => (
+                        <Button style={{ backgroundColor: "transparent", border: "none" }}
+                            {...tooltipProps}
+                            size={Button.Sizes.SMALL}
+                            className={"vc-quest-completer-icon"}
+                            onClick={openCompleteQuestUI}
+                        >
+                            <QuestIcon width={20} height={20} />
+                        </Button>
+                    )}
+                </Tooltip>
+            </ErrorBoundary>
         );
     },
-    toolbarAction(e) {
+    renderNavBar(e) {
         if (Array.isArray(e.toolbar))
             return e.toolbar.unshift(
                 <ErrorBoundary noop={true}>
