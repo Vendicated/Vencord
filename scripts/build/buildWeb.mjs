@@ -209,7 +209,7 @@ if (!process.argv.includes("--skip-extension")) {
     await Promise.all([
         appendCssRuntime,
         buildExtension("chromium-unpacked", ["modifyResponseHeaders.json", "content.js", "manifest.json", "icon.png", "icon-popup.webp", ...["html", "css", "js"].map(e => `popup.${e}`)]),
-        buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
+        buildExtension("firefox-unpacked", ["background.js", "content.js", "manifest.json", "icon.png", "icon-popup.webp", ...["html", "css", "js"].map(e => `popup.${e}`)]),
     ]);
 
     Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
