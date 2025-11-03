@@ -1,14 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 :root {
     background: black;
     color: #9b8c7d;
-    font-size: .8em;
+    font-size: 0.8em;
 }
 
 body {
     width: 305px;
-    height: 100vh;
     background: #282828;
     padding: 10px;
     font-family: "Inter", system-ui;
@@ -18,6 +17,7 @@ body {
 p {
     margin: 0;
     line-height: 1.5;
+    font-size: 1rem;
 }
 
 a {
@@ -34,23 +34,21 @@ h1 {
     margin: 0;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
-    color: #D4BE98;
+    color: #d4be98;
     p {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
         line-height: 0;
-        flex-grow: 1;
     }
-    #version {
+    #local-version {
         font-weight: 400;
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         margin-right: -2px;
-        margin-top: 2px;
-        flex-grow: 0;
+        margin-top: 3px;
     }
-    #commit {
+    #commit-url {
         font-family: monospace;
-        font-size: 0.8rem;
-        margin-top: 2px;
+        font-size: 0.9rem;
+        margin-top: 3px;
     }
 }
 
@@ -75,9 +73,10 @@ hr::before {
 
 .buttons {
     display: flex;
-    gap: 4px;
+    gap: 8px;
     flex-wrap: wrap;
-    margin: 10px 0;
+    margin: 5px 0;
+    margin-top: 10px;
     button {
         flex: 1;
         font-family: inherit;
@@ -85,11 +84,15 @@ hr::before {
         font-size: 0.9rem;
         border-radius: 0.6rem;
         border: none;
-        background: #e9686870;
+        background: #c75b5b70;
         color: #f69393;
         font-weight: 600;
         &:nth-child(3) {
             flex-basis: 100%;
+        }
+        &:hover {
+            background: #e9686870;
+            cursor: pointer;
         }
     }
 }
