@@ -43,6 +43,11 @@ export function Boo({ channel }: { channel: Channel; }) {
         });
     }, [lastMessage, currentUserId]);
 
+    if (countedChannels.has(id) && state.isCurrentUser) {
+        countedChannels.delete(id);
+        booCount--;
+    }
+
     if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser) return null;
 
     if (!countedChannels.has(id)) {
