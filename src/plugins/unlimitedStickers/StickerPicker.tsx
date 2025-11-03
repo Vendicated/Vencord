@@ -1336,7 +1336,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             </ModalHeader>
             {!isLoading && !isClosing && hasAnyStickers && (
                 <>
-                    <div style={{ padding: "0 16px 8px 16px" }}>
+                    <div style={{ padding: "12px 16px 8px 16px" }}>
                         <TextInput
                             placeholder={getPluginIntlMessage("SEARCH_STICKERS_PLACEHOLDER")}
                             value={searchQuery}
