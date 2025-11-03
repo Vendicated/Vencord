@@ -109,4 +109,77 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
     });
+    document
+        .querySelector("#export-settings")
+        .addEventListener("click", async () => {
+            const tab = await getDiscordTab();
+            await chrome.scripting.executeScript({
+                target: {
+                    tabId: tab.id
+                },
+                func: async () => {
+                    function getVencordQuickCss() {
+                        return new Promise((resolve, reject) => {
+                            const req = indexedDB.open("VencordData");
+
+                            req.onerror = () => reject(req.error);
+
+                            req.onsuccess = () => {
+                                const db = req.result;
+                                const tx = db.transaction(
+                                    "VencordStore",
+                                    "readonly"
+                                );
+                                const store = tx.objectStore("VencordStore");
+                                const getReq = store.get("VencordQuickCss");
+
+                                getReq.onsuccess = () => resolve(getReq.result);
+                                getReq.onerror = () => reject(getReq.error);
+                            };
+                        });
+                    }
+
+                    const content = localStorage.getItem("VencordSettings");
+                    let quickCss = "";
+                    try {
+                        quickCss = await getVencordQuickCss();
+                    } catch {}
+
+                    if (content) {
+                        const filename = `vencord-settings-backup-${
+                            new Date().toISOString().split("T")[0]
+                        }.json`;
+
+                        const a = document.createElement("a");
+                        a.href = URL.createObjectURL(
+                            new File(
+                                [
+                                    new TextEncoder().encode(
+                                        JSON.stringify(
+                                            {
+                                                settings: JSON.parse(content),
+                                                quickCss: quickCss || ""
+                                            },
+                                            null,
+                                            4
+                                        )
+                                    )
+                                ],
+                                filename,
+                                { type: "application/json" }
+                            )
+                        );
+                        a.download = filename;
+
+                        document.body.appendChild(a);
+                        a.click();
+                        setImmediate(() => {
+                            URL.revokeObjectURL(a.href);
+                            document.body.removeChild(a);
+                        });
+                    }
+                },
+                args: []
+            });
+        });
 });

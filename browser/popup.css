@@ -78,21 +78,32 @@ hr::before {
     margin: 5px 0;
     margin-top: 10px;
     button {
-        flex: 1;
         font-family: inherit;
         padding: 0.7rem 0;
         font-size: 0.9rem;
         border-radius: 0.6rem;
         border: none;
         background: #c75b5b70;
-        color: #f69393;
+        color: #ffb6b6;
         font-weight: 600;
-        &:nth-child(3) {
-            flex-basis: 100%;
+
+        flex: 1 1 calc(50% - 4px);
+        &:nth-child(5) {
+            flex: 1 1 100%;
         }
+
         &:hover {
             background: #e9686870;
             cursor: pointer;
+        }
+
+        &.secondary {
+            background: #3c3836;
+            color: #d4be98;
+
+            &:hover {
+                background: #44403d;
+            }
         }
     }
 }
