@@ -1,5 +1,12 @@
 .unlimited-stickers-category {
     margin-bottom: 20px;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    border-radius: 4px;
+}
+
+.unlimited-stickers-category--dragging {
+    opacity: 0.5;
+    background-color: var(--background-modifier-selected);
 }
 
 .unlimited-stickers-category-header {
@@ -8,7 +15,6 @@
     gap: 4px;
     margin-bottom: 10px;
     font-weight: 700;
-    cursor: pointer;
     color: var(--header-primary);
     padding: 4px;
     border-radius: 4px;
@@ -17,6 +23,27 @@
 
 .unlimited-stickers-category-header:hover {
     background-color: var(--background-modifier-hover);
+}
+
+.unlimited-stickers-category-header[draggable="true"]:active {
+    cursor: grabbing !important;
+}
+
+.unlimited-stickers-drag-handle {
+    flex-shrink: 0;
+    color: var(--interactive-normal);
+    opacity: 0.5;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    cursor: grab;
+}
+
+.unlimited-stickers-category-header:hover .unlimited-stickers-drag-handle {
+    opacity: 1;
+    color: var(--interactive-hover);
+}
+
+.unlimited-stickers-category-header:active .unlimited-stickers-drag-handle {
+    cursor: grabbing;
 }
 
 .unlimited-stickers-category-header > h5 {
@@ -44,6 +71,22 @@
     gap: 10px;
     justify-content: center;
     padding: 5px;
+    min-height: 40px;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+}
+
+.unlimited-stickers-grid:empty {
+    min-height: 60px;
+    border: 2px dashed var(--background-modifier-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.unlimited-stickers-grid[data-drag-over="true"] {
+    background-color: var(--background-modifier-hover);
+    border: 2px dashed var(--brand-experiment);
 }
 
 .unlimited-stickers-grid--hidden {
@@ -60,15 +103,25 @@
     align-items: center;
     border: 1px solid var(--background-modifier-accent);
     border-radius: 5px;
-    cursor: pointer;
     background-color: var(--background-secondary);
     position: relative;
-    transition: background-color 0.15s ease, opacity 0.15s ease;
+    transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.2s ease;
     overflow: hidden;
+    user-select: none;
 }
 
 .unlimited-stickers-grid-item:hover {
     background-color: var(--background-secondary-alt);
+}
+
+.unlimited-stickers-grid-item[draggable="true"]:active {
+    cursor: grabbing !important;
+}
+
+.unlimited-stickers-grid-item--dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .unlimited-stickers-grid-item-img {

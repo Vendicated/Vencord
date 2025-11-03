@@ -54,6 +54,9 @@ import {
     saveExpansionState,
     saveFavorites,
     settings,
+    getCategoryOrder,
+    saveCategoryOrder,
+    applyCategoryOrder,
 } from "./index";
 import { getPluginIntlMessage } from "./intl";
 
@@ -292,6 +295,15 @@ const StickerGridItem: React.FC<{
     onStickerRename: (stickerId: string, newName: string) => Promise<boolean>;
     onStickerDelete: (stickerId: string) => void;
     isClosing: boolean;
+    categoryName?: string;
+    onMoveSticker?: (stickerId: string, targetCategory: string) => void;
+    allCategories?: string[];
+    isDragging?: boolean;
+    onStickerDragStart?: (stickerId: string, sourceCategory: string) => void;
+    onStickerDragEnd?: () => void;
+    stickerIndex?: number;
+    onStickerDragOver?: (categoryName: string, targetIndex: number) => void;
+    anyDragging?: boolean;
 }> = ({
     file,
     guildId,
@@ -303,6 +315,15 @@ const StickerGridItem: React.FC<{
     onStickerRename,
     onStickerDelete,
     isClosing,
+    categoryName,
+    onMoveSticker,
+    allCategories = [],
+    isDragging = false,
+    onStickerDragStart,
+    onStickerDragEnd,
+    stickerIndex,
+    onStickerDragOver,
+    anyDragging = false,
 }) => {
         const [isSending, setIsSending] = React.useState(false);
         const [base64, setBase64] = React.useState<string | null>(null);
@@ -397,9 +418,30 @@ const StickerGridItem: React.FC<{
             onToggleFavorite(file);
         };
 
+        const handleDragStart = (e: React.DragEvent) => {
+            if (!categoryName || !onStickerDragStart) return;
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", JSON.stringify({ stickerId: file.id, sourceCategory: categoryName, sourceIndex: stickerIndex }));
+            onStickerDragStart(file.id, categoryName);
+        };
+
+        const handleDragEnd = () => {
+            if (onStickerDragEnd) onStickerDragEnd();
+        };
+
+        const handleDragOver = (e: React.DragEvent) => {
+            if (!categoryName || !onStickerDragOver || stickerIndex === undefined) return;
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = "move";
+            onStickerDragOver(categoryName, stickerIndex);
+        };
+
         const handleContextMenu = (e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
+
+            const canMove = categoryName && onMoveSticker && allCategories.length > 0;
 
             ContextMenuApi.openContextMenu(e, () => (
                 <Menu.Menu
@@ -420,6 +462,23 @@ const StickerGridItem: React.FC<{
                             ));
                         }}
                     />
+                    {canMove && (
+                        <Menu.MenuItem
+                            id="move-sticker"
+                            label={getPluginIntlMessage("MOVE_TO")}
+                        >
+                            {allCategories
+                                .filter(cat => cat !== categoryName)
+                                .map(targetCategory => (
+                                    <Menu.MenuItem
+                                        key={targetCategory}
+                                        id={`move-to-${targetCategory}`}
+                                        label={targetCategory}
+                                        action={() => onMoveSticker!(file.id, targetCategory)}
+                                    />
+                                ))}
+                        </Menu.MenuItem>
+                    )}
                     <Menu.MenuItem
                         id="delete-sticker"
                         label={getPluginIntlMessage("DELETE_STICKER")}
@@ -452,11 +511,14 @@ const StickerGridItem: React.FC<{
             </div>
         ) : file.name;
 
+        const isDraggable = !!categoryName && !!base64 && !isSending;
+        const showTooltip = !anyDragging;
+
         return (
-            <Tooltip text={tooltipContent} tooltipClassName="unlimited-stickers-tooltip">
+            <Tooltip text={showTooltip ? tooltipContent : ""} tooltipClassName="unlimited-stickers-tooltip">
                 {(props) => (
                     <div ref={itemRef}>
-                        <Clickable
+                        <div
                             {...props}
                             className={classes(
                                 "unlimited-stickers-grid-item",
@@ -464,9 +526,15 @@ const StickerGridItem: React.FC<{
                                 !base64 &&
                                 !isSending &&
                                 "unlimited-stickers-grid-item--placeholder",
+                                isDragging && "unlimited-stickers-grid-item--dragging",
                             )}
                             onClick={handleStickerClick}
                             onContextMenu={handleContextMenu}
+                            draggable={isDraggable}
+                            onDragStart={handleDragStart}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={handleDragOver}
+                            style={{ cursor: isDraggable ? 'grab' : 'pointer' }}
                         >
                             {isSending && (
                                 <div className="unlimited-stickers-loading-spinner-container">
@@ -504,7 +572,7 @@ const StickerGridItem: React.FC<{
                                     )}
                                 </Tooltip>
                             )}
-                        </Clickable>
+                        </div>
                     </div>
                 )}
             </Tooltip>
@@ -527,6 +595,19 @@ interface StickerCategoryWrapperProps {
     storageKey?: string;
     isInitiallyLoaded?: boolean;
     isClosing: boolean;
+    categoryIndex?: number;
+    isDraggable?: boolean;
+    onDragStart?: (index: number) => void;
+    onDragOver?: (index: number) => void;
+    onDragEnd?: () => void;
+    isDragging?: boolean;
+    onMoveSticker?: (stickerId: string, targetCategory: string) => void;
+    allCategories?: string[];
+    draggedStickerId?: string | null;
+    onStickerDragStart?: (stickerId: string, sourceCategory: string) => void;
+    onStickerDragEnd?: () => void;
+    onStickerDrop?: (targetCategory: string) => void;
+    onStickerDragOver?: (categoryName: string, targetIndex: number) => void;
 }
 
 const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
@@ -537,11 +618,25 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
     isInitiallyLoaded = false,
     isClosing,
     onCategoryRename,
+    categoryIndex,
+    isDraggable = false,
+    onDragStart,
+    onDragOver,
+    onDragEnd,
+    isDragging = false,
+    onMoveSticker,
+    allCategories,
+    draggedStickerId,
+    onStickerDragStart,
+    onStickerDragEnd,
+    onStickerDrop,
+    onStickerDragOver,
     ...rest
 }) => {
     const [isExpanded, setIsExpanded] = React.useState(initialIsExpanded);
     const [isContentLoaded, setIsContentLoaded] =
         React.useState(isInitiallyLoaded);
+    const [isDragOver, setIsDragOver] = React.useState(false);
     const categoryRef = React.useRef<HTMLDivElement>(null);
     const isInitialMount = React.useRef(true);
 
@@ -549,6 +644,54 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
         () => setIsExpanded((prev) => !prev),
         [],
     );
+
+    const handleDragStart = React.useCallback((e: React.DragEvent) => {
+        if (!isDraggable || categoryIndex === undefined || !onDragStart) return;
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", categoryIndex.toString());
+        onDragStart(categoryIndex);
+    }, [isDraggable, categoryIndex, onDragStart]);
+
+    const handleDragOver = React.useCallback((e: React.DragEvent) => {
+        if (!isDraggable || categoryIndex === undefined || !onDragOver) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        onDragOver(categoryIndex);
+    }, [isDraggable, categoryIndex, onDragOver]);
+
+    const handleDragEnd = React.useCallback((e: React.DragEvent) => {
+        if (!isDraggable || !onDragEnd) return;
+        e.preventDefault();
+        onDragEnd();
+    }, [isDraggable, onDragEnd]);
+
+    const handleHeaderClick = React.useCallback((e: React.MouseEvent) => {
+        if (e.defaultPrevented) return;
+        handleToggleExpanded();
+    }, [handleToggleExpanded]);
+
+    const handleStickerDrop = React.useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+        if (onStickerDrop && !storageKey) {
+            onStickerDrop(categoryName);
+        }
+    }, [onStickerDrop, categoryName, storageKey]);
+
+    const handleStickerDragOver = React.useCallback((e: React.DragEvent) => {
+        if (storageKey) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        setIsDragOver(true);
+    }, [storageKey]);
+
+    const handleStickerDragLeave = React.useCallback((e: React.DragEvent) => {
+        if (storageKey) return;
+        if (e.currentTarget === e.target) {
+            setIsDragOver(false);
+        }
+    }, [storageKey]);
 
     const handleContextMenu = React.useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -620,14 +763,25 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
     }, [isContentLoaded, isClosing]);
 
     return (
-        <div className="unlimited-stickers-category" ref={categoryRef}>
-            <Clickable
+        <div
+            className={classes(
+                "unlimited-stickers-category",
+                isDragging && "unlimited-stickers-category--dragging"
+            )}
+            ref={categoryRef}
+            onDragOver={handleDragOver}
+        >
+            <div
                 className="unlimited-stickers-category-header"
-                onClick={handleToggleExpanded}
+                draggable={isDraggable}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onClick={handleHeaderClick}
                 onContextMenu={handleContextMenu}
                 aria-expanded={isExpanded}
+                style={{ cursor: 'pointer' }}
             >
-                <Heading tag="h5">
+                <Heading tag="h5" style={{ userSelect: 'none' }}>
                     {categoryName} ({files.length})
                 </Heading>
                 <ChevronIcon
@@ -638,16 +792,31 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
                     width={20}
                     height={20}
                 />
-            </Clickable>
+            </div>
             {isExpanded && isContentLoaded && !isClosing && (
-                <div className="unlimited-stickers-grid">
+                <div
+                    className="unlimited-stickers-grid"
+                    onDrop={handleStickerDrop}
+                    onDragOver={handleStickerDragOver}
+                    onDragLeave={handleStickerDragLeave}
+                    data-drag-over={isDragOver}
+                >
                     {files.length > 0 ? (
-                        files.map((file) => (
+                        files.map((file, index) => (
                             <StickerGridItem
                                 key={file.id}
                                 file={file}
                                 isFavorite={rest.favoriteIds.has(file.id)}
                                 isClosing={isClosing}
+                                categoryName={!storageKey ? categoryName : undefined}
+                                onMoveSticker={onMoveSticker}
+                                allCategories={allCategories}
+                                isDragging={draggedStickerId === file.id}
+                                onStickerDragStart={onStickerDragStart}
+                                onStickerDragEnd={onStickerDragEnd}
+                                stickerIndex={index}
+                                onStickerDragOver={onStickerDragOver}
+                                anyDragging={!!draggedStickerId}
                                 {...rest}
                             />
                         ))
@@ -680,6 +849,10 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
     const [isLoading, setIsLoading] = React.useState(true);
     const [hasStartedLoading, setHasStartedLoading] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
+    const [draggedCategoryIndex, setDraggedCategoryIndex] = React.useState<number | null>(null);
+    const [draggedStickerId, setDraggedStickerId] = React.useState<string | null>(null);
+    const draggedStickerSourceRef = React.useRef<string | null>(null);
+    const draggedStickerIndexRef = React.useRef<number | null>(null);
 
     const initialExpansionState = React.useRef<Record<string, boolean>>({});
     const isClosingRef = React.useRef(false);
@@ -722,21 +895,22 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                     await DataStore.set(LIBRARY_KEY, mergedCategories);
                 }
 
-                mergedCategories.sort((a, b) => a.name.localeCompare(b.name));
-
-                const [favIds, recentIdsData, favExpanded, recExpanded] = await Promise.all([
+                const [favIds, recentIdsData, favExpanded, recExpanded, categoryOrder] = await Promise.all([
                     getFavorites(),
                     getRecentStickers(),
                     DataStore.get<boolean>(FAVORITES_EXPANDED_KEY),
                     DataStore.get<boolean>(RECENT_EXPANDED_KEY),
+                    getCategoryOrder(),
                 ]);
+
+                const orderedCategories = applyCategoryOrder(mergedCategories, categoryOrder);
 
                 if (isClosingRef.current) return;
 
                 initialExpansionState.current[FAVORITES_EXPANDED_KEY] = favExpanded ?? true;
                 initialExpansionState.current[RECENT_EXPANDED_KEY] = recExpanded ?? true;
 
-                setAllCategories(mergedCategories);
+                setAllCategories(orderedCategories);
                 setFavoriteIds(new Set(favIds));
                 setRecentIds(recentIdsData);
             } catch (e) {
@@ -849,6 +1023,139 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
         await DataStore.del(`${STICKER_DATA_KEY_PREFIX}${stickerId}`);
     }, [allCategories, favoriteIds, recentIds, isClosing]);
 
+    const handleCategoryDragStart = React.useCallback((index: number) => {
+        setDraggedCategoryIndex(index);
+    }, []);
+
+    const handleCategoryDragOver = React.useCallback((index: number) => {
+        if (draggedCategoryIndex === null || draggedCategoryIndex === index) return;
+
+        const newCategories = [...allCategories];
+        const draggedItem = newCategories[draggedCategoryIndex];
+        newCategories.splice(draggedCategoryIndex, 1);
+        newCategories.splice(index, 0, draggedItem);
+
+        setAllCategories(newCategories);
+        setDraggedCategoryIndex(index);
+    }, [draggedCategoryIndex, allCategories]);
+
+    const handleCategoryDragEnd = React.useCallback(async () => {
+        if (draggedCategoryIndex !== null) {
+            const newOrder = allCategories.map(cat => cat.name);
+            await saveCategoryOrder(newOrder);
+            setDraggedCategoryIndex(null);
+        }
+    }, [draggedCategoryIndex, allCategories]);
+
+    const handleStickerDragStart = React.useCallback((stickerId: string, sourceCategory: string) => {
+        setDraggedStickerId(stickerId);
+        draggedStickerSourceRef.current = sourceCategory;
+
+        const category = allCategories.find(cat => cat.name === sourceCategory);
+        if (category) {
+            const index = category.files.findIndex(f => f.id === stickerId);
+            draggedStickerIndexRef.current = index;
+        }
+    }, [allCategories]);
+
+    const handleStickerDragEnd = React.useCallback(async () => {
+        if (draggedStickerSourceRef.current && draggedStickerIndexRef.current !== null) {
+            await DataStore.set(LIBRARY_KEY, allCategories);
+        }
+
+        setDraggedStickerId(null);
+        draggedStickerSourceRef.current = null;
+        draggedStickerIndexRef.current = null;
+    }, [allCategories]);
+
+    const handleStickerDragOver = React.useCallback((categoryName: string, targetIndex: number) => {
+        if (!draggedStickerId || !draggedStickerSourceRef.current || draggedStickerIndexRef.current === null) return;
+
+        const sourceCategory = draggedStickerSourceRef.current;
+        const sourceIndex = draggedStickerIndexRef.current;
+
+        if (sourceCategory !== categoryName) return;
+        if (sourceIndex === targetIndex) return;
+
+        setAllCategories(prevCategories => {
+            return prevCategories.map(cat => {
+                if (cat.name !== categoryName) return cat;
+
+                const newFiles = [...cat.files];
+                const [draggedFile] = newFiles.splice(sourceIndex, 1);
+                newFiles.splice(targetIndex, 0, draggedFile);
+
+                return { ...cat, files: newFiles };
+            });
+        });
+
+        draggedStickerIndexRef.current = targetIndex;
+    }, [draggedStickerId]);
+
+    const handleMoveSticker = React.useCallback(async (stickerId: string, targetCategory: string) => {
+        if (isClosing) return;
+
+        const sourceCategory = draggedStickerSourceRef.current;
+        if (!sourceCategory) {
+            let foundSource: string | null = null;
+            for (const cat of allCategories) {
+                if (cat.files.some(f => f.id === stickerId)) {
+                    foundSource = cat.name;
+                    break;
+                }
+            }
+            if (!foundSource) return;
+        }
+
+        const actualSource = sourceCategory || allCategories.find(cat =>
+            cat.files.some(f => f.id === stickerId)
+        )?.name;
+
+        if (!actualSource || actualSource === targetCategory) return;
+
+        const updatedCategories = allCategories.map(cat => {
+            if (cat.name === actualSource) {
+                return {
+                    ...cat,
+                    files: cat.files.filter(f => f.id !== stickerId)
+                };
+            }
+            if (cat.name === targetCategory) {
+                const stickerToMove = allCategories
+                    .find(c => c.name === actualSource)
+                    ?.files.find(f => f.id === stickerId);
+                if (stickerToMove) {
+                    return {
+                        ...cat,
+                        files: [...cat.files, stickerToMove]
+                    };
+                }
+            }
+            return cat;
+        }).filter(cat => cat.files.length > 0);
+
+        setAllCategories(updatedCategories);
+        await DataStore.set(LIBRARY_KEY, updatedCategories);
+
+        if (favoriteIds.has(stickerId)) {
+            const newFavoriteIds = Array.from(favoriteIds).filter(id => id !== stickerId);
+            setFavoriteIds(new Set(newFavoriteIds));
+            await saveFavorites(newFavoriteIds);
+        }
+
+        Toasts.show({
+            message: getPluginIntlMessage("STICKER_MOVED_TO_CATEGORY").replace("{category}", targetCategory),
+            type: Toasts.Type.SUCCESS,
+            id: Toasts.genId()
+        });
+    }, [allCategories, favoriteIds, isClosing]);
+
+    const handleStickerDrop = React.useCallback(async (targetCategory: string) => {
+        if (!draggedStickerId || !draggedStickerSourceRef.current) return;
+        await handleMoveSticker(draggedStickerId, targetCategory);
+        handleStickerDragEnd();
+    }, [draggedStickerId, handleMoveSticker, handleStickerDragEnd]);
+
     const { filteredFavorites, filteredRecents, filteredLocalCategories } =
         React.useMemo(() => {
             if (!searchQuery)
@@ -895,9 +1202,23 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             );
         if (!guildId)
             return (
-                <p style={{ padding: 10, color: 'var(--text-muted)' }}>
-                    {getPluginIntlMessage("STICKER_GUILD_CREATE_FAILED_BODY")}
-                </p>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '300px',
+                    padding: '20px'
+                }}>
+                    <p style={{
+                        textAlign: "center",
+                        color: 'var(--text-muted)',
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                        maxWidth: '400px'
+                    }}>
+                        {getPluginIntlMessage("STICKER_GUILD_CREATE_FAILED_BODY")}
+                    </p>
+                </div>
             );
         const noResults =
             filteredLocalCategories.length === 0 &&
@@ -905,15 +1226,31 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             filteredRecents.length === 0;
         if (noResults)
             return (
-                <p style={{ padding: 20, textAlign: "center", color: 'var(--text-muted)' }}>
-                    {searchQuery
-                        ? getPluginIntlMessage("NO_STICKERS_FOUND_QUERY").replace(
-                            "{query}",
-                            searchQuery,
-                        )
-                        : getPluginIntlMessage("NO_FILES_FOUND_BODY")}
-                </p>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '300px',
+                    padding: '20px'
+                }}>
+                    <p style={{
+                        textAlign: "center",
+                        color: 'var(--text-muted)',
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                        maxWidth: '400px'
+                    }}>
+                        {searchQuery
+                            ? getPluginIntlMessage("NO_STICKERS_FOUND_QUERY").replace(
+                                "{query}",
+                                searchQuery,
+                            )
+                            : getPluginIntlMessage("NO_FILES_FOUND_BODY")}
+                    </p>
+                </div>
             );
+
+        const allCategoryNames = allCategories.map(cat => cat.name);
 
         const commonProps = {
             guildId,
@@ -926,6 +1263,13 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
             onStickerRename: handleStickerRename,
             onStickerDelete: handleStickerDelete,
             isClosing,
+            onMoveSticker: handleMoveSticker,
+            allCategories: allCategoryNames,
+            draggedStickerId,
+            onStickerDragStart: handleStickerDragStart,
+            onStickerDragEnd: handleStickerDragEnd,
+            onStickerDrop: handleStickerDrop,
+            onStickerDragOver: handleStickerDragOver,
         };
         const isSearching = !!searchQuery;
 
@@ -965,6 +1309,12 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                             files={category.files}
                             initialIsExpanded={isSearching ? true : index === 0}
                             isInitiallyLoaded={isSearching || index === 0}
+                            categoryIndex={index}
+                            isDraggable={!isSearching}
+                            onDragStart={handleCategoryDragStart}
+                            onDragOver={handleCategoryDragOver}
+                            onDragEnd={handleCategoryDragEnd}
+                            isDragging={draggedCategoryIndex === index}
                             {...commonProps}
                         />
                     ))}
@@ -973,15 +1323,18 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
         );
     };
 
+    const totalStickerCount = allCategories.reduce((sum, cat) => sum + cat.files.length, 0);
+    const hasAnyStickers = totalStickerCount > 0 || favoriteFiles.length > 0 || recentFiles.length > 0;
+
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader>
-                <Heading tag="h2" style={{ flexGrow: 1 }}>
+                <Heading tag="h2" style={{ flexGrow: 1, margin: 0 }}>
                     {getPluginIntlMessage("STICKERS")}
                 </Heading>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
-            {!isLoading && !isClosing && (
+            {!isLoading && !isClosing && hasAnyStickers && (
                 <>
                     <div style={{ padding: "0 16px 8px 16px" }}>
                         <TextInput
@@ -994,7 +1347,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                     <Divider style={{ margin: "8px 0 8px" }} />
                 </>
             )}
-            <ModalContent style={{ paddingTop: 0 }}>{renderContent()}</ModalContent>
+            <ModalContent style={{ padding: '0' }}>{renderContent()}</ModalContent>
         </ModalRoot>
     );
 };

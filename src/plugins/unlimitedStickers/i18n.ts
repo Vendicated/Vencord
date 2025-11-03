@@ -32,7 +32,10 @@ export const translations = {
         "DELETE_STICKER_CONFIRM_TITLE": "Delete Sticker",
         "DELETE_STICKER_CONFIRM_BODY": "Are you sure you want to delete this sticker? This cannot be undone.",
         "SAVE": "Save",
-        "CANCEL": "Cancel"
+        "CANCEL": "Cancel",
+        "MOVE_TO": "Move to",
+        "MOVE_STICKER_SUCCESS": "Sticker moved successfully",
+        "STICKER_MOVED_TO_CATEGORY": "Sticker moved to \"{category}\""
     },
     "ja": {
         "STICKERS": "無限スタンプパネル",
@@ -61,6 +64,9 @@ export const translations = {
         "DELETE_STICKER_CONFIRM_TITLE": "スタンプを削除",
         "DELETE_STICKER_CONFIRM_BODY": "本当にこのスタンプを削除しますか？この操作は取り消せません。",
         "SAVE": "保存",
-        "CANCEL": "キャンセル"
+        "CANCEL": "キャンセル",
+        "MOVE_TO": "移動先",
+        "MOVE_STICKER_SUCCESS": "スタンプを移動しました",
+        "STICKER_MOVED_TO_CATEGORY": "スタンプを「{category}」に移動しました"
     }
 };

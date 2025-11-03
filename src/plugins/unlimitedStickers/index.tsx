@@ -28,6 +28,7 @@ export const STICKER_DATA_KEY_PREFIX = "UnlimitedStickers_Data_";
 export const RECENT_LIMIT = 16;
 export const FAVORITES_EXPANDED_KEY = "UnlimitedStickers_FavoritesExpanded";
 export const RECENT_EXPANDED_KEY = "UnlimitedStickers_RecentExpanded";
+export const CATEGORY_ORDER_KEY = "UnlimitedStickers_CategoryOrder";
 
 const logger = new Logger("UnlimitedStickers");
 
@@ -66,6 +67,150 @@ const RefreshIcon: React.FC<{ className?: string; width?: number; height?: numbe
     </svg>
 );
 
+const ReorderIcon: React.FC<{ className?: string; width?: number; height?: number; }> = ({
+    className,
+    width = 16,
+    height = 16,
+}) => (
+    <svg
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+    >
+        <path d="M3 15h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V9H3v2zm0-6v2h18V5H3z" />
+    </svg>
+);
+
+interface ReorderCategoriesModalProps extends ModalProps {
+    categories: StickerCategory[];
+    onReorder: (newOrder: string[]) => void;
+}
+
+const ReorderCategoriesModal: React.FC<ReorderCategoriesModalProps> = ({ onClose, categories, onReorder, transitionState }) => {
+    const [orderedCategories, setOrderedCategories] = React.useState<StickerCategory[]>(categories);
+    const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
+
+    const handleDragStart = (index: number) => (e: React.DragEvent) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/html", e.currentTarget.outerHTML);
+    };
+
+    const handleDragOver = (index: number) => (e: React.DragEvent) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === index) return;
+
+        const newCategories = [...orderedCategories];
+        const draggedItem = newCategories[draggedIndex];
+        newCategories.splice(draggedIndex, 1);
+        newCategories.splice(index, 0, draggedItem);
+
+        setOrderedCategories(newCategories);
+        setDraggedIndex(index);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+    };
+
+    const handleSave = async () => {
+        const newOrder = orderedCategories.map(cat => cat.name);
+        await saveCategoryOrder(newOrder);
+        onReorder(newOrder);
+        onClose();
+        Toasts.show({
+            message: "Category order saved successfully",
+            type: Toasts.Type.SUCCESS,
+            id: Toasts.genId()
+        });
+    };
+
+    const handleReset = () => {
+        const sorted = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+        setOrderedCategories(sorted);
+    };
+
+    return (
+        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
+            <ModalHeader>
+                <Heading tag="h2" style={{ flexGrow: 1 }}>
+                    Reorder Categories
+                </Heading>
+                <ModalCloseButton onClick={onClose} />
+            </ModalHeader>
+            <ModalContent>
+                <Paragraph style={{ marginBottom: "16px", color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.5" }}>
+                    Drag and drop to reorder your sticker categories. This order will be used in the sticker picker.
+                </Paragraph>
+                <ScrollerThin style={{ maxHeight: "400px", paddingRight: "8px" }}>
+                    {orderedCategories.map((category, index) => (
+                        <div
+                            key={category.name}
+                            draggable
+                            onDragStart={handleDragStart(index)}
+                            onDragOver={handleDragOver(index)}
+                            onDragEnd={handleDragEnd}
+                            style={{
+                                padding: "12px 16px",
+                                marginBottom: "8px",
+                                backgroundColor: draggedIndex === index ? "var(--brand-experiment-560)" : "var(--background-secondary)",
+                                border: draggedIndex === index ? "2px solid var(--brand-experiment)" : "2px solid var(--background-tertiary)",
+                                borderRadius: "8px",
+                                cursor: draggedIndex === index ? "grabbing" : "grab",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                transition: "all 0.2s ease",
+                                userSelect: "none",
+                                boxShadow: draggedIndex === index ? "0 4px 12px rgba(0, 0, 0, 0.3)" : "0 1px 3px rgba(0, 0, 0, 0.1)",
+                                transform: draggedIndex === index ? "scale(1.02)" : "scale(1)",
+                            }}
+                            onMouseEnter={(e) => {
+                                if (draggedIndex !== index) {
+                                    e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                                    e.currentTarget.style.borderColor = "var(--background-modifier-accent)";
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (draggedIndex !== index) {
+                                    e.currentTarget.style.backgroundColor = "var(--background-secondary)";
+                                    e.currentTarget.style.borderColor = "var(--background-tertiary)";
+                                }
+                            }}
+                        >
+                            <div style={{ color: "var(--interactive-normal)", flexShrink: 0, display: "flex", alignItems: "center" }}>
+                                <ReorderIcon width={20} height={20} />
+                            </div>
+                            <span style={{ flexGrow: 1, color: "var(--header-primary)", fontWeight: 500, fontSize: "14px" }}>
+                                {category.name}
+                            </span>
+                            <span style={{ color: "var(--text-muted)", fontSize: "12px", flexShrink: 0 }}>
+                                {category.files.length} sticker{category.files.length === 1 ? "" : "s"}
+                            </span>
+                        </div>
+                    ))}
+                </ScrollerThin>
+            </ModalContent>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", padding: "16px" }}>
+                <Button onClick={handleReset} size="small" variant="secondary">
+                    Reset to Alphabetical
+                </Button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <Button onClick={onClose} size="small" variant="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSave} size="small" variant="primary">
+                        Save Order
+                    </Button>
+                </div>
+            </div>
+        </ModalRoot>
+    );
+};
+
 const StickerManagementSetting: React.FC = () => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [categories, setCategories] = React.useState<StickerCategory[]>([]);
@@ -75,8 +220,20 @@ const StickerManagementSetting: React.FC = () => {
     const fetchCategories = async () => {
         setLoading(true);
         const cats = (await DataStore.get<StickerCategory[]>(LIBRARY_KEY)) ?? [];
-        setCategories(cats);
+        const order = await getCategoryOrder();
+        const orderedCats = applyCategoryOrder(cats, order);
+        setCategories(orderedCats);
         setLoading(false);
+    };
+
+    const handleOpenReorderModal = () => {
+        openModal((props: ModalProps) => (
+            <ReorderCategoriesModal
+                {...props}
+                categories={categories}
+                onReorder={() => fetchCategories()}
+            />
+        ));
     };
 
     React.useEffect(() => {
@@ -265,6 +422,9 @@ const StickerManagementSetting: React.FC = () => {
                 <Button onClick={clearAllStickers} size="small" variant="dangerPrimary" disabled={categories.length === 0}>
                     Delete All
                 </Button>
+                <Button onClick={handleOpenReorderModal} size="small" variant="secondary" disabled={categories.length === 0}>
+                    Reorder Categories
+                </Button>
                 <Button onClick={fetchCategories} size="small" variant="secondary" style={{ padding: "4px 8px" }}>
                     <RefreshIcon width={16} height={16} />
                 </Button>
@@ -354,6 +514,34 @@ export const saveExpansionState = async (
     isExpanded: boolean,
 ): Promise<void> => {
     await DataStore.set(key, isExpanded);
+};
+
+export const getCategoryOrder = async (): Promise<string[]> => {
+    return (await DataStore.get<string[]>(CATEGORY_ORDER_KEY)) ?? [];
+};
+
+export const saveCategoryOrder = async (order: string[]): Promise<void> => {
+    await DataStore.set(CATEGORY_ORDER_KEY, order);
+};
+
+export const applyCategoryOrder = (categories: StickerCategory[], customOrder: string[]): StickerCategory[] => {
+    if (customOrder.length === 0) {
+        return [...categories].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const orderMap = new Map(customOrder.map((name, index) => [name, index]));
+    const sorted = [...categories].sort((a, b) => {
+        const aIndex = orderMap.get(a.name) ?? Number.MAX_SAFE_INTEGER;
+        const bIndex = orderMap.get(b.name) ?? Number.MAX_SAFE_INTEGER;
+
+        if (aIndex !== Number.MAX_SAFE_INTEGER || bIndex !== Number.MAX_SAFE_INTEGER) {
+            return aIndex - bIndex;
+        }
+
+        return a.name.localeCompare(b.name);
+    });
+
+    return sorted;
 };
 
 interface StickerExportData {
