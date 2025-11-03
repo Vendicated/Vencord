@@ -5,7 +5,7 @@
  */
 
 export const images = {
-    cross: "https://cdn.discordapp.com/emojis/1423430200938463315.webp",
+    cross: "https://github.com/Equicord/Equibored/raw/main/icons/loginwithqr/cross.png",
     deviceImage: {
         success:
             "https://github.com/Equicord/Equibored/raw/main/icons/loginwithqr/success.png",
