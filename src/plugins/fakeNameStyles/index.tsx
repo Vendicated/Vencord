@@ -425,11 +425,11 @@ export default definePlugin({
     styleDecodeHook(user: User) {
         if (!user) return user;
 
-        /* const bio = UserProfileStore.getUserProfile(user.id)?.bio; */
-        if (user?.bio) {
+        const bio = UserProfileStore.getUserProfile(user.id)?.bio;
+        if (bio) {
             if (settings.store.stylePriority && user.displayNameStyles !== null && user.displayNameStyles !== undefined) return user;
 
-            const style = decode(user.bio);
+            const style = decode(bio);
             if (style) {
                 const mergedStyle = {
                     fontId: style.fontId || 11,
@@ -441,7 +441,6 @@ export default definePlugin({
                     displayNameStyles: mergedStyle
                 });
 
-                console.log(merge);
                 return merge;
             }
         }
