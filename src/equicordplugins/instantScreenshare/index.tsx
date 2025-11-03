@@ -11,7 +11,7 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { VoiceState } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, MediaEngineStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore, VoiceActions } from "@webpack/common";
+import { ChannelStore, MediaEngineStore, PermissionsBits, PermissionStore, SelectedChannelStore, showToast, Toasts, UserStore, VoiceActions } from "@webpack/common";
 
 import { getCurrentMedia, settings } from "./utils";
 
@@ -55,6 +55,7 @@ export default definePlugin({
     name: "InstantScreenshare",
     description: "Instantly screenshare when joining a voice channel with support for desktop sources, windows, and video input devices (cameras, capture cards)",
     authors: [Devs.HAHALOSAH, Devs.thororen, EquicordDevs.mart],
+    dependencies: ["EquicordToolbox"],
     getCurrentMedia,
     settings,
 
@@ -81,6 +82,7 @@ export default definePlugin({
 
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
+            if (!settings.store.toolboxManagement) return;
             const myId = UserStore.getCurrentUser().id;
             for (const state of voiceStates) {
                 const { userId, channelId } = state;
@@ -99,4 +101,11 @@ export default definePlugin({
             }
         }
     },
+
+    toolboxActions: {
+        "Instant Screenshare"() {
+            settings.store.toolboxManagement = !settings.store.toolboxManagement;
+            showToast(`Instant Screenshare ${settings.store.toolboxManagement ? "Enabled" : "Disabled"}`, Toasts.Type.SUCCESS);
+        }
+    }
 });

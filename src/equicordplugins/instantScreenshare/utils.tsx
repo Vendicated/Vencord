@@ -41,6 +41,12 @@ export const settings = definePluginSettings({
         description: "Automatically deafen when joining a voice channel (also mutes you)",
         default: false,
     },
+    toolboxManagement: {
+        type: OptionType.BOOLEAN,
+        description: "Enable/Disable Instant Screenshare",
+        default: true,
+        hidden: true,
+    }
 });
 
 export async function getCurrentMedia() {
