@@ -8,11 +8,11 @@ export const images = {
     cross: "https://cdn.discordapp.com/emojis/1423430200938463315.webp",
     deviceImage: {
         success:
-            "https://github.com/nexpid/Themelings/raw/data/icons/images/native/img_remote_auth_succeeded.png",
+            "https://github.com/Equicord/Equibored/raw/main/icons/loginwithqr/success.png",
         notFound:
-            "https://github.com/nexpid/Themelings/raw/data/icons/images/native/img_remote_auth_not_found.png",
+            "https://github.com/Equicord/Equibored/raw/main/icons/loginwithqr/not-found.png",
         loading:
-            "https://github.com/nexpid/Themelings/raw/data/icons/images/native/img_remote_auth_loaded.png",
+            "https://github.com/Equicord/Equibored/raw/main/icons/loginwithqr/loaded.png",
     },
 } as const;
 
