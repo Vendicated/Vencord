@@ -182,4 +182,88 @@ document.addEventListener("DOMContentLoaded", async () => {
                 args: []
             });
         });
+    document
+        .querySelector("#import-settings")
+        .addEventListener("click", async () => {
+            const tab = await getDiscordTab();
+            await chrome.scripting.executeScript({
+                target: {
+                    tabId: tab.id
+                },
+                func: async () => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = ".json";
+                    input.onchange = async (event) => {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            const content = e.target.result;
+                            try {
+                                const data = JSON.parse(content);
+                                localStorage.setItem(
+                                    "VencordSettings",
+                                    JSON.stringify(data.settings)
+                                );
+                                localStorage.setItem(
+                                    "Vencord_settingsDirty",
+                                    "true"
+                                );
+
+                                try {
+                                    await new Promise((resolve, reject) => {
+                                        const req = indexedDB.open(
+                                            "VencordData",
+                                            1
+                                        );
+                                        req.onupgradeneeded = () => {
+                                            const db = req.result;
+                                            if (
+                                                !db.objectStoreNames.contains(
+                                                    "VencordStore"
+                                                )
+                                            ) {
+                                                db.createObjectStore(
+                                                    "VencordStore"
+                                                );
+                                            }
+                                        };
+                                        req.onerror = () => reject(req.error);
+                                        req.onsuccess = () => {
+                                            const db = req.result;
+                                            const tx = db.transaction(
+                                                "VencordStore",
+                                                "readwrite"
+                                            );
+                                            const store =
+                                                tx.objectStore("VencordStore");
+                                            const putReq = store.put(
+                                                data.quickCss || "",
+                                                "VencordQuickCss"
+                                            );
+                                            putReq.onsuccess = () => resolve();
+                                            putReq.onerror = () =>
+                                                reject(putReq.error);
+                                            tx.oncomplete = () => db.close();
+                                            tx.onerror = () => reject(tx.error);
+                                        };
+                                    });
+                                } catch {}
+
+                                window.location.reload();
+                            } catch (error) {
+                                alert(
+                                    "Failed to import settings. Is this even a Vencord Settings file?"
+                                );
+                            }
+                        };
+                        reader.readAsText(file);
+                    };
+                    input.click();
+                },
+                args: []
+            });
+        });
 });
