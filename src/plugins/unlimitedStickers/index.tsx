@@ -18,7 +18,6 @@ import { Alerts, ChannelStore, React, Toasts, UserStore, Checkbox, ScrollerThin 
 import { Heading } from "@components/index";
 import { nanoid } from "nanoid";
 
-import { getPluginIntlMessage } from "./intl";
 import { openStickerPicker } from "./StickerPicker";
 
 export const LIBRARY_KEY = "UnlimitedStickers_library";
@@ -1097,7 +1096,7 @@ export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
             openStickerPicker(channel);
         } else {
             Toasts.show({
-                message: getPluginIntlMessage("NITRO_REQUIRED_BODY"),
+                message: "This plugin requires a Discord Nitro subscription to upload and send stickers.",
                 id: Toasts.genId(),
                 type: Toasts.Type.FAILURE,
             });
@@ -1106,7 +1105,7 @@ export const UnlimitedStickersChatBarIcon: ChatBarButtonFactory = (props) => {
 
     return (
         <ChatBarButton
-            tooltip={getPluginIntlMessage("OPEN_LOCAL_STICKER_PICKER")}
+            tooltip="Open Unlimited Sticker Picker"
             onClick={handleButtonClick}
         >
             <UnlimitedStickerIcon width={20} height={20} />

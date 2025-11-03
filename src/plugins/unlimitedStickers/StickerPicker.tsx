@@ -58,7 +58,6 @@ import {
     saveCategoryOrder,
     applyCategoryOrder,
 } from "./index";
-import { getPluginIntlMessage } from "./intl";
 
 const logger = new Logger("UnlimitedStickers");
 const Spinner = findByCodeLazy("wanderingCubes");
@@ -109,7 +108,7 @@ const ensureStickerGuild = async (): Promise<string | null> => {
         const newGuild = await RestAPI.post({
             url: "/guilds",
             body: {
-                name: getPluginIntlMessage("STICKER_GUILD_NAME"),
+                name: "Stickers",
                 icon: null,
                 channels: [],
             },
@@ -119,18 +118,18 @@ const ensureStickerGuild = async (): Promise<string | null> => {
         settings.store.stickerGuildId = guildId;
 
         Alerts.show({
-            title: getPluginIntlMessage("STICKER_GUILD_CREATED_TITLE"),
-            body: getPluginIntlMessage("STICKER_GUILD_CREATED_BODY"),
+            title: "Sticker Guild Created",
+            body: "The 'Stickers' guild has been created for your local stickers.",
             confirmText: getIntlMessage("GOT_IT"),
         });
         return guildId;
     } catch (error) {
         logger.error(
-            `Failed to create 'Vencord Local Stickers' ${getIntlMessage("GUILD").toLowerCase()}:`,
+            `Failed to create 'Stickers' ${getIntlMessage("GUILD").toLowerCase()}:`,
             error,
         );
         Toasts.show({
-            message: getPluginIntlMessage("STICKER_GUILD_CREATE_FAILED_BODY"),
+            message: "Failed to create the sticker guild. Check console.",
             id: Toasts.genId(),
             type: Toasts.Type.FAILURE,
         });
@@ -163,7 +162,7 @@ const uploadAndReplaceSticker = async (
         formData.append("name", safeStickerName);
         formData.append(
             "description",
-            getPluginIntlMessage("EPHEMERAL_STICKER_DESC"),
+            "Ephemeral Vencord Sticker",
         );
         formData.append("tags", "vencord");
         formData.append(
@@ -184,7 +183,7 @@ const uploadAndReplaceSticker = async (
             (error as Error).message ||
             getIntlMessage("UNKNOWN_ERROR");
         Toasts.show({
-            message: `${getPluginIntlMessage("STICKER_UPLOAD_FAILED")}: ${errorMessage}`,
+            message: `Sticker Upload Failed: ${errorMessage}`,
             id: Toasts.genId(),
             type: Toasts.Type.FAILURE,
         });
@@ -217,7 +216,7 @@ const RenameModal: React.FC<{
         const success = await onSave(value.trim());
         if (!success) {
             if (type === "category") {
-                setError(getPluginIntlMessage("CATEGORY_NAME_EXISTS").replace("{name}", value.trim()));
+                setError(`A category named "${value.trim()}" already exists.`);
             }
         } else {
             onClose();
@@ -234,14 +233,14 @@ const RenameModal: React.FC<{
             <ModalHeader>
                 <Heading tag="h4" style={{ flexGrow: 1 }}>
                     {type === "category"
-                        ? getPluginIntlMessage("RENAME_CATEGORY")
-                        : getPluginIntlMessage("RENAME_STICKER")}
+                        ? "Rename Category"
+                        : "Rename Sticker"}
                 </Heading>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>
-                    {getPluginIntlMessage("NEW_NAME")}
+                    New name
                 </Forms.FormTitle>
                 <TextInput
                     style={{
@@ -270,13 +269,13 @@ const RenameModal: React.FC<{
                         color={Button.Colors.PRIMARY}
                         onClick={onClose}
                     >
-                        {getPluginIntlMessage("CANCEL")}
+                        Cancel
                     </Button>
                     <Button
                         color={Button.Colors.BRAND}
                         onClick={handleSave}
                     >
-                        {getPluginIntlMessage("SAVE")}
+                        Save
                     </Button>
                 </div>
             </ModalFooter>
@@ -450,7 +449,7 @@ const StickerGridItem: React.FC<{
                 >
                     <Menu.MenuItem
                         id="rename-sticker"
-                        label={getPluginIntlMessage("RENAME")}
+                        label="Rename"
                         action={() => {
                             openModal(props => (
                                 <RenameModal
@@ -465,7 +464,7 @@ const StickerGridItem: React.FC<{
                     {canMove && (
                         <Menu.MenuItem
                             id="move-sticker"
-                            label={getPluginIntlMessage("MOVE_TO")}
+                            label="Move to"
                         >
                             {allCategories
                                 .filter(cat => cat !== categoryName)
@@ -481,14 +480,14 @@ const StickerGridItem: React.FC<{
                     )}
                     <Menu.MenuItem
                         id="delete-sticker"
-                        label={getPluginIntlMessage("DELETE_STICKER")}
+                        label="Delete Sticker"
                         color="danger"
                         icon={DeleteIcon}
                         action={() => {
                             Alerts.show({
-                                title: getPluginIntlMessage("DELETE_STICKER_CONFIRM_TITLE"),
-                                body: getPluginIntlMessage("DELETE_STICKER_CONFIRM_BODY"),
-                                confirmText: getPluginIntlMessage("DELETE_STICKER"),
+                                title: "Delete Sticker",
+                                body: "Are you sure you want to delete this sticker? This cannot be undone.",
+                                confirmText: "Delete Sticker",
                                 cancelText: getIntlMessage("CANCEL"),
                                 onConfirm: () => onStickerDelete(file.id)
                             });
@@ -554,8 +553,8 @@ const StickerGridItem: React.FC<{
                                 <Tooltip
                                     text={
                                         isFavorite
-                                            ? getPluginIntlMessage("REMOVE_FROM_FAVORITES")
-                                            : getPluginIntlMessage("ADD_TO_FAVORITES")
+                                            ? "Remove from favorites"
+                                            : "Add to favorites"
                                     }
                                 >
                                     {(props) => (
@@ -706,7 +705,7 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
             >
                 <Menu.MenuItem
                     id="rename-category"
-                    label={getPluginIntlMessage("RENAME")}
+                    label="Rename"
                     action={() => {
                         openModal(props => (
                             <RenameModal
@@ -822,7 +821,7 @@ const StickerCategoryWrapper: React.FC<StickerCategoryWrapperProps> = ({
                         ))
                     ) : (
                         <div className="unlimited-stickers-empty-category">
-                            {getPluginIntlMessage("NO_STICKERS_IN_CATEGORY")}
+                            No stickers here yet!
                         </div>
                     )}
                 </div>
@@ -1144,7 +1143,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
         }
 
         Toasts.show({
-            message: getPluginIntlMessage("STICKER_MOVED_TO_CATEGORY").replace("{category}", targetCategory),
+            message: `Sticker moved to "${targetCategory}"`,
             type: Toasts.Type.SUCCESS,
             id: Toasts.genId()
         });
@@ -1216,7 +1215,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                         lineHeight: '1.5',
                         maxWidth: '400px'
                     }}>
-                        {getPluginIntlMessage("STICKER_GUILD_CREATE_FAILED_BODY")}
+                        Failed to create the sticker guild. Check console.
                     </p>
                 </div>
             );
@@ -1241,11 +1240,8 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                         maxWidth: '400px'
                     }}>
                         {searchQuery
-                            ? getPluginIntlMessage("NO_STICKERS_FOUND_QUERY").replace(
-                                "{query}",
-                                searchQuery,
-                            )
-                            : getPluginIntlMessage("NO_FILES_FOUND_BODY")}
+                            ? `No stickers found matching "${searchQuery}".`
+                            : "No supported image files found in any of your sticker sub-folders."}
                     </p>
                 </div>
             );
@@ -1279,7 +1275,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                     {filteredFavorites.length > 0 && (
                         <StickerCategoryWrapper
                             key="favorites-category"
-                            categoryName={getPluginIntlMessage("FAVORITES")}
+                            categoryName="Favorites"
                             files={filteredFavorites}
                             initialIsExpanded={
                                 initialExpansionState.current[FAVORITES_EXPANDED_KEY] ?? true
@@ -1292,7 +1288,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                     {filteredRecents.length > 0 && (
                         <StickerCategoryWrapper
                             key="recent-category"
-                            categoryName={getPluginIntlMessage("RECENTLY_USED")}
+                            categoryName="Recently Used"
                             files={filteredRecents}
                             initialIsExpanded={
                                 initialExpansionState.current[RECENT_EXPANDED_KEY] ?? true
@@ -1330,7 +1326,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
         <ModalRoot {...rootProps}>
             <ModalHeader>
                 <Heading tag="h2" style={{ flexGrow: 1, margin: 0 }}>
-                    {getPluginIntlMessage("STICKERS")}
+                    Unlimited Sticker Picker
                 </Heading>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
@@ -1338,7 +1334,7 @@ const StickerPickerModal: React.FC<StickerPickerModalProps> = ({
                 <>
                     <div style={{ padding: "12px 16px 8px 16px" }}>
                         <TextInput
-                            placeholder={getPluginIntlMessage("SEARCH_STICKERS_PLACEHOLDER")}
+                            placeholder="Search stickers by name or category..."
                             value={searchQuery}
                             onChange={setSearchQuery}
                             autoFocus
