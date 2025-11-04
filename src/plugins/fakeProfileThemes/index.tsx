@@ -98,10 +98,10 @@ interface ProfileModalProps {
     canUsePremiumCustomization: boolean;
     hideExampleButton: boolean;
     hideFakeActivity: boolean;
-    isTryItOutFlow: boolean;
+    isTryItOut: boolean;
 }
 
-const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
+const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOut:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
 function SettingsAboutComponentWrapper() {
     const [, , userProfileLoading] = useAwaiter(() => fetchUserProfile(UserStore.getCurrentUser().id));
@@ -191,7 +191,7 @@ function SettingsAboutComponent() {
                         canUsePremiumCustomization={true}
                         hideExampleButton={true}
                         hideFakeActivity={true}
-                        isTryItOutFlow={true}
+                        isTryItOut={true}
                     />
                 </div>
             </Paragraph>
