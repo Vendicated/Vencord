@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Menu, UserStore } from "@webpack/common";
+import { Menu, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
 const ThreadActions = findByPropsLazy("lockThread", "archiveThread");
 
@@ -20,10 +20,7 @@ function CreateLockContext(): NavContextMenuPatchCallback {
         const threadActions = children.find(child => {
             return child?.key === "thread-actions";
         });
-        const lockButton = threadActions?.props.children.find(child => {
-            return child?.props.id === "lock-thread" || child?.props.id === "unlock-thread";
-        });
-        if (lockButton) return;
+        if (PermissionStore.can(PermissionsBits.MANAGE_THREADS, props.channel)) return;
         const archiveButton = threadActions?.props.children.find(child => {
             return child?.props.id === "archive-thread" || child?.props.id === "unarchive-thread";
         });
@@ -35,7 +32,7 @@ function CreateLockContext(): NavContextMenuPatchCallback {
         const archiveButtonIndex = threadActions?.props.children.indexOf(archiveButton);
         threadActions?.props.children.splice(archiveButtonIndex + 1, 0,
             <Menu.MenuItem
-                id={"vc-thread-lock"}
+                id={"vc-lock-thread"}
                 label={lockLabel}
                 action={() => { ThreadActions.lockThread(props.channel); }}
             />);
