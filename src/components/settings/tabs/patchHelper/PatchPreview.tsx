@@ -128,6 +128,9 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
                     className={Margins.top20}
                     onClick={() => {
                         try {
+                            // SECURITY NOTE: Uses Function constructor to validate patched code compilation
+                            // This is a development tool for testing patches and is only available in DEV builds
+                            // The code being compiled is generated from user-controlled match/replace patterns
                             Function(patchedCode.replace(/^(?=function\()/, "0,"));
                             setCompileResult([true, "Compiled successfully"]);
                         } catch (err) {
