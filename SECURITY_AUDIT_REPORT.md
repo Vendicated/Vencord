@@ -162,10 +162,12 @@ function sanitizeObject(obj: any): any {
     
     const sanitized: any = Array.isArray(obj) ? [] : {};
     for (const key in obj) {
+        // Skip dangerous prototype pollution keys
         if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-            continue; // Skip dangerous keys
+            continue;
         }
-        if (obj.hasOwnProperty(key)) {
+        // Use Object.prototype.hasOwnProperty.call to safely check own properties
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
             sanitized[key] = sanitizeObject(obj[key]);
         }
     }
