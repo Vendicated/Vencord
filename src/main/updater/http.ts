@@ -48,8 +48,7 @@ async function calculateGitChanges() {
     const data = await githubGet(`/compare/${gitHash}...HEAD`);
 
     return data.commits.map((c: any) => ({
-        // github api only sends the long sha
-        hash: c.sha.slice(0, 7),
+        hash: c.sha,
         author: c.author.login,
         message: c.commit.message.split("\n")[0]
     }));
