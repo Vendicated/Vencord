@@ -28,7 +28,7 @@ export function OnlineThemesTab() {
     return (
         <>
             <Card className={classes("vc-warning-card", Margins.bottom16)}>
-                <Forms.FormText>
+                <Forms.FormText size="md">
                     This section is for advanced users. If you are having difficulties using it, use the
                     Local Themes tab instead.
                 </Forms.FormText>
@@ -40,7 +40,8 @@ export function OnlineThemesTab() {
                 <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
             </Card>
 
-            <Forms.FormSection title="Online Themes" tag="h5">
+            <section>
+                <Forms.FormTitle tag="h5">Online Themes</Forms.FormTitle>
                 <TextArea
                     value={themeText}
                     onChange={setThemeText}
@@ -50,7 +51,7 @@ export function OnlineThemesTab() {
                     onBlur={onBlur}
                     rows={10}
                 />
-            </Forms.FormSection>
+            </section>
         </>
     );
 }
