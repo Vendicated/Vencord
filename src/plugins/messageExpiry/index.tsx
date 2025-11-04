@@ -220,8 +220,6 @@ export default definePlugin({
                     break;
             }
 
-            console.dir(message);
-
             msgStore.addMessage({
                 id: message.id,
                 channelId: message.channel_id,
