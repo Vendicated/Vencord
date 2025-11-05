@@ -5,7 +5,11 @@
  */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { PluginNative } from "@utils/types";
+
+const Native = VencordNative.pluginHelpers.NativeIdle as PluginNative<typeof import("./native")>;
+// Vencord apparently can't load native modules so still have to piggyback off of Vesktop for wayland native module
+const waylandNativeIdle: () => boolean = VesktopNative.powerMonitor?.isWaylandIdle ?? (() => false);
 
 export default definePlugin({
     name: "NativeIdle",
@@ -16,11 +20,6 @@ export default definePlugin({
         {
             find: "IdleStore",
             replacement: [
-                {
-                    match: /(?<=return )\i\|\|\i/,
-                    replace:
-                        "VesktopNative.powerMonitor.isSuspended() || VesktopNative.powerMonitor.isLocked() || VesktopNative.powerMonitor.isWaylandIdle()"
-                },
                 // replace function names so it's easier to call ourselves, not sure if there's a better to do this?
                 // from what I can tell these functions are only called within module so replacing them should be fine
                 {
@@ -32,12 +31,24 @@ export default definePlugin({
                     replace: "handlePowerEventPatched"
                 },
                 {
+                    match: /(function \i\(\){)(?=return|let \i=\i\.\i\.getSetting\(\)|Date\.now\(\))/g,
+                    replace: "async $1"
+                },
+                {
+                    match: /(\i\(\)\?\i)/g,
+                    replace: "await $1"
+                },
+                {
+                    match: /(?<=return )\i\|\|\i/,
+                    replace: "await $self.systemIdleCheck()"
+                },
+                {
                     match: /\(null===\i\.\i\|\|void 0===\i\.\i\|\|null==\(\i=\i\.\i\.remotePowerMonitor\)\?void 0:\i\.getSystemIdleTimeMs\)!=null/,
                     replace: "true"
                 },
                 {
-                    match: /\i\.\i\.remotePowerMonitor(?=\.getSystemIdleTimeMs\(\))/,
-                    replace: "VesktopNative.powerMonitor"
+                    match: /\i\.\i\.remotePowerMonitor\.getSystemIdleTimeMs\(\)/,
+                    replace: "$self.getSystemIdleTimeMs()"
                 },
                 {
                     match: /setInterval\(\i,30\*\i\.\i\.Millis\.SECOND\)/,
@@ -47,7 +58,13 @@ export default definePlugin({
         }
     ],
     nativeIdleInit(handlePowerEvent: (idle: boolean) => boolean) {
-        VesktopNative.powerMonitor.onIdlePowerEvent(() => handlePowerEvent(true));
-        VesktopNative.powerMonitor.onNoIdlePowerEvent(() => handlePowerEvent(false));
+        Native.init();
     },
+    async systemIdleCheck() {
+        return await Native.isSuspended() || await Native.isLocked() || waylandNativeIdle();
+    },
+    getSystemIdleTimeMs() {
+        return Native.getSystemIdleTimeMs();
+    }
 });
+
