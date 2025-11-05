@@ -1,0 +1,7 @@
+{
+  "name": "BulkChannelDelete",
+  "description": "Multi-select and bulk delete Discord channels with Shift + Right Click. Designed for server admins.",
+  "author": "Miercoles",
+  "version": "1.0.0",
+  "license": "MIT"
+}
