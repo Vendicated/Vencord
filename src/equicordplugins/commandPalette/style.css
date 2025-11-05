@@ -681,6 +681,73 @@
     background: rgb(255 255 255 / 12%);
 }
 
+/* Keybind recorder styles */
+.vc-cp-key-recorder-container {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    height: 40px;
+    width: 20rem;
+}
+
+.vc-cp-key-recorder {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 3px;
+    background-color: hsl(var(--black-500-hsl) / 10%);
+    color: var(--header-primary);
+    line-height: 22px;
+    font-weight: 600;
+    padding: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    border: 1px solid;
+    border-color: hsl(var(--black-500-hsl) / 30%);
+    transition: border .15s ease;
+    user-select: none;
+    font-family: var(--font-primary);
+}
+
+.vc-cp-key-display {
+    flex: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-right: 10px;
+}
+
+.vc-cp-recording {
+    animation: shadowPulse_b16790 1s ease-in infinite;
+    box-shadow: 0 0 6px hsl(var(--red-400-hsl) / 30%);
+    border-color: hsl(var(--red-400-hsl) / 30%);
+    color: var(--status-danger);
+}
+
+.vc-cp-key-recorder:hover {
+    border-color: hsl(var(--red-400-hsl) / 30%);
+}
+
+.vc-cp-recording-button {
+    color: var(--status-danger) !important;
+    background-color: hsl(var(--red-400-hsl) / 10%) !important;
+    opacity: 1;
+    transition: opacity .2s ease-in-out, transform .2s ease-in-out;
+}
+
+.vc-cp-key-recorder-button {
+    flex-shrink: 0;
+    height: 30px;
+    width: 128px;
+    color: var(--white-500);
+    background-color: var(--button-secondary-background);
+    border-radius: 10px;
+    transition: background-color 0.15s ease;
+}
+
+.vc-cp-key-recorder-button:hover {
+    background-color: var(--button-secondary-background-hover);
+}
+
 /* stylelint-enable no-descending-specificity */
 
 /* fuck you css */
