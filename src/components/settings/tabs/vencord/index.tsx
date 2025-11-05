@@ -77,14 +77,14 @@ function Switches() {
             title: t("vencord.settings.transparent.title"),
             description: t("vencord.settings.transparent.description")
         },
-        !IS_WEB && IS_WINDOWS && {
-            key: "winCtrlQ",
-            title: t("vencord.settings.winCtrlQ.title"),
-            restartRequired: true
-        },
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
             title: t("vencord.settings.disableMinSize.title"),
+            restartRequired: true
+        },
+        !IS_WEB && IS_WINDOWS && {
+            key: "winCtrlQ",
+            title: t("vencord.settings.winCtrlQ.title"),
             restartRequired: true
         },
     ] satisfies Array<false | {
