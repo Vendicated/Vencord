@@ -11,34 +11,26 @@ import type { JSX } from "react";
 
 import translations, { type TranslationBundle } from "~translations";
 
-import { localStorage } from "./localStorage";
 import { Logger } from "./Logger";
 
 const logger = new Logger("Translations", "#7bc876");
 
 export const availableLocales = Object.keys(translations);
 
-let loadedLocale: TranslationBundle;
+let loadedLocale = translations.en; // english is the default fallback anyway
 
-let lastDiscordLocale: string = localStorage.getItem("vcLocale")!;
 let bestLocale: string;
+let lastDiscordLocale: string;
 
 export function setLocale(locale: string) {
+    // discord sometimes sends the locale update multiple times so this just prevents us from constantly renegotiating
     if (locale === lastDiscordLocale) return;
-
-    localStorage.setItem("vcLocale", locale);
 
     lastDiscordLocale = locale;
 
-    reloadLocale();
-}
-
-if (lastDiscordLocale) reloadLocale();
-
-function reloadLocale() {
     // finds the best locale based on the available ones
     bestLocale = negotiateLanguages(
-        [lastDiscordLocale],
+        [locale],
         Object.keys(translations),
         {
             defaultLocale: "en",
@@ -48,7 +40,7 @@ function reloadLocale() {
 
     loadedLocale = translations[bestLocale];
 
-    logger.info(`Locale was updated (wanted ${lastDiscordLocale}, negotiated to ${bestLocale})`);
+    logger.info(`Locale was updated (wanted ${locale}, negotiated to ${bestLocale})`);
 }
 
 // derived from stackoverflow's string formatting function
