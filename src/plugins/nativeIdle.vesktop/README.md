@@ -8,5 +8,6 @@ Vesktop will idle when:
 - system suspends/sleeps
 - system lockscreen is triggered\*\*
 
-\* on Wayland linux, this requires [ext-idle-notify-v1](https://wayland.app/protocols/ext-idle-notify-v1) to be implemented by your compositor.
-\*\* only works on Windows and MacOS
+\*on Wayland linux, this requires [ext-idle-notify-v1](https://wayland.app/protocols/ext-idle-notify-v1) to be implemented by your compositor.
+
+\*\*only works on Windows and MacOS
