@@ -167,7 +167,7 @@ class CopleSnow {
         ] ?? "transitionend";
 
     private static random(min: number, max: number, deviation?: number): number {
-        if (!deviation) {
+        if (deviation !== undefined) {
             deviation *= max;
             max += deviation;
             min = max - deviation;
