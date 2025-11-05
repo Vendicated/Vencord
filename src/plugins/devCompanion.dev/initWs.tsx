@@ -143,6 +143,7 @@ export function initWs(isManual = false) {
             case "disable": {
                 const m = d.data;
                 const settings = Settings.plugins[m.pluginName];
+                if (!settings) throw new Error("Plugin not found: " + m.pluginName);
                 if (m.enabled !== settings.enabled)
                     toggleEnabled(m.pluginName, reply);
                 break;
