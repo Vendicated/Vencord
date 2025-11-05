@@ -15,7 +15,7 @@ import { Avatar, ChannelStore, ContextMenuApi, GuildStore, PresenceStore, ReadSt
 import { JSX } from "react";
 
 import { ChannelTabsProps, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
-import { CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, NitroIcon, QuestIcon, ShopIcon } from "../util/icons";
+import { ActivityIcon, CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, ICYMIIcon, NitroIcon, QuestIcon, ShopIcon } from "../util/icons";
 import { TabContextMenu } from "./ContextMenus";
 
 const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
@@ -204,7 +204,9 @@ function ChannelTabContent(props: ChannelTabsProps & {
             "__shop__": { label: "Shop", Icon: ShopIcon },
             "__library__": { label: "Library", Icon: () => LibraryIcon(20, 20) },
             "__discovery__": { label: "Discovery", Icon: DiscoveryIcon },
-            "__nitro__": { label: "Nitro", Icon: NitroIcon }
+            "__nitro__": { label: "Nitro", Icon: NitroIcon },
+            "__icymi__": { label: "ICYMI", Icon: ICYMIIcon },
+            "__activity__": { label: "Activity", Icon: ActivityIcon },
         };
 
         const pageConfig = specialPagesConfig[channelId];

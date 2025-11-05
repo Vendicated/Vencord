@@ -29,7 +29,9 @@ export function bookmarkPlaceholderName(bookmark: Omit<Bookmark | BookmarkFolder
             "__shop__": "Shop",
             "__library__": "Library",
             "__discovery__": "Discovery",
-            "__nitro__": "Nitro"
+            "__nitro__": "Nitro",
+            "__icymi__": "ICYMI",
+            "__activity__": "Activity",
         };
 
         return specialPagesMap[channelId] || "Special Page";
