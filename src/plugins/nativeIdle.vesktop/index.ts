@@ -11,6 +11,8 @@ const Native = VencordNative.pluginHelpers.NativeIdle as PluginNative<typeof imp
 // Vencord apparently can't load native modules so still have to piggyback off of Vesktop for wayland native module
 const waylandNativeIdle: () => boolean = VesktopNative.powerMonitor?.isWaylandIdle ?? (() => false);
 
+let powerEventCallback = (_: boolean) => { };
+
 export default definePlugin({
     name: "NativeIdle",
     description: "Provides native idle integration for Vesktop, mimicking the official Discord desktop client's idling behaviours. Fully compatible with CustomIdle.",
@@ -58,8 +60,10 @@ export default definePlugin({
         }
     ],
     nativeIdleInit(handlePowerEvent: (idle: boolean) => boolean) {
+        powerEventCallback = handlePowerEvent;
         Native.init();
     },
+    handlePowerEvent: (idle: boolean) => powerEventCallback(idle),
     async systemIdleCheck() {
         return await Native.isSuspended() || await Native.isLocked() || waylandNativeIdle();
     },

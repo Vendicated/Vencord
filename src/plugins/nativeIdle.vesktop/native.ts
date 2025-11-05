@@ -4,26 +4,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { powerMonitor } from "electron";
+import { IpcMainInvokeEvent, powerMonitor } from "electron";
 
 let suspended = false;
 let locked = false;
 
-export function init() {
+export function init(e: IpcMainInvokeEvent) {
+    function handlePowerEvent(idle: boolean) {
+        e.sender.executeJavaScript(`Vencord.Plugins.plugins.NativeIdle.handlePowerEvent(${idle})`);
+    }
+
     powerMonitor.on("suspend", () => {
-        suspended = true;
+        handlePowerEvent(suspended = true);
     });
 
     powerMonitor.on("resume", () => {
-        suspended = false;
+        handlePowerEvent(suspended = false);
     });
 
     powerMonitor.on("lock-screen", () => {
-        locked = true;
+        handlePowerEvent(locked = true);
     });
 
     powerMonitor.on("unlock-screen", () => {
-        locked = false;
+        handlePowerEvent(locked = false);
     });
 }
 
