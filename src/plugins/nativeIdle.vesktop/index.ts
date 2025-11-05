@@ -54,18 +54,18 @@ export default definePlugin({
                 },
                 {
                     match: /setInterval\(\i,30\*\i\.\i\.Millis\.SECOND\)/,
-                    replace: "($self.nativeIdleInit(handlePowerEventPatched), checkNativeIdlePatched())"
+                    replace: "($self.init(handlePowerEventPatched), checkNativeIdlePatched())"
                 }
             ]
         }
     ],
-    nativeIdleInit(handlePowerEvent: (idle: boolean) => boolean) {
+    init(handlePowerEvent: (idle: boolean) => boolean) {
         powerEventCallback = handlePowerEvent;
         Native.init();
     },
     handlePowerEvent: (idle: boolean) => powerEventCallback(idle),
     async systemIdleCheck() {
-        return await Native.isSuspended() || await Native.isLocked() || waylandNativeIdle();
+        return waylandNativeIdle() || await Native.suspendedOrLocked();
     },
     getSystemIdleTimeMs() {
         return Native.getSystemIdleTimeMs();

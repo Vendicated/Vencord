@@ -31,12 +31,8 @@ export function init(e: IpcMainInvokeEvent) {
     });
 }
 
-export function isSuspended() {
-    return suspended;
-}
-
-export function isLocked() {
-    return locked;
+export function suspendedOrLocked() {
+    return suspended || locked;
 }
 
 export function getSystemIdleTimeMs() {
