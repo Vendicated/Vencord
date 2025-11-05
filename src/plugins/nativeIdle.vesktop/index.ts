@@ -15,7 +15,7 @@ let powerEventCallback = (_: boolean) => { };
 
 export default definePlugin({
     name: "NativeIdle",
-    description: "Provides native idle integration for Vesktop, mimicking the official Discord desktop client's idling behaviours. Fully compatible with CustomIdle.",
+    description: "Provides native idle integration for Vesktop, mimicking the official Discord desktop client's auto-idling behaviours",
     authors: [Devs.Timbits],
     enabledByDefault: IS_VESKTOP,
     patches: [
