@@ -20,6 +20,7 @@
 import "./index.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
@@ -94,10 +95,10 @@ interface ProfileModalProps {
     canUsePremiumCustomization: boolean;
     hideExampleButton: boolean;
     hideFakeActivity: boolean;
-    isTryItOutFlow: boolean;
+    isTryItOut: boolean;
 }
 
-const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
+const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOut:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
 function SettingsAboutComponentWrapper() {
     const [, , userProfileLoading] = useAwaiter(() => fetchUserProfile(UserStore.getCurrentUser().id));
@@ -113,7 +114,7 @@ function SettingsAboutComponent() {
     const [color2, setColor2] = useState(existingColors[1]);
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
             <Forms.FormText>
                 After enabling this plugin, you will see custom colors in
@@ -127,7 +128,7 @@ function SettingsAboutComponent() {
                     <li>• click the "Copy 3y3" button</li>
                     <li>• paste the invisible text anywhere in your bio</li>
                 </ul><br />
-                <Forms.FormDivider
+                <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
                 <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
@@ -174,7 +175,7 @@ function SettingsAboutComponent() {
                         Copy 3y3
                     </Button>
                 </Flex>
-                <Forms.FormDivider
+                <Divider
                     className={classes(Margins.top8, Margins.bottom8)}
                 />
                 <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
@@ -187,11 +188,11 @@ function SettingsAboutComponent() {
                         canUsePremiumCustomization={true}
                         hideExampleButton={true}
                         hideFakeActivity={true}
-                        isTryItOutFlow={true}
+                        isTryItOut={true}
                     />
                 </div>
             </Forms.FormText>
-        </Forms.FormSection>);
+        </section>);
 }
 
 export default definePlugin({

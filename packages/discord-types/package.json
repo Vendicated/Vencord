@@ -1,6 +1,7 @@
 {
     "name": "@vencord/discord-types",
     "author": "Vencord Contributors",
+    "private": false,
     "description": "Typescript definitions for the webpack modules of the Discord Web app",
     "version": "1.0.0",
     "license": "LGPL-3.0-or-later",
@@ -12,8 +13,10 @@
         "directory": "packages/discord-types"
     },
     "dependencies": {
-        "@types/react": "^19.0.10",
         "moment": "^2.22.2",
         "type-fest": "^4.41.0"
+    },
+    "peerDependencies": {
+        "@types/react": "^19.0.10"
     }
 }
