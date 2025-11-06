@@ -17,7 +17,7 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
+import { Channel, CloudUpload, Guild, GuildFeatures, Message, OpenUserProfileModalProps, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
@@ -170,7 +170,7 @@ export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalP
     });
 }
 
-export async function openUserProfile(id: string) {
+export async function openUserProfile(id: string, extraOptions: Partial<OpenUserProfileModalProps> = {}) {
     const user = await UserUtils.getUser(id);
     if (!user) throw new Error("No such user: " + id);
 
@@ -182,7 +182,8 @@ export async function openUserProfile(id: string) {
         analyticsLocation: {
             page: guildId ? "Guild Channel" : "DM Channel",
             section: "Profile Popout"
-        }
+        },
+        ...extraOptions,
     });
 }
 
