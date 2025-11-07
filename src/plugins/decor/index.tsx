@@ -33,8 +33,8 @@ export default definePlugin({
         {
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /(?<=function \i\(\i\){)(?=let{avatarDecoration)/,
-                replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;"
+                match: /(?<=function \i\((\i)\){)(?=let{avatarDecoration)/,
+                replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL($1);if(vcDecorDecoration)return vcDecorDecoration;"
             }
         },
         // Patch profile customization settings to include Decor section
@@ -76,7 +76,7 @@ export default definePlugin({
                 // Use added hook
                 {
                     match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:(\i).+?)/,
-                    replace: "$1??vcDecorAvatarDecoration??($&)"
+                    replace: "vcDecorAvatarDecoration??($&)"
                 },
                 // Make memo depend on added hook
                 {
