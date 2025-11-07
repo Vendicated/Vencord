@@ -983,8 +983,8 @@ export default definePlugin({
                 },
                 {
                     // QUESTS_FETCH_QUEST_TO_DELIVER_BEGIN
-                    match: /(var \i,\i,\i,\i,\i,\i,\i;\i.\i.dispatch\({)/,
-                    replace: "if($self.shouldPreventFetchingQuests())return;$1"
+                    match: /"QUESTS_FETCH_QUEST_TO_DELIVER_BEGIN",placement:\i\}\);/,
+                    replace: "$&if($self.shouldPreventFetchingQuests())return;"
                 }
             ]
         },
