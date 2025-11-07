@@ -8,10 +8,9 @@ import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 
 const Native = VencordNative.pluginHelpers.NativeIdle as PluginNative<typeof import("./native")>;
-// Vencord apparently can't load native modules so still have to piggyback off of Vesktop for wayland native module
-const waylandNativeIdle: () => boolean = VesktopNative.powerMonitor?.isWaylandIdle ?? (() => false);
 
-let powerEventCallback = (_: boolean) => { };
+let waylandNativeIdle: () => boolean;
+let powerEventCallback: (_: boolean) => void;
 
 export default definePlugin({
     name: "NativeIdle",
@@ -65,6 +64,8 @@ export default definePlugin({
     },
     handlePowerEvent: (idle: boolean) => powerEventCallback(idle),
     async systemIdleCheck() {
+        waylandNativeIdle ??= await Native.isWayland() ? VesktopNative.powerMonitor?.isWaylandIdle ?? (() => false) : () => false;
+
         return waylandNativeIdle() || await Native.suspendedOrLocked();
     },
     getSystemIdleTimeMs() {

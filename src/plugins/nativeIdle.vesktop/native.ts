@@ -38,3 +38,7 @@ export function suspendedOrLocked() {
 export function getSystemIdleTimeMs() {
     return powerMonitor.getSystemIdleTime() * 1000;
 }
+
+export function isWayland() {
+    return process.platform === "linux" && (process.env.XDG_SESSION_TYPE === "wayland" || !!process.env.WAYLAND_DISPLAY);
+}
