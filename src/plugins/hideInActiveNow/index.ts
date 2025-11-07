@@ -56,8 +56,8 @@ export default definePlugin({
         {
             find: "NOW_PLAYING_CARD_HOVERED,",
             replacement: {
-                match: /(\{party:)(\i)(.*?\}=\i)(.*,\i=\i\(\)\(\i,\i\);)/,
-                replace: "$1unfilter_$2$3,$2=$self.partyFilterIgnoredUsers(unfilter_$2)$4if($self.shoudBeNull($2)){return null;}",
+                match: /let{party:(\i),onUserContextMenu:(\i),onChannelContextMenu:(\i),quest:(\i)}=(\i),/,
+                replace: "let{party:unfilter_$1,onUserContextMenu:$2,onChannelContextMenu:$3,quest:$4}=$5,$1=$self.partyFilterIgnoredUsers(unfilter_$1);if($self.shoudBeNull($1)){return null;}let ",
             },
             predicate: () => !settings.store.hideActiveNow
         },
