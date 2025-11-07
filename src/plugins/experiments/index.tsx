@@ -96,7 +96,7 @@ export default definePlugin({
         },
         // Enable experiment embed on sent experiment links
         {
-            find: ".experimentOverride,children",
+            find: ".experimentOverride,children:",
             replacement: [
                 {
                     match: /\i\.isStaff\(\)/,
@@ -104,7 +104,7 @@ export default definePlugin({
                 },
                 // Fix some tricky experiments name causing a client crash
                 {
-                    match: /if\(null==(\i)\|\|null==\i(?=\)return null;)/,
+                    match: /\.isStaffPersonal\(\).+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
                     replace: "$&||({})[$1]!=null"
                 }
             ]
