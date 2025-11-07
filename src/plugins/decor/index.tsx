@@ -75,7 +75,7 @@ export default definePlugin({
                 },
                 // Use added hook
                 {
-                    match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:(\i).+?)/,
+                    match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:\i.+?)/,
                     replace: "vcDecorAvatarDecoration??($&)"
                 },
                 // Make memo depend on added hook
