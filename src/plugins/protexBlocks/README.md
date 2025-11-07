@@ -1,10 +1,10 @@
 # protexBlocks
 
-This plugin automatically checks users against the ProteX blocklist hosted on GitHub.
+This plugin automatically checks users against the ProteX blocks pulled from GitHub.
 
 ## Features
 
-- Checks users against public blocklist at [NexusProjectsEU/blocks](https://github.com/NexusProjectsEU/blocks)
+- Checks users against public blocks at [NexusProjectsEU/blocks](https://github.com/NexusProjectsEU/blocks)
 - No API key required - uses public GitHub repository
 - Performance optimization by only checking each user once per session
 - Displays block status directly in chat
