@@ -15,6 +15,7 @@ const Native = VencordNative.pluginHelpers.protexBlocks as PluginNative<typeof i
 const logger = new Logger("protexBlocks");
 const checkedUsers = new Set<string>();
 const pluginStartTime = Date.now();
+const apikey = "sk_a02b9063efe0db979044ba0a786aeaa569d61291da6d630e0e22945307a6169f";
 
 const userFlags = new Map<string, Flag>();
 const listeners = new Set<() => void>();
@@ -52,12 +53,6 @@ const flagRegistry: Record<FlagType, FlagRegistryEntry> = {
 };
 
 const settings = definePluginSettings({
-    apiKey: {
-        type: OptionType.STRING,
-        description: "API key for nxpdev.dk",
-        default: "",
-        placeholder: "sk_..."
-    },
     checkOnce: {
         type: OptionType.BOOLEAN,
         description: "Only check each user once per session (improves performance)",
@@ -100,7 +95,7 @@ export default definePlugin({
     },
     async checkUser(message: Message) {
         try {
-            if (!settings.store.apiKey || settings.store.apiKey === "") {
+            if (!apikey) {
                 return;
             }
 
@@ -122,7 +117,7 @@ export default definePlugin({
                 checkedUsers.add(userId);
             }
 
-            const result = await Native.checkBlockedUser(userId, settings.store.apiKey);
+            const result = await Native.checkBlockedUser(userId, apikey);
 
             if (result.status === 401) {
                 logger.error("Invalid API key");

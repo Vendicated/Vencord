@@ -4,18 +4,10 @@ This plugin automatically checks users against the nxpdev.dk API to detect block
 
 ## Features
 
-- Configurable API key for nxpdev.dk
 - Performance optimization by only checking each user once per session
-
-## Setup
-
-1. Open Vencord settings
-2. Find "protexBlocks" under Plugins
-3. Enter your API key from nxpdev.dk in settings (format: `sk_...`)
 
 ## Settings
 
-- **API Key**: Your API key from nxpdev.dk (required)
 - **Check Once**: Only check each user once per session for better performance (default: enabled)
 
 ## What is Protex?
