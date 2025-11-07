@@ -1,14 +1,21 @@
 # protexBlocks
 
-This plugin automatically checks users against the nxpdev.dk API to detect blocked users.
+This plugin automatically checks users against the ProteX blocklist hosted on GitHub.
 
 ## Features
 
+- Checks users against public blocklist at [NexusProjectsEU/blocks](https://github.com/NexusProjectsEU/blocks)
+- No API key required - uses public GitHub repository
 - Performance optimization by only checking each user once per session
+- Displays block status directly in chat
 
 ## Settings
 
 - **Check Once**: Only check each user once per session for better performance (default: enabled)
+
+## How it works
+
+The plugin checks the public GitHub repository for blocked users. When a blocked user sends a message, a warning indicator appears below their message showing they are blocked by ProteX.
 
 ## What is Protex?
 
