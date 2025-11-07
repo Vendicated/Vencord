@@ -103,6 +103,7 @@ However, Discord is pretty indifferent about them and there are no known cases o
 
 Regardless, if your account is essential to you and getting disabled would be a disaster for you, you should probably not use any client mods (not exclusive to Equicord), just to be safe.
 
+
 Additionally, make sure not to post screenshots with Equicord in a server where you might get banned for it.
 
 </details>
