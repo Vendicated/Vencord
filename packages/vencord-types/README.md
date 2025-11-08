@@ -1,11 +1,11 @@
-# Vencord Types
+# Equicord Types
 
-Typings for Vencord's api, published to npm
+Typings for Equicord's api, published to npm
 
 ```sh
-npm i @vencord/types
+npm i @equicord/types
 
-yarn add @vencord/types
+yarn add @equicord/types
 
-pnpm add @vencord/types
+pnpm add @equicord/types
 ```

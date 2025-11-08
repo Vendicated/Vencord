@@ -1,7 +1,7 @@
 {
     "name": "@equicord/types",
     "private": false,
-    "version": "1.13.3",
+    "version": "1.13.4",
     "description": "",
     "types": "index.d.ts",
     "scripts": {
