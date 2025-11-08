@@ -22,6 +22,11 @@ const DefaultEngines = {
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
 } as const;
 
+const enum ReplacementEngineValue {
+    OFF = "off",
+    CUSTOM = "custom",
+}
+
 const settings = definePluginSettings({
     customEngineName: {
         description: "Name of the custom search engine",
@@ -32,6 +37,15 @@ const settings = definePluginSettings({
         description: "The URL of your Engine",
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="
+    },
+    replacementEngine: {
+        description: "Replace with a specific search engine instead of adding a menu",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Off", value: ReplacementEngineValue.OFF, default: true },
+            { label: "Custom Engine", value: ReplacementEngineValue.CUSTOM },
+            ...Object.keys(DefaultEngines).map(engine => ({ label: engine, value: engine }))
+        ]
     }
 });
 
@@ -40,13 +54,31 @@ function search(src: string, engine: string) {
 }
 
 function makeSearchItem(src: string) {
-    let Engines = {};
+    const { customEngineName, customEngineURL, replacementEngine } = settings.store;
 
-    if (settings.store.customEngineName && settings.store.customEngineURL) {
-        Engines[settings.store.customEngineName] = settings.store.customEngineURL;
+    const hasCustomEngine = Boolean(customEngineName && customEngineURL);
+    const hasValidReplacementEngine = replacementEngine !== ReplacementEngineValue.OFF && !(replacementEngine === ReplacementEngineValue.CUSTOM && !hasCustomEngine);
+
+    const Engines = { ...DefaultEngines };
+
+    if (hasCustomEngine) {
+        Engines[customEngineName!] = customEngineURL;
     }
 
-    Engines = { ...Engines, ...DefaultEngines };
+    if (hasValidReplacementEngine) {
+        const name = replacementEngine === ReplacementEngineValue.CUSTOM && hasCustomEngine
+            ? customEngineName
+            : replacementEngine;
+
+        return (
+            <Menu.MenuItem
+                label={`Search with ${name}`}
+                key="search-custom-engine"
+                id="vc-search-custom-engine"
+                action={() => search(src, Engines[name!])}
+            />
+        );
+    }
 
     return (
         <Menu.MenuItem
@@ -95,7 +127,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) 
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
-    description: "Replaces the Google search with different Engines",
+    description: "Replaces the Google search with different Engine(s)",
     authors: [Devs.Moxxie, Devs.Ethan],
 
     settings,
