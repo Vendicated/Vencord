@@ -47,7 +47,7 @@ export class Guild extends DiscordRecord {
     };
     premiumProgressBarEnabled: boolean;
     premiumSubscriberCount: number;
-    premiumTier: number;
+    premiumTier: 0 | 1 | 2 | 3;
     profile: {
         badge: string | undefined;
         tag: string | undefined;
