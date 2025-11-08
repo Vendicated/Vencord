@@ -10,10 +10,8 @@ import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { isAnyPluginDev, isEquicordGuild } from "@utils/misc";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, fetchApplicationsRPC, FluxDispatcher, UserStore } from "@webpack/common";
 
-const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
 const logger = new Logger("arRPCBun");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {

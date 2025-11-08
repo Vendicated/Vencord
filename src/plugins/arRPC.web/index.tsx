@@ -23,10 +23,7 @@ import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Toasts } from "@webpack/common";
-
-const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
+import { ApplicationAssetUtils, fetchApplicationsRPC, FluxDispatcher, Toasts } from "@webpack/common";
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];

@@ -218,3 +218,5 @@ export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:"
 });
 
 export const MessageTypeSets: t.MessageTypeSets = findByPropsLazy("REPLYABLE", "FORWARDABLE");
+
+export const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
