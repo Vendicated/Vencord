@@ -90,7 +90,7 @@ window.VencordNative = {
                 return;
             }
 
-            const { getTheme, Theme } = require("../src/utils/discord").default;
+            const { getTheme, Theme } = require("../src/utils/discord");
 
             win.baseUrl = EXTENSION_BASE_URL;
             win.setCss = setCssDebounced;
