@@ -26,6 +26,15 @@ const settings = definePluginSettings({
     }
 });
 
+let cachedUsers: User[] | null = null;
+
+function getCachedUsers(): User[] {
+    if (!cachedUsers) {
+        cachedUsers = Object.values(UserStore.getUsers());
+    }
+    return cachedUsers;
+}
+
 export default definePlugin({
     name: "UniversalMention",
     authors: [EquicordDevs.justjxke],
@@ -58,7 +67,7 @@ export default definePlugin({
         },
     ],
     useFilter(map: boolean = false) {
-        const foundUsers = Object.values(UserStore.getUsers()) as User[];
+        const foundUsers = getCachedUsers();
         const users = settings.store.onlyDMUsers ? foundUsers.filter(user => ChannelStore.getDMFromUserId(user.id)) : foundUsers;
         return map ? users.map(user => ({ userId: user.id, nick: null })) : users;
     }
