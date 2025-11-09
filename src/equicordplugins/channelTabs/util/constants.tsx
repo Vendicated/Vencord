@@ -13,6 +13,7 @@ import { SearchableSelect, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { ChannelTabsPreview } from "../components/ChannelTabsContainer";
+import { KeybindSettings } from "../components/KeybindSettings";
 
 interface DynamicDropdownSettingOption {
     label: string;
@@ -137,7 +138,6 @@ export const settings = definePluginSettings({
     },
     tabSet: {
         component: ChannelTabsPreview,
-        description: "Select which tabs to open at startup",
         type: OptionType.COMPONENT,
         default: {}
     },
@@ -214,18 +214,80 @@ export const settings = definePluginSettings({
         ],
         restartNeeded: true
     },
-    enableHotkeys: {
+    enableNumberKeySwitching: {
         type: OptionType.BOOLEAN,
-        description: "Enable hotkey (1-9) for tab switching",
+        description: "Enable number keys (1-9) to switch tabs",
         default: true,
         restartNeeded: false
     },
-    hotkeyCount: {
+    numberKeySwitchCount: {
         type: OptionType.SLIDER,
-        description: "Number of tabs accessible via keyboard shortcuts",
+        description: "Number of tabs accessible via number keys (1-9)",
         markers: makeRange(1, 9, 1),
         default: 3,
         stickToMarkers: true,
+    },
+    enableCloseTabShortcut: {
+        type: OptionType.BOOLEAN,
+        description: "Enable close tab keyboard shortcut",
+        default: true,
+        restartNeeded: false
+    },
+    enableNewTabShortcut: {
+        type: OptionType.BOOLEAN,
+        description: "Enable new tab keyboard shortcut",
+        default: true,
+        restartNeeded: false
+    },
+    enableTabCycleShortcut: {
+        type: OptionType.BOOLEAN,
+        description: "Enable tab cycling keyboard shortcut",
+        default: true,
+        restartNeeded: false
+    },
+    keybindsSection: {
+        type: OptionType.COMPONENT,
+        component: KeybindSettings
+    },
+    // me when storage yes for keybinds
+    closeTabKeybind: {
+        type: OptionType.STRING,
+        description: "Keyboard shortcut to close the current tab",
+        default: "CTRL+W",
+        hidden: true
+    },
+    newTabKeybind: {
+        type: OptionType.STRING,
+        description: "Keyboard shortcut to open a new tab",
+        default: "CTRL+T",
+        hidden: true
+    },
+    cycleTabForwardKeybind: {
+        type: OptionType.STRING,
+        description: "Keyboard shortcut to cycle to the next tab",
+        default: "CTRL+TAB",
+        hidden: true
+    },
+    cycleTabBackwardKeybind: {
+        type: OptionType.STRING,
+        description: "Keyboard shortcut to cycle to the previous tab",
+        default: "CTRL+SHIFT+TAB",
+        hidden: true
+    },
+    showTabNumbers: {
+        type: OptionType.BOOLEAN,
+        description: "Show numbered badges on tabs to indicate keyboard shortcuts",
+        default: false,
+        restartNeeded: false
+    },
+    tabNumberPosition: {
+        type: OptionType.SELECT,
+        description: "Where to display the numbered badge on tabs",
+        options: [
+            { label: "Left side (before icon)", value: "left", default: true },
+            { label: "Right side (after content)", value: "right" }
+        ],
+        restartNeeded: false
     },
     animations: {
         type: OptionType.COMPONENT,
