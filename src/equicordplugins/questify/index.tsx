@@ -965,7 +965,7 @@ export default definePlugin({
                     replace: "const shouldHideMembersListActivelyPlayingIcon=$self.shouldHideMembersListActivelyPlayingIcon();"
                 },
                 {
-                    match: /(?<=}\),\i\(\),\i&&)/,
+                    match: /(?<=\i\(\),\i&&)/,
                     replace: "!shouldHideMembersListActivelyPlayingIcon&&"
                 }
             ]
@@ -981,7 +981,7 @@ export default definePlugin({
                     replace: "const shouldHideMembersListActivelyPlayingIcon=$self.shouldHideMembersListActivelyPlayingIcon();"
                 },
                 {
-                    match: /(?<=}\),\i\(\),\i&&)/,
+                    match: /(?<=\i\(\),\i&&)/,
                     replace: "!shouldHideMembersListActivelyPlayingIcon&&"
                 }
             ]
