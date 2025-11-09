@@ -5,12 +5,12 @@
  */
 
 import { classes } from "@utils/misc";
-import { findByCode } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Button, Clickable, Menu, Popout, React, useRef } from "@webpack/common";
 
 import { SvgOverFlowIcon } from "../icons/overFlowIcon";
 
-
+const { overflowIcon } = findByPropsLazy("overflowIcon", "forceButtonsShow");
 
 export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: string[], selectedTabId: string, onSelectTab: (tab: string) => void; }) {
     const tabBarRef = React.useRef<HTMLDivElement>(null);
@@ -23,8 +23,6 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
     function isNotNullish(value) {
         return value !== null && value !== undefined;
     }
-
-    const { overflowIcon } = findByCode("overflowIcon");
 
     const handleResize = React.useCallback(() => {
         if (!tabBarRef.current) return;
