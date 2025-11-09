@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useState } from "@webpack/common";
+import { Button, Text, useEffect, useRef, useState } from "@webpack/common";
 
 import { cleanupCommandPaletteRuntime, registerBuiltInCommands, wrapChatBarChildren } from "./registry";
 import { CommandPaletteSettingsPanel } from "./settingsPanel";
@@ -17,133 +17,120 @@ import { openCommandPalette } from "./ui";
 const DEFAULT_KEYS = IS_MAC ? ["Meta", "Shift", "P"] : ["Control", "Shift", "P"];
 
 const cl = classNameFactory("vc-cp-");
-let isRecordingGlobal = false;
+const isRecordingGlobal = false;
 let openScheduled = false;
+
+function formatKeybind(keybind: string | string[]): string {
+    const isMac = navigator.platform.toUpperCase().includes("MAC");
+    const keybindStr = Array.isArray(keybind) ? keybind.join("+").toUpperCase() : keybind;
+
+    if (!isMac) {
+        return keybindStr;
+    }
+
+    return keybindStr
+        .replace(/CONTROL/g, "^") // Actual Control key → ^
+        .replace(/CTRL/g, "⌘") // Command/Ctrl key → ⌘
+        .replace(/META/g, "⌘"); // Meta/Command key → ⌘
+}
+
+function KeybindRecorder() {
+    const [isListening, setIsListening] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const currentKeybind = settings.use(["hotkey"]).hotkey;
+
+    useEffect(() => {
+        if (!isListening) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (["Control", "Shift", "Alt", "Meta"].includes(event.key)) {
+                return;
+            }
+
+            const keys: string[] = [];
+            if (IS_MAC && event.ctrlKey) {
+                if (event.ctrlKey) keys.push("CONTROL");
+                if (event.metaKey) keys.push("CTRL");
+            } else if (event.ctrlKey) {
+                keys.push("CTRL");
+            }
+            if (event.shiftKey) keys.push("SHIFT");
+            if (event.altKey) keys.push("ALT");
+
+            let mainKey = event.key.toUpperCase();
+            if (mainKey === " ") mainKey = "SPACE";
+            if (mainKey === "ESCAPE") mainKey = "ESC";
+
+            keys.push(mainKey);
+
+            settings.store.hotkey = keys.map(k => k.toLowerCase());
+            setError(null);
+            setIsListening(false);
+        };
+
+        const handleBlur = () => {
+            setIsListening(false);
+        };
+
+        document.addEventListener("keydown", handleKeyDown, true);
+        window.addEventListener("blur", handleBlur);
+
+        buttonRef.current?.focus();
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown, true);
+            window.removeEventListener("blur", handleBlur);
+        };
+    }, [isListening]);
+
+    const handleReset = () => {
+        settings.store.hotkey = DEFAULT_KEYS;
+        setError(null);
+    };
+
+    return (
+        <div className="vc-cp-keybind-input">
+            <div className="vc-cp-keybind-info">
+                <Text variant="text-md/semibold">Command Palette Hotkey</Text>
+                <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>
+                    Hotkey used to open the command palette
+                </Text>
+                {error && (
+                    <Text variant="text-xs/normal" className="vc-cp-keybind-conflict">
+                        {error}
+                    </Text>
+                )}
+            </div>
+            <div className="vc-cp-keybind-controls">
+                <button
+                    ref={buttonRef}
+                    className={`vc-cp-keybind-button ${isListening ? "listening" : ""}`}
+                    onClick={() => setIsListening(true)}
+                >
+                    {isListening ? "Press any key..." : formatKeybind(currentKeybind)}
+                </button>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    color={Button.Colors.PRIMARY}
+                    onClick={handleReset}
+                >
+                    Reset
+                </Button>
+            </div>
+        </div>
+    );
+}
 
 export const settings = definePluginSettings({
     hotkey: {
         description: "Hotkey used to open the command palette",
         type: OptionType.COMPONENT,
         default: DEFAULT_KEYS,
-        component: () => {
-            const [isRecording, setIsRecording] = useState(false);
-            const [currentKeys, setCurrentKeys] = useState<string[]>([]);
-
-            const recordKeybind = (setIsRecording: (value: boolean) => void) => {
-                const pressedKeys: Set<string> = new Set();
-                const keyLists: string[][] = [];
-                let recordingTimeout: number | null = null;
-
-                setIsRecording(true);
-                setCurrentKeys([]);
-                isRecordingGlobal = true;
-
-                const updateKeys = () => {
-                    const currentKeyArray = Array.from(pressedKeys);
-                    setCurrentKeys(currentKeyArray);
-                    keyLists.push(currentKeyArray);
-
-                    if (recordingTimeout) {
-                        clearTimeout(recordingTimeout);
-                    }
-                    recordingTimeout = window.setTimeout(() => {
-                        const longestArray = keyLists.reduce((a, b) => a.length > b.length ? a : b);
-                        if (longestArray.length > 0) {
-                            settings.store.hotkey = longestArray.map(key => key.toLowerCase());
-                        }
-                        setIsRecording(false);
-                        setCurrentKeys([]);
-                        isRecordingGlobal = false;
-                        document.removeEventListener("keydown", keydownListener);
-                        document.removeEventListener("keyup", keyupListener);
-                    }, 500);
-                };
-
-                const getKeyName = (key: string) => {
-                    const keyMap: Record<string, string> = {
-                        "Control": "Control",
-                        "Shift": "Shift",
-                        "Alt": "Alt",
-                        "Meta": "Meta"
-                    };
-                    return keyMap[key] || key;
-                };
-
-                const keydownListener = (e: KeyboardEvent) => {
-                    if (e.ctrlKey) pressedKeys.add("Control");
-                    else pressedKeys.delete("Control");
-
-                    if (e.shiftKey) pressedKeys.add("Shift");
-                    else pressedKeys.delete("Shift");
-
-                    if (e.altKey) pressedKeys.add("Alt");
-                    else pressedKeys.delete("Alt");
-
-                    if (e.metaKey) pressedKeys.add("Meta");
-                    else pressedKeys.delete("Meta");
-
-                    const keyName = getKeyName(e.key);
-                    pressedKeys.add(keyName);
-
-                    updateKeys();
-                };
-
-                const keyupListener = (e: KeyboardEvent) => {
-                    if (e.ctrlKey) pressedKeys.add("Control");
-                    else pressedKeys.delete("Control");
-
-                    if (e.shiftKey) pressedKeys.add("Shift");
-                    else pressedKeys.delete("Shift");
-
-                    if (e.altKey) pressedKeys.add("Alt");
-                    else pressedKeys.delete("Alt");
-
-                    if (e.metaKey) pressedKeys.add("Meta");
-                    else pressedKeys.delete("Meta");
-
-                    const keyName = getKeyName(e.key);
-                    pressedKeys.delete(keyName);
-
-                    updateKeys();
-                };
-
-                document.addEventListener("keydown", keydownListener);
-                document.addEventListener("keyup", keyupListener);
-            };
-
-            const getKeySymbol = (key: string) => {
-                const normalizedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-                const keySymbols: Record<string, string> = {
-                    "Control": "⌃",
-                    "Shift": "⇧",
-                    "Alt": "⌥",
-                    "Meta": "⌘"
-                };
-                return keySymbols[normalizedKey] || "";
-            };
-
-            const displayKeys = isRecording ? currentKeys : settings.store.hotkey;
-            const displayText = displayKeys.length > 0
-                ? displayKeys.map(word => {
-                    const symbol = getKeySymbol(word);
-                    const displayWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    return symbol ? `${symbol}${displayWord}` : displayWord;
-                }).join(" + ")
-                : "No keybind set";
-
-            return (
-                <>
-                    <div className={cl("key-recorder-container")}>
-                        <div className={`${cl("key-recorder")} ${isRecording ? cl("recording") : ""}`}>
-                            <span className={cl("key-display")}>{displayText}</span>
-                            <button className={`${cl("key-recorder-button")} ${isRecording ? cl("recording-button") : ""}`} onClick={() => recordKeybind(setIsRecording)} disabled={isRecording}>
-                                {isRecording ? "Recording..." : "Record keybind"}
-                            </button>
-                        </div>
-                    </div>
-                </>
-            );
-        }
+        component: KeybindRecorder
     },
     visualStyle: {
         description: "Palette appearance",

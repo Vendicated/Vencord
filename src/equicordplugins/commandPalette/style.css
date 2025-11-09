@@ -682,70 +682,115 @@
 }
 
 /* Keybind recorder styles */
-.vc-cp-key-recorder-container {
-    position: relative;
-    display: block;
-    cursor: pointer;
-    height: 40px;
-    width: 20rem;
-}
-
-.vc-cp-key-recorder {
+.vc-cp-keybind-input {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-radius: 3px;
-    background-color: hsl(var(--black-500-hsl) / 10%);
-    color: var(--header-primary);
-    line-height: 22px;
-    font-weight: 600;
-    padding: 10px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    border: 1px solid;
-    border-color: hsl(var(--black-500-hsl) / 30%);
-    transition: border .15s ease;
-    user-select: none;
-    font-family: var(--font-primary);
+    gap: 16px;
+    padding: 12px;
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
 }
 
-.vc-cp-key-display {
+.vc-cp-keybind-input:hover {
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-cp-keybind-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     flex: 1;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    margin-right: 10px;
 }
 
-.vc-cp-recording {
-    animation: shadowPulse_b16790 1s ease-in infinite;
-    box-shadow: 0 0 6px hsl(var(--red-400-hsl) / 30%);
-    border-color: hsl(var(--red-400-hsl) / 30%);
-    color: var(--status-danger);
+.vc-cp-keybind-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
 }
 
-.vc-cp-key-recorder:hover {
-    border-color: hsl(var(--red-400-hsl) / 30%);
+.vc-cp-keybind-button {
+    padding: 8px 16px;
+    background-color: var(--background-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 140px;
+    text-align: center;
+    font-family: var(--font-code);
+    font-weight: 600;
+    color: var(--header-primary);
+    transition: all 0.2s ease;
+    outline: none;
+    box-shadow: 0 0 0 1px var(--background-modifier-accent);
 }
 
-.vc-cp-recording-button {
-    color: var(--status-danger) !important;
-    background-color: hsl(var(--red-400-hsl) / 10%) !important;
-    opacity: 1;
-    transition: opacity .2s ease-in-out, transform .2s ease-in-out;
+.vc-cp-keybind-button:hover:not(:disabled) {
+    background-color: var(--background-modifier-hover);
+    border-color: var(--brand-experiment);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
 }
 
-.vc-cp-key-recorder-button {
-    flex-shrink: 0;
-    height: 30px;
-    width: 128px;
-    color: var(--white-500);
-    background-color: var(--button-secondary-background);
-    border-radius: 10px;
-    transition: background-color 0.15s ease;
+.vc-cp-keybind-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
 }
 
-.vc-cp-key-recorder-button:hover {
-    background-color: var(--button-secondary-background-hover);
+.vc-cp-keybind-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.vc-cp-keybind-button.listening {
+    background: linear-gradient(135deg, var(--brand-experiment) 0%, var(--brand-experiment-560) 100%);
+    color: var(--white);
+    border-color: var(--brand-experiment);
+    animation: vc-cp-keybind-pulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 12px var(--brand-experiment);
+}
+
+@keyframes vc-cp-keybind-pulse {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.85;
+        transform: scale(1.02);
+    }
+}
+
+.vc-cp-keybind-conflict {
+    color: var(--text-danger);
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 2px;
+    animation: vc-cp-keybind-shake 0.3s ease;
+}
+
+@keyframes vc-cp-keybind-shake {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(4px);
+    }
 }
 
 /* stylelint-enable no-descending-specificity */
