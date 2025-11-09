@@ -121,16 +121,13 @@ export function tryOrElse<T>(func: () => T, fallback: T): T {
 
 export function isEquicordGuild(id: string | null | undefined, isGuildId: boolean = false): boolean {
     if (!id) return false;
-
     if (isGuildId) return id === GUILD_ID;
-
     const channel = ChannelStore.getChannel(id);
     return channel.guild_id === GUILD_ID;
 }
 
 export function isSupportChannel(channelId: string | null | undefined): boolean {
     if (!channelId) return false;
-
     return channelId === SUPPORT_CHANNEL_ID;
 }
 
