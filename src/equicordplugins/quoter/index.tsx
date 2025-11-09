@@ -238,7 +238,7 @@ function QuoteModal({ message, ...props }: ModalProps & { message: Message; }) {
                 <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={async () => await Export()} style={{ display: "inline-block", marginRight: "5px" }}>Export</Button>
                 <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={async () => await SendInChat()} style={{ display: "inline-block" }}>Send</Button>
             </ModalContent>
-            <br></br>
+            <br />
         </ModalRoot>
     );
 }
