@@ -20,11 +20,12 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { FluxStore } from "@webpack/types";
+import { FluxStore } from "@vencord/discord-types";
+import { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
-import { AnyModuleFactory, AnyWebpackRequire, ModuleExports, WebpackRequire } from "./wreq";
+import { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
 
@@ -145,9 +146,17 @@ function makePropertyNonEnumerable(target: Record<PropertyKey, any>, key: Proper
 }
 
 export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire["c"]>, exports: ModuleExports, moduleId: PropertyKey) {
-    if (shouldIgnoreValue(exports)) {
-        makePropertyNonEnumerable(requireCache, moduleId);
-        return true;
+    try {
+        if (shouldIgnoreValue(exports)) {
+            makePropertyNonEnumerable(requireCache, moduleId);
+            return true;
+        }
+    } catch (err) {
+        logger.error(
+            "Error while blacklisting module:\n", err,
+            "\n\nModule id:", moduleId,
+            "\n\nModule exports:", exports,
+        );
     }
 
     if (typeof exports !== "object") {
@@ -156,10 +165,25 @@ export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire
 
     let hasOnlyBadProperties = true;
     for (const exportKey in exports) {
-        if (shouldIgnoreValue(exports[exportKey])) {
-            makePropertyNonEnumerable(exports, exportKey);
-        } else {
-            hasOnlyBadProperties = false;
+        try {
+            // Some exports might have not been initialized yet due to circular imports, so try catch it.
+            try {
+                var exportValue = exports[exportKey];
+            } catch {
+                continue;
+            }
+
+            if (shouldIgnoreValue(exportValue)) {
+                makePropertyNonEnumerable(exports, exportKey);
+            } else {
+                hasOnlyBadProperties = false;
+            }
+        } catch (err) {
+            logger.error(
+                "Error while blacklistng module:\n", err,
+                "\n\nModule id:", moduleId,
+                "\n\nExport value:", exportValue,
+            );
         }
     }
 
@@ -187,6 +211,8 @@ export function handleModuleNotFound(method: string, ...filter: unknown[]) {
  * Find the first module that matches the filter
  */
 export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
+    if (IS_ANTI_CRASH_TEST) return null;
+
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -246,6 +272,8 @@ export function findAll(filter: FilterFn) {
  * @returns Array of results in the same order as the passed filters
  */
 export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+    if (IS_ANTI_CRASH_TEST) return [];
+
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
@@ -445,6 +473,29 @@ export function findStore(name: StoreNameFilter) {
             }
         }
 
+        try {
+            const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
+            const libdiscoreExports = getLibdiscore();
+
+            for (const libdiscoreExportName in libdiscoreExports) {
+                if (!libdiscoreExportName.endsWith("Store")) {
+                    continue;
+                }
+
+                const storeName = libdiscoreExportName;
+                const store = libdiscoreExports[storeName];
+
+                if (storeName === name) {
+                    res = store;
+                }
+
+                if (fluxStores[storeName] == null) {
+                    fluxStores[storeName] = store;
+                }
+            }
+
+        } catch { }
+
         if (res == null) {
             res = find(filters.byStoreName(name), { isIndirect: true });
         }
@@ -548,6 +599,9 @@ function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumera
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     const exports = {} as Record<S, any>;
 
+    // whitelist Modal API to be able to test modals
+    if (IS_ANTI_CRASH_TEST && code !== ':"thin")' && code !== ".modalKey?") return exports;
+
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
     if (id === null)
         return exports;
@@ -588,6 +642,8 @@ export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
  * @returns A promise that resolves with a boolean whether the chunks were loaded
  */
 export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultExtractAndLoadChunksRegex) {
+    if (IS_ANTI_CRASH_TEST) return false;
+
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
@@ -671,6 +727,9 @@ export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtr
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | PropsFilter | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    // if react find fails then we are fully cooked
+    if (IS_ANTI_CRASH_TEST && filter !== "useState") return;
+
     if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
 
     if (typeof filter === "string")
@@ -728,7 +787,7 @@ export function extract(id: string | number) {
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
 0,${mod.toString()}
-//# sourceURL=ExtractedWebpackModule${id}
+//# sourceURL=file:///ExtractedWebpackModule${id}
 `;
     const extracted = (0, eval)(code);
     return extracted as Function;

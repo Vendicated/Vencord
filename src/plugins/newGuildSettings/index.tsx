@@ -24,9 +24,9 @@ import { definePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Guild } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { Menu } from "@webpack/common";
-import { Guild } from "discord-types/general";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {

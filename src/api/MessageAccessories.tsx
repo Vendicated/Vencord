@@ -48,7 +48,7 @@ export function _modifyAccessories(
 ) {
     for (const [key, accessory] of accessories.entries()) {
         const res = (
-            <ErrorBoundary message={`Failed to render ${key} Message Accessory`} key={key}>
+            <ErrorBoundary noop message={`Failed to render ${key} Message Accessory`} key={key}>
                 <accessory.render {...props} />
             </ErrorBoundary>
         );
