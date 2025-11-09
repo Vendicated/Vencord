@@ -164,6 +164,18 @@ function shouldHideDiscoveryTab(): boolean {
     return disableQuestsDiscoveryTab || disableQuestsEverything;
 }
 
+function shouldHideDirectMessagesTab(): boolean {
+    const {
+        disableQuestsDirectMessagesTab,
+        disableQuestsEverything
+    } = settings.use([
+        "disableQuestsDirectMessagesTab",
+        "disableQuestsEverything"
+    ]);
+
+    return disableQuestsDirectMessagesTab || disableQuestsEverything;
+}
+
 function shouldHideBadgeOnUserProfiles(): boolean {
     const {
         disableQuestsBadgeOnUserProfiles,
@@ -205,6 +217,18 @@ function shouldHideFriendsListActiveNowPromotion(): boolean {
     ]);
 
     return disableFriendsListActiveNowPromotion || disableQuestsEverything;
+}
+
+function shouldHideMembersListActivelyPlayingIcon(): boolean {
+    const {
+        disableMembersListActivelyPlayingIcon,
+        disableQuestsEverything
+    } = settings.use([
+        "disableMembersListActivelyPlayingIcon",
+        "disableQuestsEverything"
+    ]);
+
+    return disableMembersListActivelyPlayingIcon || disableQuestsEverything;
 }
 
 function shouldDisableQuestTileOptions(quest: Quest, shouldBeIgnored: boolean): boolean {
@@ -883,10 +907,12 @@ export default definePlugin({
     shouldHideQuestPopup,
     shouldHideDiscoveryTab,
     shouldPreloadQuestAssets,
+    shouldHideDirectMessagesTab,
     shouldPreventFetchingQuests,
     shouldHideBadgeOnUserProfiles,
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
+    shouldHideMembersListActivelyPlayingIcon,
     processQuestForAutoComplete,
     getQuestAcceptedButtonProps,
     getQuestAcceptedButtonText,
@@ -911,15 +937,52 @@ export default definePlugin({
         {
             // Hides Quests tab in the Discovery page.
             find: "GlobalDiscoverySidebar",
+            replacement: [
+                {
+                    match: /(GLOBAL_DISCOVERY_TABS).map/,
+                    replace: '$1.filter(tab=>!(tab==="quests"&&$self.shouldHideDiscoveryTab())).map'
+                }
+            ]
+        },
+        {
+            // Hides Quests tab in the DMs tab list.
+            find: "QUEST_HOME_V2):",
+            replacement: [
+                {
+                    match: /(?<="family-center"\):null,\i)/,
+                    replace: "||$self.shouldHideDirectMessagesTab()"
+                }
+            ]
+        },
+        {
+            // Hides the Quest icon from members list items when
+            // a user is playing a game tied to an active Quest.
+            find: "HANG_STATUS});",
             group: true,
             replacement: [
                 {
-                    match: /(let \i=function\(\){)/,
-                    replace: "$1const shouldHideDiscoveryTab=$self.shouldHideDiscoveryTab();"
+                    match: /(?=if\(\(0,.{0,30}?isBlockedOrIgnored)/,
+                    replace: "const shouldHideMembersListActivelyPlayingIcon=$self.shouldHideMembersListActivelyPlayingIcon();"
                 },
                 {
-                    match: /(GLOBAL_DISCOVERY_TABS).map/,
-                    replace: '$1.filter(tab=>!(tab==="quests"&&shouldHideDiscoveryTab)).map'
+                    match: /(?<=}\),\i\(\),\i&&)/,
+                    replace: "!shouldHideMembersListActivelyPlayingIcon&&"
+                }
+            ]
+        },
+        {
+            // Same as above, probably? Not sure when
+            // each function is used, so patching both.
+            find: "iconOnly)},",
+            group: true,
+            replacement: [
+                {
+                    match: /(?=if\(\i\)return null;let \i=function)/,
+                    replace: "const shouldHideMembersListActivelyPlayingIcon=$self.shouldHideMembersListActivelyPlayingIcon();"
+                },
+                {
+                    match: /(?<=}\),\i\(\),\i&&)/,
+                    replace: "!shouldHideMembersListActivelyPlayingIcon&&"
                 }
             ]
         },
@@ -983,8 +1046,8 @@ export default definePlugin({
                 },
                 {
                     // QUESTS_FETCH_QUEST_TO_DELIVER_BEGIN
-                    match: /"QUESTS_FETCH_QUEST_TO_DELIVER_BEGIN",placement:\i\}\);/,
-                    replace: "$&if($self.shouldPreventFetchingQuests())return;"
+                    match: /(?=var.{0,150}QUESTS_FETCH_QUEST_TO_DELIVER_BEGIN)/,
+                    replace: "if($self.shouldPreventFetchingQuests())return;"
                 }
             ]
         },
