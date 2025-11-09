@@ -11,7 +11,7 @@ import { openPluginModal } from "@components/settings/tabs";
 import type { Plugin } from "@utils/types";
 import { changes, checkForUpdates } from "@utils/updater";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MediaEngineStore, React, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, SettingsRouter, StreamerModeStore, Toasts, UserStore, VoiceActions } from "@webpack/common";
+import { ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MediaEngineStore, React, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, SettingsRouter, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
 import type { FC, ReactElement, ReactNode } from "react";
 import { Settings } from "Vencord";
 
@@ -110,19 +110,9 @@ const TAG_SESSION = "Session";
 const TAG_CONTEXT = "Context";
 const TAG_CUSTOM = "Custom";
 
-const debugLogs: Array<unknown[]> = [];
-function debugLog(...args: unknown[]) {
-    debugLogs.push(args);
-    if (debugLogs.length > 100) debugLogs.shift();
-    (window as unknown as Record<string, unknown>).__CommandPaletteDebug = debugLogs;
-    console.debug("CommandPalette", ...args);
-}
-
 export function normalizeTag(tag: string): string {
     return tag.trim().toLowerCase();
 }
-
-
 
 export function wrapChatBarChildren(children: ReactNode): ReactNode {
     if (!Array.isArray(children) || children.length === 0) return children;
@@ -145,7 +135,9 @@ export function wrapChatBarChildren(children: ReactNode): ReactNode {
             key: existingKey ?? buttonKey
         };
 
-        return React.createElement(ChatBarCommandBridge, bridgeProps);
+        return (
+            <ChatBarCommandBridge key={existingKey} {...bridgeProps} />
+        );
     });
 
     if (!hasChanges) return children;
@@ -171,7 +163,7 @@ export const ChatBarCommandBridge: FC<ChatBarCommandBridgeProps> = ({ element, b
     const latestElementRef = React.useRef(element);
     latestElementRef.current = element;
 
-    React.useEffect(() => {
+    useEffect(() => {
         let cancelled = false;
         let cleanup: (() => void) | null = null;
         let timeoutId: number | null = null;
@@ -212,7 +204,7 @@ export const ChatBarCommandBridge: FC<ChatBarCommandBridgeProps> = ({ element, b
         };
     }, [buttonKey]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
         const state = chatBarCommandStates.get(buttonKey);
@@ -223,10 +215,11 @@ export const ChatBarCommandBridge: FC<ChatBarCommandBridgeProps> = ({ element, b
         ensureChatBarCommandState(buttonKey, label);
     }, [element, buttonKey]);
 
-    return React.createElement("div", {
-        ref: containerRef,
-        style: { display: "contents" }
-    }, element);
+    return (
+        <div ref={containerRef} style={{ display: "contents" }}>
+            {element}
+        </div>
+    );
 };
 
 export function resolveChatBarElementFromContainer(container: HTMLElement): HTMLElement | null {

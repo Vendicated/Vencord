@@ -475,7 +475,7 @@ export default definePlugin({
         document.body.appendChild(container);
 
         snowRoot = createRoot(container);
-        snowRoot.render(React.createElement(SnowfallManager));
+        snowRoot.render(<SnowfallManager />);
     },
 
     stop() {

@@ -69,19 +69,18 @@ const settings = definePluginSettings({
     clearRdms: {
         type: OptionType.COMPONENT,
         description: "Testing utility: Clear RDMS list",
-        component: () => React.createElement(
-            Button,
-            {
-                color: Button.Colors.RED,
-                onClick: async () => {
+        component: () => (
+            <Button
+                color={Button.Colors.RED}
+                onClick={async () => {
                     rmdsDmChannelIds = [];
                     cycleSnapshot = [];
                     cycleIndex = -1;
                     await DataStore.set(STORAGE_KEY, []);
                     Toasts.show({ id: Toasts.genId(), type: Toasts.Type.SUCCESS, message: "Cleared RDMS history" });
-                }
-            },
-            "Clear RDMS History"
+                }}>
+                "Clear RDMS History
+            </Button>
         )
     }
 });
