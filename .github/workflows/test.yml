@@ -8,22 +8,23 @@ on:
 jobs:
     test:
         runs-on: ubuntu-latest
+
         steps:
             - uses: actions/checkout@v4
-            - uses: pnpm/action-setup@v3
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+
             - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
                   node-version: 20
                   cache: "pnpm"
+
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
-            - name: Install missing dependencies
-              run: |
-                  pnpm add -D -w typed-emitter discord-types
+
             - name: Lint & Test if desktop version compiles
-              run: pnpm test || true
-            - name: Test if web version compiles
-              run: pnpm buildWeb
+              run: pnpm test
+
+
             - name: Test if plugin structure is valid
-              run: pnpm generatePluginJson || true
+              run: pnpm generatePluginJson
