@@ -1,80 +1,62 @@
 name: Build DevBuild
 on:
+    workflow_run:
+        workflows: ["Upstream Sync"]
+        branches: [main]
+        types:
+            - completed
     push:
         branches:
             - main
-            - dev
+        paths:
+            - .github/workflows/build.yml
+            - src/**
+            - browser/**
+            - scripts/build/**
+            - package.json
+            - pnpm-lock.yaml
     workflow_dispatch:
-
-permissions:
-    contents: write
+env:
+    FORCE_COLOR: true
 
 jobs:
-    build:
+    Build:
         runs-on: ubuntu-latest
+
         steps:
             - uses: actions/checkout@v4
-            - uses: pnpm/action-setup@v3
+
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+
             - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
                   node-version: 20
                   cache: "pnpm"
 
-            - name: Install dependencies (no lockfile freeze)
-              run: pnpm install --no-frozen-lockfile
-
-            - name: Verify installed modules
-              run: pnpm list
-
-            - name: Build web
-              run: pnpm buildWeb --standalone
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
             - name: Build
               run: pnpm build --standalone
 
             - name: Generate plugin list
-              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json || true
+              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
             - name: Clean up obsolete files
               run: |
-                  rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+                  rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
 
             - name: Get some values needed for the release
-              id: vars
+              id: release_values
               run: |
-                  echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-                  echo "date=$(git show -s --format=%cI HEAD)" >> $GITHUB_OUTPUT
-
-            - name: Create DevBuild release if not exists
-              run: |
-                  gh release view DevBuild || gh release create DevBuild --title "DevBuild" --notes "Nightly build initialized"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
             - name: Upload DevBuild as release
-              if: github.repository == 'viciouscal/Vencord'
+              if: github.repository == 'Loukious/Vencord'
               run: |
-                  gh release upload DevBuild --clobber dist/*
-                  gh release edit DevBuild --title "DevBuild ${{ steps.vars.outputs.hash }}" --notes "Nightly build from ${{ steps.vars.outputs.date }}"
+                  gh release upload devbuild --clobber dist/*
+                  gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Upload DevBuild to builds repo
-              if: github.repository == 'viciouscal/Vencord'
-              run: |
-                  git config --global user.name "${{ github.actor }}"
-                  git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-
-                  revision=$(git rev-parse --short HEAD)
-                  
-                  git clone https://github.com/Vencord/builds.git
-                  cd builds
-                  
-                  git remote add target https://${{ secrets.GITHUB_TOKEN }}@github.com/viciouscal/builds.git 2> /dev/null || git remote set-url target https://${{ secrets.GITHUB_TOKEN }}@github.com/viciouscal/builds.git
-                  
-                  cp -r ../dist .
-                  
-                  git add .
-                  git commit -m "Builds for https://github.com/${{ github.repository }}/commit/$revision" || exit 0
-                  git push --set-upstream target main
+                  RELEASE_TAG: ${{ env.release_tag }}
