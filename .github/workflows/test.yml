@@ -20,7 +20,7 @@ jobs:
               run: pnpm install --frozen-lockfile
             - name: Install missing dependencies
               run: |
-                  pnpm add -D -w typed-emitter @types/discord-types
+                  pnpm add -D -w typed-emitter discord-types
             - name: Lint & Test if desktop version compiles
               run: pnpm test || true
             - name: Test if web version compiles
