@@ -49,8 +49,8 @@ jobs:
             - name: Upload DevBuild as release
               if: github.repository == 'viciouscal/Vencord'
               run: |
-                  gh release upload devbuild --clobber dist/*
-                  gh release edit devbuild --title "DevBuild ${{ steps.vars.outputs.hash }}" --notes "Nightly build from ${{ steps.vars.outputs.date }}"
+                  gh release upload DevBuild --clobber dist/*
+                  gh release edit DevBuild --title "DevBuild ${{ steps.vars.outputs.hash }}" --notes "Nightly build from ${{ steps.vars.outputs.date }}"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
