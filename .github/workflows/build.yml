@@ -3,28 +3,18 @@ on:
     push:
         branches:
             - main
-        paths:
-            - .github/workflows/build.yml
-            - src/**
-            - browser/**
-            - scripts/build/**
-            - package.json
-            - pnpm-lock.yaml
-env:
-    FORCE_COLOR: true
+            - dev
+    workflow_dispatch:
+
+permissions:
+    contents: write
 
 jobs:
-    Build:
+    build:
         runs-on: ubuntu-latest
-
         steps:
             - uses: actions/checkout@v4
-
-            - name: Setup PNPM
-              uses: pnpm/action-setup@v3
-              with:
-                  version: 9
-
+            - uses: pnpm/action-setup@v3
             - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
@@ -35,56 +25,50 @@ jobs:
               run: pnpm install --no-frozen-lockfile
 
             - name: Verify installed modules
-              run: |
-                  pnpm list --depth 0 || true
-                  ls -la node_modules | head -n 25 || true
+              run: pnpm list
 
             - name: Build web
-              run: pnpm buildWebStandalone || pnpm run buildWebStandalone
+              run: pnpm buildWeb --standalone
 
             - name: Build
-              run: pnpm build --standalone || pnpm run build --standalone
+              run: pnpm build --standalone
 
             - name: Generate plugin list
-              run: |
-                  echo "Generating plugin list (ignoring invalid plugins)..."
-                  pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json || echo "⚠️ Ignored invalid plugin"
+              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
             - name: Clean up obsolete files
               run: |
-                  rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+                  rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
 
             - name: Get some values needed for the release
-              id: release_values
+              id: vars
               run: |
-                  echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+                  echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+                  echo "date=$(git show -s --format=%cI HEAD)" >> $GITHUB_OUTPUT
 
             - name: Upload DevBuild as release
-              if: github.repository == 'Vendicated/Vencord'
+              if: github.repository == 'viciouscal/Vencord'
               run: |
                   gh release upload devbuild --clobber dist/*
-                  gh release edit devbuild --title "DevBuild $RELEASE_TAG"
+                  gh release edit devbuild --title "DevBuild ${{ steps.vars.outputs.hash }}" --notes "Nightly build from ${{ steps.vars.outputs.date }}"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  RELEASE_TAG: ${{ env.release_tag }}
 
             - name: Upload DevBuild to builds repo
-              if: github.repository == 'Vendicated/Vencord'
+              if: github.repository == 'viciouscal/Vencord'
               run: |
-                  git config --global user.name "$USERNAME"
-                  git config --global user.email actions@github.com
+                  git config --global user.name "${{ github.actor }}"
+                  git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-                  git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
-                  cd upload
-
-                  GLOBIGNORE=.git:.gitignore:README.md:LICENSE
-                  rm -rf *
-                  cp -r ../dist/* .
-
-                  git add -A
-                  git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
-                  git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
-              env:
-                  API_TOKEN: ${{ secrets.BUILDS_TOKEN }}
-                  GH_REPO: Vencord/builds
-                  USERNAME: GitHub-Actions
+                  revision=$(git rev-parse --short HEAD)
+                  
+                  git clone https://github.com/Vencord/builds.git
+                  cd builds
+                  
+                  git remote add target https://${{ secrets.GITHUB_TOKEN }}@github.com/viciouscal/builds.git 2> /dev/null || git remote set-url target https://${{ secrets.GITHUB_TOKEN }}@github.com/viciouscal/builds.git
+                  
+                  cp -r ../dist .
+                  
+                  git add .
+                  git commit -m "Builds for https://github.com/${{ github.repository }}/commit/$revision" || exit 0
+                  git push --set-upstream target main
