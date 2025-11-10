@@ -1176,7 +1176,7 @@ export default definePlugin({
         {
             // Loads the last used sort method and filter choices.
             // Defaults to sorting by "Questify" and no filters.
-            find: "filterSortOption,selectedFilters",
+            find: "headingControls,children:",
             group: true,
             replacement: [
                 {
