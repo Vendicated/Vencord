@@ -6,7 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { copyToClipboard } from "@utils/clipboard";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
 import type { Channel, User } from "discord-types/general";
