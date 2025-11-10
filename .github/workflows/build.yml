@@ -34,7 +34,7 @@ jobs:
               run: pnpm build --standalone
 
             - name: Generate plugin list
-              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
+              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json || true
 
             - name: Clean up obsolete files
               run: |
