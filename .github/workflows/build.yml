@@ -46,6 +46,12 @@ jobs:
                   echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
                   echo "date=$(git show -s --format=%cI HEAD)" >> $GITHUB_OUTPUT
 
+            - name: Create DevBuild release if not exists
+              run: |
+                  gh release view DevBuild || gh release create DevBuild --title "DevBuild" --notes "Nightly build initialized"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             - name: Upload DevBuild as release
               if: github.repository == 'viciouscal/Vencord'
               run: |
