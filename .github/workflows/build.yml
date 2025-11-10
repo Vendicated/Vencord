@@ -46,8 +46,9 @@ jobs:
               run: pnpm build --standalone || pnpm run build --standalone
 
             - name: Generate plugin list
-              continue-on-error: true
-              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
+              run: |
+                  echo "Generating plugin list (ignoring invalid plugins)..."
+                  pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json || echo "⚠️ Ignored invalid plugin"
 
             - name: Clean up obsolete files
               run: |
