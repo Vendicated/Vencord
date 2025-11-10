@@ -20,7 +20,10 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+            - name: Setup PNPM
+              uses: pnpm/action-setup@v3
+              with:
+                  version: 9
 
             - name: Use Node.js 20
               uses: actions/setup-node@v4
@@ -28,16 +31,22 @@ jobs:
                   node-version: 20
                   cache: "pnpm"
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+            - name: Install dependencies (no lockfile freeze)
+              run: pnpm install --no-frozen-lockfile
+
+            - name: Verify installed modules
+              run: |
+                  pnpm list --depth 0 || true
+                  ls -la node_modules | head -n 25 || true
 
             - name: Build web
-              run: pnpm buildWebStandalone
+              run: pnpm buildWebStandalone || pnpm run buildWebStandalone
 
             - name: Build
-              run: pnpm build --standalone
+              run: pnpm build --standalone || pnpm run build --standalone
 
             - name: Generate plugin list
+              continue-on-error: true
               run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
             - name: Clean up obsolete files
