@@ -74,7 +74,6 @@
         "ts-pattern": "^5.6.0",
         "tsx": "^4.19.3",
         "type-fest": "^4.38.0",
-        "typed-emitter": "^2.1.0",
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.28.0",
         "typescript-transform-paths": "^3.5.5",
