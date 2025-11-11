@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*'
       - 'devbuild-*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,17 +13,33 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -30,16 +47,39 @@ jobs:
       - name: Build Vencord
         run: pnpm build
 
-      - name: Package desktop.asar
+      - name: Build web
+        run: pnpm buildWeb
+
+      - name: Install asar
+        run: npm install -g asar
+
+      - name: Create desktop.asar
         run: |
           cd dist
-          npx asar pack . ../desktop.asar
+          asar pack . ../desktop.asar
+          cd ..
+
+      - name: Get version info
+        id: version
+        run: |
+          if [[ "${{ github.ref_name }}" == devbuild-* ]]; then
+            echo "name=DevBuild ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=Vencord ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          name: ${{ steps.version.outputs.name }}
+          draft: false
+          prerelease: ${{ startsWith(github.ref_name, 'devbuild-') }}
           files: |
             desktop.asar
-            dist/**/*
+            dist/browser.js
+            dist/vencordDesktop.js
+            dist/vencordDesktopMain.js
+            dist/vencordDesktopPreload.js
+            dist/vencordDesktopRenderer.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
