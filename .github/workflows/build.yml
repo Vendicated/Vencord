@@ -18,58 +18,44 @@ on:
     workflow_dispatch:
 env:
     FORCE_COLOR: true
+
 jobs:
     Build:
         runs-on: ubuntu-latest
+
         steps:
             - uses: actions/checkout@v4
-            - uses: pnpm/action-setup@v3
+
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+
             - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
                   node-version: 20
                   cache: "pnpm"
+
             - name: Install dependencies
-              run: pnpm install --no-frozen-lockfile
+              run: pnpm install --frozen-lockfile
+
             - name: Build
-              run: |
-                  pnpm build --standalone
-                  pnpm buildWeb --standalone
+              run: pnpm build --standalone
+
             - name: Generate plugin list
               run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
-            - name: Install asar
-              run: npm install -g @electron/asar
-            - name: Create desktop.asar
+
+            - name: Clean up obsolete files
               run: |
-                  cd dist
-                  asar pack . ../desktop.asar
-                  cd ..
-                  ls -lh desktop.asar
-            - name: Prepare release files
-              run: |
-                  cd dist
-                  if [ -f "vencordDesktopMain.js" ]; then
-                    cp vencordDesktopMain.js patcher.js
-                  fi
-                  if [ -f "vencordDesktopPreload.js" ]; then
-                    cp vencordDesktopPreload.js preload.js
-                  fi
-                  if [ -f "vencordDesktopRenderer.js" ]; then
-                    cp vencordDesktopRenderer.js renderer.js
-                  fi
-                  if [ -f "vencordDesktopRenderer.css" ]; then
-                    cp vencordDesktopRenderer.css renderer.css
-                  fi
-                  ls -lh patcher.js preload.js renderer.js renderer.css
-                  cd ..
+                  rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+
             - name: Get some values needed for the release
               id: release_values
               run: |
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
             - name: Upload DevBuild as release
               if: github.repository == 'viciouscal/Vencord'
               run: |
-                  gh release upload devbuild --clobber desktop.asar dist/patcher.js dist/preload.js dist/renderer.js dist/renderer.css dist/browser.js dist/plugins.json dist/plugin-readmes.json
+                  gh release upload devbuild --clobber dist/*
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
