@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 import { fakeD } from "../fakeDeafen";
 import { replacedUserPanelComponent } from "./patches";
 
-const plugin = definePlugin({
+export default definePlugin({
     name: "PhilsPluginLibrary",
     description: "A library for phil's plugins",
     authors: [Devs.viciouscal],
@@ -47,14 +47,9 @@ const plugin = definePlugin({
                 }
             ]
         }
-    ]
+    ],
+    replacedUserPanelComponent
 });
-
-
-plugin.replacedUserPanelComponent = replacedUserPanelComponent.bind(plugin);
-
-
-export default plugin;
 
 export const DeafenIcon = (props: React.ComponentProps<"svg">) => {
     const isFakeD = fakeD;
