@@ -7,6 +7,9 @@ on:
       - 'devbuild-*'
   workflow_dispatch:
 
+env:
+  FORCE_COLOR: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,50 +17,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Build Vencord (Desktop & Web)
+      - name: Build Vencord
         run: |
-          pnpm build
-          pnpm buildWeb
+          pnpm build --standalone
+          pnpm buildWeb --standalone
 
-      - name: List build output
-        run: |
-          echo "=== Contents of dist directory ==="
-          ls -la dist/
-          echo "=================================="
-
-      - name: Get git hash
-        id: git-hash
-        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Generate plugin list
+        run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
       - name: Prepare release files
         run: |
@@ -79,10 +58,7 @@ jobs:
             cp vencordDesktopRenderer.css renderer.css
           fi
           
-          echo "=== Files prepared for release ==="
-          ls -lh patcher.js preload.js renderer.js renderer.css 2>/dev/null || echo "Some files missing!"
-          echo "==================================="
-          
+          ls -lh
           cd ..
 
       - name: Create browser.zip
@@ -94,19 +70,15 @@ jobs:
       - name: Get version info
         id: version
         run: |
-          HASH="${{ steps.git-hash.outputs.hash }}"
-          if [[ "${{ github.ref_name }}" == devbuild-* ]]; then
-            echo "name=DevBuild $HASH" >> $GITHUB_OUTPUT
-          else
-            echo "name=Vencord ${{ github.ref_name }} $HASH" >> $GITHUB_OUTPUT
-          fi
+          HASH=$(git rev-parse --short HEAD)
+          echo "name=DevBuild $HASH" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.version.outputs.name }}
           draft: false
-          prerelease: ${{ startsWith(github.ref_name, 'devbuild-') }}
+          prerelease: true
           files: |
             dist/patcher.js
             dist/preload.js
