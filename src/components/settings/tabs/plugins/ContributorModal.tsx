@@ -28,19 +28,19 @@ const cl = classNameFactory("vc-author-modal-");
 
 type PluginFilter = "all" | "equicord" | "vencord" | "modified" | "user";
 
-export function openContributorModal(user: User, filter: PluginFilter = "all") {
+export function openContributorModal(user: User) {
     openModal(modalProps =>
         <ModalRoot {...modalProps}>
             <ErrorBoundary>
                 <ModalContent className={cl("root")}>
-                    <ContributorModal user={user} filter={filter} />
+                    <ContributorModal user={user} />
                 </ModalContent>
             </ErrorBoundary>
         </ModalRoot>
     );
 }
 
-function ContributorModal({ user, filter }: { user: User; filter: PluginFilter; }) {
+function ContributorModal({ user }: { user: User; }) {
     useSettings();
 
     const profile = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(user.id));
@@ -55,14 +55,12 @@ function ContributorModal({ user, filter }: { user: User; filter: PluginFilter; 
 
     const plugins = useMemo(() => {
         const allPlugins = Object.values(Plugins);
-        const pluginsByAuthor = (VencordDevsById[user.id] || EquicordDevsById[user.id]) && filter !== "user"
+        const pluginsByAuthor = (VencordDevsById[user.id] || EquicordDevsById[user.id])
             ? allPlugins.filter(p => p.authors.includes(VencordDevsById[user.id] || EquicordDevsById[user.id]))
-            : filter === "user"
-                ? allPlugins.filter(p => {
-                    const pluginMeta = PluginMeta[p.name];
-                    return pluginMeta?.userPlugin && p.authors.some(a => a.id.toString() === user.id);
-                })
-                : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
+            : allPlugins.filter(p =>
+                PluginMeta[p.name]?.userPlugin && p.authors.some(a => a.id.toString() === user.id)
+                || p.authors.some(a => a.name === user.username)
+            );
 
         return pluginsByAuthor
             .filter(p => !p.name.endsWith("API"))
@@ -70,25 +68,6 @@ function ContributorModal({ user, filter }: { user: User; filter: PluginFilter; 
     }, [user.id, user.username]);
 
     const ContributedHyperLink = <Link href="https://github.com/Equicord/Equicord">contributed</Link>;
-
-    const filteredPlugins = useMemo(() => {
-        return plugins.filter(p => {
-            const pluginMeta = PluginMeta[p.name];
-            switch (filter) {
-                case "vencord":
-                    return pluginMeta.folderName.startsWith("src/plugins/") ?? false;
-                case "equicord":
-                    return pluginMeta.folderName.startsWith("src/equicordplugins/") ?? false;
-                case "user":
-                    return pluginMeta?.userPlugin ?? false;
-                case "modified":
-                    return p.isModified ?? false;
-                case "all":
-                default:
-                    return () => true;
-            }
-        });
-    }, [plugins]);
 
     return (
         <>
@@ -116,9 +95,9 @@ function ContributorModal({ user, filter }: { user: User; filter: PluginFilter; 
                 </div>
             </div>
 
-            {filteredPlugins.length ? (
+            {plugins.length ? (
                 <Paragraph>
-                    {user.username} has {ContributedHyperLink} to {pluralise(filteredPlugins.length, "plugin")}!
+                    {user.username} has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
                 </Paragraph>
             ) : (
                 <Paragraph>
@@ -126,9 +105,9 @@ function ContributorModal({ user, filter }: { user: User; filter: PluginFilter; 
                 </Paragraph>
             )}
 
-            {!!filteredPlugins.length && (
+            {!!plugins.length && (
                 <div className={cl("plugins")}>
-                    {filteredPlugins.map(p =>
+                    {plugins.map(p =>
                         <PluginCard
                             key={p.name}
                             plugin={p}

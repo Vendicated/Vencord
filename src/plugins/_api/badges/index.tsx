@@ -41,7 +41,7 @@ const ContributorBadge: ProfileBadge = {
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
-    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId), "vencord")
+    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
 const EquicordContributorBadge: ProfileBadge = {
@@ -49,7 +49,7 @@ const EquicordContributorBadge: ProfileBadge = {
     image: EQUICORD_CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowEquicordContributorBadge(userId),
-    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId), "equicord"),
+    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId)),
     props: {
         style: {
             borderRadius: "50%",
@@ -69,7 +69,7 @@ const UserPluginContributorBadge: ProfileBadge = {
             return pluginMeta?.userPlugin && p.authors.some(a => a.id.toString() === userId) && IS_DEV;
         });
     },
-    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId), "user"),
+    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId)),
     props: {
         style: {
             borderRadius: "50%",
