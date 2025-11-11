@@ -80,23 +80,15 @@ export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean;
 const buttonFactories = new Map<string, ChatBarButtonFactory>();
 const logger = new Logger("ChatButtons");
 
-export function _injectButtons(buttons: { key: string, node: ReactNode; }[], order: Record<string, number | null>, props: ChatBarProps) {
+export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled) return;
 
-    let anchorIndex = -100;
-    let currentOrder = anchorIndex - 1;
-
     for (const [key, Button] of buttonFactories) {
-        order[key] = anchorIndex;
-        order.submit && (order.submit = ++currentOrder);
-        anchorIndex = currentOrder + 1;
-
-        buttons.push({
-            key,
-            node: <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
+        buttons.push(
+            <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
                 <Button {...props} isMainChat={props.type.analyticsName === "normal"} />
             </ErrorBoundary>
-        });
+        );
     }
 }
 
