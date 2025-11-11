@@ -134,3 +134,22 @@ $modifier: var(--input-border);
     margin-bottom: calc(-8px + .15*(var(--custom-user-profile-modal-header-avatar-size) + var(--custom-user-profile-modal-header-total-avatar-border-size)));
     z-index: 1;
 }
+
+.vc-help-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+.vc-help-modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.vc-help-markdown span[class*="statusTag"] {
+    display: inline-block;
+    width: auto;
+}

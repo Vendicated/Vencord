@@ -170,8 +170,6 @@ export function CreateTabBar({ tabs, firstSelectedTab, onChangeTab }) {
         firstSelectedTab || (tabKeys.length > 0 ? tabKeys[0] : null)
     );
 
-
-
     const renderSelectedTab = React.useCallback(() => {
         const selectedTabId = tabKeys.find(tab => tab === selectedTab);
         return selectedTabId;

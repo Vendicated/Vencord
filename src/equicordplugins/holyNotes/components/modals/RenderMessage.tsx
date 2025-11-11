@@ -4,16 +4,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { CopyIcon, DeleteIcon, IDIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { makeDummyUser } from "@components/settings/tabs/plugins/PluginModal";
 import { MessageType } from "@equicordplugins/holyNotes";
 import { copyToClipboard } from "@utils/clipboard";
 import { classes } from "@utils/misc";
 import { ModalProps } from "@utils/modal";
-import { findByCodeLazy, findByProps, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 
 import { noteHandler } from "../../NoteHandler";
 import { HolyNotes } from "../../types";
+
+const messageClasses = findByPropsLazy("message", "groupStart", "cozyMessage");
+const Channel = findByCodeLazy("computeLurkerPermissionsAllowList(){");
+const ChannelMessage = findComponentByCodeLazy("Message must not be a thread");
 
 export const RenderMessage = ({
     note,
@@ -28,15 +33,18 @@ export const RenderMessage = ({
     fromDeleteModal: boolean;
     closeModal?: () => void;
 }) => {
-    const { message, groupStart, cozyMessage } = findByProps("cozyMessage");
-    const Channel = findByCodeLazy("computeLurkerPermissionsAllowList(){");
-    const ChannelMessage = findComponentByCodeLazy("Message must not be a thread");
-
-    const [isHoldingDelete, setHoldingDelete] = React.useState(false);
+    const isHoldingDeleteRef = React.useRef(false);
+    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
 
     React.useEffect(() => {
-        const deleteHandler = (e: { key: string; type: string; }) =>
-            e.key.toLowerCase() === "delete" && setHoldingDelete(e.type.toLowerCase() === "keydown");
+        const deleteHandler = (e: KeyboardEvent) => {
+            if (e.key.toLowerCase() !== "delete") return;
+            const newState = e.type === "keydown";
+            if (isHoldingDeleteRef.current !== newState) {
+                isHoldingDeleteRef.current = newState;
+                forceUpdate();
+            }
+        };
 
         document.addEventListener("keydown", deleteHandler);
         document.addEventListener("keyup", deleteHandler);
@@ -57,7 +65,7 @@ export const RenderMessage = ({
                 paddingBottom: "4px",
             }}
             onClick={() => {
-                if (isHoldingDelete && !fromDeleteModal) {
+                if (isHoldingDeleteRef.current && !fromDeleteModal) {
                     noteHandler.deleteNote(note.id, notebook);
                     updateParent?.();
                 }
@@ -78,7 +86,7 @@ export const RenderMessage = ({
             }}
         >
             <ChannelMessage
-                className={classes("vc-holy-render", message, groupStart, cozyMessage)}
+                className={classes("vc-holy-render", messageClasses?.message, messageClasses?.groupStart, messageClasses?.cozyMessage)}
                 key={note.id}
                 groupId={note.id}
                 id={note.id}
@@ -135,26 +143,26 @@ const NoteContextMenu = (
                     NavigationRouter.transitionTo(`/channels/${note.guild_id ?? "@me"}/${note.channel_id}/${note.id}`);
                     closeModal?.();
                 }}
+                icon={OpenExternalIcon}
             />
             <Menu.MenuItem
                 label="Copy Text"
                 id="copy-text"
                 action={() => copyToClipboard(note.content)}
+                icon={CopyIcon}
             />
             {note?.attachments.length ? (
                 <Menu.MenuItem
                     label="Copy Attachment URL"
                     id="copy-url"
                     action={() => copyToClipboard(note.attachments[0].url)}
+                    icon={LinkIcon}
                 />) : null}
             <Menu.MenuItem
-                color="danger"
-                label="Delete Note"
-                id="delete"
-                action={() => {
-                    noteHandler.deleteNote(note.id, notebook);
-                    updateParent?.();
-                }}
+                label="Copy ID"
+                id="copy-id"
+                action={() => copyToClipboard(note.id)}
+                icon={IDIcon}
             />
             {Object.keys(noteHandler.getAllNotes()).length !== 1 ? (
                 <Menu.MenuItem
@@ -179,9 +187,14 @@ const NoteContextMenu = (
                 </Menu.MenuItem>
             ) : null}
             <Menu.MenuItem
-                label="Copy ID"
-                id="copy-id"
-                action={() => copyToClipboard(note.id)}
+                color="danger"
+                label="Delete Note"
+                id="delete"
+                action={() => {
+                    noteHandler.deleteNote(note.id, notebook);
+                    updateParent?.();
+                }}
+                icon={DeleteIcon}
             />
         </Menu.Menu>
     );
