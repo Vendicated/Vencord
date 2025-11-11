@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -79,10 +79,10 @@ export const settings = definePluginSettings({
         default: "",
         restartNeeded: false
     },
-    Boo: {
+    scary: {
         type: OptionType.BOOLEAN,
         description: "Something might happen if you ignore someone for too long...",
-        default: true,
+        default: false,
         restartNeeded: false
     }
 });
@@ -189,8 +189,9 @@ function BooIndicator() {
     );
 }
 
+migratePluginSettings("Ghosted", "Boo");
 export default definePlugin({
-    name: "Boo",
+    name: "Ghosted",
     description: "A cute ghost will appear if you don't answer their DMs",
     authors: [EquicordDevs.vei, Devs.sadan, EquicordDevs.justjxke],
     settings,
