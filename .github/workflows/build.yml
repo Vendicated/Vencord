@@ -37,6 +37,14 @@ jobs:
                   pnpm buildWeb --standalone
             - name: Generate plugin list
               run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
+            - name: Install asar
+              run: npm install -g @electron/asar
+            - name: Create desktop.asar
+              run: |
+                  cd dist
+                  asar pack . ../desktop.asar
+                  cd ..
+                  ls -lh desktop.asar
             - name: Prepare release files
               run: |
                   cd dist
@@ -61,7 +69,7 @@ jobs:
             - name: Upload DevBuild as release
               if: github.repository == 'viciouscal/Vencord'
               run: |
-                  gh release upload devbuild --clobber dist/patcher.js dist/preload.js dist/renderer.js dist/renderer.css dist/browser.js dist/plugins.json dist/plugin-readmes.json
+                  gh release upload devbuild --clobber desktop.asar dist/patcher.js dist/preload.js dist/renderer.js dist/renderer.css dist/browser.js dist/plugins.json dist/plugin-readmes.json
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
