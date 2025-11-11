@@ -14,7 +14,7 @@ import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, useCallback, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { BasicChannelTabsProps, ChannelTabsProps, clearStaleNavigationContext, closeTab, createTab, handleChannelSwitch, isNavigationFromSource, isTabSelected, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
-import BookmarkContainer from "./BookmarkContainer";
+import BookmarkContainer, { HorizontalScroller } from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu } from "./ContextMenus";
 
@@ -100,7 +100,6 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     }, [userId]);
 
     const ref = useRef<HTMLDivElement>(null);
-    const tabScrollerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setUpdaterFunction(update);
@@ -296,11 +295,11 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
                 <div className={cl("separator")} />
             </>}
             <div className={cl("tab-container")}>
-                <div className={cl("tab-scroller")} ref={tabScrollerRef}>
+                <HorizontalScroller className={cl("tab-scroller")}>
                     {openedTabs.filter(tab => tab != null).map((tab, i) =>
                         <ChannelTab {...tab} index={i} key={tab.id} />
                     )}
-                </div>
+                </HorizontalScroller>
 
                 <button
                     onClick={() => createTab(props, true)}
@@ -316,11 +315,11 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     );
 }
 
-export function ChannelTabsPreview(p) {
+export function ChannelTabsPreview(p: { setValue: (v: TabSet) => void; }) {
     const id = UserStore.getCurrentUser()?.id;
     if (!id) return <Paragraph>there's no logged in account?????</Paragraph>;
 
-    const { setValue }: { setValue: (v: TabSet) => void; } = p;
+    const { setValue } = p;
     const { tabSet }: { tabSet: TabSet; } = settings.use(["tabSet"]);
 
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
