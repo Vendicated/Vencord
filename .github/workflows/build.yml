@@ -1,62 +1,45 @@
-name: Build DevBuild
+name: Build Vencord
+
 on:
-    workflow_run:
-        workflows: ["Upstream Sync"]
-        branches: [main]
-        types:
-            - completed
-    push:
-        branches:
-            - main
-        paths:
-            - .github/workflows/build.yml
-            - src/**
-            - browser/**
-            - scripts/build/**
-            - package.json
-            - pnpm-lock.yaml
-    workflow_dispatch:
-env:
-    FORCE_COLOR: true
+  push:
+    tags:
+      - 'v*'
+      - 'devbuild-*'
 
 jobs:
-    Build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-            - name: Use Node.js 20
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-                  cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Build
-              run: pnpm build --standalone
+      - name: Build Vencord
+        run: pnpm build
 
-            - name: Generate plugin list
-              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
+      - name: Package desktop.asar
+        run: |
+          cd dist
+          npx asar pack . ../desktop.asar
 
-            - name: Clean up obsolete files
-              run: |
-                  rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
-
-            - name: Get some values needed for the release
-              id: release_values
-              run: |
-                  echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-            - name: Upload DevBuild as release
-              if: github.repository == 'viciouscal/Vencord'
-              run: |
-                  gh release upload devbuild --clobber dist/*
-                  gh release edit devbuild --title "DevBuild $RELEASE_TAG"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  RELEASE_TAG: ${{ env.release_tag }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            desktop.asar
+            dist/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
