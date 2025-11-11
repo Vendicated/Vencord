@@ -36,7 +36,7 @@ export function ChatPluginCard({ url, description }: { url: string, description:
     const excludedPlugin = ExcludedPlugins[pluginName];
 
     if (excludedPlugin || !p) {
-        const toolTipText = !p
+        const toolTipText = excludedPlugin
             ? `${pluginName} is only available on the ${ExcludedReasons[ExcludedPlugins[pluginName]]}`
             : "This plugin is not on this version of Equicord. Try updating!";
 
@@ -110,6 +110,8 @@ export const PluginCards = ErrorBoundary.wrap(function PluginCards({ message }: 
 
         if (!pluginName || seenPlugins.has(pluginName)) return;
         seenPlugins.add(pluginName);
+
+        if (embed.rawDescription.startsWith("A fork that has")) embed.rawDescription = "";
 
         pluginCards.push(
             <ChatPluginCard
