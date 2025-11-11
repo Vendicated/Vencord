@@ -11,7 +11,7 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore, MessageStore, RelationshipStore, StreamerModeStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, MessageStore, RelationshipStore, StreamerModeStore, useEffect, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 const wrapEmojis = findByCodeLazy("lastIndex;return");
@@ -72,11 +72,11 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         normal: {
             original: {
                 color: fallbackColor,
-                "text-decoration-color": fallbackColor,
+                "text-decoration-color": fallbackColor
             },
             adjusted: {
                 color: fallbackColor,
-                "text-decoration-color": fallbackColor,
+                "text-decoration-color": fallbackColor
             }
         },
         gradient: null
@@ -126,7 +126,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
             : "linear-gradient(to right,var(--custom-gradient-color-1),var(--custom-gradient-color-2),var(--custom-gradient-color-1))";
 
     const baseNormalStyle = {
-        "isolation": "isolate",
+        "isolation": "isolate"
     };
 
     const baseGradientStyle = {
@@ -134,7 +134,7 @@ function resolveColor(user: User | GuildMember, savedColor: string, fallbackColo
         "background-size": "100px auto",
         "-webkit-text-fill-color": "transparent",
         "-webkit-background-clip": "text",
-        "isolation": "isolate",
+        "isolation": "isolate"
     };
 
     return {
@@ -351,8 +351,8 @@ function renderUsername(
     const isReaction = isReactionsTooltip || isReactionsPopout;
     const isVoice = type === "voiceChannel";
 
-    const config = hookless ? settings.store : settings.use(["messages", "replies", "mentions", "memberList", "profilePopout", "reactions", "discriminators", "hideDefaultAtSign", "truncateAllNamesWithStreamerMode", "removeDuplicates", "ignoreGradients", "animateGradients", "includedNames", "friendNameColor", "nicknameColor", "displayNameColor", "usernameColor", "nameSeparator", "triggerNameRerender"]);
-    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, nameSeparator, triggerNameRerender } = config;
+    const config = hookless ? settings.store : settings.use(["messages", "replies", "mentions", "memberList", "profilePopout", "reactions", "discriminators", "hideDefaultAtSign", "truncateAllNamesWithStreamerMode", "removeDuplicates", "ignoreGradients", "ignoreFonts", "animateGradients", "includedNames", "friendNameColor", "nicknameColor", "displayNameColor", "usernameColor", "nameSeparator", "triggerNameRerender"]);
+    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, ignoreFonts, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, nameSeparator, triggerNameRerender } = config;
 
     const canUseGradient = ((author as GuildMember)?.guildId ? (GuildStore.getGuild((author as GuildMember).guildId) ?? {}).premiumFeatures?.features.includes("ENHANCED_ROLE_COLORS") : false);
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
@@ -361,7 +361,7 @@ function renderUsername(
     const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "", canUseGradient) : null;
     const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "", canUseGradient) : null;
     const resolvedFriendNameColor = author ? resolveColor(author, friendNameColor.trim(), "", canUseGradient) : null;
-    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate", "white-space": "pre" };
+    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate", "white-space": "pre", "font-family": "var(--font-primary)" };
     const [username, display, nick, friend] = getProcessedNames(author, truncateAllNamesWithStreamerMode, discriminators);
 
     const names: Record<string, [string | null, object | null]> = {
@@ -485,8 +485,9 @@ function renderUsername(
     const hasGradient = !!topRoleStyle?.gradient && Object.keys(topRoleStyle.gradient).length > 0;
     const message = channelId && messageId ? MessageStore.getMessage(channelId, messageId) : null;
     const groupId = (message as any)?.showMeYourNameGroupId || null;
+
     const isHovering = (isMessage || isReply || isMention)
-        ? ((messageId && hoveringMessageSet.has(messageId)) || (groupId && hoveringMessageSet.has(groupId)))
+        ? ((messageId && hoveringMessageMap.has(messageId)) || (groupId && hoveringMessageMap.has(groupId)))
         : isReactionsPopout
             ? hoveringReactionPopoutSet.has((author as User).id)
             : false;
@@ -560,15 +561,16 @@ function renderUsername(
                     <span
                         // On non-primary names, allow disabling the gradients completely, or just their animation & glow.
                         className={secondNameClasses}
-                        style={
-                            ignoreGradients
+                        style={{
+                            ...(ignoreFonts ? { "font-family": "var(--font-primary)" } : {}),
+                            ...(ignoreGradients
                                 ? second.style.normal.adjusted
                                 : shouldAnimateGradients && shouldAnimateSecondaryNames && second.style.gradient
                                     ? second.style.gradient.animated
                                     : second.style.gradient
                                         ? second.style.gradient.static.original
-                                        : second.style.normal.adjusted
-                        }>
+                                        : second.style.normal.adjusted)
+                        }}>
                         {second.wrapped}</span>
                     <span style={affixColor as React.CSSProperties} className={suffixClasses}>
                         {second.suffix}</span>
@@ -585,15 +587,16 @@ function renderUsername(
                         {third.prefix}</span>
                     <span
                         className={thirdNameClasses}
-                        style={
-                            ignoreGradients
+                        style={{
+                            ...(ignoreFonts ? { "font-family": "var(--font-primary)" } : {}),
+                            ...(ignoreGradients
                                 ? third.style.normal.adjusted
                                 : shouldAnimateGradients && shouldAnimateSecondaryNames && third.style.gradient
                                     ? third.style.gradient.animated
                                     : third.style.gradient
                                         ? third.style.gradient.static.original
-                                        : third.style.normal.adjusted
-                        }>
+                                        : third.style.normal.adjusted)
+                        }}>
                         {third.wrapped}</span>
                     <span style={affixColor as React.CSSProperties} className={suffixClasses}>
                         {third.suffix}</span>
@@ -610,15 +613,16 @@ function renderUsername(
                         {fourth.prefix}</span>
                     <span
                         className={fourthNameClasses}
-                        style={
-                            ignoreGradients
+                        style={{
+                            ...(ignoreFonts ? { "font-family": "var(--font-primary)" } : {}),
+                            ...(ignoreGradients
                                 ? fourth.style.normal.adjusted
                                 : shouldAnimateGradients && shouldAnimateSecondaryNames && fourth.style.gradient
                                     ? fourth.style.gradient.animated
                                     : fourth.style.gradient
                                         ? fourth.style.gradient.static.original
-                                        : fourth.style.normal.adjusted
-                        }>
+                                        : fourth.style.normal.adjusted)
+                        }}>
                         {fourth.wrapped}</span>
                     <span style={affixColor as React.CSSProperties} className={suffixClasses}>
                         {fourth.suffix}</span>
@@ -630,31 +634,48 @@ function renderUsername(
     return [allDataText, nameElement, first.name];
 }
 
-const hoveringMessageSet = new Set<string>();
+const hoveringMessageMap = new Map<string, number>();
 const hoveringReactionPopoutSet = new Set<string>();
 
-function handleHoveringMessage(message: any, animate: boolean) {
-    if (!message) return;
+function handleHoveringMessage(message: any, isHovering: boolean) {
+    const messageId = message?.id;
+    const groupId = message?.showMeYourNameGroupId ?? "";
 
-    if (animate) {
-        addHoveringMessage(message.id);
-        addHoveringMessage(message.showMeYourNameGroupId);
-    } else {
-        removeHoveringMessage(message.id);
-        removeHoveringMessage(message.showMeYourNameGroupId);
-    }
+    useEffect(() => {
+        if (!message) return;
+
+        if (isHovering) {
+            addHoveringMessage(messageId);
+            addHoveringMessage(groupId);
+        } else {
+            removeHoveringMessage(messageId);
+            removeHoveringMessage(groupId);
+        }
+    }, [messageId, groupId, isHovering]);
 }
 
 function addHoveringMessage(id: string) {
     if (!id) return;
-    hoveringMessageSet.add(id);
-    settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+
+    const currentCount = hoveringMessageMap.get(id) || 0;
+    hoveringMessageMap.set(id, currentCount + 1);
+
+    if (currentCount === 0) {
+        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+    }
 }
 
 function removeHoveringMessage(id: string) {
     if (!id) return;
-    hoveringMessageSet.delete(id);
-    settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+
+    const currentCount = hoveringMessageMap.get(id) || 0;
+
+    if (currentCount <= 1) {
+        hoveringMessageMap.delete(id);
+        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+    } else {
+        hoveringMessageMap.set(id, currentCount - 1);
+    }
 }
 
 function addHoveringReactionPopout(id: string) {
@@ -722,6 +743,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "If any of the names are equivalent, remove them, leaving only the unique names.",
+    },
+    ignoreFonts: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "For the second, third, and fourth names, use GG SANS regardless of the user's custom font.",
     },
     ignoreGradients: {
         type: OptionType.BOOLEAN,
@@ -801,19 +827,12 @@ export default definePlugin({
             ]
         },
         {
-            // Track hovering on messages to animate mentions.
-            find: /setAnimate.{0,50}\.ANIMATE_CHAT_AVATAR,/,
-            replacement: {
-                match: /(let{setAnimate:\i}=(\i);)/,
-                replace: "$1$self.handleHoveringMessage(arguments[0].message,$2.animate);"
-            }
-        },
-        {
-            // Attach the group ID to their messages to allow animating mentions within a group.
+            // Track hovering on messages to animate gradients.
+            // Attach the group ID to their messages to allow animating gradients within a group.
             find: "CUSTOM_GIFT?\"\":",
             replacement: {
                 match: /(\(\i,\i,\i\);)(let \i=\i.id===\i(?:.{0,500}?)hovering:(\i))/,
-                replace: "$1arguments[0].message.showMeYourNameGroupId=arguments[0].groupId;$2"
+                replace: "$1arguments[0].message.showMeYourNameGroupId=!!arguments[0].groupId?`g-${arguments[0].groupId}`:null;$self.handleHoveringMessage(arguments[0].message,$3);$2"
             },
         },
         {
