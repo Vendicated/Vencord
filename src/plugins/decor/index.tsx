@@ -75,8 +75,8 @@ export default definePlugin({
                 },
                 // Use added hook
                 {
-                    match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:\i.+?)/,
-                    replace: "vcDecorAvatarDecoration??($&)"
+                    match: /(?<={avatarDecoration:).{1,20}?(?=,)(?<=avatarDecorationOverride:(\i).+?)/,
+                    replace: "$1??vcDecorAvatarDecoration??($&)"
                 },
                 // Make memo depend on added hook
                 {
@@ -95,7 +95,17 @@ export default definePlugin({
                     replace: "$self.useUserDecorAvatarDecoration($1)??$&"
                 }
             ]
-        }
+        },
+        // Messages
+        {
+            find: '"Message Username"',
+            replacement: [
+                {
+                    match: /(?<=userValue.{0,25}void 0:)((\i)\.avatarDecoration)/,
+                    replace: "$self.useUserDecorAvatarDecoration($2)??$1"
+                }
+            ]
+        },
     ],
     settings,
 
