@@ -48,17 +48,27 @@ export default definePlugin({
         },
         {
             find: ".gifts)",
-            replacement: {
-                match: /(?<=,.{0,5}\(null==\(\i=\i\.stickers\)\?void 0.*?(\i)\.push\((\(0,\i\.jsx\))\((.+?),{disabled:\i,type:(\i)},"sticker"\)\)\))/,
-                replace: ",arguments[0].type?.submit?.button&&$1.push($2($3,{disabled:!arguments[0].type?.submit?.button,type:$4,stickersType:\"stickers+\"},\"stickers+\"))"
-            }
+            replacement: [
+                {
+                    match: /(?<="submit"\)\}\);)(?=.{0,50}null!=(\i))/,
+                    replace: '$1["stickers+"]=3;'
+                },
+                {
+                    match: /(?<=,.{0,5}\(null==\(\i=\i\.stickers\)\?void 0.*?(\i)\.push\(\{.{0,15}node:(.{0,15}{disabled:\i,type:\i)},"sticker"\)\}\))/,
+                    replace: ",arguments[0].type?.submit?.button&&$1.push({key:\"stickers+\",node:$2,stickersType:\"stickers+\"},\"stickers+\")})"
+                }
+            ]
         },
         {
             find: "#{intl::EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL}",
             replacement: [
                 {
-                    match: /(?<=null,(\i)\?(\(.*?\))\((\i),{.{0,128},isActive:(\i)===.{0,200},children:(\i\.intl\.string\(.*?\))\}\)\}\):null,)/s,
-                    replace: '$1?$2($3,{id:"stickers+-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":$4==="stickers+",isActive:$4==="stickers+",autoFocus:true,viewType:"stickers+",children:$5+"+"}):null,'
+                    match: /(?<=(\i)\?(\(.{0,15}\))\((\i),\{.{0,150}(\i)===\i\.\i\.STICKER,.{0,150}children:(.{0,30}\.stickersNavItem,children:.{0,25})\}\)\}\):null)/,
+                    replace: ',vcStickers=$1?$2($3,{id:"stickers+-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":$4==="stickers+",isActive:$4==="stickers+",autoFocus:true,viewType:"stickers+",children:$5+"+"})}):null'
+                },
+                {
+                    match: /children:\[\i,\i(?=.{0,5}\}\))/g,
+                    replace: "$&,vcStickers"
                 },
                 {
                     match: /:null,((.{1,200})===.{1,30}\.STICKER&&\w+\?(\([^()]{1,10}\)).{1,15}?(\{.*?,onSelectSticker:.*?\})\):null)/,
