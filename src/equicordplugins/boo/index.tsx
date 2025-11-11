@@ -48,7 +48,7 @@ function resetJumpscareTimer() {
     }
 
     const count = getBooCount();
-    if (count > 0 && settings.store.Boo) {
+    if (count > 0 && settings.store.scary) {
         // this is such a bad way to do this LMFAO
         const milliseconds = 60 * 60 * 1000;
 
