@@ -83,13 +83,12 @@ const logger = new Logger("ChatButtons");
 export function _injectButtons(buttons: { key: string, node: ReactNode; }[], order: Record<string, number | null>, props: ChatBarProps) {
     if (props.disabled) return;
 
-    let anchorIndex = -100;
-    let currentOrder = anchorIndex - 1;
+    let anchorIndex = -1;
+    let currentOrder = anchorIndex + 1;
 
     for (const [key, Button] of buttonFactories) {
         order[key] = anchorIndex;
-        order.submit && (order.submit = ++currentOrder);
-        anchorIndex = currentOrder + 1;
+        anchorIndex = --currentOrder;
 
         buttons.push({
             key,
