@@ -105,7 +105,7 @@ export default definePlugin({
                     replace: "$self.useUserDecorAvatarDecoration($2)??$1"
                 }
             ]
-        }
+        },
     ],
     settings,
 
