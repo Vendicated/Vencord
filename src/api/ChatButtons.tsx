@@ -84,11 +84,10 @@ export function _injectButtons(buttons: { key: string, node: ReactNode; }[], ord
     if (props.disabled) return;
 
     let anchorIndex = -1;
-    let currentOrder = anchorIndex + 1;
 
     for (const [key, Button] of buttonFactories) {
         order[key] = anchorIndex;
-        anchorIndex = --currentOrder;
+        anchorIndex--;
 
         buttons.push({
             key,
