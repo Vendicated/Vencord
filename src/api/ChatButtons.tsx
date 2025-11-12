@@ -80,9 +80,8 @@ export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean;
 const buttonFactories = new Map<string, ChatBarButtonFactory>();
 const logger = new Logger("ChatButtons");
 
-export function _injectButtons(buttons: ReactNode[], order: Record<string, number | null>, props: ChatBarProps) {
+export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled) return;
-
 
     for (const [key, Button] of buttonFactories) {
         buttons.unshift(
