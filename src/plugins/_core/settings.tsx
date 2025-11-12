@@ -71,6 +71,13 @@ export default definePlugin({
                 match: /(?<=function\((\i),(\i),\i\)\{)(?=let \i=Object.values\(\i\.\i\).+?(\(0,\i\.openUserSettings\))\()/,
                 replace: (_, settingsPanel, section, openUserSettings) => `${openUserSettings}(${settingsPanel},{section:${section}});return;`
             }
+        },
+        {
+            find: "2025-09-user-settings-redesign-1",
+            replacement: {
+                match: /enabled:![01],showLegacyOpen:/g,
+                replace: "enabled:false,showLegacyOpen:"
+            }
         }
     ],
 
