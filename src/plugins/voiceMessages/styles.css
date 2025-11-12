@@ -48,3 +48,7 @@
     flex: 1;
     text-align: center;
 }
+
+.vc-vmsg-error {
+    color: var(--text-danger);
+}
