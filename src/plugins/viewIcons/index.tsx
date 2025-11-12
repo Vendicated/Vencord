@@ -233,7 +233,7 @@ export default definePlugin({
         },
         // User Dms top large icon
         {
-            find: ".EMPTY_GROUP_DM,children:",
+            find: ".EMPTY_GROUP_DM)",
             replacement: {
                 match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
                 replace: (_, avatarUrl) => `onClick:()=>$self.openAvatar(${avatarUrl}),`
