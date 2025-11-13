@@ -136,8 +136,8 @@ export default definePlugin({
         {
             find: ".reactorDefault",
             replacement: {
-                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
-                replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
+                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),\i\).+?tag:"strong"/,
+                replace: (_, props, user) => `${_},style:$self.getColorStyle(${user}?.id,${props}?.channel?.id)`
             },
             predicate: () => settings.store.reactorsList,
         },
