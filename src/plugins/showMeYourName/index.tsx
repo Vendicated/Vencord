@@ -361,7 +361,7 @@ function renderUsername(
     const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "", canUseGradient) : null;
     const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "", canUseGradient) : null;
     const resolvedFriendNameColor = author ? resolveColor(author, friendNameColor.trim(), "", canUseGradient) : null;
-    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate", "white-space": "pre", "font-family": "var(--font-primary)" };
+    const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate", "white-space": "pre", "font-family": "var(--font-primary)", "letter-spacing": "normal" };
     const [username, display, nick, friend] = getProcessedNames(author, truncateAllNamesWithStreamerMode, discriminators);
 
     const names: Record<string, [string | null, object | null]> = {
@@ -562,7 +562,7 @@ function renderUsername(
                         // On non-primary names, allow disabling the gradients completely, or just their animation & glow.
                         className={secondNameClasses}
                         style={{
-                            ...(ignoreFonts ? { "font-family": "var(--font-primary)" } : {}),
+                            ...(ignoreFonts ? { "font-family": "var(--font-primary)", "letter-spacing": "normal" } : {}),
                             ...(ignoreGradients
                                 ? second.style.normal.adjusted
                                 : shouldAnimateGradients && shouldAnimateSecondaryNames && second.style.gradient
@@ -588,7 +588,7 @@ function renderUsername(
                     <span
                         className={thirdNameClasses}
                         style={{
-                            ...(ignoreFonts ? { "font-family": "var(--font-primary)" } : {}),
+                            ...(ignoreFonts ? { "font-family": "var(--font-primary)", "letter-spacing": "normal" } : {}),
                             ...(ignoreGradients
                                 ? third.style.normal.adjusted
                                 : shouldAnimateGradients && shouldAnimateSecondaryNames && third.style.gradient
@@ -614,7 +614,7 @@ function renderUsername(
                     <span
                         className={fourthNameClasses}
                         style={{
-                            ...(ignoreFonts ? { "font-family": "var(--font-primary)" } : {}),
+                            ...(ignoreFonts ? { "font-family": "var(--font-primary)", "letter-spacing": "normal" } : {}),
                             ...(ignoreGradients
                                 ? fourth.style.normal.adjusted
                                 : shouldAnimateGradients && shouldAnimateSecondaryNames && fourth.style.gradient
