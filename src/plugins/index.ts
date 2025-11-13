@@ -55,7 +55,7 @@ export function isPluginEnabled(p: string) {
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
-        settings[p]?.enabled
+        (settings[p]?.enabled && !Settings.safeMode)
     ) ?? false;
 }
 
