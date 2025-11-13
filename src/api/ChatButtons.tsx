@@ -84,12 +84,14 @@ export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled) return;
 
     for (const [key, Button] of buttonFactories) {
-        buttons.push(
+        buttons.unshift(
             <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
                 <Button {...props} isMainChat={props.type.analyticsName === "normal"} />
             </ErrorBoundary>
         );
     }
+
+    return buttons;
 }
 
 export const addChatBarButton = (id: string, button: ChatBarButtonFactory) => buttonFactories.set(id, button);
