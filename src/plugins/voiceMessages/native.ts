@@ -8,12 +8,12 @@ import { app } from "electron";
 import { readFile } from "fs/promises";
 import { basename, normalize } from "path";
 
-export async function readRecording(_, filePath: string) {
+export async function readRecording(_: any, filePath: string) {
     filePath = normalize(filePath);
     const filename = basename(filePath);
-    const discordBaseDirWithTrailingSlash = normalize(app.getPath("userData") + "/");
-    console.log(filename, discordBaseDirWithTrailingSlash, filePath);
-    if (filename !== "recording.ogg" || !filePath.startsWith(discordBaseDirWithTrailingSlash)) return null;
+    const userDataDir = normalize(app.getPath("userData") + "/");
+
+    if (filename !== "recording.ogg" || !filePath.startsWith(userDataDir)) return null;
 
     try {
         const buf = await readFile(filePath);
