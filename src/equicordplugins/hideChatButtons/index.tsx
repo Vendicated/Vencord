@@ -8,7 +8,7 @@ import { ChatBarButton } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { React, useMemo, useState } from "@webpack/common";
+import { React, useEffect, useState } from "@webpack/common";
 import type { MouseEventHandler, ReactNode } from "react";
 
 let hidechatbuttonsopen: boolean | undefined;
@@ -50,29 +50,26 @@ function HideToggleButton(props: { open: boolean | undefined, onClick: MouseEven
     </ChatBarButton>);
 }
 
-function buttonsInner(buttons: ReactNode[]) {
-    if (buttons.every(x => (x as any)?.props?.disabled === true)) {
-        return null;
-    }
+function ButtonsInnerComponent({ buttons }: { buttons: ReactNode[]; }) {
+    if (!buttons || buttons.every(x => (x as any)?.props?.disabled === true)) return null;
+
     const [open, setOpen] = useState(hidechatbuttonsopen);
 
-    useMemo(() => {
+    useEffect(() => {
         hidechatbuttonsopen = open;
     }, [open]);
 
-    const buttonList = (
-        <div key={"chat-bar-buttons-menu"} id="chat-bar-buttons-menu" style={{
+    return (
+        <div key="chat-bar-buttons-menu" id="chat-bar-buttons-menu" style={{
             display: "flex",
             flexWrap: "nowrap",
             overflowX: "auto"
         }}>
-            {open ? buttons.map((b, i) => <React.Fragment key={i}>{b}</React.Fragment>) : null}
-            <HideToggleButton onClick={() => setOpen(!open)} open={open}></HideToggleButton>
+            {open && buttons.map((b, i) => <React.Fragment key={i}>{b}</React.Fragment>)}
+            <HideToggleButton onClick={() => setOpen(!open)} open={open} />
         </div>
     );
-    return [buttonList];
 }
-
 
 export default definePlugin({
     name: "HideChatButtons",
@@ -89,6 +86,10 @@ export default definePlugin({
         }
     ],
     startAt: StartAt.Init,
-    buttonsInner: buttonsInner,
-    start: async () => { hidechatbuttonsopen = settings.store.Open; }
+    buttonsInner(buttons: ReactNode[]) {
+        return <ButtonsInnerComponent buttons={buttons} />;
+    },
+    async start() {
+        hidechatbuttonsopen = settings.store.Open;
+    }
 });
