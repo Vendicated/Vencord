@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
@@ -119,26 +119,30 @@ const settings = definePluginSettings({
     }
 });
 
-function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavContextMenuPatchCallback {
+function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Message"): NavContextMenuPatchCallback {
     return (children, props) => {
-        const value = props[name.toLowerCase()];
+        let value = props[name.toLowerCase()];
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
 
-        const lastChild = children.at(-1);
-        if (lastChild?.key === "developer-actions") {
-            const p = lastChild.props;
-            if (!Array.isArray(p.children))
-                p.children = [p.children];
-
-            children = p.children;
+        let messageContent = undefined;
+        if (name === "Message") {
+            value = cleanMessage(value as Message);
+            messageContent = value.content;
         }
 
-        children.splice(-1, 0,
+        let group = findGroupChildrenByChildId("devmode-copy-id", children, true);
+        let sliceIndex = 0;
+        if (group === null) { // not in dev mode
+            group = children;
+            sliceIndex = -1;
+        }
+
+        group.splice(sliceIndex, 0,
             <Menu.MenuItem
                 id={`vc-view-${name.toLowerCase()}-raw`}
                 label="View Raw"
-                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
+                action={() => openViewRawModal(JSON.stringify(value, null, 4), name, messageContent)}
                 icon={CopyIcon}
             />
         );
@@ -152,7 +156,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
     const role = GuildRoleStore.getRole(guild.id, id);
     if (!role) return;
 
-    children.push(
+    children.splice(0, 0,
         <Menu.MenuItem
             id={"vc-view-role-raw"}
             label="View Raw"
@@ -165,7 +169,7 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message, channel or guild",
-    authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
+    authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna, Devs.TomW1605],
     settings,
 
     contextMenus: {
@@ -175,6 +179,7 @@ export default definePlugin({
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
+        "message": MakeContextCallback("Message"),
         "dev-context": devContextCallback
     },
 
