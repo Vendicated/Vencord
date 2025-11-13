@@ -1,0 +1,24 @@
+name: rebase to dev
+on:
+    pull_request:
+        types: [opened]
+        branches:
+            - main
+
+permissions:
+    pull-requests: write
+
+jobs:
+    rebase:
+        runs-on: ubuntu-latest
+
+        steps:
+            - run: |
+                  url="${{ github.event.pull_request.html_url }}"
+                  
+                  gh pr edit "$url" --base dev
+                  # try to update the PR if needed
+                  gh pr update-branch "$url" || true
+        
+        env:
+            GH_TOKEN: ${{ github.token }}
