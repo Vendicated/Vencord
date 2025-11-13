@@ -29,28 +29,29 @@
 .vc-github-repos-button,
 .vc-github-repos-show-more {
     color: var(--text-default);
-    background-color: var(--control-background-primary-default);
     width: 100%;
 }
 
-.vc-github-repo-card {
+.vc-github-repos-card {
     padding: 8px;
     border-radius: var(--radius-xs);
     border: 1px solid var(--profile-body-divider-color, var(--input-border));
 }
 
-.vc-github-repo-header {
+.vc-github-repos-header {
+    color: var(--header-secondary);
     display: flex;
     justify-content: space-between;
 }
 
-.vc-github-repo-stars {
+.vc-github-repos-stars {
     display: flex;
     align-items: center;
     gap: 4px;
+    color: var(--text-muted);
 }
 
-.vc-github-repo-language {
+.vc-github-repos-language {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -58,7 +59,7 @@
     font-size: 12px;
 }
 
-.vc-github-repo-language-color {
+.vc-github-repos-language-color {
     width: var(--size-sm);
     height: var(--size-sm);
     border-radius: var(--radius-round);
@@ -68,6 +69,7 @@
 .vc-github-repos-modal {
     width: 90%;
     max-width: 900px;
+    background-color: var(--background-base-lower);
 }
 
 .vc-github-repos-modal-title {
@@ -187,4 +189,57 @@
 
 .vc-github-repos-modal-footer-close {
     margin-right: 5px;
+}
+
+.vc-github-repos-modal-footer-close,
+.vc-github-repos-modal-footer-github {
+    color: var(--text-default);
+    background-color: color-mix(in srgb, var(--background-base-low) 90%, white);
+    border: 0;
+}
+
+.vc-github-repos-modal-footer-close:hover,
+.vc-github-repos-modal-footer-github:hover {
+    background-color: color-mix(in srgb, var(--background-base-low) 75%, white);
+}
+
+.vc-github-repos-modal-footer {
+    background-color: var(--background-base-lower);
+}
+
+.vc-github-repos-loading {
+    color: var(--header-secondary);
+}
+
+.vc-github-repos-count {
+    color: var(--text-muted);
+}
+
+.vc-github-repos-error {
+    color: var(--text-danger);
+}
+
+.vc-github-repos-link {
+    cursor: pointer;
+    fill: var(--interactive-normal);
+}
+
+.vc-github-repos-name {
+    color: var(--interactive-active);
+}
+
+.vc-github-repos-header-repo {
+    width: 20%
+}
+
+.vc-github-repos-header-description {
+    width: 50%
+}
+
+.vc-github-repos-header-language {
+    width: 15%
+}
+
+.vc-github-repos-header-stars {
+    width: 10%
 }

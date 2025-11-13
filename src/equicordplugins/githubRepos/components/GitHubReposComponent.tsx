@@ -4,19 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
 import { Button, TextButton } from "@components/Button";
 import { openModal } from "@utils/modal";
 import { React, useEffect, UserProfileStore, useState } from "@webpack/common";
 
-import { settings } from "..";
+import { cl, settings } from "..";
 import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "../githubApi";
 import { GitHubRepo } from "../types";
 import { RepoCard } from "./RepoCard";
 import { ReposModal } from "./ReposModal";
-
-export const cl = classNameFactory("vc-github-repos-");
 
 export function GitHubReposComponent({ id, theme }: { id: string, theme: string; }) {
     const [repos, setRepos] = useState<GitHubRepo[]>([]);
@@ -90,10 +87,10 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
         fetchData();
     }, [id]);
 
-    if (loading) return <BaseText size="xs" weight="semibold" className={cl("loading")} style={{ color: "var(--header-secondary)" }}>
+    if (loading) return <BaseText size="xs" weight="semibold" className={cl("loading")} >
         Loading repositories...</BaseText>;
 
-    if (error) return <BaseText size="xs" weight="semibold" className={cl("error")} style={{ color: "var(--text-danger)" }}>
+    if (error) return <BaseText size="xs" weight="semibold" className={cl("error")}>
         Error: {error}</BaseText>;
 
     if (!repos.length) return null;
@@ -115,10 +112,10 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
 
     return (
         <div className={cl("container")}>
-            <BaseText size="xs" weight="semibold" className={cl("header")} style={{ color: "var(--header-secondary)" }}>
+            <BaseText size="xs" weight="semibold" className={cl("header")}>
                 GitHub Repositories
                 {userInfo && (
-                    <span className={cl("count")} style={{ color: "var(--text-muted)" }}>
+                    <span className={cl("count")}>
                         {` (Showing only top ${topRepos.length}/${userInfo.totalRepos})`}
                     </span>
                 )}

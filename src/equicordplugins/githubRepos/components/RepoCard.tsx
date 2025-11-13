@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
 import { React, Tooltip } from "@webpack/common";
 
+import { cl } from "..";
 import { getLanguageColor } from "../colors";
 import { RepoCardProps } from "../types";
 import { Star } from "./Star";
@@ -15,15 +15,13 @@ import { Star } from "./Star";
 export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {
     const handleClick = () => window.open(repo.html_url, "_blank");
 
-    const cl = classNameFactory("vc-github-repo-");
-
     const renderStars = () => {
         if (!showStars) return null;
 
         return (
             <div className={cl("stars")}>
                 <Star className={cl("stars-icon")} />
-                <BaseText size="sm" style={{ color: "var(--text-muted)" }}>{repo.stargazers_count.toLocaleString()}</BaseText>
+                <BaseText size="sm">{repo.stargazers_count.toLocaleString()}</BaseText>
             </div>
         );
     };
@@ -40,9 +38,10 @@ export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {
                     height="16"
                     fill="none"
                     viewBox="0 0 24 24"
-                    style={{ cursor: "pointer" }}>
-                    <path fill="var(--interactive-normal)" d="M8 5a1 1 0 0 0 0 2h7.59L5.29 17.3a1 1 0 1 0 1.42 1.4L17 8.42V16a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1H8Z">
-                    </path>
+                >
+                    <path
+                        d="M8 5a1 1 0 0 0 0 2h7.59L5.29 17.3a1 1 0 1 0 1.42 1.4L17 8.42V16a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1H8Z"
+                    />
                 </svg>
             </div>
         );
@@ -57,7 +56,7 @@ export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {
                     className={cl("language-color")}
                     style={{ backgroundColor: getLanguageColor(repo.language) }}
                 />
-                <BaseText size="sm" style={{ color: "var(--text-muted)" }}>{repo.language}</BaseText>
+                <BaseText size="sm">{repo.language}</BaseText>
                 {renderStars()}
             </div >
         );
@@ -73,7 +72,7 @@ export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {
                             onMouseEnter={onMouseEnter}
                         >
                             <div className={cl("header")}>
-                                <BaseText size="sm" weight="medium" className={cl("name")} style={{ color: "var(--interactive-active)" }}>
+                                <BaseText size="sm" weight="medium" className={cl("name")}>
                                     {repo.name}
                                 </BaseText>
                                 {renderLink()}
@@ -85,7 +84,7 @@ export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {
             ) : (
                 <div className={cl("card")}>
                     <div className={cl("header")}>
-                        <BaseText size="sm" weight="medium" className={cl("name")} style={{ color: "var(--interactive-active)" }}>
+                        <BaseText size="sm" weight="medium" className={cl("name")} >
                             {repo.name}
                         </BaseText>
                         {renderLink()}
