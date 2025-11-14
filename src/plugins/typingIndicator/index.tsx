@@ -68,7 +68,11 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
     const myId = UserStore.getCurrentUser()?.id;
 
     const typingUsersArray = Object.keys(typingUsers).filter(id =>
-        id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers)
+        id !== myId &&
+        (
+          settings.store.includeBlockedUsers ||
+          (!RelationshipStore.isBlocked(id) && !RelationshipStore.isIgnored(id))
+        )
     );
     const [a, b, c] = typingUsersArray;
     let tooltipText: string;
@@ -147,7 +151,7 @@ const settings = definePluginSettings({
     },
     includeBlockedUsers: {
         type: OptionType.BOOLEAN,
-        description: "Whether to show the typing indicator for blocked users.",
+        description: "Whether to show the typing indicator for blocked or ignored users.",
         default: false
     },
     indicatorMode: {
