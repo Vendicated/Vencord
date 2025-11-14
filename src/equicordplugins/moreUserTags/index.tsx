@@ -43,11 +43,11 @@ export default definePlugin({
             find: ".STAFF_ONLY_DM:",
             replacement: [
                 {
-                    match: /(?<=type:(\i).*?.NOT_STAFF_WARNING.{0,100})default:(\i)=/,
+                    match: /(?<=type:(\i).*?\.BOT:.{0,25})default:(\i)=/,
                     replace: "default:$2=$self.getTagText($self.localTags[$1]);",
                 },
                 {
-                    match: /(?<=type:(\i).*?.NOT_STAFF_WARNING.{0,100})\.BOT:(?=default:)/,
+                    match: /(?<=type:(\i).*?)\.BOT:(?=default:)/,
                     replace: "$&return null;",
                     predicate: () => settings.store.dontShowBotTag
                 },
