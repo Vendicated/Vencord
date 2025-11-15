@@ -11,6 +11,7 @@ import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
+import ShowHiddenChannelsPlugin from "plugins/showHiddenChannels";
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-uvs-");
@@ -142,7 +143,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
     if (channel == null) return null;
 
     const isDM = channel.isDM() || channel.isMultiUserDM();
-    if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && !isPluginEnabled("ShowHiddenChannels")) return null;
+    if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && !isPluginEnabled(ShowHiddenChannelsPlugin.name)) return null;
 
     const isLocked = !isDM && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel));
 

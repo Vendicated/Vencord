@@ -24,9 +24,10 @@ import { formatDuration } from "@utils/text";
 import type { Channel } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import PermissionsViewerPlugin from "plugins/permissionsViewer";
+import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "plugins/permissionsViewer/components/RolesAndUsersPermissions";
+import { sortPermissionOverwrites } from "plugins/permissionsViewer/utils";
 
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "../../permissionsViewer/components/RolesAndUsersPermissions";
-import { sortPermissionOverwrites } from "../../permissionsViewer/utils";
 import { cl, settings } from "..";
 
 const enum SortOrderTypes {
@@ -275,7 +276,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 }
                 <div className={cl("allowed-users-and-roles-container")}>
                     <div className={cl("allowed-users-and-roles-container-title")}>
-                        {isPluginEnabled("PermissionsViewer") && (
+                        {isPluginEnabled(PermissionsViewerPlugin.name) && (
                             <Tooltip text="Permission Details">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button

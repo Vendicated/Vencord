@@ -134,7 +134,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         target="_blank"
                         rel="noreferrer"
                         onClick={e => {
-                            if (isPluginEnabled("OpenInApp")) {
+                            if (isPluginEnabled(OpenInAppPlugin.name)) {
                                 // handleLink will .preventDefault() if applicable
                                 OpenInAppPlugin.handleLink(e.currentTarget, e);
                             }

@@ -20,6 +20,7 @@ import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { findByProps, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
+import OpenInAppPlugin from "plugins/openInApp";
 
 export interface Track {
     id: string;
@@ -90,7 +91,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris || isPluginEnabled("OpenInApp")
+            const url = Settings.plugins.SpotifyControls.useSpotifyUris || isPluginEnabled(OpenInAppPlugin.name)
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
