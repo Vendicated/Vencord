@@ -28,8 +28,6 @@ export * as Webpack from "./webpack";
 export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
-import "./api/Themes";
-
 import { addVencordUiStyles } from "@components/css";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { debounce } from "@shared/debounce";
