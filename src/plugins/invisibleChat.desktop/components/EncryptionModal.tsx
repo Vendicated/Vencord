@@ -17,7 +17,6 @@
 */
 
 import { FormSwitch } from "@components/FormSwitch";
-import { encrypt } from "@plugins/invisibleChat.desktop/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import {
     ModalContent,
@@ -28,6 +27,8 @@ import {
     openModal,
 } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
+
+import { encrypt } from "../index";
 
 function EncModal(props: ModalProps) {
     const [secret, setSecret] = React.useState("");

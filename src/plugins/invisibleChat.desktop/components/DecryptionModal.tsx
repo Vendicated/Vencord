@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import InvisibleChatPlugin, { decrypt } from "@plugins/invisibleChat.desktop/index";
 import {
     ModalContent,
     ModalFooter,
@@ -25,6 +24,8 @@ import {
     openModal,
 } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
+
+import InvisibleChatPlugin, { decrypt } from "../index";
 
 export function DecModal(props: any) {
     const encryptedMessage: string = props?.message?.content;

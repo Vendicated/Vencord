@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { cl } from "@plugins/shikiCodeblocks.desktop/utils/misc";
-
+import { cl } from "../utils/misc";
 import { CopyButton } from "./CopyButton";
 
 export interface ButtonRowProps {

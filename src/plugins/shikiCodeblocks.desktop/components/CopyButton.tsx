@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useCopyCooldown } from "@plugins/shikiCodeblocks.desktop/hooks/useCopyCooldown";
+import { useCopyCooldown } from "../hooks/useCopyCooldown";
 
 export interface CopyButtonProps extends React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
     content: string;
