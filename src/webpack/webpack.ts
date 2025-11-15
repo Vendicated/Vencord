@@ -482,11 +482,9 @@ function populateFluxStoreMap() {
  * Find a store by its displayName
  */
 export function findStore(name: StoreNameFilter) {
-    if (fluxStores.has(name)) {
-        return fluxStores.get(name);
+    if (!fluxStores.has(name)) {
+        populateFluxStoreMap();
     }
-
-    populateFluxStoreMap();
 
     if (fluxStores.has(name)) {
         return fluxStores.get(name);
