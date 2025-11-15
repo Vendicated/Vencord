@@ -124,7 +124,7 @@ export async function putCloudSettings(manual?: boolean) {
                 Authorization: await getCloudAuth(),
                 "Content-Type": "application/octet-stream"
             },
-            body: deflateSync(new TextEncoder().encode(settings))
+            body: deflateSync(new TextEncoder().encode(settings)) as Uint8Array<ArrayBuffer>
         });
 
         if (!res.ok) {

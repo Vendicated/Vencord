@@ -8,8 +8,6 @@
  * @license MIT
  */
 
-// ===== animation.js =====
-
 // https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
 export const enum ApngDisposeOp {
     /**
@@ -40,7 +38,7 @@ interface Frame {
     delay: number;
     disposeOp: ApngDisposeOp;
     blendOp: ApngBlendOp;
-    dataParts?: Uint8Array[];
+    dataParts?: U8Arr[];
     img: HTMLImageElement;
 }
 
@@ -52,7 +50,9 @@ class Animation {
     frames: Frame[] = [];
 }
 
-// ===== crc32.js =====
+// Typescript has become more strict, requiring you to explicitly specify the ArrayBuffer generic
+type U8Arr = Uint8Array<ArrayBuffer>;
+
 const table = new Uint32Array(256);
 
 for (let i = 0; i < 256; i++) {
@@ -61,7 +61,7 @@ for (let i = 0; i < 256; i++) {
     table[i] = c;
 }
 
-function crc32(bytes: Uint8Array, start: number = 0, length?: number): number {
+function crc32(bytes: U8Arr, start: number = 0, length?: number): number {
     length = length ?? (bytes.length - start);
     let crc = -1;
     for (let i = start, l = start + length; i < l; i++) {
@@ -71,7 +71,6 @@ function crc32(bytes: Uint8Array, start: number = 0, length?: number): number {
 }
 
 
-// ===== parser.js =====
 const PNG_SIGNATURE_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export function parseAPNG(buffer: ArrayBuffer): Promise<Animation> {
@@ -99,9 +98,9 @@ export function parseAPNG(buffer: ArrayBuffer): Promise<Animation> {
             return;
         }
 
-        const preDataParts: Uint8Array[] = [];
-        const postDataParts: Uint8Array[] = [];
-        let headerDataBytes: Uint8Array | null = null;
+        const preDataParts: U8Arr[] = [];
+        const postDataParts: U8Arr[] = [];
+        let headerDataBytes: U8Arr | null = null;
         let frame: Frame | null = null;
         const anim = new Animation();
 
@@ -156,12 +155,12 @@ export function parseAPNG(buffer: ArrayBuffer): Promise<Animation> {
 
         // creating images
         let createdImages = 0;
-        const preBlob = new Blob(preDataParts as Uint8Array<ArrayBuffer>[]);
-        const postBlob = new Blob(postDataParts as Uint8Array<ArrayBuffer>[]);
+        const preBlob = new Blob(preDataParts);
+        const postBlob = new Blob(postDataParts);
         for (let f = 0; f < anim.frames.length; f++) {
             frame = anim.frames[f];
 
-            const bb: (Uint8Array | Blob)[] = [];
+            const bb: (U8Arr | Blob)[] = [];
             bb.push(PNG_SIGNATURE_BYTES);
             headerDataBytes!.set(makeDWordArray(frame.width), 0);
             headerDataBytes!.set(makeDWordArray(frame.height), 4);
@@ -171,7 +170,7 @@ export function parseAPNG(buffer: ArrayBuffer): Promise<Animation> {
                 bb.push(makeChunkBytes("IDAT", frame.dataParts![j]));
             }
             bb.push(postBlob);
-            const url = URL.createObjectURL(new Blob(bb as Uint8Array<ArrayBuffer>[], { "type": "image/png" }));
+            const url = URL.createObjectURL(new Blob(bb, { "type": "image/png" }));
             delete frame.dataParts;
 
             /**
@@ -195,7 +194,7 @@ export function parseAPNG(buffer: ArrayBuffer): Promise<Animation> {
     });
 }
 
-function parseChunks(bytes: Uint8Array, callback: (type: string, bytes: Uint8Array, off: number, length: number) => boolean | void): void {
+function parseChunks(bytes: U8Arr, callback: (type: string, bytes: U8Arr, off: number, length: number) => boolean | void): void {
     let off = 8;
     let res: boolean | void;
     let type: string;
@@ -208,7 +207,7 @@ function parseChunks(bytes: Uint8Array, callback: (type: string, bytes: Uint8Arr
     } while (res !== false && type != "IEND" && off < bytes.length);
 }
 
-function readDWord(bytes: Uint8Array, off: number): number {
+function readDWord(bytes: U8Arr, off: number): number {
     let x = 0;
     // Force the most-significant byte to unsigned.
     x += ((bytes[0 + off] << 24) >>> 0);
@@ -216,23 +215,23 @@ function readDWord(bytes: Uint8Array, off: number): number {
     return x;
 }
 
-function readWord(bytes: Uint8Array, off: number): number {
+function readWord(bytes: U8Arr, off: number): number {
     let x = 0;
     for (let i = 0; i < 2; i++) x += (bytes[i + off] << ((1 - i) * 8));
     return x;
 }
 
-function readByte(bytes: Uint8Array, off: number): number {
+function readByte(bytes: U8Arr, off: number): number {
     return bytes[off];
 }
 
-function subBuffer(bytes: Uint8Array, start: number, length: number): Uint8Array {
+function subBuffer(bytes: U8Arr, start: number, length: number): U8Arr {
     const a = new Uint8Array(length);
     a.set(bytes.subarray(start, start + length));
     return a;
 }
 
-function readString(bytes: Uint8Array, off: number, length: number): string {
+function readString(bytes: U8Arr, off: number, length: number): string {
     const chars = Array.prototype.slice.call(bytes.subarray(off, off + length));
     return String.fromCharCode.apply(String, chars);
 }
@@ -247,7 +246,7 @@ function makeStringArray(x: string): number[] {
     return res;
 }
 
-function makeChunkBytes(type: string, dataBytes: Uint8Array): Uint8Array {
+function makeChunkBytes(type: string, dataBytes: U8Arr): U8Arr {
     const crcLen = type.length + dataBytes.length;
     const bytes = new Uint8Array(new ArrayBuffer(crcLen + 8));
     bytes.set(makeDWordArray(dataBytes.length), 0);
