@@ -26,6 +26,26 @@ import { Logger } from "./Logger";
 import { relaunch } from "./native";
 import { chooseFile, saveFile } from "./web";
 
+/**
+ * Recursively sanitize an object to prevent prototype pollution attacks
+ * by removing dangerous keys like __proto__, constructor, and prototype
+ */
+function sanitizeObject(obj: any): any {
+    if (obj === null || typeof obj !== "object") return obj;
+
+    const sanitized: any = Array.isArray(obj) ? [] : {};
+    for (const key in obj) {
+        // Skip dangerous prototype pollution keys
+        if (key === "__proto__" || key === "constructor" || key === "prototype") {
+            continue;
+        }
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            sanitized[key] = sanitizeObject(obj[key]);
+        }
+    }
+    return sanitized;
+}
+
 export async function importSettings(data: string) {
     try {
         var parsed = JSON.parse(data);
@@ -34,10 +54,13 @@ export async function importSettings(data: string) {
         throw new Error("Failed to parse JSON: " + String(err));
     }
 
-    if ("settings" in parsed && "quickCss" in parsed) {
-        Object.assign(PlainSettings, parsed.settings);
-        await VencordNative.settings.set(parsed.settings);
-        await VencordNative.quickCss.set(parsed.quickCss);
+    // Sanitize parsed data to prevent prototype pollution
+    const sanitized = sanitizeObject(parsed);
+
+    if ("settings" in sanitized && "quickCss" in sanitized) {
+        Object.assign(PlainSettings, sanitized.settings);
+        await VencordNative.settings.set(sanitized.settings);
+        await VencordNative.quickCss.set(sanitized.quickCss);
     } else
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }

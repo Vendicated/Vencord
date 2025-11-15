@@ -53,6 +53,12 @@ const TrustedRolesIds = [
     DONOR_ROLE_ID, // donor
 ];
 
+// SECURITY NOTE: This allows execution of JavaScript code snippets from VENBOT messages.
+// This is an intentional support feature, but requires:
+// 1. Message must be from VENBOT_USER_ID (official Vencord bot)
+// 2. User must manually click "Run Snippet" button
+// 3. Only works in designated support channels
+// Risk: If VENBOT account is compromised, malicious code could be executed.
 const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;

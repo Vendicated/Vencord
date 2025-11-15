@@ -79,9 +79,13 @@ function parseNode(node: Node) {
         case "regex":
             return new RegExp(node.value.pattern, node.value.flags);
         case "function":
-            // We LOVE remote code execution
-            // Safety: This comes from localhost only, which actually means we have less permissions than the source,
-            // since we're running in the browser sandbox, whereas the sender has host access
+            // SECURITY WARNING: This uses eval() to execute code from WebSocket messages
+            // Safety considerations:
+            // - Only accepts connections from localhost (127.0.0.1:8485)
+            // - Runs in browser sandbox with fewer permissions than the sender
+            // - Intended for development/debugging purposes only
+            // - Risk: If malware gains local access, it could connect to this WebSocket
+            // This is a development-only plugin and should be disabled in production
             return (0, eval)(node.value);
         default:
             throw new Error("Unknown Node Type " + (node as any).type);
