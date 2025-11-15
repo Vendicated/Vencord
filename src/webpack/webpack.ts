@@ -454,21 +454,12 @@ export function findByCodeLazy(...code: CodeFilter) {
     return proxyLazy(() => findByCode(...code));
 }
 
-/**
- * Find a store by its displayName
- */
-export function findStore(name: StoreNameFilter) {
-    let res = fluxStores.get(name);
-    if (res) return res;
-
+function populateFluxStoreMap() {
     const { Flux } = require("./common") as typeof import("./common");
 
-    for (const store of Flux.Store.getAll?.() ?? []) {
-        if (name === store.getName()) {
-            fluxStores.set(name, store);
-            return store;
-        }
-    }
+    Flux.Store.getAll?.().forEach(store =>
+        fluxStores.set(store.getName(), store)
+    );
 
     try {
         const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
@@ -482,15 +473,26 @@ export function findStore(name: StoreNameFilter) {
             const storeName = libdiscoreExportName;
             const store = libdiscoreExports[storeName];
 
-            if (storeName === name) {
-                fluxStores.set(storeName, store);
-                return store;
-            }
+            fluxStores.set(storeName, store);
         }
-
     } catch { }
+}
 
-    res = find(filters.byStoreName(name), { isIndirect: true });
+/**
+ * Find a store by its displayName
+ */
+export function findStore(name: StoreNameFilter) {
+    if (fluxStores.has(name)) {
+        return fluxStores.get(name);
+    }
+
+    populateFluxStoreMap();
+
+    if (fluxStores.has(name)) {
+        return fluxStores.get(name);
+    }
+
+    const res = find(filters.byStoreName(name), { isIndirect: true });
     if (res) {
         fluxStores.set(name, res);
         return res;
