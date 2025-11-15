@@ -17,7 +17,7 @@
 */
 
 import { FormSwitch } from "@components/FormSwitch";
-import { encrypt } from "@plugins/invisibleChat.desktop/index";
+import { encrypt } from "@plugins/invisibleChat.desktop";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import {
     ModalContent,

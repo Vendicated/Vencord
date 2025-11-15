@@ -5,8 +5,8 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { PinOrder, settings } from "@plugins/pinDms";
 import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "@plugins/pinDms/data";
-import { PinOrder, settings } from "@plugins/pinDms/index";
 import { Menu } from "@webpack/common";
 
 import { openCategoryModal } from "./CreateCategoryModal";

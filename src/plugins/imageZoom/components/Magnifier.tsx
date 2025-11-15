@@ -18,8 +18,8 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { settings } from "@plugins/imageZoom";
 import { ELEMENT_ID } from "@plugins/imageZoom/constants";
-import { settings } from "@plugins/imageZoom/index";
 import { waitFor } from "@plugins/imageZoom/utils/waitFor";
 import { FluxDispatcher, useLayoutEffect, useMemo, useRef, useState } from "@webpack/common";
 

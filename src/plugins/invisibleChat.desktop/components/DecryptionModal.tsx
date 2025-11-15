@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import InvisibleChatPlugin, { decrypt } from "@plugins/invisibleChat.desktop/index";
+import InvisibleChatPlugin, { decrypt } from "@plugins/invisibleChat.desktop";
 import {
     ModalContent,
     ModalFooter,

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
+import * as DataStore from "@api/DataStore";
 import { AUTHORIZE_URL, CLIENT_ID } from "@plugins/decor/lib/constants";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
