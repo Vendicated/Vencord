@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 /**
- * apng-canvas v2.1.2 - heavily modified
+ * apng-canvas v2.1.2 - heavily modified and converted to Typescript
  *
  * @copyright 2011-2019 David Mzareulyan
  * @link https://github.com/davidmz/apng-canvas
