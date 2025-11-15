@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { initQuickCssThemeStore } from "@utils/quickCss";
 import * as t from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 
@@ -86,5 +85,7 @@ waitForStore("VoiceStateStore", m => VoiceStateStore = m);
 waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
-    initQuickCssThemeStore();
+    // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
+    // For this reason, use a non import access here.
+    Vencord.QuickCss.initQuickCssThemeStore();
 });
