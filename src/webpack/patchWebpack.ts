@@ -538,7 +538,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         const previousFactory = originalFactory;
         let markedAsPatched = false;
 
-        // We change all patch.replacement to array in plugins/index
+        // We change all patch.replacement to array in PluginManager
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
                 shouldCheckBuildNumber &&

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import InvisibleChatPlugin, { decrypt } from "@plugins/invisibleChat.desktop";
 import {
     ModalContent,
     ModalFooter,
@@ -24,8 +25,6 @@ import {
     openModal,
 } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
-
-import { decrypt } from "../index";
 
 export function DecModal(props: any) {
     const encryptedMessage: string = props?.message?.content;
@@ -53,8 +52,7 @@ export function DecModal(props: any) {
                     onClick={() => {
                         const toSend = decrypt(encryptedMessage, password, true);
                         if (!toSend || !props?.message) return;
-                        // @ts-expect-error
-                        Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
+                        InvisibleChatPlugin.buildEmbed(props?.message, toSend);
                         props.onClose();
                     }}>
                     Decrypt
