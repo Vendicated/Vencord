@@ -33,6 +33,7 @@ import "./utils/quickCss";
 
 import { addVencordUiStyles } from "@components/css";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { debounce } from "@shared/debounce";
 import { IS_WINDOWS } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
@@ -40,7 +41,7 @@ import { StartAt } from "@utils/types";
 import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
-import { PlainSettings, Settings } from "./api/Settings";
+import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
@@ -90,6 +91,18 @@ async function syncSettings() {
             });
         }
     }
+
+    const saveSettingsOnFrequentAction = debounce(async () => {
+        if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
+            await putCloudSettings();
+            delete localStorage.Vencord_settingsDirty;
+        }
+    }, 60_000);
+
+    SettingsStore.addGlobalChangeListener(() => {
+        localStorage.Vencord_settingsDirty = true;
+        saveSettingsOnFrequentAction();
+    });
 }
 
 let notifiedForUpdatesThisSession = false;
