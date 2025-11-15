@@ -17,7 +17,7 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
-import { ThemeStore } from "@webpack/common";
+import { ThemeStore } from "@webpack/common/stores";
 
 import { createAndAppendStyle } from "./css";
 
