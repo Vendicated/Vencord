@@ -30,7 +30,6 @@ export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
 import "./utils/quickCss";
-import "./webpack/patchWebpack";
 
 import { addVencordUiStyles } from "@components/css";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
@@ -48,7 +47,6 @@ import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
-// eslint-disable-next-line no-duplicate-imports
 import { patches } from "./webpack/patchWebpack";
 
 if (IS_REPORTER) {
