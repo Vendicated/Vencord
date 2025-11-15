@@ -10,14 +10,36 @@
 
 // ===== animation.js =====
 
+// https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
+export const enum ApngDisposeOp {
+    /**
+     * no disposal is done on this frame before rendering the next; the contents of the output buffer are left as is.
+     */
+    NONE,
+    /**
+     * the frame's region of the output buffer is to be cleared to fully transparent black before rendering the next frame.
+     */
+    BACKGROUND,
+    /**
+     * the frame's region of the output buffer is to be reverted to the previous contents before rendering the next frame.
+     */
+    PREVIOUS
+}
+
+// TODO: Might need to somehow implement this
+export const enum ApngBlendOp {
+    SOURCE,
+    OVER
+}
+
 interface Frame {
     width: number;
     height: number;
     left: number;
     top: number;
     delay: number;
-    disposeOp: number;
-    blendOp: number;
+    disposeOp: ApngDisposeOp;
+    blendOp: ApngBlendOp;
     dataParts?: Uint8Array[];
     img: HTMLImageElement;
 }

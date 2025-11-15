@@ -18,9 +18,8 @@
 
 import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
-import { parseAPNG } from "@utils/apng";
+import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
-import { ApngBlendOp, ApngDisposeOp } from "@utils/dependencies";
 import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
