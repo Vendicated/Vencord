@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "styles.css?managed";
+import "./styles.css";
 
 import { DataStore } from "@api/index";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
-import { Heart } from "@components/Heart";
 import { Paragraph } from "@components/Paragraph";
 import { EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
@@ -36,6 +36,8 @@ interface GroupData {
     users: { [key: string]: IStorageUser; };
     name: string;
 }
+
+const cl = classNameFactory("vc-i-remember-you-");
 
 class Data {
     declare usersCollection: Record<string, GroupData>;
@@ -214,10 +216,10 @@ class DataUI {
 
 
         return <aside key={key} >
-            <div className={"vc-i-remember-you-user-header-container"}>
+            <div className={cl("header-container")}>
                 <BaseText>{key.toUpperCase()}</BaseText>
-                <div className={"vc-i-remember-you-user-header-btns"}>
-                    <Flex style={{ gap: "calc(0.5em + 0.5vw) 0.2em", flexDirection: "column" }}>
+                <div className={cl("header-btns")}>
+                    <Flex>
                         {usersElements}
                     </Flex>
                 </div>
@@ -227,11 +229,12 @@ class DataUI {
 
     renderUserAvatar(user: IStorageUser) {
         return <Clickable onClick={() => openUserProfile(user.id)}>
-            <span style={{ cursor: "pointer" }} >
+            <span className={cl("user-avatar")}>
                 <Avatar src={user.iconURL} size="SIZE_24" />
             </span>
         </Clickable>;
     }
+
     userTooltipText(user: IStorageUser) {
         const { updatedAt } = user.extra || {};
         const updatedAtContent = updatedAt ? new Intl.DateTimeFormat().format(updatedAt) : null;
@@ -241,66 +244,79 @@ class DataUI {
     renderUserRow(user: IStorageUser, allowExtra: { owner?: boolean; } = {}) {
         allowExtra = Object.assign({ owner: true }, allowExtra);
 
-        return <Flex key={user.id} style={{ margin: 0, width: "100%", flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ width: "24em" }}>
-                <Flex style={{ gap: "0.5em", alignItems: "center", margin: 0, wordBreak: "break-word" }}>
-                    {this.renderUserAvatar(user)}
-                    <Tooltip text={this.userTooltipText(user)}>
-                        {props =>
-                            <Paragraph {...props}>{user.tag} {allowExtra.owner && user.extra?.isOwner && "(owner)"}</Paragraph>
-                        }
-                    </Tooltip>
-                </Flex>
-            </span>
+        return (
+            <Flex key={user.id} className={cl("user-row")}>
+                <span className={cl("user")}>
+                    <Flex>
+                        {this.renderUserAvatar(user)}
+                        <Tooltip text={this.userTooltipText(user)}>
+                            {props =>
+                                <Paragraph {...props} className={cl("user-username")}>
+                                    {user.tag} {allowExtra.owner && user.extra?.isOwner && "(owner)"}
+                                </Paragraph>
+                            }
+                        </Tooltip>
+                    </Flex>
+                </span>
 
-            <span style={{ height: "min-content" }}><Paragraph style={{ opacity: 0.75 }}>{user.id}</Paragraph></span>
-        </Flex>;
+                <span className={cl("user-id")}>
+                    <Paragraph>
+                        {user.id}
+                    </Paragraph>
+                </span>
+            </Flex>
+        );
     }
 
     renderButtonsFooter(usersCollection: Data["usersCollection"]) {
-        return <footer>
-            <Flex style={{ gap: "1.5em", marginTop: "2em" }}>
+        return (
+            <footer className={cl("buttons")}>
+                <Flex>
 
-                <Clickable onClick={() => Modal.openModal(props => <Modal.ModalRoot size={Modal.ModalSize.LARGE} fullscreenOnMobile={true} {...props}>
-                    <Modal.ModalHeader separator={false}>
-                        <BaseText
-                            size="lg"
-                            weight="semibold"
-                            color="header-primary"
-                            tag="h1"
-                            style={{ flexGrow: 1 }}
-                        >
-                            Editor
-                        </BaseText>
-                        <Modal.ModalCloseButton onClick={props.onClose} />
-                    </Modal.ModalHeader>
-                    <Modal.ModalContent>
-                        <Flex style={{ paddingBlock: "0.5em", gap: "0.75em" }}>
-                            <Button label="Validate and save" >Validate and save</Button>
-                            <Button label="Cancel" color={Button.Colors.TRANSPARENT}>Cancel</Button>
-                        </Flex>
-                        <TextArea value={JSON.stringify(usersCollection, null, "\t")} onChange={() => { }} rows={20} />
-                    </Modal.ModalContent>
-                </Modal.ModalRoot>)}>
-                    <Paragraph style={{ cursor: "pointer" }}>Open editor</Paragraph>
-                </Clickable>
+                    <Clickable onClick={() => Modal.openModal(props => <Modal.ModalRoot size={Modal.ModalSize.LARGE} fullscreenOnMobile={true} {...props}>
+                        <Modal.ModalHeader separator={false}>
+                            <BaseText
+                                size="lg"
+                                weight="semibold"
+                                color="header-primary"
+                                tag="h1"
+                                className={cl("buttons-editor")}
+                            >
+                                Editor
+                            </BaseText>
+                            <Modal.ModalCloseButton onClick={props.onClose} />
+                        </Modal.ModalHeader>
+                        <Modal.ModalContent>
+                            <Flex className={cl("buttons-save")}>
+                                <Button label="Validate and save" >Validate and save</Button>
+                                <Button label="Cancel" color={Button.Colors.TRANSPARENT}>Cancel</Button>
+                            </Flex>
+                            <TextArea value={JSON.stringify(usersCollection, null, "\t")} onChange={() => { }} rows={20} />
+                        </Modal.ModalContent>
+                    </Modal.ModalRoot>)}>
+                        <BaseText className={cl("buttons-editor-open")}>Open editor</BaseText>
+                    </Clickable>
 
-                <Clickable onClick={
-                    async () => {
-                        const confirmed = confirm("Sure?");
-                        if (!confirmed) {
-                            return;
+                    <Clickable onClick={
+                        async () => {
+                            const confirmed = confirm("Sure?");
+                            if (!confirmed) {
+                                return;
+                            }
+
+                            const { plugin } = this;
+                            const data = plugin.dataManager as Data;
+                            data.usersCollection = {};
+                            await data.updateStorage();
                         }
-
-                        const { plugin } = this;
-                        const data = plugin.dataManager as Data;
-                        data.usersCollection = {};
-                        await data.updateStorage();
-                    }
-                }><BaseText style={{ cursor: "pointer" }}>Reset storage</BaseText>
-                </Clickable>
-            </Flex>
-        </footer >;
+                    }>
+                        <BaseText className={cl("buttons-reset")}>
+                            Reset storage
+                        </BaseText>
+                    </Clickable>
+                </Flex>
+            </footer >
+        );
     }
 
     renderSearchElement(usersCollection: Data["usersCollection"]) {
@@ -311,38 +327,33 @@ class DataUI {
 
         const list = [...map.values()];
 
-        return <section style={{ paddingBlock: "1em" }}>
-            <TextInput placeholder="Filter by tag, username" name="Filter" onChange={value => setState(value)} />
-            {current &&
-                <Flex style={{ flexDirection: "column", gap: "0.5em", paddingTop: "1em" }}>
-                    {list.filter(user => user.tag.includes(current) || user.username.includes(current))
-                        .map(user => this.renderUserRow(
-                            user,
-                            { owner: false }
-                        ))
-                    }
-                </Flex>
-            }
-        </section>;
+        return (
+            <section className={cl("search")}>
+                <TextInput placeholder="Filter by tag, username" name="Filter" onChange={value => setState(value)} />
+                {current &&
+                    <Flex className={cl("search-user")}>
+                        {list.filter(user => user.tag.includes(current) || user.username.includes(current))
+                            .map(user => this.renderUserRow(
+                                user,
+                                { owner: false }
+                            ))
+                        }
+                    </Flex>
+                }
+            </section>
+        );
     }
 
     toElement(usersCollection: Data["usersCollection"]) {
         return (
-            /*
-          > ![Important]
-          > Let me know a more promising color, instead of #ffffff
-          */
-            <main style={{ color: "#ffffff", paddingBottom: "4em" }}>
+            <main className={cl("header")}>
                 <BaseText size="lg" weight="bold" tag="h1">
-                    {"IRememberYou"}{" "}
-                    <Heart />
+                    {"IRememberYou"}
                 </BaseText>
 
-
                 {this.renderSectionDescription()}
-                <br />
                 {this.renderSearchElement(usersCollection)}
-                <Flex style={{ gap: "1.5em", flexDirection: "column" }}>
+                <Flex className={cl("rows")}>
                     {this.renderUsersCollectionAsRows(usersCollection)}
                 </Flex>
                 {this.renderButtonsFooter(usersCollection)}

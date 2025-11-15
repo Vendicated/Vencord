@@ -1,11 +1,66 @@
-.vc-i-remember-you-user-header-container {
+.vc-i-remember-you-header-container {
     display: contents;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    flex-direction: column;
 }
 
-.vc-i-remember-you-user-header-btns {
-    display: none;
+.vc-i-remember-you-header-btns {
     gap: 8px;
+}
+
+.vc-i-remember-you-header {
+    color: var(--text-default);
+}
+
+.vc-i-remember-you-rows {
+    gap: 5px;
+    flex-direction: column;
+}
+
+.vc-i-remember-you-search {
+    padding-block: 10px;
+}
+
+.vc-i-remember-you-search-user {
+    flex-direction: column;
+    padding-top: 18px;
+}
+
+.vc-i-remember-you-user-avatar {
+    cursor: pointer;
+    margin-right: 30px;
+}
+
+.vc-i-remember-you-user-row {
+    margin: 0;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.vc-i-remember-you-user-id {
+    height: min-content;
+    opacity: 0.75;
+}
+
+.vc-i-remember-you-user {
+    width: 500px;
+    gap: 250px;
+    align-items: center;
+    overflow-wrap: break-word;
+    margin-top: 5px;
+}
+
+.vc-i-remember-you-user-username {
+    margin-top: 2px;
+}
+
+.vc-i-remember-you-buttons {
+    margin-top: 10px;
+}
+
+.vc-i-remember-you-buttons-reset {
+    cursor: pointer;
+    margin-left: 12px;
 }
