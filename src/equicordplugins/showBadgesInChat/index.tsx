@@ -38,18 +38,15 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
 
     switch (badge) {
         case "EquicordDonor":
-            const equicordDonorBadges = badges.getEquicordDonorBadges(author.id)?.slice(0, 12);
-            if (!equicordDonorBadges || equicordDonorBadges.length === 0) return null;
-
             return (
                 <span style={{ order: settings.store.EquicordDonorPosition }}>
-                    {equicordDonorBadges.map((badge: any) => (
+                    {badges.getEquicordDonorBadges(author.id)?.map(badge => (
                         <RoleIconComponent
                             key={author.id}
                             className={roleIconClassName}
                             name={badge.description}
                             size={20}
-                            src={badge.image}
+                            src={badge.iconSrc}
                         />
                     ))}
                 </span>
@@ -74,7 +71,7 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
                             className={roleIconClassName}
                             name={badge.description}
                             size={20}
-                            src={badge.image}
+                            src={badge.iconSrc}
                         />
                     ))}
                 </span>
