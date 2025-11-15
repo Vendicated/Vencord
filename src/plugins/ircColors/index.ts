@@ -137,7 +137,7 @@ export default definePlugin({
                 if (customColor) return customColor;
             }
 
-            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
             }
 
