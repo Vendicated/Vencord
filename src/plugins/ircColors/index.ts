@@ -59,7 +59,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [Devs.Grzesiek11, Devs.jamesbt365],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365, Devs.alfred],
     settings,
 
     patches: [
@@ -127,7 +127,7 @@ export default definePlugin({
             const colorString = context?.colorString;
             const color = calculateNameColorForUser(id);
 
-            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
             }
 
