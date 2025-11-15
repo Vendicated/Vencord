@@ -173,7 +173,7 @@ export function parseAPNG(buffer: ArrayBuffer): Promise<Animation> {
     });
 }
 
-const parseChunks = function (bytes: Uint8Array, callback: (type: string, bytes: Uint8Array, off: number, length: number) => boolean | void): void {
+function parseChunks(bytes: Uint8Array, callback: (type: string, bytes: Uint8Array, off: number, length: number) => boolean | void): void {
     let off = 8;
     let res: boolean | void;
     let type: string;
@@ -184,48 +184,48 @@ const parseChunks = function (bytes: Uint8Array, callback: (type: string, bytes:
         res = callback(type, bytes, off, length);
         off += 12 + length;
     } while (res !== false && type != "IEND" && off < bytes.length);
-};
+}
 
-const readDWord = function (bytes: Uint8Array, off: number): number {
+function readDWord(bytes: Uint8Array, off: number): number {
     let x = 0;
     // Force the most-significant byte to unsigned.
     x += ((bytes[0 + off] << 24) >>> 0);
     for (let i = 1; i < 4; i++) x += ((bytes[i + off] << ((3 - i) * 8)));
     return x;
-};
+}
 
-const readWord = function (bytes: Uint8Array, off: number): number {
+function readWord(bytes: Uint8Array, off: number): number {
     let x = 0;
     for (let i = 0; i < 2; i++) x += (bytes[i + off] << ((1 - i) * 8));
     return x;
-};
+}
 
-const readByte = function (bytes: Uint8Array, off: number): number {
+function readByte(bytes: Uint8Array, off: number): number {
     return bytes[off];
-};
+}
 
-const subBuffer = function (bytes: Uint8Array, start: number, length: number): Uint8Array {
+function subBuffer(bytes: Uint8Array, start: number, length: number): Uint8Array {
     const a = new Uint8Array(length);
     a.set(bytes.subarray(start, start + length));
     return a;
-};
+}
 
-const readString = function (bytes: Uint8Array, off: number, length: number): string {
+function readString(bytes: Uint8Array, off: number, length: number): string {
     const chars = Array.prototype.slice.call(bytes.subarray(off, off + length));
     return String.fromCharCode.apply(String, chars);
-};
+}
 
-const makeDWordArray = function (x: number): number[] {
+function makeDWordArray(x: number): number[] {
     return [(x >>> 24) & 0xff, (x >>> 16) & 0xff, (x >>> 8) & 0xff, x & 0xff];
-};
+}
 
-const makeStringArray = function (x: string): number[] {
+function makeStringArray(x: string): number[] {
     const res: number[] = [];
     for (let i = 0; i < x.length; i++) res.push(x.charCodeAt(i));
     return res;
-};
+}
 
-const makeChunkBytes = function (type: string, dataBytes: Uint8Array): Uint8Array {
+function makeChunkBytes(type: string, dataBytes: Uint8Array): Uint8Array {
     const crcLen = type.length + dataBytes.length;
     const bytes = new Uint8Array(new ArrayBuffer(crcLen + 8));
     bytes.set(makeDWordArray(dataBytes.length), 0);
