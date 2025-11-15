@@ -21,13 +21,18 @@ import "./styles.css";
 import { OptionType } from "@utils/types";
 import { ComponentType } from "react";
 
+import { ArraySetting } from "./ArraySetting";
 import { BooleanSetting } from "./BooleanSetting";
+import { ChannelSetting } from "./ChannelSetting";
 import { ComponentSettingProps, SettingProps } from "./Common";
 import { ComponentSetting } from "./ComponentSetting";
+import { GuildSetting } from "./GuildSetting";
 import { NumberSetting } from "./NumberSetting";
+import { RoleSetting } from "./RoleSetting";
 import { SelectSetting } from "./SelectSetting";
 import { SliderSetting } from "./SliderSetting";
 import { TextSetting } from "./TextSetting";
+import { UserSetting } from "./UserSetting";
 
 export const OptionComponentMap: Record<OptionType, ComponentType<SettingProps<any> | ComponentSettingProps<any>>> = {
     [OptionType.STRING]: TextSetting,
@@ -38,4 +43,9 @@ export const OptionComponentMap: Record<OptionType, ComponentType<SettingProps<a
     [OptionType.SLIDER]: SliderSetting,
     [OptionType.COMPONENT]: ComponentSetting,
     [OptionType.CUSTOM]: () => null,
+    [OptionType.ARRAY]: ArraySetting,
+    [OptionType.USERS]: UserSetting,
+    [OptionType.CHANNELS]: ChannelSetting,
+    [OptionType.GUILDS]: GuildSetting,
+    [OptionType.ROLES]: RoleSetting,
 };

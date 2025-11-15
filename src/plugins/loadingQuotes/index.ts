@@ -42,14 +42,16 @@ const settings = definePluginSettings({
         default: false
     },
     additionalQuotes: {
-        description: "Additional custom quotes to possibly appear, separated by the below delimiter",
-        type: OptionType.STRING,
-        default: "",
-    },
-    additionalQuotesDelimiter: {
-        description: "Delimiter for additional quotes",
-        type: OptionType.STRING,
-        default: "|",
+        description: "Additional custom quotes to possibly appear",
+        type: OptionType.ARRAY,
+        oldStringSeparator: s => {
+            if ("additionalQuotesDelimiter" in settings.store) {
+                const deli = settings.store.additionalQuotesDelimiter ?? "|";
+                delete settings.store.additionalQuotesDelimiter;
+                return s.split(deli);
+            }
+            return s.split("|");
+        },
     },
 });
 
@@ -79,7 +81,7 @@ export default definePlugin({
 
     mutateQuotes(quotes: string[]) {
         try {
-            const { enableDiscordPresetQuotes, additionalQuotes, additionalQuotesDelimiter, enablePluginPresetQuotes } = settings.store;
+            const { enableDiscordPresetQuotes, additionalQuotes, enablePluginPresetQuotes } = settings.store;
 
             if (!enableDiscordPresetQuotes)
                 quotes.length = 0;
@@ -88,7 +90,7 @@ export default definePlugin({
             if (enablePluginPresetQuotes)
                 quotes.push(...presetQuotes);
 
-            quotes.push(...additionalQuotes.split(additionalQuotesDelimiter).filter(Boolean));
+            quotes.push(...additionalQuotes);
 
             if (!quotes.length)
                 quotes.push(noQuotesQuote);

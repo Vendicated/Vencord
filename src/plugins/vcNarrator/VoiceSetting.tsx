@@ -37,7 +37,7 @@ function SimplePicker({ voice, voices }: PickerProps) {
             maxVisibleItems={5}
             options={options}
             value={options.find(o => o.value === voice)}
-            onChange={v => settings.store.voice = v}
+            onChange={(v: string) => settings.store.voice = v}
             closeOnSelect
         />
     );
@@ -88,7 +88,7 @@ function ComplexPicker({ voice, voices }: PickerProps) {
                 placeholder="Select a language"
                 options={languageOptions}
                 value={languageOptions.find(l => l.value === selectedLanguage)}
-                onChange={v => setSelectedLanguage(v)}
+                onChange={(v: string) => setSelectedLanguage(v)}
                 maxVisibleItems={5}
                 closeOnSelect
             />
