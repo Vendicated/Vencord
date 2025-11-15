@@ -10,57 +10,53 @@
 
 // ===== animation.js =====
 
-/**
- * Animation class
- * @constructor
- */
+interface Frame {
+    width: number;
+    height: number;
+    left: number;
+    top: number;
+    delay: number;
+    disposeOp: number;
+    blendOp: number;
+    dataParts?: Uint8Array[];
+    img: HTMLImageElement;
+}
+
 class Animation {
     width = 0;
     height = 0;
     numPlays = 0;
     playTime = 0;
-    frames = [];
+    frames: Frame[] = [];
 }
 
 // ===== crc32.js =====
-var table = new Uint32Array(256);
+const table = new Uint32Array(256);
 
-for (var i = 0; i < 256; i++) {
-    var c = i;
-    for (var k = 0; k < 8; k++) c = (c & 1) ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
     table[i] = c;
 }
 
-/**
- *
- * @param {Uint8Array} bytes
- * @param {int} start
- * @param {int} length
- * @return {int}
- */
-function crc32(bytes, start, length) {
-    start = start || 0;
-    length = length || (bytes.length - start);
-    var crc = -1;
-    for (var i = start, l = start + length; i < l; i++) {
+function crc32(bytes: Uint8Array, start: number = 0, length?: number): number {
+    length = length ?? (bytes.length - start);
+    let crc = -1;
+    for (let i = start, l = start + length; i < l; i++) {
         crc = (crc >>> 8) ^ table[(crc ^ bytes[i]) & 0xFF];
     }
     return crc ^ (-1);
-};
+}
 
 
 // ===== parser.js =====
-var PNG_SIGNATURE_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const PNG_SIGNATURE_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
-/**
- * @param {ArrayBuffer} buffer
- * @return {Promise<Animation>}
- */
-export function parseAPNG(buffer) {
-    var bytes = new Uint8Array(buffer);
+export function parseAPNG(buffer: ArrayBuffer): Promise<Animation> {
+    const bytes = new Uint8Array(buffer);
     return new Promise(function (resolve, reject) {
 
-        for (var i = 0; i < PNG_SIGNATURE_BYTES.length; i++) {
+        for (let i = 0; i < PNG_SIGNATURE_BYTES.length; i++) {
             if (PNG_SIGNATURE_BYTES[i] != bytes[i]) {
                 reject("Not a PNG file (invalid file signature)");
                 return;
@@ -68,7 +64,7 @@ export function parseAPNG(buffer) {
         }
 
         // fast animation test
-        var isAnimated = false;
+        let isAnimated = false;
         parseChunks(bytes, function (type) {
             if (type == "acTL") {
                 isAnimated = true;
@@ -81,12 +77,11 @@ export function parseAPNG(buffer) {
             return;
         }
 
-        var
-            preDataParts = [],
-            postDataParts = [],
-            headerDataBytes = null,
-            frame = null,
-            anim = new Animation();
+        const preDataParts: Uint8Array[] = [];
+        const postDataParts: Uint8Array[] = [];
+        let headerDataBytes: Uint8Array | null = null;
+        let frame: Frame | null = null;
+        const anim = new Animation();
 
         parseChunks(bytes, function (type, bytes, off, length) {
             switch (type) {
@@ -100,13 +95,13 @@ export function parseAPNG(buffer) {
                     break;
                 case "fcTL":
                     if (frame) anim.frames.push(frame);
-                    frame = {};
+                    frame = {} as Frame;
                     frame.width = readDWord(bytes, off + 8 + 4);
                     frame.height = readDWord(bytes, off + 8 + 8);
                     frame.left = readDWord(bytes, off + 8 + 12);
                     frame.top = readDWord(bytes, off + 8 + 16);
-                    var delayN = readWord(bytes, off + 8 + 20);
-                    var delayD = readWord(bytes, off + 8 + 22);
+                    let delayN = readWord(bytes, off + 8 + 20);
+                    let delayD = readWord(bytes, off + 8 + 22);
                     if (delayD == 0) delayD = 100;
                     frame.delay = 1000 * delayN / delayD;
                     // see http://mxr.mozilla.org/mozilla/source/gfx/src/shared/gfxImageFrame.cpp#343
@@ -117,10 +112,10 @@ export function parseAPNG(buffer) {
                     frame.dataParts = [];
                     break;
                 case "fdAT":
-                    if (frame) frame.dataParts.push(bytes.subarray(off + 8 + 4, off + 8 + length));
+                    if (frame) frame.dataParts!.push(bytes.subarray(off + 8 + 4, off + 8 + length));
                     break;
                 case "IDAT":
-                    if (frame) frame.dataParts.push(bytes.subarray(off + 8, off + 8 + length));
+                    if (frame) frame.dataParts!.push(bytes.subarray(off + 8, off + 8 + length));
                     break;
                 case "IEND":
                     postDataParts.push(subBuffer(bytes, off, 12 + length));
@@ -138,130 +133,105 @@ export function parseAPNG(buffer) {
         }
 
         // creating images
-        var createdImages = 0;
-        var preBlob = new Blob(preDataParts), postBlob = new Blob(postDataParts);
-        for (var f = 0; f < anim.frames.length; f++) {
+        let createdImages = 0;
+        const preBlob = new Blob(preDataParts as Uint8Array<ArrayBuffer>[]);
+        const postBlob = new Blob(postDataParts as Uint8Array<ArrayBuffer>[]);
+        for (let f = 0; f < anim.frames.length; f++) {
             frame = anim.frames[f];
 
-            var bb = [];
+            const bb: (Uint8Array | Blob)[] = [];
             bb.push(PNG_SIGNATURE_BYTES);
-            headerDataBytes.set(makeDWordArray(frame.width), 0);
-            headerDataBytes.set(makeDWordArray(frame.height), 4);
-            bb.push(makeChunkBytes("IHDR", headerDataBytes));
+            headerDataBytes!.set(makeDWordArray(frame.width), 0);
+            headerDataBytes!.set(makeDWordArray(frame.height), 4);
+            bb.push(makeChunkBytes("IHDR", headerDataBytes!));
             bb.push(preBlob);
-            for (var j = 0; j < frame.dataParts.length; j++) {
-                bb.push(makeChunkBytes("IDAT", frame.dataParts[j]));
+            for (let j = 0; j < frame.dataParts!.length; j++) {
+                bb.push(makeChunkBytes("IDAT", frame.dataParts![j]));
             }
             bb.push(postBlob);
-            var url = URL.createObjectURL(new Blob(bb, { "type": "image/png" }));
+            const url = URL.createObjectURL(new Blob(bb as Uint8Array<ArrayBuffer>[], { "type": "image/png" }));
             delete frame.dataParts;
-            bb = null;
 
             /**
              * Using "createElement" instead of "new Image" because of bug in Chrome 27
              * https://code.google.com/p/chromium/issues/detail?id=238071
              * http://stackoverflow.com/questions/16377375/using-canvas-drawimage-in-chrome-extension-content-script/16378270
              */
-            frame.img = document.createElement('img');
-            frame.img.onload = function () {
-                URL.revokeObjectURL(this.src);
+            const img = frame.img = new Image();
+            img.onload = function () {
+                URL.revokeObjectURL(img.src);
                 createdImages++;
                 if (createdImages == anim.frames.length) {
                     resolve(anim);
                 }
             };
-            frame.img.onerror = function () {
+            img.onerror = function () {
                 reject("Image creation error");
             };
-            frame.img.src = url;
+            img.src = url;
         }
     });
-};
+}
 
-/**
- * @param {Uint8Array} bytes
- * @param {function(string, Uint8Array, int, int)} callback
- */
-var parseChunks = function (bytes, callback) {
-    var off = 8;
+const parseChunks = function (bytes: Uint8Array, callback: (type: string, bytes: Uint8Array, off: number, length: number) => boolean | void): void {
+    let off = 8;
+    let res: boolean | void;
+    let type: string;
+
     do {
-        var length = readDWord(bytes, off);
-        var type = readString(bytes, off + 4, 4);
-        var res = callback(type, bytes, off, length);
+        const length = readDWord(bytes, off);
+        type = readString(bytes, off + 4, 4);
+        res = callback(type, bytes, off, length);
         off += 12 + length;
     } while (res !== false && type != "IEND" && off < bytes.length);
 };
 
-/**
- * @param {Uint8Array} bytes
- * @param {int} off
- * @return {int}
- */
-var readDWord = function (bytes, off) {
-    var x = 0;
+const readDWord = function (bytes: Uint8Array, off: number): number {
+    let x = 0;
     // Force the most-significant byte to unsigned.
     x += ((bytes[0 + off] << 24) >>> 0);
-    for (var i = 1; i < 4; i++) x += ((bytes[i + off] << ((3 - i) * 8)));
+    for (let i = 1; i < 4; i++) x += ((bytes[i + off] << ((3 - i) * 8)));
     return x;
 };
 
-/**
- * @param {Uint8Array} bytes
- * @param {int} off
- * @return {int}
- */
-var readWord = function (bytes, off) {
-    var x = 0;
-    for (var i = 0; i < 2; i++) x += (bytes[i + off] << ((1 - i) * 8));
+const readWord = function (bytes: Uint8Array, off: number): number {
+    let x = 0;
+    for (let i = 0; i < 2; i++) x += (bytes[i + off] << ((1 - i) * 8));
     return x;
 };
 
-/**
- * @param {Uint8Array} bytes
- * @param {int} off
- * @return {int}
- */
-var readByte = function (bytes, off) {
+const readByte = function (bytes: Uint8Array, off: number): number {
     return bytes[off];
 };
 
-/**
- * @param {Uint8Array} bytes
- * @param {int} start
- * @param {int} length
- * @return {Uint8Array}
- */
-var subBuffer = function (bytes, start, length) {
-    var a = new Uint8Array(length);
+const subBuffer = function (bytes: Uint8Array, start: number, length: number): Uint8Array {
+    const a = new Uint8Array(length);
     a.set(bytes.subarray(start, start + length));
     return a;
 };
 
-var readString = function (bytes, off, length) {
-    var chars = Array.prototype.slice.call(bytes.subarray(off, off + length));
+const readString = function (bytes: Uint8Array, off: number, length: number): string {
+    const chars = Array.prototype.slice.call(bytes.subarray(off, off + length));
     return String.fromCharCode.apply(String, chars);
 };
 
-var makeDWordArray = function (x) {
+const makeDWordArray = function (x: number): number[] {
     return [(x >>> 24) & 0xff, (x >>> 16) & 0xff, (x >>> 8) & 0xff, x & 0xff];
 };
-var makeStringArray = function (x) {
-    var res = [];
-    for (var i = 0; i < x.length; i++) res.push(x.charCodeAt(i));
+
+const makeStringArray = function (x: string): number[] {
+    const res: number[] = [];
+    for (let i = 0; i < x.length; i++) res.push(x.charCodeAt(i));
     return res;
 };
-/**
- * @param {string} type
- * @param {Uint8Array} dataBytes
- * @return {Uint8Array}
- */
-var makeChunkBytes = function (type, dataBytes) {
-    var crcLen = type.length + dataBytes.length;
-    var bytes = new Uint8Array(new ArrayBuffer(crcLen + 8));
+
+const makeChunkBytes = function (type: string, dataBytes: Uint8Array): Uint8Array {
+    const crcLen = type.length + dataBytes.length;
+    const bytes = new Uint8Array(new ArrayBuffer(crcLen + 8));
     bytes.set(makeDWordArray(dataBytes.length), 0);
     bytes.set(makeStringArray(type), 4);
     bytes.set(dataBytes, 8);
-    var crc = crc32(bytes, 4, crcLen);
+    const crc = crc32(bytes, 4, crcLen);
     bytes.set(makeDWordArray(crc), crcLen + 4);
     return bytes;
 };

@@ -18,8 +18,9 @@
 
 import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
+import { parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
-import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
+import { ApngBlendOp, ApngDisposeOp } from "@utils/dependencies";
 import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
@@ -706,7 +707,6 @@ export default definePlugin({
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
-        const { parseAPNG } = importApngJs();
 
         const { frames, width, height } = await fetch(stickerLink)
             .then(res => res.arrayBuffer())
@@ -759,7 +759,7 @@ export default definePlugin({
 
         gif.finish();
 
-        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
+        const file = new File([gif.bytesView() as Uint8Array<ArrayBuffer>], `${stickerId}.gif`, { type: "image/gif" });
         UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DraftType.ChannelMessage);
     },
 
