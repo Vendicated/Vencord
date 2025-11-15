@@ -706,9 +706,11 @@ export default definePlugin({
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
-        const { parseURL } = importApngJs();
+        const { parseAPNG } = importApngJs();
 
-        const { frames, width, height } = await parseURL(stickerLink);
+        const { frames, width, height } = await fetch(stickerLink)
+            .then(res => res.arrayBuffer())
+            .then(parseAPNG);
 
         const gif = GIFEncoder();
         const resolution = settings.store.stickerSize;
