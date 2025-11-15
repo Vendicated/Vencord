@@ -18,9 +18,9 @@
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
+import OpenInAppPlugin from "@plugins/openInApp";
 import { findByProps, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
-import OpenInAppPlugin from "plugins/openInApp";
 
 export interface Track {
     id: string;

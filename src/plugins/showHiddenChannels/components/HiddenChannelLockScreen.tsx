@@ -19,14 +19,14 @@
 import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import PermissionsViewerPlugin from "@plugins/permissionsViewer";
+import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
+import { sortPermissionOverwrites } from "@plugins/permissionsViewer/utils";
 import { classes } from "@utils/misc";
 import { formatDuration } from "@utils/text";
 import type { Channel } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
-import PermissionsViewerPlugin from "plugins/permissionsViewer";
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "plugins/permissionsViewer/components/RolesAndUsersPermissions";
-import { sortPermissionOverwrites } from "plugins/permissionsViewer/utils";
 
 import { cl, settings } from "..";
 

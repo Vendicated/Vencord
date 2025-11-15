@@ -7,11 +7,11 @@
 import { isPluginEnabled } from "@api/PluginManager";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import ShowHiddenChannelsPlugin from "@plugins/showHiddenChannels";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
-import ShowHiddenChannelsPlugin from "plugins/showHiddenChannels";
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-uvs-");
