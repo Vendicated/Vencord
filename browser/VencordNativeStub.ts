@@ -27,6 +27,7 @@ import { Settings } from "../src/Vencord";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { debounce } from "@shared/debounce";
 import { localStorage } from "@utils/localStorage";
+import { Theme, getTheme } from "@utils/discord";
 
 // listeners for ipc.on
 const cssListeners = new Set<(css: string) => void>();
@@ -89,8 +90,6 @@ window.VencordNative = {
                 alert("Failed to open QuickCSS popup. Make sure to allow popups!");
                 return;
             }
-
-            const { getTheme, Theme } = require("../src/utils/discord");
 
             win.baseUrl = EXTENSION_BASE_URL;
             win.setCss = setCssDebounced;
