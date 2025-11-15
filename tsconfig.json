@@ -29,6 +29,7 @@
             "@plugins/*": ["./plugins/*"],
             "@shared/*": ["./shared/*"],
             "@webpack/common": ["./webpack/common"],
+            "@webpack/common/*": ["./webpack/common/*"],
             "@webpack": ["./webpack/webpack"],
             "@webpack/patcher": ["./webpack/patchWebpack"],
             "@webpack/wreq.d": ["./webpack/wreq.d"],

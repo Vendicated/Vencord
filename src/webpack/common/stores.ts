@@ -87,5 +87,5 @@ waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
     // For this reason, use a non import access here.
-    Vencord.QuickCss.initQuickCssThemeStore();
+    Vencord.Api.Themes.initQuickCssThemeStore(m);
 });
