@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { SessionInfo } from "@plugins/betterSessions/types";
+import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Button, Forms, React, TextInput } from "@webpack/common";
 import { KeyboardEvent } from "react";
-
-import { SessionInfo } from "../types";
-import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
 
 export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
     const [title, setTitle] = state;

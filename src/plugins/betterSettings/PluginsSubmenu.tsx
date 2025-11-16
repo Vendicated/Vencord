@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { openPluginModal } from "@components/settings/tabs";
 import { getIntlMessage } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
@@ -28,7 +29,7 @@ export default function PluginsSubmenu() {
 
     const search = query.toLowerCase();
     const include = (p: typeof Plugins[keyof typeof Plugins]) => (
-        Vencord.Plugins.isPluginEnabled(p.name)
+        isPluginEnabled(p.name)
         && p.options && !isObjectEmpty(p.options)
         && (
             p.name.toLowerCase().includes(search)

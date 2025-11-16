@@ -6,13 +6,12 @@
 
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
+import { useAuthorizationStore } from "@plugins/decor/lib/stores/AuthorizationStore";
+import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
+import { cl } from "@plugins/decor/ui";
+import { openChangeDecorationModal } from "@plugins/decor/ui/modals/ChangeDecorationModal";
 import { findComponentByCodeLazy } from "@webpack";
 import { useEffect } from "@webpack/common";
-
-import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
-import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import { cl } from "../";
-import { openChangeDecorationModal } from "../modals/ChangeDecorationModal";
 
 const CustomizationSection = findComponentByCodeLazy(".customizationSectionBackground");
 

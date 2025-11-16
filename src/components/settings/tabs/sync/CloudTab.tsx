@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { showNotification } from "@api/Notifications";
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
+import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
+import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, putCloudSettings } from "@api/SettingsSync/cloudSync";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
@@ -25,9 +26,7 @@ import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { authorizeCloud, checkCloudUrlCsp, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
-import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
 import { Alerts, Button, Forms, Tooltip } from "@webpack/common";
 
 function validateUrl(url: string) {
@@ -37,34 +36,6 @@ function validateUrl(url: string) {
     } catch {
         return "Invalid URL";
     }
-}
-
-async function eraseAllData() {
-    if (!await checkCloudUrlCsp()) return;
-
-    const res = await fetch(new URL("/v1/", getCloudUrl()), {
-        method: "DELETE",
-        headers: { Authorization: await getCloudAuth() }
-    });
-
-    if (!res.ok) {
-        cloudLogger.error(`Failed to erase data, API returned ${res.status}`);
-        showNotification({
-            title: "Cloud Integrations",
-            body: `Could not erase all data (API returned ${res.status}), please contact support.`,
-            color: "var(--red-360)"
-        });
-        return;
-    }
-
-    Settings.cloud.authenticated = false;
-    await deauthorizeCloud();
-
-    showNotification({
-        title: "Cloud Integrations",
-        body: "Successfully erased all data.",
-        color: "var(--green-360)"
-    });
 }
 
 function SettingsSyncSection() {
@@ -181,7 +152,7 @@ function CloudTab() {
                         onClick={() => Alerts.show({
                             title: "Are you sure?",
                             body: "Once your data is erased, we cannot recover it. There's no going back!",
-                            onConfirm: eraseAllData,
+                            onConfirm: eraseAllCloudData,
                             confirmText: "Erase it!",
                             confirmColor: "vc-cloud-erase-data-danger-btn",
                             cancelText: "Nevermind"

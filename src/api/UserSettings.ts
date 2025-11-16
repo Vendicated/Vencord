@@ -20,6 +20,8 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { findModuleId, proxyLazyWebpack, wreq } from "@webpack";
 
+import { isPluginEnabled } from "./PluginManager";
+
 interface UserSettingDefinition<T> {
     /**
      * Get the setting value
@@ -45,7 +47,7 @@ interface UserSettingDefinition<T> {
 
 export const UserSettings: Record<PropertyKey, UserSettingDefinition<any>> | undefined = proxyLazyWebpack(() => {
     const modId = findModuleId('"textAndImages","renderSpoilers"');
-    if (modId == null) return new Logger("UserSettingsAPI ").error("Didn't find settings module.");
+    if (modId == null) return new Logger("UserSettingsAPI").error("Didn't find settings module.");
 
     return wreq(modId as any);
 });
@@ -57,7 +59,7 @@ export const UserSettings: Record<PropertyKey, UserSettingDefinition<any>> | und
  * @param name The name of the setting
  */
 export function getUserSetting<T = any>(group: string, name: string): UserSettingDefinition<T> | undefined {
-    if (!Vencord.Plugins.isPluginEnabled("UserSettingsAPI")) throw new Error("Cannot use UserSettingsAPI without setting as dependency.");
+    if (!isPluginEnabled("UserSettingsAPI")) throw new Error("Cannot use UserSettingsAPI without setting it as a dependency.");
 
     for (const key in UserSettings) {
         const userSetting = UserSettings[key];
