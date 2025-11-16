@@ -183,16 +183,21 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
 
     useEffect(() => {
         if (paths) {
-            const prefixes = paths.filter(p => p.endsWith(".*")).map(p => p.slice(0, -2));
-            const exacts = paths.filter(p => !p.endsWith(".*"));
+            paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.addPrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.addChangeListener(p, forceUpdate);
+                }
+            });
 
-            prefixes.forEach(p => SettingsStore.addPrefixChangeListener(p, forceUpdate));
-            exacts.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
-
-            return () => {
-                prefixes.forEach(p => SettingsStore.removePrefixChangeListener(p, forceUpdate));
-                exacts.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
-            };
+            return () => paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.removePrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.removeChangeListener(p, forceUpdate);
+                }
+            });
         } else {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
