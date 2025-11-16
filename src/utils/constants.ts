@@ -1193,6 +1193,10 @@ export const EquicordDevs = Object.freeze({
     square: {
         name: "square",
         id: 219363409097916416n
+    },
+    neoarz: {
+        name: "neoarz",
+        id: 1015372540937502851n
     }
 } satisfies Record<string, Dev>);
 
