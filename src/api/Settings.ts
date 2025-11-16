@@ -205,8 +205,21 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
 
     useEffect(() => {
         if (paths) {
-            paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
-            return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
+            paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.addPrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.addChangeListener(p, forceUpdate);
+                }
+            });
+
+            return () => paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.removePrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.removeChangeListener(p, forceUpdate);
+                }
+            });
         } else {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
@@ -256,9 +269,11 @@ export function definePluginSettings<
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return PlainSettings.plugins[definedSettings.pluginName] as any;
         },
-        use: settings => useSettings(
-            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]
-        ).plugins[definedSettings.pluginName] as any,
+        use: settings => useSettings((
+            settings
+                ? settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+                : [`plugins.${definedSettings.pluginName}.*`]
+        ) as UseSettings<Settings>[]).plugins[definedSettings.pluginName] as any,
         def,
         checks: checks ?? {} as any,
         pluginName: "",
