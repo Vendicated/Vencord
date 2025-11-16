@@ -114,7 +114,9 @@ function VencordChatBarButtons(props: ChatBarProps) {
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled) return;
 
-    buttons.push(<VencordChatBarButtons key="vencord-chat-buttons" {...props} />);
+    buttons.unshift(<VencordChatBarButtons key="vencord-chat-buttons" {...props} />);
+
+    return buttons;
 }
 
 /**
