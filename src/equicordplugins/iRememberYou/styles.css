@@ -60,6 +60,17 @@
     margin-top: 10px;
 }
 
+.vc-i-remember-you-buttons-save,
+.vc-i-remember-you-buttons-cancel {
+    margin-left: 490px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.vc-i-remember-you-buttons-cancel {
+    margin-left: 12px;
+}
+
 .vc-i-remember-you-buttons-reset {
     cursor: pointer;
     margin-left: 12px;

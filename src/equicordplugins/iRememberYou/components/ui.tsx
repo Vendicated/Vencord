@@ -1,0 +1,119 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
+import { Paragraph } from "@components/Paragraph";
+import { openUserProfile } from "@utils/discord";
+import { Avatar, Clickable, Flex, React, TextInput, Tooltip, } from "@webpack/common";
+
+import { Data, IStorageUser } from "./data";
+
+const cl = classNameFactory("vc-i-remember-you-");
+
+function tooltipText(user: IStorageUser) {
+    const { updatedAt } = user.extra || {};
+    const updatedAtContent = updatedAt ? new Intl.DateTimeFormat().format(updatedAt) : null;
+    return `${user.username ?? user.tag}, updated at ${updatedAtContent}`;
+}
+
+function SectionDescription() {
+    return (
+        <BaseText>
+            {"Provides a list of users you have mentioned or replied to, or those who own the servers you belong to (owner*), or are members of your guild"}
+        </BaseText>
+    );
+}
+
+function UsersCollectionRows({ usersCollection }: { usersCollection: Data["usersCollection"]; }) {
+    if (Object.keys(usersCollection).length === 0) return (
+        <BaseText>
+            It's empty right now
+        </BaseText>
+    );
+
+    return (
+        <>
+            {Object.entries(usersCollection)
+                .map(([_key, { users, name }]) => ({ name, users: Object.values(users) }))
+                .sort((a, b) => b.users.length - a.users.length)
+                .map(({ name, users }) => (
+                    <aside key={name}>
+                        <div className={cl("header-container")}>
+                            <BaseText>{name.toUpperCase()}</BaseText>
+                            <div className={cl("header-btns")}>
+                                <Flex>
+                                    {users.map(u => <UserRow key={u.id} user={u} />)}
+                                </Flex>
+                            </div>
+                        </div>
+                    </aside>
+                ))}
+        </>
+    );
+}
+
+function UserRow({ user, allowOwner = true }: { user: IStorageUser, allowOwner?: boolean; }) {
+    return (
+        <Flex key={user.id} className={cl("user-row")}>
+            <span className={cl("user")}>
+                <Flex>
+                    <Clickable onClick={() => openUserProfile(user.id)}>
+                        <span className={cl("user-avatar")}>
+                            <Avatar src={user.iconURL} size="SIZE_24" />
+                        </span>
+                    </Clickable>
+                    <Tooltip text={tooltipText(user)}>
+                        {props =>
+                            <Paragraph {...props} className={cl("user-username")}>
+                                {user.tag} {allowOwner && user.extra?.isOwner && "(owner)"}
+                            </Paragraph>
+                        }
+                    </Tooltip>
+                </Flex>
+            </span>
+
+            <span className={cl("user-id")}>
+                <Paragraph>
+                    {user.id}
+                </Paragraph>
+            </span>
+        </Flex>
+    );
+}
+
+function SearchElement({ usersCollection }: { usersCollection: Data["usersCollection"]; }) {
+    const [current, setCurrent] = React.useState("");
+    const list = Object.values(usersCollection).flatMap(col => Object.values(col.users)) as IStorageUser[];
+
+    return (
+        <section className={cl("search")}>
+            <TextInput placeholder="Filter by tag, username" name="Filter" onChange={setCurrent} />
+            {current && (
+                <Flex className={cl("search-user")}>
+                    {list.filter(user => user.tag.includes(current) || user.username.includes(current))
+                        .map(user => <UserRow key={user.id} user={user} allowOwner={false} />)}
+                </Flex>
+            )}
+        </section>
+    );
+}
+
+export function DataUI({ plugin, usersCollection }: { plugin: any; usersCollection: Data["usersCollection"]; }) {
+    return (
+        <main className={cl("header")}>
+            <BaseText size="lg" weight="bold" tag="h1">
+                IRememberYou
+            </BaseText>
+
+            <SectionDescription />
+            <SearchElement usersCollection={usersCollection} />
+            <Flex className={cl("rows")}>
+                <UsersCollectionRows usersCollection={usersCollection} />
+            </Flex>
+        </main>
+    );
+}
