@@ -17,6 +17,7 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
@@ -85,8 +86,9 @@ async function resolveImage(options: CommandArgument[], ctx: CommandContext, noS
     return null;
 }
 
+migratePluginSettings("PetPet", "petpet");
 export default definePlugin({
-    name: "petpet",
+    name: "PetPet",
     description: "Adds a /petpet slash command to create headpet gifs from any image",
     authors: [Devs.Ven],
     commands: [
