@@ -67,9 +67,7 @@ export function removeMessagePopoverButton(identifier: string) {
 function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePopoverButtonItem>, message: Message; }) {
     const { Component, message } = props;
 
-    // FIXME: subscribing to all settings here is bad, but the settings api currently
-    // only supports exact key subscriptions, which doesn't work for our use case
-    const { messagePopoverButtons } = useSettings().uiElements;
+    const { messagePopoverButtons } = useSettings(["uiElements.messagePopoverButtons.*"]).uiElements;
 
     const elements = MessagePopoverButtonMap.entries()
         .filter(([key]) => messagePopoverButtons[key]?.enabled !== false)

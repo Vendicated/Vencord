@@ -96,9 +96,7 @@ export const ChatBarButtonMap = new Map<string, ChatBarButtonData>();
 const logger = new Logger("ChatButtons");
 
 function VencordChatBarButtons(props: ChatBarProps) {
-    // FIXME: subscribing to all settings here is bad, but the settings api currently
-    // only supports exact key subscriptions, which doesn't work for our use case
-    const { chatBarButtons } = useSettings().uiElements;
+    const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
 
     return (
         <>
