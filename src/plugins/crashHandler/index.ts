@@ -17,10 +17,11 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
+import { relaunch } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
@@ -95,6 +96,15 @@ export default definePlugin({
                             noPersist: true
                         });
                     } catch { }
+
+                    const shouldEnableSafeMode = confirm(
+                        "Discord has crashed two times rapidly. Would you like to relaunch with Vencord safe mode? " +
+                        "This will temporarily disable all plugins and allow you to permanently disable any problematic ones."
+                    );
+                    if (shouldEnableSafeMode) {
+                        Settings.safeMode = true;
+                        relaunch();
+                    }
 
                     return;
                 }
