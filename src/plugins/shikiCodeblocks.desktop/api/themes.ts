@@ -19,7 +19,7 @@
 import { IShikiTheme } from "@vap/shiki";
 
 export const SHIKI_REPO = "shikijs/textmate-grammars-themes";
-export const SHIKI_REPO_COMMIT = "2d87559c7601a928b9f7e0f0dda243d2fb6d4499";
+export const SHIKI_REPO_COMMIT = "ecd9fb1b4a38381df95048c19cf9b8bdcbb1ec09";
 export const shikiRepoTheme = (name: string) => `https://raw.githubusercontent.com/${SHIKI_REPO}/${SHIKI_REPO_COMMIT}/packages/tm-themes/themes/${name}.json`;
 
 export const themes = {
@@ -48,6 +48,12 @@ export const themes = {
     GithubLightDefault: shikiRepoTheme("github-light-default"),
     GithubLightHighContrast: shikiRepoTheme("github-light-high-contrast"),
     GithubLight: shikiRepoTheme("github-light"),
+    GruvBoxDarkHard: shikiRepoTheme("gruvbox-dark-hard"),
+    GruvBoxDarkMedium: shikiRepoTheme("gruvbox-dark-medium"),
+    GruvBoxDarkSoft: shikiRepoTheme("gruvbox-dark-soft"),
+    GruvBoxLightHard: shikiRepoTheme("gruvbox-light-hard"),
+    GruvBoxLightMedium: shikiRepoTheme("gruvbox-light-medium"),
+    GruvBoxLightSoft: shikiRepoTheme("gruvbox-light-soft"),
     Houston: shikiRepoTheme("houston"),
     KanagawaDragon: shikiRepoTheme("kanagawa-dragon"),
     KanagawaLotus: shikiRepoTheme("kanagawa-lotus"),
