@@ -17,18 +17,26 @@
 */
 
 import "./style.css";
+// Plugin stylesheet: provides classes used by TagBubble and any
+// supporting layout needed for placement in member lists / messages.
+// Keeping styles in a managed file allows theme consistency and easier
+// tweaks without touching logic.
 import { definePluginSettings } from "@api/Settings";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addProfileBadge, removeProfileBadge, BadgePosition } from "@api/Badges";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildRoleStore, GuildMemberStore, GuildStore, PermissionsBits, SelectedGuildStore, Toasts, React, UserStore } from "@webpack/common";
+import { GuildRoleStore, GuildMemberStore, GuildStore, PermissionsBits, SelectedGuildStore, React, UserStore } from "@webpack/common";
 import { findByPropsLazy } from "@webpack";
 import { classes } from "@utils/misc";
 import type { User, Channel } from "@vencord/discord-types";
 
 
+// Configuration exposed to the user. Each option controls where tags are
+// rendered and the textual labels used. These settings are read at
+// runtime and polled periodically so toggles can apply without a full
+// plugin restart.
 const settings = definePluginSettings({
     showInMemberList: {
         type: OptionType.BOOLEAN,
@@ -83,6 +91,14 @@ const settings = definePluginSettings({
     }
 });
 
+// Compute effective permissions for a member in a guild and optional channel.
+// This follows Discord's semantics by combining role permissions and
+// applying channel permission overwrites in the proper order:
+// 1) aggregate role permissions
+// 2) apply @everyone overwrite
+// 3) apply role overwrites in role position order
+// 4) apply member-specific overwrite
+// Returns a BigInt bitmask representing the computed permissions.
 function computeEffectivePermissions(userId: string, guildId?: string, channel?: Channel) {
     if (!guildId) return 0n;
     const guild = GuildStore.getGuild(guildId);
@@ -114,6 +130,9 @@ function computeEffectivePermissions(userId: string, guildId?: string, channel?:
     return perms;
 }
 
+// Decide which single permission tag to show for a user. Tags are
+// prioritized (owner -> admin -> staff -> chat/voice mods -> mod). The
+// function returns a tag key or null when no special tag applies.
 function getHighestTagForUser(user: User, guildId?: string, channel?: Channel) {
     if (!guildId) return null;
     const guild = GuildStore.getGuild(guildId);
@@ -134,8 +153,15 @@ function getHighestTagForUser(user: User, guildId?: string, channel?: Channel) {
 
 
 
+// Try to reuse Discord's native bot/app tag classes when available.
+// `findByPropsLazy` defers lookup until the module is present so we can
+// match visuals even if the host changes class names across versions.
 const BotTagClasses = findByPropsLazy("botTagRegular", "botText");
 
+// Presentational component that renders a small badge/tag. We try to
+// render a 'cozy' variant for messages (smaller spacing) and a regular
+// variant for member lists/profile. If Discord's bot tag CSS is available
+// we reuse those classes to keep a consistent look-and-feel.
 function TagBubble({ text, user, cozy = false }: { text: string; user: User; cozy?: boolean; }) {
     const hasBotTagModule = BotTagClasses && BotTagClasses.botTagRegular && BotTagClasses.botText;
 
@@ -174,6 +200,8 @@ function TagBubble({ text, user, cozy = false }: { text: string; user: User; coz
     );
 }
 
+// Translate our internal tag keys to user-visible labels. These labels are
+// configurable via plugin settings so server owners can choose wording.
 const labelFor = (tag: string | null) => {
     switch (tag) {
         case "OWNER": return settings.store.labelOwner ?? "Owner";
@@ -186,6 +214,9 @@ const labelFor = (tag: string | null) => {
     }
 };
 
+// Main plugin registration. The plugin registers decorators and badges
+// with the host at runtime according to user settings. Most runtime
+// behavior is controlled from the `start()` and `stop()` hooks below.
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for moderative roles (owner, admin, etc.)",
@@ -193,6 +224,9 @@ export default definePlugin({
     settings,
 
     start() {
+        // Callback used by the MemberListDecorators API. This is invoked
+        // for each member row rendered by the host; returning a React
+        // element will place that element in the decorators wrapper.
         const decoratorCallback = (props: any) => {
             const { user, type, channel } = props as any;
             if (!user) return null;
@@ -208,8 +242,15 @@ export default definePlugin({
             return <TagBubble text={labelFor(tag)} user={user} cozy={false} />;
         };
 
+        // Runtime state persisted to `window` so the plugin can survive
+        // hot reloads during development. The fields track whether we've
+        // registered decorators/badges and hold references to observers
+        // and polling intervals for clean teardown.
         const state = (window as any).__vc_upb_state = (window as any).__vc_upb_state || { registered: false, observer: undefined, interval: undefined, messageRegistered: false, profileRegistered: false, profileBadge: undefined };
 
+        // Profile badge: a small React component descriptor used by the
+        // Badges API to render a badge inside the user profile modal.
+        // `shouldShow` is consulted by the host before calling `component`.
         const profileBadge = {
             key: 'UserPermissionBadge',
             position: BadgePosition.END,
@@ -231,6 +272,9 @@ export default definePlugin({
         } as any;
         state.profileBadge = profileBadge;
 
+        // Register the member list decorator which adds TagBubble elements
+        // to the member list rows. This uses the host API and avoids
+        // fragile DOM manipulation for member lists.
         const ensureRegistered = () => {
             if (state.registered) return;
             addMemberListDecorator("UserPermissionBadges", decoratorCallback);
@@ -244,6 +288,10 @@ export default definePlugin({
             try { if (state.observer) { state.observer.disconnect(); state.observer = undefined; } } catch { }
         };
 
+        // Message decoration callback: returns a compact (cozy) TagBubble
+        // to be placed next to the message author's name in chat. We
+        // compute the guild context for the message to apply channel- or
+        // server-specific permission checks.
         const messageCallback = (props: any) => {
             const { message } = props as any;
             if (!message || !message.author) return null;
@@ -259,6 +307,10 @@ export default definePlugin({
             return <TagBubble text={labelFor(tag)} user={user} cozy={true} />;
         };
 
+        // Register message decorations and start an observer to adjust
+        // placement of the generated elements. The observer attempts a
+        // minimal DOM reparent operation to move our tag into the final
+        // decorations location while avoiding race conditions.
         const ensureRegisteredMessage = () => {
             if (state.messageRegistered) return;
             addMessageDecoration("UserPermissionBadgesMessage", messageCallback);
@@ -312,6 +364,9 @@ export default definePlugin({
         if (settings.store.showNextToMessage) ensureRegisteredMessage(); else ensureUnregisteredMessage();
 
         try {
+            // Small polling interval that watches the settings object and
+            // applies toggles at runtime. This keeps the plugin responsive
+            // to user preference changes without requiring a restart.
             if (!state.interval) {
                 state.interval = setInterval(() => {
                     try {
