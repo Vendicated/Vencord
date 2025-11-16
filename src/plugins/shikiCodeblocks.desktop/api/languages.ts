@@ -37,17 +37,17 @@ export interface Language {
 }
 export interface LanguageJson {
     name: string;
-    id: string;
+    displayName: string;
     fileName: string;
-    devicon?: string;
     scopeName: string;
+    devicon?: string;
     aliases?: string[];
 }
 
 export const languages: Record<string, Language> = {};
 
 export const loadLanguages = async () => {
-    const langsJson = await fetch(JSON_URL).then(res => res.ok ? res.json() : []);
+    const langsJson: LanguageJson[] = await fetch(JSON_URL).then(res => res.ok ? res.json() : []);
     const loadedLanguages = Object.fromEntries(
         langsJson.map(lang => {
             const { name, displayName, ...rest } = lang;
