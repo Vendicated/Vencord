@@ -17,10 +17,6 @@
 */
 
 import "./style.css";
-// Plugin stylesheet: provides classes used by TagBubble and any
-// supporting layout needed for placement in member lists / messages.
-// Keeping styles in a managed file allows theme consistency and easier
-// tweaks without touching logic.
 import { definePluginSettings } from "@api/Settings";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
@@ -33,62 +29,18 @@ import { classes } from "@utils/misc";
 import type { User, Channel } from "@vencord/discord-types";
 
 
-// Configuration exposed to the user. Each option controls where tags are
-// rendered and the textual labels used. These settings are read at
-// runtime and polled periodically so toggles can apply without a full
-// plugin restart.
+// User-facing settings
 const settings = definePluginSettings({
-    showInMemberList: {
-        type: OptionType.BOOLEAN,
-        description: "Show permission badges in the member list",
-        default: true
-    }
-    ,
-    showInMemberBadges: {
-        type: OptionType.BOOLEAN,
-        description: "Show permission badges in the member profile",
-        default: true
-    }
-    , hideForBots: {
-        type: OptionType.BOOLEAN,
-        description: "Do not show custom permission badges in member list for bot accounts",
-        default: true
-    }
-    , showNextToMessage: {
-        type: OptionType.BOOLEAN,
-        description: "Show permission badges next to messages (by the author)",
-        default: true
-    }
-    , labelOwner: {
-        type: OptionType.STRING,
-        description: "Label for OWNER badge",
-        default: "Owner"
-    }
-    , labelAdministrator: {
-        type: OptionType.STRING,
-        description: "Label for ADMINISTRATOR badge",
-        default: "Admin"
-    }
-    , labelStaff: {
-        type: OptionType.STRING,
-        description: "Label for MODERATOR_STAFF badge",
-        default: "Staff"
-    }
-    , labelModerator: {
-        type: OptionType.STRING,
-        description: "Label for MODERATOR badge",
-        default: "Mod"
-    }
-    , labelVcMod: {
-        type: OptionType.STRING,
-        description: "Label for VOICE_MODERATOR badge",
-        default: "VC Mod"
-    }
-    , labelChatMod: {
-        type: OptionType.STRING,
-        description: "Label for CHAT_MODERATOR badge",
-        default: "Chat Mod"
-    }
+    showInMemberList: { type: OptionType.BOOLEAN, description: "Show permission badges in the member list", default: true },
+    showInMemberBadges: { type: OptionType.BOOLEAN, description: "Show permission badges in the member profile", default: true },
+    hideForBots: { type: OptionType.BOOLEAN, description: "Do not show custom permission badges for bots", default: true },
+    showNextToMessage: { type: OptionType.BOOLEAN, description: "Show permission badges next to messages", default: true },
+    labelOwner: { type: OptionType.STRING, description: "Label for OWNER badge", default: "Owner" },
+    labelAdministrator: { type: OptionType.STRING, description: "Label for ADMINISTRATOR badge", default: "Admin" },
+    labelStaff: { type: OptionType.STRING, description: "Label for MODERATOR_STAFF badge", default: "Staff" },
+    labelModerator: { type: OptionType.STRING, description: "Label for MODERATOR badge", default: "Mod" },
+    labelVcMod: { type: OptionType.STRING, description: "Label for VOICE_MODERATOR badge", default: "VC Mod" },
+    labelChatMod: { type: OptionType.STRING, description: "Label for CHAT_MODERATOR badge", default: "Chat Mod" },
 });
 
 // Compute effective permissions for a member in a guild and optional channel.
@@ -110,16 +62,16 @@ function computeEffectivePermissions(userId: string, guildId?: string, channel?:
 
     const roles = GuildRoleStore.getSortedRoles(guildId).filter(r => r.id === guildId || member.roles.includes(r.id));
     let perms = roles.reduce((acc, r) => acc | (r.permissions ?? 0n), 0n);
-
     if (!channel || !channel.permissionOverwrites) return perms;
 
     const overwritesArr = Object.values(channel.permissionOverwrites as any) as any[];
-    const apply = (ow: any) => { perms = (perms & ~BigInt(ow.deny)) | BigInt(ow.allow); };
+    const apply = (ow: any) => { const allow = BigInt(ow.allow); const deny = BigInt(ow.deny); perms = (perms & ~deny) | allow; };
 
     const everyone = overwritesArr.find((o: any) => o.id === guildId);
     if (everyone) apply(everyone);
 
-    const roleOws = overwritesArr.filter((o: any) => member.roles.includes(o.id))
+    const roleOws = overwritesArr
+        .filter((o: any) => member.roles.includes(o.id))
         .map((o: any) => ({ ...o, position: GuildRoleStore.getRole(guildId, o.id)?.position ?? 0 }))
         .sort((a: any, b: any) => b.position - a.position);
     for (const ow of roleOws) apply(ow);
@@ -153,15 +105,8 @@ function getHighestTagForUser(user: User, guildId?: string, channel?: Channel) {
 
 
 
-// Try to reuse Discord's native bot/app tag classes when available.
-// `findByPropsLazy` defers lookup until the module is present so we can
-// match visuals even if the host changes class names across versions.
 const BotTagClasses = findByPropsLazy("botTagRegular", "botText");
 
-// Presentational component that renders a small badge/tag. We try to
-// render a 'cozy' variant for messages (smaller spacing) and a regular
-// variant for member lists/profile. If Discord's bot tag CSS is available
-// we reuse those classes to keep a consistent look-and-feel.
 function TagBubble({ text, user, cozy = false }: { text: string; user: User; cozy?: boolean; }) {
     const hasBotTagModule = BotTagClasses && BotTagClasses.botTagRegular && BotTagClasses.botText;
 
@@ -175,9 +120,7 @@ function TagBubble({ text, user, cozy = false }: { text: string; user: User; coz
 
     if (cozy && !hasBotTagModule) {
         return (
-            <span
-                className={classes("vc-upb-wrapper", "customCozy", "botTag", "botTagRegular", "rem")}
-            >
+            <span className={classes("vc-upb-wrapper", "customCozy", "botTag", "botTagRegular", "rem")}>
                 <span className={classes("botText")}>{text}</span>
             </span>
         );
@@ -185,9 +128,7 @@ function TagBubble({ text, user, cozy = false }: { text: string; user: User; coz
 
     if (cozy) {
         return (
-            <span
-                className={classes("vc-upb-wrapper", "customCozy", BotTagClasses.botTag, BotTagClasses.botTagRegular, BotTagClasses.rem)}
-            >
+            <span className={classes("vc-upb-wrapper", "customCozy", BotTagClasses.botTag, BotTagClasses.botTagRegular, BotTagClasses.rem)}>
                 <span className={classes(BotTagClasses.botText, "botText")}>{text}</span>
             </span>
         );
@@ -214,6 +155,22 @@ const labelFor = (tag: string | null) => {
     }
 };
 
+// Message decoration renderer (module-level). Exported on the plugin
+// object so our injected patch can call `$self.UserPermissionBadgesMessage`.
+const messageRenderer = (props: any) => {
+    const { message } = props as any;
+    if (!message?.author) return null;
+    const user = message.author;
+    if (!settings.store.showNextToMessage || (settings.store.hideForBots && !!user.bot)) return null;
+
+    const guildId = message?.channel_id ? (message.channel?.guild_id ?? SelectedGuildStore.getGuildId()) : SelectedGuildStore.getGuildId();
+    const tag = getHighestTagForUser(user, guildId ?? undefined, message.channel);
+    if (!tag) return null;
+
+    console.debug?.('[MoreUserTags] messageRenderer', { messageId: message.id, userId: user.id, tag });
+    return <TagBubble text={labelFor(tag)} user={user} cozy={true} />;
+};
+
 // Main plugin registration. The plugin registers decorators and badges
 // with the host at runtime according to user settings. Most runtime
 // behavior is controlled from the `start()` and `stop()` hooks below.
@@ -223,30 +180,25 @@ export default definePlugin({
     authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.Stellaros],
     settings,
 
+    // Expose the renderer so patched host code can inline the decoration
+    // directly by calling `$self.UserPermissionBadgesMessage(arguments[0])`.
+    UserPermissionBadgesMessage: messageRenderer,
+
     start() {
-        // Callback used by the MemberListDecorators API. This is invoked
-        // for each member row rendered by the host; returning a React
-        // element will place that element in the decorators wrapper.
+        // Member-list decorator: returns a React element to be inserted by host API
         const decoratorCallback = (props: any) => {
             const { user, type, channel } = props as any;
             if (!user) return null;
-
             if (settings.store.hideForBots && !!user.bot) return null;
-
             const guildId = type === "guild" ? SelectedGuildStore.getGuildId() : channel?.guild_id;
             if (!guildId) return null;
-
             const tag = getHighestTagForUser(user, guildId as string, channel);
             if (!tag) return null;
-
             return <TagBubble text={labelFor(tag)} user={user} cozy={false} />;
         };
 
-        // Runtime state persisted to `window` so the plugin can survive
-        // hot reloads during development. The fields track whether we've
-        // registered decorators/badges and hold references to observers
-        // and polling intervals for clean teardown.
-        const state = (window as any).__vc_upb_state = (window as any).__vc_upb_state || { registered: false, observer: undefined, interval: undefined, messageRegistered: false, profileRegistered: false, profileBadge: undefined };
+        // Persist runtime state to `window` so hot-reloads don't lose it.
+        const state = (window as any).__vc_upb_state = (window as any).__vc_upb_state || { registered: false, interval: undefined, messageRegistered: false, profileRegistered: false, profileBadge: undefined };
 
         // Profile badge: a small React component descriptor used by the
         // Badges API to render a badge inside the user profile modal.
@@ -256,18 +208,14 @@ export default definePlugin({
             position: BadgePosition.END,
             component: (props: any) => {
                 const user = UserStore.getUser(props.userId);
-                if (!user) return null;
-                if (settings.store.hideForBots && !!user.bot) return null;
+                if (!user || (settings.store.hideForBots && !!user.bot)) return null;
                 const tag = getHighestTagForUser(user, props.guildId as string | undefined);
-                if (!tag) return null;
-                return <TagBubble text={labelFor(tag)} user={user} cozy={false} />;
+                return tag ? <TagBubble text={labelFor(tag)} user={user} cozy={false} /> : null;
             },
             shouldShow: (args: any) => {
                 const user = UserStore.getUser(args.userId);
-                if (!user) return false;
-                if (settings.store.hideForBots && !!user.bot) return false;
-                const tag = getHighestTagForUser(user, args.guildId as string | undefined);
-                return !!tag;
+                if (!user || (settings.store.hideForBots && !!user.bot)) return false;
+                return !!getHighestTagForUser(user, args.guildId as string | undefined);
             },
         } as any;
         state.profileBadge = profileBadge;
@@ -280,32 +228,14 @@ export default definePlugin({
             addMemberListDecorator("UserPermissionBadges", decoratorCallback);
             state.registered = true;
         };
-
         const ensureUnregistered = () => {
             if (!state.registered) return;
             try { removeMemberListDecorator("UserPermissionBadges"); } catch { }
             state.registered = false;
-            try { if (state.observer) { state.observer.disconnect(); state.observer = undefined; } } catch { }
         };
 
-        // Message decoration callback: returns a compact (cozy) TagBubble
-        // to be placed next to the message author's name in chat. We
-        // compute the guild context for the message to apply channel- or
-        // server-specific permission checks.
-        const messageCallback = (props: any) => {
-            const { message } = props as any;
-            if (!message || !message.author) return null;
-            const user = message.author;
-
-            if (!settings.store.showNextToMessage) return null;
-            if (settings.store.hideForBots && !!user.bot) return null;
-
-            const guildId = message?.channel_id ? (message.channel?.guild_id ?? SelectedGuildStore.getGuildId()) : SelectedGuildStore.getGuildId();
-            const tag = getHighestTagForUser(user, (guildId ?? undefined), message.channel);
-            if (!tag) return null;
-
-            return <TagBubble text={labelFor(tag)} user={user} cozy={true} />;
-        };
+        // Use the module-level renderer for messages
+        const messageCallback = messageRenderer;
 
         // Register message decorations and start an observer to adjust
         // placement of the generated elements. The observer attempts a
@@ -315,44 +245,7 @@ export default definePlugin({
             if (state.messageRegistered) return;
             addMessageDecoration("UserPermissionBadgesMessage", messageCallback);
             state.messageRegistered = true;
-            try {
-                if (!state.observer) {
-                    const observer = new MutationObserver((mutations) => {
-                        for (const m of mutations) {
-                            for (const node of Array.from(m.addedNodes)) {
-                                try {
-                                    if (!(node instanceof Element)) continue;
-                                    const wrappers = node.matches?.('.vc-message-decorations-wrapper') ? [node] : Array.from(node.querySelectorAll?.('.vc-message-decorations-wrapper') || []);
-                                    for (const wrapper of wrappers) {
-                                        if (!wrapper.parentElement) continue;
-                                        const inner = wrapper.querySelector('.vc-upb-wrapper') || wrapper.querySelector('.botTag') || wrapper.querySelector('span');
-                                        if (inner && wrapper.parentElement) {
-                                            const parent = wrapper.parentElement;
-                                            if (parent.contains(wrapper)) {
-                                                try {
-                                                    parent.insertBefore(inner, wrapper);
-                                                    setTimeout(() => { try { if (parent.contains(wrapper)) parent.removeChild(wrapper); } catch { } }, 0);
-                                                } catch (e) {
-                                                    try {
-                                                        const frag = document.createDocumentFragment();
-                                                        while (wrapper.firstChild) frag.appendChild(wrapper.firstChild);
-                                                        parent.insertBefore(frag, wrapper);
-                                                        if (parent.contains(wrapper)) parent.removeChild(wrapper);
-                                                    } catch { /* ignore */ }
-                                                }
-                                            }
-                                        }
-                                    }
-                                } catch { }
-                            }
-                        }
-                    });
-                    observer.observe(document.body, { childList: true, subtree: true });
-                    state.observer = observer;
-                }
-            } catch { /* ignore */ }
         };
-
         const ensureUnregisteredMessage = () => {
             if (!state.messageRegistered) return;
             try { removeMessageDecoration("UserPermissionBadgesMessage"); } catch { }
@@ -360,7 +253,12 @@ export default definePlugin({
         };
 
         if (settings.store.showInMemberList) ensureRegistered(); else ensureUnregistered();
-        if (settings.store.showInMemberBadges) { try { addProfileBadge(state.profileBadge); state.profileRegistered = true; } catch { } } else { try { removeProfileBadge(state.profileBadge); } catch { } state.profileRegistered = false; }
+        if (settings.store.showInMemberBadges) {
+            try { addProfileBadge(state.profileBadge); state.profileRegistered = true; } catch { }
+        } else {
+            try { removeProfileBadge(state.profileBadge); } catch { }
+            state.profileRegistered = false;
+        }
         if (settings.store.showNextToMessage) ensureRegisteredMessage(); else ensureUnregisteredMessage();
 
         try {
@@ -388,20 +286,17 @@ export default definePlugin({
     },
 
     stop() {
-        try {
-            const state = (window as any).__vc_upb_state;
-            if (state) {
-                try { if (state.interval) { clearInterval(state.interval); state.interval = undefined; } } catch { }
-                try { if (state.observer) { state.observer.disconnect(); state.observer = undefined; } } catch { }
-                try { if (state.registered) { removeMemberListDecorator("UserPermissionBadges"); state.registered = false; } } catch { }
-                try { if (state.messageRegistered) { removeMessageDecoration("UserPermissionBadgesMessage"); state.messageRegistered = false; } } catch { }
-                try { if (state.profileRegistered && state.profileBadge) { try { removeProfileBadge(state.profileBadge); } catch { } state.profileRegistered = false; state.profileBadge = undefined; } } catch { }
-                try { delete (window as any).__vc_upb_state; } catch { }
-            } else {
-                try { removeMemberListDecorator("UserPermissionBadges"); } catch { }
-                try { removeMessageDecoration("UserPermissionBadgesMessage"); } catch { }
-            }
-        } catch { }
+        const state = (window as any).__vc_upb_state;
+        if (state) {
+            if (state.interval) { try { clearInterval(state.interval); } catch { } state.interval = undefined; }
+            if (state.registered) { try { removeMemberListDecorator("UserPermissionBadges"); } catch { } state.registered = false; }
+            if (state.messageRegistered) { try { removeMessageDecoration("UserPermissionBadgesMessage"); } catch { } state.messageRegistered = false; }
+            if (state.profileRegistered && state.profileBadge) { try { removeProfileBadge(state.profileBadge); } catch { } state.profileRegistered = false; state.profileBadge = undefined; }
+            try { delete (window as any).__vc_upb_state; } catch { }
+        } else {
+            try { removeMemberListDecorator("UserPermissionBadges"); } catch { }
+            try { removeMessageDecoration("UserPermissionBadgesMessage"); } catch { }
+        }
 
         try { delete (window as any).vcTestUPB; } catch { }
     }
