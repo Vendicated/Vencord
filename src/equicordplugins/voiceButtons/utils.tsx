@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { Icon, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, ChannelStore, MediaEngineStore, NavigationRouter, Tooltip, UserStore, VoiceActions } from "@webpack/common";
+import { Button, ChannelStore, GuildActions, MediaEngineStore, NavigationRouter, PermissionsBits, PermissionStore, Tooltip, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
 import { JSX } from "react";
 
 import { settings } from "./settings";
@@ -61,6 +61,29 @@ function getUserName(user: User) {
     return username;
 }
 
+function canServerMuteDeafen(userId: string) {
+    if (!settings.store.useServer) return { canMute: false, canDeafen: false };
+
+    const voiceState = VoiceStateStore.getVoiceStateForUser(userId);
+    const channel = voiceState?.channelId ? ChannelStore.getChannel(voiceState.channelId) : null;
+    if (!channel?.guild_id) return { canMute: false, canDeafen: false };
+
+    const canMute = PermissionStore.can(PermissionsBits.MUTE_MEMBERS, channel);
+    const canDeafen = PermissionStore.can(PermissionsBits.DEAFEN_MEMBERS, channel);
+
+    return { canMute, canDeafen };
+}
+
+function getServerMuteDeafenState(userId: string) {
+    const voiceState = VoiceStateStore.getVoiceStateForUser(userId);
+    if (!voiceState) return { isServerMuted: false, isServerDeafened: false };
+
+    return {
+        isServerMuted: voiceState.mute ?? false,
+        isServerDeafened: voiceState.deaf ?? false
+    };
+}
+
 export function UserChatButton({ user }: { user: User; }) {
     const isCurrent = (user.id === UserStore.getCurrentUser().id);
     return (
@@ -82,19 +105,42 @@ export function UserChatButton({ user }: { user: User; }) {
 
 export function UserMuteButton({ user }: { user: User; }) {
     const isCurrent = (user.id === UserStore.getCurrentUser().id);
-    const isMuted = (isCurrent && MediaEngineStore.isSelfMute()) || MediaEngineStore.isLocalMute(user.id);
+    const { canMute: canServerMute } = canServerMuteDeafen(user.id);
+    const { isServerMuted } = getServerMuteDeafenState(user.id);
+
+    const useServerMuteForSelf = isCurrent && settings.store.serverSelf;
+
+    const isLocalMuted = (isCurrent && MediaEngineStore.isSelfMute()) || MediaEngineStore.isLocalMute(user.id);
+    const isMuted = canServerMute ? isServerMuted : isLocalMuted;
     const color = isMuted ? "var(--status-danger)" : "var(--channels-default)";
+
+    const muteAction = canServerMute && (useServerMuteForSelf || !isCurrent) ? "Server Mute" : "Mute";
+    const tooltipAction = isMuted ? (canServerMute && (useServerMuteForSelf || !isCurrent) ? "Unserver Mute" : "Unmute") : muteAction;
+
     return (
         <VoiceUserButton
             user={user}
-            tooltip={`${isMuted ? "Unmute" : "Mute"} ${isCurrent ? "yourself" : `${getUserName(user)}`}`}
+            tooltip={`${tooltipAction} ${isCurrent ? "yourself" : `${getUserName(user)}`}`}
             icon={isCurrent ? <MuteIconSelf muted={isMuted} size="sm" color={color} /> : <MuteIconOther muted={isMuted} size="sm" color={color} />}
             onClick={() => {
-                if (isCurrent) {
-                    VoiceActions.toggleSelfMute();
-                    return;
+                if (canServerMute) {
+                    if (!useServerMuteForSelf) {
+                        VoiceActions.toggleSelfMute();
+                        return;
+                    }
+
+                    const voiceState = VoiceStateStore.getVoiceStateForUser(user.id);
+                    const channel = voiceState?.channelId ? ChannelStore.getChannel(voiceState.channelId) : null;
+                    if (channel?.guild_id) {
+                        GuildActions.setServerMute(channel.guild_id, user.id, !isServerMuted);
+                    }
+                } else {
+                    if (isCurrent) {
+                        VoiceActions.toggleSelfMute();
+                    } else {
+                        VoiceActions.toggleLocalMute(user.id);
+                    }
                 }
-                VoiceActions.toggleLocalMute(user.id);
             }}
         />
     );
@@ -102,44 +148,68 @@ export function UserMuteButton({ user }: { user: User; }) {
 
 export function UserDeafenButton({ user }: { user: User; }) {
     const isCurrent = (user.id === UserStore.getCurrentUser().id);
+    const { canDeafen: canServerDeafen } = canServerMuteDeafen(user.id);
+    const { isServerDeafened } = getServerMuteDeafenState(user.id);
+
+    const useServerDeafenForSelf = isCurrent && settings.store.serverSelf;
+
     const isMuted = MediaEngineStore.isLocalMute(user.id);
     const isSoundboardMuted = SoundboardStore.isLocalSoundboardMuted(user.id);
     const isVideoDisabled = MediaEngineStore.isLocalVideoDisabled(user.id);
-    const isDeafened = isCurrent && MediaEngineStore.isSelfDeaf() || isMuted && isSoundboardMuted && isVideoDisabled;
+    const isLocalDeafened = isCurrent && MediaEngineStore.isSelfDeaf() || isMuted && isSoundboardMuted && isVideoDisabled;
+
+    const isDeafened = canServerDeafen && (useServerDeafenForSelf || !isCurrent) ? isServerDeafened : isLocalDeafened;
     const color = isDeafened ? "var(--status-danger)" : "var(--channels-default)";
+
+    const deafenAction = canServerDeafen && (useServerDeafenForSelf || !isCurrent) ? "Server Deafen" : "Deafen";
+    const tooltipAction = isDeafened ? (canServerDeafen && (useServerDeafenForSelf || !isCurrent) ? "Unserver Deafen" : "Undeafen") : deafenAction;
+
     return (
         <VoiceUserButton
             user={user}
-            tooltip={`${isDeafened ? "Undeafen" : "Deafen"} ${isCurrent ? "yourself" : `${getUserName(user)}`}`}
+            tooltip={`${tooltipAction} ${isCurrent ? "yourself" : `${getUserName(user)}`}`}
             icon={isCurrent ? <DeafenIconSelf muted={isDeafened} size="sm" color={color} /> : <DeafenIconOther muted={isDeafened} size="sm" color={color} />}
             onClick={() => {
-                if (isCurrent) {
-                    VoiceActions.toggleSelfDeaf();
-                    return;
-                }
-                if (isMuted) {
-                    VoiceActions.toggleLocalMute(user.id);
-                    if (settings.store.muteSoundboard && isSoundboardMuted) {
-                        VoiceActions.toggleLocalSoundboardMute(user.id);
+                if (canServerDeafen) {
+                    if (!useServerDeafenForSelf) {
+                        VoiceActions.toggleSelfDeaf();
+                        return;
                     }
-                    if (settings.store.disableVideo && isVideoDisabled) {
-                        VoiceActions.setDisableLocalVideo(
-                            user.id,
-                            "ENABLED",
-                            "default"
-                        );
+
+                    const voiceState = VoiceStateStore.getVoiceStateForUser(user.id);
+                    const channel = voiceState?.channelId ? ChannelStore.getChannel(voiceState.channelId) : null;
+                    if (channel?.guild_id) {
+                        GuildActions.setServerDeaf(channel.guild_id, user.id, !isServerDeafened);
                     }
                 } else {
-                    VoiceActions.toggleLocalMute(user.id);
-                    if (settings.store.muteSoundboard && !isSoundboardMuted) {
-                        VoiceActions.toggleLocalSoundboardMute(user.id);
+                    if (isCurrent) {
+                        VoiceActions.toggleSelfDeaf();
+                        return;
                     }
-                    if (settings.store.disableVideo && !isVideoDisabled) {
-                        VoiceActions.setDisableLocalVideo(
-                            user.id,
-                            "DISABLED",
-                            "default"
-                        );
+                    if (isMuted) {
+                        VoiceActions.toggleLocalMute(user.id);
+                        if (settings.store.muteSoundboard && isSoundboardMuted) {
+                            VoiceActions.toggleLocalSoundboardMute(user.id);
+                        }
+                        if (settings.store.disableVideo && isVideoDisabled) {
+                            VoiceActions.setDisableLocalVideo(
+                                user.id,
+                                "ENABLED",
+                                "default"
+                            );
+                        }
+                    } else {
+                        VoiceActions.toggleLocalMute(user.id);
+                        if (settings.store.muteSoundboard && !isSoundboardMuted) {
+                            VoiceActions.toggleLocalSoundboardMute(user.id);
+                        }
+                        if (settings.store.disableVideo && !isVideoDisabled) {
+                            VoiceActions.setDisableLocalVideo(
+                                user.id,
+                                "DISABLED",
+                                "default"
+                            );
+                        }
                     }
                 }
             }}

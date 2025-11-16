@@ -38,6 +38,18 @@ export const settings = definePluginSettings({
         description: "Toggles their video upon clicking deafen button.",
         restartNeeded: false,
     },
+    useServer: {
+        type: OptionType.BOOLEAN,
+        description: "Use server mute/deafen instead of local when you have permission.",
+        default: false,
+        restartNeeded: false,
+    },
+    serverSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Deafen / Mute yourself on the server when using mute/deafen.",
+        default: false,
+        restartNeeded: false,
+    },
     showButtonsSelf: {
         type: OptionType.SELECT,
         default: "display",
@@ -59,5 +71,16 @@ export const settings = definePluginSettings({
             { label: "Default Username", value: "username" },
             { label: "Both", value: "both" },
         ],
+    }
+}, {
+    useServer: {
+        disabled() {
+            return !this.store.showMuteButton && !this.store.showDeafenButton;
+        },
+    },
+    serverSelf: {
+        disabled() {
+            return !this.store.useServer && !this.store.showMuteButton && !this.store.showDeafenButton;
+        },
     }
 });
