@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.13.5",
+    "version": "1.13.6",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -49,7 +49,7 @@
         "@types/chrome": "^0.0.312",
         "@types/diff": "^7.0.2",
         "@types/lodash": "^4.17.14",
-        "@types/node": "^22.13.13",
+        "@types/node": "^24.10.1",
         "@types/react": "^19.0.10",
         "@types/react-dom": "^19.0.4",
         "@types/yazl": "^2.4.5",
@@ -74,7 +74,7 @@
         "ts-pattern": "^5.6.0",
         "tsx": "^4.19.3",
         "type-fest": "^4.38.0",
-        "typescript": "^5.8.2",
+        "typescript": "^5.9.3",
         "typescript-eslint": "^8.28.0",
         "typescript-transform-paths": "^3.5.5",
         "zip-local": "^0.3.5"

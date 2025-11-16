@@ -8,12 +8,11 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
-import { Button, ButtonWrapperClasses, Menu, Tooltip } from "@webpack/common";
-import { classes } from "@utils/misc";
-import { ButtonWrapperClasses, Clickable, Tooltip } from "@webpack/common";
+import { ButtonWrapperClasses, Clickable, Menu, Tooltip } from "@webpack/common";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
 import { addContextMenuPatch, findGroupChildrenByChildId } from "./ContextMenu";
