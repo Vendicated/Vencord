@@ -249,7 +249,7 @@ export function definePluginSettings<
         },
         use: settings => useSettings((
             settings
-                ? settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+                ? settings.map(name => `plugins.${definedSettings.pluginName}.${name}`)
                 : [`plugins.${definedSettings.pluginName}.*`]
         ) as UseSettings<Settings>[]).plugins[definedSettings.pluginName] as any,
         def,
