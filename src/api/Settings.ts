@@ -235,6 +235,7 @@ export function migratePluginToSetting(newName: string, oldName: string, setting
     if (oldPlugin?.enabled) {
         newPlugin[settingName] = true;
         oldPlugin.enabled = false;
+        if (!newPlugin?.enabled) newPlugin.enabled = true;
         SettingsStore.markAsChanged();
     }
 }
