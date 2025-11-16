@@ -126,11 +126,11 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
 
     if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
     if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
-    if (p.chatBarButton || p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
+    if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
     if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
     if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
     if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
-    if (p.messagePopoverButton || p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
+    if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
     if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
 
     for (const key of pluginKeysToBind) {
@@ -260,7 +260,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.start) {
@@ -310,15 +310,11 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) addMessageClickListener(onMessageClick);
 
-    if (chatBarButton) addChatBarButton(name, chatBarButton.render, chatBarButton.icon);
-    // @ts-expect-error: legacy code doesn't have icon
-    else if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
+    if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
-    if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
-    // @ts-expect-error: legacy code doesn't have icon
-    else if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
+    if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -327,7 +323,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.stop) {
@@ -375,11 +371,11 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) removeMessageClickListener(onMessageClick);
 
-    if (chatBarButton || renderChatBarButton) removeChatBarButton(name);
+    if (renderChatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
-    if (messagePopoverButton || renderMessagePopoverButton) removeMessagePopoverButton(name);
+    if (renderMessagePopoverButton) removeMessagePopoverButton(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
