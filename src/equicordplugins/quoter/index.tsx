@@ -15,8 +15,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { Button, Menu, TextInput, UploadHandler, useEffect, useState } from "@webpack/common";
 
-import { QuoteIcon } from "./components";
-import { createQuoteImage, ensureFontLoaded, generateFileNamePreview, QuoteFont, resetFontLoading, sizeUpgrade } from "./utils";
+import { QuoteIcon } from "./components/QuoteIcon";
+import { QuoteFont } from "./types";
+import { createQuoteImage, ensureFontLoaded, generateFileNamePreview, getFileExtension, getMimeType, resetFontLoading, sizeUpgrade } from "./utils";
 
 const settings = definePluginSettings({
     quoteFont: {
@@ -57,8 +58,8 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Quoter",
-    description: "Adds the ability to create an inspirational quote image from a message",
-    authors: [Devs.Samwich, Devs.thororen, EquicordDevs.neoarz],
+    description: "Adds the ability to create an inspirational quote image from a message.",
+    authors: [Devs.Samwich, Devs.thororen, EquicordDevs.neoarz, EquicordDevs.Prism],
     settings,
 
     async start() {
@@ -96,25 +97,19 @@ function QuoteModal({ message, ...props }: ModalProps & { message: Message; }) {
     const [saveAsGif, setSaveAsGif] = useState(settings.store.saveAsGif);
     const [watermarkText, setWatermarkText] = useState(settings.store.watermark);
     const [quoteImage, setQuoteImage] = useState<Blob | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const { quoteFont } = settings.store;
-    const safeContent = message.content ? message.content : "";
 
     useEffect(() => {
         settings.store.grayscale = gray;
-    }, [gray]);
-
-    useEffect(() => {
         settings.store.showWatermark = showWatermark;
-    }, [showWatermark]);
-
-    useEffect(() => {
         settings.store.saveAsGif = saveAsGif;
-    }, [saveAsGif]);
+    }, [gray, showWatermark, saveAsGif]);
 
     const generateImage = async () => {
         const image = await createQuoteImage({
             avatarUrl: sizeUpgrade(message.author.getAvatarURL()),
-            quoteOld: safeContent,
+            quote: message.content,
             grayScale: gray,
             author: message.author,
             watermark: watermarkText,
@@ -123,30 +118,52 @@ function QuoteModal({ message, ...props }: ModalProps & { message: Message; }) {
             quoteFont
         });
         setQuoteImage(image);
-        document.getElementById("quoterPreview")?.setAttribute("src", URL.createObjectURL(image));
+
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+        const newUrl = URL.createObjectURL(image);
+        setPreviewUrl(newUrl);
+        document.getElementById("quoterPreview")?.setAttribute("src", newUrl);
     };
 
-    useEffect(() => { generateImage(); }, [gray, showWatermark, saveAsGif, safeContent, watermarkText, quoteFont]);
+    useEffect(() => { generateImage(); }, [gray, showWatermark, saveAsGif, watermarkText, quoteFont]);
 
-    const Export = () => {
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
+    const handleExport = () => {
         if (!quoteImage) return;
+
+        const preview = generateFileNamePreview(message.content);
+        const extension = getFileExtension(saveAsGif);
+        const url = URL.createObjectURL(quoteImage);
+
         const link = document.createElement("a");
-        const preview = generateFileNamePreview(safeContent);
-        const extension = saveAsGif ? "gif" : "png";
-        link.href = URL.createObjectURL(quoteImage);
+        link.href = url;
         link.download = `${preview} - ${message.author.username}.${extension}`;
         link.click();
         link.remove();
+
+        URL.revokeObjectURL(url);
     };
 
-    const SendInChat = () => {
+    const handleSendInChat = () => {
         if (!quoteImage) return;
-        const preview = generateFileNamePreview(safeContent);
-        const extension = saveAsGif ? "gif" : "png";
-        const mimeType = saveAsGif ? "image/gif" : "image/png";
+
+        const channel = getCurrentChannel();
+        if (!channel) return;
+
+        const preview = generateFileNamePreview(message.content);
+        const extension = getFileExtension(saveAsGif);
+        const mimeType = getMimeType(saveAsGif);
         const file = new File([quoteImage], `${preview} - ${message.author.username}.${extension}`, { type: mimeType });
-        // @ts-expect-error typing issue
-        UploadHandler.promptToUpload([file], getCurrentChannel(), 0);
+
+        UploadHandler.promptToUpload([file], channel, 0);
         props.onClose?.();
     };
 
@@ -159,42 +176,41 @@ function QuoteModal({ message, ...props }: ModalProps & { message: Message; }) {
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
             <ModalContent scrollbarType="none">
-                <img alt="" src="" id="quoterPreview" style={{ borderRadius: "20px", width: "100%" }} />
-                <br /><br />
-                <br /><br />
+                <img alt="Quote preview" src="" id="quoterPreview" style={{ borderRadius: "20px", width: "100%", marginBottom: "20px" }} />
+
                 <FormSwitch title="Grayscale" value={gray} onChange={setGray} />
-                <FormSwitch title="Save as GIF" value={saveAsGif} onChange={setSaveAsGif} description="Saves/Sends the image as a GIF instead of a PNG" />
-                {!showWatermark ? (
-                    <FormSwitch
-                        title="Show Watermark"
-                        value={showWatermark}
-                        onChange={setShowWatermark}
-                    />
-                ) : (
-                    <>
-                        <FormSwitch
-                            title="Show Watermark"
-                            value={showWatermark}
-                            onChange={setShowWatermark}
-                            hideBorder
+                <FormSwitch
+                    title="Save as GIF"
+                    value={saveAsGif}
+                    onChange={setSaveAsGif}
+                    description="Saves/Sends the image as a GIF instead of a PNG"
+                />
+                <FormSwitch
+                    title="Show Watermark"
+                    value={showWatermark}
+                    onChange={setShowWatermark}
+                    hideBorder={showWatermark}
+                />
+                {showWatermark && (
+                    <div style={{ marginTop: "8px", marginBottom: "20px" }}>
+                        <TextInput
+                            value={watermarkText}
+                            onChange={setWatermarkText}
+                            placeholder="Watermark text (max 32 characters)"
+                            maxLength={32}
                         />
-                        <div style={{ marginTop: "8px", marginBottom: "20px" }}>
-                            <TextInput
-                                value={watermarkText}
-                                onChange={setWatermarkText}
-                                placeholder="Watermark text (max 32 characters)"
-                                maxLength={32}
-                            />
-                        </div>
-                    </>
+                    </div>
                 )}
-                <br />
-                <div style={{ display: "flex", gap: "5px" }}>
-                    <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={async () => await Export()}>Export</Button>
-                    <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={async () => await SendInChat()}>Send</Button>
+
+                <div style={{ display: "flex", gap: "8px", marginTop: "16px", marginBottom: "16px" }}>
+                    <Button color={Button.Colors.BRAND} size={Button.Sizes.MEDIUM} onClick={handleExport}>
+                        Export
+                    </Button>
+                    <Button color={Button.Colors.BRAND} size={Button.Sizes.MEDIUM} onClick={handleSendInChat}>
+                        Send
+                    </Button>
                 </div>
             </ModalContent>
-            <br />
         </ModalRoot>
     );
 }
