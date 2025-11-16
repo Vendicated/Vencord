@@ -222,6 +222,7 @@ function createObserver(targetNode: HTMLElement) {
         childList: true,
         subtree: true,
     });
+    return observer;
 }
 
 function tryHexToRgb(hex) {
@@ -292,6 +293,8 @@ const settings = definePluginSettings({
     },
 });
 
+let observer: MutationObserver | null = null;
+
 export default definePlugin({
     name: "BetterAudioPlayer",
     description: "Adds a spectrograph and oscilloscope visualizer to audio attachment players",
@@ -302,11 +305,15 @@ export default definePlugin({
             const targetNode = document.querySelector("[class^='content_']");
             if (targetNode) {
                 scanForAudioElements(targetNode as HTMLElement);
-                createObserver(targetNode as HTMLElement);
+                observer = createObserver(targetNode as HTMLElement);
             } else {
                 requestAnimationFrame(waitForContent);
             }
         };
         waitForContent();
+    },
+    stop() {
+        observer?.disconnect();
+        observer = null;
     },
 });

@@ -24,22 +24,28 @@ const throttledOnMessage = throttle(onMessage, 3000, () => FluxDispatcher.dispat
 
 let ws: WebSocket;
 let wsReconnect: NodeJS.Timeout;
+let shouldReconnect = false;
 
 export default definePlugin({
     name: "TosuRPC",
     description: "osu! RPC with data from tosu",
     authors: [Devs.AutumnVN],
     start() {
+        shouldReconnect = true;
         (function connect() {
             ws = new WebSocket("ws://127.0.0.1:24050/websocket/v2");
             ws.addEventListener("error", () => ws.close());
-            ws.addEventListener("close", () => wsReconnect = setTimeout(connect, 5000));
+            ws.addEventListener("close", () => {
+                if (!shouldReconnect) return;
+                wsReconnect = setTimeout(connect, 5000);
+            });
             ws.addEventListener("message", ({ data }) => throttledOnMessage(data));
         })();
     },
     stop() {
-        ws.close();
-        clearTimeout(wsReconnect);
+        shouldReconnect = false;
+        if (wsReconnect) clearTimeout(wsReconnect);
+        if (ws) ws.close();
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null, socketId: "tosu" });
     }
 });

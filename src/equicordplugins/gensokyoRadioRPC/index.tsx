@@ -39,6 +39,8 @@ const settings = definePluginSettings({
     }
 });
 
+let updateInterval: NodeJS.Timeout | undefined;
+
 export default definePlugin({
     name: "GensokyoRadioRPC",
     description: "Discord rich presence for Gensokyo Radio!",
@@ -57,11 +59,12 @@ export default definePlugin({
 
     start() {
         this.updatePresence();
-        this.updateInterval = setInterval(() => { this.updatePresence(); }, settings.store.refreshInterval * 1000);
+        updateInterval = setInterval(() => { this.updatePresence(); }, settings.store.refreshInterval * 1000);
     },
 
     stop() {
-        clearInterval(this.updateInterval);
+        clearInterval(updateInterval);
+        updateInterval = undefined;
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null });
     },
 

@@ -37,6 +37,8 @@ const enum AssetImageType {
 
 const applicationId = "1239490006054207550";
 
+let updateInterval: NodeJS.Timeout | undefined;
+
 function setActivity(activity: Activity | null) {
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
@@ -172,11 +174,12 @@ export default definePlugin({
 
     start() {
         this.updatePresence();
-        this.updateInterval = setInterval(() => { this.updatePresence(); }, settings.store.refreshInterval * 1000);
+        updateInterval = setInterval(() => { this.updatePresence(); }, settings.store.refreshInterval * 1000);
     },
 
     stop() {
-        clearInterval(this.updateInterval);
+        clearInterval(updateInterval);
+        updateInterval = undefined;
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null });
     },
 

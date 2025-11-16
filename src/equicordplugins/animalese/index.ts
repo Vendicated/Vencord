@@ -222,16 +222,11 @@ export default definePlugin({
         }
     },
 
-    start() {
-        // Only subscribe once!
-        const init = async () => {
-            if (!audioContext) {
-                audioContext = new AudioContext();
-                await initSoundBuffers();
-            }
-            init();
-        };
-        init();
+    async start() {
+        if (!audioContext) {
+            audioContext = new AudioContext();
+            await initSoundBuffers();
+        }
     },
 
     stop() {

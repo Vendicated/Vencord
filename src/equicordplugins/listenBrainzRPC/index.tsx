@@ -42,6 +42,8 @@ const logger = new Logger("ListenBrainzRPC");
 
 const PresenceStore = findByPropsLazy("getLocalPresence");
 
+let updateInterval: NodeJS.Timeout | undefined;
+
 async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
 }
@@ -181,13 +183,14 @@ export default definePlugin({
 
     start() {
         this.updatePresence();
-        this.updateInterval = setInterval(() => {
+        updateInterval = setInterval(() => {
             this.updatePresence();
         }, 16000);
     },
 
     stop() {
-        clearInterval(this.updateInterval);
+        clearInterval(updateInterval);
+        updateInterval = undefined;
     },
 
     async fetchTrackData(): Promise<TrackData | null> {

@@ -10,7 +10,7 @@ import { createAudioPlayer } from "@api/AudioPlayer";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { createRoot, FluxDispatcher, useEffect, useState } from "@webpack/common";
+import { createRoot, FluxDispatcher, useCallback, useEffect, useState } from "@webpack/common";
 import { Root } from "react-dom/client";
 
 let jumpscareRoot: Root | undefined;
@@ -67,7 +67,7 @@ export default definePlugin({
         const [isPlaying, setIsPlaying] = useState(false);
         const jumpscareAudio = createAudioPlayer(settings.store.audioSource, { volume: 100, onEnded: () => { setIsPlaying(false); } });
 
-        const jumpscare = event => {
+        const jumpscare = useCallback(event => {
             if (isPlaying) return;
 
             const chance = 1 / settings.store.chance;
@@ -75,7 +75,7 @@ export default definePlugin({
 
             setIsPlaying(true);
             jumpscareAudio.play();
-        };
+        }, [isPlaying]);
 
         useEffect(() => {
             FluxDispatcher.subscribe("CHANNEL_SELECT", jumpscare);
@@ -83,7 +83,7 @@ export default definePlugin({
             return () => {
                 FluxDispatcher.unsubscribe("CHANNEL_SELECT", jumpscare);
             };
-        });
+        }, [jumpscare]);
 
         return <img className={`jumpscare-img ${isPlaying ? "jumpscare-animate" : ""}`} src={settings.store.imageSource} />;
     }
