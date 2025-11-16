@@ -160,7 +160,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
 }, { noop: true });
 
 addContextMenuPatch("textarea-context", (children, args) => {
-    const { chatBarButtons } = useSettings().uiElements;
+    const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
 
     const buttons = Array.from(ChatBarButtonMap.entries());
     if (!buttons.length) return;
