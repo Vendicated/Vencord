@@ -1,6 +1,5 @@
 # Pocket Bird
 
-![License](https://img.shields.io/github/license/IdreesInc/Pocket-Bird)
 [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/lbbdngkbbgaecefacpnhnhleggabghak)](https://chromewebstore.google.com/detail/pocket-bird/lbbdngkbbgaecefacpnhnhleggabghak)
 [![Mozilla Add-on Version](https://img.shields.io/amo/v/pocket-bird)](https://addons.mozilla.org/en-US/firefox/addon/pocket-bird/)
 [![Discord](https://img.shields.io/discord/1398471368403583120?logo=discord&logoColor=fff&label=discord&color=5865F2)](https://discord.gg/6yxE9prcNc)
