@@ -32,10 +32,11 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
+import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import Plugins, { ExcludedPlugins } from "~plugins";
+import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
 
@@ -72,7 +73,8 @@ const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED,
-    NEW
+    NEW,
+    USER_PLUGINS
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -108,7 +110,8 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
 function PluginSettings() {
     const settings = useSettings();
-    const changes = useMemo(() => new ChangeList<string>(), []);
+    const changeRef = useRef<ChangeList<string>>(null);
+    const changes = changeRef.current ??= new ChangeList<string>();
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
@@ -170,6 +173,9 @@ function PluginSettings() {
             case SearchStatus.NEW:
                 if (!newPlugins?.includes(plugin.name)) return false;
                 break;
+            case SearchStatus.USER_PLUGINS:
+                if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                break;
         }
 
         if (!search.length) return true;
@@ -177,7 +183,7 @@ function PluginSettings() {
         return (
             plugin.name.toLowerCase().includes(search) ||
             plugin.description.toLowerCase().includes(search) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(search))
+            plugin.keywords?.some(t => t.toLowerCase().includes(search))
         );
     };
 
@@ -200,6 +206,7 @@ function PluginSettings() {
 
     const plugins = [] as JSX.Element[];
     const requiredPlugins = [] as JSX.Element[];
+    const userPlugins = !IS_STANDALONE && Object.values(PluginMeta).some(p => p.userPlugin);
 
     const showApi = searchValue.value.includes("API");
     for (const p of sortedPlugins) {
@@ -259,6 +266,7 @@ function PluginSettings() {
                         <Select
                             options={[
                                 { label: "Show All", value: SearchStatus.ALL, default: true },
+                                ...(userPlugins ? [{ label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS }] : []),
                                 { label: "Show Enabled", value: SearchStatus.ENABLED },
                                 { label: "Show Disabled", value: SearchStatus.DISABLED },
                                 { label: "Show New", value: SearchStatus.NEW }
