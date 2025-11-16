@@ -187,7 +187,7 @@ export interface PluginDef {
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
 
-    // TODO: Remove by November 2025
+    // TODO: Remove eventually
     /**
      * @deprecated Use {@link chatBarButton} instead
      */
