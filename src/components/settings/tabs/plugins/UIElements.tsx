@@ -11,7 +11,7 @@ import { MessagePopoverButtonMap } from "@api/MessagePopover";
 import { SettingsPluginUiElements, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { PlaceholderIcon } from "@components/Icons";
-import { Switch } from "@components/settings/Switch";
+import { Switch } from "@components/Switch";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
