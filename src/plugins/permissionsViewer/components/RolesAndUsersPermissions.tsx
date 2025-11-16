@@ -28,7 +28,7 @@ import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n,
 
 import { settings } from "..";
 import { cl, getGuildPermissionSpecMap } from "../utils";
-import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
+import { IdIcon, PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon, ViewServerAsRoleIcon } from "./icons";
 
 export const enum PermissionType {
     Role = 0,
@@ -133,6 +133,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                 else if (permission.type === PermissionType.User) {
                                                     ContextMenuApi.openContextMenu(e, () => (
                                                         <UserContextMenu
+                                                            guild={guild}
                                                             userId={permission.id!}
                                                         />
                                                     ));
@@ -218,15 +219,19 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 }
 
 function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: string; onClose: () => void; }) {
+    const role = GuildRoleStore.getRole(guild.id, roleId);
+
     return (
         <Menu.Menu
             navId={cl("role-context-menu")}
             onClose={ContextMenuApi.closeContextMenu}
             aria-label="Role Options"
+            contextMenuAPIArguments={[{ guild, role }]}
         >
             <Menu.MenuItem
                 id={cl("copy-role-id")}
                 label={getIntlMessage("COPY_ID_ROLE")}
+                icon={IdIcon}
                 action={() => {
                     copyToClipboard(roleId);
                 }}
@@ -236,8 +241,8 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                 <Menu.MenuItem
                     id={cl("view-as-role")}
                     label={getIntlMessage("VIEW_AS_ROLE")}
+                    icon={ViewServerAsRoleIcon}
                     action={() => {
-                        const role = GuildRoleStore.getRole(guild.id, roleId);
                         if (!role) return;
 
                         onClose();
@@ -258,16 +263,20 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
     );
 }
 
-function UserContextMenu({ userId }: { userId: string; }) {
+function UserContextMenu({ guild, userId }: { guild: Guild; userId: string; }) {
+    const member = GuildMemberStore.getMember(guild.id, userId);
+
     return (
         <Menu.Menu
             navId={cl("user-context-menu")}
             onClose={ContextMenuApi.closeContextMenu}
             aria-label="User Options"
+            contextMenuAPIArguments={[{ guild, user: member }]}
         >
             <Menu.MenuItem
                 id={cl("copy-user-id")}
                 label={getIntlMessage("COPY_ID_USER")}
+                icon={IdIcon}
                 action={() => {
                     copyToClipboard(userId);
                 }}
@@ -286,5 +295,5 @@ export default function openRolesAndUsersPermissionsModal(permissions: Array<Rol
             guild={guild}
             header={header}
         />
-    ));
+    ), { modalKey: "vc-permviewer" });
 }
