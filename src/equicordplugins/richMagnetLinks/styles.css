@@ -1,0 +1,23 @@
+/* `a.` is needed for specificity */
+a.vc-magnet-link {
+    background: var(--mention-background);
+    border-radius: 3px;
+    color: var(--mention-foreground);
+    font-weight: var(--font-weight-medium);
+    padding: 0 2px;
+    unicode-bidi: plaintext;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: max-content;
+    
+    &:hover { text-decoration: none }
+}
+
+a.vc-magnet-link svg {
+    height: 1em;
+    vertical-align: middle;
+    width: 1em;
+    margin: 0 var(--space-4);
+    scale: 0.9;
+}
