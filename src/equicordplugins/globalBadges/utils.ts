@@ -9,7 +9,6 @@ import { classNameFactory } from "@api/Styles";
 import { settings } from "./settings";
 import { BadgeCache } from "./types";
 
-const API_URL = "https://badges.equicord.org/";
 const cache = new Map<string, BadgeCache>();
 const EXPIRES = 1000 * 60 * 15;
 
@@ -45,7 +44,7 @@ export const fetchBadges = (id: string): BadgeCache["badges"] | undefined => {
             return {};
         }
 
-        fetch(`${API_URL}${id}?seperated=true&services=${services.join(",")}`)
+        fetch(`${settings.store.apiUrl}${id}?seperated=true&services=${services.join(",")}`)
             .then(res => res.json() as Promise<{ status: number; badges: BadgeCache["badges"]; }>)
             .then(body => {
                 cache.set(id, { badges: body.badges, expires: Date.now() + EXPIRES });

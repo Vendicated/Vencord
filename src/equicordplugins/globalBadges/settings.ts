@@ -73,5 +73,15 @@ export const settings = definePluginSettings({
         description: "Show Replugged Badges",
         default: true,
         restartNeeded: false
+    },
+    apiUrl: {
+        type: OptionType.STRING,
+        description: "API to use",
+        default: "https://badges.equicord.org/",
+        restartNeeded: false,
+        onChange: (e => {
+            if (!e || !e.startsWith("https://")) return settings.store.apiUrl = "https://badges.equicord.org/";
+            return e;
+        })
     }
 });
