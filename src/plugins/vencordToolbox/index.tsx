@@ -20,21 +20,202 @@ import "./styles.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { isPluginEnabled, plugins } from "@api/PluginManager";
-import { Settings, useSettings } from "@api/Settings";
+import { definePluginSettings, Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { openPluginModal } from "@components/settings";
 import { Devs } from "@utils/constants";
 import { useAwaiter } from "@utils/react";
-import definePlugin from "@utils/types";
+import { wordsFromCamel, wordsToTitle } from "@utils/text";
+import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Menu, Popout, SettingsRouter, useRef, useState } from "@webpack/common";
+import { Menu, Popout, SettingsRouter, useMemo, useRef, useState } from "@webpack/common";
 import type { PropsWithChildren, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
-function VencordPopout(onClose: () => void) {
+const settings = definePluginSettings({
+    showPluginMenu: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show the plugins menu in the toolbox",
+    }
+});
+
+function buildPluginMenuEntries() {
+    const { showPluginMenu } = settings.use(["showPluginMenu"]);
+    const pluginSettings = useSettings().plugins;
+
+    const [search, setSearch] = useState("");
+
+    const lowerSearch = search.toLowerCase();
+
+    const sortedPlugins = useMemo(() =>
+        Object.values(plugins).sort((a, b) => a.name.localeCompare(b.name)),
+        []
+    );
+
+    const candidates = useMemo(() =>
+        sortedPlugins
+            .filter(p => {
+                if (p.name.endsWith("API")) return false;
+
+                const name = p.name.toLowerCase();
+                return name.includes(lowerSearch);
+            }),
+        [lowerSearch]
+    );
+
+    if (!showPluginMenu) return null;
+
+    return (
+        <Menu.MenuItem
+            id="vc-toolbox-plugins"
+            label="Plugins"
+        >
+            <Menu.MenuControlItem
+                id="vc-plugins-search"
+                control={(props, ref) => (
+                    <Menu.MenuSearchControl
+                        {...props}
+                        query={search}
+                        onChange={setSearch}
+                        ref={ref}
+                    />
+                )}
+            />
+
+            <Menu.MenuSeparator />
+
+            {candidates
+                .map(p => {
+                    const options = [] as ReactNode[];
+
+                    if (p.options) for (const [key, option] of Object.entries(p.options)) {
+                        const s = pluginSettings[p.name];
+
+                        const baseProps = {
+                            id: `${p.name}-${key}`,
+                            key: key,
+                            label: wordsToTitle(wordsFromCamel(key)),
+                            disabled: "disabled" in option ? option.disabled?.call(p.settings) : false,
+                        };
+
+                        switch (option.type) {
+                            case OptionType.BOOLEAN:
+                                options.push(
+                                    <Menu.MenuCheckboxItem
+                                        {...baseProps}
+                                        checked={s[key]}
+                                        action={() => {
+                                            s[key] = !s[key];
+                                        }}
+                                    />
+                                );
+                                break;
+                            case OptionType.SELECT:
+                                options.push(
+                                    <Menu.MenuItem {...baseProps}>
+                                        {option.options.map(opt => (
+                                            <Menu.MenuRadioItem
+                                                group={`${p.name}-${key}`}
+                                                id={`${p.name}-${key}-${opt.value}`}
+                                                key={opt.label}
+                                                label={opt.label}
+                                                checked={s[key] === opt.value}
+                                                action={() => s[key] = opt.value}
+                                            />
+                                        ))}
+                                    </Menu.MenuItem>
+                                );
+                                break;
+                        }
+                    }
+
+                    return (
+                        <Menu.MenuItem
+                            id={`vc-toolbox-plugin-${p.name}`}
+                            key={p.name}
+                            label={p.name}
+                        >
+                            <Menu.MenuItem
+                                id={`${p.name}-open`}
+                                label={"Open Settings"}
+                                action={() => openPluginModal(p)}
+                            />
+
+                            <Menu.MenuCheckboxItem
+                                id={`${p.name}-enabled`}
+                                label={"Enable Plugin"}
+                                checked={isPluginEnabled(p.name)}
+                                action={() => {
+                                    // TODO
+                                }}
+                            />
+
+                            {options.length > 0 && (
+                                <Menu.MenuGroup label="Options">
+                                    {options}
+                                </Menu.MenuGroup>
+                            )}
+                        </Menu.MenuItem>
+                    );
+                })
+            }
+        </Menu.MenuItem>
+    );
+}
+
+function buildThemeMenuEntries() {
     const { useQuickCss, enabledThemes } = useSettings(["useQuickCss", "enabledThemes"]);
     const [themes] = useAwaiter(VencordNative.themes.getThemesList);
 
+    return (
+        <Menu.MenuItem
+            id="vc-toolbox-themes"
+            label="Themes"
+        >
+            <Menu.MenuCheckboxItem
+                id="vc-toolbox-quickcss-toggle"
+                checked={useQuickCss}
+                label={"Enable QuickCSS"}
+                action={() => {
+                    Settings.useQuickCss = !useQuickCss;
+                }}
+            />
+            <Menu.MenuItem
+                id="vc-toolbox-quickcss"
+                label="Edit QuickCSS"
+                action={() => VencordNative.quickCss.openEditor()}
+            />
+            <Menu.MenuItem
+                id="vc-toolbox-themes-manage"
+                label="Manage Themes"
+                action={() => SettingsRouter.open("VencordThemes")}
+            />
+            {!!themes?.length && (
+                <Menu.MenuGroup>
+                    {themes.map(theme => (
+                        <Menu.MenuCheckboxItem
+                            id={`vc-toolbox-theme-${theme.fileName}`}
+                            key={theme.fileName}
+                            label={theme.name}
+                            checked={enabledThemes.includes(theme.fileName)}
+                            action={() => {
+                                if (enabledThemes.includes(theme.fileName)) {
+                                    Settings.enabledThemes = enabledThemes.filter(t => t !== theme.fileName);
+                                } else {
+                                    Settings.enabledThemes = [...enabledThemes, theme.fileName];
+                                }
+                            }}
+                        />
+                    ))}
+                </Menu.MenuGroup>
+            )}
+        </Menu.MenuItem>
+    );
+}
+
+function VencordPopout(onClose: () => void) {
     const pluginEntries = [] as ReactNode[];
     for (const plugin of Object.values(plugins)) {
         if (plugin.toolboxActions && isPluginEnabled(plugin.name)) {
@@ -74,56 +255,12 @@ function VencordPopout(onClose: () => void) {
                 label="Open Notification Log"
                 action={openNotificationLogModal}
             />
-            <Menu.MenuItem
-                id="vc-toolbox-themes"
-                label="Themes"
-            >
-                <Menu.MenuCheckboxItem
-                    id="vc-toolbox-quickcss-toggle"
-                    checked={useQuickCss}
-                    label={"Enable QuickCSS"}
-                    action={() => {
-                        Settings.useQuickCss = !useQuickCss;
-                    }}
-                />
-                <Menu.MenuItem
-                    id="vc-toolbox-quickcss"
-                    label="Edit QuickCSS"
-                    action={() => VencordNative.quickCss.openEditor()}
-                />
-                <Menu.MenuItem
-                    id="vc-toolbox-themes-manage"
-                    label="Manage Themes"
-                    action={() => SettingsRouter.open("VencordThemes")}
-                />
-                {!!themes?.length && (
-                    <Menu.MenuGroup>
-                        {themes.map(theme => (
-                            <Menu.MenuCheckboxItem
-                                id={`vc-toolbox-theme-${theme.fileName}`}
-                                key={theme.fileName}
-                                label={theme.name}
-                                checked={enabledThemes.includes(theme.fileName)}
-                                action={() => {
-                                    if (enabledThemes.includes(theme.fileName)) {
-                                        Settings.enabledThemes = enabledThemes.filter(t => t !== theme.fileName);
-                                    } else {
-                                        Settings.enabledThemes = [...enabledThemes, theme.fileName];
-                                    }
-                                }}
-                            />
-                        ))}
-                    </Menu.MenuGroup>
-                )}
-            </Menu.MenuItem>
-            <Menu.MenuItem
-                id="vc-toolbox-plugins"
-                label="Plugins"
-            >
 
-            </Menu.MenuItem>
+            {buildThemeMenuEntries()}
+            {buildPluginMenuEntries()}
+
             {...pluginEntries}
-        </Menu.Menu>
+        </Menu.Menu >
     );
 }
 
@@ -167,6 +304,8 @@ export default definePlugin({
     name: "VencordToolbox",
     description: "Adds a button to the titlebar that houses Vencord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
+
+    settings,
 
     patches: [
         {
