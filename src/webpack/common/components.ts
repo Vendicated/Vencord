@@ -16,28 +16,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { TextCompat } from "@components/BaseText";
+import { ButtonCompat } from "@components/Button";
+import { Divider } from "@components/Divider";
+import { FormSwitchCompat } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { LazyComponent } from "@utils/lazyReact";
 import * as t from "@vencord/discord-types";
 import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
-import { FormText } from "./FormText";
 import { waitForComponent } from "./internal";
 
-
-const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat', '="h5"'));
-const FormSection = waitForComponent<t.FormSection>("FormSection", filters.componentByCode(".titleId)"));
-const FormDivider = waitForComponent<t.FormDivider>("FormDivider", filters.componentByCode(".divider,", ",style:", '"div"', /\.divider,\i\),style:/));
-
 export const Forms = {
-    FormTitle,
-    FormText,
-    FormSection,
-    FormDivider
+    // TODO: Stop using this and use Heading/Paragraph directly
+    FormTitle: Heading,
+    FormText: Paragraph,
+    /** @deprecated don't use this */
+    FormSection: "section" as never, // Backwards compat since Vesktop uses this
+    /** @deprecated use `@components/Divider` */
+    FormDivider: Divider as never, // Backwards compat since Vesktop uses this
 };
 
+// TODO: Stop using this and use Paragraph/Span directly
+export const Text = TextCompat;
+export const Button = ButtonCompat;
+/** @deprecated Use FormSwitch from Vencord */
+export const Switch = FormSwitchCompat as never;
+
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
-export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
-export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode(".labelRow,ref:", ".disabledText"));
 export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
@@ -53,10 +60,8 @@ export const TooltipContainer = LazyComponent(() => Tooltips.TooltipContainer);
 
 export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode("#{intl::MAXIMUM_LENGTH_ERROR}", '"input"'));
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("this.getPaddingRight()},id:"));
-export const Text = waitForComponent<t.Text>("Text", filters.componentByCode('case"always-white"'));
-export const Heading = waitForComponent<t.Heading>("Heading", filters.componentByCode(">6?{", "variant:"));
-export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('="bottom",', ".select,", '"Escape"==='));
-export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode(".setSelectionRange(", ".multi]:"));
+export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('"Select"', ".newOptionLabel"));
+export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('"SearchableSelect"'));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode('"markDash".concat('));
 export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCode("ref:this.ref,", "renderPopout:this.renderPopout,"));
 export const Dialog = waitForComponent<t.Dialog>("Dialog", filters.componentByCode('role:"dialog",tabIndex:-1'));
@@ -87,13 +92,7 @@ export const ListScrollerNone = LazyComponent(() => createListScroller(listScrol
 export const ListScrollerThin = LazyComponent(() => createListScroller(listScrollerClasses.thin, listScrollerClasses.fade, "", ResizeObserver));
 export const ListScrollerAuto = LazyComponent(() => createListScroller(listScrollerClasses.auto, listScrollerClasses.fade, "", ResizeObserver));
 
-const { FocusLock_ } = mapMangledModuleLazy('document.getElementById("app-mount"))', {
-    FocusLock_: filters.componentByCode(".containerRef")
-}) as {
-    FocusLock_: t.FocusLock;
-};
-
-export const FocusLock = LazyComponent(() => FocusLock_);
+export const FocusLock = waitForComponent<t.FocusLock>("FocusLock", filters.componentByCode(".containerRef,{keyboardModeEnabled:"));
 
 export let useToken: t.useToken;
 waitFor(m => {

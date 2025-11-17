@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./index.css";
+import "./styles.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
+import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Menu, Popout, useRef, useState } from "@webpack/common";
-import type { ReactNode } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
@@ -34,8 +35,8 @@ function VencordPopout(onClose: () => void) {
 
     const pluginEntries = [] as ReactNode[];
 
-    for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolboxActions && Vencord.Plugins.isPluginEnabled(plugin.name)) {
+    for (const plugin of Object.values(plugins)) {
+        if (plugin.toolboxActions && isPluginEnabled(plugin.name)) {
             pluginEntries.push(
                 <Menu.MenuGroup
                     label={plugin.name}
@@ -131,16 +132,20 @@ export default definePlugin({
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                // TODO: (?:\.button) is for stable compat and should be removed soon:tm:
-                match: /focusSectionProps:"HELP".{0,20},className:(\i(?:\.button)?)\}\),/,
-                replace: "$& $self.renderVencordPopoutButton($1),"
+                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i))/,
+                replace: "$self.TrailingWrapper,{className:$1,"
             }
         }
     ],
 
-    renderVencordPopoutButton: (buttonClass: string) => (
-        <ErrorBoundary noop>
-            <VencordPopoutButton buttonClass={buttonClass} />
-        </ErrorBoundary>
-    )
+    TrailingWrapper({ children, className }: PropsWithChildren<{ className: string; }>) {
+        return (
+            <>
+                {children}
+                <ErrorBoundary noop>
+                    <VencordPopoutButton buttonClass={className} />
+                </ErrorBoundary>
+            </>
+        );
+    },
 });

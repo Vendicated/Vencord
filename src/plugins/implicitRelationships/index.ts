@@ -18,6 +18,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
@@ -48,7 +49,7 @@ export default definePlugin({
         },
         // Sections header
         {
-            find: "#{intl::FRIENDS_SECTION_ONLINE}",
+            find: "#{intl::FRIENDS_SECTION_ONLINE}),className:",
             replacement: {
                 match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.item)/,
                 replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
@@ -143,13 +144,17 @@ export default definePlugin({
         // with will not be fetched; so, if they're not otherwise cached, they will not be shown
         // This should not be a big deal as these should be rare
         const callback = ({ chunks }) => {
-            const chunkCount = chunks.filter(chunk => chunk.nonce === sentNonce).length;
-            if (chunkCount === 0) return;
+            try {
+                const chunkCount = chunks.filter(chunk => chunk.nonce === sentNonce).length;
+                if (chunkCount === 0) return;
 
-            count -= chunkCount;
-            RelationshipStore.emitChange();
-            if (count <= 0) {
-                FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
+                count -= chunkCount;
+                RelationshipStore.emitChange();
+                if (count <= 0) {
+                    FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
+                }
+            } catch (e) {
+                new Logger("ImplicitRelationships").error("Error in GUILD_MEMBERS_CHUNK_BATCH handler", e);
             }
         };
 

@@ -19,12 +19,12 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import { getCurrentGuild, getIntlMessage } from "@utils/discord";
+import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
@@ -75,7 +75,7 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
                             <>
                                 <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
                                 <CodeBlock content={msgContent} lang="" />
-                                <Forms.FormDivider className={Margins.bottom20} />
+                                <Divider className={Margins.bottom20} />
                             </>
                         )}
 
