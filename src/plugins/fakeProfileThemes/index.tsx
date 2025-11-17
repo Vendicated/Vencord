@@ -17,15 +17,15 @@
 */
 
 // This plugin is a port from Alyxia's Vendetta plugin
-import "./index.css";
+import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { fetchUserProfile } from "@utils/discord";
+import { copyWithToast, fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes, copyWithToast } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { User, UserProfile } from "@vencord/discord-types";

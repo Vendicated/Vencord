@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
@@ -11,9 +12,9 @@ import { Link } from "@components/Link";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { UserThemeHeader } from "@main/themes";
+import ClientThemePlugin from "@plugins/clientTheme";
 import { findLazy } from "@webpack";
 import { Card, Forms, useEffect, useRef, useState } from "@webpack/common";
-import ClientThemePlugin from "plugins/clientTheme";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { ThemeCard } from "./ThemeCard";
@@ -140,7 +141,7 @@ export function LocalThemesTab() {
                             Icon={PaintbrushIcon}
                         />
 
-                        {Vencord.Plugins.isPluginEnabled(ClientThemePlugin.name) && (
+                        {isPluginEnabled(ClientThemePlugin.name) && (
                             <QuickAction
                                 text="Edit ClientTheme"
                                 action={() => openPluginModal(ClientThemePlugin)}
