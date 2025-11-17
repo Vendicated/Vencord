@@ -23,37 +23,42 @@ import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Menu, Popout, useRef, useState } from "@webpack/common";
+import { Menu, Popout, SettingsRouter, useRef, useState } from "@webpack/common";
 import type { PropsWithChildren, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
 function VencordPopout(onClose: () => void) {
-    const { useQuickCss } = useSettings(["useQuickCss"]);
+    const { useQuickCss, enabledThemes } = useSettings(["useQuickCss", "enabledThemes"]);
+    const [themes] = useAwaiter(VencordNative.themes.getThemesList);
 
     const pluginEntries = [] as ReactNode[];
-
     for (const plugin of Object.values(plugins)) {
         if (plugin.toolboxActions && isPluginEnabled(plugin.name)) {
+            const entries = typeof plugin.toolboxActions === "function"
+                ? plugin.toolboxActions()
+                : Object.entries(plugin.toolboxActions).map(([text, action]) => {
+                    const key = `vc-toolbox-${plugin.name}-${text}`;
+
+                    return (
+                        <Menu.MenuItem
+                            id={key}
+                            key={key}
+                            label={text}
+                            action={action}
+                        />
+                    );
+                });
+
             pluginEntries.push(
                 <Menu.MenuGroup
                     label={plugin.name}
                     key={`vc-toolbox-${plugin.name}`}
                 >
-                    {Object.entries(plugin.toolboxActions).map(([text, action]) => {
-                        const key = `vc-toolbox-${plugin.name}-${text}`;
-
-                        return (
-                            <Menu.MenuItem
-                                id={key}
-                                key={key}
-                                label={text}
-                                action={action}
-                            />
-                        );
-                    })}
+                    {entries}
                 </Menu.MenuGroup>
             );
         }
@@ -69,19 +74,54 @@ function VencordPopout(onClose: () => void) {
                 label="Open Notification Log"
                 action={openNotificationLogModal}
             />
-            <Menu.MenuCheckboxItem
-                id="vc-toolbox-quickcss-toggle"
-                checked={useQuickCss}
-                label={"Enable QuickCSS"}
-                action={() => {
-                    Settings.useQuickCss = !useQuickCss;
-                }}
-            />
             <Menu.MenuItem
-                id="vc-toolbox-quickcss"
-                label="Open QuickCSS"
-                action={() => VencordNative.quickCss.openEditor()}
-            />
+                id="vc-toolbox-themes"
+                label="Themes"
+            >
+                <Menu.MenuCheckboxItem
+                    id="vc-toolbox-quickcss-toggle"
+                    checked={useQuickCss}
+                    label={"Enable QuickCSS"}
+                    action={() => {
+                        Settings.useQuickCss = !useQuickCss;
+                    }}
+                />
+                <Menu.MenuItem
+                    id="vc-toolbox-quickcss"
+                    label="Edit QuickCSS"
+                    action={() => VencordNative.quickCss.openEditor()}
+                />
+                <Menu.MenuItem
+                    id="vc-toolbox-themes-manage"
+                    label="Manage Themes"
+                    action={() => SettingsRouter.open("VencordThemes")}
+                />
+                {!!themes?.length && (
+                    <Menu.MenuGroup>
+                        {themes.map(theme => (
+                            <Menu.MenuCheckboxItem
+                                id={`vc-toolbox-theme-${theme.fileName}`}
+                                key={theme.fileName}
+                                label={theme.name}
+                                checked={enabledThemes.includes(theme.fileName)}
+                                action={() => {
+                                    if (enabledThemes.includes(theme.fileName)) {
+                                        Settings.enabledThemes = enabledThemes.filter(t => t !== theme.fileName);
+                                    } else {
+                                        Settings.enabledThemes = [...enabledThemes, theme.fileName];
+                                    }
+                                }}
+                            />
+                        ))}
+                    </Menu.MenuGroup>
+                )}
+            </Menu.MenuItem>
+            <Menu.MenuItem
+                id="vc-toolbox-plugins"
+                label="Plugins"
+            >
+
+            </Menu.MenuItem>
             {...pluginEntries}
         </Menu.Menu>
     );
