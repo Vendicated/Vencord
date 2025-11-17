@@ -31,7 +31,7 @@ export interface ProfileBadge {
     /** Custom component for the badge (tooltip not included) */
     component?: ComponentType<ProfileBadge & BadgeUserArgs>;
     /** The custom image to use */
-    image?: string;
+    iconSrc?: string;
     link?: string;
     /** Action to perform when you click the badge */
     onClick?(event: React.MouseEvent, props: ProfileBadge & BadgeUserArgs): void;
