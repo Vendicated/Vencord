@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./index.css";
+import "./styles.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
+import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Menu, Popout, useRef, useState } from "@webpack/common";
-import type { ReactNode } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
@@ -34,8 +35,8 @@ function VencordPopout(onClose: () => void) {
 
     const pluginEntries = [] as ReactNode[];
 
-    for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolboxActions && Vencord.Plugins.isPluginEnabled(plugin.name)) {
+    for (const plugin of Object.values(plugins)) {
+        if (plugin.toolboxActions && isPluginEnabled(plugin.name)) {
             pluginEntries.push(
                 <Menu.MenuGroup
                     label={plugin.name}
@@ -94,7 +95,7 @@ function VencordPopoutIcon(isShown: boolean) {
     );
 }
 
-function VencordPopoutButton() {
+function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 
@@ -111,7 +112,7 @@ function VencordPopoutButton() {
             {(_, { isShown }) => (
                 <HeaderBarIcon
                     ref={buttonRef}
-                    className="vc-toolbox-btn"
+                    className={`vc-toolbox-btn ${buttonClass}`}
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : "Vencord Toolbox"}
                     icon={() => VencordPopoutIcon(isShown)}
@@ -122,33 +123,29 @@ function VencordPopoutButton() {
     );
 }
 
-function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
-    children.splice(
-        children.length - 1, 0,
-        <ErrorBoundary noop>
-            <VencordPopoutButton />
-        </ErrorBoundary>
-    );
-
-    return <>{children}</>;
-}
-
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
+    description: "Adds a button to the titlebar that houses Vencord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
 
     patches: [
         {
-            find: "toolbar:function",
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
-                replace: "$self.ToolboxFragmentWrapper,"
+                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i))/,
+                replace: "$self.TrailingWrapper,{className:$1,"
             }
         }
     ],
 
-    ToolboxFragmentWrapper: ErrorBoundary.wrap(ToolboxFragmentWrapper, {
-        fallback: () => <p style={{ color: "red" }}>Failed to render :(</p>
-    })
+    TrailingWrapper({ children, className }: PropsWithChildren<{ className: string; }>) {
+        return (
+            <>
+                {children}
+                <ErrorBoundary noop>
+                    <VencordPopoutButton buttonClass={className} />
+                </ErrorBoundary>
+            </>
+        );
+    },
 });

@@ -16,12 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@shared/debounce";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
-import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
-import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React, useEffect } from "@webpack/common";
 
@@ -111,14 +108,6 @@ const DefaultSettings: Settings = {
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
-const saveSettingsOnFrequentAction = debounce(async () => {
-    if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
-        await putCloudSettings();
-        delete localStorage.Vencord_settingsDirty;
-    }
-}, 60_000);
-
-
 export const SettingsStore = new SettingsStoreClass(settings, {
     readOnly: true,
     getDefaultValue({
@@ -161,8 +150,6 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 if (!IS_REPORTER) {
     SettingsStore.addGlobalChangeListener((_, path) => {
         SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
-        localStorage.Vencord_settingsDirty = true;
-        saveSettingsOnFrequentAction();
         VencordNative.settings.set(SettingsStore.plain, path);
     });
 }

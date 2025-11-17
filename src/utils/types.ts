@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ProfileBadge } from "@api/Badges";
-import { ChatBarButtonFactory } from "@api/ChatButtons";
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
-import { MessageAccessoryFactory } from "@api/MessageAccessories";
-import { MessageDecorationFactory } from "@api/MessageDecorations";
-import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import { MessagePopoverButtonFactory } from "@api/MessagePopover";
-import { Command, FluxEvents } from "@vencord/discord-types";
-import { ReactNode } from "react";
+import type { ProfileBadge } from "@api/Badges";
+import type { ChatBarButtonFactory } from "@api/ChatButtons";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { MemberListDecoratorFactory } from "@api/MemberListDecorators";
+import type { MessageAccessoryFactory } from "@api/MessageAccessories";
+import type { MessageDecorationFactory } from "@api/MessageDecorations";
+import type { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
+import type { MessagePopoverButtonFactory } from "@api/MessagePopover";
+import type { Command, FluxEvents } from "@vencord/discord-types";
+import type { ReactNode } from "react";
+import type { LiteralUnion } from "type-fest";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<PropertyKey, any>) {
@@ -150,9 +151,9 @@ export interface PluginDef {
     /**
      * Allows you to subscribe to Flux events
      */
-    flux?: {
-        [E in FluxEvents]?: (event: any) => void | Promise<void>;
-    };
+    flux?: Partial<{
+        [E in LiteralUnion<FluxEvents, string>]: (event: any) => void | Promise<void>;
+    }>;
     /**
      * Allows you to manipulate context menus
      */

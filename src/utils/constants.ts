@@ -30,6 +30,9 @@ const platform = navigator.platform.toLowerCase();
 export const IS_WINDOWS = platform.startsWith("win");
 export const IS_MAC = platform.startsWith("mac");
 export const IS_LINUX = platform.startsWith("linux");
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
+// "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
+export const IS_MOBILE = navigator.userAgent.includes("Mobi");
 
 export interface Dev {
     name: string;
@@ -47,6 +50,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Ven: {
         name: "V",
         id: 343383572805058560n
+    },
+    Apexo: {
+        name: "Apexo",
+        id: 228548952687902720n
     },
     Arjix: {
         name: "ArjixWasTaken",
@@ -93,9 +100,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Mai",
         id: 722647978577363026n
     },
-    echo: {
-        name: "ECHO",
-        id: 712639419785412668n
+    amy: {
+        name: "Amy",
+        id: 603229858612510720n
     },
     katlyn: {
         name: "katlyn",
@@ -197,9 +204,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "sunnie",
         id: 406028027768733696n
     },
-    axyie: {
-        name: "'ax",
-        id: 929877747151548487n,
+    rae: {
+        name: "rae",
+        id: 1398136199503282277n
     },
     pointy: {
         name: "pointy",
@@ -482,7 +489,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Sqaaakoi",
         id: 259558259491340288n
     },
-    Byron: {
+    Byeoon: {
         name: "byeoon",
         id: 1167275288036655133n
     },
@@ -598,6 +605,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Cootshk",
         id: 921605971577548820n
     },
+    thororen: {
+        name: "thororen",
+        id: 848339671629299742n
+    },
+    alfred: {
+        name: "alfred",
+        id: 1038466644353232967n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

@@ -74,8 +74,8 @@ export default definePlugin({
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=roleName:\i,)color:/,
-                replace: "color:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
+                match: /(?<=roleName:\i,)colorString:/,
+                replace: "colorString:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }
@@ -127,7 +127,7 @@ export default definePlugin({
             const colorString = context?.colorString;
             const color = calculateNameColorForUser(id);
 
-            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
             }
 

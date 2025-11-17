@@ -22,8 +22,9 @@ import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapM
 export let FluxDispatcher: t.FluxDispatcher;
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
-    // Non import access to avoid circular dependency
-    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
+    // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
+    // For this reason, use a non import access here.
+    Vencord.Api.PluginManager.subscribeAllPluginsFluxEvents(m);
 
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
@@ -203,6 +204,9 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
 export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
     dateFormat: filters.byCode('":'),
-    isSameDay: filters.byCode("Math.abs(+"),
+    // TODO: the +? are for compat with the old version - Remove them once no longer needed
+    isSameDay: filters.byCode(/Math\.abs\(\+?\i-\+?\i\)/),
     diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });
+
+export const MessageTypeSets: t.MessageTypeSets = findByPropsLazy("REPLYABLE", "FORWARDABLE");
