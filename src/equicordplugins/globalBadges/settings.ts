@@ -80,7 +80,7 @@ export const settings = definePluginSettings({
         default: "https://badges.equicord.org/",
         restartNeeded: false,
         onChange: (e => {
-            if (!e || !e.startsWith("https://")) return settings.store.apiUrl = "https://badges.equicord.org/";
+            if (!e || !e.startsWith("https://") || !e.startsWith("localhost") || !e.startsWith("127.0.0.1")) return settings.store.apiUrl = "https://badges.equicord.org/";
             return e;
         })
     }
