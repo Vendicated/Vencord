@@ -22,8 +22,7 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { definePluginSettings, Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { openPluginModal } from "@components/settings";
-import { openThemeModal } from "@components/settings/tabs/themes";
+import { openPluginModal, openSettingsTabModal, ThemesTab } from "@components/settings";
 import { Devs } from "@utils/constants";
 import { useAwaiter } from "@utils/react";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
@@ -191,7 +190,7 @@ function buildThemeMenuEntries() {
             <Menu.MenuItem
                 id="vc-toolbox-themes-manage"
                 label="Manage Themes"
-                action={() => openThemeModal()}
+                action={() => openSettingsTabModal(ThemesTab)}
             />
             {!!themes?.length && (
                 <Menu.MenuGroup>
