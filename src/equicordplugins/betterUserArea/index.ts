@@ -90,7 +90,7 @@ export default definePlugin({
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
-                match: /avatarDecoration:(\i),size:/,
+                match: /avatarDecoration:(.{0,70}),size:/,
                 replace: "avatarDecoration:void 0,size:"
             },
             predicate: () => settings.store.removeAvatarDecoration
