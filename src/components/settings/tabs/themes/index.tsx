@@ -19,7 +19,8 @@
 import "./styles.css";
 
 import { Link } from "@components/Link";
-import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { handleSettingsTabError, SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { Card, Forms, React, TabBar, useState } from "@webpack/common";
 
@@ -80,6 +81,23 @@ function UserscriptThemesTab() {
     );
 }
 
-export default IS_USERSCRIPT
+const Tab = IS_USERSCRIPT
     ? wrapTab(UserscriptThemesTab, "Themes")
     : wrapTab(ThemesTab, "Themes");
+
+export default Tab;
+
+export function openThemeModal() {
+    try {
+        openModal(wrapTab((modalProps: ModalProps) => (
+            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
+                <ModalContent className="vc-updater-modal">
+                    <ModalCloseButton onClick={modalProps.onClose} className="vc-updater-modal-close-button" />
+                    <Tab />
+                </ModalContent>
+            </ModalRoot>
+        ), "UpdaterModal"));
+    } catch {
+        handleSettingsTabError();
+    }
+}

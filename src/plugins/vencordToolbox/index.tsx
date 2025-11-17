@@ -23,12 +23,13 @@ import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { definePluginSettings, Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { openPluginModal } from "@components/settings";
+import { openThemeModal } from "@components/settings/tabs/themes";
 import { Devs } from "@utils/constants";
 import { useAwaiter } from "@utils/react";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Menu, Popout, SettingsRouter, useMemo, useRef, useState } from "@webpack/common";
+import { Menu, Popout, useMemo, useRef, useState } from "@webpack/common";
 import type { PropsWithChildren, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
@@ -190,7 +191,7 @@ function buildThemeMenuEntries() {
             <Menu.MenuItem
                 id="vc-toolbox-themes-manage"
                 label="Manage Themes"
-                action={() => SettingsRouter.open("VencordThemes")}
+                action={() => openThemeModal()}
             />
             {!!themes?.length && (
                 <Menu.MenuGroup>
