@@ -63,7 +63,7 @@ const settings = definePluginSettings({
             { label: "Oneko", value: Follower.Oneko, default: true },
             { label: "Tora", value: Follower.Tora },
             { label: "Dog", value: Follower.Dog },
-            { label: "Oneko (original)", value: Follower.OnekoOrig },
+            // { label: "Oneko (original)", value: Follower.OnekoOrig },
         ],
         onChange: applyFollowerAndExec
     }
