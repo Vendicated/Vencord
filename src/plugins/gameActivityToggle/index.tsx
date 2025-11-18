@@ -86,7 +86,7 @@ function GameActivityToggleButton(props: { nameplate?: any; }) {
     const { location } = settings.use(["location"]);
     const showCurrentGame = ShowCurrentGame.useSetting();
 
-    if (location !== "PANEL") return null;
+    if (location !== "PANEL" && isPluginEnabled(VencordToolboxPlugin.name)) return null;
 
     return (
         <Button
