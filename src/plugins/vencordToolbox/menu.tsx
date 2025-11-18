@@ -131,7 +131,9 @@ export function buildPluginMenuEntries() {
                             label={p.name}
                             action={() => openPluginModal(p)}
                         >
-                            {options}
+                            <Menu.MenuGroup label={p.name}>
+                                {options}
+                            </Menu.MenuGroup>
 
                             <Menu.MenuSeparator />
 
