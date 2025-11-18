@@ -107,6 +107,11 @@
     padding-top: 1px;
 }
 
+.vc-channeltabs-tab-scroller-following {
+    width: fit-content;
+    flex: unset;
+}
+
 .vc-channeltabs-tab-scroller::-webkit-scrollbar {
     display: none;
 }

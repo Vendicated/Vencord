@@ -420,6 +420,12 @@ export const settings = definePluginSettings({
         default: false,
         restartNeeded: false
     },
+    newTabButtonBehavior: {
+        type: OptionType.BOOLEAN,
+        description: "New tab (+) button follows tabs instead of staying pinned to the right",
+        default: true,
+        restartNeeded: false
+    },
     oneTabPerServer: {
         type: OptionType.BOOLEAN,
         description: "Limit to one tab per server, so opening a new channel in that server will use the existing tab.",
