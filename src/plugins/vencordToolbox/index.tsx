@@ -235,12 +235,15 @@ function VencordPopout(onClose: () => void) {
                 });
 
             pluginEntries.push(
-                <Menu.MenuGroup
-                    label={plugin.name}
+                <Menu.MenuItem
+                    id={`vc-toolbox-${plugin.name}`}
                     key={`vc-toolbox-${plugin.name}`}
+                    label={plugin.name}
                 >
-                    {entries}
-                </Menu.MenuGroup>
+                    <Menu.MenuGroup label={plugin.name}>
+                        {entries}
+                    </Menu.MenuGroup>
+                </Menu.MenuItem>
             );
         }
     }
@@ -257,7 +260,11 @@ function VencordPopout(onClose: () => void) {
             />
 
             {buildThemeMenuEntries()}
-            {buildPluginMenuEntries()}
+
+            <Menu.MenuSeparator />
+            <Menu.MenuGroup>
+                {buildPluginMenuEntries()}
+            </Menu.MenuGroup>
 
             {...pluginEntries}
         </Menu.Menu >
