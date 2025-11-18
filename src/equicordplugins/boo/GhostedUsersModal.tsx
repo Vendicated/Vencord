@@ -46,19 +46,36 @@ export function GhostedUsersModal({ modalProps, ghostedChannels: initialChannels
         setGhostedChannels(prev => prev.filter(id => id !== channelId));
     };
 
+    const handleClearAll = () => {
+        for (const channelId of initialChannels) {
+            onClearGhost(channelId);
+        }
+        setGhostedChannels([]);
+    };
+
     return (
         <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
             <ModalHeader>
                 <Text
                     variant="heading-lg/semibold"
-                    style={{ flexGrow: 1 }}
+                    className={cl("modal-header")}
                 >
                     Ghosted Users ({ghostedChannels.length})
                 </Text>
+                {ghostedChannels.length > 0 && (
+                    <Button
+                        size={Button.Sizes.SMALL}
+                        color={Button.Colors.PRIMARY}
+                        onClick={handleClearAll}
+                        className={cl("clear")}
+                    >
+                        Clear All
+                    </Button>
+                )}
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
             <ModalContent>
-                <div style={{ padding: "16px 0" }}>
+                <div className={cl("modal-content")}>
                     {ghostedChannels.length === 0 ? (
                         <Text variant="text-md/normal">No ghosts here!</Text>
                     ) : (
@@ -102,7 +119,7 @@ export function GhostedUsersModal({ modalProps, ghostedChannels: initialChannels
                                             {displayName}
                                         </Text>
                                         {lastMessageDate && (
-                                            <Text variant="text-xs/normal" style={{ color: "var(--text-muted)" }}>
+                                            <Text variant="text-xs/normal" className={cl("modal-text")}>
                                                 {lastMessageDate}
                                             </Text>
                                         )}

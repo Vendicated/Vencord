@@ -138,3 +138,19 @@
         transform: translate(-2px, -2px) rotate(-0.5deg);
     }
 }
+
+.vc-boo-clear {
+    margin-right: 16px;
+}
+
+.vc-boo-modal-header {
+    flex-grow: 1;
+}
+
+.vc-boo-modal-content {
+    padding: 16px 0;
+}
+
+.vc-boo-modal-text {
+    color: var(--text-muted);
+}
