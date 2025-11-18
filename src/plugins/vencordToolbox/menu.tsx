@@ -148,7 +148,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
 
                     const hasVisibleOptions = options.length > 0;
                     const shouldSkip = !hasVisibleOptions && !(includeEmpty && hasAnyOption);
-                    if (!shouldSkip) return null;
+                    if (shouldSkip) return null;
 
                     return (
                         <Menu.MenuItem
