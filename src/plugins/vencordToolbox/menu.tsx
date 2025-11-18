@@ -123,6 +123,26 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                                     </Menu.MenuItem>
                                 );
                                 break;
+                            case OptionType.SLIDER:
+                                // The menu slider doesn't support these options. Skip to avoid confusion
+                                if (option.stickToMarkers || option.componentProps) continue;
+
+                                options.push(
+                                    <Menu.MenuControlItem
+                                        {...baseProps}
+                                        control={(props, ref) => (
+                                            <Menu.MenuSliderControl
+                                                ref={ref}
+                                                {...props}
+                                                minValue={option.markers[0]}
+                                                maxValue={option.markers.at(-1)!}
+                                                value={s[key]}
+                                                onChange={v => s[key] = v}
+                                            />
+                                        )}
+                                    />
+                                );
+                                break;
                         }
                     }
 
@@ -132,7 +152,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
 
                     return (
                         <Menu.MenuItem
-                            id={`plugin-${p.name}`}
+                            id={`${p.name}-menu`}
                             key={p.name}
                             label={p.name}
                             action={() => openPluginModal(p)}
@@ -179,7 +199,7 @@ export function buildThemeMenuEntries() {
     return (
         <>
             <Menu.MenuCheckboxItem
-                id="quickcss-toggle"
+                id="toggle-quickcss"
                 checked={useQuickCss}
                 label={"Enable QuickCSS"}
                 action={() => {
@@ -187,12 +207,12 @@ export function buildThemeMenuEntries() {
                 }}
             />
             <Menu.MenuItem
-                id="quickcss"
+                id="edit-quickcss"
                 label="Edit QuickCSS"
                 action={() => VencordNative.quickCss.openEditor()}
             />
             <Menu.MenuItem
-                id="themes-manage"
+                id="manage-themes"
                 label="Manage Themes"
                 action={() => openSettingsTabModal(ThemesTab)}
             />
@@ -258,7 +278,7 @@ function buildCustomPluginEntries() {
 
     const submenuEntries = pluginEntries.map(({ node, plugin }) => (
         <Menu.MenuItem
-            id={`${plugin.name}`}
+            id={`${plugin.name}-menu`}
             key={`${plugin.name}-menu`}
             label={plugin.name}
             action={() => openPluginModal(plugin)}
