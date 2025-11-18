@@ -48,11 +48,11 @@ export default definePlugin({
     reporterTestable: ReporterTestable.None,
 
     settingsAboutComponent() {
-        return <>
+        return (
             <Paragraph>
                 Discord rich presence for Gensokyo Radio!
             </Paragraph>
-        </>;
+        );
     },
 
     settings,

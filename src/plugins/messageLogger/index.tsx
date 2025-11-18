@@ -145,8 +145,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (
     const messages = MessageStore.getMessages(channel?.id) as MLMessage[];
     if (!messages?.some(msg => msg.deleted || msg.editHistory?.length)) return;
 
-    const group =
-        findGroupChildrenByChildId("mark-channel-read", children) ?? children;
+    const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
     group.push(
         <Menu.MenuItem
             id="vc-ml-clear-channel"
