@@ -28,7 +28,7 @@ import { useAwaiter } from "@utils/react";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Menu, Popout, useMemo, useRef, useState } from "@webpack/common";
+import { Menu, Popout, showToast, useMemo, useRef, useState } from "@webpack/common";
 import type { PropsWithChildren, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
@@ -41,8 +41,21 @@ const settings = definePluginSettings({
     }
 });
 
-function buildPluginMenuEntries() {
+function buildPluginMenu() {
     const { showPluginMenu } = settings.use(["showPluginMenu"]);
+    if (!showPluginMenu) return null;
+
+    return (
+        <Menu.MenuItem
+            id="vc-toolbox-plugins"
+            label="Plugins"
+        >
+            {buildPluginMenuEntries()}
+        </Menu.MenuItem>
+    );
+}
+
+export function buildPluginMenuEntries() {
     const pluginSettings = useSettings().plugins;
 
     const [search, setSearch] = useState("");
@@ -57,6 +70,7 @@ function buildPluginMenuEntries() {
     const candidates = useMemo(() =>
         sortedPlugins
             .filter(p => {
+                if (!isPluginEnabled(p.name)) return false;
                 if (p.name.endsWith("API")) return false;
 
                 const name = p.name.toLowerCase();
@@ -65,13 +79,8 @@ function buildPluginMenuEntries() {
         [lowerSearch]
     );
 
-    if (!showPluginMenu) return null;
-
     return (
-        <Menu.MenuItem
-            id="vc-toolbox-plugins"
-            label="Plugins"
-        >
+        <>
             <Menu.MenuControlItem
                 id="vc-plugins-search"
                 control={(props, ref) => (
@@ -91,6 +100,8 @@ function buildPluginMenuEntries() {
                     const options = [] as ReactNode[];
 
                     if (p.options) for (const [key, option] of Object.entries(p.options)) {
+                        if ("hidden" in option && option.hidden) continue;
+
                         const s = pluginSettings[p.name];
 
                         const baseProps = {
@@ -108,6 +119,7 @@ function buildPluginMenuEntries() {
                                         checked={s[key]}
                                         action={() => {
                                             s[key] = !s[key];
+                                            if (option.restartNeeded) showToast("Restart to apply the change");
                                         }}
                                     />
                                 );
@@ -122,7 +134,10 @@ function buildPluginMenuEntries() {
                                                 key={opt.label}
                                                 label={opt.label}
                                                 checked={s[key] === opt.value}
-                                                action={() => s[key] = opt.value}
+                                                action={() => {
+                                                    s[key] = opt.value;
+                                                    if (option.restartNeeded) showToast("Restart to apply the change");
+                                                }}
                                             />
                                         ))}
                                     </Menu.MenuItem>
@@ -131,37 +146,28 @@ function buildPluginMenuEntries() {
                         }
                     }
 
+                    if (!options.length) return null;
+
                     return (
                         <Menu.MenuItem
                             id={`vc-toolbox-plugin-${p.name}`}
                             key={p.name}
                             label={p.name}
                         >
+                            {options}
+
+                            <Menu.MenuSeparator />
+
                             <Menu.MenuItem
                                 id={`${p.name}-open`}
                                 label={"Open Settings"}
                                 action={() => openPluginModal(p)}
                             />
-
-                            <Menu.MenuCheckboxItem
-                                id={`${p.name}-enabled`}
-                                label={"Enable Plugin"}
-                                checked={isPluginEnabled(p.name)}
-                                action={() => {
-                                    // TODO
-                                }}
-                            />
-
-                            {options.length > 0 && (
-                                <Menu.MenuGroup label="Options">
-                                    {options}
-                                </Menu.MenuGroup>
-                            )}
                         </Menu.MenuItem>
                     );
                 })
             }
-        </Menu.MenuItem>
+        </>
     );
 }
 
@@ -260,13 +266,11 @@ function VencordPopout(onClose: () => void) {
             />
 
             {buildThemeMenuEntries()}
+            {buildPluginMenuEntries()}
 
-            <Menu.MenuSeparator />
             <Menu.MenuGroup>
-                {buildPluginMenuEntries()}
+                {...pluginEntries}
             </Menu.MenuGroup>
-
-            {...pluginEntries}
         </Menu.Menu >
     );
 }
