@@ -7,7 +7,7 @@
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
-import { openPluginModal, openSettingsTabModal, ThemesTab } from "@components/settings";
+import { openPluginModal, openSettingsTabModal, PluginsTab, ThemesTab } from "@components/settings";
 import { useAwaiter } from "@utils/react";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType } from "@utils/types";
@@ -24,6 +24,7 @@ function buildPluginMenu() {
         <Menu.MenuItem
             id="vc-toolbox-plugins"
             label="Plugins"
+            action={() => openSettingsTabModal(PluginsTab)}
         >
             {buildPluginMenuEntries()}
         </Menu.MenuItem>
@@ -128,6 +129,7 @@ export function buildPluginMenuEntries() {
                             id={`vc-toolbox-plugin-${p.name}`}
                             key={p.name}
                             label={p.name}
+                            action={() => openPluginModal(p)}
                         >
                             {options}
 
@@ -154,6 +156,7 @@ function buildThemeMenu() {
         <Menu.MenuItem
             id="vc-toolbox-themes"
             label="Themes"
+            action={() => openSettingsTabModal(ThemesTab)}
         >
             <Menu.MenuCheckboxItem
                 id="vc-toolbox-quickcss-toggle"
@@ -196,7 +199,7 @@ function buildThemeMenu() {
     );
 }
 
-export function renderPopout(onClose: () => void) {
+function buildCustomPluginEntries() {
     const pluginEntries = [] as ReactNode[];
 
     for (const plugin of Object.values(plugins)) {
@@ -216,11 +219,14 @@ export function renderPopout(onClose: () => void) {
                     );
                 });
 
+            if (!entries || Array.isArray(entries) && entries.length === 0) continue;
+
             pluginEntries.push(
                 <Menu.MenuItem
                     id={`vc-toolbox-${plugin.name}`}
                     key={`vc-toolbox-${plugin.name}`}
                     label={plugin.name}
+                    action={() => openPluginModal(plugin)}
                 >
                     <Menu.MenuGroup label={plugin.name}>
                         {entries}
@@ -230,6 +236,10 @@ export function renderPopout(onClose: () => void) {
         }
     }
 
+    return pluginEntries;
+}
+
+export function renderPopout(onClose: () => void) {
     return (
         <Menu.Menu
             navId="vc-toolbox"
@@ -245,7 +255,7 @@ export function renderPopout(onClose: () => void) {
             {buildPluginMenu()}
 
             <Menu.MenuGroup>
-                {...pluginEntries}
+                {buildCustomPluginEntries()}
             </Menu.MenuGroup>
         </Menu.Menu >
     );
