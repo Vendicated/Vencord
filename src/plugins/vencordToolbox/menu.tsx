@@ -10,7 +10,7 @@ import { Settings, useSettings } from "@api/Settings";
 import { openPluginModal, openSettingsTabModal, PluginsTab, ThemesTab } from "@components/settings";
 import { useAwaiter } from "@utils/react";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { OptionType } from "@utils/types";
+import { OptionType, Plugin } from "@utils/types";
 import { Menu, showToast, useMemo, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
@@ -22,7 +22,7 @@ function buildPluginMenu() {
 
     return (
         <Menu.MenuItem
-            id="vc-toolbox-plugins"
+            id="plugins"
             label="Plugins"
             action={() => openSettingsTabModal(PluginsTab)}
         >
@@ -58,7 +58,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
     return (
         <>
             <Menu.MenuControlItem
-                id="vc-plugins-search"
+                id="plugins-search"
                 control={(props, ref) => (
                     <Menu.MenuSearchControl
                         {...props}
@@ -132,7 +132,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
 
                     return (
                         <Menu.MenuItem
-                            id={`vc-toolbox-plugin-${p.name}`}
+                            id={`plugin-${p.name}`}
                             key={p.name}
                             label={p.name}
                             action={() => openPluginModal(p)}
@@ -163,7 +163,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
 export function buildThemeMenu() {
     return (
         <Menu.MenuItem
-            id="vc-toolbox-themes"
+            id="themes"
             label="Themes"
             action={() => openSettingsTabModal(ThemesTab)}
         >
@@ -179,7 +179,7 @@ export function buildThemeMenuEntries() {
     return (
         <>
             <Menu.MenuCheckboxItem
-                id="vc-toolbox-quickcss-toggle"
+                id="quickcss-toggle"
                 checked={useQuickCss}
                 label={"Enable QuickCSS"}
                 action={() => {
@@ -187,12 +187,12 @@ export function buildThemeMenuEntries() {
                 }}
             />
             <Menu.MenuItem
-                id="vc-toolbox-quickcss"
+                id="quickcss"
                 label="Edit QuickCSS"
                 action={() => VencordNative.quickCss.openEditor()}
             />
             <Menu.MenuItem
-                id="vc-toolbox-themes-manage"
+                id="themes-manage"
                 label="Manage Themes"
                 action={() => openSettingsTabModal(ThemesTab)}
             />
@@ -200,7 +200,7 @@ export function buildThemeMenuEntries() {
                 <Menu.MenuGroup>
                     {themes.map(theme => (
                         <Menu.MenuCheckboxItem
-                            id={`vc-toolbox-theme-${theme.fileName}`}
+                            id={`theme-${theme.fileName}`}
                             key={theme.fileName}
                             label={theme.name}
                             checked={enabledThemes.includes(theme.fileName)}
@@ -220,14 +220,14 @@ export function buildThemeMenuEntries() {
 }
 
 function buildCustomPluginEntries() {
-    const pluginEntries = [] as ReactNode[];
+    const pluginEntries = [] as { plugin: Plugin, node: ReactNode; }[];
 
     for (const plugin of Object.values(plugins)) {
         if (plugin.toolboxActions && isPluginEnabled(plugin.name)) {
             const entries = typeof plugin.toolboxActions === "function"
                 ? plugin.toolboxActions()
                 : Object.entries(plugin.toolboxActions).map(([text, action]) => {
-                    const key = `vc-toolbox-${plugin.name}-${text}`;
+                    const key = `${plugin.name}-${text}`;
 
                     return (
                         <Menu.MenuItem
@@ -241,22 +241,33 @@ function buildCustomPluginEntries() {
 
             if (!entries || Array.isArray(entries) && entries.length === 0) continue;
 
-            pluginEntries.push(
-                <Menu.MenuItem
-                    id={`vc-toolbox-${plugin.name}`}
-                    key={`vc-toolbox-${plugin.name}`}
-                    label={plugin.name}
-                    action={() => openPluginModal(plugin)}
-                >
-                    <Menu.MenuGroup label={plugin.name}>
+            pluginEntries.push({
+                plugin,
+                node:
+                    <Menu.MenuGroup label={plugin.name} key={`${plugin.name}-group`}>
                         {entries}
                     </Menu.MenuGroup>
-                </Menu.MenuItem>
-            );
+            });
         }
     }
 
-    return pluginEntries;
+    // If there aren't too many entries, just put them all in the main menu.
+    // Otherwise, add submenus for each plugin
+    if (pluginEntries.length <= 5)
+        return pluginEntries.map(e => e.node);
+
+    const submenuEntries = pluginEntries.map(({ node, plugin }) => (
+        <Menu.MenuItem
+            id={`${plugin.name}`}
+            key={`${plugin.name}-menu`}
+            label={plugin.name}
+            action={() => openPluginModal(plugin)}
+        >
+            {node}
+        </Menu.MenuItem>
+    ));
+
+    return <Menu.MenuGroup>{submenuEntries}</Menu.MenuGroup>;
 }
 
 export function renderPopout(onClose: () => void) {
@@ -266,7 +277,7 @@ export function renderPopout(onClose: () => void) {
             onClose={onClose}
         >
             <Menu.MenuItem
-                id="vc-toolbox-notifications"
+                id="notifications"
                 label="Open Notification Log"
                 action={openNotificationLogModal}
             />
@@ -274,9 +285,7 @@ export function renderPopout(onClose: () => void) {
             {buildThemeMenu()}
             {buildPluginMenu()}
 
-            <Menu.MenuGroup>
-                {buildCustomPluginEntries()}
-            </Menu.MenuGroup>
+            {buildCustomPluginEntries()}
         </Menu.Menu >
     );
 }
