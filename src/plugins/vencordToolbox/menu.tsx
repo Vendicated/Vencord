@@ -31,7 +31,7 @@ function buildPluginMenu() {
     );
 }
 
-export function buildPluginMenuEntries() {
+export function buildPluginMenuEntries(includeEmpty = false) {
     const pluginSettings = useSettings().plugins;
 
     const [search, setSearch] = useState("");
@@ -75,8 +75,12 @@ export function buildPluginMenuEntries() {
                 .map(p => {
                     const options = [] as ReactNode[];
 
+                    let hasAnyOption = false;
+
                     if (p.options) for (const [key, option] of Object.entries(p.options)) {
                         if ("hidden" in option && option.hidden) continue;
+
+                        hasAnyOption = true;
 
                         const s = pluginSettings[p.name];
 
@@ -122,7 +126,9 @@ export function buildPluginMenuEntries() {
                         }
                     }
 
-                    if (!options.length) return null;
+                    const hasVisibleOptions = options.length > 0;
+                    const shouldSkip = !hasVisibleOptions && !(includeEmpty && hasAnyOption);
+                    if (!shouldSkip) return null;
 
                     return (
                         <Menu.MenuItem
@@ -131,17 +137,21 @@ export function buildPluginMenuEntries() {
                             label={p.name}
                             action={() => openPluginModal(p)}
                         >
-                            <Menu.MenuGroup label={p.name}>
-                                {options}
-                            </Menu.MenuGroup>
+                            {hasVisibleOptions && (
+                                <>
+                                    <Menu.MenuGroup label={p.name}>
+                                        {options}
+                                    </Menu.MenuGroup>
 
-                            <Menu.MenuSeparator />
+                                    <Menu.MenuSeparator />
 
-                            <Menu.MenuItem
-                                id={`${p.name}-open`}
-                                label={"Open Settings"}
-                                action={() => openPluginModal(p)}
-                            />
+                                    <Menu.MenuItem
+                                        id={`${p.name}-open`}
+                                        label={"Open Settings"}
+                                        action={() => openPluginModal(p)}
+                                    />
+                                </>
+                            )}
                         </Menu.MenuItem>
                     );
                 })
@@ -150,16 +160,24 @@ export function buildPluginMenuEntries() {
     );
 }
 
-function buildThemeMenu() {
-    const { useQuickCss, enabledThemes } = useSettings(["useQuickCss", "enabledThemes"]);
-    const [themes] = useAwaiter(VencordNative.themes.getThemesList);
-
+export function buildThemeMenu() {
     return (
         <Menu.MenuItem
             id="vc-toolbox-themes"
             label="Themes"
             action={() => openSettingsTabModal(ThemesTab)}
         >
+            {buildThemeMenuEntries()}
+        </Menu.MenuItem>
+    );
+}
+
+export function buildThemeMenuEntries() {
+    const { useQuickCss, enabledThemes } = useSettings(["useQuickCss", "enabledThemes"]);
+    const [themes] = useAwaiter(VencordNative.themes.getThemesList);
+
+    return (
+        <>
             <Menu.MenuCheckboxItem
                 id="vc-toolbox-quickcss-toggle"
                 checked={useQuickCss}
@@ -197,7 +215,7 @@ function buildThemeMenu() {
                     ))}
                 </Menu.MenuGroup>
             )}
-        </Menu.MenuItem>
+        </>
     );
 }
 
