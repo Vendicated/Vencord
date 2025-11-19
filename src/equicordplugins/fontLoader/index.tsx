@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { definePluginSettings, migratePluginSetting } from "@api/Settings";
+import { Card } from "@components/Card";
 import { HeadingSecondary, HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
@@ -14,7 +15,7 @@ import { EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Card, React, TextInput } from "@webpack/common";
+import { React, TextInput } from "@webpack/common";
 
 interface GoogleFontMetadata {
     family: string;

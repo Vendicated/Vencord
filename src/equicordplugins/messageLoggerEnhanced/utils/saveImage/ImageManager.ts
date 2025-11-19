@@ -23,11 +23,10 @@ import {
     keys,
     set,
 } from "@api/DataStore";
+import { Flogger, Native } from "@equicordplugins/messageLoggerEnhanced";
+import { LoggedAttachment } from "@equicordplugins/messageLoggerEnhanced/types";
+import { DEFAULT_IMAGE_CACHE_DIR } from "@equicordplugins/messageLoggerEnhanced/utils/constants";
 import { sleep } from "@utils/misc";
-
-import { Flogger, Native } from "../..";
-import { LoggedAttachment } from "../../types";
-import { DEFAULT_IMAGE_CACHE_DIR } from "../constants";
 
 const ImageStore = createStore("MessageLoggerImageData", "MessageLoggerImageStore");
 

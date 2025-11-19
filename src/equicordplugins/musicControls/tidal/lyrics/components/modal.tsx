@@ -5,9 +5,9 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { TidalStore, Track } from "@equicordplugins/musicControls/tidal/TidalStore";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 
-import { TidalStore, Track } from "../../TidalStore";
 import { cl, NoteSvg, scrollClasses, useLyrics } from "./util";
 
 const formatTime = (time: number) => {

@@ -5,13 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { settings } from "@equicordplugins/musicControls/settings";
+import { TidalLrcStore } from "@equicordplugins/musicControls/tidal/lyrics/providers/store";
+import { EnhancedLyric } from "@equicordplugins/musicControls/tidal/lyrics/types";
+import { TidalStore } from "@equicordplugins/musicControls/tidal/TidalStore";
 import { findByPropsLazy } from "@webpack";
 import { React, useEffect, useState, useStateFromStores } from "@webpack/common";
-
-import { settings } from "../../../settings";
-import { TidalStore } from "../../TidalStore";
-import { TidalLrcStore } from "../providers/store";
-import { EnhancedLyric } from "../types";
 
 export const scrollClasses = findByPropsLazy("auto", "customTheme");
 

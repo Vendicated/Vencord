@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { CategoryImageProps, StickerCategoryProps } from "@equicordplugins/moreStickers/types";
+import { cl } from "@equicordplugins/moreStickers/utils";
 import { React } from "@webpack/common";
 import { JSX } from "react";
-
-import { CategoryImageProps, StickerCategoryProps } from "../types";
-import { cl } from "../utils";
 
 export function CategoryImage({ src, alt, isActive }: CategoryImageProps) {
     return (

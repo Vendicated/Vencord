@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { VoiceChannelLogEntry } from "@equicordplugins/voiceChannelLog.dev/logs";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { React } from "@webpack/common";
 
 import { cl } from "..";
-import { VoiceChannelLogEntry } from "../logs";
 
 export default function Icon({ logEntry, channel, className }: { logEntry: VoiceChannelLogEntry; channel: Channel; className: string; }) {
     // Taken from /assets/7378a83d74ce97d83380.svg

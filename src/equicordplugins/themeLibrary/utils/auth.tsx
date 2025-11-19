@@ -6,10 +6,9 @@
 
 import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
+import { logger, themeRequest } from "@equicordplugins/themeLibrary/components/ThemeTab";
 import { openModal } from "@utils/modal";
 import { OAuth2AuthorizeModal, Toasts, UserStore } from "@webpack/common";
-
-import { logger, themeRequest } from "../components/ThemeTab";
 
 export async function authorizeUser(triggerModal: boolean = true) {
     const isAuthorized = await getAuthorization();

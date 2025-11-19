@@ -9,7 +9,7 @@ import { Toasts } from "@webpack/common";
 
 import { DATA_COLLECTION_NAME, getCollections, refreshCacheCollection } from "./collectionManager";
 
-// 99% of this is coppied from src\utils\settingsSync.ts
+// 99% of this is coppied from src/utils/settingsSync.ts
 
 export async function downloadCollections() {
     const filename = "gif-collections.json";

@@ -13,13 +13,13 @@ import { HeadingPrimary, HeadingTertiary } from "@components/Heading";
 import { OpenExternalIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings";
+import { SearchStatus, TabItem, Theme, ThemeLikeProps } from "@equicordplugins/themeLibrary/types";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { Button, React, SearchableSelect, TabBar, TextInput, useEffect, useState } from "@webpack/common";
 
-import { SearchStatus, TabItem, Theme, ThemeLikeProps } from "../types";
 import { ThemeCard } from "./ThemeCard";
 
 const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");

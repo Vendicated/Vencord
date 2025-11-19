@@ -6,13 +6,14 @@
 
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { ChangeList } from "@utils/ChangeList";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
-import { Button, Card, React, Tooltip } from "@webpack/common";
+import { Button, React, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
 

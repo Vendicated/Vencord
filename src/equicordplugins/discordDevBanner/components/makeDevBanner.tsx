@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { ChromiumIcon, DevBannerIcon, DiscordIcon, ElectronIcon, EquicordIcon } from "@equicordplugins/discordDevBanner/icons";
 import { gitHashShort } from "@shared/vencordUserAgent";
 import { React } from "@webpack/common";
 import SettingsPlugin from "plugins/_core/settings";
 import { JSX } from "react";
 
-import { ChromiumIcon, DevBannerIcon, DiscordIcon, ElectronIcon, EquicordIcon } from "../icons";
 import { names, settings } from ".";
 
 export function makeDevBanner(state?: string): string | JSX.Element {

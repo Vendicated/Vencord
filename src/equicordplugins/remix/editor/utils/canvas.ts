@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { brushCanvas } from "../components/Canvas";
+import { brushCanvas } from "@equicordplugins/remix/editor/components/Canvas";
 
 export function fillCircle(x: number, y: number, radius: number, canvas = brushCanvas) {
     canvas.beginPath();

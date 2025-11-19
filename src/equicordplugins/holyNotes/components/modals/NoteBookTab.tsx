@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { SvgOverFlowIcon } from "@equicordplugins/holyNotes/components/icons/overFlowIcon";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { Button, Clickable, Menu, Popout, React, useRef } from "@webpack/common";
-
-import { SvgOverFlowIcon } from "../icons/overFlowIcon";
 
 const { overflowIcon } = findByPropsLazy("overflowIcon", "forceButtonsShow");
 

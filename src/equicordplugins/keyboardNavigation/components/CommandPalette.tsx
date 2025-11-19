@@ -7,12 +7,12 @@
 import "./style.css";
 
 import { classNameFactory } from "@api/Styles";
+import { actions } from "@equicordplugins/keyboardNavigation/commands";
 import { Logger } from "@utils/Logger";
 import { closeAllModals, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { React, TextInput, useEffect, useState } from "@webpack/common";
 
 import { settings } from "..";
-import { actions } from "../commands";
 
 const logger = new Logger("CommandPalette", "#e5c890");
 

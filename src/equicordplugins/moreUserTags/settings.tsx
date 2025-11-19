@@ -5,11 +5,13 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Card } from "@components/Card";
+import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { OptionType } from "@utils/types";
-import { Card, Flex, Forms, TextInput, Tooltip } from "@webpack/common";
+import { Forms, TextInput, Tooltip } from "@webpack/common";
 
 import { Tag, tags } from "./consts";
 import { TagSettings } from "./types";

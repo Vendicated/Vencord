@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled, isPluginRequired } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { WarningIcon } from "@components/Icons";
@@ -13,7 +14,7 @@ import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { EQUIBOT_USER_ID } from "@utils/constants";
 import { isEquicordGuild, isEquicordSupport } from "@utils/misc";
 import { Message } from "@vencord/discord-types";
-import { showToast, Tooltip, TooltipContainer } from "@webpack/common";
+import { showToast, Tooltip, TooltipContainer, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import plugins, { ExcludedPlugins } from "~plugins";
@@ -58,8 +59,22 @@ export function ChatPluginCard({ url, description }: { url: string, description:
 
     const onRestartNeeded = () => showToast("A restart is required for the change to take effect!");
 
-    const required = Vencord.Plugins.isPluginRequired(pluginName);
-    const dependents = Vencord.Plugins.calculatePluginDependencyMap()[p.name]?.filter(d => Vencord.Plugins.isPluginEnabled(d));
+    const depMap = useMemo(() => {
+        const o = {} as Record<string, string[]>;
+        for (const plugin in plugins) {
+            const deps = plugins[plugin].dependencies;
+            if (deps) {
+                for (const dep of deps) {
+                    o[dep] ??= [];
+                    o[dep].push(plugin);
+                }
+            }
+        }
+        return o;
+    }, []);
+
+    const required = isPluginRequired(pluginName);
+    const dependents = depMap[p.name]?.filter(d => isPluginEnabled(d));
 
     if (required) {
         const tooltipText = p.required || !dependents.length

@@ -7,13 +7,12 @@
 import { definePluginSettings } from "@api/Settings";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { ChannelTabsPreview } from "@equicordplugins/channelTabs/components/ChannelTabsContainer";
+import { KeybindSettings } from "@equicordplugins/channelTabs/components/KeybindSettings";
 import { Logger } from "@utils/Logger";
 import { makeRange, OptionType } from "@utils/types";
 import { SearchableSelect, useState } from "@webpack/common";
 import { JSX } from "react";
-
-import { ChannelTabsPreview } from "../components/ChannelTabsContainer";
-import { KeybindSettings } from "../components/KeybindSettings";
 
 interface DynamicDropdownSettingOption {
     label: string;

@@ -5,8 +5,9 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { Card } from "@components/Card";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Card, useEffect, useState } from "@webpack/common";
+import { Button, useEffect, useState } from "@webpack/common";
 
 import pl, { Native, settings, SongLinkResult } from ".";
 import Providers from "./Providers";

@@ -10,6 +10,7 @@ import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { Paragraph } from "@components/Paragraph";
 import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { ChangeList } from "@utils/ChangeList";
@@ -17,7 +18,7 @@ import { classes, Margins } from "@utils/index";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Flex, React, Tooltip, useMemo } from "@webpack/common";
+import { Button, React, Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins from "~plugins";
@@ -128,14 +129,14 @@ export function NewPluginsModal({ modalProps, newPlugins, newSettings }: { modal
             </div>
         </ModalContent>
         <ModalFooter>
-            <Flex direction={Flex.Direction.HORIZONTAL_REVERSE}>
+            <Flex flexDirection="row-reverse">
                 <ContinueButton
                     close={modalProps.onClose}
                     changes={changes}
                     callback={(v: () => void) => updateContinueButton = v}
                 />
             </Flex>
-            <Flex direction={Flex.Direction.HORIZONTAL}>
+            <Flex flexDirection="row">
                 <div className="vc-newPluginsManager-disable-wrapper">
                     <Checkbox
                         type="inverted"

@@ -9,6 +9,8 @@ import { Logger } from "@utils/Logger";
 import { chooseFile, saveFile } from "@utils/web";
 import { moment, Toasts } from "@webpack/common";
 
+import { DataStore } from "..";
+
 const toast = (type: string, message: string) =>
     Toasts.show({
         type,
@@ -43,12 +45,48 @@ export async function importSettings(data: string) {
 export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
     const settings = VencordNative.settings.get();
     const quickCss = await VencordNative.quickCss.get();
-    return JSON.stringify({ settings, quickCss }, null, minify ? undefined : 4);
+    const dataStore = await DataStore.entries();
+    return JSON.stringify({ settings, quickCss, dataStore }, null, minify ? undefined : 4);
 }
 
-export async function downloadSettingsBackup() {
-    const filename = `vencord-settings-backup-${moment().format("YYYY-MM-DD")}.json`;
-    const backup = await exportSettings();
+export async function exportPlugins({ minify }: { minify?: boolean; } = {}) {
+    const { plugins } = VencordNative.settings.get();
+    return JSON.stringify({ settings: { plugins } }, null, minify ? undefined : 4);
+}
+
+export async function exportCSS({ minify }: { minify?: boolean; } = {}) {
+    const quickCss = await VencordNative.quickCss.get();
+    return JSON.stringify({ quickCss }, null, minify ? undefined : 4);
+}
+
+export async function exportDataStores({ minify }: { minify?: boolean; } = {}) {
+    const dataStore = await DataStore.entries();
+    return JSON.stringify({ dataStore }, null, minify ? undefined : 4);
+}
+
+type BackupType = "settings" | "plugins" | "css" | "datastore";
+
+export async function downloadSettingsBackup(type: BackupType, { minify }: { minify?: boolean; } = {}) {
+    let backup: string;
+
+    switch (type) {
+        case "settings":
+            backup = await exportSettings({ minify });
+            break;
+        case "plugins":
+            backup = await exportPlugins({ minify });
+            break;
+        case "css":
+            backup = await exportCSS({ minify });
+            break;
+        case "datastore":
+            backup = await exportDataStores({ minify });
+            break;
+        default:
+            throw new Error("Invalid backup type");
+    }
+
+    const filename = `equicord-${type}-backup-${moment().format("YYYY-MM-DD")}.json`;
     const data = new TextEncoder().encode(backup);
 
     if (IS_DISCORD_DESKTOP) {

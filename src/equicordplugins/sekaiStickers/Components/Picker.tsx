@@ -6,10 +6,9 @@
 
 import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
+import { characters } from "@equicordplugins/sekaiStickers/characters.json";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { React, ScrollerThin, TextInput } from "@webpack/common";
-
-import { characters } from "../characters.json";
 
 export default function CharSelectModal({ modalProps, setCharacter }: { modalProps: ModalProps; setCharacter?: any; }) {
     const [search, setSearch] = React.useState<string>("");

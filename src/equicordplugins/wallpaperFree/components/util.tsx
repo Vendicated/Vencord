@@ -5,11 +5,11 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { WallpaperFreeStore } from "@equicordplugins/wallpaperFree/store";
 import { openModal } from "@utils/modal";
 import { makeCodeblock } from "@utils/text";
 import { Button, FluxDispatcher, Parser } from "@webpack/common";
 
-import { WallpaperFreeStore } from "../store";
 import { SetWallpaperModal } from "./modal";
 
 export function GlobalDefaultComponent() {

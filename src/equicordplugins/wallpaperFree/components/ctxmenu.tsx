@@ -5,10 +5,10 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { WallpaperFreeStore } from "@equicordplugins/wallpaperFree/store";
 import { openModal } from "@utils/modal";
 import { ChannelStore, FluxDispatcher, Menu } from "@webpack/common";
 
-import { WallpaperFreeStore } from "../store";
 import { SetWallpaperModal } from "./modal";
 
 

@@ -5,10 +5,10 @@
  */
 
 import { DataStore } from "@api/index";
+import { settings } from "@equicordplugins/gifCollections/index";
+import { Collection, Gif } from "@equicordplugins/gifCollections/types";
 import { Toasts } from "@webpack/common";
 
-import { settings } from "../index";
-import { Collection, Gif } from "../types";
 import { getFormat } from "./getFormat";
 
 export const DATA_COLLECTION_NAME = "gif-collections-collections";

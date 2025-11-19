@@ -19,10 +19,10 @@
 import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { settings as PluginSettings } from "@equicordplugins/toastNotifications/index";
 import { classes } from "@utils/misc";
 import { React, useEffect, useMemo, useState } from "@webpack/common";
 
-import { settings as PluginSettings } from "../index";
 import { NotificationData } from "./Notifications";
 
 export default ErrorBoundary.wrap(function NotificationComponent({

@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { IconProps } from "@equicordplugins/githubRepos/types";
 import { React } from "@webpack/common";
-
-import { IconProps } from "../types";
 
 export function Star({ className, width = 16, height = 16 }: IconProps) {
     return (

@@ -8,11 +8,10 @@ import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { settings } from "@equicordplugins/channelTabs/util";
 import { IS_MAC } from "@utils/constants";
 import { Button, React, Text, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
-
-import { settings } from "../util";
 
 interface KeybindInputProps {
     label: string;

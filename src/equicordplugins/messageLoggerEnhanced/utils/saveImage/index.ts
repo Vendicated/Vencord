@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Flogger, settings } from "@equicordplugins/messageLoggerEnhanced";
+import { LoggedAttachment, LoggedMessage, LoggedMessageJSON } from "@equicordplugins/messageLoggerEnhanced/types";
+import { memoize } from "@equicordplugins/messageLoggerEnhanced/utils/memoize";
 import { MessageAttachment } from "@vencord/discord-types";
 
-import { Flogger, settings } from "../..";
-import { LoggedAttachment, LoggedMessage, LoggedMessageJSON } from "../../types";
-import { memoize } from "../memoize";
 import { deleteImage, downloadAttachment, getImage, } from "./ImageManager";
 
 export function getFileExtension(str: string) {

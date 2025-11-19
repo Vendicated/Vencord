@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { brushCanvas, render, shapeCanvas } from "../components/Canvas";
-import { ToolDefinition } from "../components/Toolbar";
-import { Mouse } from "../input";
-import { line } from "../utils/canvas";
+import { brushCanvas, render, shapeCanvas } from "@equicordplugins/remix/editor/components/Canvas";
+import { ToolDefinition } from "@equicordplugins/remix/editor/components/Toolbar";
+import { Mouse } from "@equicordplugins/remix/editor/input";
+import { line } from "@equicordplugins/remix/editor/utils/canvas";
 
 export type Shape = "rectangle" | "ellipse" | "line" | "arrow";
 

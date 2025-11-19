@@ -23,7 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { EquicordDevs } from "@utils/constants";
-import { copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/discord";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ChannelStore } from "@webpack/common";
@@ -82,7 +82,7 @@ function openDecodedBase64Modal(decodedContent) {
                     </div>
                 </ModalContent >
                 <ModalFooter>
-                    <Flex cellSpacing={10}>
+                    <Flex gap={10}>
                         {decodedContent.map((content, index) => (
                             <Button key={index} onClick={() => copyWithToast(content, "Decoded content copied to clipboard!")}>
                                 Copy Decoded Content {index + 1}

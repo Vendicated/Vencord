@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { countMessagesByStatusIDB, countMessagesIDB, DBMessageRecord, DBMessageStatus, getDateStortedMessagesByStatusIDB } from "@equicordplugins/messageLoggerEnhanced/db";
+import { doesMatch, tokenizeQuery } from "@equicordplugins/messageLoggerEnhanced/utils/parseQuery";
 import { useEffect, useState } from "@webpack/common";
 
-import { countMessagesByStatusIDB, countMessagesIDB, DBMessageRecord, DBMessageStatus, getDateStortedMessagesByStatusIDB } from "../db";
-import { doesMatch, tokenizeQuery } from "../utils/parseQuery";
 import { LogTabs } from "./LogsModal";
 
 function useDebouncedValue<T>(value: T, delay: number): T {

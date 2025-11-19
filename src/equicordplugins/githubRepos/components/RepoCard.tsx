@@ -5,11 +5,11 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { getLanguageColor } from "@equicordplugins/githubRepos/colors";
+import { RepoCardProps } from "@equicordplugins/githubRepos/types";
 import { React, Tooltip } from "@webpack/common";
 
 import { cl } from "..";
-import { getLanguageColor } from "../colors";
-import { RepoCardProps } from "../types";
 import { Star } from "./Star";
 
 export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {

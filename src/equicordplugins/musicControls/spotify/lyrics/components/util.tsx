@@ -5,13 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { settings } from "@equicordplugins/musicControls/settings";
+import { SpotifyLrcStore } from "@equicordplugins/musicControls/spotify/lyrics/providers/store";
+import { SyncedLyric } from "@equicordplugins/musicControls/spotify/lyrics/providers/types";
+import { SpotifyStore } from "@equicordplugins/musicControls/spotify/SpotifyStore";
 import { findByPropsLazy } from "@webpack";
 import { React, useEffect, useState, useStateFromStores } from "@webpack/common";
-
-import { settings } from "../../../settings";
-import { SpotifyStore } from "../../SpotifyStore";
-import { SpotifyLrcStore } from "../providers/store";
-import { SyncedLyric } from "../providers/types";
 
 export const scrollClasses = findByPropsLazy("auto", "customTheme");
 

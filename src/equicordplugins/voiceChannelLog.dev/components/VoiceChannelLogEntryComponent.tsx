@@ -6,13 +6,13 @@
 
 import "./VoiceChannelLogEntryComponent.css";
 
+import { VoiceChannelLogEntry } from "@equicordplugins/voiceChannelLog.dev/logs";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { React, Timestamp, Tooltip, UserStore } from "@webpack/common";
 import { Util } from "Vencord";
 
 import { cl } from "..";
-import { VoiceChannelLogEntry } from "../logs";
 import Icon from "./VoiceChannelLogEntryIcons";
 
 export function VoiceChannelLogEntryComponent({ logEntry, channel }: { logEntry: VoiceChannelLogEntry; channel: Channel; }) {

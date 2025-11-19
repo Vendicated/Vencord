@@ -6,9 +6,10 @@
 
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
+import { Flex } from "@components/Flex";
 import { Paragraph } from "@components/Paragraph";
 import { openUserProfile } from "@utils/discord";
-import { Avatar, Clickable, Flex, React, TextInput, Tooltip, } from "@webpack/common";
+import { Avatar, Clickable, React, TextInput, Tooltip, } from "@webpack/common";
 
 import { Data, IStorageUser } from "./data";
 

@@ -5,10 +5,9 @@
  */
 
 import { HeadingSecondary } from "@components/Heading";
+import { noteHandler } from "@equicordplugins/holyNotes/NoteHandler";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, React, TextInput } from "@webpack/common";
-
-import { noteHandler } from "../../NoteHandler";
 
 export default (props: ModalProps & { onClose: () => void; }) => {
     const [notebookName, setNotebookName] = React.useState("");

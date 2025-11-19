@@ -5,12 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { questIsIgnored, settings } from "@equicordplugins/questify/settings";
 import { getIntlMessageFromHash, runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "@utils/index";
 import { Logger } from "@utils/Logger";
 import { findStoreLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, UserStore } from "@webpack/common";
 
-import { questIsIgnored, settings } from "../settings";
 import { Quest, QuestStatus, RGB } from "./components";
 
 export const q = classNameFactory("questify-");

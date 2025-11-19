@@ -5,6 +5,7 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { getVcLogs, vcLogSubscribe } from "@equicordplugins/voiceChannelLog.dev/logs";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Channel } from "@vencord/discord-types";
@@ -12,7 +13,6 @@ import { findStoreLazy } from "@webpack";
 import { React, ScrollerThin } from "@webpack/common";
 
 import { cl } from "..";
-import { getVcLogs, vcLogSubscribe } from "../logs";
 import { VoiceChannelLogEntryComponent } from "./VoiceChannelLogEntryComponent";
 
 const AccessibilityStore = findStoreLazy("AccessibilityStore");

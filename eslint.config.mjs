@@ -36,7 +36,7 @@ export default tseslint.config(
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
             "simple-import-sort": simpleImportSort,
-            "unused-imports": unusedImports
+            "unused-imports": unusedImports,
         },
         settings: {
             "import/resolver": {
@@ -138,7 +138,7 @@ export default tseslint.config(
             // Plugin Rules
             "simple-import-sort/imports": "error",
             "simple-import-sort/exports": "error",
-            "unused-imports/no-unused-imports": "error",
+            "unused-imports/no-unused-imports": "error"
         }
     }
 );

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { canvas, cropCanvas, render } from "../components/Canvas";
-import { ToolDefinition } from "../components/Toolbar";
-import { Mouse } from "../input";
-import { dist, fillCircle } from "../utils/canvas";
+import { canvas, cropCanvas, render } from "@equicordplugins/remix/editor/components/Canvas";
+import { ToolDefinition } from "@equicordplugins/remix/editor/components/Toolbar";
+import { Mouse } from "@equicordplugins/remix/editor/input";
+import { dist, fillCircle } from "@equicordplugins/remix/editor/utils/canvas";
 
 export const bounds = {
     top: 0,

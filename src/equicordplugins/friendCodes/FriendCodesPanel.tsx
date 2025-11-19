@@ -7,10 +7,11 @@
 import "./styles.css";
 
 import { BaseText } from "@components/BaseText";
+import { Flex } from "@components/Flex";
 import { HeadingTertiary } from "@components/Heading";
 import { copyToClipboard } from "@utils/clipboard";
 import { findByPropsLazy } from "@webpack";
-import { Button, Flex, Forms, Parser, useEffect, useState } from "@webpack/common";
+import { Button, Forms, Parser, useEffect, useState } from "@webpack/common";
 
 import { FriendInvite } from "./types";
 
@@ -41,7 +42,7 @@ function CopyButton({ copyText, copiedText, onClick }) {
 function FriendInviteCard({ invite }: { invite: FriendInvite; }) {
     return (
         <div className="vc-friend-codes-card">
-            <Flex justify={Flex.Justify.START}>
+            <Flex justifyContent="start">
                 <div className="vc-friend-codes-card-title">
                     <HeadingTertiary style={{ textTransform: "none" }}>
                         {invite.code}
@@ -50,7 +51,7 @@ function FriendInviteCard({ invite }: { invite: FriendInvite; }) {
                         Expires {Parser.parse(`<t:${new Date(invite.expires_at).getTime() / 1000}:R>`)} • {invite.uses}/{invite.max_uses} uses
                     </span>
                 </div>
-                <Flex justify={Flex.Justify.END}>
+                <Flex justifyContent="end">
                     <CopyButton
                         copyText="Copy"
                         copiedText="Copied!"
@@ -85,10 +86,10 @@ export default function FriendCodesPanel() {
 
                 <Flex
                     style={{ marginBottom: "16px" }}
-                    justify={Flex.Justify.BETWEEN}
+                    justifyContent="space-between"
                 >
                     <h2 className="vc-friend-codes-info-header">{`Friend Codes - ${invites.length}`}</h2>
-                    <Flex justify={Flex.Justify.END}>
+                    <Flex justifyContent="end">
                         <Button
                             color={Button.Colors.GREEN}
                             look={Button.Looks.FILLED}

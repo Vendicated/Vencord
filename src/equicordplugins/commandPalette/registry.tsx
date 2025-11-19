@@ -5,17 +5,17 @@
  */
 
 import { DataStore } from "@api/index";
+import { isPluginEnabled } from "@api/PluginManager";
 import { SettingsStore } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { openPluginModal } from "@components/settings/tabs";
+import { toggleEnabled } from "@equicordplugins/equicordHelper/utils";
 import type { Plugin } from "@utils/types";
 import { changes, checkForUpdates } from "@utils/updater";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MediaEngineStore, React, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, SettingsRouter, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
 import type { FC, ReactElement, ReactNode } from "react";
 import { Settings } from "Vencord";
-
-import { toggleEnabled } from "../equicordHelper/utils";
 
 type CommandHandler = () => void | Promise<void>;
 
@@ -1571,7 +1571,7 @@ function createPluginKeywords(plugin: Plugin): string[] {
 }
 
 function buildPluginToggleCommand(plugin: Plugin): CommandEntry {
-    const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+    const enabled = isPluginEnabled(plugin.name);
     const keywords = Array.from(new Set([
         ...createPluginKeywords(plugin),
         "settings",
@@ -1588,9 +1588,9 @@ function buildPluginToggleCommand(plugin: Plugin): CommandEntry {
         searchGroup: `plugin-${plugin.name.toLowerCase()}`,
         tags: [TAG_PLUGINS, TAG_UTILITY],
         handler: async () => {
-            const before = Vencord.Plugins.isPluginEnabled(plugin.name);
+            const before = isPluginEnabled(plugin.name);
             const result = await toggleEnabled(plugin.name);
-            const after = Vencord.Plugins.isPluginEnabled(plugin.name);
+            const after = isPluginEnabled(plugin.name);
 
             if (result && before !== after) {
                 showToast(`${after ? "Enabled" : "Disabled"} ${plugin.name}.`, Toasts.Type.SUCCESS);
@@ -2473,7 +2473,7 @@ function registerSystemUtilityCommands() {
 }
 
 function hotReloadPlugin(plugin: Plugin) {
-    if (!Vencord.Plugins.isPluginEnabled(plugin.name)) {
+    if (!isPluginEnabled(plugin.name)) {
         showToast(`${plugin.name} is disabled.`, Toasts.Type.MESSAGE);
         return false;
     }
@@ -2503,7 +2503,7 @@ async function reloadAllPlugins() {
     const entries = Object.values(Vencord.Plugins.plugins) as Plugin[];
     let count = 0;
     for (const plugin of entries) {
-        if (!Vencord.Plugins.isPluginEnabled(plugin.name)) continue;
+        if (!isPluginEnabled(plugin.name)) continue;
         if (hotReloadPlugin(plugin)) count += 1;
     }
 
@@ -2518,17 +2518,17 @@ async function setAllPluginsEnabled(enabled: boolean) {
     const { plugins } = Vencord.Plugins;
     let changed = 0;
     for (const plugin of Object.values(plugins) as Plugin[]) {
-        const currentlyEnabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+        const currentlyEnabled = isPluginEnabled(plugin.name);
         if (enabled && currentlyEnabled) continue;
         if (!enabled) {
-            if (Vencord.Plugins.isPluginRequired(plugin.name)) continue;
+            if (isPluginEnabled(plugin.name)) continue;
             if (!currentlyEnabled) continue;
         }
         if (plugin.patches?.length) continue;
 
         const result = await toggleEnabled(plugin.name);
         if (result) {
-            const nowEnabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+            const nowEnabled = isPluginEnabled(plugin.name);
             if (nowEnabled === enabled) changed += 1;
         }
     }
@@ -2607,7 +2607,7 @@ function createPluginToolboxCommands(): CommandEntry[] {
             }
             usedIds.add(uniqueId);
 
-            const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
+            const enabled = isPluginEnabled(plugin.name);
 
             const keywords = Array.from(new Set([
                 ...createPluginKeywords(plugin),
@@ -2623,7 +2623,7 @@ function createPluginToolboxCommands(): CommandEntry[] {
                 categoryId: TOOLBOX_ACTIONS_CATEGORY_ID,
                 tags: [TAG_PLUGINS, TAG_UTILITY, TAG_DEVELOPER],
                 handler: () => {
-                    if (!Vencord.Plugins.isPluginEnabled(plugin.name)) {
+                    if (!isPluginEnabled(plugin.name)) {
                         showToast(`${plugin.name} is disabled. Enable the plugin to use this action.`, Toasts.Type.FAILURE);
                         return;
                     }

@@ -6,6 +6,7 @@
 
 import "./styles.css";
 
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Heading } from "@components/Heading";
@@ -13,15 +14,15 @@ import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { HashLink } from "@components/settings/tabs/updater/Components";
 import { gitHashShort } from "@shared/vencordUserAgent";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import { getRepo, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, React, Toasts } from "@webpack/common";
+import { Alerts, Button, React, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
-import { HashLink } from "../updater/Components";
 import {
     ChangelogEntry,
     ChangelogHistory,

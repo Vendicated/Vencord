@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { isEquicordGuild, isEquicordSupport } from "@utils/misc";
@@ -30,7 +31,7 @@ export const PluginButtons = ErrorBoundary.wrap(function PluginCards({ message }
 
     if (shouldAddPluginButtons) {
         if (pluginData.required || pluginData.name.endsWith("API")) return;
-        const isEnabled = Vencord.Plugins.isPluginEnabled(matchedPlugin);
+        const isEnabled = isPluginEnabled(matchedPlugin);
 
         let label = `${matchedPlugin} is already ${isEnabled ? "enabled" : "disabled"}`;
         let disabled = true;

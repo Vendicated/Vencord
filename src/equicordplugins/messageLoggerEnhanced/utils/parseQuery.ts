@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { LoggedMessageJSON } from "@equicordplugins/messageLoggerEnhanced/types";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
-import { LoggedMessageJSON } from "../types";
 import { getGuildIdByChannel } from "./index";
 import { memoize } from "./memoize";
 

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { copyWithToast } from "@utils/misc";
+import { providers } from "@equicordplugins/musicControls/spotify/lyrics/api";
+import { lyricsAlternative } from "@equicordplugins/musicControls/spotify/lyrics/providers/store";
+import { copyWithToast } from "@utils/discord";
 import { findComponentByCodeLazy } from "@webpack";
 import { FluxDispatcher, Menu } from "@webpack/common";
 
-import { providers } from "../api";
-import { lyricsAlternative } from "../providers/store";
 import { useLyrics } from "./util";
 
 const CopyIcon = findComponentByCodeLazy(" 1-.5.5H10a6");

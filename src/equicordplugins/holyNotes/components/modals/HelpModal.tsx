@@ -6,12 +6,11 @@
 
 import { BaseText } from "@components/BaseText";
 import { Paragraph } from "@components/Paragraph";
+import { noteHandler } from "@equicordplugins/holyNotes/NoteHandler";
+import { downloadNotes, uploadNotes } from "@equicordplugins/holyNotes/utils";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { findByProps } from "@webpack";
 import { Button } from "@webpack/common";
-
-import { noteHandler } from "../../NoteHandler";
-import { downloadNotes, uploadNotes } from "../../utils";
 
 export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; }) => {
     const { statusTagGreen } = findByProps("statusTagGreen");

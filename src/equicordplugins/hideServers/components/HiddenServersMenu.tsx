@@ -7,6 +7,7 @@
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
 import { Heading } from "@components/Heading";
+import { HiddenServersStore } from "@equicordplugins/hideServers/HiddenServersStore";
 import { getGuildAcronym } from "@utils/discord";
 import { classes } from "@utils/misc";
 import {
@@ -24,7 +25,6 @@ import { findByPropsLazy } from "@webpack";
 import { Button, IconUtils, useStateFromStores } from "@webpack/common";
 
 import { SortedGuildStore } from "..";
-import { HiddenServersStore } from "../HiddenServersStore";
 
 const cl = classNameFactory("vc-hideservers-");
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");

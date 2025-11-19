@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addMessagesBulkIDB, DBMessageRecord, getAllMessagesIDB } from "@equicordplugins/messageLoggerEnhanced/db";
+import { LoggedMessage, LoggedMessageJSON } from "@equicordplugins/messageLoggerEnhanced/types";
 import { chooseFile as chooseFileWeb } from "@utils/web";
 import { Toasts } from "@webpack/common";
 
 import { Native } from "..";
-import { addMessagesBulkIDB, DBMessageRecord, getAllMessagesIDB } from "../db";
-import { LoggedMessage, LoggedMessageJSON } from "../types";
 
 async function getLogContents(): Promise<string> {
     if (IS_WEB) {

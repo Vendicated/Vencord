@@ -6,17 +6,18 @@
 
 import { generateId } from "@api/Commands";
 import { Settings } from "@api/Settings";
+import { Card } from "@components/Card";
 import { HeadingPrimary, HeadingTertiary } from "@components/Heading";
 import { OpenExternalIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
+import type { Theme, ThemeLikeProps } from "@equicordplugins/themeLibrary/types";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
-import { Button, Card, FluxDispatcher, Parser, React, UserStore, UserUtils } from "@webpack/common";
+import { Button, FluxDispatcher, Parser, React, UserStore, UserUtils } from "@webpack/common";
 import { Constructor } from "type-fest";
 
-import type { Theme, ThemeLikeProps } from "../types";
 import { LikesComponent } from "./LikesComponent";
 import { ThemeInfoModal } from "./ThemeInfoModal";
 import { apiUrl } from "./ThemeTab";

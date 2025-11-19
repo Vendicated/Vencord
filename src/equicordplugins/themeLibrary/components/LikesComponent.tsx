@@ -5,11 +5,11 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import type { Theme, ThemeLikeProps } from "@equicordplugins/themeLibrary/types";
+import { isAuthorized } from "@equicordplugins/themeLibrary/utils/auth";
+import { LikeIcon } from "@equicordplugins/themeLibrary/utils/Icons";
 import { Button, useEffect, useRef, useState } from "@webpack/common";
 
-import type { Theme, ThemeLikeProps } from "../types";
-import { isAuthorized } from "../utils/auth";
-import { LikeIcon } from "../utils/Icons";
 import { logger, themeRequest } from "./ThemeTab";
 
 export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { themeId: Theme["id"], likedThemes: ThemeLikeProps | undefined; }) => {

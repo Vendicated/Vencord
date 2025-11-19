@@ -6,6 +6,8 @@
 
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
+import { ChannelTabsProps, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "@equicordplugins/channelTabs/util";
+import { ActivityIcon, CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, ICYMIIcon, NitroIcon, QuestIcon, ShopIcon } from "@equicordplugins/channelTabs/util/icons";
 import { activeQuestIntervals } from "@equicordplugins/questify"; // sorry murphy!
 import { getGuildAcronym, getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
@@ -14,8 +16,6 @@ import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Avatar, ChannelStore, ContextMenuApi, GuildStore, PresenceStore, ReadStateStore, TypingStore, useDrag, useDrop, useEffect, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { JSX } from "react";
 
-import { ChannelTabsProps, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
-import { ActivityIcon, CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, ICYMIIcon, NitroIcon, QuestIcon, ShopIcon } from "../util/icons";
 import { TabContextMenu } from "./ContextMenus";
 
 const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
@@ -137,12 +137,14 @@ function ChannelTabContent(props: ChannelTabsProps & {
         showStatusIndicators
     } = settings.use(["noPomeloNames", "showStatusIndicators"]);
 
+    if (!recipients) return null;
+
     const [isTyping, status, isMobile] = useStateFromStores(
         [TypingStore, PresenceStore],
         () => [
             !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
-            PresenceStore.getStatus(recipients?.[0]) as string,
-            PresenceStore.isMobileOnline(recipients?.[0]) as boolean
+            PresenceStore.getStatus(recipients[0]) as string,
+            PresenceStore.isMobileOnline(recipients[0]) as boolean
         ]
     );
 

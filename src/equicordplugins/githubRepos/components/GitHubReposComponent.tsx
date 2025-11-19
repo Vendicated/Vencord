@@ -6,12 +6,12 @@
 
 import { BaseText } from "@components/BaseText";
 import { Button, TextButton } from "@components/Button";
+import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "@equicordplugins/githubRepos/githubApi";
+import { GitHubRepo } from "@equicordplugins/githubRepos/types";
 import { openModal } from "@utils/modal";
 import { React, useEffect, UserProfileStore, useState } from "@webpack/common";
 
 import { cl, settings } from "..";
-import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "../githubApi";
-import { GitHubRepo } from "../types";
 import { RepoCard } from "./RepoCard";
 import { ReposModal } from "./ReposModal";
 

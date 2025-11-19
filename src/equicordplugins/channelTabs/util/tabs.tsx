@@ -5,6 +5,7 @@
  */
 
 import { DataStore } from "@api/index";
+import { isPluginEnabled } from "@api/PluginManager";
 import { classNameFactory } from "@api/Styles";
 import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
@@ -457,7 +458,7 @@ export function openStartupTabs(props: BasicChannelTabsProps & { userId: string;
     replaceArray(openTabHistory);
     highestIdIndex = 0;
 
-    if (settings.store.onStartup !== "nothing" && Vencord.Plugins.isPluginEnabled("KeepCurrentChannel"))
+    if (settings.store.onStartup !== "nothing" && isPluginEnabled("KeepCurrentChannel"))
         return showToast("Not restoring tabs as KeepCurrentChannel is enabled", Toasts.Type.FAILURE);
 
     switch (settings.store.onStartup) {

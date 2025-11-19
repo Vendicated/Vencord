@@ -8,14 +8,14 @@ import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { HeadingPrimary } from "@components/Heading";
 import { CopyIcon } from "@components/Icons";
-import { openUserProfile } from "@utils/discord";
+import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User, UserSummaryItem } from "@equicordplugins/soundBoardLogger/utils";
+import { copyWithToast, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes, copyWithToast } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Clickable, Timestamp } from "@webpack/common";
 import moment from "moment";
 
-import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User, UserSummaryItem } from "../utils";
 import { DownloadIcon, IconWithTooltip, PlayIcon } from "./Icons";
 
 export function openUserModal(item, user, sounds) {

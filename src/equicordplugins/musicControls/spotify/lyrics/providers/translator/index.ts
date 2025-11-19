@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import settings from "../../../..";
-import { Provider, SyncedLyric } from "../types";
+import settings from "@equicordplugins/musicControls";
+import { Provider, SyncedLyric } from "@equicordplugins/musicControls/spotify/lyrics/providers/types";
 
-// stolen from src\plugins\translate\utils.ts
+// stolen from src/plugins/translate/utils.ts
 
 interface GoogleData {
     src: string;

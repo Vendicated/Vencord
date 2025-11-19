@@ -7,14 +7,13 @@
 import { CopyIcon, DeleteIcon, IDIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { makeDummyUser } from "@components/settings/tabs/plugins/PluginModal";
 import { MessageType } from "@equicordplugins/holyNotes";
+import { noteHandler } from "@equicordplugins/holyNotes/NoteHandler";
+import { HolyNotes } from "@equicordplugins/holyNotes/types";
 import { copyToClipboard } from "@utils/clipboard";
 import { classes } from "@utils/misc";
 import { ModalProps } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
-
-import { noteHandler } from "../../NoteHandler";
-import { HolyNotes } from "../../types";
 
 const messageClasses = findByPropsLazy("message", "groupStart", "cozyMessage");
 const Channel = findByCodeLazy("computeLurkerPermissionsAllowList(){");

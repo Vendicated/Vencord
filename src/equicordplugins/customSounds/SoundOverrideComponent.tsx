@@ -6,13 +6,14 @@
 
 import { AudioPlayerInterface, playAudio } from "@api/AudioPlayer";
 import { classNameFactory } from "@api/Styles";
+import { Card } from "@components/Card";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import { makeRange } from "@utils/types";
 import { findLazy } from "@webpack";
-import { Button, Card, React, Select, showToast, Slider } from "@webpack/common";
+import { Button, React, Select, showToast, Slider } from "@webpack/common";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { deleteAudio, getAllAudio, saveAudio, StoredAudioFile } from "./audioStore";

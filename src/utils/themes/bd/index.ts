@@ -31,7 +31,7 @@ export interface UserThemeHeader {
     source?: string;
     website?: string;
     invite?: string;
-
+    content?: string;
     customName?: string;
 }
 

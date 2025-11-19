@@ -6,6 +6,7 @@
 
 import { BaseText } from "@components/BaseText";
 import { Button, TextButton } from "@components/Button";
+import { images } from "@equicordplugins/loginWithQR/images";
 import { getIntlMessage } from "@utils/discord";
 import {
     ModalContent,
@@ -23,7 +24,6 @@ import {
     useState,
 } from "@webpack/common";
 
-import { images } from "../../images";
 import { cl } from "..";
 
 const { Controller } = findByPropsLazy("Controller");

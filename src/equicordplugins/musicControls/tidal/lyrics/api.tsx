@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Track } from "../TidalStore";
+import { Track } from "@equicordplugins/musicControls/tidal/TidalStore";
+
 import { EnhancedLyric } from "./types";
 
 export async function getLyrics(track: Track | null, retries = 3): Promise<EnhancedLyric[] | null> {

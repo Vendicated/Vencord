@@ -6,12 +6,12 @@
 
 import { Button } from "@components/Button";
 import { HeadingPrimary } from "@components/Heading";
+import { getLanguageColor } from "@equicordplugins/githubRepos/colors";
+import { GitHubRepo } from "@equicordplugins/githubRepos/types";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@utils/modal";
 import { React } from "@webpack/common";
 
 import { cl } from "..";
-import { getLanguageColor } from "../colors";
-import { GitHubRepo } from "../types";
 import { Star } from "./Star";
 
 interface ReposModalProps {

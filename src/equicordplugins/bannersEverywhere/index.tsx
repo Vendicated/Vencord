@@ -5,6 +5,7 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
@@ -138,7 +139,7 @@ export default definePlugin({
     },
 
     getBanner(userId: string): string | undefined {
-        if (Vencord.Plugins.isPluginEnabled("USRBG") && (Vencord.Plugins.plugins.USRBG as iUSRBG).userHasBackground(userId)) {
+        if (isPluginEnabled("USRBG") && (Vencord.Plugins.plugins.USRBG as iUSRBG).userHasBackground(userId)) {
             let banner = (Vencord.Plugins.plugins.USRBG as iUSRBG).getImageUrl(userId);
             if (banner === null) banner = "";
             return banner;

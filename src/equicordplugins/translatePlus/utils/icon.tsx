@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { cl, IconProps } from "../misc/types";
+import { cl, IconProps } from "@equicordplugins/translatePlus/misc/types";
 
 export function Icon({ width = 24, height = 24 }: IconProps) {
     return (

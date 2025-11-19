@@ -5,12 +5,12 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { settings } from "@equicordplugins/musicControls/settings";
+import { TidalLrcStore } from "@equicordplugins/musicControls/tidal/lyrics/providers/store";
+import { TidalStore } from "@equicordplugins/musicControls/tidal/TidalStore";
 import { openModal } from "@utils/modal";
 import { ContextMenuApi, TooltipContainer, useEffect, useState, useStateFromStores } from "@webpack/common";
 
-import { settings } from "../../../settings";
-import { TidalStore } from "../../TidalStore";
-import { TidalLrcStore } from "../providers/store";
 import { LyricsContextMenu } from "./ctxMenu";
 import { LyricsModal } from "./modal";
 import { cl, NoteSvg, useLyrics } from "./util";

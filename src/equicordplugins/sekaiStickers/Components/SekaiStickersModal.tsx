@@ -8,10 +8,10 @@ import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
+import { characters } from "@equicordplugins/sekaiStickers/characters.json";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, ChannelStore, React, SelectedChannelStore, Slider, TextArea, UploadHandler } from "@webpack/common";
 
-import { characters } from "../characters.json";
 import Canvas from "./Canvas";
 import CharSelectModal from "./Picker";
 

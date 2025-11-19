@@ -18,11 +18,11 @@
 
 import { classNameFactory } from "@api/Styles";
 import { Heading } from "@components/Heading";
-import { copyWithToast } from "@utils/misc";
+import { DEFAULT_IMAGE_CACHE_DIR } from "@equicordplugins/messageLoggerEnhanced/utils/constants";
+import { copyWithToast } from "@utils/discord";
 import { Button, Toasts } from "@webpack/common";
 
 import { Native, settings } from "..";
-import { DEFAULT_IMAGE_CACHE_DIR } from "../utils/constants";
 
 const cl = classNameFactory("folder-upload");
 

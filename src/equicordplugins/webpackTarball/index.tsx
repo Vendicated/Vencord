@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
+import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading, HeadingPrimary } from "@components/Heading";
 import { Devs } from "@utils/constants";
@@ -13,7 +14,7 @@ import { makeLazy } from "@utils/lazy";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, wreq } from "@webpack";
-import { Button, Flex, Timestamp, useState } from "@webpack/common";
+import { Button, Timestamp, useState } from "@webpack/common";
 
 import TarFile from "./tar";
 import * as Webpack from "./webpack";
@@ -116,7 +117,7 @@ function TarModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                     <Heading>
                         Lazy chunks
                     </Heading>
-                    <Flex align={Flex.Align.CENTER}>
+                    <Flex alignItems="center">
                         <BaseText
                             size="md"
                             style={{ flexGrow: 1 }}

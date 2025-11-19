@@ -8,13 +8,14 @@ import "./tidalStyles.css";
 
 import { Settings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
+import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
+import { SeekBar } from "@equicordplugins/musicControls/spotify/SeekBar";
 import { debounce } from "@shared/debounce";
-import { openImageModal } from "@utils/discord";
-import { classes, copyWithToast } from "@utils/misc";
-import { ContextMenuApi, Flex, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { copyWithToast, openImageModal } from "@utils/discord";
+import { classes } from "@utils/misc";
+import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
-import { SeekBar } from "../spotify/SeekBar";
 import { type PlayerState, type Repeat, TidalStore } from "./TidalStore";
 
 const cl = (className: string) => `eq-tdl-${className}`;
