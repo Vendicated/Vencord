@@ -5,11 +5,11 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ActivityTooltip } from "@equicordplugins\betterActivities/components/ActivityTooltip";
-import { TwitchIcon } from "@equicordplugins\betterActivities/components/TwitchIcon";
-import { settings } from "@equicordplugins\betterActivities/settings";
-import { ActivityListIcon, ActivityListProps, ApplicationIcon, IconCSSProperties } from "@equicordplugins\betterActivities/types";
-import { cl, getApplicationIcons } from "@equicordplugins\betterActivities/utils";
+import { ActivityTooltip } from "@equicordplugins/betterActivities/components/ActivityTooltip";
+import { TwitchIcon } from "@equicordplugins/betterActivities/components/TwitchIcon";
+import { settings } from "@equicordplugins/betterActivities/settings";
+import { ActivityListIcon, ActivityListProps, ApplicationIcon, IconCSSProperties } from "@equicordplugins/betterActivities/types";
+import { cl, getApplicationIcons } from "@equicordplugins/betterActivities/utils";
 import { findComponentByCodeLazy } from "@webpack";
 import { React, Tooltip } from "@webpack/common";
 import { JSX } from "react";

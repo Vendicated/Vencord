@@ -5,10 +5,10 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { CarouselControls } from "@equicordplugins\betterActivities/components/CarouselControls";
-import { settings } from "@equicordplugins\betterActivities/settings";
-import { AllActivitiesProps } from "@equicordplugins\betterActivities/types";
-import { ActivityView, getActivityApplication } from "@equicordplugins\betterActivities/utils";
+import { CarouselControls } from "@equicordplugins/betterActivities/components/CarouselControls";
+import { settings } from "@equicordplugins/betterActivities/settings";
+import { AllActivitiesProps } from "@equicordplugins/betterActivities/types";
+import { ActivityView, getActivityApplication } from "@equicordplugins/betterActivities/utils";
 import { Activity } from "@vencord/discord-types";
 import { PresenceStore, React, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { JSX } from "react";

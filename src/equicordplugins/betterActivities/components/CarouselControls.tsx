@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CarouselControlsProps } from "@equicordplugins\betterActivities/types";
-import { cl } from "@equicordplugins\betterActivities/utils";
+import { CarouselControlsProps } from "@equicordplugins/betterActivities/types";
+import { cl } from "@equicordplugins/betterActivities/utils";
 import { React, Tooltip } from "@webpack/common";
 
 import { Caret } from "./Caret";

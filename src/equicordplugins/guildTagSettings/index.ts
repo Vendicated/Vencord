@@ -20,9 +20,10 @@ import "@equicordplugins/_misc/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
-import clanBadges from "@equicordplugins/_misc/clanBadges.css?managed";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+
+import clanBadges from "./styles.css?managed";
 
 const settings = definePluginSettings({
     hideTags: {
