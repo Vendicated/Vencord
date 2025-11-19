@@ -14,7 +14,7 @@
             "esnext.symbol"
         ],
         "module": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "strict": true,
         "noImplicitAny": false,
         "target": "ESNEXT",
