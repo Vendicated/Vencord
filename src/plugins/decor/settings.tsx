@@ -13,13 +13,14 @@ import { closeAllModals } from "@utils/modal";
 import { OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
+import DecorPlugin from ".";
 import DecorSection from "./ui/components/DecorSection";
 
 export const settings = definePluginSettings({
     changeDecoration: {
         type: OptionType.COMPONENT,
         component() {
-            if (!Vencord.Plugins.plugins.Decor.started) return <Paragraph>
+            if (!DecorPlugin.started) return <Paragraph>
                 Enable Decor and restart your client to change your avatar decoration.
             </Paragraph>;
 

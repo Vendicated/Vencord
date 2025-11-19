@@ -19,10 +19,11 @@
 import "./SpecialCard.css";
 
 import { classNameFactory } from "@api/Styles";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
-import { Card, Clickable, React } from "@webpack/common";
+import { Clickable } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-special-");

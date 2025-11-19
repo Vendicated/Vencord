@@ -71,7 +71,7 @@
 .vc-cloud-settings-sync-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 1em;
+    gap: 1em;
 }
 
 .vc-cloud-erase-data-danger-btn {

@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChannelStore, GuildMemberStore, Toasts } from "@webpack/common";
+import { ChannelStore, GuildMemberStore } from "@webpack/common";
 
-import { copyToClipboard } from "./clipboard";
 import { EQUICORD_HELPERS, EquicordDevsById, GUILD_ID, SUPPORT_CHANNEL_ID, VencordDevsById } from "./constants";
 
 /**
@@ -34,15 +33,6 @@ export function classes(...classes: Array<string | null | undefined | false>) {
  */
 export function sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
-}
-
-export async function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    await copyToClipboard(text);
-    Toasts.show({
-        message: toastMessage,
-        id: Toasts.genId(),
-        type: Toasts.Type.SUCCESS
-    });
 }
 
 /**
@@ -86,10 +76,6 @@ export const checkIntersecting = (el: Element) => {
 export function identity<T>(value: T): T {
     return value;
 }
-
-// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
-// "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
-export const isMobile = navigator.userAgent.includes("Mobi");
 
 export const isPluginDev = (id: string) => Object.hasOwn(VencordDevsById, id);
 export const shouldShowContributorBadge = (id: string) => isPluginDev(id) && VencordDevsById[id].badge !== false;

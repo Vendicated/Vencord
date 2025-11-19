@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./style.css";
+import "./styles.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
+import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { migratePluginSettings, Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -34,8 +35,8 @@ function VencordPopout(onClose: () => void) {
 
     const pluginEntries = [] as ReactNode[];
 
-    for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolboxActions && Vencord.Plugins.isPluginEnabled(plugin.name)) {
+    for (const plugin of Object.values(plugins)) {
+        if (plugin.toolboxActions && isPluginEnabled(plugin.name)) {
             pluginEntries.push(
                 <Menu.MenuGroup
                     label={plugin.name}
