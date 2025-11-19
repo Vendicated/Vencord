@@ -22,6 +22,7 @@ import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
@@ -32,7 +33,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { Alerts, Button, Card, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Alerts, Button, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
@@ -44,7 +45,7 @@ export const logger = new Logger("PluginSettings", "#a6d189");
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
-        <Card className={classes(cl("info-card"), required && "vc-warning-card")}>
+        <Card variant={required ? "warning" : "normal"} className={cl("info-card")}>
             {required
                 ? (
                     <>
