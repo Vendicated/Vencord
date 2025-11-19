@@ -13,7 +13,7 @@ import { settings } from "@equicordplugins/messageLoggerEnhanced/index";
 import { LoggedMessage, LoggedMessageJSON } from "@equicordplugins/messageLoggerEnhanced/types";
 import { messageJsonToMessageClass } from "@equicordplugins/messageLoggerEnhanced/utils";
 import { importLogs } from "@equicordplugins/messageLoggerEnhanced/utils/settingsUtils";
-import { openUserProfile } from "@utils/discord";
+import { copyWithToast, openUserProfile } from "@utils/discord";
 import { closeAllModals, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
 import { User } from "@vencord/discord-types";
