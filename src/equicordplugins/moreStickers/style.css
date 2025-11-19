@@ -202,8 +202,8 @@
     position: relative;
     box-sizing: border-box;
     min-height: 0;
-    -webkit-box-flex: 1;
     flex: 1 1 auto;
+    flex-grow: 1;
 }
 
 .vc-more-stickers-picker-content-list-items {
@@ -215,7 +215,6 @@
 .vc-more-stickers-picker-content-header-wrapper {
     position: sticky;
     top: 0;
-    -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
     background-color: var(--background-secondary);
@@ -229,10 +228,8 @@
 .vc-more-stickers-picker-content-header-header {
     color: var(--header-secondary);
     display: flex;
-    -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-    -webkit-box-pack: start;
     -ms-flex-pack: start;
     justify-content: flex-start;
     font-size: 12px;
@@ -254,14 +251,12 @@
 .vc-more-stickers-picker-content-header-guild-icon,
 .vc-more-stickers-picker-content-inspector-graphic-secondary img {
     text-indent: -9999px;
-    -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
     background-color: var(--background-primary);
     color: var(--text-default);
     display: flex;
     height: 100%;
-    -webkit-box-pack: center;
     -ms-flex-pack: center;
     justify-content: center;
     width: 100%;
@@ -301,7 +296,6 @@
 }
 
 .vc-more-stickers-picker-content-row-grid-hidden-visually {
-    clip: rect(0 0 0 0);
     clip-path: inset(50%);
     height: 1px;
     overflow: hidden;

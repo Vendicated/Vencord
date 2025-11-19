@@ -7,7 +7,7 @@
 .vc-github-repos-list {
     display: grid;
     grid-template-columns: 260px 260px;
-    grid-gap: 16px;
+    gap: 16px;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
