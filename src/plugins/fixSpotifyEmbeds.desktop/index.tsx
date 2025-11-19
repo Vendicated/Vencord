@@ -7,7 +7,6 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { Menu } from "@webpack/common";
 
 const settings = definePluginSettings({
     volume: {
@@ -25,23 +24,4 @@ export default definePlugin({
     description: "Fixes spotify embeds being incredibly loud by letting you customise the volume",
     authors: [Devs.Ven],
     settings,
-
-    toolboxActions() {
-        return (
-            <Menu.MenuControlItem
-                id="fix-spotify-embeds-settings"
-                label="Embed Volume"
-                control={(props, ref) => (
-                    <Menu.MenuSliderControl
-                        ref={ref}
-                        {...props}
-                        minValue={0}
-                        maxValue={100}
-                        value={settings.store.volume}
-                        onChange={v => settings.store.volume = v}
-                    />
-                )}
-            />
-        );
-    }
 });
