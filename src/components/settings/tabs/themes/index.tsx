@@ -81,8 +81,6 @@ function UserscriptThemesTab() {
     );
 }
 
-const Tab = IS_USERSCRIPT
+export default IS_USERSCRIPT
     ? wrapTab(UserscriptThemesTab, "Themes")
     : wrapTab(ThemesTab, "Themes");
-
-export default Tab;
