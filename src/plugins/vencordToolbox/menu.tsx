@@ -273,8 +273,10 @@ function buildCustomPluginEntries() {
 
     // If there aren't too many entries, just put them all in the main menu.
     // Otherwise, add submenus for each plugin
-    if (pluginEntries.length <= 5)
-        return pluginEntries.map(e => e.node);
+    // Commented out for now because the Slider component has broken styles that overlap with higher context menus
+    // https://discord.com/channels/1015060230222131221/1015063227299811479/1440489344631705693
+    // if (pluginEntries.length <= 5)
+    //     return pluginEntries.map(e => e.node);
 
     const submenuEntries = pluginEntries.map(({ node, plugin }) => (
         <Menu.MenuItem
