@@ -45,7 +45,7 @@ function Updater() {
 
     return (
         <SettingsTab title="Vencord Updater">
-            <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.bottom16}>Updater Settings</Forms.FormTitle>
 
             <FormSwitch
                 title="Automatically update"

@@ -22,20 +22,22 @@ import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
+import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { Alerts, Button, Card, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Alerts, Button, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import Plugins, { ExcludedPlugins } from "~plugins";
+import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
 
@@ -44,7 +46,7 @@ export const logger = new Logger("PluginSettings", "#a6d189");
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
-        <Card className={classes(cl("info-card"), required && "vc-warning-card")}>
+        <Card variant={required ? "warning" : "normal"} className={cl("info-card")}>
             {required
                 ? (
                     <>
@@ -72,12 +74,16 @@ const enum SearchStatus {
     ALL,
     ENABLED,
     DISABLED,
-    NEW
+    NEW,
+    USER_PLUGINS,
+    API_PLUGINS
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
-    const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
-        .filter(([name]) => name.toLowerCase().includes(search));
+    const matchingExcludedPlugins = search
+        ? Object.entries(ExcludedPlugins)
+            .filter(([name]) => name.toLowerCase().includes(search))
+        : [];
 
     const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
         desktop: "Discord Desktop app or Vesktop",
@@ -150,6 +156,8 @@ function PluginSettings() {
         []
     );
 
+    const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
+
     const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.ALL });
 
     const search = searchValue.value.toLowerCase();
@@ -169,6 +177,12 @@ function PluginSettings() {
                 break;
             case SearchStatus.NEW:
                 if (!newPlugins?.includes(plugin.name)) return false;
+                break;
+            case SearchStatus.USER_PLUGINS:
+                if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                break;
+            case SearchStatus.API_PLUGINS:
+                if (!plugin.name.endsWith("API")) return false;
                 break;
         }
 
@@ -201,7 +215,7 @@ function PluginSettings() {
     const plugins = [] as JSX.Element[];
     const requiredPlugins = [] as JSX.Element[];
 
-    const showApi = searchValue.value.includes("API");
+    const showApi = searchValue.status === SearchStatus.API_PLUGINS;
     for (const p of sortedPlugins) {
         if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
             continue;
@@ -261,8 +275,10 @@ function PluginSettings() {
                                 { label: "Show All", value: SearchStatus.ALL, default: true },
                                 { label: "Show Enabled", value: SearchStatus.ENABLED },
                                 { label: "Show Disabled", value: SearchStatus.DISABLED },
-                                { label: "Show New", value: SearchStatus.NEW }
-                            ]}
+                                { label: "Show New", value: SearchStatus.NEW },
+                                hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
+                                { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
+                            ].filter(isTruthy)}
                             serialize={String}
                             select={onStatusChange}
                             isSelected={v => v === searchValue.status}

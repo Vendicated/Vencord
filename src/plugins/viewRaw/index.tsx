@@ -84,7 +84,7 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
                     </div>
                 </ModalContent >
                 <ModalFooter>
-                    <Flex cellSpacing={10}>
+                    <Flex>
                         <Button onClick={() => copyWithToast(json, `${type} data copied to clipboard!`)}>
                             Copy {type} JSON
                         </Button>
