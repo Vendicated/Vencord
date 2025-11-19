@@ -19,6 +19,7 @@
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Card } from "@components/Card";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
@@ -31,7 +32,7 @@ import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -226,7 +227,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     )}
 
                 {isUnsupportedFormat && (
-                    <Card className={`vc-warning-card ${Margins.top16}`}>
+                    <Card variant="warning" className={Margins.top16} defaultPadding>
                         <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
 
                         <Forms.FormText className={Margins.top8}>

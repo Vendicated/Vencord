@@ -15,24 +15,6 @@
     flex-direction: row;
 }
 
-.vc-settings-card {
-    padding: 1em;
-    margin-bottom: 1em;
-}
-
-.vc-warning-card {
-    padding: 1em;
-    background: var(--info-warning-background);
-    border: 1px solid var(--info-warning-foreground);
-    color: var(--info-warning-foreground);
-}
-
-.vc-backup-restore-card {
-    background-color: var(--info-warning-background);
-    border-color: var(--info-warning-foreground);
-    color: var(--info-warning-foreground);
-}
-
 .vc-settings-theme-links {
     /* Needed to fix bad themes that hide certain textarea elements for whatever eldritch reason */
     display: inline-block !important;
