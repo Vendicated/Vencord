@@ -49,7 +49,7 @@ function loadImage(source: File | string) {
                 URL.revokeObjectURL(url);
             resolve(img);
         };
-        img.onerror = (event, _source, _lineno, _colno, err) => reject(err || event);
+        img.onerror = (_event) => reject(Error(`An error occurred while loading ${url}. Check the console for more info.`));
         img.crossOrigin = "Anonymous";
         img.src = url;
     });
