@@ -36,7 +36,7 @@ export default tseslint.config(
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
             "simple-import-sort": simpleImportSort,
-            "unused-imports": unusedImports,
+            "unused-imports": unusedImports
         },
         settings: {
             "import/resolver": {
