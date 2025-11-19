@@ -37,11 +37,11 @@ export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
 export function wrapTab(component: ComponentType<any>, tab: string) {
     const wrapped = ErrorBoundary.wrap(component, {
+        displayName: `${tab}SettingsTab`,
         message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
         onError: handleSettingsTabError,
     });
 
-    wrapped.displayName = `${tab}SettingsTab`;
     return wrapped;
 }
 
