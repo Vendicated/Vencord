@@ -315,7 +315,7 @@ export const initPluginManager = onlyOnce(function init() {
 
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton", "renderNicknameIcon"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -347,10 +347,10 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
         if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
         if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
-        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
         if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
         if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
+        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
 
         for (const key of pluginKeysToBind) {
