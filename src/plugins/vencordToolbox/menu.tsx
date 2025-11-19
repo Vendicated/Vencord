@@ -18,6 +18,10 @@ import { settings } from ".";
 
 function buildPluginMenu() {
     const { showPluginMenu } = settings.use(["showPluginMenu"]);
+
+    // has to be here due to hooks
+    const pluginEntries = buildPluginMenuEntries();
+
     if (!showPluginMenu) return null;
 
     return (
@@ -26,7 +30,7 @@ function buildPluginMenu() {
             label="Plugins"
             action={() => openSettingsTabModal(PluginsTab)}
         >
-            {buildPluginMenuEntries()}
+            {pluginEntries}
         </Menu.MenuItem>
     );
 }
