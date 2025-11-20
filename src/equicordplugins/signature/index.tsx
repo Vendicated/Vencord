@@ -24,11 +24,8 @@ const settings = definePluginSettings(
         },
         textHeader: {
             description: "What header to preface text with",
-            type: OptionType.SELECT,
-            options: [
-                { label: ">", value: ">", default: true },
-                { label: "-#", value: "-#" }
-            ]
+            type: OptionType.STRING,
+            default: ">",
         },
         showIcon: {
             type: OptionType.BOOLEAN,
@@ -148,7 +145,7 @@ export default definePlugin({
 
 // text processing injection processor
 function textProcessing(input: string) {
-    return `${input}\n${settings.store.textHeader} ${settings.store.name}`;
+    return `${input}\n${settings.store.textHeader ? settings.store.textHeader + " " : ""}${settings.store.name}`;
 }
 
 
