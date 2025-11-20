@@ -1,26 +1,13 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 OpenAsar
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { VoiceState } from "@vencord/discord-types";
-import { ChannelStore, FluxDispatcher, GuildMemberStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildMemberStore, StreamerModeStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
 
 interface ChannelState {
     userId: string;
@@ -39,6 +26,12 @@ const settings = definePluginSettings({
         description: "Port to connect to",
         default: 6888,
         restartNeeded: true
+    },
+    isKeybindEnabled: {
+        type: OptionType.BOOLEAN,
+        description: "Enable/disable the global keybind (Ctrl + `)",
+        default: true,
+        restartNeeded: true,
     },
     messageAlignment: {
         type: OptionType.SELECT,
@@ -81,28 +74,26 @@ const settings = definePluginSettings({
 let ws: WebSocket | null = null;
 let currentChannel: string | null = null;
 
-async function waitForPopulate(fn) {
+const waitForPopulate = async fn => {
     while (true) {
         const result = await fn();
         if (result) return result;
         await new Promise(r => setTimeout(r, 500));
     }
-}
+};
 
-function stateToPayload(guildId: string, state: VoiceState) {
-    const user = UserStore.getUser(state.userId);
-    const nickname = GuildMemberStore.getNick(guildId, state.userId);
-    return {
-        userId: state.userId,
-        username: nickname || (user as any).globalName || user.username,
-        avatarUrl: user.avatar,
-        channelId: state.channelId,
-        deaf: state.deaf || state.selfDeaf,
-        mute: state.mute || state.selfMute,
-        streaming: state.selfStream,
-        speaking: false,
-    };
-}
+const stateToPayload = (guildId: string, state: ChannelState) => ({
+    userId: state.userId,
+    username:
+        GuildMemberStore.getNick(guildId, state.userId) ||
+        UserStore.getUser(state.userId)?.globalName,
+    avatarUrl: UserStore.getUser(state.userId)?.avatar,
+    channelId: state.channelId,
+    deaf: state.deaf || state.selfDeaf,
+    mute: state.mute || state.selfMute,
+    streaming: state.selfStream,
+    speaking: false,
+});
 
 const incoming = payload => {
     switch (payload.cmd) {
@@ -140,13 +131,115 @@ const incoming = payload => {
                 streamKey: `guild:${channel.guild_id}:${voiceState.channelId}:${userId}`,
                 appContext: "APP"
             });
+
+            break;
+        }
+        case "NAVIGATE": {
+            if (!payload.guild_id || !payload.channel_id || !payload.message_id) break;
+
+            const { guild_id, channel_id, message_id } = payload;
+            FluxDispatcher.dispatch({
+                type: "CHANNEL_SELECT",
+                guildId: String(guild_id),
+                channelId: String(channel_id),
+                messageId: String(message_id),
+            });
+
+            break;
         }
     }
 };
 
+const handleSpeaking = dispatch => {
+    ws?.send(
+        JSON.stringify({
+            cmd: "VOICE_STATE_UPDATE",
+            state: {
+                userId: dispatch.userId,
+                speaking: dispatch.speakingFlags === 1,
+            },
+        })
+    );
+};
+
+const handleMessageNotification = dispatch => {
+    ws?.send(
+        JSON.stringify({
+            cmd: "MESSAGE_NOTIFICATION",
+            message: {
+                title: dispatch.title,
+                body: dispatch.body,
+                icon: dispatch.icon,
+                guildId: dispatch.message.guild_id,
+                channelId: dispatch.message.channel_id,
+                messageId: dispatch.message.id,
+            }
+        })
+    );
+};
+
+const handleVoiceStateUpdates = async dispatch => {
+    const { id } = UserStore.getCurrentUser();
+
+    for (const state of dispatch.voiceStates) {
+        const ourState = state.userId === id;
+        const { guildId } = state;
+
+        if (ourState) {
+            if (state.channelId && state.channelId !== currentChannel) {
+                const voiceStates = await waitForPopulate(() =>
+                    VoiceStateStore?.getVoiceStatesForChannel(state.channelId)
+                );
+
+                ws?.send(
+                    JSON.stringify({
+                        cmd: "CHANNEL_JOINED",
+                        states: Object.values(voiceStates).map(s => stateToPayload(guildId, s as ChannelState)),
+                    })
+                );
+
+                currentChannel = state.channelId;
+
+                break;
+            } else if (!state.channelId) {
+                ws?.send(
+                    JSON.stringify({
+                        cmd: "CHANNEL_LEFT",
+                    })
+                );
+
+                currentChannel = null;
+
+                break;
+            }
+        }
+
+        if (
+            !!currentChannel &&
+            (state.channelId === currentChannel ||
+                state.oldChannelId === currentChannel)
+        ) {
+            ws?.send(
+                JSON.stringify({
+                    cmd: "VOICE_STATE_UPDATE",
+                    state: stateToPayload(guildId, state as ChannelState),
+                })
+            );
+        }
+    }
+};
+
+const handleStreamerMode = dispatch => {
+    ws?.send(
+        JSON.stringify({
+            cmd: "STREAMER_MODE",
+            enabled: dispatch.value,
+        })
+    );
+};
+
 const createWebsocket = () => {
     console.log("Attempting to connect to Orbolay server");
-
     if (ws?.close) ws.close();
 
     setTimeout(() => {
@@ -186,10 +279,10 @@ const createWebsocket = () => {
         };
 
         config.userId = await waitForPopulate(() => UserStore.getCurrentUser().id);
+        if (!config.userId) return;
 
         ws?.send(JSON.stringify({ cmd: "REGISTER_CONFIG", ...config }));
 
-        if (!config.userId) return;
         const userVoiceState = VoiceStateStore.getVoiceStateForUser(config.userId);
         if (!userVoiceState || !userVoiceState.channelId) return;
 
@@ -198,13 +291,19 @@ const createWebsocket = () => {
 
         const guildId = channel.guild_id;
         const channelState = VoiceStateStore.getVoiceStatesForChannel(userVoiceState.channelId);
-
         if (!guildId || !channelState) return;
 
         ws?.send(
             JSON.stringify({
                 cmd: "CHANNEL_JOINED",
-                states: Object.values(channelState).map(s => stateToPayload(guildId, s)),
+                states: Object.values(channelState).map(s => stateToPayload(guildId, s as ChannelState)),
+            })
+        );
+
+        ws?.send(
+            JSON.stringify({
+                cmd: "STREAMER_MODE",
+                enabled: StreamerModeStore.enabled,
             })
         );
 
@@ -218,74 +317,18 @@ export default definePlugin({
     authors: [EquicordDevs.SpikeHD],
     settings,
     flux: {
-        SPEAKING({ userId, speakingFlags }) {
-            ws?.send(
-                JSON.stringify({
-                    cmd: "VOICE_STATE_UPDATE",
-                    state: {
-                        userId: userId,
-                        speaking: speakingFlags === 1,
-                    },
-                })
-            );
-        },
-        async VOICE_STATE_UPDATES({ voiceStates }) {
-            const { id } = UserStore.getCurrentUser();
-
-            for (const state of voiceStates) {
-                const ourState = state.userId === id;
-                const { guildId } = state;
-
-                if (ourState) {
-                    if (state.channelId && state.channelId !== currentChannel) {
-                        const voiceStates = await waitForPopulate(() => VoiceStateStore.getVoiceStatesForChannel(state.channelId));
-
-                        ws?.send(
-                            JSON.stringify({
-                                cmd: "CHANNEL_JOINED",
-                                states: Object.values(voiceStates).map(s => stateToPayload(guildId, s as VoiceState)),
-                            })
-                        );
-
-                        currentChannel = state.channelId;
-                        break;
-                    } else if (!state.channelId) {
-                        ws?.send(
-                            JSON.stringify({
-                                cmd: "CHANNEL_LEFT",
-                            })
-                        );
-
-                        currentChannel = null;
-                        break;
-                    }
-                }
-
-                if (!!currentChannel && (state.channelId === currentChannel || state.oldChannelId === currentChannel)) {
-                    ws?.send(
-                        JSON.stringify({
-                            cmd: "VOICE_STATE_UPDATE",
-                            state: stateToPayload(guildId, state),
-                        })
-                    );
-                }
-            }
-        },
-        RPC_NOTIFICATION_CREATE({ title, body, icon, channelId }) {
-            ws?.send(
-                JSON.stringify({
-                    cmd: "MESSAGE_NOTIFICATION",
-                    message: {
-                        title: title,
-                        body: body,
-                        icon: icon,
-                        channelId: channelId,
-                    }
-                })
-            );
-        }
+        SPEAKING: handleSpeaking,
+        VOICE_STATE_UPDATES: handleVoiceStateUpdates,
+        RPC_NOTIFICATION_CREATE: handleMessageNotification,
+        STREAMER_MODE: handleStreamerMode,
     },
+
     start() {
         createWebsocket();
+    },
+
+    stop() {
+        ws?.close?.();
+        ws = null;
     }
 });
