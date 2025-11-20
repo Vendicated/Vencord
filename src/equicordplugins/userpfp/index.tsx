@@ -11,7 +11,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 
 let data = { avatars: {} as Record<string, string> };
-const API_URL = "https://userpfp.github.io/UserPFP/source/data.json";
 const settings = definePluginSettings({
     preferNitro: {
         description: "Which avatar to use if both default animated (Nitro) pfp and UserPFP avatars are present",
@@ -20,6 +19,15 @@ const settings = definePluginSettings({
             { label: "UserPFP", value: false },
             { label: "Nitro", value: true, default: true },
         ],
+    },
+    dbSource: {
+        description: "URL to load database from",
+        type: OptionType.STRING,
+        default: "https://userpfp.github.io/UserPFP/source/data.json",
+        onChange: (e => {
+            if (!e) return settings.store.dbSource = "https://userpfp.github.io/UserPFP/source/data.json";
+            return e;
+        })
     }
 });
 
@@ -64,7 +72,7 @@ export default definePlugin({
         return res.toString();
     },
     async start() {
-        await fetch(API_URL)
+        await fetch(settings.store.dbSource)
             .then(async res => {
                 if (res.ok) this.data = data = await res.json();
             })
