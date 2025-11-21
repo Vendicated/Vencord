@@ -100,8 +100,8 @@ export const settings = definePluginSettings({
         description: "Background opacity",
         markers: [0, 20, 40, 60, 80, 100],
         default: 100,
+        stickToMarkers: false,
         componentProps: {
-            stickToMarkers: false,
             onValueRender: null, // Defaults to percentage
         },
     },
