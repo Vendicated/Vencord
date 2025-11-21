@@ -62,7 +62,7 @@ function Section(props: {
             <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20)}>{description}</Paragraph>
 
             <div className={cl("switches")}>
-                {buttonMap.entries().map(([name, { icon }]) => {
+                {Array.from(buttonMap, ([name, { icon }]) => {
                     const Icon = icon ?? PlaceholderIcon;
                     return (
                         <Paragraph size="md" weight="semibold" key={name} className={cl("switches-row")}>

@@ -69,7 +69,7 @@ function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePo
 
     const { messagePopoverButtons } = useSettings(["uiElements.messagePopoverButtons.*"]).uiElements;
 
-    const elements = MessagePopoverButtonMap.entries()
+    const elements = Array.from(MessagePopoverButtonMap.entries())
         .filter(([key]) => messagePopoverButtons[key]?.enabled !== false)
         .map(([key, { render }]) => {
             try {
@@ -84,6 +84,7 @@ function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePo
                 );
             } catch (err) {
                 logger.error(`[${key}]`, err);
+                return null;
             }
         });
 

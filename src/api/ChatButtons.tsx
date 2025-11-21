@@ -100,7 +100,7 @@ function VencordChatBarButtons(props: ChatBarProps) {
 
     return (
         <>
-            {ChatBarButtonMap.entries()
+            {Array.from(ChatBarButtonMap)
                 .filter(([key]) => chatBarButtons[key]?.enabled !== false)
                 .map(([key, { render: Button }]) => (
                     <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
@@ -134,6 +134,7 @@ export interface ChatBarButtonProps {
     onAuxClick?: MouseEventHandler;
     buttonProps?: Omit<HTMLProps<HTMLDivElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
 }
+
 export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
         <Tooltip text={props.tooltip}>
@@ -173,7 +174,7 @@ addContextMenuPatch("textarea-context", (children, args) => {
 
     group.splice(idx, 0,
         <Menu.MenuItem id="vc-chat-buttons" key="vencord-chat-buttons" label="Vencord Buttons">
-            {buttons.map(([id, { icon: Icon }]) => (
+            {buttons.map(([id]) => (
                 <Menu.MenuCheckboxItem
                     label={id}
                     key={id}
