@@ -137,11 +137,17 @@ function ChannelTabContent(props: ChannelTabsProps & {
         showStatusIndicators
     } = settings.use(["noPomeloNames", "showStatusIndicators"]);
 
-    const [isTyping] = useStateFromStores(
-        [TypingStore],
-        () => [
-            !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length)
-        ]
+    const [isTyping, status, isMobile] = useStateFromStores(
+        [TypingStore, PresenceStore],
+        () => {
+            const recipientId = recipients?.[0] ?? "";
+
+            return [
+                !!((Object.keys(TypingStore.getTypingUsers(props.channelId)) as string[]).filter(id => id !== userId).length),
+                PresenceStore.getStatus(recipientId),
+                PresenceStore.isMobileOnline(recipientId)
+            ];
+        }
     );
 
     if (guild) {
@@ -182,17 +188,6 @@ function ChannelTabContent(props: ChannelTabsProps & {
             );
         }
     }
-
-    if (!recipients) return null;
-
-    const [status, isMobile] = useStateFromStores(
-        [PresenceStore],
-        () => [
-            PresenceStore.getStatus(recipients[0]) as string,
-            PresenceStore.isMobileOnline(recipients[0]) as boolean
-        ]
-    );
-
 
     if (channel && recipients?.length) {
         if (recipients.length === 1) {
