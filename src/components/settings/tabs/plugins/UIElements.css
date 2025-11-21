@@ -1,11 +1,7 @@
 .vc-plugin-ui-elements-button {
     display: flex;
     align-items: center;
-    background-color: var(--card-primary-bg);
     color: var(--interactive-normal);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    padding: 1em;
     margin-top: 0.5em;
     cursor: pointer;
 

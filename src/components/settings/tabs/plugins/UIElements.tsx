@@ -10,38 +10,40 @@ import { ChatBarButtonMap } from "@api/ChatButtons";
 import { MessagePopoverButtonMap } from "@api/MessagePopover";
 import { SettingsPluginUiElements, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
+import { Card } from "@components/Card";
 import { PlaceholderIcon } from "@components/Icons";
+import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Clickable, Text } from "@webpack/common";
+import { Clickable } from "@webpack/common";
 
 
 const cl = classNameFactory("vc-plugin-ui-elements-");
 
 export function UIElementsButton() {
     return (
-        <Clickable
-            className={cl("button")}
-            onClick={() => openModal(modalProps => <UIElementsModal {...modalProps} />)}
-        >
-            <div className={cl("button-description")}>
-                <Text variant="text-md/semibold">
-                    Manage plugin UI elements
-                </Text>
-                <Text variant="text-xs/normal">
-                    Allows you to hide buttons you don't like
-                </Text>
-            </div>
-            <svg
-                className={cl("button-arrow")}
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-            >
-                <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z" />
-            </svg>
+        <Clickable onClick={() => openModal(modalProps => <UIElementsModal {...modalProps} />)}>
+            <Card className={cl("button")} defaultPadding>
+                <div className={cl("button-description")}>
+                    <Paragraph size="md" weight="semibold">
+                        Manage plugin UI elements
+                    </Paragraph>
+                    <Paragraph size="xs">
+                        Allows you to hide buttons you don't like
+                    </Paragraph>
+                </div>
+                <svg
+                    className={cl("button-arrow")}
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                >
+                    <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z" />
+                </svg>
+            </Card>
         </Clickable >
     );
 }
@@ -56,14 +58,14 @@ function Section(props: {
 
     return (
         <section>
-            <Text tag="h3" variant="heading-xl/bold">{title}</Text>
-            <Text variant="text-sm/normal" className={classes(Margins.top8, Margins.bottom20)}>{description}</Text>
+            <BaseText tag="h3" size="xl" weight="bold">{title}</BaseText>
+            <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20)}>{description}</Paragraph>
 
             <div className={cl("switches")}>
                 {buttonMap.entries().map(([name, { icon }]) => {
                     const Icon = icon ?? PlaceholderIcon;
                     return (
-                        <Text variant="text-md/semibold" key={name} className={cl("switches-row")}>
+                        <Paragraph size="md" weight="semibold" key={name} className={cl("switches-row")}>
                             <Icon height={20} width={20} />
                             {name}
                             <Switch
@@ -73,7 +75,7 @@ function Section(props: {
                                     settings[name].enabled = v;
                                 }}
                             />
-                        </Text>
+                        </Paragraph>
                     );
                 })}
             </div>
@@ -89,13 +91,13 @@ function UIElementsModal(props: ModalProps) {
             <ModalContent className={cl("modal-content")}>
                 <Section
                     title="Chatbar Buttons"
-                    description="These buttons appear in the chat input."
+                    description="These are the buttons on the right side of the chat input bar"
                     buttonMap={ChatBarButtonMap}
                     settings={uiElements.chatBarButtons}
                 />
                 <Section
                     title="Message Popover Buttons"
-                    description="These buttons appear when you hover over a message."
+                    description="These are the floating buttons on the right when you hover over a message"
                     buttonMap={MessagePopoverButtonMap}
                     settings={uiElements.messagePopoverButtons}
                 />
