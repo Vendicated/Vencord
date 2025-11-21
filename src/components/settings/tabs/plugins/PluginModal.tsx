@@ -69,7 +69,7 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
 }
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
-    const pluginSettings = useSettings().plugins[plugin.name];
+    const pluginSettings = useSettings([`plugins.${plugin.name}.*`]).plugins[plugin.name];
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
     const [authors, setAuthors] = useState<Partial<User>[]>([]);
