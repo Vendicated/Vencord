@@ -22,8 +22,8 @@ import { SHIKI_REPO, SHIKI_REPO_COMMIT } from "./themes";
 
 export const JSON_REPO = "thororen1234/shikijsons"; // temp i hope
 export const JSON_REPO_COMMIT = "f418661f27c3b6b23e5b92156fb77b3e221ef823";
-export const JSON_URL = `https://raw.githubusercontent.com/${JSON_REPO}/${JSON_REPO_COMMIT}/grammars.json`;
-export const shikiRepoGrammar = (name: string) => `https://raw.githubusercontent.com/${SHIKI_REPO}/${SHIKI_REPO_COMMIT}/packages/tm-grammars/grammars/${name}.json`;
+export const JSON_URL = `https://cdn.jsdelivr.net/gh/${JSON_REPO}@${JSON_REPO_COMMIT}/grammars.json`;
+export const shikiRepoGrammar = (name: string) => `https://cdn.jsdelivr.net/gh/${SHIKI_REPO}@${SHIKI_REPO_COMMIT}/packages/tm-grammars/grammars/${name}.json`;
 
 export interface Language {
     name: string;
