@@ -262,7 +262,7 @@ export class SettingsStore<T extends object> {
      * Setting.store.foo.baz = "hi"
      * ```
      */
-    public addPrefixChangeListener<P extends string>(prefix: string, cb: (data: ResolvePropDeep<T, P>, path: string) => void) {
+    public addPrefixChangeListener<P extends string>(prefix: P, cb: (data: ResolvePropDeep<T, P>, path: string) => void) {
         const listeners = this.prefixListeners.get(prefix) ?? new Set();
         listeners.add(cb);
         this.prefixListeners.set(prefix, listeners);
