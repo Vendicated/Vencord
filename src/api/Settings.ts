@@ -25,6 +25,18 @@ import { React, useEffect } from "@webpack/common";
 import plugins from "~plugins";
 
 const logger = new Logger("Settings");
+
+export interface SettingsPluginUiElement {
+    enabled: boolean;
+    // TODO
+    /** not implemented for now */
+    order?: number;
+}
+export type SettingsPluginUiElements = {
+    /** id will be whatever id the element was registered with. Usually, but not always, the plugin name */
+    [id: string]: SettingsPluginUiElement;
+};
+
 export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean,
@@ -59,6 +71,11 @@ export interface Settings {
         };
     };
 
+    uiElements: {
+        messagePopoverButtons: SettingsPluginUiElements;
+        chatBarButtons: SettingsPluginUiElements;
+    },
+
     notifications: {
         timeout: number;
         position: "top-right" | "bottom-right";
@@ -89,6 +106,11 @@ const DefaultSettings: Settings = {
     disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
+
+    uiElements: {
+        chatBarButtons: {},
+        messagePopoverButtons: {}
+    },
 
     notifications: {
         timeout: 5000,
