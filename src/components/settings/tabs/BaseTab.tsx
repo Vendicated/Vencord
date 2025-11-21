@@ -20,6 +20,7 @@ import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { Margins } from "@utils/margins";
+import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { onlyOnce } from "@utils/onlyOnce";
 import { t } from "@utils/translation";
 import type { ComponentType, PropsWithChildren } from "react";
@@ -36,8 +37,26 @@ export function SettingsTab({ title, children }: PropsWithChildren<{ title: stri
 export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
 export function wrapTab(component: ComponentType<any>, tab: string) {
-    return ErrorBoundary.wrap(component, {
+    const wrapped = ErrorBoundary.wrap(component, {
+        displayName: `${tab}SettingsTab`,
         message: t("vencord.failedToRender", { tab }),
         onError: handleSettingsTabError,
     });
+
+    return wrapped;
+}
+
+export function openSettingsTabModal(Tab: ComponentType<any>) {
+    try {
+        openModal(wrapTab((modalProps: ModalProps) => (
+            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
+                <ModalContent className="vc-settings-modal">
+                    <ModalCloseButton onClick={modalProps.onClose} className="vc-settings-modal-close" />
+                    <Tab />
+                </ModalContent>
+            </ModalRoot>
+        ), Tab.displayName || "Settings Tab"));
+    } catch {
+        handleSettingsTabError();
+    }
 }

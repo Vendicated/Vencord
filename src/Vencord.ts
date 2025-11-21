@@ -29,7 +29,7 @@ export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
 import { addVencordUiStyles } from "@components/css";
-import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { IS_WINDOWS } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
@@ -105,6 +105,8 @@ async function syncSettings() {
 let notifiedForUpdatesThisSession = false;
 
 async function runUpdateCheck() {
+    if (IS_UPDATER_DISABLED) return;
+
     const notify = (data: NotificationData) => {
         if (notifiedForUpdatesThisSession) return;
         notifiedForUpdatesThisSession = true;
@@ -135,7 +137,7 @@ async function runUpdateCheck() {
         notify({
             title: "A Vencord update is available!",
             body: "Click here to view the update",
-            onClick: openUpdaterModal!
+            onClick: () => openSettingsTabModal(UpdaterTab!)
         });
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
