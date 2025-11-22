@@ -25,11 +25,14 @@ import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, findComponentByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
 
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
+const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
+const RunningGameStore = findStoreLazy("RunningGameStore");
+const QuestsStore = findStoreLazy("QuestStore");
 
 let questIdCheck = 0;
 
@@ -48,11 +51,7 @@ function ToolBarHeader() {
     );
 }
 
-
 async function openCompleteQuestUI() {
-    const ApplicationStreamingStore = findByProps("getStreamerActiveStreamMetadata");
-    const RunningGameStore = findByProps("getRunningGames");
-    const QuestsStore = findByProps("getQuest");
     const quest = [...QuestsStore.quests.values()].find(x => x.id !== "1412491570820812933" && x.userStatus?.enrolledAt && !x.userStatus?.completedAt && new Date(x.config.expiresAt).getTime() > Date.now());
 
     if (!quest && !settings.store.disableNotifications) {
