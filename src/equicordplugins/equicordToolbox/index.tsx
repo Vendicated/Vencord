@@ -68,7 +68,7 @@ function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
                     ref={buttonRef}
                     className={`vc-toolbox-btn ${buttonClass}`}
                     onClick={() => setShow(v => !v)}
-                    tooltip={isShown ? null : "Vencord Toolbox"}
+                    tooltip={isShown ? null : "Equicord Toolbox"}
                     icon={() => <Icon />}
                     selected={isShown}
                 />

@@ -71,7 +71,7 @@ export function NewPluginsModal({ modalProps, newPlugins, newSettings }: { modal
 
         if (isRequired) {
             const tooltipText = p.required
-                ? "This plugin is required for Vencord to function."
+                ? "This plugin is required for Equicord to function."
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(
