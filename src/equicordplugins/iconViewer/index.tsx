@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import settings from "@plugins/_core/settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
@@ -26,7 +27,7 @@ export default definePlugin({
     settingsAboutComponent: SettingsAbout,
     start() {
         const customSettingsSections = (
-            Vencord.Plugins.plugins.Settings as any as {
+            settings as any as {
                 customSections: ((ID: Record<string, unknown>) => any)[];
             }
         ).customSections;
@@ -43,7 +44,7 @@ export default definePlugin({
     },
     stop() {
         const customSettingsSections = (
-            Vencord.Plugins.plugins.Settings as any as {
+            settings as any as {
                 customSections: ((ID: Record<string, unknown>) => any)[];
             }
         ).customSections;

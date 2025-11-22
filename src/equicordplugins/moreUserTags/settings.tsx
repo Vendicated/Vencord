@@ -13,12 +13,13 @@ import { Margins } from "@utils/margins";
 import { OptionType } from "@utils/types";
 import { Forms, TextInput, Tooltip } from "@webpack/common";
 
+import moreUserTags from ".";
 import { Tag, tags } from "./consts";
 import { TagSettings } from "./types";
 
 function SettingsComponent() {
     const tagSettings = (settings.store.tagSettings ??= {} as TagSettings);
-    const { localTags } = Vencord.Plugins.plugins.MoreUserTags as any;
+    const { localTags } = moreUserTags;
 
     tags.forEach(t => {
         if (!tagSettings[t.name]) {

@@ -6,6 +6,7 @@
 
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import usrbg from "@plugins/usrbg";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { IconUtils, UserStore } from "@webpack/common";
@@ -39,13 +40,12 @@ export default definePlugin({
         const avatarUrl = IconUtils.getUserAvatarURL(user, false, 1024);
 
         if (Settings.plugins.USRBG.enabled && Settings.plugins.USRBG.voiceBackground) {
-            const USRBG = (Vencord.Plugins.plugins.USRBG as unknown as iUSRBG);
-            if (USRBG.userHasBackground(participantUserId)) {
+            if (usrbg.userHasBackground(participantUserId)) {
                 document.querySelectorAll('[class*="background_"]').forEach(element => {
                     (element as HTMLElement).style.backgroundColor = "transparent";
                 });
                 return {
-                    backgroundImage: `url(${USRBG.getImageUrl(participantUserId)})`,
+                    backgroundImage: `url(${usrbg.getImageUrl(participantUserId)})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat",

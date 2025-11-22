@@ -9,6 +9,7 @@ import { fetchFile } from "@ffmpeg/util";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, UploadHandler } from "@webpack/common";
 
+import moreStickers from ".";
 import { FFmpegState, Sticker } from "./types";
 
 const PendingReplyStore = findByPropsLazy("getPendingReply");
@@ -107,7 +108,7 @@ export async function sendSticker({
 }: { channelId: string; sticker: Sticker; sendAsLink?: boolean; ctrlKey: boolean; shiftKey: boolean; ffmpegState?: FFmpegState; }) {
 
     let messageContent = "";
-    const { textEditor } = Vencord.Plugins.plugins.MoreStickers as any;
+    const { textEditor } = moreStickers;
     if (DraftStore) {
         messageContent = DraftStore.getDraft(channelId, 0);
     }
