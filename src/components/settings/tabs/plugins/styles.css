@@ -287,3 +287,15 @@
     margin-top: 2px;
     margin-right: 8px;
 }
+
+.vc-plugins-stats-container {
+    margin-top: 16px;
+    gap: 16px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.vc-plugins-ui-elements {
+    margin-top: 16px;
+}
