@@ -26,7 +26,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
-import { openUpdaterModal } from "@components/settings";
+import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { platformName } from "@equicordplugins/equicordHelper/utils";
 import { gitHashShort } from "@shared/vencordUserAgent";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_IDS, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
@@ -266,7 +266,7 @@ export default definePlugin({
                                 Please first update before asking for support!
                             </Paragraph>
                         </div>,
-                        onCancel: () => openUpdaterModal!(),
+                        onCancel: () => openSettingsTabModal(UpdaterTab!),
                         cancelText: "View Updates",
                         confirmText: "Update & Restart Now",
                         onConfirm: forceUpdate,

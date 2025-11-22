@@ -17,13 +17,13 @@
 */
 
 import type { ProfileBadge } from "@api/Badges";
-import type { ChatBarButtonFactory } from "@api/ChatButtons";
+import type { ChatBarButtonData, ChatBarButtonFactory } from "@api/ChatButtons";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import type { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import type { MessageAccessoryFactory } from "@api/MessageAccessories";
 import type { MessageDecorationFactory } from "@api/MessageDecorations";
 import type { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import type { MessagePopoverButtonFactory } from "@api/MessagePopover";
+import type { MessagePopoverButtonData, MessagePopoverButtonFactory } from "@api/MessagePopover";
 import type { NicknameIconFactory } from "@api/NicknameIcons";
 import type { Command, FluxEvents } from "@vencord/discord-types";
 import type { ReactNode } from "react";
@@ -96,6 +96,8 @@ export interface Plugin extends PluginDef {
     isDependency?: boolean;
 }
 
+export type IconComponent = (props: IconProps & Record<string, any>) => ReactNode;
+export type IconProps = { height?: number | string; width?: number | string; className?: string; };
 export interface PluginDef {
     name: string;
     description: string;
@@ -161,9 +163,16 @@ export interface PluginDef {
     contextMenus?: Record<string, NavContextMenuPatchCallback>;
     /**
      * Allows you to add custom actions to the Vencord Toolbox.
-     * The key will be used as text for the button
+     *
+     * Can either be an object mapping labels to action functions or a Function returning Menu components.
+     * Please note that you can only use Menu components.
+     *
+     * @example
+     * toolboxActions: {
+     *   "Click Me": () => alert("Hi")
+     * }
      */
-    toolboxActions?: Record<string, () => void>;
+    toolboxActions?: Record<string, () => void> | (() => ReactNode);
 
     tags?: string[];
 
@@ -175,18 +184,28 @@ export interface PluginDef {
     userProfileBadge?: ProfileBadge;
     userProfileBadges?: ProfileBadge[];
 
+    messagePopoverButton?: MessagePopoverButtonData;
+    chatBarButton?: ChatBarButtonData;
+
     onMessageClick?: MessageClickListener;
     onBeforeMessageSend?: MessageSendListener;
     onBeforeMessageEdit?: MessageEditListener;
 
-    renderMessagePopoverButton?: MessagePopoverButtonFactory;
     renderMessageAccessory?: MessageAccessoryFactory;
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
     renderNicknameIcon?: NicknameIconFactory;
 
+    // TODO: Remove eventually
+    /**
+     * @deprecated Use {@link chatBarButton} instead
+     */
     renderChatBarButton?: ChatBarButtonFactory;
+    /**
+     * @deprecated Use {@link messagePopoverButton} instead
+     */
+    renderMessagePopoverButton?: MessagePopoverButtonFactory;
 
     /**
      * A Vencord plugin that is modified for extra features in Equicord
@@ -421,3 +440,5 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
     ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
     : never;
 };
+
+export type AllOrNothing<T> = T | { [K in keyof T]?: never; };

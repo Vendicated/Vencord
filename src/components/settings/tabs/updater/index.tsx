@@ -24,10 +24,9 @@ import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
-import { handleSettingsTabError, SettingsTab, wrapTab } from "@components/settings";
+import { SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
@@ -224,21 +223,6 @@ function Updater() {
     );
 }
 
-export default IS_UPDATER_DISABLED ? null : wrapTab(Updater, "Updater");
-
-export const openUpdaterModal = IS_UPDATER_DISABLED ? null : function () {
-    const UpdaterTab = wrapTab(Updater, "Updater");
-
-    try {
-        openModal(wrapTab((modalProps: ModalProps) => (
-            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
-                <ModalContent className="vc-updater-modal">
-                    <ModalCloseButton onClick={modalProps.onClose} className="vc-updater-modal-close-button" />
-                    <UpdaterTab />
-                </ModalContent>
-            </ModalRoot>
-        ), "UpdaterModal"));
-    } catch {
-        handleSettingsTabError();
-    }
-};
+export default IS_UPDATER_DISABLED
+    ? null
+    : wrapTab(Updater, "Updater");

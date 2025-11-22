@@ -79,10 +79,10 @@
     background-color: var(--button-danger-background);
 }
 
-.vc-updater-modal {
+.vc-settings-modal {
     padding: 1.5em !important;
 }
 
-.vc-updater-modal-close-button {
+.vc-settings-modal-close {
     float: right;
 }

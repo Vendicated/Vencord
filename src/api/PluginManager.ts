@@ -187,7 +187,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton, renderNicknameIcon
     } = p;
 
     if (p.start) {
@@ -237,12 +237,16 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) addMessageClickListener(onMessageClick);
 
-    if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
+    if (chatBarButton) addChatBarButton(name, chatBarButton.render, chatBarButton.icon);
+    // @ts-expect-error: legacy code doesn't have icon
+    else if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
     if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
-    if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
+    if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
+    // @ts-expect-error: legacy code doesn't have icon
+    else if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -251,7 +255,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton, renderNicknameIcon
     } = p;
 
     if (p.stop) {
@@ -299,12 +303,12 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) removeMessageClickListener(onMessageClick);
 
-    if (renderChatBarButton) removeChatBarButton(name);
+    if (chatBarButton || renderChatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
     if (renderNicknameIcon) removeNicknameIcon(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
-    if (renderMessagePopoverButton) removeMessagePopoverButton(name);
+    if (messagePopoverButton || renderMessagePopoverButton) removeMessagePopoverButton(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -345,11 +349,11 @@ export const initPluginManager = onlyOnce(function init() {
 
         if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
         if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
-        if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
+        if (p.chatBarButton || p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
         if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
         if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
-        if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
+        if (p.messagePopoverButton || p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
         if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
 

@@ -43,6 +43,7 @@ import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 import { PluginCard } from "./PluginCard";
 import { openWarningModal } from "./PluginModal";
 import { StockPluginsCard, UserPluginsCard } from "./PluginStatCards";
+import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
@@ -371,13 +372,7 @@ export default function PluginSettings() {
 
             <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openWarningModal={openWarningModal} resetCheckAndDo={resetCheckAndDo} />
 
-            <div className={cl("stats-container")} style={{
-                marginTop: "16px",
-                gap: "16px",
-                display: "flex",
-                flexDirection: "row",
-                width: "100%"
-            }}>
+            <div className={cl("stats-container")}>
                 <StockPluginsCard
                     totalStockPlugins={totalStockPlugins}
                     enabledStockPlugins={enabledStockPlugins}
@@ -386,6 +381,10 @@ export default function PluginSettings() {
                     totalUserPlugins={totalUserPlugins}
                     enabledUserPlugins={enabledUserPlugins}
                 />
+            </div>
+
+            <div className={cl("ui-elements")}>
+                <UIElementsButton />
             </div>
 
             <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>
