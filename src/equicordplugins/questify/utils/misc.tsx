@@ -8,14 +8,14 @@ import { classNameFactory } from "@api/Styles";
 import { questIsIgnored, settings } from "@equicordplugins/questify/settings";
 import { getIntlMessageFromHash, runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "@utils/index";
 import { Logger } from "@utils/Logger";
-import { findStoreLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, UserStore } from "@webpack/common";
 
 import { Quest, QuestStatus, RGB } from "./components";
 
 export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
-export const QuestsStore = findStoreLazy("QuestStore");
+export const QuestsStore = findByPropsLazy("getQuest");
 export const questPath = "/quest-home";
 export const leftClick = 0;
 export const middleClick = 1;

@@ -25,14 +25,14 @@ import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
 
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 const RunningGameStore = findStoreLazy("RunningGameStore");
-const QuestsStore = findStoreLazy("QuestStore");
+const QuestsStore = findByPropsLazy("getQuest");
 
 let questIdCheck = 0;
 
