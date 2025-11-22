@@ -40,3 +40,4 @@ export interface Activity {
     };
 }
 
+export type OnlineStatus = "online" | "idle" | "dnd" | "invisible" | "offline" | "unknown" | "streaming";
