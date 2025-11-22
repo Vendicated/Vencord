@@ -20,7 +20,7 @@ import "./style.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
-import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { removeMessagePopoverButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import { classes } from "@utils/misc";
@@ -112,11 +112,9 @@ export default definePlugin({
             e.toolbar,
         ];
     },
-    async start() {
-        if (await DataStore.keys(HolyNoteStore).then(keys => !keys.includes("Main"))) return noteHandler.newNoteBook("Main");
-        if (!noteHandlerCache.has("Main")) await DataStoreToCache();
-
-        addMessagePopoverButton("HolyNotes", message => {
+    messagePopoverButton: {
+        icon: NoteButtonPopover,
+        render(message) {
             return {
                 label: "Save Note",
                 icon: NoteButtonPopover,
@@ -125,7 +123,11 @@ export default definePlugin({
                 onClick: () => noteHandler.addNote(message, "Main")
 
             };
-        });
+        }
+    },
+    async start() {
+        if (await DataStore.keys(HolyNoteStore).then(keys => !keys.includes("Main"))) return noteHandler.newNoteBook("Main");
+        if (!noteHandlerCache.has("Main")) await DataStoreToCache();
     },
 
     async stop() {

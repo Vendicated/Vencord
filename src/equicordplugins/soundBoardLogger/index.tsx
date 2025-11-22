@@ -11,7 +11,7 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
-import { ChatBarIcon } from "./components/Icons";
+import { CharBarButton, ChatBarIcon } from "./components/Icons";
 import { OpenSBLogsButton } from "./components/SoundBoardLog";
 import settings from "./settings";
 import { updateLoggedSounds } from "./store";
@@ -56,7 +56,7 @@ export default definePlugin({
             await updateLoggedSounds(sound);
             getListeners().forEach(cb => cb());
         });
-        if (settings.store.IconLocation === "chat") addChatBarButton("vc-soundlog-button", ChatBarIcon);
+        if (settings.store.IconLocation === "chat") addChatBarButton("vc-soundlog-button", CharBarButton, ChatBarIcon);
     },
     stop() {
         disableStyle(styles);

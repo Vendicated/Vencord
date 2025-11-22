@@ -226,7 +226,7 @@ export function buildThemeMenuEntries() {
                         <Menu.MenuCheckboxItem
                             id={`theme-${theme.fileName}`}
                             key={theme.fileName}
-                            label={theme.name}
+                            label={theme.fileName}
                             checked={enabledThemes.includes(theme.fileName)}
                             action={() => {
                                 if (enabledThemes.includes(theme.fileName)) {

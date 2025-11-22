@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { removeMessagePopoverButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
@@ -94,9 +94,9 @@ export default definePlugin({
     description: "Jumps to the earliest reply to a message in a channel (lets you follow past conversations more easily).",
     authors: [Devs.newwares],
     settings,
-    start() {
-        enableStyle(styles);
-        addMessagePopoverButton("vc-findreply", message => {
+    messagePopoverButton: {
+        icon: FindReplyIcon,
+        render(message) {
             if (!message.id) return null;
             const replies = findReplies(message);
             if (settings.store.hideButtonIfNoReply && !replies.length) return null;
@@ -148,7 +148,10 @@ export default definePlugin({
                     }
                 }
             };
-        });
+        }
+    },
+    start() {
+        enableStyle(styles);
     },
     stop() {
         removeMessagePopoverButton("vc-findreply");

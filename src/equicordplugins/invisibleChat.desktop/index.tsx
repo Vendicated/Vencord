@@ -98,6 +98,49 @@ const settings = definePluginSettings({
     }
 });
 
+const EMBED_API_URL = "https://embed.sammcheese.net";
+const INV_REGEX = new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/);
+const URL_REGEX = new RegExp(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/);
+function colorCodeFromNumber(color: number): string {
+    return `#${[color >> 16, color >> 8, color]
+        .map(x => (x & 0xFF).toString(16))
+        .join("")}`;
+}
+
+async function getEmbed(url: URL): Promise<Object | {}> {
+    const { body } = await RestAPI.post({
+        url: Constants.Endpoints.UNFURL_EMBED_URLS,
+        body: {
+            urls: [url]
+        }
+    });
+    // The endpoint returns the color as a number, but Discord expects a string
+    body.embeds[0].color = colorCodeFromNumber(body.embeds[0].color);
+    return await body.embeds[0];
+}
+
+export async function buildEmbed(message: any, revealed: string): Promise<void> {
+    const urlCheck = revealed.match(URL_REGEX);
+
+    message.embeds.push({
+        type: "rich",
+        rawTitle: "Decrypted Message",
+        color: "#45f5f5",
+        rawDescription: revealed,
+        footer: {
+            text: "Made with ❤️ by c0dine and Sammy!",
+        },
+    });
+
+    if (urlCheck?.length) {
+        const embed = await getEmbed(new URL(urlCheck[0]));
+        if (embed)
+            message.embeds.push(embed);
+    }
+
+    updateMessage(message.channel_id, message.id, { embeds: message.embeds });
+}
+
 export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt your Messages in a non-suspicious way!",
@@ -116,80 +159,35 @@ export default definePlugin({
             }
         },
     ],
+    INV_REGEX,
 
-    EMBED_API_URL: "https://embed.sammcheese.net",
-    INV_REGEX: new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/),
-    URL_REGEX: new RegExp(
-        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
-    ),
     async start() {
         const { default: StegCloak } = await getStegCloak();
         steggo = new StegCloak(true, false);
     },
-
-    renderMessagePopoverButton(message) {
-        return this.INV_REGEX.test(message?.content)
-            ? {
-                label: "Decrypt Message",
-                icon: this.popOverIcon,
-                message: message,
-                channel: ChannelStore.getChannel(message.channel_id),
-                onClick: async () => {
-                    const res = await iteratePasswords(message);
-
-                    if (res)
-                        this.buildEmbed(message, res);
-                    else
-                        buildDecModal({ message });
-                }
-            }
-            : null;
-    },
-
     renderChatBarButton: ChatBarIcon,
+    messagePopoverButton: {
+        icon: PopOverIcon,
+        render(message) {
+            return INV_REGEX.test(message?.content)
+                ? {
+                    label: "Decrypt Message",
+                    icon: PopOverIcon,
+                    message: message,
+                    channel: ChannelStore.getChannel(message.channel_id),
+                    onClick: async () => {
+                        const res = await iteratePasswords(message);
 
-    colorCodeFromNumber(color: number): string {
-        return `#${[color >> 16, color >> 8, color]
-            .map(x => (x & 0xFF).toString(16))
-            .join("")}`;
-    },
-
-    // Gets the Embed of a Link
-    async getEmbed(url: URL): Promise<Object | {}> {
-        const { body } = await RestAPI.post({
-            url: Constants.Endpoints.UNFURL_EMBED_URLS,
-            body: {
-                urls: [url]
-            }
-        });
-        // The endpoint returns the color as a number, but Discord expects a string
-        body.embeds[0].color = this.colorCodeFromNumber(body.embeds[0].color);
-        return await body.embeds[0];
-    },
-
-    async buildEmbed(message: any, revealed: string): Promise<void> {
-        const urlCheck = revealed.match(this.URL_REGEX);
-
-        message.embeds.push({
-            type: "rich",
-            rawTitle: "Decrypted Message",
-            color: "#45f5f5",
-            rawDescription: revealed,
-            footer: {
-                text: "Made with ❤️ by c0dine and Sammy!",
-            },
-        });
-
-        if (urlCheck?.length) {
-            const embed = await this.getEmbed(new URL(urlCheck[0]));
-            if (embed)
-                message.embeds.push(embed);
+                        if (res)
+                            buildEmbed(message, res);
+                        else
+                            buildDecModal({ message });
+                    }
+                }
+                : null;
         }
-
-        updateMessage(message.channel_id, message.id, { embeds: message.embeds });
     },
 
-    popOverIcon: () => <PopOverIcon />,
     indicator: ErrorBoundary.wrap(Indicator, { noop: true })
 });
 

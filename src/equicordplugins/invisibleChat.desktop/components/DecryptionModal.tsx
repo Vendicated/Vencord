@@ -26,7 +26,7 @@ import {
 } from "@utils/modal";
 import { Button, React, TextInput } from "@webpack/common";
 
-import invisibleChatDesktop, { decrypt } from "../index";
+import { buildEmbed, decrypt } from "../index";
 
 export function DecModal(props: any) {
     const encryptedMessage: string = props?.message?.content;
@@ -54,7 +54,7 @@ export function DecModal(props: any) {
                     onClick={() => {
                         const toSend = decrypt(encryptedMessage, password, true);
                         if (!toSend || !props?.message) return;
-                        invisibleChatDesktop.buildEmbed(props?.message, toSend);
+                        buildEmbed(props?.message, toSend);
                         props.onClose();
                     }}>
                     Decrypt

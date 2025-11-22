@@ -136,15 +136,18 @@ export default definePlugin({
     contextMenus: {
         "message": messageCtxPatch
     },
-    renderMessagePopoverButton(msg) {
-        if (!msg) return null;
-        return {
-            label: "Repeat (Click) / Repeat and Reply (Shift + Click)",
-            icon: RepeatMessageIcon,
-            message: msg,
-            channel: ChannelStore.getChannel(msg.channel_id),
-            onClick: async () => repeatMessage(msg)
-        };
+    messagePopoverButton: {
+        icon: RepeatMessageIcon,
+        render(msg) {
+            if (!msg) return null;
+            return {
+                label: "Repeat (Click) / Repeat and Reply (Shift + Click)",
+                icon: RepeatMessageIcon,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: async () => repeatMessage(msg)
+            };
+        }
     },
     start() {
         document.addEventListener("keyup", keyupListener);

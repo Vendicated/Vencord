@@ -112,42 +112,45 @@ export default definePlugin({
     authors: [EquicordDevs.ThePirateStoner],
     dependencies: ["MessagePopoverAPI"],
     settings,
-    renderMessagePopoverButton(msg) {
-        const handleClick = () => {
-            const base64Strings = findBase64Strings(msg.content);
-            const decodedContent = decodeBase64Strings(base64Strings);
-            if (settings.store.clickMethod === "Right") {
-                decodedContent.forEach(content => copyWithToast(content));
-            } else {
-                openDecodedBase64Modal(decodedContent);
-            }
-        };
+    messagePopoverButton: {
+        icon: DecodeIcon,
+        render(msg) {
+            const handleClick = () => {
+                const base64Strings = findBase64Strings(msg.content);
+                const decodedContent = decodeBase64Strings(base64Strings);
+                if (settings.store.clickMethod === "Right") {
+                    decodedContent.forEach(content => copyWithToast(content));
+                } else {
+                    openDecodedBase64Modal(decodedContent);
+                }
+            };
 
-        const handleContextMenu = e => {
-            const base64Strings = findBase64Strings(msg.content);
-            const decodedContent = decodeBase64Strings(base64Strings);
-            if (settings.store.clickMethod === "Left") {
-                e.preventDefault();
-                e.stopPropagation();
-                decodedContent.forEach(content => copyWithToast(content));
-            } else {
-                e.preventDefault();
-                e.stopPropagation();
-                openDecodedBase64Modal(decodedContent);
-            }
-        };
+            const handleContextMenu = e => {
+                const base64Strings = findBase64Strings(msg.content);
+                const decodedContent = decodeBase64Strings(base64Strings);
+                if (settings.store.clickMethod === "Left") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    decodedContent.forEach(content => copyWithToast(content));
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openDecodedBase64Modal(decodedContent);
+                }
+            };
 
-        const label = settings.store.clickMethod === "Right"
-            ? "Copy Decoded (Left Click) / Decode Base64 (Right Click)"
-            : "Decode Base64 (Left Click) / Copy Decoded (Right Click)";
+            const label = settings.store.clickMethod === "Right"
+                ? "Copy Decoded (Left Click) / Decode Base64 (Right Click)"
+                : "Decode Base64 (Left Click) / Copy Decoded (Right Click)";
 
-        return {
-            label,
-            icon: DecodeIcon,
-            message: msg,
-            channel: ChannelStore.getChannel(msg.channel_id),
-            onClick: handleClick,
-            onContextMenu: handleContextMenu
-        };
+            return {
+                label,
+                icon: DecodeIcon,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: handleClick,
+                onContextMenu: handleContextMenu
+            };
+        }
     }
 });

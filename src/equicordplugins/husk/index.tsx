@@ -18,7 +18,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
@@ -70,40 +69,44 @@ export function Husk(props: IconProps) {
     );
 }
 
+const settings = definePluginSettings({
+    findInServer: {
+        description: "Attempt to find emoji of same name in server before using ID in settings (useful if no nitro)",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    emojiName: {
+        description: "Emoji name (default (from Vencord Server): husk)",
+        type: OptionType.STRING,
+        default: "husk"
+    },
+    emojiID: {
+        description: "Emoji ID (default (from Vencord Server): 1026532993923293184)",
+        type: OptionType.BIGINT,
+        default: 1026532993923293184n
+    }
+});
+
+function getEmojiIdThatShouldBeUsed(guildId: string) {
+    if (!settings.store.findInServer || guildId === "") return settings.store.emojiID;
+    let id = "";
+    EmojiStore.getGuildEmoji(guildId).forEach(emoji => {
+        if (emoji.name === settings.store.emojiName) {
+            id = emoji.id;
+        }
+    });
+    return id !== "" ? id : settings.store.emojiID;
+}
+
 export default definePlugin({
     name: "Husk",
     description: "Adds Husk button (check settings to change used emoji)",
     authors: [Devs.nin0dev],
     dependencies: ["MessagePopoverAPI"],
-    settings: definePluginSettings({
-        findInServer: {
-            description: "Attempt to find emoji of same name in server before using ID in settings (useful if no nitro)",
-            type: OptionType.BOOLEAN,
-            default: true
-        },
-        emojiName: {
-            description: "Emoji name (default (from Vencord Server): husk)",
-            type: OptionType.STRING,
-            default: "husk"
-        },
-        emojiID: {
-            description: "Emoji ID (default (from Vencord Server): 1026532993923293184)",
-            type: OptionType.BIGINT,
-            default: 1026532993923293184n
-        }
-    }),
-    getEmojiIdThatShouldBeUsed(guildId: string) {
-        if (!this.settings.store.findInServer || guildId === "") return this.settings.store.emojiID;
-        let id = "";
-        EmojiStore.getGuildEmoji(guildId).forEach(emoji => {
-            if (emoji.name === this.settings.store.emojiName) {
-                id = emoji.id;
-            }
-        });
-        return id !== "" ? id : this.settings.store.emojiID;
-    },
-    async start() {
-        addMessagePopoverButton("Husk", msg => {
+    settings,
+    messagePopoverButton: {
+        icon: Husk,
+        render(msg) {
             return {
                 label: "Husk",
                 icon: Husk,
@@ -112,16 +115,11 @@ export default definePlugin({
                 onClick: () => {
                     const guildId = ChannelStore.getChannel(msg.channel_id).guild_id !== null ? ChannelStore.getChannel(msg.channel_id).guild_id : "";
                     RestAPI.put({
-                        url: `/channels/${msg.channel_id}/messages/${msg.id}/reactions/${this.settings.store.emojiName}:${this.getEmojiIdThatShouldBeUsed(guildId)}/@me`
+                        url: `/channels/${msg.channel_id}/messages/${msg.id}/reactions/${settings.store.emojiName}:${getEmojiIdThatShouldBeUsed(guildId)}/@me`
                     }
                     );
                 }
             };
-        });
-    },
-
-    stop() {
-        removeMessagePopoverButton("Husk");
-    },
-
+        },
+    }
 });

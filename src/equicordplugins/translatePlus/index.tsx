@@ -52,17 +52,18 @@ export default definePlugin({
     contextMenus: {
         "message": messageCtxPatch
     },
-
     renderMessageAccessory: props => <Accessory message={props.message} />,
-    renderMessagePopoverButton: message => {
-        if (!message.content) return null;
-
-        return {
-            label: "Translate",
-            icon: Icon,
-            message: message,
-            channel: ChannelStore.getChannel(message.channel_id),
-            onClick: () => handleTranslate(message),
-        };
-    },
+    messagePopoverButton: {
+        icon: Icon,
+        render(message) {
+            if (!message.content) return null;
+            return {
+                label: "Translate",
+                icon: Icon,
+                message: message,
+                channel: ChannelStore.getChannel(message.channel_id),
+                onClick: () => handleTranslate(message),
+            };
+        }
+    }
 });
