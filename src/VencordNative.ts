@@ -5,14 +5,14 @@
  */
 
 import type { Settings } from "@api/Settings";
-import { CspRequestResult } from "@main/csp/manager";
-import { PluginIpcMappings } from "@main/ipcPlugins";
+import type { CspRequestResult } from "@main/csp/manager";
+import type { PluginIpcMappings } from "@main/ipcPlugins";
 import type { UserThemeHeader } from "@main/themes";
 import { IpcEvents } from "@shared/IpcEvents";
-import { IpcRes } from "@utils/types";
-import { ipcRenderer } from "electron";
+import type { IpcRes } from "@utils/types";
+import { ipcRenderer } from "electron/renderer";
 
-function invoke<T = any>(event: IpcEvents, ...args: any[]) {
+export function invoke<T = any>(event: IpcEvents, ...args: any[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
 }
 
@@ -69,6 +69,7 @@ export default {
 
         openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
         openEditor: () => invoke<void>(IpcEvents.OPEN_MONACO_EDITOR),
+        getEditorTheme: () => sendSync<string>(IpcEvents.GET_MONACO_THEME),
     },
 
     native: {

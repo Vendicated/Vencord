@@ -17,6 +17,8 @@
 */
 
 export const enum IpcEvents {
+    INIT_FILE_WATCHERS = "VencordInitFileWatchers",
+
     OPEN_QUICKCSS = "VencordOpenQuickCss",
     GET_QUICK_CSS = "VencordGetQuickCss",
     SET_QUICK_CSS = "VencordSetQuickCss",
@@ -42,6 +44,7 @@ export const enum IpcEvents {
     BUILD = "VencordBuild",
 
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
+    GET_MONACO_THEME = "VencordGetMonacoTheme",
 
     GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
 
@@ -51,4 +54,8 @@ export const enum IpcEvents {
     CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
     CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",
     CSP_REQUEST_ADD_OVERRIDE = "VencordCspRequestAddOverride",
+
+    PRELOAD_GET_RENDERER_CSS = "VencordPreloadGetRendererCss",
+    PRELOAD_GET_RENDERER_JS = "VencordPreloadGetRendererJs",
+    PRELOAD_RENDERER_CSS_UPDATE = "VencordPreloadRendererCssUpdate",
 }
