@@ -67,7 +67,7 @@ function Switches() {
             restartRequired: true
         } : {
             key: "winNativeTitleBar",
-            title: "Use operating system's native title bar instead of Discord's custom one",
+            title: "Use the operating system's native title bar instead of Discord's custom one",
             restartRequired: true
         }),
         !IS_WEB && {
