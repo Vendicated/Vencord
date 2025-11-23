@@ -31,7 +31,7 @@ export { PlainSettings, Settings };
 import { addVencordUiStyles } from "@components/css";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
-import { IS_WINDOWS } from "@utils/constants";
+import { IS_WINDOWS, IS_LINUX } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
 
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startAllPlugins(StartAt.DOMContentLoaded);
 
     // FIXME
-    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
+    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && (IS_WINDOWS || IS_LINUX)) {
         createAndAppendStyle("vencord-native-titlebar-style").textContent = "[class*=titleBar]{display: none!important}";
     }
 }, { once: true });
