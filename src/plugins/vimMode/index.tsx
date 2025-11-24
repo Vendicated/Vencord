@@ -18,7 +18,7 @@ export default definePlugin({
     description: "Vim-style navigation & motions",
 
     onKeyDown(e: KeyboardEvent) {
-        const { block } = vim.handleKey(e.key);
+        const { block } = vim.handleKey(e);
         if (block) {
             e.preventDefault();
             e.stopPropagation();

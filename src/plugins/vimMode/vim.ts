@@ -21,7 +21,28 @@ class Vim {
         }
     }
 
-    handleKey(key: string): { block: boolean; } {
+    handleKey(e: KeyboardEvent): { block: boolean; } {
+        const MODIFIERS = new Set(["Shift", "Control", "Alt", "Meta"]);
+        if (MODIFIERS.has(e.key)) {
+            return { block: false };
+        }
+        let { key } = e;
+        console.log("keypress", e);
+        const shiftMap: Record<string, string> = {
+            "1": "!",
+            "2": "@",
+            "3": "#",
+            "4": "$",
+            "5": "%",
+            "6": "^",
+            "7": "&",
+            "8": "*",
+            "9": "(",
+            "0": ")"
+        };
+        if (e.shiftKey && shiftMap[key]) {
+            key = shiftMap[key];
+        }
         const slate = this.getSlate();
         const state = VimStore.getState();
 
