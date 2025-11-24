@@ -60,6 +60,11 @@ export default definePlugin({
 
     settings: settings,
 
+    notificationLogTab: {
+        label: "BetterSessions",
+        filter: (notification) => notification.title === "BetterSessions"
+    },
+
     patches: [
         {
             find: "#{intl::AUTH_SESSIONS_SESSION_LOG_OUT}",

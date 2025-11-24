@@ -29,6 +29,11 @@ export default definePlugin({
     authors: [Devs.nick],
     settings,
 
+    notificationLogTab: {
+        label: "RelationshipNotifier",
+        filter: (notification) => notification.title === "Relationship Notifier"
+    },
+
     patches: [
         {
             find: "removeRelationship:(",

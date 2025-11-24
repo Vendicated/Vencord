@@ -24,6 +24,7 @@ import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonData } from "@api/MessagePopover";
+import type { NotificationData } from "@api/Notifications/Notifications";
 import { Command, FluxEvents } from "@vencord/discord-types";
 import { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
@@ -172,6 +173,20 @@ export interface PluginDef {
      * }
      */
     toolboxActions?: Record<string, () => void> | (() => ReactNode);
+
+    /**
+     * Adds a custom tab to the Notification Log modal.
+     *
+     * @example
+     * notificationLogTab: {
+     *   label: "CutePlugin",
+     *   filter: (notification) => notification.title === "CutePlugin"
+     * }
+     */
+    notificationLogTab?: {
+        label: string;
+        filter: (notification: { title: string; }) => boolean;
+    };
 
     tags?: string[];
 
