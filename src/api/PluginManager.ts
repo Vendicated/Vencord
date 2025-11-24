@@ -214,6 +214,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (keybinds && Object.keys(keybinds).length) {
         logger.debug("Registering keybinds of plugin", name);
         let warned = false;
+        const settings = Settings.plugins[name];
         for (const keybind of keybinds) {
             try {
                 if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
