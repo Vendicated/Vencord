@@ -235,6 +235,11 @@ class Vim {
             return { block: true };
         }
 
+        if (key === "x") {
+            slate.deleteForward("char");
+            return { block: true };
+        }
+
         return { block: true };
     }
 
