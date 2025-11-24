@@ -10,7 +10,7 @@ import { PaintbrushIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import { closeModal, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { extractAndLoadChunksLazy, findLazy, findStoreLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, DraftType, FluxDispatcher, Menu, SelectedChannelStore, UploadHandler } from "@webpack/common";
 
 import RemixModal from "./RemixModal";
@@ -19,7 +19,6 @@ import css from "./styles.css?managed";
 const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
 const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
 
-const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 const validMediaTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 
