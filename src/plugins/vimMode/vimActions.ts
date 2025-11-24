@@ -40,20 +40,5 @@ export const VimActions = {
             query: ""
         });
     },
-
-    // nextChannel(count: number) {
-    //     const guildId = SelectedGuildStore.getGuildId();
-    //     if (!guildId) return;
-
-    //     const channels = ChannelStore.getChannelIds(guildId);
-    //     if (!channels.length) return;
-
-    //     const current = SelectedChannelStore.getChannelId();
-    //     const idx = channels.indexOf(current);
-
-    //     let nextIdx = idx + count;
-    //     if (nextIdx >= channels.length) nextIdx = channels.length - 1;
-
-    //     ChannelRouter.transitionToChannel(channels[nextIdx]);
 };
 

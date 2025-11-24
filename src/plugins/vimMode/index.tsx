@@ -10,6 +10,8 @@ import definePlugin from "@utils/types";
 import { vim } from "./vim";
 import { VimStatus } from "./VimStatus";
 
+export let currentEditor: any = null;
+
 export default definePlugin({
     name: "VimMode",
     authors: [Devs.iamvpk_],
@@ -17,7 +19,6 @@ export default definePlugin({
 
     onKeyDown(e: KeyboardEvent) {
         const { block } = vim.handleKey(e.key);
-
         if (block) {
             e.preventDefault();
             e.stopPropagation();
@@ -32,6 +33,11 @@ export default definePlugin({
             </>
         );
     },
+
+    captureEditor(editor) {
+        currentEditor = editor;
+    },
+
     patches: [
         {
             find: "ChannelTextAreaFormComponent",
@@ -46,6 +52,13 @@ export default definePlugin({
             replacement: {
                 match: /"handleInputKeyDown",\s*\(([^)]*)\)\s*=>\s*\{/,
                 replace: "\"handleInputKeyDown\", ($1) => { $self.onKeyDown($1);"
+            }
+        },
+        {
+            find: "ChannelTextAreaFormComponent",
+            replacement: {
+                match: /setEditorRef:\s*([a-zA-Z0-9_$]+)\s*=>\s*this\.editorRef\s*=\s*\1,/,
+                replace: "setEditorRef: $1 => { this.editorRef = $1; $self.captureEditor($1); },"
             }
         }
     ],
