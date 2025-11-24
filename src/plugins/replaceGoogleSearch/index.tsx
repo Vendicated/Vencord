@@ -6,9 +6,10 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Flex, Menu } from "@webpack/common";
+import { Menu } from "@webpack/common";
 
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
@@ -93,7 +94,7 @@ function makeSearchItem(src: string) {
                         key={key}
                         id={key}
                         label={
-                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                            <Flex gap="0.5em" alignItems="center">
                                 <img
                                     style={{
                                         borderRadius: "50%"

@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import ShowHiddenChannelsPlugin from "@plugins/showHiddenChannels";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
@@ -141,7 +143,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
     if (channel == null) return null;
 
     const isDM = channel.isDM() || channel.isMultiUserDM();
-    if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && !Vencord.Plugins.isPluginEnabled("ShowHiddenChannels")) return null;
+    if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && !isPluginEnabled(ShowHiddenChannelsPlugin.name)) return null;
 
     const isLocked = !isDM && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel));
 
