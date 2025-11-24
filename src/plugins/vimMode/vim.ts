@@ -260,18 +260,18 @@ class Vim {
         return node.text || "";
     }
 
-    findNextWordOffset(text: string, offset: number) {
+    findNextWordOffset(text, offset) {
         const len = text.length;
         let i = offset;
-        while (i < len && /\w/.test(text[i])) i++;
+        while (i < len && /\S/.test(text[i])) i++;
         while (i < len && /\s/.test(text[i])) i++;
         return i;
     }
 
-    findPrevWordOffset(text: string, offset: number) {
+    findPrevWordOffset(text, offset) {
         let i = offset;
         while (i > 0 && /\s/.test(text[i - 1])) i--;
-        while (i > 0 && /\w/.test(text[i - 1])) i--;
+        while (i > 0 && /\S/.test(text[i - 1])) i--;
         return i;
     }
 
@@ -291,7 +291,6 @@ class Vim {
     getOffset(editor) {
         return editor.selection.anchor.offset;
     }
-
 }
 
 export const vim = new Vim();
