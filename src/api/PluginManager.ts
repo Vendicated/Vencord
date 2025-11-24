@@ -224,11 +224,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
                     }
                     continue;
                 }
-                if (p.settings?.store) {
-                    const keys = p.settings.store[keybind.event] ?? [];
-                    if (keybindsManager.registerKeybind(keybind, keys)) {
-                        keybindsManager.enableKeybind(keybind.event, keybind.global);
-                    }
+                if (keybindsManager.registerKeybind(keybind, p.settings?.store[keybind.event] ?? [])) {
+                    keybindsManager.enableKeybind(keybind.event, keybind.global);
                 }
             } catch (e) {
                 logger.error(`Failed to register keybind ${keybind.event}\n`, e);
