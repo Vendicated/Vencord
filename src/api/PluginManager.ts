@@ -214,7 +214,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (keybinds && Object.keys(keybinds).length) {
         logger.debug("Registering keybinds of plugin", name);
         let warned = false;
-        const settings = Settings.plugins[name];
+
         for (const keybind of keybinds) {
             try {
                 if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
@@ -224,9 +224,11 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
                     }
                     continue;
                 }
-                const keys = settings[name]?.[keybind.event] ?? [];
-                if (keybindsManager.registerKeybind(keybind, keys)) {
-                    keybindsManager.enableKeybind(keybind.event, keybind.global);
+                if (p.settings?.store) {
+                    const keys = p.settings.store[keybind.event] ?? [];
+                    if (keybindsManager.registerKeybind(keybind, keys)) {
+                        keybindsManager.enableKeybind(keybind.event, keybind.global);
+                    }
                 }
             } catch (e) {
                 logger.error(`Failed to register keybind ${keybind.event}\n`, e);
