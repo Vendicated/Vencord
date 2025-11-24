@@ -8,12 +8,12 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import type { Channel, Message } from "@vencord/discord-types";
+import { findByPropsLazy } from "@webpack";
 import { ApplicationStreamingStore, Button, ChannelStore, MessageStore, PresenceStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
-import { Webpack } from "Vencord";
 
 import { showNotification } from "./components/Notifications";
 
-const MuteStore = Webpack.findByPropsLazy("isSuppressEveryoneEnabled");
+const MuteStore = findByPropsLazy("isSuppressEveryoneEnabled");
 
 let ignoredUsers: string[] = [];
 
