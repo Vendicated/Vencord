@@ -89,9 +89,9 @@ export const settings = definePluginSettings({
         description: "API to use",
         default: "https://badges.equicord.org/",
         restartNeeded: false,
-        onChange: (e => {
-            if (!e) return settings.store.apiUrl = "https://badges.equicord.org/";
-            return e;
+        isValid: (value => {
+            if (!value) return false;
+            return true;
         })
     }
 });

@@ -27,13 +27,13 @@ const Badge: ProfileBadge = {
 export default definePlugin({
     name: "GlobalBadges",
     description: "Adds global badges from other client mods",
-    authors: [Devs.HypedDomi, EquicordDevs.Wolfie],
+    authors: [Devs.HypedDomi, EquicordDevs.Wolfie, Devs.thororen],
     settings,
     settingsAboutComponent: () => (
         <>
             <Button
-                className={cl("settings-button")}
                 variant="link"
+                className={cl("settings-button")}
                 onClick={() => openInviteModal(INVITE_LINK)}
             >
                 Join GlobalBadges Server
