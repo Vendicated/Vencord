@@ -7,13 +7,15 @@
 import "./styles.css";
 
 import { addProfileBadge, BadgePosition, ProfileBadge, removeProfileBadge } from "@api/Badges";
+import { Button } from "@components/Button";
 import { Devs, EquicordDevs } from "@utils/constants";
+import { openInviteModal } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 
 import { GlobalBadges } from "./badgeComponent";
 import { settings } from "./settings";
-import { fetchBadges } from "./utils";
+import { cl, fetchBadges, INVITE_LINK } from "./utils";
 
 const Badge: ProfileBadge = {
     component: b => <GlobalBadges {...b} />,
@@ -27,6 +29,17 @@ export default definePlugin({
     description: "Adds global badges from other client mods",
     authors: [Devs.HypedDomi, EquicordDevs.Wolfie],
     settings,
+    settingsAboutComponent: () => (
+        <>
+            <Button
+                className={cl("settings-button")}
+                variant="link"
+                onClick={() => openInviteModal(INVITE_LINK)}
+            >
+                Join GlobalBadges Server
+            </Button>
+        </>
+    ),
     start: () => addProfileBadge(Badge),
     stop: () => removeProfileBadge(Badge),
 });

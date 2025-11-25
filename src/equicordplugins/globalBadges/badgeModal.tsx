@@ -4,65 +4,78 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
-import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { Paragraph } from "@components/Paragraph";
+import { openInviteModal } from "@utils/discord";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
 import { React, Tooltip } from "@webpack/common";
 
-import { badgeImages } from "./badgeComponent";
-import { cl } from "./utils";
+import { badgeData } from "./badgeComponent";
+import { cl, INVITE_LINK } from "./utils";
 
 export const BadgeModalComponent = ({ name, img }: { name: string, img: string; }) => {
     return (
-        <Tooltip text={name} >
-            {(tooltipProps: any) => (
-                <img
-                    className={cl("modal-badges")}
-                    {...tooltipProps}
-                    src={img}
-                />
-            )}
-        </Tooltip>
+        <>
+            <Tooltip text={name} >
+                {(tooltipProps: any) => (
+                    <img
+                        className={cl("modal-badge")}
+                        {...tooltipProps}
+                        src={img}
+                    />
+                )}
+            </Tooltip>
+        </>
     );
 };
 
-export function BadgeModal({ user }: { user: User; }) {
-    return (
-        <>
-            <div className={cl("header")}>
-                <img
-                    className={cl("avatar")}
-                    src={user.getAvatarURL(void 0, 512, true)}
-                    alt=""
-                />
-                {badgeImages.length ? (
-                    <HeadingTertiary className={cl("name")}>
-                        {user.username} has {badgeImages.length} global badges
-                    </HeadingTertiary>
-                ) : (
-                    <HeadingTertiary className={cl("name")}>
-                        {user.username} has no global badges
-                    </HeadingTertiary>
-                )}
-            </div>
-            {!!badgeImages.length && (
-                <div className={cl("badges")}>
-                    {badgeImages}
-                </div>
-            )}
-        </>
-    );
-}
-
 export function openBadgeModal(user: User) {
-    openModal(modalprops =>
+    const badgeDataElements = badgeData.map(badge => (
+        <BadgeModalComponent key={badge.rawName} name={badge.name} img={badge.badge} />
+    ));
+
+    openModal(modalprops => (
         <ModalRoot {...modalprops}>
             <ErrorBoundary>
-                <ModalContent className={cl("root")}>
-                    <BadgeModal user={user} />
+                <ModalHeader>
+                    <img
+                        className={cl("modal-avatar")}
+                        src={user.getAvatarURL(undefined, 512, true)}
+                        alt=""
+                    />
+                    <HeadingTertiary className={cl("modal-name")}>
+                        {user.username}
+                    </HeadingTertiary>
+                </ModalHeader>
+                <ModalContent className={cl("modal-description")}>
+                    {badgeDataElements.length ? (
+                        <>
+                            <Paragraph className={cl("modal-text")}>
+                                {badgeDataElements.length} global badge
+                                {badgeDataElements.length > 1 ? "s" : ""}.
+                            </Paragraph>
+                            <div className={cl("modal-badges")}>
+                                {badgeDataElements}
+                            </div>
+                        </>
+                    ) : (
+                        <Paragraph>
+                            No global badges.
+                        </Paragraph>
+                    )}
                 </ModalContent>
+                <ModalFooter>
+                    <Button
+                        variant="link"
+                        onClick={() => openInviteModal(INVITE_LINK)}
+                    >
+                        Join GlobalBadges Server
+                    </Button>
+                </ModalFooter>
             </ErrorBoundary>
         </ModalRoot>
-    );
+    ));
 }

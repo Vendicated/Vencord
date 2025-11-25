@@ -7,12 +7,17 @@
 import { React, Tooltip, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
-import { BadgeModalComponent, openBadgeModal } from "./badgeModal";
+import { openBadgeModal } from "./badgeModal";
 import { settings } from "./settings";
 import { BadgeCache } from "./types";
-import { cl, fetchBadges, serviceMap } from "./utils";
+import { cl, fetchBadges } from "./utils";
 
-export let badgeImages;
+interface BadgeModalItem {
+    name: string;
+    rawName: string;
+}
+
+export let badgeData;
 
 export const BadgeComponent = ({ name, img }: { name: string, img: string; }) => {
     return (
@@ -38,7 +43,7 @@ export const GlobalBadges = ({ userId }: { userId: string; }) => {
 
     if (!badges) return null;
     const globalBadges: JSX.Element[] = [];
-    const badgeModal: JSX.Element[] = [];
+    const badgeModal: BadgeModalItem[] = [];
 
     Object.keys(badges).forEach(mod => {
         if (!badges[mod] || !Array.isArray(badges[mod]) || badges[mod].length === 0) return;
@@ -46,20 +51,23 @@ export const GlobalBadges = ({ userId }: { userId: string; }) => {
         badges[mod].forEach(badge => {
             if (!badge || !badge.tooltip || !badge.badge) return;
 
-            const modDisplay = serviceMap[mod.toLowerCase()] || mod;
-            const prefix = settings.store.showPrefix ? `(${modDisplay})` : "";
-            const suffix = settings.store.showSuffix ? `(${modDisplay})` : "";
+            const prefix = settings.store.showPrefix ? `(${mod})` : "";
+            const suffix = settings.store.showSuffix ? `(${mod})` : "";
             const displayName = `${prefix} ${badge.tooltip} ${suffix}`;
 
-            if (mod.toLowerCase() === "badgevault") {
+            if (mod === "BadgeVault") {
                 badge.custom = true;
             }
 
             globalBadges.push(<BadgeComponent name={displayName} img={badge.badge} />);
-            badgeModal.push(<BadgeModalComponent name={displayName} img={badge.badge} />);
+            badgeModal.push({
+                name: displayName,
+                rawName: badge.tooltip,
+                ...badge
+            });
         });
     });
-    badgeImages = badgeModal;
+    badgeData = badgeModal;
 
     return (
         <div

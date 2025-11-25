@@ -4,11 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
-import { Link } from "@components/Link";
+import { classNameFactory } from "@api/Styles";
+import { Button } from "@components/Button";
 import { Devs, EquicordDevs } from "@utils/constants";
+import { openInviteModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
+
+const cl = classNameFactory("vc-userpfp-");
+const DONO_URL = "https://ko-fi.com/coolesding";
+const INVITE_LINK = "https://discord.gg/userpfp-1129784704267210844";
 
 let data = { avatars: {} as Record<string, string> };
 const settings = definePluginSettings({
@@ -20,32 +28,39 @@ const settings = definePluginSettings({
             { label: "Nitro", value: true, default: true },
         ],
     },
-    dbSource: {
+    databaseSource: {
         description: "URL to load database from",
         type: OptionType.STRING,
         default: "https://userpfp.github.io/UserPFP/source/data.json",
         onChange: (e => {
-            if (!e) return settings.store.dbSource = "https://userpfp.github.io/UserPFP/source/data.json";
+            if (!e) return settings.store.databaseSource = "https://userpfp.github.io/UserPFP/source/data.json";
             return e;
         })
     }
 });
 
 export default definePlugin({
-    data,
     name: "UserPFP",
     description: "Allows you to use an animated avatar without Nitro",
     authors: [EquicordDevs.nexpid, Devs.thororen],
     settings,
     settingsAboutComponent: () => (
         <>
-            <Link href="https://userpfp.github.io/UserPFP/#how-to-request-a-profile-picture-pfp">
-                <b>Submit your own PFP here!</b>
-            </Link>
+            <Button
+                variant="link"
+                className={cl("settings-button")}
+                onClick={() => openInviteModal(INVITE_LINK)}
+            >
+                Join UserPFP Server
+            </Button>
             <br />
-            <Link href="https://ko-fi.com/coolesding">
-                <b>Support UserPFP here!</b>
-            </Link>
+            <Button
+                variant="link"
+                className={cl("settings-button")}
+                onClick={() => VencordNative.native.openExternal(DONO_URL)}
+            >
+                Support UserPFP here
+            </Button>
         </>
     ),
     patches: [
@@ -72,9 +87,9 @@ export default definePlugin({
         return res.toString();
     },
     async start() {
-        await fetch(settings.store.dbSource)
+        await fetch(settings.store.databaseSource)
             .then(async res => {
-                if (res.ok) this.data = data = await res.json();
+                if (res.ok) data = await res.json();
             })
             .catch(() => null);
     }

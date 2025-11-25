@@ -13,17 +13,7 @@ const cache = new Map<string, BadgeCache>();
 const EXPIRES = 1000 * 60 * 15;
 
 export const cl = classNameFactory("vc-global-badges-");
-export const serviceMap = {
-    "nekocord": "Nekocord",
-    "reviewdb": "ReviewDB",
-    "aero": "Aero",
-    "aliucord": "Aliucord",
-    "ra1ncord": "Ra1ncord",
-    "velocity": "Velocity",
-    "enmity": "Enmity",
-    "replugged": "Replugged",
-    "badgevault": "BadgeVault"
-};
+export const INVITE_LINK = "https://discord.gg/kwHCJPxp8t";
 
 export const fetchBadges = (id: string): BadgeCache["badges"] | undefined => {
     const cachedValue = cache.get(id);
@@ -44,7 +34,7 @@ export const fetchBadges = (id: string): BadgeCache["badges"] | undefined => {
             return {};
         }
 
-        fetch(`${settings.store.apiUrl}${id}?seperated=true&services=${services.join(",")}`)
+        fetch(`${settings.store.apiUrl}${id}?seperated=true&capitalize=true&services=${services.join(",")}`)
             .then(res => res.json() as Promise<{ status: number; badges: BadgeCache["badges"]; }>)
             .then(body => {
                 cache.set(id, { badges: body.badges, expires: Date.now() + EXPIRES });

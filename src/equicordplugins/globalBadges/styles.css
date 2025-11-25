@@ -4,13 +4,7 @@
     flex-wrap: nowrap;
 }
 
-.vc-global-badges-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1em;
-}
-
-.vc-global-badges-name {
+.vc-global-badges-modal-name {
     text-transform: none;
     flex-grow: 0;
     background: var(--background-base-lowest);
@@ -22,7 +16,7 @@
     text-wrap: nowrap;
 }
 
-.vc-global-badges-name::before {
+.vc-global-badges-modal-name::before {
     content: "";
     display: block;
     position: absolute;
@@ -36,19 +30,27 @@
     border-bottom-left-radius: 9999px;
 }
 
-.vc-global-badges-avatar {
+.vc-global-badges-modal-avatar {
     height: 48px;
     width: 48px;
     border-radius: 50%;
 }
 
-.vc-global-badges-description {
+.vc-global-badges-modal-description {
     font-size: 16px;
-    margin-left: 6px;
 }
 
-.vc-global-badges-modal-badges {
+.vc-global-badges-modal-text {
+    margin-left: 8px;
+}
+
+.vc-global-badges-modal-badge {
     width: 50px;
     height: 50px;
     margin: 2px;
+}
+
+.vc-global-badges-settings-button {
+    width: 100%;
+    height: 50px;
 }

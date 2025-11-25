@@ -26,8 +26,6 @@ import { PluginCard } from "./PluginCard";
 
 const cl = classNameFactory("vc-author-modal-");
 
-type PluginFilter = "all" | "equicord" | "vencord" | "modified" | "user";
-
 export function openContributorModal(user: User) {
     openModal(modalProps =>
         <ModalRoot {...modalProps}>

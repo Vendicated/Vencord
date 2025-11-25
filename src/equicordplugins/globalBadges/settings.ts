@@ -12,13 +12,23 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Shows the Mod as Prefix",
         default: true,
-        restartNeeded: false
+        restartNeeded: false,
+        onChange: (e => {
+            if (e && settings.store.showSuffix) {
+                settings.store.showSuffix = false;
+            }
+        })
     },
     showSuffix: {
         type: OptionType.BOOLEAN,
         description: "Shows the Mod as Suffix",
         default: false,
-        restartNeeded: false
+        restartNeeded: false,
+        onChange: (e => {
+            if (e && settings.store.showPrefix) {
+                settings.store.showPrefix = false;
+            }
+        })
     },
     showCustom: {
         type: OptionType.BOOLEAN,
