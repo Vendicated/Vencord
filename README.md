@@ -68,6 +68,12 @@ Build Equicord:
 pnpm build
 ```
 
+Build Equicord for web:
+
+```shell
+pnpm buildWeb
+```
+
 Inject Equicord into your client:
 
 ```shell
