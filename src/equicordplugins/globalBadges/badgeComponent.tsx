@@ -26,9 +26,8 @@ export const BadgeComponent = ({ name, img }: { name: string, img: string; }) =>
                 <img
                     {...tooltipProps}
                     src={img}
+                    className={cl("badge")}
                     style={{
-                        width: "20px",
-                        height: "20px",
                         transform: name.includes("Replugged") ? "scale(0.9)" : null
                     }}
                 />

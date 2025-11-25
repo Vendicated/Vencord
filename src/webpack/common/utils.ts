@@ -182,6 +182,7 @@ export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 
 export const VoiceActions = findByPropsLazy("toggleSelfMute");
 export const GuildActions = findByPropsLazy("setServerMute", "setServerDeaf");
+export const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 

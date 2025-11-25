@@ -4,6 +4,12 @@
     flex-wrap: nowrap;
 }
 
+.vc-global-badges-badge {
+    width: 20px;
+    height: 20px;
+    gap: 1px;
+}
+
 .vc-global-badges-modal-name {
     text-transform: none;
     flex-grow: 0;

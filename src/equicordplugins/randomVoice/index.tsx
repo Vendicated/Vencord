@@ -10,14 +10,13 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
+import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
+import { ChannelActions, ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
 
 import style from "./styles.css?managed";
 
 const ChatVoiceIcon = findComponentByCodeLazy("0l1.8-1.8c.17");
 const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
-const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
 const startStream = findByCodeLazy('type:"STREAM_START"');
 const getDesktopSources = findByCodeLazy("desktop sources");
 
