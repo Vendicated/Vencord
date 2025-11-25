@@ -60,11 +60,6 @@ export default definePlugin({
 
     settings: settings,
 
-    notificationLogTab: {
-        label: "BetterSessions",
-        filter: (notification) => notification.title === "BetterSessions"
-    },
-
     patches: [
         {
             find: "#{intl::AUTH_SESSIONS_SESSION_LOG_OUT}",
@@ -177,7 +172,7 @@ export default definePlugin({
 
             savedSessionsCache.set(session.id_hash, { name: "", isNew: true });
             showNotification({
-                title: "BetterSessions",
+                category: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
                 permanent: true,
                 onClick: () => UserSettingsModal.open("Sessions")

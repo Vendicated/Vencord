@@ -17,7 +17,6 @@
 */
 
 import * as DataStore from "@api/DataStore";
-import { isPluginEnabled, plugins } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
@@ -31,7 +30,7 @@ import type { DispatchWithoutAction } from "react";
 import NotificationComponent from "./NotificationComponent";
 import type { NotificationData } from "./Notifications";
 
-interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color"> {
+interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color" | "category"> {
     timestamp: number;
     id: string;
 }
@@ -153,6 +152,10 @@ export function NotificationLog({ log, pending, filter }: { log: PersistentNotif
     );
 }
 
+function getCategory(notification: PersistentNotificationData): string {
+    return notification.category || (notification.title?.replace(/\s+/g, "") ?? "");
+}
+
 interface LogTab {
     id: string;
     label: string;
@@ -164,24 +167,30 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     const [selectedTab, setSelectedTab] = useState("all");
 
     const tabs = useMemo<LogTab[]>(() => {
-        const pluginTabs: LogTab[] = [];
+        const categoryMap = new Map<string, string>();
 
-        for (const plugin of Object.values(plugins)) {
-            if (!isPluginEnabled(plugin.name) || !plugin.notificationLogTab) continue;
+        for (const notification of log) {
+            const normalized = getCategory(notification);
+            if (!normalized) continue;
 
-            const { label, filter } = plugin.notificationLogTab;
-            pluginTabs.push({
-                id: plugin.name,
-                label,
-                filter
-            });
+            if (!categoryMap.has(normalized)) {
+                categoryMap.set(normalized, notification.category || notification.title || normalized);
+            }
         }
+
+        const categoryTabs = Array.from(categoryMap.entries())
+            .sort(([, a], [, b]) => a.localeCompare(b))
+            .map(([id, label]) => ({
+                id,
+                label,
+                filter: (n) => getCategory(n) === id
+            }));
 
         return [
             { id: "all", label: "All", filter: () => true },
-            ...pluginTabs.sort((a, b) => a.label.localeCompare(b.label))
+            ...categoryTabs
         ];
-    }, []);
+    }, [log]);
 
     const currentFilter = tabs.find(t => t.id === selectedTab)?.filter;
 
@@ -192,7 +201,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
-            {tabs.length > 1 && (
+            {tabs.length > 0 && (
                 <div className={cl("tab-bar-wrapper")}>
                     <TabBar
                         type="top"
@@ -214,7 +223,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
             )}
 
             <div className={cl("content")}>
-                <NotificationLog log={log} pending={pending} filter={currentFilter} />
+                <NotificationLog log={log} pending={pending} filter={currentFilter ?? (() => true)} />
             </div>
 
             <ModalFooter>

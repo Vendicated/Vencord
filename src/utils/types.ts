@@ -174,20 +174,6 @@ export interface PluginDef {
      */
     toolboxActions?: Record<string, () => void> | (() => ReactNode);
 
-    /**
-     * Adds a custom tab to the Notification Log modal.
-     *
-     * @example
-     * notificationLogTab: {
-     *   label: "CutePlugin",
-     *   filter: (notification) => notification.title === "CutePlugin"
-     * }
-     */
-    notificationLogTab?: {
-        label: string;
-        filter: (notification: { title: string; }) => boolean;
-    };
-
     tags?: string[];
 
     /**
