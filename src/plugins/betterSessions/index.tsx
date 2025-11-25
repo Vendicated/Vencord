@@ -172,7 +172,7 @@ export default definePlugin({
 
             savedSessionsCache.set(session.id_hash, { name: "", isNew: true });
             showNotification({
-                title: "BetterSessions",
+                category: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
                 permanent: true,
                 onClick: () => UserSettingsModal.open("Sessions")
