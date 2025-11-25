@@ -22,7 +22,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
 import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
-import { ApplicationAssetUtils, FluxDispatcher, PresenceStore } from "@webpack/common";
+import { ApplicationAssetUtils, AuthenticationStore, FluxDispatcher, PresenceStore } from "@webpack/common";
 
 interface TrackData {
     name: string;
@@ -243,13 +243,13 @@ export default definePlugin({
 
     async getActivity(): Promise<Activity | null> {
         if (settings.store.hideWithActivity) {
-            if (PresenceStore.getActivities().some(a => a.application_id !== DISCORD_APP_ID)) {
+            if (PresenceStore.getActivities(AuthenticationStore.getId()).some(a => a.application_id !== DISCORD_APP_ID)) {
                 return null;
             }
         }
 
         if (settings.store.hideWithSpotify) {
-            if (PresenceStore.getActivities().some(a => a.type === ActivityType.LISTENING && a.application_id !== DISCORD_APP_ID)) {
+            if (PresenceStore.getActivities(AuthenticationStore.getId()).some(a => a.type === ActivityType.LISTENING && a.application_id !== DISCORD_APP_ID)) {
                 // there is already music status because of Spotify or richerCider (probably more)
                 return null;
             }

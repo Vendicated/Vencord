@@ -9,10 +9,14 @@ import "./ChatButton.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
+import { IconComponent } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
-import { ButtonWrapperClasses, Clickable, Tooltip } from "@webpack/common";
+import { ButtonWrapperClasses, Clickable, Menu, Tooltip } from "@webpack/common";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
+
+import { addContextMenuPatch, findGroupChildrenByChildId } from "./ContextMenu";
+import { useSettings } from "./Settings";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
 waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
@@ -76,26 +80,51 @@ export interface ChatBarProps {
 }
 
 export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
+export type ChatBarButtonData = {
+    render: ChatBarButtonFactory;
+    /**
+     * This icon is used only for Settings UI. Your render function must still render an icon,
+     * and it can be different from this one.
+     */
+    icon: IconComponent;
+};
 
-const buttonFactories = new Map<string, ChatBarButtonFactory>();
+/**
+ * Don't use this directly, use {@link addChatBarButton} and {@link removeChatBarButton} instead.
+ */
+export const ChatBarButtonMap = new Map<string, ChatBarButtonData>();
 const logger = new Logger("ChatButtons");
+
+function VencordChatBarButtons(props: ChatBarProps) {
+    const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
+
+    return (
+        <>
+            {Array.from(ChatBarButtonMap)
+                .filter(([key]) => chatBarButtons[key]?.enabled !== false)
+                .map(([key, { render: Button }]) => (
+                    <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
+                        <Button {...props} isMainChat={props.type.analyticsName === "normal"} />
+                    </ErrorBoundary>
+                ))}
+        </>
+    );
+}
 
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled) return;
 
-    for (const [key, Button] of buttonFactories) {
-        buttons.unshift(
-            <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
-                <Button {...props} isMainChat={props.type.analyticsName === "normal"} />
-            </ErrorBoundary>
-        );
-    }
+    buttons.unshift(<VencordChatBarButtons key="vencord-chat-buttons" {...props} />);
 
     return buttons;
 }
 
-export const addChatBarButton = (id: string, button: ChatBarButtonFactory) => buttonFactories.set(id, button);
-export const removeChatBarButton = (id: string) => buttonFactories.delete(id);
+/**
+ * The icon argument is used only for Settings UI. Your render function must still render an icon,
+ * and it can be different from this one.
+ */
+export const addChatBarButton = (id: string, render: ChatBarButtonFactory, icon: IconComponent) => ChatBarButtonMap.set(id, { render, icon });
+export const removeChatBarButton = (id: string) => ChatBarButtonMap.delete(id);
 
 export interface ChatBarButtonProps {
     children: ReactNode;
@@ -105,6 +134,7 @@ export interface ChatBarButtonProps {
     onAuxClick?: MouseEventHandler;
     buttonProps?: Omit<HTMLProps<HTMLDivElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
 }
+
 export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
         <Tooltip text={props.tooltip}>
@@ -129,3 +159,35 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
         </Tooltip>
     );
 }, { noop: true });
+
+addContextMenuPatch("textarea-context", (children, args) => {
+    const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
+
+    const buttons = Array.from(ChatBarButtonMap.entries());
+    if (!buttons.length) return;
+
+    const group = findGroupChildrenByChildId("submit-button", children);
+    if (!group) return;
+
+    const idx = group.findIndex(c => c?.props?.id === "submit-button");
+    if (idx === -1) return;
+
+    group.splice(idx, 0,
+        <Menu.MenuItem id="vc-chat-buttons" key="vencord-chat-buttons" label="Vencord Buttons">
+            {buttons.map(([id]) => (
+                <Menu.MenuCheckboxItem
+                    label={id}
+                    key={id}
+                    id={`vc-chat-button-${id}`}
+                    checked={chatBarButtons[id]?.enabled !== false}
+                    action={() => {
+                        const wasEnabled = chatBarButtons[id]?.enabled !== false;
+
+                        chatBarButtons[id] ??= {} as any;
+                        chatBarButtons[id].enabled = !wasEnabled;
+                    }}
+                />
+            ))}
+        </Menu.MenuItem>
+    );
+});

@@ -30,7 +30,9 @@ import { waitForComponent } from "./internal";
 
 export const Forms = {
     // TODO: Stop using this and use Heading/Paragraph directly
+    /** @deprecated use Heading from Vencord */
     FormTitle: Heading,
+    /** @deprecated use Paragraph from Vencord */
     FormText: Paragraph,
     /** @deprecated don't use this */
     FormSection: "section" as never, // Backwards compat since Vesktop uses this
@@ -39,12 +41,15 @@ export const Forms = {
 };
 
 // TODO: Stop using this and use Paragraph/Span directly
+/** @deprecated use Paragraph, Span, or BaseText from Vencord */
 export const Text = TextCompat;
+/** @deprecated use Button from Vencord */
 export const Button = ButtonCompat;
 /** @deprecated Use FormSwitch from Vencord */
 export const Switch = FormSwitchCompat as never;
 
-export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
+/** @deprecated Use Card from Vencord */
+export const Card = waitForComponent<never>("Card", filters.componentByCode(".editable),", ".outline:"));
 export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
@@ -55,6 +60,7 @@ const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
     TooltipContainer: t.TooltipContainer;
 };
 
+// TODO: if these finds break, they should just return their children
 export const Tooltip = LazyComponent(() => Tooltips.Tooltip);
 export const TooltipContainer = LazyComponent(() => Tooltips.TooltipContainer);
 
@@ -67,6 +73,7 @@ export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCo
 export const Dialog = waitForComponent<t.Dialog>("Dialog", filters.componentByCode('role:"dialog",tabIndex:-1'));
 export const TabBar = waitForComponent("TabBar", filters.componentByCode("ref:this.tabBarRef,className:"));
 export const Paginator = waitForComponent<t.Paginator>("Paginator", filters.componentByCode('rel:"prev",children:'));
+// TODO: remake this component
 export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.componentByCode("this.context?this.renderNonInteractive():"));
 export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
 
@@ -106,7 +113,6 @@ waitFor(m => {
 
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.componentByCode("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}"));
-export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 export const OAuth2AuthorizeModal = waitForComponent("OAuth2AuthorizeModal", filters.componentByCode(".authorize,children:", ".contentBackground"));
 
 export const Animations = mapMangledModuleLazy(".assign({colorNames:", {
