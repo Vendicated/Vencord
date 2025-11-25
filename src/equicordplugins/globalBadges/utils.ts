@@ -12,7 +12,7 @@ import { BadgeCache } from "./types";
 const cache = new Map<string, BadgeCache>();
 const EXPIRES = 1000 * 60 * 15;
 
-export const cl = classNameFactory("vc-author-modal-");
+export const cl = classNameFactory("vc-global-badges-");
 export const serviceMap = {
     "nekocord": "Nekocord",
     "reviewdb": "ReviewDB",

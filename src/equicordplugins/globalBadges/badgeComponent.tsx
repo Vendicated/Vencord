@@ -10,7 +10,7 @@ import { JSX } from "react";
 import { BadgeModalComponent, openBadgeModal } from "./badgeModal";
 import { settings } from "./settings";
 import { BadgeCache } from "./types";
-import { fetchBadges, serviceMap } from "./utils";
+import { cl, fetchBadges, serviceMap } from "./utils";
 
 export let badgeImages;
 
@@ -63,8 +63,7 @@ export const GlobalBadges = ({ userId }: { userId: string; }) => {
 
     return (
         <div
-            className="vc-global-badges"
-            style={{ alignItems: "center", display: "flex" }}
+            className={cl("badges")}
             onClick={_ => openBadgeModal(UserStore.getUser(userId))}
         >
             {globalBadges}

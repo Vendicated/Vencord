@@ -5,8 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { HeadingPrimary } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
+import { HeadingTertiary } from "@components/Heading";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
 import { React, Tooltip } from "@webpack/common";
@@ -19,9 +18,9 @@ export const BadgeModalComponent = ({ name, img }: { name: string, img: string; 
         <Tooltip text={name} >
             {(tooltipProps: any) => (
                 <img
+                    className={cl("modal-badges")}
                     {...tooltipProps}
                     src={img}
-                    style={{ width: "50px", height: "50px", margin: "2px 2px" }}
                 />
             )}
         </Tooltip>
@@ -37,17 +36,16 @@ export function BadgeModal({ user }: { user: User; }) {
                     src={user.getAvatarURL(void 0, 512, true)}
                     alt=""
                 />
-                <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
+                {badgeImages.length ? (
+                    <HeadingTertiary className={cl("name")}>
+                        {user.username} has {badgeImages.length} global badges
+                    </HeadingTertiary>
+                ) : (
+                    <HeadingTertiary className={cl("name")}>
+                        {user.username} has no global badges
+                    </HeadingTertiary>
+                )}
             </div>
-            {badgeImages.length ? (
-                <Paragraph>
-                    {user.username} has {badgeImages.length} global badges.
-                </Paragraph>
-            ) : (
-                <Paragraph>
-                    {user.username} has no global badges.
-                </Paragraph>
-            )}
             {!!badgeImages.length && (
                 <div className={cl("badges")}>
                     {badgeImages}
