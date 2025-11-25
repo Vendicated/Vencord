@@ -9,7 +9,7 @@ import "./UIElements.css";
 import { ChatBarButtonMap } from "@api/ChatButtons";
 import { MessagePopoverButtonMap } from "@api/MessagePopover";
 import { SettingsPluginUiElements, useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
 import { PlaceholderIcon } from "@components/Icons";

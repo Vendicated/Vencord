@@ -6,7 +6,7 @@
 
 import "./QuickAction.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Card } from "@components/Card";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 

@@ -96,10 +96,17 @@ ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
 
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
-ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
-    // win & mac only
-    "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
-}));
+ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => {
+    let accentColor = systemPreferences.getAccentColor?.() ?? "";
+
+    if (accentColor.length && accentColor[0] !== "#") {
+        accentColor = `#${accentColor}`;
+    }
+
+    return {
+        "os-accent-color": accentColor
+    };
+});
 
 ipcMain.handle(IpcEvents.OPEN_THEMES_FOLDER, () => shell.openPath(THEMES_DIR));
 ipcMain.handle(IpcEvents.OPEN_SETTINGS_FOLDER, () => shell.openPath(SETTINGS_DIR));
@@ -121,7 +128,7 @@ ipcMain.handle(IpcEvents.INIT_FILE_WATCHERS, ({ sender }) => {
 
     if (IS_DEV) {
         rendererCssWatcher = watch(RENDERER_CSS_PATH, { persistent: false }, async () => {
-            sender.postMessage(IpcEvents.PRELOAD_RENDERER_CSS_UPDATE, await readFile(RENDERER_CSS_PATH, "utf-8"));
+            sender.postMessage(IpcEvents.RENDERER_CSS_UPDATE, await readFile(RENDERER_CSS_PATH, "utf-8"));
         });
     }
 
@@ -161,7 +168,7 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
 });
 
-ipcMain.handle(IpcEvents.PRELOAD_GET_RENDERER_CSS, () => readFile(RENDERER_CSS_PATH, "utf-8"));
+ipcMain.handle(IpcEvents.GET_RENDERER_CSS, () => readFile(RENDERER_CSS_PATH, "utf-8"));
 
 if (IS_DISCORD_DESKTOP) {
     ipcMain.on(IpcEvents.PRELOAD_GET_RENDERER_JS, e => {

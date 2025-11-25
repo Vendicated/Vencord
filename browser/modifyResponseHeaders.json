@@ -15,7 +15,8 @@
             ]
         },
         "condition": {
-            "resourceTypes": ["main_frame", "sub_frame"]
+            "resourceTypes": ["main_frame", "sub_frame"],
+            "urlFilter": "https://*.discord.com/*"
         }
     },
     {

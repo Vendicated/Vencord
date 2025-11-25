@@ -18,7 +18,7 @@
 
 import "./SpecialCard.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { Clickable, Forms } from "@webpack/common";

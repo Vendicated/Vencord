@@ -18,7 +18,7 @@
 
 import { debounce } from "@shared/debounce";
 import { IpcEvents } from "@shared/IpcEvents";
-import { contextBridge, ipcRenderer, webFrame } from "electron/renderer";
+import { contextBridge, webFrame } from "electron/renderer";
 
 import VencordNative, { invoke, sendSync } from "./VencordNative";
 
@@ -27,29 +27,6 @@ contextBridge.exposeInMainWorld("VencordNative", VencordNative);
 // Discord
 if (location.protocol !== "data:") {
     invoke(IpcEvents.INIT_FILE_WATCHERS);
-
-    invoke<string>(IpcEvents.PRELOAD_GET_RENDERER_CSS).then(css => {
-        console.log("ADDING CSS");
-        const style = document.createElement("style");
-        style.id = "vencord-css-core";
-        style.textContent = css;
-
-        if (document.readyState === "complete") {
-            document.documentElement.appendChild(style);
-        } else {
-            document.addEventListener("DOMContentLoaded", () => document.documentElement.appendChild(style), {
-                once: true
-            });
-        }
-
-        if (IS_DEV) {
-            console.log("[Vencord] Listening for renderer CSS updates");
-            ipcRenderer.on(IpcEvents.PRELOAD_RENDERER_CSS_UPDATE, (e, newCss: string) => {
-                console.log("[Vencord] Updating renderer CSS");
-                style.textContent = newCss;
-            });
-        }
-    });
 
     if (IS_DISCORD_DESKTOP) {
         webFrame.executeJavaScript(sendSync<string>(IpcEvents.PRELOAD_GET_RENDERER_JS));
