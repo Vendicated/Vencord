@@ -10,16 +10,11 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import usrbg from "@plugins/usrbg";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, Plugin } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 
 import style from "./style.css?managed";
-
-interface iUSRBG extends Plugin {
-    userHasBackground(userId: string);
-    getImageUrl(userId: string): string | null;
-}
 
 interface Nameplate {
     imgAlt: string;

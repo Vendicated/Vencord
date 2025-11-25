@@ -16,11 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { definePluginSettings, Settings } from "@api/Settings";
-import { LinkButton } from "@components/Button";
+import { classNameFactory } from "@api/Styles";
+import { Button } from "@components/Button";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+const cl = classNameFactory("vc-usrbg-");
 const API_URL = "https://usrbg.is-hardly.online/users";
 
 interface UsrbgApiReturn {
@@ -75,13 +79,15 @@ export default definePlugin({
 
     data: null as UsrbgApiReturn | null,
 
-    settingsAboutComponent: () => {
-        return (
-            <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
-                Get your own USRBG banner
-            </LinkButton>
-        );
-    },
+    settingsAboutComponent: () => (
+        <Button
+            variant="link"
+            className={cl("settings-button")}
+            onClick={() => VencordNative.native.openExternal("https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner")}
+        >
+            Get your own USRBG banner
+        </Button>
+    ),
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
         if (className.includes("tile_")) {

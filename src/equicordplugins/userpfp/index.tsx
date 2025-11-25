@@ -9,6 +9,8 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Button } from "@components/Button";
+import { Flex } from "@components/Flex";
+import { Heart } from "@components/Heart";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { openInviteModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -45,7 +47,7 @@ export default definePlugin({
     authors: [EquicordDevs.nexpid, Devs.thororen],
     settings,
     settingsAboutComponent: () => (
-        <>
+        <Flex className={cl("settings")}>
             <Button
                 variant="link"
                 className={cl("settings-button")}
@@ -53,15 +55,14 @@ export default definePlugin({
             >
                 Join UserPFP Server
             </Button>
-            <br />
             <Button
-                variant="link"
+                variant="secondary"
                 className={cl("settings-button")}
                 onClick={() => VencordNative.native.openExternal(DONO_URL)}
             >
-                Support UserPFP here
+                Support UserPFP here <Heart className={cl("settings-heart")} />
             </Button>
-        </>
+        </Flex>
     ),
     patches: [
         {
