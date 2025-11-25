@@ -18,7 +18,7 @@ import { User } from "@vencord/discord-types";
 
 const cl = classNameFactory("vc-userpfp-");
 const DONO_URL = "https://ko-fi.com/coolesding";
-const INVITE_LINK = "https://discord.gg/userpfp-1129784704267210844";
+const INVITE_LINK = "userpfp-1129784704267210844";
 
 let data = { avatars: {} as Record<string, string> };
 const settings = definePluginSettings({

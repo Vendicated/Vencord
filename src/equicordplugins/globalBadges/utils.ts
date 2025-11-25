@@ -13,7 +13,7 @@ const cache = new Map<string, BadgeCache>();
 const EXPIRES = 1000 * 60 * 15;
 
 export const cl = classNameFactory("vc-global-badges-");
-export const INVITE_LINK = "https://discord.gg/kwHCJPxp8t";
+export const INVITE_LINK = "kwHCJPxp8t";
 
 export const fetchBadges = (id: string): BadgeCache["badges"] | undefined => {
     const cachedValue = cache.get(id);
