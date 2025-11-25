@@ -35,7 +35,7 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
         hideDivider={hideDivider}
         className={noMargin && cl("section-remove-margin")}
     >
-        <Flex style={{ gap: "4px " }}>
+        <Flex gap="4px">
             <Button
                 onClick={() => {
                     if (!authorization.isAuthorized()) {

@@ -51,7 +51,7 @@ function makeSearchItem(src: string) {
                         key={key}
                         id={key}
                         label={
-                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                            <Flex alignItems="center" gap="0.5em">
                                 <img
                                     style={{
                                         borderRadius: "50%",
@@ -72,7 +72,7 @@ function makeSearchItem(src: string) {
                 key="search-image-all"
                 id="search-image-all"
                 label={
-                    <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                    <Flex alignItems="center" gap="0.5em">
                         <OpenExternalIcon height={16} width={16} />
                         All
                     </Flex>

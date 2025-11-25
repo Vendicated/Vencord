@@ -121,7 +121,7 @@ function ServerTrace({ trace }: ServerTraceProps) {
         <section>
             <Forms.FormTitle tag="h3">Server Trace</Forms.FormTitle>
             <code>
-                <Flex flexDirection="column" style={{ color: "var(--header-primary)", gap: 5, userSelect: "text" }}>
+                <Flex flexDirection="column" gap="5px" style={{ color: "var(--header-primary)", userSelect: "text" }}>
                     {lines.map((line, idx) => (
                         <span key={idx}>{line}</span>
                     ))}

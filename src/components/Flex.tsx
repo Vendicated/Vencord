@@ -23,9 +23,10 @@ export interface FlexProps extends HTMLAttributes<HTMLDivElement> {
     gap?: CSSProperties["gap"];
     justifyContent?: CSSProperties["justifyContent"];
     alignItems?: CSSProperties["alignItems"];
+    flexWrap?: CSSProperties["flexWrap"];
 }
 
-export function Flex({ flexDirection, gap = "1em", justifyContent, alignItems, children, style, ...restProps }: FlexProps) {
+export function Flex({ flexDirection, gap = "1em", justifyContent, alignItems, flexWrap, children, style, ...restProps }: FlexProps) {
     style ??= {};
     Object.assign(style, {
         display: "flex",
@@ -33,6 +34,7 @@ export function Flex({ flexDirection, gap = "1em", justifyContent, alignItems, c
         gap,
         justifyContent,
         alignItems,
+        flexWrap
     });
 
     return (
