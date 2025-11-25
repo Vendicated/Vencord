@@ -252,7 +252,7 @@
 }
 
 /* Quest name color. */
-.questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > h2[class^="eyebrow"] {
+.questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > [class^="eyebrow"] {
     color: var(--questify-quest-name) !important; /* Necessary !important */
 }
 

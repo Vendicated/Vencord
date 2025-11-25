@@ -6,7 +6,6 @@
 
 import { classNameFactory } from "@api/Styles";
 import { questIsIgnored, settings } from "@equicordplugins/questify/settings";
-import { getIntlMessageFromHash, runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "@utils/index";
 import { Logger } from "@utils/Logger";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, UserStore } from "@webpack/common";
@@ -20,14 +19,6 @@ export const questPath = "/quest-home";
 export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;
-
-// TODO: Remove this once Discord has properly deployed the new system.
-export function getIntlMessageQuestify(key: string, values?: Record<PropertyKey, any>): string[] {
-    const remake = getIntlMessageFromHash(runtimeHashMessageKey(key), values, key);
-    const legacy = getIntlMessageFromHash(runtimeHashMessageKeyLegacy(key), values, key);
-
-    return remake.length ? remake : legacy.length ? legacy : [""];
-}
 
 export function setIgnoredQuestIDs(questIDs: string[], userId?: string): void {
     const currentUserID = userId ?? UserStore.getCurrentUser()?.id;
@@ -212,7 +203,7 @@ export async function waitUntilEnrolled(quest: Quest, timeout: number = 30000, i
     }
 }
 
-export async function reportVideoQuestProgress(quest: Quest, currentProgress: number, logger?: Logger): Promise<boolean> {
+export async function reportVideoQuestProgress(quest: Quest, currentProgress: number, logger?: Logger, options?: { attempts?: number, delay?: number; }): Promise<boolean> {
     const questName = normalizeQuestName(quest.config.messages.questName);
 
     if (!quest.userStatus?.enrolledAt) {
@@ -222,26 +213,42 @@ export async function reportVideoQuestProgress(quest: Quest, currentProgress: nu
         return true;
     }
 
-    try {
-        const response = await RestAPI.post({
-            url: `/quests/${quest.id}/video-progress`,
-            body: { timestamp: currentProgress }
-        });
+    const maxAttempts = options?.attempts ?? 1;
+    const delay = options?.delay ?? 2500;
 
-        if (!response || !response.body) {
-            logger?.warn(`[${getFormattedNow()}] No response body received while reporting video progress for Quest ${questName}.`);
-            return false;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const response = await RestAPI.post({
+                url: `/quests/${quest.id}/video-progress`,
+                body: { timestamp: currentProgress }
+            });
+
+            if (!response || !response.body) {
+                logger?.warn(`[${getFormattedNow()}] No response body received while reporting video progress for Quest ${questName} on attempt ${attempt}/${maxAttempts}.`);
+
+                if (attempt < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+
+                continue;
+            }
+
+            logger?.info(`[${getFormattedNow()}] Quest ${questName} progress reported: ${currentProgress} seconds.`);
+            return true;
+        } catch (error) {
+            logger?.error(`[${getFormattedNow()}] Failed to report progress for Quest ${questName} on attempt ${attempt}/${maxAttempts}:`, error);
+
+            if (attempt < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
         }
-
-        logger?.info(`[${getFormattedNow()}] Quest ${questName} progress reported: ${currentProgress} seconds.`);
-        return true;
-    } catch (error) {
-        logger?.error(`[${getFormattedNow()}] Failed to report progress for Quest ${questName}:`, error);
-        return false;
     }
+
+    logger?.warn(`[${getFormattedNow()}] Exhausted all ${maxAttempts} attempts to report progress for Quest ${questName}.`);
+    return false;
 }
 
-export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolean, logger?: Logger): Promise<{ progress: number | null; }> {
+export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolean, logger?: Logger, options?: { attempts?: number, delay?: number; }): Promise<{ progress: number | null; }> {
     const questName = normalizeQuestName(quest.config.messages.questName);
 
     if (!quest.userStatus?.enrolledAt) {
@@ -251,36 +258,52 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
         return { progress: null };
     }
 
-    try {
-        const response = await RestAPI.post({
-            url: `/quests/${quest.id}/heartbeat`,
-            body: {
-                stream_key: `call:${quest.id}:1`,
-                terminal
+    const maxAttempts = options?.attempts ?? 1;
+    const delay = options?.delay ?? 2500;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const response = await RestAPI.post({
+                url: `/quests/${quest.id}/heartbeat`,
+                body: {
+                    stream_key: `call:${quest.id}:1`,
+                    terminal
+                }
+            });
+
+            if (!response || !response.body) {
+                logger?.warn(`[${getFormattedNow()}] No response body received while sending heartbeat for Quest ${questName} on attempt ${attempt}/${maxAttempts}.`);
+
+                if (attempt < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+
+                continue;
             }
-        });
 
-        if (!response || !response.body) {
-            logger?.warn(`[${getFormattedNow()}] No response body received while sending heartbeat for Quest ${questName}.`);
-            return { progress: null };
+            const { body } = snakeToCamel(response);
+            const progressPlayType = body.progress.PLAY_ON_DESKTOP || body.progress.PLAY_ON_XBOX || body.progress.PLAY_ON_PLAYSTATION || body.progress.PLAY_ACTIVITY;
+            const questPlayType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
+            const progress = progressPlayType?.value || 1;
+
+            if (!questPlayType) {
+                logger?.warn(`[${getFormattedNow()}] Could not recognize the Quest type for Quest ${questName}.`);
+                return { progress: null };
+            }
+
+            logger?.info(`[${getFormattedNow()}] Heartbeat sent for Quest ${questName} with progress: ${progress}/${questPlayType.target}.`);
+            return { progress };
+        } catch (error) {
+            logger?.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${questName} on attempt ${attempt}/${maxAttempts}:`, error);
+
+            if (attempt < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
         }
-
-        const { body } = snakeToCamel(response);
-        const progressPlayType = body.progress.PLAY_ON_DESKTOP || body.progress.PLAY_ON_XBOX || body.progress.PLAY_ON_PLAYSTATION || body.progress.PLAY_ACTIVITY;
-        const questPlayType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-        const progress = progressPlayType?.value || 1;
-
-        if (!questPlayType) {
-            logger?.warn(`[${getFormattedNow()}] Could not recognize the Quest type for Quest ${questName}.`);
-            return { progress: null };
-        }
-
-        logger?.info(`[${getFormattedNow()}] Heartbeat sent for Quest ${questName} with progress: ${progress}/${questPlayType.target}.`);
-        return { progress };
-    } catch (error) {
-        logger?.error(`[${getFormattedNow()}] Failed to send heartbeat for Quest ${questName}:`, error);
-        return { progress: null };
     }
+
+    logger?.warn(`[${getFormattedNow()}] Exhausted all ${maxAttempts} attempts to send heartbeat for Quest ${questName}.`);
+    return { progress: null };
 }
 
 export function getBadgeSize(value: string, negative: boolean): number {

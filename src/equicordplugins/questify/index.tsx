@@ -10,7 +10,6 @@ import { showNotification } from "@api/Notifications";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { ErrorBoundary, openPluginModal } from "@components/index";
 import { EquicordDevs } from "@utils/constants";
-import { getIntlMessage } from "@utils/index";
 import definePlugin, { StartAt } from "@utils/types";
 import { onceReady } from "@webpack";
 import { ContextMenuApi, Menu, NavigationRouter, useEffect, useState } from "@webpack/common";
@@ -18,7 +17,7 @@ import { JSX } from "react";
 
 import { addIgnoredQuest, addRerenderCallback, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, rerenderQuests, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
 import { ExcludedQuestMap, GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, RGB } from "./utils/components";
-import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getIntlMessageQuestify, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, waitUntilEnrolled } from "./utils/misc";
+import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, waitUntilEnrolled } from "./utils/misc";
 
 const patchedMobileQuests = new Set<string>();
 export const activeQuestIntervals = new Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; duration: number, type: string; }>();
@@ -653,10 +652,10 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
         }
     }
 
-    reportPlayGameQuestProgress(quest, false, QuestifyLogger);
+    const initial = await reportPlayGameQuestProgress(quest, false, QuestifyLogger, { attempts: 3, delay: 2500 });
 
     const progressIntervalId = setInterval(async () => {
-        const result = await reportPlayGameQuestProgress(quest, false, QuestifyLogger);
+        const result = await reportPlayGameQuestProgress(quest, false, QuestifyLogger, { attempts: 3, delay: 2500 });
 
         if (result.progress === null) {
             clearInterval(progressIntervalId);
@@ -667,12 +666,14 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
         const isComplete = result.progress >= questDuration;
         const timeRemaining = questDuration - result.progress;
+        const intervalData = activeQuestIntervals.get(quest.id);
+        intervalData && (intervalData.progress = result.progress);
 
         if (isComplete) {
             clearInterval(progressIntervalId);
             clearTimeout(renderIntervalId);
             activeQuestIntervals.delete(quest.id);
-            const success = await reportPlayGameQuestProgress(quest, true, QuestifyLogger);
+            const success = await reportPlayGameQuestProgress(quest, true, QuestifyLogger, { attempts: 3, delay: 2500 });
 
             if (success) {
                 QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
@@ -694,7 +695,7 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
             setTimeout(async () => {
                 activeQuestIntervals.delete(quest.id);
-                const success = await reportPlayGameQuestProgress(quest, true, QuestifyLogger);
+                const success = await reportPlayGameQuestProgress(quest, true, QuestifyLogger, { attempts: 3, delay: 2500 });
 
                 if (success) {
                     QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
@@ -726,7 +727,7 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
         rerenderQuests();
     }, 1000);
 
-    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initialProgress, duration: questDuration, type: "play" });
+    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initial.progress || initialProgress, duration: questDuration, type: "play" });
 
     if (remaining > 0) {
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} will be completed in the background in ${remaining} seconds.`);
@@ -759,7 +760,7 @@ function processQuestForAutoComplete(quest: Quest): boolean {
         return false;
     }
 
-    return true; // True means continue as normal, false means prevent default action.
+    return true; // true means continue as normal, false means prevent default action.
 }
 
 function shouldDisableQuestAcceptedButton(quest: Quest): boolean | null {
@@ -786,19 +787,15 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
     const taskType = playType || watchType;
     const duration = taskType?.target || 0;
     const intervalData = activeQuestIntervals.get(quest.id);
-    const progress = Math.min(
-        (intervalData?.progress ?? (quest.userStatus?.progress?.[taskType?.type || ""]?.value || 0)),
-        duration
-    );
+    const progress = Math.min((intervalData?.progress ?? (quest.userStatus?.progress?.[taskType?.type || ""]?.value || 0)), duration);
     const timeRemaining = Math.max(0, duration - progress);
     const progressFormatted = `${String(Math.floor(timeRemaining / 60)).padStart(2, "0")}:${String(timeRemaining % 60).padStart(2, "0")}`;
 
-    // TODO: Revert to using the built-in getIntlMessage once Discord has properly deployed the new system.
     if (questEnrolledAt && ((playType && completeGameQuestsInBackground) || (watchType && completeVideoQuestsInBackground))) {
         if (!!intervalData) {
-            return getIntlMessageQuestify("QUESTS_VIDEO_WATCH_RESUME_WITH_TIME_CTA", { remainTime: progressFormatted })[0].replace(getIntlMessage("GAME_LIBRARY_UPDATES_ACTION_RESUME"), getIntlMessage(playType ? "USER_ACTIVITY_PLAYING" : "USER_ACTIVITY_WATCHING"));
+            return timeRemaining ? `Completing (${progressFormatted})` : "Completing...";
         } else if (watchType || (playType && IS_DISCORD_DESKTOP)) {
-            return getIntlMessageQuestify("QUESTS_VIDEO_WATCH_RESUME_WITH_TIME_CTA", { remainTime: progressFormatted })[0];
+            return `Resume (~${progressFormatted})`;
         }
     }
 
@@ -818,7 +815,10 @@ function getQuestPanelOverride(): Quest | null {
 
         const timeRemaining = interval.duration - interval.progress;
 
-        if (timeRemaining < closestTimeRemaining) {
+        // 3 second buffer to account for per-second rerendering
+        // which could cause flickering if multiple quests were
+        // started at the same time.
+        if (timeRemaining < (closestTimeRemaining - 3)) {
             closestTimeRemaining = timeRemaining;
             closestQuest = quest;
         }
@@ -934,7 +934,7 @@ export default definePlugin({
         },
         {
             // Hides Quests tab in the Discovery page.
-            find: "GlobalDiscoverySidebar",
+            find: "GLOBAL_DISCOVERY_SIDEBAR},",
             replacement: [
                 {
                     match: /(GLOBAL_DISCOVERY_TABS).map/,
@@ -1392,5 +1392,11 @@ export default definePlugin({
     stop() {
         removeServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
         stopAutoFetchingQuests();
+
+        activeQuestIntervals.forEach((intervalData, questId) => {
+            clearInterval(intervalData.progressTimeout);
+            clearTimeout(intervalData.rerenderTimeout);
+            activeQuestIntervals.delete(questId);
+        });
     }
 });
