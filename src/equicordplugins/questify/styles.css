@@ -229,9 +229,9 @@
     position: relative;
 }
 
-/* Background of bottom half of Quest tile. */
+/* Background of Quest tile. */
 .questify-quest-item-restyle > div {
-    background-color: var(--questify-color);
+    background-color: var(--questify-color) !important; /* Necessary !important */
 }
 
 /* Normal button text + SVG button text color. */
