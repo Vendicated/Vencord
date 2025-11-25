@@ -29,7 +29,6 @@ export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
 import { coreStyleRootNode, initStyles } from "@api/Styles";
-import { addVencordUiStyles } from "@components/css";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { IS_WINDOWS } from "@utils/constants";
@@ -180,8 +179,6 @@ startAllPlugins(StartAt.Init);
 init();
 
 document.addEventListener("DOMContentLoaded", () => {
-    addVencordUiStyles();
-
     startAllPlugins(StartAt.DOMContentLoaded);
 
     // FIXME

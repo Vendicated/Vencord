@@ -5,9 +5,9 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@utils/css";
 import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@utils/css";
 import { resolveLang } from "@plugins/shikiCodeblocks.desktop/api/languages";
 import { HighlighterProps } from "@plugins/shikiCodeblocks.desktop/components/Highlighter";
 import { HljsSetting } from "@plugins/shikiCodeblocks.desktop/types";
+import { classNameFactory } from "@utils/css";
 import { hljs } from "@webpack/common";
 
 export const cl = classNameFactory("vc-shiki-");
