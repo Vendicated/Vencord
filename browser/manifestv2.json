@@ -49,7 +49,7 @@
     ],
     "browser_specific_settings": {
         "gecko": {
-            "id": "equicord-firefox@equicord.org",
+            "id": "firefox@equicord.org",
             "strict_min_version": "128.0",
             "data_collection_permissions": {
                 "required": [
