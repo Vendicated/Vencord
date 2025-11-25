@@ -9,9 +9,7 @@ export let EXTENSION_BASE_URL: string;
 export let RENDERER_CSS_URL: string;
 
 let resolveMetaReady: Function;
-export const metaReady = IS_EXTENSION
-    ? new Promise<void>(res => resolveMetaReady = res)
-    : /* #__PURE__*/ Promise.reject("metaReady is only available in the extension build");
+export const metaReady = new Promise<void>(res => resolveMetaReady = res);
 
 if (IS_EXTENSION) {
     const listener = (e: MessageEvent) => {
