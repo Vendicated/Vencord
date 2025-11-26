@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { DataStore } from "@api/index";
 import "./style.css";
 
 import { definePluginSettings, Settings } from "@api/Settings";
@@ -11,15 +12,21 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore, MessageStore, RelationshipStore, StreamerModeStore, useEffect, UserStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, Menu, MessageStore, RelationshipStore, StreamerModeStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Button, ErrorBoundary, Heading, TextButton } from "@components/index";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/index";
 
 const wrapEmojis = findByCodeLazy("lastIndex;return");
 const AccessibilityStore = findStoreLazy("AccessibilityStore");
 const colorPattern = /^#(?:[\da-f]{3}){1,2}$|^#(?:[\da-f]{4}){1,2}$|(rgb|hsl)a?\((\s*-?\d+%?\s*,){2}(\s*-?\d+%?\s*)\)|(rgb|hsl)a?\((\s*-?\d+%?\s*,){3}\s*(0|(0?\.\d+)|1)\)$/iu;
 const roleColorPattern = /^role((?:\+|-)\d{0,4})?$/iu;
 const symbolPattern = /^[\p{S}\p{P}]{1,3}$/iu;
-const templatePattern = /(?:\{(?:friend|nick|display|user)(?:,\s*(?:friend|nick|display|user))*\})/iu;
+const templatePattern = /(?:\{(?:custom|friend|nick|display|user)(?:,\s*(?:custom|friend|nick|display|user))*\})/iu;
+
+type CustomNicknameData = Record<string, string>;
+let customNicknames: CustomNicknameData = {};
 
 function adjustHex(color: string, percent: number): string {
     let hex = color.replace("#", "");
@@ -208,8 +215,8 @@ function validTemplate(value: string) {
             suffix.length > 3 ||
             (!!prefix && !symbolPattern.test(prefix)) ||
             (!!suffix && !symbolPattern.test(suffix)) ||
-            targetProcessedNames.length > 4 ||
-            targetProcessedNames.some(name => !["friend", "nick", "display", "user"].includes(name.trim()))
+            targetProcessedNames.length > 5 ||
+            targetProcessedNames.some(name => !["custom", "friend", "nick", "display", "user"].includes(name.trim()))
         );
     });
 
@@ -218,7 +225,13 @@ function validTemplate(value: string) {
     }
 }
 
-function getProcessedNames(author: any, truncateAllNamesWithStreamerMode: boolean, discriminators: boolean): [string | null, string | null, string | null, string | null] {
+function getProcessedNames(author: any, truncateAllNamesWithStreamerMode: boolean, discriminators: boolean): {
+    username: string | null;
+    display: string | null;
+    nick: string | null;
+    friend: string | null;
+    custom: string | null;
+} {
     let discriminator: string | null = null;
 
     if (discriminators) {
@@ -254,7 +267,13 @@ function getProcessedNames(author: any, truncateAllNamesWithStreamerMode: boolea
             ? friendName[0] + "..."
             : friendName as string;
 
-    return [username, display, nick, friend];
+    const customName: string | null = customNicknames[author.id] || null;
+    const custom: string | null = !customName ? null
+        : StreamerModeStore.enabled && (truncateAllNamesWithStreamerMode || customName.toLowerCase() === author.username.toLowerCase())
+            ? customName[0] + "..."
+            : customName;
+
+    return { username, display, nick, friend, custom };
 }
 
 interface mentionProps {
@@ -351,8 +370,8 @@ function renderUsername(
     const isReaction = isReactionsTooltip || isReactionsPopout;
     const isVoice = type === "voiceChannel";
 
-    const config = hookless ? settings.store : settings.use(["messages", "replies", "mentions", "memberList", "profilePopout", "reactions", "discriminators", "hideDefaultAtSign", "truncateAllNamesWithStreamerMode", "removeDuplicates", "ignoreGradients", "ignoreFonts", "animateGradients", "includedNames", "friendNameColor", "nicknameColor", "displayNameColor", "usernameColor", "nameSeparator", "triggerNameRerender"]);
-    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, ignoreFonts, animateGradients, includedNames, friendNameColor, nicknameColor, displayNameColor, usernameColor, nameSeparator, triggerNameRerender } = config;
+    const config = hookless ? settings.store : settings.use(["messages", "replies", "mentions", "memberList", "profilePopout", "reactions", "discriminators", "hideDefaultAtSign", "truncateAllNamesWithStreamerMode", "removeDuplicates", "ignoreGradients", "ignoreFonts", "animateGradients", "includedNames", "customNameColor", "friendNameColor", "nicknameColor", "displayNameColor", "usernameColor", "nameSeparator", "triggerNameRerender"]);
+    const { messages, replies, mentions, memberList, profilePopout, reactions, discriminators, hideDefaultAtSign, truncateAllNamesWithStreamerMode, removeDuplicates, ignoreGradients, ignoreFonts, animateGradients, includedNames, customNameColor, friendNameColor, nicknameColor, displayNameColor, usernameColor, nameSeparator, triggerNameRerender } = config;
 
     const canUseGradient = ((author as GuildMember)?.guildId ? (GuildStore.getGuild((author as GuildMember).guildId) ?? {}).premiumFeatures?.features.includes("ENHANCED_ROLE_COLORS") : false);
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
@@ -361,14 +380,16 @@ function renderUsername(
     const resolvedDisplayNameColor = author ? resolveColor(author, displayNameColor.trim(), "", canUseGradient) : null;
     const resolvedNicknameColor = author ? resolveColor(author, nicknameColor.trim(), "", canUseGradient) : null;
     const resolvedFriendNameColor = author ? resolveColor(author, friendNameColor.trim(), "", canUseGradient) : null;
+    const resolvedCustomNameColor = author ? resolveColor(author, customNameColor.trim(), "", canUseGradient) : null;
     const affixColor = { color: textMutedValue, "-webkit-text-fill-color": textMutedValue, isolation: "isolate", "white-space": "pre", "font-family": "var(--font-primary)", "letter-spacing": "normal" };
-    const [username, display, nick, friend] = getProcessedNames(author, truncateAllNamesWithStreamerMode, discriminators);
+    const { username, display, nick, friend, custom } = getProcessedNames(author, truncateAllNamesWithStreamerMode, discriminators);
 
     const names: Record<string, [string | null, object | null]> = {
         user: [username, resolvedUsernameColor],
         display: [display, resolvedDisplayNameColor],
         nick: [nick, resolvedNicknameColor],
         friend: [friend, resolvedFriendNameColor],
+        custom: [custom, resolvedCustomNameColor]
     };
 
     const outputs: any[] = [];
@@ -421,6 +442,7 @@ function renderUsername(
     let second = outputs.shift();
     let third = outputs.shift();
     let fourth = outputs.shift();
+    let fifth = outputs.shift();
 
     const firstValueWrapped = hookless ?
         (first.name || "")
@@ -438,10 +460,15 @@ function renderUsername(
         ((fourth ?? {}).name || "")
         : wrapEmojis((fourth ?? {}).name || "");
 
+    const fifthValueWrapped = hookless ?
+        ((fifth ?? {}).name || "")
+        : wrapEmojis((fifth ?? {}).name || "");
+
     first.wrapped = firstValueWrapped;
     second && (second.wrapped = secondValueWrapped);
     third && (third.wrapped = thirdValueWrapped);
     fourth && (fourth.wrapped = fourthValueWrapped);
+    fifth && (fifth.wrapped = fifthValueWrapped);
 
     if (isMessage && !messages) {
         return [null, null, null];
@@ -462,10 +489,14 @@ function renderUsername(
         return [fallbackText, <>{fallbackText}</>, fallbackText];
     }
 
-    const prioritizeUsername = (new Set([first, second, third, fourth].filter(Boolean).map(pos => pos.name.toLowerCase())).size > 1);
+    const prioritizeUsername = (new Set([first, second, third, fourth, fifth].filter(Boolean).map(pos => pos.name.toLowerCase())).size > 1);
 
     if (removeDuplicates) {
         // Remove duplicates from back to front. Prioritize the earlier name, unless it's the username and there's more than one unique option, then prioritize it.
+        fifth && fourth && fifth.name.toLowerCase() === fourth.name.toLowerCase() ? fifth.type === "user" && prioritizeUsername ? fourth = null : fifth = null : null;
+        fifth && third && fifth.name.toLowerCase() === third.name.toLowerCase() ? fifth.type === "user" && prioritizeUsername ? third = null : fifth = null : null;
+        fifth && second && fifth.name.toLowerCase() === second.name.toLowerCase() ? fifth.type === "user" && prioritizeUsername ? second = null : fifth = null : null;
+        fifth && first && fifth.name.toLowerCase() === first.name.toLowerCase() ? fifth.type === "user" && prioritizeUsername ? first = null : fifth = null : null;
         fourth && third && fourth.name.toLowerCase() === third.name.toLowerCase() ? fourth.type === "user" && prioritizeUsername ? third = null : fourth = null : null;
         fourth && second && fourth.name.toLowerCase() === second.name.toLowerCase() ? fourth.type === "user" && prioritizeUsername ? second = null : fourth = null : null;
         fourth && first && fourth.name.toLowerCase() === first.name.toLowerCase() ? fourth.type === "user" && prioritizeUsername ? first = null : fourth = null : null;
@@ -474,11 +505,12 @@ function renderUsername(
         second && first && second.name.toLowerCase() === first.name.toLowerCase() ? second.type === "user" && prioritizeUsername ? first = null : second = null : null;
     }
 
-    const remainingNames = [first, second, third, fourth].filter(Boolean);
+    const remainingNames = [first, second, third, fourth, fifth].filter(Boolean);
     first = remainingNames.shift();
     second = remainingNames.shift();
     third = remainingNames.shift();
     fourth = remainingNames.shift();
+    fifth = remainingNames.shift();
 
     const useTopRoleStyle = isMention || isReactionsPopout;
     const topRoleStyle = resolveColor(author, "Role", "", canUseGradient);
@@ -500,7 +532,8 @@ function renderUsername(
     const secondDataText = second && shouldAnimateSecondaryNames ? (second.prefix + second.name + second.suffix) : "";
     const thirdDataText = third && shouldAnimateSecondaryNames ? (third.prefix + third.name + third.suffix) : "";
     const fourthDataText = fourth && shouldAnimateSecondaryNames ? (fourth.prefix + fourth.name + fourth.suffix) : "";
-    const allDataText = [firstDataText, secondDataText, thirdDataText, fourthDataText].filter(Boolean).join(nameSeparator).trim();
+    const fifthDataText = fifth && shouldAnimateSecondaryNames ? (fifth.prefix + fifth.name + fifth.suffix) : "";
+    const allDataText = [firstDataText, secondDataText, thirdDataText, fourthDataText, fifthDataText].filter(Boolean).join(nameSeparator).trim();
 
     // Only mentions and reactions popouts should patch in the gradient glow or else a double glow will appear on messages.
     const hoveringClass = (isHovering ? " show-me-your-name-gradient-hovered" : "");
@@ -512,10 +545,12 @@ function renderUsername(
     const secondGroupClasses = "show-me-your-name-name-group show-me-your-name-second-name-group";
     const thirdGroupClasses = "show-me-your-name-name-group show-me-your-name-third-name-group";
     const fourthGroupClasses = "show-me-your-name-name-group show-me-your-name-fourth-name-group";
+    const fifthGroupClasses = "show-me-your-name-name-group show-me-your-name-fifth-name-group";
     const firstNameClasses = "show-me-your-name-name show-me-your-name-first-name";
     const secondNameClasses = "show-me-your-name-name show-me-your-name-second-name";
     const thirdNameClasses = "show-me-your-name-name show-me-your-name-third-name";
     const fourthNameClasses = "show-me-your-name-name show-me-your-name-fourth-name";
+    const fifthNameClasses = "show-me-your-name-name show-me-your-name-fifth-name";
     const prefixClasses = "show-me-your-name-affix show-me-your-name-prefix";
     const suffixClasses = "show-me-your-name-affix show-me-your-name-suffix";
 
@@ -549,85 +584,39 @@ function renderUsername(
                         {first.wrapped}</span>
                 </span>
             )}
-            {second && (
+            {[
+                { name: second, dataText: secondDataText, groupClass: secondGroupClasses, nameClass: secondNameClasses, position: "second" },
+                { name: third, dataText: thirdDataText, groupClass: thirdGroupClasses, nameClass: thirdNameClasses, position: "third" },
+                { name: fourth, dataText: fourthDataText, groupClass: fourthGroupClasses, nameClass: fourthNameClasses, position: "fourth" },
+                { name: fifth, dataText: fifthDataText, groupClass: fifthGroupClasses, nameClass: fifthNameClasses, position: "fifth" }
+            ].map(({ name, dataText, groupClass, nameClass, position }) => name && (
                 <span
-                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? (gradientClasses + " " + secondGroupClasses) : secondGroupClasses)}
-                    data-text={shouldGradientGlow && secondDataText ? secondDataText : undefined}
-                    style={(shouldGradientGlow && shouldAnimateSecondaryNames ? second.style.gradient.animated : undefined) as React.CSSProperties}
+                    key={position}
+                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? (gradientClasses + " " + groupClass) : groupClass)}
+                    data-text={shouldGradientGlow && dataText ? dataText : undefined}
+                    style={(shouldGradientGlow && shouldAnimateSecondaryNames ? name.style.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span style={affixColor as React.CSSProperties} className={prefixClasses}>
                         <span>{nameSeparator}</span>
-                        {second.prefix}</span>
+                        {name.prefix}</span>
                     <span
                         // On non-primary names, allow disabling the gradients completely, or just their animation & glow.
-                        className={secondNameClasses}
+                        className={nameClass}
                         style={{
                             ...(ignoreFonts ? { "font-family": "var(--font-primary)", "letter-spacing": "normal" } : {}),
                             ...(ignoreGradients
-                                ? second.style.normal.adjusted
-                                : shouldAnimateGradients && shouldAnimateSecondaryNames && second.style.gradient
-                                    ? second.style.gradient.animated
-                                    : second.style.gradient
-                                        ? second.style.gradient.static.original
-                                        : second.style.normal.adjusted)
+                                ? name.style.normal.adjusted
+                                : shouldAnimateGradients && shouldAnimateSecondaryNames && name.style.gradient
+                                    ? name.style.gradient.animated
+                                    : name.style.gradient
+                                        ? name.style.gradient.static.original
+                                        : name.style.normal.adjusted)
                         }}>
-                        {second.wrapped}</span>
+                        {name.wrapped}</span>
                     <span style={affixColor as React.CSSProperties} className={suffixClasses}>
-                        {second.suffix}</span>
+                        {name.suffix}</span>
                 </span>
-            )}
-            {third && (
-                <span
-                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? (gradientClasses + " " + thirdGroupClasses) : thirdGroupClasses)}
-                    data-text={shouldGradientGlow && thirdDataText ? thirdDataText : undefined}
-                    style={(shouldGradientGlow && shouldAnimateSecondaryNames ? third.style.gradient.animated : undefined) as React.CSSProperties}
-                >
-                    <span style={affixColor as React.CSSProperties} className={prefixClasses}>
-                        <span>{nameSeparator}</span>
-                        {third.prefix}</span>
-                    <span
-                        className={thirdNameClasses}
-                        style={{
-                            ...(ignoreFonts ? { "font-family": "var(--font-primary)", "letter-spacing": "normal" } : {}),
-                            ...(ignoreGradients
-                                ? third.style.normal.adjusted
-                                : shouldAnimateGradients && shouldAnimateSecondaryNames && third.style.gradient
-                                    ? third.style.gradient.animated
-                                    : third.style.gradient
-                                        ? third.style.gradient.static.original
-                                        : third.style.normal.adjusted)
-                        }}>
-                        {third.wrapped}</span>
-                    <span style={affixColor as React.CSSProperties} className={suffixClasses}>
-                        {third.suffix}</span>
-                </span>
-            )}
-            {fourth && (
-                <span
-                    className={(shouldGradientGlow && shouldAnimateSecondaryNames ? (gradientClasses + " " + fourthGroupClasses) : fourthGroupClasses)}
-                    data-text={shouldGradientGlow && fourthDataText ? fourthDataText : undefined}
-                    style={(shouldGradientGlow && shouldAnimateSecondaryNames ? fourth.style.gradient.animated : undefined) as React.CSSProperties}
-                >
-                    <span style={affixColor as React.CSSProperties} className={prefixClasses}>
-                        <span>{nameSeparator}</span>
-                        {fourth.prefix}</span>
-                    <span
-                        className={fourthNameClasses}
-                        style={{
-                            ...(ignoreFonts ? { "font-family": "var(--font-primary)", "letter-spacing": "normal" } : {}),
-                            ...(ignoreGradients
-                                ? fourth.style.normal.adjusted
-                                : shouldAnimateGradients && shouldAnimateSecondaryNames && fourth.style.gradient
-                                    ? fourth.style.gradient.animated
-                                    : fourth.style.gradient
-                                        ? fourth.style.gradient.static.original
-                                        : fourth.style.normal.adjusted)
-                        }}>
-                        {fourth.wrapped}</span>
-                    <span style={affixColor as React.CSSProperties} className={suffixClasses}>
-                        {fourth.suffix}</span>
-                </span>
-            )}
+            ))}
         </span>
     );
 
@@ -688,6 +677,98 @@ function removeHoveringReactionPopout(id: string) {
     settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
 }
 
+function CustomNicknameModal({ modalProps, user }: { modalProps: ModalProps; user: User; }) {
+    const [value, setValue] = useState(customNicknames[user.id] ?? "");
+
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader>
+                <Heading tag="h1" style={{ flexGrow: 1, margin: 0 }}>
+                    {customNicknames[user.id] ? "Change SMYN Nickname" : "Add SMYN Nickname"}
+                </Heading>
+                <ModalCloseButton onClick={modalProps.onClose} />
+            </ModalHeader>
+            <ModalContent>
+                <Heading tag="h3" style={{ marginBottom: 8, fontSize: "16px", fontWeight: "400", lineHeight: "1.25", color: "var(--text-secondary)" }}>
+                    {"Set a custom SMYN nickname for this user. Make use of it by specifying {custom} in the SMYN template settings."}
+                </Heading>
+                <div style={{ paddingTop: "10px", flexGrow: 0 }}></div>
+                <Heading tag="h3" style={{ marginBottom: 8, fontSize: "14px", fontWeight: 600 }}>
+                    SMYN Nickname
+                </Heading>
+                <TextInput
+                    value={value}
+                    maxLength={32}
+                    onChange={setValue}
+                    placeholder={user.globalName ?? user.username}
+                    style={{ width: "100%" }}
+                />
+                <TextButton
+                    className="show-me-your-name-reset-button"
+                    onClick={async () => {
+                        setValue("");
+                        delete customNicknames[user.id];
+                        await DataStore.set("SMYNCustomNicknames", customNicknames);
+                        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+                    }}
+                >
+                    Reset SMYN Nickname
+                </TextButton>
+                <div style={{ paddingTop: "10px", flexGrow: 0 }}></div>
+            </ModalContent>
+            <ModalFooter className="show-me-your-name-modal-footer-container">
+                <Button
+                    variant="primary"
+                    onClick={async () => {
+                        const trimmed = value.trim().slice(0, 32).trim();
+
+                        if (trimmed) {
+                            customNicknames[user.id] = trimmed;
+                        } else {
+                            delete customNicknames[user.id];
+                        }
+
+                        await DataStore.set("SMYNCustomNicknames", customNicknames);
+                        settings.store.triggerNameRerender = !settings.store.triggerNameRerender;
+                        modalProps.onClose();
+                    }}
+                >
+                    Save
+                </Button>
+                <Button
+                    variant="secondary"
+                    style={{ marginRight: "8px" }}
+                    onClick={modalProps.onClose}
+                >
+                    Cancel
+                </Button>
+            </ModalFooter>
+        </ModalRoot>
+    );
+}
+
+const userContextPatch: NavContextMenuPatchCallback = (children, { user }) => {
+    if (!user) return;
+
+    const currentUser = UserStore.getCurrentUser();
+    if (!currentUser || user.id === currentUser.id) return;
+
+    const group = findGroupChildrenByChildId("user-profile", children);
+
+    !group && children.push(<Menu.MenuSeparator />);
+    (group || children).push(
+        <Menu.MenuItem
+            id="smyn-custom-nickname"
+            label={customNicknames[user.id] ? "Change SMYN Nickname" : "Add SMYN Nickname"}
+            action={() => openModal(props => (
+                <ErrorBoundary>
+                    <CustomNicknameModal modalProps={props} user={user} />
+                </ErrorBoundary>
+            ))}
+        />
+    );
+};
+
 const settings = definePluginSettings({
     messages: {
         type: OptionType.BOOLEAN,
@@ -747,17 +828,17 @@ const settings = definePluginSettings({
     ignoreFonts: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "For the second, third, and fourth names, use GG SANS regardless of the user's custom font.",
+        description: "For the non-primary names, use Discord's default fonts regardless of the user's custom nitro font.",
     },
     ignoreGradients: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "For the second, third, and fourth names, if the role has a gradient, ignore it in favor of the value below.",
+        description: "For the non-primary names, if the role has a gradient, ignore it in favor of the color set below.",
     },
     animateGradients: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "For the second, third, and fourth names, if the role has a gradient, animate it. This is disabled by \"Ignore Gradients\" and reduced motion.",
+        description: "For the non-primary names, if the role has a gradient, animate it. This is disabled by \"Ignore Gradients\" and reduced motion.",
     },
     nameSeparator: {
         type: OptionType.STRING,
@@ -766,9 +847,15 @@ const settings = definePluginSettings({
     },
     includedNames: {
         type: OptionType.STRING,
-        description: "The order to display usernames, display names, nicknames, and friend names. Use the following placeholders: {user}, {display}, {nick}, {friend}. You can provide multiple name options to use as fallbacks if one is unavailable by separating them with commas as such: {friend, nick, display}. You can have up to three prefixes and three suffixes per name.",
-        default: "{friend, nick} [{display}] (@{user})",
+        description: "The order to display usernames, display names, nicknames, friend names, and custom names. Use the following placeholders: {user}, {display}, {nick}, {friend}, {custom}. You can provide multiple name options to use as fallbacks if one is unavailable by separating them with commas as such: {custom, friend, nick}. You can have up to three prefixes and three suffixes per name.",
+        default: "{custom, friend, nick} [{display}] (@{user})",
         isValid: validTemplate,
+    },
+    customNameColor: {
+        type: OptionType.STRING,
+        description: "The color to use for the custom name you assigned a user if it's not the first displayed. Leave blank for default. Accepts hex(a), rgb(a), or hsl(a) input. Use \"Role\" to follow the user's top role color. Use \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        default: "Role-25",
+        isValid: validColor,
     },
     friendNameColor: {
         type: OptionType.STRING,
@@ -804,8 +891,9 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ShowMeYourName",
-    description: "Display any permutation of nicknames, display names, and usernames in chat.",
-    authors: [Devs.Rini, Devs.TheKodeToad, EquicordDevs.Etorix, Devs.sadan],
+    description: "Display any permutation of custom nicknames, friend nicknames, server nicknames, display names, and usernames in chat.",
+    authors: [Devs.Rini, Devs.TheKodeToad, EquicordDevs.Etorix, Devs.sadan, EquicordDevs.Prism],
+    tags: ["SMYN", "Nicknames", "Custom Nicknames",],
     isModified: true,
     settings,
 
@@ -942,6 +1030,15 @@ export default definePlugin({
             }
         }
     ],
+
+    async start() {
+        const data = await DataStore.get<CustomNicknameData>("SMYNCustomNicknames");
+        customNicknames = data ?? {};
+    },
+
+    contextMenus: {
+        "user-context": userContextPatch
+    },
 
     flux: {
         RELATIONSHIP_UPDATE(data) {

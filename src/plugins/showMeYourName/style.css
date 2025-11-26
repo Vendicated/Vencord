@@ -38,3 +38,13 @@
     opacity: .7;
     transition: opacity .1s ease-in-out
 }
+
+.show-me-your-name-modal-footer-container button {
+    width: 100%;
+}
+
+.show-me-your-name-reset-button {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
