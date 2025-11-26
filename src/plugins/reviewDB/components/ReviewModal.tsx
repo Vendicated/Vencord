@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading } from "@components/Heading";
 import { Auth } from "@plugins/reviewDB/auth";
 import { ReviewType } from "@plugins/reviewDB/entities";
 import { Response, REVIEWS_PER_PAGE } from "@plugins/reviewDB/reviewDbApi";
@@ -43,10 +43,10 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
         <ErrorBoundary>
             <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
                 <ModalHeader>
-                    <BaseText size="lg" weight="semibold" className={cl("modal-header")}>
+                    <Heading className={cl("modal-header")}>
                         {name}'s Reviews
                         {!!reviewCount && <span> ({reviewCount} Reviews)</span>}
-                    </BaseText>
+                    </Heading>
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </ModalHeader>
 

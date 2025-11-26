@@ -19,9 +19,9 @@
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
 import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
@@ -159,7 +159,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE} className={cl("modal")}>
             <ModalHeader>
-                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Notification Log</BaseText>
+                <Heading style={{ flexGrow: 1 }}>Notification Log</Heading>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 

@@ -21,9 +21,9 @@ import "./PluginModal.css";
 import { generateId } from "@api/Commands";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -155,7 +155,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
             <ModalHeader separator={false} className={Margins.bottom8}>
-                <BaseText size="xl" weight="bold" style={{ flexGrow: 1 }}>{plugin.name}</BaseText>
+                <HeadingSecondary style={{ flexGrow: 1 }}>{plugin.name}</HeadingSecondary>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
 
@@ -176,7 +176,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             </div>
                         )}
                     </Flex>
-                    <BaseText size="lg" weight="semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</BaseText>
+                    <Heading className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -215,7 +215,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <BaseText size="lg" weight="semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
+                    <Heading className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
                     {renderSettings()}
                 </section>
             </ModalContent>

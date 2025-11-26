@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { settings } from "@plugins/decor/settings";
@@ -22,15 +22,13 @@ function GuidelinesModal(props: ModalProps) {
         className={DecorationModalStyles.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
-            <BaseText
-                size="lg"
-                weight="semibold"
+            <Heading
                 color="header-primary"
                 tag="h1"
                 style={{ flexGrow: 1 }}
             >
                 Hold on
-            </BaseText>
+            </Heading>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>
         <ModalContent

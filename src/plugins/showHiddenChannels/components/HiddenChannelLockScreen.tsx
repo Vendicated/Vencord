@@ -20,6 +20,7 @@ import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Heading, HeadingPrimary, HeadingSecondary, HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import PermissionsViewerPlugin from "@plugins/permissionsViewer";
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
@@ -178,7 +179,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <img className={cl("logo")} src={HiddenChannelLogo} />
 
                 <div className={cl("heading-container")}>
-                    <BaseText size="xxl" weight="bold">This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</BaseText>
+                    <HeadingPrimary>This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</HEadingTertiary>
                     {channel.isNSFW() &&
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
@@ -270,7 +271,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 }
                 {availableTags && availableTags.length > 0 &&
                     <div className={cl("tags-container")}>
-                        <BaseText size="lg" weight="bold">Available tags:</BaseText>
+                        <Heading>Available tags:</Heading>
                         <div className={cl("tags")}>
                             {availableTags.map(tag => <TagComponent tag={tag} key={tag.id} />)}
                         </div>
@@ -298,7 +299,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                                 )}
                             </Tooltip>
                         )}
-                        <BaseText size="lg" weight="bold">Allowed users and roles:</BaseText>
+                        <Heading>Allowed users and roles:</Heading>
                         <Tooltip text={defaultAllowedUsersAndRolesDropdownState ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <button

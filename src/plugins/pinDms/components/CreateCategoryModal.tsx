@@ -5,7 +5,6 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
@@ -78,7 +77,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</BaseText>
+                <Heading style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</Heading>
             </ModalHeader>
 
             {/* form is here so when you press enter while in the text input it submits */}
