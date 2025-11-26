@@ -258,7 +258,7 @@ export default definePlugin({
                 )}
 
                 <Flex flexDirection="column" gap=".5em" className={Margins.top16}>
-                    <Forms.FormText>
+                    <Paragraph>
                         Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                         get the application ID.
                     </Paragraph>
