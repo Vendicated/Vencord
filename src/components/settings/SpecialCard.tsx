@@ -21,7 +21,9 @@ import "./SpecialCard.css";
 import { classNameFactory } from "@api/Styles";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
-import { Clickable, Forms } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { Clickable } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-special-");
@@ -47,9 +49,9 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
         <Card className={cl("card", "card-special")} style={cardStyle}>
             <div className={cl("card-flex")}>
                 <div className={cl("card-flex-main")}>
-                    <Forms.FormTitle className={cl("title")} tag="h5">{title}</Forms.FormTitle>
-                    <Forms.FormText className={cl("subtitle")}>{subtitle}</Forms.FormText>
-                    <Forms.FormText className={cl("text")}>{description}</Forms.FormText>
+                    <Heading className={cl("title")} tag="h5">{title}</Heading>
+                    <Paragraph className={cl("subtitle")}>{subtitle}</Paragraph>
+                    <Paragraph className={cl("text")}>{description}</Paragraph>
 
                     {children}
                 </div>
@@ -68,9 +70,9 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
                 <>
                     <Divider className={cl("seperator")} />
                     <Clickable onClick={onClick} className={cl("hyperlink")}>
-                        <Forms.FormText className={cl("hyperlink-text")}>
+                        <Paragraph className={cl("hyperlink-text")}>
                             {buttonTitle}
-                        </Forms.FormText>
+                        </Paragraph>
                     </Clickable>
                 </>
             )}

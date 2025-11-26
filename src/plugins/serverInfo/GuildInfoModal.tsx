@@ -7,13 +7,15 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Guild, User } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "getAvatarURL");
@@ -107,8 +109,8 @@ function GuildInfoModal({ guild }: GuildProps) {
                 }
 
                 <div className={cl("name-and-description")}>
-                    <Forms.FormTitle tag="h5" className={cl("name")}>{guild.name}</Forms.FormTitle>
-                    {guild.description && <Forms.FormText>{guild.description}</Forms.FormText>}
+                    <Heading className={cl("name")}>{guild.name}</Heading>
+                    {guild.description && <Paragraph>{guild.description}</Paragraph>}
                 </div>
             </div>
 
@@ -207,7 +209,7 @@ function ServerInfoTab({ guild }: GuildProps) {
         <div className={cl("info")}>
             {Object.entries(Fields).map(([name, node]) =>
                 <div className={cl("server-info-pair")} key={name}>
-                    <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>
+                    <Heading>{name}</Heading>
                     {typeof node === "string" ? <span>{node}</span> : node}
                 </div>
             )}

@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
 import { PluginNative } from "@utils/types";
-import { Button, showToast, Toasts, useState } from "@webpack/common";
+import { showToast, Toasts, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";

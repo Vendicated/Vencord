@@ -19,15 +19,17 @@
 import { useSettings } from "@api/Settings";
 import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
 import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, putCloudSettings } from "@api/SettingsSync/cloudSync";
+import { Button } from "@components/Button";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
-import { Alerts, Button, Forms, Tooltip } from "@webpack/common";
+import { Alerts, Tooltip } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -44,7 +46,7 @@ function SettingsSyncSection() {
 
     return (
         <section className={Margins.top16}>
-            <Forms.FormTitle tag="h5">Settings Sync</Forms.FormTitle>
+            <Heading>Settings Sync</Heading>
 
             <Paragraph size="md" className={Margins.bottom20}>
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
@@ -59,7 +61,7 @@ function SettingsSyncSection() {
             />
             <div className="vc-cloud-settings-sync-grid">
                 <Button
-                    size={Button.Sizes.SMALL}
+                    size="small"
                     disabled={!sectionEnabled}
                     onClick={() => putCloudSettings(true)}
                 >
@@ -70,8 +72,8 @@ function SettingsSyncSection() {
                         <Button
                             onMouseLeave={onMouseLeave}
                             onMouseEnter={onMouseEnter}
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.RED}
+                            size="small"
+                            color="dangerPrimary"
                             disabled={!sectionEnabled}
                             onClick={() => getCloudSettings(true, true)}
                         >
@@ -80,8 +82,8 @@ function SettingsSyncSection() {
                     )}
                 </Tooltip>
                 <Button
-                    size={Button.Sizes.SMALL}
-                    color={Button.Colors.RED}
+                    size="small"
+                    color="dangerPrimary"
                     disabled={!sectionEnabled}
                     onClick={() => deleteCloudSettings()}
                 >
@@ -98,7 +100,7 @@ function CloudTab() {
     return (
         <SettingsTab title="Vencord Cloud">
             <section className={Margins.top16}>
-                <Forms.FormTitle tag="h5">Cloud Settings</Forms.FormTitle>
+                <Heading>Cloud Settings</Heading>
 
                 <Paragraph size="md" className={Margins.bottom20}>
                     Vencord comes with a cloud integration that adds goodies like settings sync across devices.
@@ -118,10 +120,10 @@ function CloudTab() {
                             settings.cloud.authenticated = v;
                     }}
                 />
-                <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
-                <Forms.FormText className={Margins.bottom8}>
+                <Heading>Backend URL</Heading>
+                <Paragraph className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
-                </Forms.FormText>
+                </Paragraph>
                 <CheckedTextInput
                     key="backendUrl"
                     value={settings.cloud.url}
@@ -135,7 +137,7 @@ function CloudTab() {
 
                 <Grid columns={2} gap="1em" className={Margins.top8}>
                     <Button
-                        size={Button.Sizes.MEDIUM}
+                        size="medium"
                         disabled={!settings.cloud.authenticated}
                         onClick={async () => {
                             await deauthorizeCloud();
@@ -146,8 +148,8 @@ function CloudTab() {
                         Reauthorise
                     </Button>
                     <Button
-                        size={Button.Sizes.MEDIUM}
-                        color={Button.Colors.RED}
+                        size="medium"
+                        color="dangerPrimary"
                         disabled={!settings.cloud.authenticated}
                         onClick={() => Alerts.show({
                             title: "Are you sure?",

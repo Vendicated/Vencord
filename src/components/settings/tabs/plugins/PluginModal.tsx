@@ -21,8 +21,10 @@ import "./PluginModal.css";
 import { generateId } from "@api/Commands";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
@@ -32,7 +34,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, Mod
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, React, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -93,7 +95,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     function renderSettings() {
         if (!hasSettings || !plugin.options)
-            return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
+            return <Paragraph>There are no settings for this plugin.</Paragraph>;
 
         const options = Object.entries(plugin.options).map(([key, setting]) => {
             if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
@@ -153,14 +155,14 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
             <ModalHeader separator={false} className={Margins.bottom8}>
-                <Text variant="heading-xl/bold" style={{ flexGrow: 1 }}>{plugin.name}</Text>
+                <BaseText size="xl" weight="bold" style={{ flexGrow: 1 }}>{plugin.name}</BaseText>
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
 
             <ModalContent className={Margins.bottom16}>
                 <section>
                     <Flex className={cl("info")}>
-                        <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>
+                        <Paragraph className={cl("description")}>{plugin.description}</Paragraph>
                         {!pluginMeta.userPlugin && (
                             <div className="vc-settings-modal-links">
                                 <WebsiteButton
@@ -174,7 +176,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             </div>
                         )}
                     </Flex>
-                    <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
+                    <BaseText size="lg" weight="semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</BaseText>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -213,7 +215,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <Text variant="heading-lg/semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</Text>
+                    <BaseText size="lg" weight="semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
                     {renderSettings()}
                 </section>
             </ModalContent>

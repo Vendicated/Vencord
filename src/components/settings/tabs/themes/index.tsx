@@ -19,10 +19,12 @@
 import "./styles.css";
 
 import { Card } from "@components/Card";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { getStylusWebStoreUrl } from "@utils/web";
-import { Forms, React, TabBar, useState } from "@webpack/common";
+import { React, TabBar, useState } from "@webpack/common";
 
 import { CspErrorCard } from "./CspErrorCard";
 import { LocalThemesTab } from "./LocalThemesTab";
@@ -71,11 +73,11 @@ function UserscriptThemesTab() {
     return (
         <SettingsTab title="Themes">
             <Card variant="danger">
-                <Forms.FormTitle tag="h5">Themes are not supported on the Userscript!</Forms.FormTitle>
+                <Heading>Themes are not supported on the Userscript!</Heading>
 
-                <Forms.FormText>
+                <Paragraph>
                     You can instead install themes with the <Link href={getStylusWebStoreUrl()}>Stylus extension</Link>!
-                </Forms.FormText>
+                </Paragraph>
             </Card>
         </SettingsTab>
     );

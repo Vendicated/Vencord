@@ -8,13 +8,14 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, Text, TooltipContainer } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, TooltipContainer } from "@webpack/common";
 import { ReactNode } from "react";
 
 const countDownFilter = canonicalizeMatch(/#{intl::MAX_AGE_NEVER}/);
@@ -90,9 +91,9 @@ export default definePlugin({
         return (
             <div className="vc-std-wrapper">
                 <TooltipContainer text={text}>{children}</TooltipContainer>
-                <Text variant="text-md/normal" color="status-danger">
+                <Paragraph color="status-danger">
                     {renderTimeout(message, true)} timeout remaining
-                </Text>
+                </Paragraph>
             </div>
         );
     }, { noop: true })

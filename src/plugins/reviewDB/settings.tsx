@@ -17,8 +17,8 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { OptionType } from "@utils/types";
-import { Button } from "@webpack/common";
 
 import { authorize, getToken } from "./auth";
 import { openBlockModal } from "./components/BlockedUserModal";
@@ -60,7 +60,7 @@ export const settings = definePluginSettings({
                 <Button onClick={openBlockModal}>Manage Blocked Users</Button>
 
                 <Button
-                    color={Button.Colors.GREEN}
+                    color="primary"
                     onClick={() => {
                         VencordNative.native.openExternal("https://github.com/sponsors/mantikafasi");
                     }}
