@@ -4,16 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Card } from "@components/Card";
+import { Flex } from "@components/Flex";
 import { FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { UserThemeHeader } from "@main/themes";
+import ClientThemePlugin from "@plugins/clientTheme";
 import { findLazy } from "@webpack";
-import { Card, Forms, useEffect, useRef, useState } from "@webpack/common";
-import ClientThemePlugin from "plugins/clientTheme";
+import { Forms, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { ThemeCard } from "./ThemeCard";
@@ -81,8 +84,8 @@ export function LocalThemesTab() {
     }
 
     return (
-        <>
-            <Card className="vc-settings-card">
+        <Flex flexDirection="column" gap="1em">
+            <Card>
                 <Forms.FormTitle tag="h5">Find Themes:</Forms.FormTitle>
                 <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
                     <Link style={{ marginRight: ".5em" }} href="https://betterdiscord.app/themes">
@@ -93,7 +96,7 @@ export function LocalThemesTab() {
                 <Forms.FormText>If using the BD site, click on "Download" and place the downloaded .theme.css file into your themes folder.</Forms.FormText>
             </Card>
 
-            <Card className="vc-settings-card">
+            <Card>
                 <Forms.FormTitle tag="h5">External Resources</Forms.FormTitle>
                 <Forms.FormText>For security reasons, loading resources (styles, fonts, images, ...) from most sites is blocked.</Forms.FormText>
                 <Forms.FormText>Make sure all your assets are hosted on GitHub, GitLab, Codeberg, Imgur, Discord or Google Fonts.</Forms.FormText>
@@ -140,7 +143,7 @@ export function LocalThemesTab() {
                             Icon={PaintbrushIcon}
                         />
 
-                        {Vencord.Plugins.isPluginEnabled(ClientThemePlugin.name) && (
+                        {isPluginEnabled(ClientThemePlugin.name) && (
                             <QuickAction
                                 text="Edit ClientTheme"
                                 action={() => openPluginModal(ClientThemePlugin)}
@@ -166,6 +169,6 @@ export function LocalThemesTab() {
                     ))}
                 </div>
             </section>
-        </>
+        </Flex>
     );
 }
