@@ -1,3 +1,0 @@
-files:
-    - source: /i18n/en/
-      translation: /i18n/%locale_with_underscore%/%original_file_name%
