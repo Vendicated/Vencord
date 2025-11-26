@@ -14,12 +14,6 @@ import { PluginButtons } from "./pluginButtons";
 import { PluginCards } from "./pluginCards";
 
 const settings = definePluginSettings({
-    disableCreateDMButton: {
-        type: OptionType.BOOLEAN,
-        description: "Disables the create dm button",
-        restartNeeded: true,
-        default: false,
-    },
     disableDMContextMenu: {
         type: OptionType.BOOLEAN,
         description: "Disables the DM list context menu in favor of the x button",
@@ -58,15 +52,6 @@ export default definePlugin({
                     replace: "return $1;"
                 }
             ]
-        },
-        // Disable Giant Create DM Button
-        {
-            find: ".createDMButtonContainer,",
-            predicate: () => settings.store.disableCreateDMButton,
-            replacement: {
-                match: /"create-dm"\)/,
-                replace: "$&&&false"
-            },
         },
         // Remove DM Context Menu
         {
