@@ -172,7 +172,7 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, 
                 )
             }
             footer={
-                <Flex flexDirection="row" style={{ gap: "0.2em" }}>
+                <Flex flexDirection="row" gap="0.2em">
                     {!!theme.website && <Link href={theme.website}>Website</Link>}
                     {!!(theme.website && theme.invite) && " • "}
                     {!!theme.invite && (
