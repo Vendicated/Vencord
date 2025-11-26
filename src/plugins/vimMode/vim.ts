@@ -4,318 +4,116 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByPropsLazy } from "@webpack";
-
-import { currentEditor } from ".";
-import { VimActions } from "./vimActions";
+import { keyMap } from "./keymap";
+import { VimContext } from "./vimContext";
 import { Mode, VimStore } from "./vimStore";
-const Transforms = findByPropsLazy("insertNodes", "textToText");
+import { Action, Motion, Operator } from "./vimTypes";
+
+const TIMEOUT_MS = 1500;
 
 class Vim {
-    getSlate() {
-        if (!currentEditor) return null;
-        try {
-            return currentEditor.getSlateEditor();
-        } catch {
-            return null;
-        }
-    }
+    ctx = new VimContext();
+
+    refreshTimeout = () => {
+        VimStore.startTimeout(TIMEOUT_MS, () => VimStore.resetBuffer());
+    };
 
     handleKey(e: KeyboardEvent): { block: boolean; } {
-        const MODIFIERS = new Set(["Shift", "Control", "Alt", "Meta"]);
-        if (MODIFIERS.has(e.key)) {
-            return { block: false };
-        }
-        let { key } = e;
-        console.log("keypress", e);
-        const shiftMap: Record<string, string> = {
-            "1": "!",
-            "2": "@",
-            "3": "#",
-            "4": "$",
-            "5": "%",
-            "6": "^",
-            "7": "&",
-            "8": "*",
-            "9": "(",
-            "0": ")"
-        };
-        if (e.shiftKey && shiftMap[key]) {
-            key = shiftMap[key];
-        }
-        const slate = this.getSlate();
         const state = VimStore.getState();
 
+        const MODIFIERS = new Set(["Shift", "Control", "Alt", "Meta"]);
+        if (MODIFIERS.has(e.key)) return { block: false };
+
         if (state.mode === Mode.INSERT) {
-            if (key === "Escape") {
+            if (e.key === "Escape") {
                 VimStore.setMode(Mode.NORMAL);
                 return { block: true };
             }
             return { block: false };
         }
 
-        if (!isNaN(Number(key))) {
-            const digit = Number(key);
+        if (!isNaN(Number(e.key)) && Number(e.key) !== 0) {
+            const digit = Number(e.key);
             const newCount = (state.count ?? 0) * 10 + digit;
             VimStore.setCount(newCount);
+            this.refreshTimeout();
             return { block: true };
         }
 
+        const { key } = e;
         const count = state.count ?? 1;
 
-        // chord movements
-        if (state.buffer === "g") {
-            VimStore.resetBuffer();
-
-            if (key === "g") {
-                VimActions.scrollTop();
-                return { block: true };
-            }
-
-            if (key === "o") {
-                VimActions.openQuickSwitcher();
-                return { block: true };
-            }
-
-            return { block: true };
-        }
-
-        // delete motions
-        if (state.buffer === "d") {
-            VimStore.resetBuffer();
-
-            // dw
-            if (key === "w") {
-                for (let n = 0; n < count; n++) {
-                    const text = this.getCurrentLineText(slate);
-                    const start = this.getOffset(slate);
-                    const end = this.findNextWordOffset(text, start);
-
-                    this.setSelectionRange(slate, start, end);
-                    this.deleteSelection(slate);
-                }
-                VimStore.resetBuffer();
-                return { block: true };
-            }
-
-            // db
-            if (key === "b") {
-                for (let n = 0; n < count; n++) {
-                    const text = this.getCurrentLineText(slate);
-                    const start = this.getOffset(slate);
-                    const end = this.findPrevWordOffset(text, start);
-                    this.setSelectionRange(slate, end, start);
-                    this.deleteSelection(slate);
-                }
-                VimStore.resetBuffer();
-                return { block: true };
-            }
-
-            // dd
-            if (key === "d") {
-                const { path } = slate.selection.anchor;
-                const linePath = path.slice(0, 2);
-                Transforms.removeNodes(slate, { at: linePath });
-                VimStore.resetBuffer();
-                return { block: true };
-            }
-
-            // d$
-            if (key === "$") {
-                const text = this.getCurrentLineText(slate);
-                const start = this.getOffset(slate);
-                const end = text.length;
-                this.setSelectionRange(slate, start, end);
-                this.deleteSelection(slate);
-                VimStore.resetBuffer();
-                return { block: true };
-            }
-
-            return { block: true };
-        }
-
-        // change motions
-        if (state.buffer === "c" || state.buffer === "ca") {
-            if (key === "a") {
-                VimStore.setBuffer("ca");
-                VimStore.startTimeout(1500, () => VimStore.resetBuffer());
-                return { block: true };
-            }
-
-            if (state.buffer === "ca" && key === "w") {
-                const text = this.getCurrentLineText(slate);
-                const cursor = this.getOffset(slate);
-
-                const start = this.findPrevWordOffset(text, cursor);
-                const end = this.findNextWordOffset(text, cursor);
-
-                let finalStart = start;
-                let finalEnd = end;
-
-                while (finalStart > 0 && /\s/.test(text[finalStart - 1])) finalStart--;
-                while (finalEnd < text.length && /\s/.test(text[finalEnd])) finalEnd++;
-
-                this.setSelectionRange(slate, finalStart, finalEnd);
-                this.deleteSelection(slate);
-
-                VimStore.resetBuffer();
-                VimStore.setMode(Mode.INSERT);
-
-                return { block: true };
-            }
-            VimStore.resetBuffer();
-            return { block: true };
-        }
-
-        // chord triggers
-        if (key === "g") {
+        if (key === "g" && state.buffer === "") {
             VimStore.setBuffer("g");
-            VimStore.startTimeout(1500, () => VimStore.resetBuffer());
-            return { block: true };
-        }
-        if (key === "d") {
-            VimStore.setBuffer("d");
-            VimStore.startTimeout(1500, () => VimStore.resetBuffer());
-            return { block: true };
-        }
-        if (key === "c") {
-            VimStore.setBuffer("c");
-            VimStore.startTimeout(1500, () => VimStore.resetBuffer());
+            this.refreshTimeout();
             return { block: true };
         }
 
-        // scroll
-        if (key === "j") {
-            VimActions.scrollDown(count);
-            VimStore.resetBuffer();
+        if (state.buffer && (key === "i" || key === "a")) {
+            VimStore.setBuffer(state.buffer + key);
+            this.refreshTimeout();
             return { block: true };
         }
 
-        if (key === "k") {
-            VimActions.scrollUp(count);
-            VimStore.resetBuffer();
-            return { block: true };
-        }
-
-        if (key === "G") {
-            VimActions.scrollBottom();
-            VimStore.resetBuffer();
-            return { block: true };
-        }
-
-        if (key === "i") {
-            VimStore.setMode(Mode.INSERT);
-            return { block: true };
-        }
-
-        // cursor movements
-        if (key === "h") {
-            const slate = this.getSlate();
-            for (let i = 0; i < count; i++) {
-                this.moveCursor(slate, -1);
+        const compositeKey = state.buffer + key;
+        if (state.buffer && keyMap[compositeKey]) {
+            const command = keyMap[compositeKey];
+            if (command instanceof Action) command.execute(this.ctx, count);
+            if (command instanceof Motion) {
+                const range = command.execute(this.ctx, count);
+                this.ctx.moveCursor(range.end);
             }
             VimStore.resetBuffer();
             return { block: true };
         }
 
-        if (key === "l") {
-            const slate = this.getSlate();
-            for (let i = 0; i < count; i++) {
-                this.moveCursor(slate, +1);
+        let commandKey = key;
+        let pendingOperatorKey = state.buffer;
+
+        if (state.buffer.length > 1) {
+            const modifier = state.buffer.slice(1);
+            pendingOperatorKey = state.buffer[0];
+            commandKey = modifier + key;
+        }
+
+        const command = keyMap[commandKey];
+        if (!command) return { block: true };
+
+        if (command instanceof Operator) {
+            if (state.buffer === key) {
+                const text = this.ctx.getText();
+                command.execute(this.ctx, 0, text.length);
+                VimStore.resetBuffer();
+            } else {
+                VimStore.setBuffer(key);
+                this.refreshTimeout();
             }
-            VimStore.resetBuffer();
             return { block: true };
         }
 
-        if (key === "w") {
-            for (let n = 0; n < count; n++) {
-                const text = this.getCurrentLineText(slate);
-                const { anchor } = slate.selection;
-                const newOffset = this.findNextWordOffset(text, anchor.offset);
+        if (command instanceof Motion) {
+            const range = command.execute(this.ctx, count);
 
-                this.moveCursor(slate, newOffset - anchor.offset);
+            if (pendingOperatorKey) {
+                const operator = keyMap[pendingOperatorKey];
+                if (operator instanceof Operator) {
+                    operator.execute(this.ctx, range.start, range.end);
+                }
+            } else {
+                this.ctx.moveCursor(range.end);
             }
+
             VimStore.resetBuffer();
             return { block: true };
         }
 
-        if (key === "b") {
-            for (let n = 0; n < count; n++) {
-                const text = this.getCurrentLineText(slate);
-                const { anchor } = slate.selection;
-                const newOffset = this.findPrevWordOffset(text, anchor.offset);
-                this.moveCursor(slate, newOffset - anchor.offset);
-            }
+        if (command instanceof Action) {
+            command.execute(this.ctx, count);
             VimStore.resetBuffer();
-            return { block: true };
-        }
-
-        if (key === "u") {
-            slate.undo();
-            VimStore.resetBuffer();
-            return { block: true };
-        }
-
-        if (key === "x") {
-            slate.deleteForward("char");
             return { block: true };
         }
 
         return { block: true };
-    }
-
-    // helpers
-    moveCursor(editor, delta) {
-        const { selection } = editor;
-        if (!selection) return;
-
-        const { anchor } = selection;
-        const newOffset = Math.max(0, anchor.offset + delta);
-
-        Transforms.setSelection(editor, {
-            anchor: { path: anchor.path, offset: newOffset },
-            focus: { path: anchor.path, offset: newOffset }
-        });
-    }
-
-    getCurrentLineText(editor) {
-        const { selection } = editor;
-        if (!selection) return "";
-        const { anchor } = selection;
-        const [node] = editor.children[anchor.path[0]].children;
-        return node.text || "";
-    }
-
-    findNextWordOffset(text, offset) {
-        const len = text.length;
-        let i = offset;
-        while (i < len && /\S/.test(text[i])) i++;
-        while (i < len && /\s/.test(text[i])) i++;
-        return i;
-    }
-
-    findPrevWordOffset(text, offset) {
-        let i = offset;
-        while (i > 0 && /\s/.test(text[i - 1])) i--;
-        while (i > 0 && /\S/.test(text[i - 1])) i--;
-        return i;
-    }
-
-    setSelectionRange(editor, startOffset, endOffset) {
-        const { anchor } = editor.selection;
-
-        Transforms.setSelection(editor, {
-            anchor: { path: anchor.path, offset: startOffset },
-            focus: { path: anchor.path, offset: endOffset }
-        });
-    }
-
-    deleteSelection(editor) {
-        editor.deleteFragment();
-    }
-
-    getOffset(editor) {
-        return editor.selection.anchor.offset;
     }
 }
 
