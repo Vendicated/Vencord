@@ -84,6 +84,12 @@ export const settings = definePluginSettings({
         description: "Something might happen if you ignore someone for too long...",
         default: false,
         restartNeeded: false
+    },
+    ignoreBots: {
+        type: OptionType.BOOLEAN,
+        description: "Ignore DMs from bots",
+        default: true,
+        restartNeeded: false
     }
 });
 

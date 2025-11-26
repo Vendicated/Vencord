@@ -163,8 +163,8 @@ export function Boo({ channel }: { channel: Channel; }) {
             return;
         }
 
-        // if exempted, remove from ghost tracking
-        if (isExempted) {
+        // if exempted or bot (if setting enabled), remove from ghost tracking
+        if (isExempted || (settings.store.ignoreBots && lastMessage.author.bot)) {
             if (countedChannels.has(id)) {
                 countedChannels.delete(id);
                 setBooCount(getBooCount() - 1);
@@ -186,7 +186,7 @@ export function Boo({ channel }: { channel: Channel; }) {
         }
     }, [state.isCurrentUser, state.isDataProcessed, id, lastMessage?.id]);
 
-    if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser || isChannelExempted(id) || isCleared)
+    if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser || isChannelExempted(id) || isCleared || (settings.store.ignoreBots && lastMessage.author.bot))
         return null;
 
     if (!settings.store.showDmIcons) return null;
