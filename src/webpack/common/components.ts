@@ -51,6 +51,7 @@ export const Switch = FormSwitchCompat as never;
 /** @deprecated Use Card from Vencord */
 export const Card = waitForComponent<never>("Card", filters.componentByCode(".editable),", ".outline:"));
 export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
+export const Keybind = waitForComponent<t.GlobalKeybind>("Keybind", filters.componentByCode("=this.handleComboKeys"));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
     Tooltip: filters.componentByCode("this.renderTooltip()]"),
