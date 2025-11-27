@@ -4,20 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "@equicordplugins/_misc/styles.css";
-
-import { Paragraph } from "@components/Paragraph";
+import { Alert } from "@components/Alert";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "QuestFocused",
     description: "Prevent the quests player from pausing and possibly skip it all together.",
-    settingsAboutComponent: () => <>
-        <Paragraph className="plugin-warning">
+    settingsAboutComponent: () => (
+        <Alert.Warning>
             You might need to spam left mouse button on the video to skip it.
-        </Paragraph>
-    </>,
+        </Alert.Warning>
+    ),
     authors: [EquicordDevs.secp192k1],
     patches: [
         // Block pausing

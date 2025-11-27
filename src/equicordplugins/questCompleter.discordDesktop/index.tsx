@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "@equicordplugins/_misc/styles.css";
 import "./style.css";
 
 import { showNotification } from "@api/Notifications";

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+export * from "./Alert";
 export * from "./BaseText";
 export * from "./Button";
 export * from "./Card";

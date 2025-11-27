@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "@equicordplugins/_misc/styles.css";
-
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { Paragraph } from "@components/Paragraph";
+import { Alert } from "@components/Alert";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, User, VoiceState } from "@vencord/discord-types";
@@ -79,11 +77,11 @@ export default definePlugin({
     description: "Follow a friend in voice chat.",
     authors: [EquicordDevs.TheArmagan],
     settings,
-    settingsAboutComponent: () => <>
-        <Paragraph className="plugin-warning">
+    settingsAboutComponent: () => (
+        <Alert.Info>
             This Plugin is used to follow a Friend/Friends into voice chat(s).
-        </Paragraph>
-    </>,
+        </Alert.Info>
+    ),
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             if (!followedUserInfo) return;

@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "@equicordplugins/_misc/styles.css";
-
 import { definePluginSettings } from "@api/Settings";
-import { Paragraph } from "@components/Paragraph";
+import { Alert } from "@components/Alert";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { UserStore } from "@webpack/common";
@@ -51,11 +49,11 @@ export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
     authors: [EquicordDevs.Drag],
-    settingsAboutComponent: () => <>
-        <Paragraph className="plugin-warning">
+    settingsAboutComponent: () => (
+        <Alert.Warning>
             We can't guarantee this plugin won't get you warned or banned.
-        </Paragraph>
-    </>,
+        </Alert.Warning>
+    ),
     settings: settings,
     patches: [
         {

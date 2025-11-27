@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Paragraph } from "@components/Paragraph";
+import { Alert } from "@components/Alert";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
@@ -41,9 +41,9 @@ export default definePlugin({
     description: "Mention any user, regardless of channel access.",
     settings,
     settingsAboutComponent: () => (
-        <Paragraph className="plugin-warning">
+        <Alert.Warning>
             Using Global Mention can cause performance issues and show an absurd amount of users in the autocomplete.
-        </Paragraph>
+        </Alert.Warning>
     ),
 
     patches: [
