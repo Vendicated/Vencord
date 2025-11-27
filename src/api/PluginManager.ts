@@ -365,8 +365,11 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
         if (p.messagePopoverButton || p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
-        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+
+        // Custom
+        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
+        if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;
