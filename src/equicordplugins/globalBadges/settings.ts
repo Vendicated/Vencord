@@ -78,12 +78,6 @@ export const settings = definePluginSettings({
         default: true,
         restartNeeded: false
     },
-    showReplugged: {
-        type: OptionType.BOOLEAN,
-        description: "Show Replugged Badges",
-        default: true,
-        restartNeeded: false
-    },
     apiUrl: {
         type: OptionType.STRING,
         description: "API to use",

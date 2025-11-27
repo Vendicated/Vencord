@@ -6,7 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
-import { Flex } from "@components/Flex";
+import { HeadingPrimary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { openUserProfile } from "@utils/discord";
 import { Avatar, Clickable, React, TextInput, Tooltip, } from "@webpack/common";
@@ -44,11 +44,9 @@ function UsersCollectionRows({ usersCollection }: { usersCollection: Data["users
                 .map(({ name, users }) => (
                     <aside key={name}>
                         <div className={cl("header-container")}>
-                            <BaseText>{name.toUpperCase()}</BaseText>
+                            <HeadingPrimary className={cl("header-name")}>{name}</HeadingPrimary>
                             <div className={cl("header-btns")}>
-                                <Flex>
-                                    {users.map(u => <UserRow key={u.id} user={u} />)}
-                                </Flex>
+                                {users.map(u => <UserRow key={u.id} user={u} />)}
                             </div>
                         </div>
                     </aside>
@@ -59,14 +57,14 @@ function UsersCollectionRows({ usersCollection }: { usersCollection: Data["users
 
 function UserRow({ user, allowOwner = true }: { user: IStorageUser, allowOwner?: boolean; }) {
     return (
-        <Flex key={user.id} className={cl("user-row")}>
-            <span className={cl("user")}>
-                <Flex>
-                    <Clickable onClick={() => openUserProfile(user.id)}>
-                        <span className={cl("user-avatar")}>
-                            <Avatar src={user.iconURL} size="SIZE_24" />
-                        </span>
-                    </Clickable>
+        <div key={user.id} className={cl("user-row")}>
+            <div className={cl("user")}>
+                <Clickable onClick={() => openUserProfile(user.id)}>
+                    <span className={cl("user-avatar")}>
+                        <Avatar src={user.iconURL} size="SIZE_24" />
+                    </span>
+                </Clickable>
+                <div className={cl("user-tooltip")}>
                     <Tooltip text={tooltipText(user)}>
                         {props =>
                             <Paragraph {...props} className={cl("user-username")}>
@@ -74,15 +72,14 @@ function UserRow({ user, allowOwner = true }: { user: IStorageUser, allowOwner?:
                             </Paragraph>
                         }
                     </Tooltip>
-                </Flex>
-            </span>
-
-            <span className={cl("user-id")}>
-                <Paragraph>
-                    {user.id}
-                </Paragraph>
-            </span>
-        </Flex>
+                    <span className={cl("user-id")}>
+                        <Paragraph>
+                            {user.id}
+                        </Paragraph>
+                    </span>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -94,10 +91,10 @@ function SearchElement({ usersCollection }: { usersCollection: Data["usersCollec
         <section className={cl("search")}>
             <TextInput placeholder="Filter by tag, username" name="Filter" onChange={setCurrent} />
             {current && (
-                <Flex className={cl("search-user")}>
+                <div className={cl("search-user")}>
                     {list.filter(user => user.tag.includes(current) || user.username.includes(current))
                         .map(user => <UserRow key={user.id} user={user} allowOwner={false} />)}
-                </Flex>
+                </div>
             )}
         </section>
     );
@@ -112,9 +109,9 @@ export function DataUI({ plugin, usersCollection }: { plugin: any; usersCollecti
 
             <SectionDescription />
             <SearchElement usersCollection={usersCollection} />
-            <Flex className={cl("rows")}>
+            <div className={cl("rows")}>
                 <UsersCollectionRows usersCollection={usersCollection} />
-            </Flex>
+            </div>
         </main>
     );
 }

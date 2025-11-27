@@ -100,7 +100,7 @@ async function loadAllBadges(noCache = false) {
 
 let intervalId: any;
 
-function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
+export function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
     return (
         <Menu.Menu
             navId="vc-badge-context"

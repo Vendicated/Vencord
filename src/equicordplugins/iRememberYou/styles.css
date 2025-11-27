@@ -5,8 +5,15 @@
     flex-direction: column;
 }
 
+.vc-i-remember-you-header-name {
+    margin-top: 16px;
+}
+
 .vc-i-remember-you-header-btns {
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 350px));
+    gap: 10px;
+    margin-top: 8px;
 }
 
 .vc-i-remember-you-header {
@@ -29,49 +36,38 @@
 
 .vc-i-remember-you-user-avatar {
     cursor: pointer;
-    margin-right: 30px;
+    margin-right: 0;
 }
 
 .vc-i-remember-you-user-row {
-    margin: 0;
-    width: 100%;
-    flex-wrap: wrap;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px;
+    align-items: flex-start;
 }
 
 .vc-i-remember-you-user-id {
-    height: min-content;
+    align-self: flex-start;
     opacity: 0.75;
+    height: min-content;
 }
 
 .vc-i-remember-you-user {
-    width: 500px;
-    gap: 250px;
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    overflow-wrap: break-word;
-    margin-top: 5px;
+    gap: 8px;
+    width: 100%;
+    margin-top: 0;
 }
 
 .vc-i-remember-you-user-username {
     margin-top: 2px;
 }
 
-.vc-i-remember-you-buttons {
-    margin-top: 10px;
-}
-
-.vc-i-remember-you-buttons-save,
-.vc-i-remember-you-buttons-cancel {
-    margin-left: 490px;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
-
-.vc-i-remember-you-buttons-cancel {
-    margin-left: 12px;
-}
-
-.vc-i-remember-you-buttons-reset {
-    cursor: pointer;
-    margin-left: 12px;
+.vc-i-remember-you-user-tooltip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
