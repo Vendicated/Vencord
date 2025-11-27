@@ -28,7 +28,7 @@ import gitHash from "~git-hash";
 type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
 type SectionTypes = Record<SectionType, SectionType>;
 
-const VencordMainIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const VencordMainIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
     <svg
         {...props}
         xmlns="http://www.w3.org/2000/svg"
@@ -45,7 +45,8 @@ const VencordMainIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         />
     </svg>
 );
-const PluginsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+(window as any).VVIcon = VencordMainIcon;
+const PluginsIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
     <svg
         {...props}
         xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +63,7 @@ const PluginsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         />
     </svg>
 );
-const ThemesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const ThemesIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
     <svg
         {...props}
         xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +80,7 @@ const ThemesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         />
     </svg>
 );
-const CloudIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const CloudIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
     <svg
         {...props}
         xmlns="http://www.w3.org/2000/svg"
@@ -98,7 +99,7 @@ const CloudIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         </g>
     </svg>
 );
-const BackupRestoreIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const BackupRestoreIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
     <svg
         {...props}
         xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +116,7 @@ const BackupRestoreIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         />
     </svg>
 );
-const UpdaterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const UpdaterIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
     <svg
         {...props}
         xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +133,7 @@ const UpdaterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         />
     </svg>
 );
-const PatchHelperIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+const PatchHelperIcon: React.FC<React.SVGProps<SVGSVGElement>> = props => (
     <svg
         {...props}
         xmlns="http://www.w3.org/2000/svg"
@@ -174,7 +175,7 @@ export default definePlugin({
                     }
                 },
                 {
-                    match: /copyValue:\i\.join\(" "\)/,
+                    match: /copyValue:\i\.join\(" "\)/g,
                     replace: "$& + $self.getInfoString()"
                 }
             ]
