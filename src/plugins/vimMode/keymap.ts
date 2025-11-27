@@ -5,71 +5,112 @@
  */
 
 import { VimActions } from "./vimActions";
+import { Editor } from "./vimContext";
 import { Mode, VimStore } from "./vimStore";
-import { Action, Motion, Operator } from "./vimTypes";
+import { Action, Motion, Operator, VimPoint } from "./vimTypes";
 
 export const keyMap: Record<string, Motion | Operator | Action> = {
     "h": new Motion((ctx, count) => {
-        const pos = Math.max(0, ctx.getOffset() - count);
-        return { start: pos, end: pos };
+        const start = ctx.getPoint();
+        ctx.moveBy(-count);
+        const focus = ctx.getPoint();
+        VimStore.setCursorColumn(null);
+        return { anchor: start, focus };
     }),
+
     "l": new Motion((ctx, count) => {
-        const pos = ctx.getOffset() + count;
-        return { start: pos, end: pos };
+        const start = ctx.getPoint();
+        ctx.moveBy(count);
+        const focus = ctx.getPoint();
+        VimStore.setCursorColumn(null);
+        return { anchor: start, focus };
     }),
-    "w": new Motion((ctx, count) => {
-        const text = ctx.getText();
-        let pos = ctx.getOffset();
-        for (let i = 0; i < count; i++) pos = ctx.findNextWord(text, pos);
-        return { start: ctx.getOffset(), end: pos };
-    }),
-    "b": new Motion((ctx, count) => {
-        const text = ctx.getText();
-        let pos = ctx.getOffset();
-        for (let i = 0; i < count; i++) pos = ctx.findPrevWord(text, pos);
-        return { start: ctx.getOffset(), end: pos };
-    }),
+
     "iw": new Motion(ctx => {
-        const current = ctx.getOffset();
-        const text = ctx.getText();
-        let start = current;
-        let end = current;
+        const { editor } = ctx;
+        const point = ctx.getPoint();
+
+        const textNode = editor.children[point.path[0]].children[0];
+        const { text } = textNode;
+
+        let start = point.offset;
+        let end = point.offset;
+
         while (start > 0 && /\S/.test(text[start - 1])) start--;
         while (end < text.length && /\S/.test(text[end])) end++;
-        return { start, end };
-    }),
-    "0": new Motion(() => ({ start: 0, end: 0 })),
-    "$": new Motion(ctx => {
-        const current = ctx.getOffset();
-        const len = ctx.getText().length;
-        return { start: current, end: len };
-    }),
-    "gg": new Motion(() => ({ start: 0, end: 0 })),
 
-    "d": new Operator((ctx, start, end) => {
-        ctx.deleteRange(start, end);
+        const anchor = {
+            path: point.path,
+            offset: start
+        };
+
+        const focus = {
+            path: point.path,
+            offset: end
+        };
+
+        return { anchor, focus };
     }),
-    "c": new Operator((ctx, start, end) => {
-        ctx.deleteRange(start, end);
+
+    "w": new Motion((ctx, count) => {
+        const start = ctx.getPoint();
+        ctx.wordForward(count);
+        const focus = ctx.getPoint();
+        return { anchor: start, focus };
+    }),
+
+    "b": new Motion((ctx, count) => {
+        const start = ctx.getPoint();
+        ctx.wordBackward(count);
+        const focus = ctx.getPoint();
+        return { anchor: start, focus };
+    }),
+
+    "0": new Motion(ctx => {
+        const focus = ctx.lineBoundary("start");
+        return { anchor: focus, focus };
+    }),
+
+    "$": new Motion(ctx => {
+        const start = ctx.getPoint();
+        const focus = ctx.lineBoundary("end");
+        return { anchor: start, focus };
+    }),
+
+    "gg": new Motion(ctx => {
+        const focus: VimPoint = { path: [0, 0], offset: 0 };
+        return { anchor: focus, focus };
+    }),
+
+    "d": new Operator((ctx, anchor, focus) => {
+        ctx.deleteRange(anchor, focus);
+    }),
+
+    "c": new Operator((ctx, anchor, focus) => {
+        ctx.deleteRange(anchor, focus);
         VimStore.setMode(Mode.INSERT);
     }),
 
     "x": new Action((ctx, count) => {
-        const curr = ctx.getOffset();
-        ctx.deleteRange(curr, curr + count);
-    }),
-    "u": new Action(ctx => ctx.editor.undo()),
-    // "j": new Action((_, count) => VimActions.scrollDown(count)),
-    // "k": new Action((_, count) => VimActions.scrollUp(count)),
-    "j": new Action((ctx, count) => {
-        ctx.moveLine(count);
-    }),
-    "k": new Action((ctx, count) => {
-        ctx.moveLine(-count);
+        const start = ctx.getPoint();
+        const focus: VimPoint = { path: start.path, offset: start.offset + count };
+        ctx.deleteRange(start, focus);
     }),
 
-    "G": new Action(() => VimActions.scrollBottom()),
+    "u": new Action(ctx => ctx.editor.undo()),
+
+    "j": new Action((ctx, count) => ctx.moveLine(count)),
+    "k": new Action((ctx, count) => ctx.moveLine(-count)),
+
+    "G": new Action(ctx => {
+        const { editor } = ctx;
+        const lastBlockIndex = editor.children.length - 1;
+        const end = (Editor.end(editor, [lastBlockIndex]) as VimPoint) ?? { path: [lastBlockIndex, 0], offset: 0 };
+        ctx.moveTo(end);
+    }),
+
     "i": new Action(() => VimStore.setMode(Mode.INSERT)),
+
     "go": new Action(() => {
         VimActions.openQuickSwitcher();
     }),

@@ -7,117 +7,115 @@
 import { findByPropsLazy } from "@webpack";
 
 import { currentEditor } from ".";
-import { Mode, VimStore } from "./vimStore";
+import { VimStore } from "./vimStore";
+import type { VimPoint } from "./vimTypes";
 
 const Transforms = findByPropsLazy("insertNodes", "textToText");
+export const Editor = findByPropsLazy("after", "levels");
 
 export class VimContext {
     get editor() {
         return currentEditor.getSlateEditor();
     }
 
-    getOffset(): number {
+    getPoint(): VimPoint {
         const { selection } = this.editor;
-        const state = VimStore.getState();
-
-        if (state.mode === Mode.VISUAL && VimStore.visualCursor != null) {
-            return VimStore.visualCursor;
-        }
-
-        return selection?.focus.offset ?? 0;
+        return (selection?.focus as VimPoint)
+            ?? { path: [0, 0], offset: 0 };
     }
 
-    getText(): string {
-        const { anchor } = this.editor.selection;
-        if (!anchor) return "";
-        const [node] = this.editor.children[anchor.path[0]].children;
-        return node.text || "";
-    }
-
-    moveCursor(offset: number) {
-        const { anchor } = this.editor.selection;
-        const textLen = this.getText().length;
-        const safeOffset = Math.max(0, Math.min(offset, textLen));
-        Transforms.setSelection(this.editor, {
-            anchor: { path: anchor.path, offset: safeOffset },
-            focus: { path: anchor.path, offset: safeOffset }
+    moveTo(point: VimPoint) {
+        Transforms.select(this.editor, {
+            anchor: point,
+            focus: point
         });
     }
 
-    deleteRange(start: number, end: number) {
-        const { anchor } = this.editor.selection;
-        const low = Math.min(start, end);
-        const high = Math.max(start, end);
-        Transforms.setSelection(this.editor, {
-            anchor: { path: anchor.path, offset: low },
-            focus: { path: anchor.path, offset: high }
-        });
-        this.editor.deleteFragment();
-    }
-
-    findNextWord(text: string, start: number): number {
-        const len = text.length;
-        let i = start;
-        if (i < len && /\S/.test(text[i])) i++;
-        while (i < len && /\S/.test(text[i])) i++;
-        while (i < len && /\s/.test(text[i])) i++;
-        return i;
-    }
-
-    findPrevWord(text: string, start: number): number {
-        let i = start;
-        while (i > 0 && /\s/.test(text[i - 1])) i--;
-        while (i > 0 && /\S/.test(text[i - 1])) i--;
-        return i;
-    }
-
-    setSelection(start: number, end: number) {
+    moveBy(delta: number) {
         const { editor } = this;
-        const { selection } = editor;
-        if (!selection) return;
+        const from = this.getPoint();
 
-        const { anchor } = selection;
+        const next =
+            delta > 0
+                ? Editor.after(editor, from, { unit: "offset", distance: delta })
+                : Editor.before(editor, from, { unit: "offset", distance: -delta });
 
-        const low = Math.min(start, end);
-        const high = Math.max(start, end);
-
-        Transforms.select(editor, {
-            anchor: { path: anchor.path, offset: low },
-            focus: { path: anchor.path, offset: high }
-        });
+        if (next) {
+            this.moveTo(next as VimPoint);
+        }
     }
 
     moveLine(delta: number) {
         const { editor } = this;
-        const { selection } = editor;
-        const children = editor.children as any[];
+        const current = this.getPoint();
+        const { cursorColumn: desiredColumn } = VimStore;
 
-        if (!children.length) return;
-        if (!selection) {
-            Transforms.setSelection(editor, {
-                anchor: { path: [0, 0], offset: 0 },
-                focus: { path: [0, 0], offset: 0 },
-            });
-            return;
+        const goalCol =
+            desiredColumn != null ? desiredColumn : current.offset;
+        VimStore.setCursorColumn(goalCol);
+
+        const [blockIndex] = current.path;
+
+        const nextBlockIndex = blockIndex + delta;
+        if (nextBlockIndex < 0 || nextBlockIndex >= editor.children.length) return;
+
+        const nextText = editor.children[nextBlockIndex].children[0];
+        const nextTextLength = nextText.text.length;
+
+        const nextOffset = Math.min(goalCol, nextTextLength);
+
+        const nextPoint = {
+            path: [nextBlockIndex, 0],
+            offset: nextOffset
+        };
+
+        this.moveTo(nextPoint);
+    }
+
+
+    wordForward(count: number) {
+        const { editor } = this;
+        let point = this.getPoint();
+
+        for (let i = 0; i < count; i++) {
+            const next = Editor.after(editor, point, { unit: "word" });
+            if (!next) break;
+            point = next as VimPoint;
         }
 
-        const { focus } = selection;
-        const currentLine = focus.path[0] ?? 0;
-        const desiredOffset = focus.offset ?? 0;
+        this.moveTo(point);
+    }
 
-        const maxLine = children.length - 1;
-        const targetLine = Math.max(0, Math.min(maxLine, currentLine + delta));
+    wordBackward(count: number) {
+        const { editor } = this;
+        let point = this.getPoint();
 
-        const targetBlock = children[targetLine];
-        if (!targetBlock || !targetBlock.children?.[0]) return;
+        for (let i = 0; i < count; i++) {
+            const next = Editor.before(editor, point, { unit: "word" });
+            if (!next) break;
+            point = next as VimPoint;
+        }
 
-        const targetTextNode = targetBlock.children[0];
-        const text: string = targetTextNode.text || "";
-        const safeOffset = Math.max(0, Math.min(desiredOffset, text.length));
+        this.moveTo(point);
+    }
 
-        Transforms.setSelection(editor, {
-            anchor: { path: [targetLine, 0], offset: safeOffset },
-            focus: { path: [targetLine, 0], offset: safeOffset },
-        });
+    lineBoundary(which: "start" | "end"): VimPoint {
+        const { editor } = this;
+        const point = this.getPoint();
+        const at =
+            which === "start"
+                ? Editor.start(editor, point.path)
+                : Editor.end(editor, point.path);
+
+        return (at as VimPoint) ?? point;
+    }
+
+    selectRange(anchor: VimPoint, focus: VimPoint) {
+        Transforms.select(this.editor, { anchor, focus });
+    }
+
+    deleteRange(anchor: VimPoint, focus: VimPoint) {
+        this.selectRange(anchor, focus);
+        this.editor.deleteFragment();
     }
 }

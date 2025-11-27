@@ -7,6 +7,8 @@
 import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
+import type { VimPoint } from "./vimTypes";
+
 export enum Mode {
     NORMAL = "NORMAL",
     INSERT = "INSERT",
@@ -27,8 +29,8 @@ export const VimStore = proxyLazyWebpack(() => {
         buffer = "";
         count: number | null = null;
         timeout: number | null = null;
-        visualAnchor: number | null = null;
-        visualCursor: number | null = null;
+        visualAnchorPoint: VimPoint | null = null;
+        cursorColumn: number | null = null;
 
         getState(): VimState {
             return {
@@ -78,17 +80,19 @@ export const VimStore = proxyLazyWebpack(() => {
             }
         }
 
-        setVisualAnchor(anchor: number) {
-            this.visualAnchor = anchor;
-        }
-
-        setVisualCursor(cursor: number) {
-            this.visualCursor = cursor;
+        setVisualAnchor(point: VimPoint) {
+            this.visualAnchorPoint = point;
+            this.emitChange();
         }
 
         resetVisual() {
-            this.visualAnchor = null;
-            this.visualCursor = null;
+            this.visualAnchorPoint = null;
+            this.emitChange();
+        }
+
+        setCursorColumn(col: number | null) {
+            this.cursorColumn = col;
+            this.emitChange();
         }
     }
 

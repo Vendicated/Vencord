@@ -5,9 +5,9 @@
  */
 
 import { keyMap } from "./keymap";
-import { VimContext } from "./vimContext";
+import { Editor, VimContext } from "./vimContext";
 import { Mode, VimStore } from "./vimStore";
-import { Action, Motion, Operator } from "./vimTypes";
+import { Action, Motion, Operator, VimPoint } from "./vimTypes";
 
 const TIMEOUT_MS = 1500;
 
@@ -33,22 +33,21 @@ class Vim {
         }
 
         if (state.mode === Mode.VISUAL && e.key === "Escape") {
-            const anchor = VimStore.visualAnchor!;
-            this.ctx.moveCursor(anchor);
+            const anchor = VimStore.visualAnchorPoint!;
+            this.ctx.moveTo(anchor);
             VimStore.resetVisual();
             VimStore.setMode(Mode.NORMAL);
             return { block: true };
         }
 
         if (e.key === "v") {
-            const offset = this.ctx.getOffset();
+            const point = this.ctx.getPoint();
             VimStore.setMode(Mode.VISUAL);
-            VimStore.setVisualAnchor(offset);
-            VimStore.setVisualCursor(offset);
+            VimStore.setVisualAnchor(point);
             return { block: true };
         }
 
-        if (!isNaN(Number(e.key)) && Number(e.key) !== 0) {
+        if (!isNaN(Number(e.key)) && e.key !== "0") {
             const digit = Number(e.key);
             const newCount = (state.count ?? 0) * 10 + digit;
             VimStore.setCount(newCount);
@@ -74,10 +73,11 @@ class Vim {
         const compositeKey = state.buffer + key;
         if (state.buffer && keyMap[compositeKey]) {
             const command = keyMap[compositeKey];
-            if (command instanceof Action) command.execute(this.ctx, count);
             if (command instanceof Motion) {
-                const range = command.execute(this.ctx, count);
-                this.ctx.moveCursor(range.end);
+                const { anchor, focus } = command.execute(this.ctx, count);
+                this.ctx.moveTo(focus);
+            } else if (command instanceof Action) {
+                command.execute(this.ctx, count);
             }
             VimStore.resetBuffer();
             return { block: true };
@@ -96,42 +96,51 @@ class Vim {
         if (!command) return { block: true };
 
         if (command instanceof Operator) {
+            const currentPoint = this.ctx.getPoint();
+
             if (state.mode === Mode.VISUAL) {
-                const start = VimStore.visualAnchor!;
-                const end = VimStore.visualCursor!;
-                command.execute(this.ctx, start, end);
+                const anchor = VimStore.visualAnchorPoint ?? this.ctx.getPoint();
+                const focus = this.ctx.getPoint();
+                command.execute(this.ctx, anchor, focus);
                 VimStore.resetVisual();
-                if (VimStore.mode !== Mode.INSERT) {
-                    VimStore.setMode(Mode.NORMAL);
-                }
+                if (VimStore.mode !== Mode.INSERT) VimStore.setMode(Mode.NORMAL);
                 return { block: true };
             }
 
             if (state.buffer === key) {
-                const text = this.ctx.getText();
-                command.execute(this.ctx, 0, text.length);
+                const { editor } = this.ctx;
+                const lineStart = Editor.start(editor, currentPoint.path) as VimPoint;
+                const lineEnd = Editor.end(editor, currentPoint.path) as VimPoint;
+
+                command.execute(this.ctx, lineStart, lineEnd);
+
+                if (VimStore.mode !== Mode.INSERT) {
+                    VimStore.setMode(Mode.NORMAL);
+                }
+
                 VimStore.resetBuffer();
-            } else {
-                VimStore.setBuffer(key);
-                this.refreshTimeout();
+                return { block: true };
             }
+
+            VimStore.setBuffer(key);
+            this.refreshTimeout();
             return { block: true };
         }
 
         if (command instanceof Motion) {
-            const range = command.execute(this.ctx, count);
+            const { anchor, focus } = command.execute(this.ctx, count);
 
             if (state.mode === Mode.VISUAL) {
-                VimStore.setVisualCursor(range.end);
-                this.ctx.setSelection(VimStore.visualAnchor!, VimStore.visualCursor!);
+                const anchor = VimStore.visualAnchorPoint ?? focus;
+                this.ctx.selectRange(anchor, focus);
             } else if (!pendingOperatorKey) {
-                this.ctx.moveCursor(range.end);
+                this.ctx.moveTo(focus);
             }
 
             if (pendingOperatorKey) {
                 const operator = keyMap[pendingOperatorKey];
                 if (operator instanceof Operator) {
-                    operator.execute(this.ctx, range.start, range.end);
+                    operator.execute(this.ctx, anchor, focus);
                 }
             }
 

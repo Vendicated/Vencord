@@ -4,17 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { VimContext } from "./vimContext";
+import type { VimContext } from "./vimContext";
+
+export type VimPoint = {
+    path: number[];
+    offset: number;
+};
+
+export type VimRange = {
+    anchor: VimPoint;
+    focus: VimPoint;
+};
 
 export class Motion {
     constructor(
-        public execute: (ctx: VimContext, count: number) => { start: number, end: number; }
+        public execute: (ctx: VimContext, count: number) => VimRange
     ) { }
 }
 
 export class Operator {
     constructor(
-        public execute: (ctx: VimContext, start: number, end: number) => void
+        public execute: (ctx: VimContext, anchor: VimPoint, focus: VimPoint) => void
     ) { }
 }
 
@@ -23,4 +33,3 @@ export class Action {
         public execute: (ctx: VimContext, count: number) => void
     ) { }
 }
-
