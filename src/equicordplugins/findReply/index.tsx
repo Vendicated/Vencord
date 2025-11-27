@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { removeMessagePopoverButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
@@ -154,7 +153,6 @@ export default definePlugin({
         enableStyle(styles);
     },
     stop() {
-        removeMessagePopoverButton("vc-findreply");
         root && root.unmount();
         element?.remove();
         disableStyle(styles);

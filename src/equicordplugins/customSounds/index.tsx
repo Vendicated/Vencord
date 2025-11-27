@@ -394,12 +394,9 @@ export default definePlugin({
     name: "CustomSounds",
     description: "Customize Discord's sounds.",
     authors: [Devs.ScattrdBlade, Devs.TheKodeToad],
-    dependencies: ["AudioPlayerAPI"],
-
     settings,
-    getCustomSoundURL,
     startAt: StartAt.Init,
-    audioProcessor: getCustomSoundURL,
+    onAudioProcessor: getCustomSoundURL,
 
     async start() {
         console.log("[CustomSounds] Plugin starting...");

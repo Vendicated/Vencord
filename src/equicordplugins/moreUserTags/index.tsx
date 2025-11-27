@@ -35,7 +35,6 @@ export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
     authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, EquicordDevs.Hen],
-    dependencies: ["MemberListDecoratorsAPI", "NicknameIconsAPI", "MessageDecorationsAPI"],
     settings,
     patches: [
         // Make discord actually use our tags

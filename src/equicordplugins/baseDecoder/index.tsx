@@ -110,7 +110,6 @@ export default definePlugin({
     name: "DecodeBase64",
     description: "Decode base64 content of any message and copy the decoded content.",
     authors: [EquicordDevs.ThePirateStoner],
-    dependencies: ["MessagePopoverAPI"],
     settings,
     messagePopoverButton: {
         icon: DecodeIcon,

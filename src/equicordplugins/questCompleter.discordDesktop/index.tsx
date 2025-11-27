@@ -20,12 +20,11 @@ import "./style.css";
 
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
-import { ErrorBoundary } from "@components/index";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, UserStore } from "@webpack/common";
 
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
@@ -37,16 +36,13 @@ let questIdCheck = 0;
 
 function ToolBarHeader() {
     return (
-        <ErrorBoundary noop={true}>
-            <HeaderBarIcon
-                tooltip="Complete Quest"
-                position="bottom"
-                className="vc-quest-completer"
-                icon={QuestIcon}
-                onClick={openCompleteQuestUI}
-            >
-            </HeaderBarIcon>
-        </ErrorBoundary>
+        <HeaderBarIcon
+            tooltip="Complete Quest"
+            position="bottom"
+            className="vc-quest-completer"
+            icon={QuestIcon}
+            onClick={openCompleteQuestUI}
+        />
     );
 }
 
@@ -212,11 +208,6 @@ async function openCompleteQuestUI() {
 }
 
 const settings = definePluginSettings({
-    useNavBar: {
-        description: "Move quest button down to the server nav bar",
-        type: OptionType.BOOLEAN,
-        default: false,
-    },
     disableNotifications: {
         description: "Disable notifications when no quests are available or when a quest is completed",
         type: OptionType.BOOLEAN,
@@ -237,22 +228,6 @@ export default definePlugin({
                 replace: "onClick:()=>$self.mobileQuestPatch($1)"
             },
         },
-        {
-            find: '?"BACK_FORWARD_NAVIGATION":',
-            replacement: {
-                match: /"HELP".{0,100}className:\i\}\)(?=\])/,
-                replace: "$&,$self.renderTitleBar()"
-            },
-            predicate: () => !settings.store.useNavBar
-        },
-        {
-            find: ".controlButtonWrapper,",
-            replacement: {
-                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,200}mobileToolbar)/,
-                replace: "$1$self.renderNavBar(arguments[0]);$2"
-            },
-            predicate: () => settings.store.useNavBar
-        }
     ],
     mobileQuestPatch(questId) {
         if (questId === questIdCheck) return;
@@ -264,37 +239,5 @@ export default definePlugin({
             }
         });
     },
-    renderTitleBar() {
-        return (
-            <ErrorBoundary noop>
-                <Tooltip text="Complete Quest">
-                    {tooltipProps => (
-                        <Button style={{ backgroundColor: "transparent", border: "none" }}
-                            {...tooltipProps}
-                            size={Button.Sizes.SMALL}
-                            className={"vc-quest-completer-icon"}
-                            onClick={openCompleteQuestUI}
-                        >
-                            <QuestIcon width={20} height={20} />
-                        </Button>
-                    )}
-                </Tooltip>
-            </ErrorBoundary>
-        );
-    },
-    renderNavBar(e) {
-        if (Array.isArray(e.toolbar))
-            return e.toolbar.unshift(
-                <ErrorBoundary noop={true}>
-                    <ToolBarHeader />
-                </ErrorBoundary>
-            );
-
-        e.toolbar = [
-            <ErrorBoundary noop={true} key={"QuestCompleter"}>
-                <ToolBarHeader />
-            </ErrorBoundary>,
-            e.toolbar,
-        ];
-    }
+    renderHeaderBarButton: ToolBarHeader
 });

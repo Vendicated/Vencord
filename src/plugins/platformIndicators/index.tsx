@@ -18,9 +18,6 @@
 
 import "./style.css";
 
-import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
-import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { definePluginSettings, migratePluginSetting, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
@@ -192,49 +189,22 @@ const PlatformIndicator = ({ user, isProfile, isMessage, isMemberList }: Platfor
     );
 };
 
-function toggleMemberListDecorators(enabled: boolean) {
-    if (enabled) {
-        addMemberListDecorator("PlatformIndicators", props => <PlatformIndicator user={props.user} isMemberList />);
-    } else {
-        removeMemberListDecorator("PlatformIndicators");
-    }
-}
-
-function toggleNicknameIcons(enabled: boolean) {
-    if (enabled) {
-        addNicknameIcon("PlatformIndicators", props => <PlatformIndicator user={UserStore.getUser(props.userId)} isProfile />, 1);
-    } else {
-        removeNicknameIcon("PlatformIndicators");
-    }
-}
-
-function toggleMessageDecorators(enabled: boolean) {
-    if (enabled) {
-        addMessageDecoration("PlatformIndicators", props => <PlatformIndicator user={props.message?.author} isMessage />);
-    } else {
-        removeMessageDecoration("PlatformIndicators");
-    }
-}
-
 migratePluginSetting("PlatformIndicators", "profiles", "badges");
 const settings = definePluginSettings({
     list: {
         type: OptionType.BOOLEAN,
         description: "Show indicators in the member list",
         default: true,
-        onChange: toggleMemberListDecorators
     },
     profiles: {
         type: OptionType.BOOLEAN,
         description: "Show indicators in user profiles",
         default: true,
-        onChange: toggleNicknameIcons
     },
     messages: {
         type: OptionType.BOOLEAN,
         description: "Show indicators inside messages",
         default: true,
-        onChange: toggleMessageDecorators
     },
     colorMobileIndicator: {
         type: OptionType.BOOLEAN,
@@ -278,19 +248,21 @@ export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
     authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz, Devs.Ven],
-    dependencies: ["MemberListDecoratorsAPI", "NicknameIconsAPI", "MessageDecorationsAPI"],
     settings,
-
-    start() {
-        if (settings.store.list) toggleMemberListDecorators(true);
-        if (settings.store.profiles) toggleNicknameIcons(true);
-        if (settings.store.messages) toggleMessageDecorators(true);
+    renderNicknameIcon(props) {
+        if (!settings.store.profiles) return null;
+        return (
+            <PlatformIndicator user={UserStore.getUser(props.userId)} isProfile />
+        );
     },
+    renderMemberListDecorator(props) {
+        if (!settings.store.list) return null;
+        return <PlatformIndicator user={props.user} isMemberList />;
 
-    stop() {
-        if (settings.store.list) toggleMemberListDecorators(false);
-        if (settings.store.profiles) toggleNicknameIcons;
-        if (settings.store.messages) toggleMessageDecorators(false);
+    },
+    renderMessageDecoration(props) {
+        if (!settings.store.messages) return null;
+        return <PlatformIndicator user={props.message?.author} isMessage />;
     },
 
     patches: [

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { MessageSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
@@ -117,16 +117,11 @@ export default definePlugin({
     name: "SplitLargeMessages",
     description: "Splits large messages into multiple to fit Discord's message limit.",
     authors: [EquicordDevs.Reycko],
-    dependencies: ["MessageEventsAPI"],
     settings,
+    onBeforeMessageSend: listener,
 
     start() {
         if (settings.store.maxLength === 0) maxLength = autoMaxLength();
-        addMessagePreSendListener(listener);
-    },
-
-    stop() {
-        removeMessagePreSendListener(listener);
     },
 
     patches: [

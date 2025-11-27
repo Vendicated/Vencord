@@ -102,7 +102,6 @@ export default definePlugin({
     name: "Husk",
     description: "Adds Husk button (check settings to change used emoji)",
     authors: [Devs.nin0dev],
-    dependencies: ["MessagePopoverAPI"],
     settings,
     messagePopoverButton: {
         icon: Husk,

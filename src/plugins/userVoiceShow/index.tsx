@@ -18,9 +18,6 @@
 
 import "./style.css";
 
-import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
-import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -52,9 +49,22 @@ export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
     authors: [Devs.Nuckyz, Devs.LordElias, EquicordDevs.omaw],
-    dependencies: ["NicknameIconsAPI", "MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
+    renderNicknameIcon({ userId }) {
+        if (!settings.store.showInUserProfileModal) return null;
+        return (
+            <VoiceChannelIndicator userId={userId} isProfile />
+        );
+    },
+    renderMemberListDecorator({ user }) {
+        if (!settings.store.showInMemberList) return null;
+        return user == null ? null : <VoiceChannelIndicator userId={user.id} />;
 
+    },
+    renderMessageDecoration({ message }) {
+        if (!settings.store.showInMessages) return null;
+        return message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} isMessageIndicator />;
+    },
     patches: [
         // Friends List
         {
@@ -66,24 +76,6 @@ export default definePlugin({
             predicate: () => settings.store.showInMemberList
         }
     ],
-
-    start() {
-        if (settings.store.showInUserProfileModal) {
-            addNicknameIcon("UserVoiceShow", ({ userId }) => <VoiceChannelIndicator userId={userId} isProfile />);
-        }
-        if (settings.store.showInMemberList) {
-            addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
-        }
-        if (settings.store.showInMessages) {
-            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} isMessageIndicator />);
-        }
-    },
-
-    stop() {
-        removeNicknameIcon("UserVoiceShow");
-        removeMemberListDecorator("UserVoiceShow");
-        removeMessageDecoration("UserVoiceShow");
-    },
 
     VoiceChannelIndicator
 });

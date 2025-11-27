@@ -22,6 +22,7 @@ import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
+import * as $HeaderBar from "./HeaderBar";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
@@ -128,6 +129,11 @@ export const ContextMenu = $ContextMenu;
  * An API allowing you to add buttons to the chat input.
  */
 export const ChatButtons = $ChatButtons;
+
+/**
+ * An API allowing you to add buttons to the header bar.
+ */
+export const HeaderBar = $HeaderBar;
 
 /**
  * An API allowing you to update and re-render messages.

@@ -8,12 +8,11 @@ export const Native = getNative();
 
 import "./styles.css";
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, MessageStore, React, UserStore } from "@webpack/common";
+import { FluxDispatcher, MessageStore, UserStore } from "@webpack/common";
 
 import { OpenLogsButton } from "./components/LogsButton";
 import { openLogModal } from "./components/LogsModal";
@@ -257,15 +256,6 @@ export default definePlugin({
             }
         },
         {
-            find: ".controlButtonWrapper,",
-            predicate: () => settings.store.ShowLogsButton,
-            replacement: {
-                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,100}mobileToolbar)/,
-                replace: "$1$self.addIconToToolBar(arguments[0]);$2"
-            }
-        },
-
-        {
             find: "childrenMessageContent:null",
             replacement: {
                 match: /(cozyMessage.{1,50},)childrenHeader:/,
@@ -310,21 +300,9 @@ export default definePlugin({
             openLogModal();
         }
     },
-
-    addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
-        if (Array.isArray(e.toolbar))
-            return e.toolbar.unshift(
-                <ErrorBoundary noop={true}>
-                    <OpenLogsButton />
-                </ErrorBoundary>
-            );
-
-        e.toolbar = [
-            <ErrorBoundary noop={true} key={"MessageLoggerEnhanced"} >
-                <OpenLogsButton />
-            </ErrorBoundary>,
-            e.toolbar,
-        ];
+    renderHeaderBarButton() {
+        if (!settings.store.ShowLogsButton) return null;
+        return OpenLogsButton();
     },
 
     processMessageFetch,

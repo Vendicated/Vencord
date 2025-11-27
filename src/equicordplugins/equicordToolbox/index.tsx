@@ -18,13 +18,12 @@
 
 import "./styles.css";
 
+import { addHeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Popout, useRef, useState } from "@webpack/common";
-import type { PropsWithChildren } from "react";
 
 import { renderPopout } from "./menu";
 
@@ -48,7 +47,7 @@ function Icon() {
     );
 }
 
-function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
+function VencordPopoutButton() {
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 
@@ -66,10 +65,10 @@ function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
             {(_, { isShown }) => (
                 <HeaderBarIcon
                     ref={buttonRef}
-                    className={`vc-toolbox-btn ${buttonClass}`}
+                    className="vc-toolbox-btn"
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : "Equicord Toolbox"}
-                    icon={() => <Icon />}
+                    icon={Icon}
                     selected={isShown}
                 />
             )}
@@ -82,27 +81,15 @@ export default definePlugin({
     name: "EquicordToolbox",
     description: "Adds a button next to the inbox button in the channel header that houses Equicord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
+    dependencies: ["HeaderBarAPI"],
 
     settings,
 
-    patches: [
-        {
-            find: '?"BACK_FORWARD_NAVIGATION":',
-            replacement: {
-                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i))/,
-                replace: "$self.TrailingWrapper,{className:$1,"
-            }
-        }
-    ],
-
-    TrailingWrapper({ children, className }: PropsWithChildren<{ className: string; }>) {
-        return (
-            <>
-                {children}
-                <ErrorBoundary noop>
-                    <VencordPopoutButton buttonClass={className} />
-                </ErrorBoundary>
-            </>
-        );
+    start() {
+        addHeaderBarButton("EquicordToolbox", VencordPopoutButton, 1000);
     },
+
+    stop() {
+        removeHeaderBarButton("EquicordToolbox");
+    }
 });

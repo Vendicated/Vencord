@@ -7,7 +7,6 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -78,14 +77,6 @@ function SignatureIcon() {
     );
 }
 
-const handleMessage = ((channelId, msg) => {
-    if (!settings.store.isEnabled) {
-        msg.content = msg.content;
-    } else {
-        msg.content = textProcessing(msg.content);
-    }
-});
-
 const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     const { isEnabled, contextMenu } = settings.use(["isEnabled", "contextMenu"]);
     if (!contextMenu) return;
@@ -110,16 +101,18 @@ export default definePlugin({
     name: "Signature",
     description: "Automated fingerprint/end text",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana, EquicordDevs.KrystalSkull],
-    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
-
+    onBeforeMessageSend(channelId, msg) {
+        if (!settings.store.isEnabled) {
+            msg.content = msg.content;
+        } else {
+            msg.content = textProcessing(msg.content);
+        }
+    },
     start: () => {
         if (settings.store.isEnabled) true;
-        addMessagePreSendListener(handleMessage);
     },
     stop: () => {
         if (settings.store.isEnabled) false;
-        removeMessagePreSendListener(handleMessage);
-
     },
 
     chatBarButton: {
