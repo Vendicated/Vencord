@@ -59,8 +59,15 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
         ctx.deleteRange(curr, curr + count);
     }),
     "u": new Action(ctx => ctx.editor.undo()),
-    "j": new Action((_, count) => VimActions.scrollDown(count)),
-    "k": new Action((_, count) => VimActions.scrollUp(count)),
+    // "j": new Action((_, count) => VimActions.scrollDown(count)),
+    // "k": new Action((_, count) => VimActions.scrollUp(count)),
+    "j": new Action((ctx, count) => {
+        ctx.moveLine(count);
+    }),
+    "k": new Action((ctx, count) => {
+        ctx.moveLine(-count);
+    }),
+
     "G": new Action(() => VimActions.scrollBottom()),
     "i": new Action(() => VimStore.setMode(Mode.INSERT)),
     "go": new Action(() => {

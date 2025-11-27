@@ -86,4 +86,38 @@ export class VimContext {
             focus: { path: anchor.path, offset: high }
         });
     }
+
+    moveLine(delta: number) {
+        const { editor } = this;
+        const { selection } = editor;
+        const children = editor.children as any[];
+
+        if (!children.length) return;
+        if (!selection) {
+            Transforms.setSelection(editor, {
+                anchor: { path: [0, 0], offset: 0 },
+                focus: { path: [0, 0], offset: 0 },
+            });
+            return;
+        }
+
+        const { focus } = selection;
+        const currentLine = focus.path[0] ?? 0;
+        const desiredOffset = focus.offset ?? 0;
+
+        const maxLine = children.length - 1;
+        const targetLine = Math.max(0, Math.min(maxLine, currentLine + delta));
+
+        const targetBlock = children[targetLine];
+        if (!targetBlock || !targetBlock.children?.[0]) return;
+
+        const targetTextNode = targetBlock.children[0];
+        const text: string = targetTextNode.text || "";
+        const safeOffset = Math.max(0, Math.min(desiredOffset, text.length));
+
+        Transforms.setSelection(editor, {
+            anchor: { path: [targetLine, 0], offset: safeOffset },
+            focus: { path: [targetLine, 0], offset: safeOffset },
+        });
+    }
 }
