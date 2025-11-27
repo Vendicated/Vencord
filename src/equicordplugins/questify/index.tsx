@@ -1251,7 +1251,7 @@ export default definePlugin({
                 },
                 {
                     // Add the trigger to the memo for rerendering the progress label.
-                    match: /(\)}}},\[)/,
+                    match: /(\i\.intl\.string\(\i\.\i#{intl::QUESTS_SEE_CODE}\)\}\)\}\},\[|\)\}\}\},\[)/,
                     replace: "$1questRerenderTrigger,"
                 },
                 {
