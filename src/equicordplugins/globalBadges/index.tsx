@@ -13,50 +13,14 @@ import { BadgeContextMenu } from "@plugins/_api/badges";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { openInviteModal } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, React } from "@webpack/common";
+import { ContextMenuApi, React, Toasts } from "@webpack/common";
 
 import { settings } from "./settings";
+import { GlobalBadges, loadBadges } from "./utils";
 
-let GlobalBadges = {};
 let intervalId: any;
 const INVITE_LINK = "kwHCJPxp8t";
 const cl = classNameFactory("vc-global-badges-");
-
-async function loadBadges() {
-    const globalBadges = await fetch("https://badges.equicord.org/users", { cache: "no-cache" })
-        .then(r => r.json());
-
-    const filteredUsers: Record<string, typeof globalBadges.users[string]> = {};
-
-    for (const key in globalBadges.users) {
-        filteredUsers[key] = globalBadges.users[key].map(b => {
-            if (b.url) {
-                return { tooltip: b.label, badge: b.url };
-            }
-            return b;
-        }).filter(b => {
-            const url = b.badge;
-            // fix this when creations updates it
-            return url &&
-                url.startsWith("https://") &&
-                !url.startsWith("https://cdn.discordapp.com") &&
-                !url.startsWith("https://images.equicord.org") &&
-                !(url.startsWith("https://badges.vencord.dev/badges") && !url.startsWith("https://badges.vencord.dev/badges/reviewdb")) &&
-                // !(!settings.store.showAero && url.startsWith(":aero_icon:")) &&
-                // !(!settings.store.showVelocity && url.startsWith("Velocity")) &&
-                // !(!settings.store.showVelocity && url.startsWith("Official Velocity")) &&
-                !(!settings.store.showCustom && url.startsWith("https://gb.obamabot.me")) &&
-                !(!settings.store.showNekocord && url.startsWith("https://nekocord.dev")) &&
-                !(!settings.store.showReviewDB && url.startsWith("https://badges.vencord.dev/badges/reviewdb")) &&
-                !(!settings.store.showAliucord && url.startsWith("https://aliucord.com")) &&
-                !(!settings.store.showRa1ncord && url.startsWith("https://codeberg.org/raincord/badges")) &&
-                !(!settings.store.showEnmity && url.startsWith("https://raw.githubusercontent.com/enmity-mod/badges"));
-
-        });
-    }
-
-    GlobalBadges = filteredUsers;
-}
 
 export default definePlugin({
     name: "GlobalBadges",
@@ -81,6 +45,16 @@ export default definePlugin({
     },
     async stop() {
         clearInterval(intervalId);
+    },
+    toolboxActions: {
+        async "Refetch Global Badges"() {
+            await loadBadges();
+            Toasts.show({
+                id: Toasts.genId(),
+                message: "Successfully refetched global badges!",
+                type: Toasts.Type.SUCCESS
+            });
+        }
     },
     get GlobalBadges() {
         return GlobalBadges;
