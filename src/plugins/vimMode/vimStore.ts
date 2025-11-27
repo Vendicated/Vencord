@@ -10,6 +10,7 @@ import { Flux, FluxDispatcher } from "@webpack/common";
 export enum Mode {
     NORMAL = "NORMAL",
     INSERT = "INSERT",
+    VISUAL = "VISUAL"
 }
 
 export interface VimState {
@@ -26,6 +27,8 @@ export const VimStore = proxyLazyWebpack(() => {
         buffer = "";
         count: number | null = null;
         timeout: number | null = null;
+        visualAnchor: number | null = null;
+        visualCursor: number | null = null;
 
         getState(): VimState {
             return {
@@ -73,6 +76,19 @@ export const VimStore = proxyLazyWebpack(() => {
                 clearTimeout(this.timeout);
                 this.timeout = null;
             }
+        }
+
+        setVisualAnchor(anchor: number) {
+            this.visualAnchor = anchor;
+        }
+
+        setVisualCursor(cursor: number) {
+            this.visualCursor = cursor;
+        }
+
+        resetVisual() {
+            this.visualAnchor = null;
+            this.visualCursor = null;
         }
     }
 

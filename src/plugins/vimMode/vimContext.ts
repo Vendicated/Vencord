@@ -7,6 +7,7 @@
 import { findByPropsLazy } from "@webpack";
 
 import { currentEditor } from ".";
+import { Mode, VimStore } from "./vimStore";
 
 const Transforms = findByPropsLazy("insertNodes", "textToText");
 
@@ -16,7 +17,14 @@ export class VimContext {
     }
 
     getOffset(): number {
-        return this.editor.selection?.anchor.offset ?? 0;
+        const { selection } = this.editor;
+        const state = VimStore.getState();
+
+        if (state.mode === Mode.VISUAL && VimStore.visualCursor != null) {
+            return VimStore.visualCursor;
+        }
+
+        return selection?.focus.offset ?? 0;
     }
 
     getText(): string {
@@ -61,5 +69,21 @@ export class VimContext {
         while (i > 0 && /\s/.test(text[i - 1])) i--;
         while (i > 0 && /\S/.test(text[i - 1])) i--;
         return i;
+    }
+
+    setSelection(start: number, end: number) {
+        const { editor } = this;
+        const { selection } = editor;
+        if (!selection) return;
+
+        const { anchor } = selection;
+
+        const low = Math.min(start, end);
+        const high = Math.max(start, end);
+
+        Transforms.select(editor, {
+            anchor: { path: anchor.path, offset: low },
+            focus: { path: anchor.path, offset: high }
+        });
     }
 }

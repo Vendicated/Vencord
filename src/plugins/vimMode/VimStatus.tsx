@@ -22,9 +22,12 @@ export function VimStatus() {
                 right: "10px",
                 padding: "4px 10px",
                 borderRadius: "6px",
-                background: mode === Mode.INSERT
-                    ? "var(--orange-500)"
-                    : "var(--brand-560)",
+                background:
+                    mode === Mode.INSERT
+                        ? "var(--orange-500)"
+                        : mode === Mode.VISUAL
+                            ? "var(--green-500)"
+                            : "var(--brand-560)",
                 fontFamily: "var(--font-code)",
                 fontWeight: 700,
                 fontSize: "12px",

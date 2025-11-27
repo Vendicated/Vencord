@@ -32,6 +32,22 @@ class Vim {
             return { block: false };
         }
 
+        if (state.mode === Mode.VISUAL && e.key === "Escape") {
+            const anchor = VimStore.visualAnchor!;
+            this.ctx.moveCursor(anchor);
+            VimStore.resetVisual();
+            VimStore.setMode(Mode.NORMAL);
+            return { block: true };
+        }
+
+        if (e.key === "v") {
+            const offset = this.ctx.getOffset();
+            VimStore.setMode(Mode.VISUAL);
+            VimStore.setVisualAnchor(offset);
+            VimStore.setVisualCursor(offset);
+            return { block: true };
+        }
+
         if (!isNaN(Number(e.key)) && Number(e.key) !== 0) {
             const digit = Number(e.key);
             const newCount = (state.count ?? 0) * 10 + digit;
@@ -80,6 +96,17 @@ class Vim {
         if (!command) return { block: true };
 
         if (command instanceof Operator) {
+            if (state.mode === Mode.VISUAL) {
+                const start = VimStore.visualAnchor!;
+                const end = VimStore.visualCursor!;
+                command.execute(this.ctx, start, end);
+                VimStore.resetVisual();
+                if (VimStore.mode !== Mode.INSERT) {
+                    VimStore.setMode(Mode.NORMAL);
+                }
+                return { block: true };
+            }
+
             if (state.buffer === key) {
                 const text = this.ctx.getText();
                 command.execute(this.ctx, 0, text.length);
@@ -94,13 +121,18 @@ class Vim {
         if (command instanceof Motion) {
             const range = command.execute(this.ctx, count);
 
+            if (state.mode === Mode.VISUAL) {
+                VimStore.setVisualCursor(range.end);
+                this.ctx.setSelection(VimStore.visualAnchor!, VimStore.visualCursor!);
+            } else if (!pendingOperatorKey) {
+                this.ctx.moveCursor(range.end);
+            }
+
             if (pendingOperatorKey) {
                 const operator = keyMap[pendingOperatorKey];
                 if (operator instanceof Operator) {
                     operator.execute(this.ctx, range.start, range.end);
                 }
-            } else {
-                this.ctx.moveCursor(range.end);
             }
 
             VimStore.resetBuffer();
