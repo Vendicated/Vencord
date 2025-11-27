@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
+import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { OAuth2AuthorizeModal, showToast, Toasts, UserStore } from "@webpack/common";
