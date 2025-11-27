@@ -36,7 +36,10 @@ export default definePlugin({
     authors: [Devs.MaiKokain],
     dependencies: ["ChatInputButtonAPI"],
     settings,
-    renderChatBarButton: SekaiStickerChatButton,
+    chatBarButton: {
+        icon: kanadeSvg,
+        render: SekaiStickerChatButton
+    },
     async start() {
         const fonts = [{ name: "YurukaStd", url: "https://raw.githubusercontent.com/TheOriginalAyaka/sekai-stickers/47a2ca33b8cb35f59800e8faad48980e4ce5ea71/src/fonts/YurukaStd.woff2" }, { name: "SSFangTangTi", url: "https://raw.githubusercontent.com/TheOriginalAyaka/sekai-stickers/main/src/fonts/ShangShouFangTangTi.woff2" }];
         if (!IS_FONTS_LOADED) {

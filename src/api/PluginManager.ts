@@ -40,6 +40,7 @@ import Plugins from "~plugins";
 export { Plugins as plugins };
 
 import { traceFunction } from "../debug/Tracer";
+import { addAudioProcessor, removeAudioProcessor } from "./AudioPlayer";
 
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -187,7 +188,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton, renderNicknameIcon
+        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
+        // Custom
+        renderNicknameIcon, audioProcessor
     } = p;
 
     if (p.start) {
@@ -241,12 +244,15 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     // @ts-expect-error: legacy code doesn't have icon
     else if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
-    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
     // @ts-expect-error: legacy code doesn't have icon
     else if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
+
+    // Custom
+    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
+    if (audioProcessor) addAudioProcessor(name, audioProcessor);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -255,7 +261,9 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton, renderNicknameIcon
+        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
+        // Custom
+        renderNicknameIcon, audioProcessor
     } = p;
 
     if (p.stop) {
@@ -305,10 +313,13 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (chatBarButton || renderChatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
-    if (renderNicknameIcon) removeNicknameIcon(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (messagePopoverButton || renderMessagePopoverButton) removeMessagePopoverButton(name);
+
+    // Custom
+    if (renderNicknameIcon) removeNicknameIcon(name);
+    if (audioProcessor) removeAudioProcessor(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);

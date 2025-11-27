@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { addAudioProcessor, AudioProcessor, PreprocessAudioData, removeAudioProcessor } from "@api/AudioPlayer";
+import { AudioProcessor, PreprocessAudioData } from "@api/AudioPlayer";
 import { get as getFromDataStore } from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -399,10 +399,10 @@ export default definePlugin({
     settings,
     getCustomSoundURL,
     startAt: StartAt.Init,
+    audioProcessor: getCustomSoundURL,
 
     async start() {
         console.log("[CustomSounds] Plugin starting...");
-        addAudioProcessor("CustomSounds", this.getCustomSoundURL);
 
         try {
             await preloadDataURIs();
@@ -413,7 +413,6 @@ export default definePlugin({
     },
 
     stop() {
-        removeAudioProcessor("CustomSounds");
         console.log("[CustomSounds] Plugin stopped");
     }
 });

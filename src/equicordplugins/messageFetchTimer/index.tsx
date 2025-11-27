@@ -72,14 +72,7 @@ const FetchTimeButton: ChatBarButtonFactory = ({ isMainChat }) => {
                 alignItems: "center",
                 gap: "4px"
             }}>
-                <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                >
-                    <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" />
-                </svg>
+                {FetchTimeIcon()}
                 <span style={{
                     fontSize: "12px",
                     color: iconColor,
@@ -91,6 +84,19 @@ const FetchTimeButton: ChatBarButtonFactory = ({ isMainChat }) => {
         </ChatBarButton>
     );
 };
+
+function FetchTimeIcon() {
+    return (
+        <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+        >
+            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" />
+        </svg>
+    );
+}
 
 function formatTimeAgo(timestamp: Date): string {
     const now = new Date();
@@ -145,6 +151,11 @@ export default definePlugin({
     authors: [EquicordDevs.GroupXyz],
     settings,
 
+    chatBarButton: {
+        icon: FetchTimeIcon,
+        render: FetchTimeButton
+    },
+
     start() {
         FluxDispatcher.subscribe("CHANNEL_SELECT", handleChannelSelect);
         FluxDispatcher.subscribe("LOAD_MESSAGES_SUCCESS", handleMessageLoad);
@@ -164,7 +175,5 @@ export default definePlugin({
         currentFetch = null;
         channelTimings.clear();
         currentChannelId = null;
-    },
-
-    renderChatBarButton: FetchTimeButton,
+    }
 });
