@@ -15,15 +15,16 @@ import { React, Tooltip } from "@webpack/common";
 
 import { cl, GlobalBadges, INVITE_LINK } from "./utils";
 
-export const BadgeModalComponent = ({ name, img }: { name: string, img: string; }) => {
+export const BadgeModalComponent = ({ key, tooltip, badge }: { key: string, tooltip: string, badge: string; }) => {
     return (
         <>
-            <Tooltip text={name} >
+            <Tooltip text={tooltip} >
                 {(tooltipProps: any) => (
                     <img
                         className={cl("modal-badge")}
+                        key={key}
                         {...tooltipProps}
-                        src={img}
+                        src={badge}
                     />
                 )}
             </Tooltip>
@@ -33,7 +34,7 @@ export const BadgeModalComponent = ({ name, img }: { name: string, img: string; 
 
 export function openBadgeModal(user: User) {
     const badgeDataElements = GlobalBadges[user.id].map(badge => (
-        <BadgeModalComponent key={badge.key} name={badge.tooltip} img={badge.badge} />
+        <BadgeModalComponent key={badge.key} tooltip={badge.tooltip} badge={badge.badge} />
     ));
 
     openModal(modalprops => (

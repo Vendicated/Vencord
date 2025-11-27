@@ -13,7 +13,7 @@ import { settings } from "./settings";
 export let GlobalBadges = {};
 export const INVITE_LINK = "kwHCJPxp8t";
 export const cl = classNameFactory("vc-global-badges-");
-const serviceMap: Record<string, string> = {
+export const serviceMap: Record<string, string> = {
     nekocord: "Nekocord",
     reviewdb: "ReviewDB",
     aero: "Aero",
@@ -60,7 +60,7 @@ export async function loadBadges() {
             const tooltip = prefix + b.tooltip + suffix;
             return {
                 ...b,
-                name: b.tooltip,
+                key: b.tooltip,
                 tooltip
             };
         });
