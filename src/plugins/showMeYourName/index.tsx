@@ -267,7 +267,7 @@ function getProcessedNames(author: any, truncateAllNamesWithStreamerMode: boolea
             ? friendName[0] + "..."
             : friendName as string;
 
-    const customName: string | null = customNicknames[author.id] || null;
+    const customName: string | null = !author?.id ? null : customNicknames[author.id] || null;
     const custom: string | null = !customName ? null
         : StreamerModeStore.enabled && (truncateAllNamesWithStreamerMode || customName.toLowerCase() === author.username.toLowerCase())
             ? customName[0] + "..."
