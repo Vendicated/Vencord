@@ -26,7 +26,7 @@ Visit https://vencord.dev/download
 
 ## Join our Support/Community Server
 
-https://discord.gg/D9uwnFnqmd
+https://discord.gg/vencord
 
 ## Sponsors
 
