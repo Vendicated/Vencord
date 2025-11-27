@@ -396,7 +396,7 @@ export default definePlugin({
     authors: [Devs.ScattrdBlade, Devs.TheKodeToad],
     settings,
     startAt: StartAt.Init,
-    onAudioProcessor: getCustomSoundURL,
+    audioProcessor: getCustomSoundURL,
 
     async start() {
         console.log("[CustomSounds] Plugin starting...");

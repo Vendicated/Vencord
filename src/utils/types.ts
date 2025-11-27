@@ -201,7 +201,7 @@ export interface PluginDef {
     // Custom
     renderNicknameIcon?: NicknameIconFactory;
     renderHeaderBarButton?: HeaderBarButtonFactory;
-    onAudioProcessor?: AudioProcessor;
+    audioProcessor?: AudioProcessor;
 
     // TODO: Remove eventually
     /**
