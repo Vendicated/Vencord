@@ -70,7 +70,7 @@ class Vim {
     handleScrollKey(state: VimState, key: string, count: number): { block: boolean; } | null {
         if (
             (key !== "j" && key !== "k") ||
-            !Settings.plugins.VimMode.useJkScroll ||
+            !Settings.plugins.VimMode.vimChatScroll ||
             state.mode !== Mode.NORMAL
         ) {
             return null;
