@@ -204,7 +204,7 @@ class Vim {
             return this.handleVisualEscape();
         }
 
-        if (key === "v") {
+        if (key === "v" && state.buffer !== "f" && state.buffer !== "F") {
             return this.enterVisualMode();
         }
 
