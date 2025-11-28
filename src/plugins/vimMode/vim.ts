@@ -64,6 +64,45 @@ class Vim {
             return { block: true };
         }
 
+        if (key === "f" || key === "F") {
+            key === "f" ? VimStore.setBuffer("f") : VimStore.setBuffer("F");
+            this.refreshTimeout();
+            return { block: true };
+        }
+
+        if (state.buffer === "f" || state.buffer === "F") {
+            const start = this.ctx.getPoint();
+            const char = key;
+            const { editor } = this.ctx;
+
+            const textNode = editor.children[start.path[0]].children[0];
+            const { text } = textNode;
+
+            const forward = state.buffer === "f";
+
+            const from = forward
+                ? start.offset + 1
+                : start.offset - 1;
+
+            const target = forward
+                ? text.indexOf(char, from)
+                : text.lastIndexOf(char, from);
+
+            if (target !== -1) {
+                const focus: VimPoint = { path: start.path, offset: target };
+
+                if (state.mode === Mode.VISUAL) {
+                    this.ctx.selectRange(VimStore.visualAnchorPoint!, focus);
+                } else {
+                    this.ctx.moveTo(focus);
+                }
+            }
+
+            VimStore.resetBuffer();
+            return { block: true };
+        }
+
+
         if (state.buffer && (key === "i" || key === "a")) {
             VimStore.setBuffer(state.buffer + key);
             this.refreshTimeout();
