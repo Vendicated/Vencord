@@ -19,66 +19,70 @@ export class VimContext {
     }
 
     getPoint(): VimPoint {
-        const { selection } = this.editor;
-        return (selection?.focus as VimPoint)
+        return (this.editor.selection?.focus as VimPoint)
             ?? { path: [0, 0], offset: 0 };
     }
 
     moveTo(point: VimPoint) {
-        Transforms.select(this.editor, {
-            anchor: point,
-            focus: point
-        });
+        Transforms.select(this.editor, { anchor: point, focus: point });
     }
 
     moveBy(delta: number) {
-        const { editor } = this;
         const from = this.getPoint();
-
         const next =
             delta > 0
-                ? Editor.after(editor, from, { unit: "offset", distance: delta })
-                : Editor.before(editor, from, { unit: "offset", distance: -delta });
+                ? Editor.after(this.editor, from, { unit: "offset", distance: delta })
+                : Editor.before(this.editor, from, { unit: "offset", distance: -delta });
 
         if (next) {
+            VimStore.setCursorColumn(null);
             this.moveTo(next as VimPoint);
         }
     }
 
     moveLine(delta: number) {
-        const { editor } = this;
-        const current = this.getPoint();
-        const { cursorColumn: desiredColumn } = VimStore;
+        const point = this.getPoint();
+        const [block] = point.path;
+        const nextBlock = block + delta;
+        const textNodes = this.editor.children;
 
-        const goalCol =
-            desiredColumn != null ? desiredColumn : current.offset;
-        VimStore.setCursorColumn(goalCol);
+        if (nextBlock < 0 || nextBlock >= textNodes.length) return;
 
-        const [blockIndex] = current.path;
+        const desired = VimStore.cursorColumn ?? point.offset;
+        VimStore.setCursorColumn(desired);
 
-        const nextBlockIndex = blockIndex + delta;
-        if (nextBlockIndex < 0 || nextBlockIndex >= editor.children.length) return;
+        const nextText = textNodes[nextBlock].children[0];
+        const offset = Math.min(desired, nextText.text.length);
 
-        const nextText = editor.children[nextBlockIndex].children[0];
-        const nextTextLength = nextText.text.length;
-
-        const nextOffset = Math.min(goalCol, nextTextLength);
-
-        const nextPoint = {
-            path: [nextBlockIndex, 0],
-            offset: nextOffset
-        };
-
-        this.moveTo(nextPoint);
+        this.moveTo({ path: [nextBlock, 0], offset });
     }
 
+    goToStart() {
+        this.moveTo({ path: [0, 0], offset: 0 });
+    }
+
+    goToEnd() {
+        const textNodes = this.editor.children;
+        const last = textNodes.length - 1;
+        const end = Editor.end(this.editor, [last]) as VimPoint;
+        this.moveTo(end);
+    }
+
+    lineBoundaryStart(): VimPoint {
+        return (Editor.start(this.editor, this.getPoint().path) as VimPoint)
+            ?? this.getPoint();
+    }
+
+    lineBoundaryEnd(): VimPoint {
+        return (Editor.end(this.editor, this.getPoint().path) as VimPoint)
+            ?? this.getPoint();
+    }
 
     wordForward(count: number) {
-        const { editor } = this;
         let point = this.getPoint();
 
         for (let i = 0; i < count; i++) {
-            const next = Editor.after(editor, point, { unit: "word" });
+            const next = Editor.after(this.editor, point, { unit: "word" });
             if (!next) break;
             point = next as VimPoint;
         }
@@ -87,11 +91,10 @@ export class VimContext {
     }
 
     wordBackward(count: number) {
-        const { editor } = this;
         let point = this.getPoint();
 
         for (let i = 0; i < count; i++) {
-            const next = Editor.before(editor, point, { unit: "word" });
+            const next = Editor.before(this.editor, point, { unit: "word" });
             if (!next) break;
             point = next as VimPoint;
         }
@@ -99,15 +102,39 @@ export class VimContext {
         this.moveTo(point);
     }
 
-    lineBoundary(which: "start" | "end"): VimPoint {
-        const { editor } = this;
+    innerWord() {
         const point = this.getPoint();
-        const at =
-            which === "start"
-                ? Editor.start(editor, point.path)
-                : Editor.end(editor, point.path);
+        const textNode = this.editor.children[point.path[0]].children[0];
+        const { text } = textNode;
 
-        return (at as VimPoint) ?? point;
+        let start = point.offset;
+        let end = point.offset;
+
+        while (start > 0 && /\S/.test(text[start - 1])) start--;
+        while (end < text.length && /\S/.test(text[end])) end++;
+
+        const anchor = { path: point.path, offset: start };
+        const focus = { path: point.path, offset: end };
+
+        return { anchor, focus };
+    }
+
+    aroundWord() {
+        const point = this.getPoint();
+        const textNode = this.editor.children[point.path[0]].children[0];
+        const { text } = textNode;
+
+        let start = point.offset;
+        let end = point.offset;
+
+        while (start > 0 && /\w/.test(text[start - 1])) start--;
+        while (end < text.length && /\w/.test(text[end])) end++;
+        while (end < text.length && /\s/.test(text[end])) end++;
+
+        const anchor = { path: point.path, offset: start };
+        const focus = { path: point.path, offset: end };
+
+        return { anchor, focus };
     }
 
     selectRange(anchor: VimPoint, focus: VimPoint) {
@@ -119,11 +146,33 @@ export class VimContext {
         this.editor.deleteFragment();
     }
 
-    insertTextAtCursor(text: string, before: boolean = false) {
-        const point = this.getPoint();
-        const insertPoint: VimPoint = before
-            ? point
-            : { path: point.path, offset: point.offset + 1 };
-        Transforms.insertText(this.editor, text, { at: insertPoint });
+    yank(anchor: VimPoint, focus: VimPoint) {
+        const fragment = Editor.fragment(this.editor, { anchor, focus });
+        const text = fragment
+            .map(n => n.children?.map(c => c.text).join("") ?? "")
+            .join("\n");
+        VimStore.setRegister(text);
+    }
+
+    paste() {
+        const text = VimStore.getRegister();
+        if (!text) return;
+        Transforms.insertText(this.editor, text, { at: this.getPoint() });
+    }
+
+    pasteBefore() {
+        const text = VimStore.getRegister();
+        if (!text) return;
+        Transforms.insertText(this.editor, text, { at: this.getPoint() });
+    }
+
+    deleteChars(count: number) {
+        const start = this.getPoint();
+        const focus = { path: start.path, offset: start.offset + count };
+        this.deleteRange(start, focus);
+    }
+
+    undo() {
+        this.editor.undo();
     }
 }
