@@ -77,6 +77,10 @@ export default definePlugin({
 
     onMessageClick(msg, channel, event) {
         const isMe = msg.author.id === UserStore.getCurrentUser().id;
+        const isSelfInvokedUserApp = (msg as any).interactionMetadata ? (() => {
+            if ((msg as any).interactionMetadata.authorizing_integration_owners[0]) return false;
+            else return (msg as any).interactionMetadata.authorizing_integration_owners[1] === UserStore.getCurrentUser().id;
+        })() : false;
         if (!isDeletePressed) {
             if (event.detail < 2) return;
             if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
@@ -106,7 +110,7 @@ export default definePlugin({
                     showMentionToggle: channel.guild_id !== null
                 });
             }
-        } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel))) {
+        } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel)) || isSelfInvokedUserApp) {
             if (msg.deleted) {
                 FluxDispatcher.dispatch({
                     type: "MESSAGE_DELETE",
