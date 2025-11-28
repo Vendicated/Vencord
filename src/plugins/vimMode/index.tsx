@@ -19,11 +19,6 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "j/k for scroll chat up/down"
-    },
-    blockCursor: {
-        type: OptionType.BOOLEAN,
-        default: true,
-        description: "Toggle block cursor"
     }
 });
 
