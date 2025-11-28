@@ -29,8 +29,9 @@ class Vim {
         this.refreshTimeout();
     }
 
-    isCountKey(key: string) {
-        return key.length === 1 && key >= "1" && key <= "9";
+    isCountKey(state: VimState, key: string) {
+        if (key === "0") return state.count !== null && state.count !== undefined;
+        return key >= "1" && key <= "9";
     }
 
     handleInsertModeKey(key: string): { block: boolean; } {
@@ -57,7 +58,7 @@ class Vim {
     }
 
     handleCountKey(state: VimState, key: string): { block: boolean; } | null {
-        if (!this.isCountKey(key)) return null;
+        if (!this.isCountKey(state, key)) return null;
 
         const digit = Number(key);
         const newCount = (state.count ?? 0) * 10 + digit;
