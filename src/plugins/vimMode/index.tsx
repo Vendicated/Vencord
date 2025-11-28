@@ -4,18 +4,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 import { vim } from "./vim";
 import { VimStatus } from "./VimStatus";
-
 export let currentEditor: any = null;
+
+export const settings = definePluginSettings({
+    useJkScroll: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "j/k for scroll chat up/down"
+    },
+    blockCursor: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Toggle block cursor"
+    }
+});
 
 export default definePlugin({
     name: "VimMode",
     authors: [Devs.iamvpk_],
     description: "Vim-style navigation & motions",
+    settings: settings,
 
     onKeyDown(e: KeyboardEvent) {
         const { block } = vim.handleKey(e);

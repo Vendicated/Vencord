@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Settings } from "@api/Settings";
+
 import { keyMap } from "./keymap";
+import { VimActions } from "./vimActions";
 import { Editor, VimContext } from "./vimContext";
 import { Mode, VimStore } from "./vimStore";
 import { Action, Motion, Operator, VimPoint } from "./vimTypes";
@@ -57,6 +60,16 @@ class Vim {
 
         const { key } = e;
         const count = state.count ?? 1;
+
+        if ((key === "j" || key === "k")
+            && Settings.plugins.VimMode.useJkScroll
+            && state.mode === Mode.NORMAL) {
+            const count = state.count ?? 1;
+            if (key === "j") VimActions.scrollDown(count);
+            if (key === "k") VimActions.scrollUp(count);
+            VimStore.resetBuffer();
+            return { block: true };
+        }
 
         if (key === "g" && state.buffer === "") {
             VimStore.setBuffer("g");
