@@ -65,7 +65,7 @@ const VimScrollToggle: ChatBarButtonFactory = ({ isMainChat }) => {
             tooltip={vimChatScroll ? "Disable Vim Chat Scroll" : "Enable Vim Chat Scroll"}
             onClick={toggle}
         >
-            {vimChatScroll ? <VimScrollIcon /> : <VimScrollDisabledIcon />}
+            {vimChatScroll ? <VimScrollDisabledIcon /> : <VimScrollIcon />}
         </ChatBarButton>
     );
 };
