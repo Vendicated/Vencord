@@ -175,4 +175,32 @@ export class VimContext {
     undo() {
         this.editor.undo();
     }
+
+    toggleCase(count: number) {
+        const start = this.getPoint();
+        const { path, offset } = start;
+        const [node] = Editor.node(this.editor, path);
+        const { text } = node;
+        const end = Math.min(offset + count, text.length);
+
+        const charsToToggle = text.slice(offset, end);
+        const toggledChunk = charsToToggle.replace(/[a-z]/gi, c =>
+            c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()
+        );
+
+        Editor.withoutNormalizing(this.editor, () => {
+            Transforms.delete(this.editor, {
+                at: {
+                    anchor: { path, offset },
+                    focus: { path, offset: end }
+                }
+            });
+            Transforms.insertText(this.editor, toggledChunk, {
+                at: { path, offset }
+            });
+        });
+
+        const next = Editor.after(this.editor, start, { unit: "offset", distance: count });
+        this.moveTo(next ? next as VimPoint : start);
+    }
 }
