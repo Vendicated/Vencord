@@ -118,4 +118,12 @@ export class VimContext {
         this.selectRange(anchor, focus);
         this.editor.deleteFragment();
     }
+
+    insertTextAtCursor(text: string, before: boolean = false) {
+        const point = this.getPoint();
+        const insertPoint: VimPoint = before
+            ? point
+            : { path: point.path, offset: point.offset + 1 };
+        Transforms.insertText(this.editor, text, { at: insertPoint });
+    }
 }

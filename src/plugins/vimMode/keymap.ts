@@ -132,4 +132,26 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
     "go": new Action(() => {
         VimActions.openQuickSwitcher();
     }),
+
+    "y": new Operator((ctx, anchor, focus) => {
+        const { editor } = ctx;
+        const fragment = Editor.fragment(editor, { anchor, focus });
+        const text = fragment
+            .map(n => n.children?.map(c => c.text).join("") ?? "")
+            .join("\n");
+        VimStore.setRegister(text);
+    }),
+
+    "p": new Action(ctx => {
+        const text = VimStore.getRegister();
+        if (!text) return;
+        ctx.insertTextAtCursor(text, false);
+    }),
+
+    "P": new Action(ctx => {
+        const text = VimStore.getRegister();
+        if (!text) return;
+        ctx.insertTextAtCursor(text, true);
+    }),
+
 };

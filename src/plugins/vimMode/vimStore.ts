@@ -31,6 +31,7 @@ export const VimStore = proxyLazyWebpack(() => {
         timeout: number | null = null;
         visualAnchorPoint: VimPoint | null = null;
         cursorColumn: number | null = null;
+        unnamedReg: string = "";
 
         getState(): VimState {
             return {
@@ -93,6 +94,15 @@ export const VimStore = proxyLazyWebpack(() => {
         setCursorColumn(col: number | null) {
             this.cursorColumn = col;
             this.emitChange();
+        }
+
+        setRegister(text: string) {
+            this.unnamedReg = text;
+            this.emitChange();
+        }
+
+        getRegister(): string {
+            return this.unnamedReg;
         }
     }
 
