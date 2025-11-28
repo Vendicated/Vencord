@@ -71,6 +71,21 @@ export class Message extends DiscordRecord {
         type: number;
         version: string;
     }[];
+    interactionMetadata?: {
+        id: string;
+        type: number;
+        name?: string;
+        command_type?: number;
+        ephemerality_reason?: number;
+        user: User;
+        authorizing_integration_owners: {
+            [key: number]: string;
+        };
+        original_response_message_id?: string;
+        interacted_message_id?: string;
+        target_user?: User;
+        target_message_id?: string;
+    };
     interactionError: unknown[];
     isSearchHit: boolean;
     loggingName: unknown;
