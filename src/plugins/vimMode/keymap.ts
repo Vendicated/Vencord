@@ -26,6 +26,46 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
         return { anchor: start, focus };
     }),
 
+    "j": new Motion((ctx, count) => {
+        const start = ctx.getPoint();
+        ctx.moveLine(count);
+        const focus = ctx.getPoint();
+        return { anchor: start, focus };
+    }),
+
+    "k": new Motion((ctx, count) => {
+        const start = ctx.getPoint();
+        ctx.moveLine(-count);
+        const focus = ctx.getPoint();
+        return { anchor: start, focus };
+    }),
+
+    "gg": new Motion(ctx => {
+        const start = ctx.getPoint();
+        const focus: VimPoint = { path: [0, 0], offset: 0 };
+        ctx.moveTo(focus);
+        return { anchor: start, focus };
+    }),
+
+    "G": new Motion(ctx => {
+        const start = ctx.getPoint();
+        const { editor } = ctx;
+        const lastBlockIndex = editor.children.length - 1;
+        const focus =
+            (Editor.end(editor, [lastBlockIndex]) as VimPoint)
+            ?? { path: [lastBlockIndex, 0], offset: 0 };
+
+        ctx.moveTo(focus);
+        return { anchor: start, focus };
+    }),
+
+    "w": new Motion((ctx, count) => {
+        const start = ctx.getPoint();
+        ctx.wordForward(count);
+        const focus = ctx.getPoint();
+        return { anchor: start, focus };
+    }),
+
     "iw": new Motion(ctx => {
         const { editor } = ctx;
         const point = ctx.getPoint();
@@ -52,13 +92,6 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
         return { anchor, focus };
     }),
 
-    "w": new Motion((ctx, count) => {
-        const start = ctx.getPoint();
-        ctx.wordForward(count);
-        const focus = ctx.getPoint();
-        return { anchor: start, focus };
-    }),
-
     "b": new Motion((ctx, count) => {
         const start = ctx.getPoint();
         ctx.wordBackward(count);
@@ -77,11 +110,6 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
         return { anchor: start, focus };
     }),
 
-    "gg": new Motion(ctx => {
-        const focus: VimPoint = { path: [0, 0], offset: 0 };
-        return { anchor: focus, focus };
-    }),
-
     "d": new Operator((ctx, anchor, focus) => {
         ctx.deleteRange(anchor, focus);
     }),
@@ -98,16 +126,6 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
     }),
 
     "u": new Action(ctx => ctx.editor.undo()),
-
-    "j": new Action((ctx, count) => ctx.moveLine(count)),
-    "k": new Action((ctx, count) => ctx.moveLine(-count)),
-
-    "G": new Action(ctx => {
-        const { editor } = ctx;
-        const lastBlockIndex = editor.children.length - 1;
-        const end = (Editor.end(editor, [lastBlockIndex]) as VimPoint) ?? { path: [lastBlockIndex, 0], offset: 0 };
-        ctx.moveTo(end);
-    }),
 
     "i": new Action(() => VimStore.setMode(Mode.INSERT)),
 
