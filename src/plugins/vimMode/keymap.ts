@@ -67,5 +67,7 @@ export const keyMap = {
     y: new Operator((ctx, a, f) => ctx.yank(a, f)),
     p: new Action(ctx => ctx.paste()),
     P: new Action(ctx => ctx.pasteBefore()),
-    "~": new Action((ctx, count) => ctx.toggleCase(count))
+    "~": new Action((ctx, count) => ctx.toggleCase(count)),
+
+    o: new Action(ctx => ctx.openLineBelow()),
 };

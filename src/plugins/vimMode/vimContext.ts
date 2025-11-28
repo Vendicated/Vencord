@@ -7,7 +7,7 @@
 import { findByPropsLazy } from "@webpack";
 
 import { currentEditor } from ".";
-import { VimStore } from "./vimStore";
+import { Mode, VimStore } from "./vimStore";
 import type { VimPoint } from "./vimTypes";
 
 const Transforms = findByPropsLazy("insertNodes", "textToText");
@@ -202,5 +202,13 @@ export class VimContext {
 
         const next = Editor.after(this.editor, start, { unit: "offset", distance: count });
         this.moveTo(next ? next as VimPoint : start);
+    }
+
+    openLineBelow() {
+        const point = this.getPoint();
+        const { path, offset } = point;
+        Transforms.insertText(this.editor, "\n", { at: point });
+        this.moveTo({ path, offset: offset + 1 });
+        VimStore.setMode(Mode.INSERT);
     }
 }
