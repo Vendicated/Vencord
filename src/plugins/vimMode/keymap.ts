@@ -180,4 +180,7 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
         ctx.insertTextAtCursor(text, true);
     }),
 
+    "/": new Action(() => {
+        VimActions.openFind();
+    })
 };

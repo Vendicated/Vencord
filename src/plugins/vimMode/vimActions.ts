@@ -6,6 +6,8 @@
 
 import { FluxDispatcher } from "@webpack/common";
 
+import { currentSearchBar } from ".";
+
 function getScroller(): HTMLElement | null {
     return (
         document.querySelector('[data-list-id="chat-messages"]')
@@ -40,5 +42,9 @@ export const VimActions = {
             query: ""
         });
     },
-};
 
+    openFind() {
+        if (!currentSearchBar) return;
+        currentSearchBar.handleFocusSearch({ prefillCurrentChannel: false });
+    }
+};
