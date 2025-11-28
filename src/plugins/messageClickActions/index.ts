@@ -110,7 +110,7 @@ export default definePlugin({
                     showMentionToggle: channel.guild_id !== null
                 });
             }
-        } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel)) || isSelfInvokedUserApp) {
+        } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel) || isSelfInvokedUserApp)) {
             if (msg.deleted) {
                 FluxDispatcher.dispatch({
                     type: "MESSAGE_DELETE",
