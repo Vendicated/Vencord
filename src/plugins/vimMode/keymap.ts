@@ -92,6 +92,32 @@ export const keyMap: Record<string, Motion | Operator | Action> = {
         return { anchor, focus };
     }),
 
+    "aw": new Motion(ctx => {
+        const point = ctx.getPoint();
+        const { editor } = ctx;
+        const textNode = editor.children[point.path[0]].children[0];
+        const { text } = textNode;
+
+        let start = point.offset;
+        let end = point.offset;
+
+        while (start > 0 && /\w/.test(text[start - 1])) start--;
+        while (end < text.length && /\w/.test(text[end])) end++;
+
+        while (end < text.length && /\s/.test(text[end])) end++;
+
+        const anchor = {
+            path: point.path,
+            offset: start
+        };
+        const focus = {
+            path: point.path,
+            offset: end
+        };
+
+        return { anchor, focus };
+    }),
+
     "b": new Motion((ctx, count) => {
         const start = ctx.getPoint();
         ctx.wordBackward(count);
