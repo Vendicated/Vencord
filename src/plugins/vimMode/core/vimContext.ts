@@ -6,7 +6,7 @@
 
 import { findByPropsLazy } from "@webpack";
 
-import { currentEditor } from ".";
+import { currentEditor } from "..";
 import { Mode, VimStore } from "./vimStore";
 import type { VimPoint } from "./vimTypes";
 

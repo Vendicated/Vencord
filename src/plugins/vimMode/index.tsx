@@ -9,7 +9,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 
-import { vim } from "./vim";
+import { vim } from "./core/vim";
 import { VimStatus } from "./VimStatus";
 
 export let currentEditor: any = null;

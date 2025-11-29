@@ -4,14 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2025 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
 import { useStateFromStores } from "@webpack/common";
 
-import { Mode, VimStore } from "./vimStore";
+import { Mode, VimStore } from "./core/vimStore";
 
 const modeColors = {
     [Mode.NORMAL]: "#5865f2",

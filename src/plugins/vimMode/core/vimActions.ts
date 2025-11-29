@@ -6,7 +6,7 @@
 
 import { FluxDispatcher } from "@webpack/common";
 
-import { currentSearchBar } from ".";
+import { currentSearchBar } from "..";
 
 function getScroller(): HTMLElement | null {
     return (
