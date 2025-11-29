@@ -77,13 +77,18 @@ jobs:
               if: steps.check.outputs.release == 'true'
               run: pnpm buildWebStandalone
 
+            - name: Create sources zip
+              if: steps.check.outputs.release == 'true'
+              run: zip -r dist/extension-sources.zip . -x "node_modules/*" -x "dist/*" -x ".git/*"
+
             - name: Publish extension
               if: steps.check.outputs.release == 'true'
-              run: |
-                  cd dist/browser/chromium-unpacked
-                  pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
+              run: pnpx publish-browser-extension@latest --chrome-zip dist/extension-chrome.zip --firefox-zip dist/extension-firefox.zip --firefox-sources-zip dist/extension-sources.zip
               env:
-                  EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
-                  CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-                  CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
-                  REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+                  CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+                  CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+                  CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+                  CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+                  FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+                  FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+                  FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
