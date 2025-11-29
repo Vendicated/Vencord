@@ -17,16 +17,42 @@
 */
 
 import { Settings } from "@api/Settings";
+import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, Text } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
 type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
 type SectionTypes = Record<SectionType, SectionType>;
+
+const LayoutType = { SECTION: 1, ENTRY: 2, PANEL: 3, PANE: 4 } as const;
+
+interface SettingsLayoutNode {
+    key?: string;
+    type: number;
+    legacySearchKey?: string;
+    useLabel?: () => string;
+    useTitle?: () => string;
+    buildLayout?: () => SettingsLayoutNode[];
+    icon?: () => React.ReactNode;
+    render?: () => React.ReactNode;
+}
+
+interface SettingsLayoutBuilder {
+    key?: string;
+    buildLayout(): SettingsLayoutNode[];
+}
+
+function getSettingsCfg(): any { try { return Settings.plugins.Settings; } catch { return null; } }
+
+const isNewUIForcedOff = () => !!getSettingsCfg()?.disableNewUI;
+const getSettingsLocationSafe = (): string => getSettingsCfg()?.settingsLocation ?? "aboveNitro";
+
+const findIndexByKey = (layout: SettingsLayoutNode[], key: string) => layout.findIndex(s => typeof s?.key === "string" && s.key === key);
 
 export default definePlugin({
     name: "Settings",
@@ -39,6 +65,12 @@ export default definePlugin({
             find: ".versionHash",
             replacement: [
                 {
+                    match: /\.compactInfo.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\),/,
+                    replace: (m, component, props) => {
+                        return `${m}$self.makeInfoElements(${component}, ${props}),`;
+                    }
+                },
+                {
                     match: /\.info.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
                     replace: (m, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
@@ -46,7 +78,7 @@ export default definePlugin({
                     }
                 },
                 {
-                    match: /copyValue:\i\.join\(" "\)/,
+                    match: /copyValue:\i\.join\(" "\)(?=,text:)/g,
                     replace: "$& + $self.getInfoString()"
                 }
             ]
@@ -73,6 +105,16 @@ export default definePlugin({
             }
         },
         {
+            find: "2025-09-user-settings-redesign-1",
+            replacement: {
+                match: /enabled:![01],showLegacyOpen:/g,
+                replace: (m: string) =>
+                    isNewUIForcedOff()
+                        ? "enabled:false,showLegacyOpen:"
+                        : m
+            }
+        },
+        {
             find: ".buildLayout().map",
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
@@ -81,39 +123,104 @@ export default definePlugin({
         }
     ],
 
-    buildLayout(originalLayoutBuilder: any) {
+    buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
         const layout = originalLayoutBuilder.buildLayout();
         if (originalLayoutBuilder.key !== "$Root") return layout;
+        if (!Array.isArray(layout)) return layout;
+        if (isNewUIForcedOff()) return layout;
 
-        console.log({ originalLayoutBuilder, layout });
-        layout.unshift({
-            key: "vencord_section",
-            type: 1,
-            useLabel: () => "Vencord Settings",
+        if (layout.some(s => s?.key === "vencord_section")) return layout;
+
+        const makeEntry = (
+            key: string,
+            title: string,
+            Component: React.ComponentType<any>,
+            Icon: React.ComponentType<any>
+        ): SettingsLayoutNode => ({
+            key,
+            type: LayoutType.ENTRY,
+            legacySearchKey: title.toUpperCase(),
+            useTitle: () => title,
+            icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [
                 {
-                    key: "vencord_settings",
-                    legacySearchKey: "VENCORD SETTINGS",
-                    type: 2,
-                    useTitle: () => "Vencord Settings",
-                    icon: () => null,
+                    key: key + "_panel",
+                    type: LayoutType.PANEL,
+                    useTitle: () => title,
                     buildLayout: () => [
                         {
-                            key: "vencord_settings_panel",
-                            type: 3,
-                            useTitle: () => "Vencord Settings Panel",
-                            buildLayout: () => [{
-                                key: "vencord_settings_pane",
-                                type: 4,
-                                buildLayout: () => [],
-                                render: () => <Text>Hi</Text>,
-                                useTitle: () => "Vencord Settings Pane"
-                            }]
+                            key: key + "_pane",
+                            type: LayoutType.PANE,
+                            buildLayout: () => [],
+                            render: () => <Component />,
+                            useTitle: () => title
                         }
                     ]
                 }
             ]
         });
+
+        const vencordEntries: SettingsLayoutNode[] = [
+            makeEntry("vencord_main", "Vencord", VencordTab, MainSettingsIcon),
+            makeEntry("vencord_plugins", "Plugins", PluginsTab, PluginsIcon),
+            makeEntry("vencord_themes", "Themes", ThemesTab, PaintbrushIcon),
+            makeEntry("vencord_cloud", "Cloud", CloudTab, CloudIcon),
+            makeEntry("vencord_backup_restore", "Backup & Restore", BackupAndRestoreTab, BackupRestoreIcon)
+        ];
+
+        if (!IS_UPDATER_DISABLED && UpdaterTab) {
+            vencordEntries.push(makeEntry("vencord_updater", "Updater", UpdaterTab, UpdaterIcon));
+        }
+
+        if (IS_DEV && PatchHelperTab) {
+            vencordEntries.push(makeEntry("vencord_patch_helper", "Patch Helper", PatchHelperTab, PatchHelperIcon));
+        }
+
+        const vencordSection: SettingsLayoutNode = {
+            key: "vencord_section",
+            type: LayoutType.SECTION,
+            useLabel: () => "Vencord",
+            buildLayout: () => vencordEntries
+        };
+
+        const settingsLocation = getSettingsLocationSafe();
+        let insertIndex = layout.length;
+
+        switch (settingsLocation) {
+            case "top": {
+                const idx = findIndexByKey(layout, "user_section");
+                insertIndex = idx === -1 ? Math.min(1, layout.length) : idx;
+                break;
+            }
+            case "aboveNitro": {
+                const idx = findIndexByKey(layout, "billing_section");
+                insertIndex = idx === -1 ? layout.length : idx;
+                break;
+            }
+            case "belowNitro": {
+                const idx = findIndexByKey(layout, "billing_section");
+                insertIndex = idx === -1 ? layout.length : idx + 1;
+                break;
+            }
+            case "aboveActivity": {
+                const idx = findIndexByKey(layout, "activity_section");
+                insertIndex = idx === -1 ? layout.length : idx;
+                break;
+            }
+            case "belowActivity": {
+                const idx = findIndexByKey(layout, "activity_section");
+                insertIndex = idx === -1 ? layout.length : idx + 1;
+                break;
+            }
+            case "bottom":
+            default: {
+                const idx = findIndexByKey(layout, "logout_section");
+                insertIndex = idx === -1 ? layout.length : idx;
+                break;
+            }
+        }
+
+        layout.splice(insertIndex, 0, vencordSection);
 
         return layout;
     },
@@ -181,7 +288,7 @@ export default definePlugin({
         // lowest two elements... sanity backup
         if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
 
-        const { settingsLocation } = Settings.plugins.Settings;
+        const settingsLocation = getSettingsLocationSafe();
 
         if (settingsLocation === "bottom") return firstChild === "LOGOUT";
         if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
@@ -242,6 +349,12 @@ export default definePlugin({
                 { label: "At the very bottom", value: "bottom" },
             ]
         },
+        disableNewUI: {
+            type: OptionType.BOOLEAN,
+            description: "Force Discord to use the old settings UI",
+            default: false,
+            restartNeeded: true
+        }
     },
 
     get electronVersion() {
