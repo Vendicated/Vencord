@@ -90,7 +90,7 @@ const PreviewIcon: IconComponent = ({ height = 20, width = 20, className }) => {
 };
 
 const PreviewButton: ChatBarButtonFactory = ({ isMainChat, isEmpty, type: { attachments }, channel }) => {
-    const channelId = channel.id ?? SelectedChannelStore.getChannelId();
+    const channelId = channel.id;
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
     if (!isMainChat) return null;
