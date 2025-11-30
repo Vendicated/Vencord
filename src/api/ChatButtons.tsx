@@ -104,7 +104,7 @@ function VencordChatBarButtons(props: ChatBarProps) {
                 .filter(([key]) => chatBarButtons[key]?.enabled !== false)
                 .map(([key, { render: Button }]) => (
                     <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
-                        <Button {...props} isMainChat={props.type.analyticsName === "normal" || props.type.analyticsName === "sidebar"} />
+                        <Button {...props} isMainChat={["normal", "sidebar"].includes(props.type.analyticsName)} />
                     </ErrorBoundary>
                 ))}
         </>
