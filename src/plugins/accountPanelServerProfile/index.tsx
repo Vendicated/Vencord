@@ -39,8 +39,10 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
                 label={prioritizeServerProfile ? "View Account Profile" : "View Server Profile"}
                 disabled={getCurrentChannel()?.getGuildId() == null}
                 action={e => {
-                    const user = UserStore.getCurrentUser();
-                    if (isPluginEnabled(alwaysExpandProfiles.name)) return alwaysExpandProfiles.openUserModal(user);
+                    if (isPluginEnabled(alwaysExpandProfiles.name)) {
+                        const user = UserStore.getCurrentUser();
+                        return alwaysExpandProfiles.openUserModal(user);
+                    }
                     openAlternatePopout = true;
                     accountPanelRef.current?.click();
                 }}
