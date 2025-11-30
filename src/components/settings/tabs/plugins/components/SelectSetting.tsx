@@ -17,7 +17,7 @@
 */
 
 import { PluginOptionSelect } from "@utils/types";
-import { React, Select, useState } from "@webpack/common";
+import { React, Select, useEffect, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -26,6 +26,11 @@ export function SelectSetting({ option, pluginSettings, definedSettings, onChang
 
     const [state, setState] = useState<any>(def ?? null);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const val = pluginSettings[id] ?? option.options?.find(o => o.default)?.value ?? null;
+        setState(val);
+    }, [pluginSettings, id, option.options]);
 
     function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;

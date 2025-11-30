@@ -17,13 +17,18 @@
 */
 
 import { PluginOptionString } from "@utils/types";
-import { React, TextInput, useState } from "@webpack/common";
+import { React, TextInput, useEffect, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
 export function TextSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionString>) {
     const [state, setState] = useState(pluginSettings[id] ?? option.default ?? null);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const val = pluginSettings[id] ?? option.default ?? null;
+        setState(val);
+    }, [pluginSettings, id, option.default]);
 
     function handleChange(newValue: string) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;

@@ -18,7 +18,7 @@
 
 import { Switch } from "@components/Switch";
 import { PluginOptionBoolean } from "@utils/types";
-import { React, useState } from "@webpack/common";
+import { React, useEffect, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -27,6 +27,11 @@ export function BooleanSetting({ option, pluginSettings, definedSettings, id, on
 
     const [state, setState] = useState(def ?? false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const val = pluginSettings[id] ?? option.default ?? false;
+        setState(val);
+    }, [pluginSettings, id, option.default]);
 
     function handleChange(newValue: boolean): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;

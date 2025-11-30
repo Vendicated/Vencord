@@ -17,7 +17,7 @@
 */
 
 import { OptionType, PluginOptionNumber } from "@utils/types";
-import { React, TextInput, useState } from "@webpack/common";
+import { React, TextInput, useEffect, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -32,6 +32,11 @@ export function NumberSetting({ option, pluginSettings, definedSettings, id, onC
     const [state, setState] = useState<any>(`${pluginSettings[id] ?? option.default ?? 0}`);
     const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        const val = `${pluginSettings[id] ?? option.default ?? 0}`;
+        setState(val);
+    }, [pluginSettings, id, option.default]);
+
     function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
 
@@ -41,8 +46,20 @@ export function NumberSetting({ option, pluginSettings, definedSettings, id, onC
             onChange(serialize(newValue));
         }
 
-        if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
-            setState(`${Number.MAX_SAFE_INTEGER}`);
+        if (option.type === OptionType.NUMBER) {
+            const num = Number(newValue);
+            if (!Number.isNaN(num) && num >= Number.MAX_SAFE_INTEGER) {
+                setState(`${Number.MAX_SAFE_INTEGER}`);
+            } else {
+                setState(newValue);
+            }
+        } else if (option.type === OptionType.BIGINT) {
+            // For bigint, try to coerce but avoid calling BigInt on non-integer decimals
+            try {
+                setState(`${BigInt(newValue)}`);
+            } catch {
+                setState(newValue);
+            }
         } else {
             setState(newValue);
         }
