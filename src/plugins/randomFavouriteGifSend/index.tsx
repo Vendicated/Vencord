@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2025 Doomah
+ * Copyright (c) 2025 Doomah and Hazrtine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import { Devs } from "../../utils";
 
 export default definePlugin({
     name: "RandomFavouriteGifSend",
-    authors: [Devs.doomah],
+    authors: [Devs.doomah, Devs.Hazrtine],
     description: "Adds a random gif sender button to favourite gifs tab.",
     patches: [{
         find: "renderHeaderContent()", replacement: [{
