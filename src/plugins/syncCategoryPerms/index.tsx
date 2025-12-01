@@ -31,6 +31,37 @@ function permissionsMatch(perms1: any, perms2: any): boolean {
     return true;
 }
 
+async function syncChannelWithRetry(channelId: string, permissionOverwrites: any, maxRetries = 3): Promise<boolean> {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            await RestAPI.patch({
+                url: Constants.Endpoints.CHANNEL(channelId),
+                body: {
+                    permission_overwrites: Object.values(permissionOverwrites)
+                }
+            });
+            return true;
+        } catch (error: any) {
+            // If rate limited, wait longer before retrying
+            if (error?.status === 429 && attempt < maxRetries - 1) {
+                const retryAfter = error.body?.retry_after ? error.body.retry_after * 1000 : 2000;
+                await new Promise(resolve => setTimeout(resolve, retryAfter));
+                continue;
+            }
+
+            // For other errors or final retry, fail
+            if (attempt === maxRetries - 1) {
+                console.error(`Failed to sync channel ${channelId} after ${maxRetries} attempts:`, error);
+                return false;
+            }
+
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+        }
+    }
+    return false;
+}
+
 async function syncCategoryPermissions(categoryId: string) {
     const category = ChannelStore.getChannel(categoryId);
     if (!category || category.type !== 4) {
@@ -54,23 +85,57 @@ async function syncCategoryPermissions(categoryId: string) {
         return;
     }
 
+    showToast(
+        `Syncing permissions for ${channelsInCategory.length} channel${channelsInCategory.length === 1 ? "" : "s"}...`,
+        Toasts.Type.MESSAGE
+    );
+
     try {
-        // Sync permissions for each channel in the category
-        const promises = channelsInCategory.map((channel: any) =>
-            RestAPI.patch({
-                url: Constants.Endpoints.CHANNEL(channel.id),
-                body: {
-                    permission_overwrites: Object.values(categoryPermissions)
+        // Sync permissions in batches to avoid rate limiting
+        const BATCH_SIZE = 3;
+        const DELAY_MS = 1000;
+
+        let successCount = 0;
+        let failCount = 0;
+
+        for (let i = 0; i < channelsInCategory.length; i += BATCH_SIZE) {
+            const batch = channelsInCategory.slice(i, i + BATCH_SIZE);
+
+            const results = await Promise.all(
+                batch.map((channel: any) =>
+                    syncChannelWithRetry(channel.id, categoryPermissions)
+                )
+            );
+
+            results.forEach(success => {
+                if (success) {
+                    successCount++;
+                } else {
+                    failCount++;
                 }
-            })
-        );
+            });
 
-        await Promise.all(promises);
+            // Add delay between batches to avoid rate limiting
+            if (i + BATCH_SIZE < channelsInCategory.length) {
+                await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+            }
+        }
 
-        showToast(
-            `Successfully synced permissions for ${channelsInCategory.length} channel${channelsInCategory.length === 1 ? "" : "s"}`,
-            Toasts.Type.SUCCESS
-        );
+        console.log(`[syncCategoryPerms] Sync completed: ${successCount} succeeded, ${failCount} failed (${channelsInCategory.length} total)`);
+
+        if (failCount === 0) {
+            showToast(
+                `Successfully synced permissions for ${successCount} channel${successCount === 1 ? "" : "s"}`,
+                Toasts.Type.SUCCESS
+            );
+        } else if (successCount > 0) {
+            showToast(
+                `Synced ${successCount} channel${successCount === 1 ? "" : "s"}, ${failCount} failed`,
+                Toasts.Type.MESSAGE
+            );
+        } else {
+            showToast("Failed to sync permissions", Toasts.Type.FAILURE);
+        }
     } catch (error) {
         console.error("Failed to sync category permissions:", error);
         showToast("Failed to sync permissions", Toasts.Type.FAILURE);
