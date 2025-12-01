@@ -16,72 +16,114 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// also sorry if the code is a bit messy i literally just learnt typescript as i went to code this idea thats been on my head for a while
-
-import definePlugin from "@utils/types";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
-import { useCallback, useRef, ExpressionPickerStore } from "@webpack/common";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { findStore } from "@webpack";
+import definePlugin from "@utils/types";
+import { findStoreLazy } from "@webpack";
+import { ExpressionPickerStore, useCallback, useRef } from "@webpack/common";
+import { Devs } from "../../utils";
+
 
 export default definePlugin({
     name: "RandomFavouriteGifSend",
     authors: [Devs.doomah],
     description: "Adds a random gif sender button to favourite gifs tab.",
-    patches: [
-        {
-            find: "renderHeaderContent()",
-            replacement: [
-                {
-                    match: /(renderHeaderContent\(\).{1,150}FAVORITES:return)(.{1,150});(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\..{1,10}),)/,
-                    replace: "$1 $self.renderFavButton(this, $<searchComp>);$3"
-                },
-                {
-                    match: /(,suggestions:\i,favorites:)(\i),/,
-                    replace: "$1$self.getFav($2),"
-                }
-            ]
-        }
-    ],
+    patches: [{
+        find: "renderHeaderContent()", replacement: [{
+            match: /(children:\s*)(\i(?:\.\i)+\(\i(?:\.\i)+\))/, replace: "$1[$self.renderFavButton($2)]"
+        }]
+    }],
     instance: null,
-    renderFavButton(instance) {
-        this.instance = instance;
-        return <GambleButton />; //theres no way walmart fucking deletes that chance picture
+    renderFavButton(title) {
+
+        if (!Vencord.Plugins.isPluginEnabled("FavoriteGifSearch")) {
+            return (<div style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%"
+            }}>
+                {title}
+                <GambleButton />
+            </div>);
+        }
+        return <GambleButton />;
     },
-    getFav(favorites: any[]) {
+    getFav(favorites) {
         return favorites;
+    },
+    start() {
+        const favGifSearchBar = Vencord.Plugins.plugins.FavoriteGifSearch;
+        if (!Vencord.Plugins.isPluginEnabled("FavoriteGifSearch")) return;
+
+        const original = favGifSearchBar.renderSearchBar;
+        favGifSearchBar.renderSearchBar = (...args) => {
+            const jsx = original.apply(this, args);
+            return (<>
+                {jsx}
+                {this.renderFavButton(this)}
+            </>);
+        };
     }
 });
 
 function GambleButton() {
     const containerRef = useRef(null);
 
-    const gifs = Object.keys(findStore("UserSettingsProtoStore").frecencyWithoutFetchingLatest.favoriteGifs.gifs);
+    const gifs = Object.keys(findStoreLazy("UserSettingsProtoStore").frecencyWithoutFetchingLatest.favoriteGifs.gifs);
 
     const pickRandomGif = () => gifs[Math.floor(Math.random() * gifs.length)];
 
-    const sendGif = async (gif: string) => {
+    const sendGif = async gif => {
         insertTextIntoChatInputBox(gif + " ");
         ExpressionPickerStore.closeExpressionPicker();
     };
 
-    const handleClick = useCallback(async (e) => {
+    const handleClick = useCallback(async e => {
         e.stopPropagation();
         e.preventDefault();
         sendGif(pickRandomGif());
     }, []);
-
-    return (
-        <div ref={containerRef} onMouseDown={e => e.stopPropagation()} onMouseUp={e => e.stopPropagation()} style={{ position: "absolute", right: 8, top: 6, zIndex: 99999, pointerEvents: "auto" }}>
-            <div onClick={handleClick} role="button" title="Click to paste a random favorite GIF into the chat input." style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: 8, background: "var(--background-secondary)", boxShadow: "var(--elevation-medium)", cursor: "pointer", userSelect: "none" }}>
-                <img
-                    src="https://i5.walmartimages.com/asr/6c5de11e-499a-4e2f-9daf-1635daceb794.1b271a4bcdf6a8bead3d3c348c5ab29c.jpeg"
+    if (!Vencord.Plugins.isPluginEnabled("FavoriteGifSearch")) return (
+        <div ref={containerRef} onMouseDown={e => e.stopPropagation()} onMouseUp={e => e.stopPropagation()} style={{
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: 8,
+            zIndex: 0,
+            pointerEvents: "auto",
+            position: "absolute",
+            right: "15px"
+        }}>
+            <div onClick={handleClick} role="button"
+                title="Click to paste a random favorite GIF into the chat input."
+                style={{ cursor: "pointer", color: "var(--interactive-normal)", display: "flex" }}>
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                     style={{ width: 32, height: 32 }}
-                    draggable={false}
-                    onMouseDown={e => e.stopPropagation()}
-                />
+                    onMouseDown={e => e.stopPropagation()}>
+                    <path
+                        d="M8 8H8.01M16 8H16.01M12 12H12.01M16 16H16.01M8 16H8.01M7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.07989 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.07989 20 7.2 20Z"
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+                </svg>
             </div>
+        </div>);
+
+    return (<div ref={containerRef} onMouseDown={e => e.stopPropagation()} onMouseUp={e => e.stopPropagation()} style={{
+        marginLeft: "auto",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: 8,
+        right: 8,
+        top: "35%",
+        zIndex: 0,
+        pointerEvents: "auto",
+    }}>
+        <div onClick={handleClick} role="button"
+            title="Click to paste a random favorite GIF into the chat input."
+            style={{
+                cursor: "pointer", color: "var(--interactive-normal)", display: "flex",
+            }}>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: 32, height: 32 }}
+                onMouseDown={e => e.stopPropagation()}>
+                <path
+                    d="M8 8H8.01M16 8H16.01M12 12H12.01M16 16H16.01M8 16H8.01M7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.07989 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.07989 20 7.2 20Z"
+                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+            </svg>
         </div>
-    );
+    </div>);
 }
