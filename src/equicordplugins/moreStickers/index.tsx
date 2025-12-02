@@ -50,12 +50,12 @@ export default definePlugin({
             find: ".gifts)",
             replacement: [
                 {
-                    match: /(?<="submit"\)\}\);)(?=.{0,50}null!=(\i))/,
-                    replace: '$1["stickers+"]=3;'
+                    match: /(?<=(,!\i&&\(null==\(\i=\i\.stickers\)\?void 0.*?\i\.push\(\{).{0,15}node:(.{0,45})},"sticker"\)\}\))/,
+                    replace: "$1key:\"stickers+\",node:$2,stickersType:\"stickers+\"},\"stickers+\")})"
                 },
                 {
-                    match: /(?<=,.{0,5}\(null==\(\i=\i\.stickers\)\?void 0.*?(\i)\.push\(\{.{0,15}node:(.{0,15}{disabled:\i,type:\i)},"sticker"\)\}\))/,
-                    replace: ",arguments[0].type?.submit?.button&&$1.push({key:\"stickers+\",node:$2,stickersType:\"stickers+\"},\"stickers+\")})"
+                    match: /(?<="submit"\)\}\);)(?=.{0,50}null!=(\i))/,
+                    replace: '$1["stickers+"]=3;'
                 }
             ]
         },
