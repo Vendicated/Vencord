@@ -17,17 +17,11 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
-import { ThemeStore } from "@webpack/common";
+import { createAndAppendStyle } from "@utils/css";
+import { ThemeStore } from "@vencord/discord-types";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
-
-function createStyle(id: string) {
-    const style = document.createElement("style");
-    style.id = id;
-    document.documentElement.append(style);
-    return style;
-}
 
 async function initSystemValues() {
     const values = await VencordNative.themes.getSystemValues();
@@ -36,13 +30,13 @@ async function initSystemValues() {
         .map(([k, v]) => `--${k}: ${v};`)
         .join("");
 
-    createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
+    createAndAppendStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
 }
 
 async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
-            style = createStyle("vencord-custom-css");
+            style = createAndAppendStyle("vencord-custom-css");
             VencordNative.quickCss.addChangeListener(css => {
                 style.textContent = css;
                 // At the time of writing this, changing textContent resets the disabled state
@@ -55,9 +49,11 @@ async function toggle(isEnabled: boolean) {
 }
 
 async function initThemes() {
-    themesStyle ??= createStyle("vencord-themes");
+    themesStyle ??= createAndAppendStyle("vencord-themes");
 
     const { themeLinks, enabledThemes } = Settings;
+
+    const { ThemeStore } = require("@webpack/common/stores") as typeof import("@webpack/common/stores");
 
     // "darker" and "midnight" both count as dark
     // This function is first called on DOMContentLoaded, so ThemeStore may not have been loaded yet
@@ -107,16 +103,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 }, { once: true });
 
-export function initQuickCssThemeStore() {
+export function initQuickCssThemeStore(themeStore: ThemeStore) {
     if (IS_USERSCRIPT) return;
 
     initThemes();
 
-    let currentTheme = ThemeStore.theme;
-    ThemeStore.addChangeListener(() => {
-        if (currentTheme === ThemeStore.theme) return;
+    let currentTheme = themeStore.theme;
+    themeStore.addChangeListener(() => {
+        if (currentTheme === themeStore.theme) return;
 
-        currentTheme = ThemeStore.theme;
+        currentTheme = themeStore.theme;
         initThemes();
     });
 }
