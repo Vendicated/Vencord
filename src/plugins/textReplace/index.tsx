@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
-import { HeadingTertiary } from "@components/Heading";
+import { Heading } from "@components/Heading";
 import { DeleteIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -140,7 +140,7 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
 
     return (
         <>
-            <HeadingTertiary>{title}</HeadingTertiary>
+            <Heading>{title}</Heading>
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
                 {
                     rulesArray.map((rule, index) =>
@@ -192,7 +192,7 @@ function TextReplaceTesting() {
     const [value, setValue] = useState("");
     return (
         <>
-            <HeadingTertiary>Test Rules</HeadingTertiary>
+            <Heading>Test Rules</Heading>
             <TextInput placeholder="Type a message" onChange={setValue} />
             <TextInput placeholder="Message with rules applied" editable={false} value={applyRules(value)} />
         </>

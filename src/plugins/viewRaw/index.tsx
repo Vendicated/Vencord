@@ -78,7 +78,7 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <BaseText style={{ flexGrow: 1 }}>View Raw</BaseText>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>View Raw</BaseText>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
                 <ModalContent>

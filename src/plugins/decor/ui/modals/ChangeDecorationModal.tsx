@@ -229,7 +229,7 @@ function ChangeDecorationModal(props: ModalProps) {
             <div className={cl("modal-footer-btn-container")}>
                 <Button
                     onClick={props.onClose}
-                    color="secondary"
+                    variant="secondary"
                 >
                     Cancel
                 </Button>

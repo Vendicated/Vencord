@@ -68,7 +68,7 @@ export function CspErrorCard() {
                         {i !== 0 && <Divider className={Margins.bottom8} />}
                         <div className="vc-settings-csp-row">
                             <Link href={url}>{url}</Link>
-                            <Button color="secondary" onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
+                            <Button variant="secondary" onClick={() => allowUrl(url)} disabled={isImgurHtmlDomain(url)}>
                                 Allow
                             </Button>
                         </div>

@@ -249,7 +249,7 @@ export default definePlugin({
                         <Paragraph>Activity Sharing isn't enabled, people won't be able to see your custom rich presence!</Paragraph>
 
                         <Button
-                            color="secondary"
+                            variant="secondary"
                             className={Margins.top8}
                             onClick={() => ShowCurrentGame.updateSetting(true)}
                         >

@@ -193,7 +193,7 @@ export default definePlugin({
                         <Button
                             {...popoutProps}
                             ref={buttonRef}
-                            color="secondary"
+                            variant="none"
                             size="min"
                             className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, "vc-permviewer-role-button")}
                         >
