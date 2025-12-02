@@ -20,7 +20,7 @@ import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Heading, HeadingPrimary, HeadingSecondary, HeadingTertiary } from "@components/Heading";
+import { Heading, HeadingPrimary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import PermissionsViewerPlugin from "@plugins/permissionsViewer";
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
@@ -179,7 +179,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <img className={cl("logo")} src={HiddenChannelLogo} />
 
                 <div className={cl("heading-container")}>
-                    <HeadingPrimary>This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</HEadingTertiary>
+                    <HeadingPrimary>This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</HeadingPrimary>
                     {channel.isNSFW() &&
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
