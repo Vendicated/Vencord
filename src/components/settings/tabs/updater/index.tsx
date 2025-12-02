@@ -17,6 +17,7 @@
 */
 
 import { useSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
@@ -30,7 +31,7 @@ import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Parser, React, Toasts } from "@webpack/common";
+import { Alerts, Parser, React, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -91,7 +92,7 @@ function Updatable(props: CommonProps) {
         <>
             <Flex className={classes(Margins.bottom8, Margins.top8)}>
                 {isOutdated && <Button
-                    size={Button.Sizes.SMALL}
+                    size="small"
                     disabled={isUpdating || isChecking}
                     onClick={withDispatcher(setIsUpdating, async () => {
                         if (await update()) {
@@ -115,7 +116,7 @@ function Updatable(props: CommonProps) {
                     Update Now
                 </Button>}
                 <Button
-                    size={Button.Sizes.SMALL}
+                    size="small"
                     disabled={isUpdating || isChecking}
                     onClick={withDispatcher(setIsChecking, async () => {
                         const outdated = await checkForUpdates();

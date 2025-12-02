@@ -90,8 +90,8 @@ function ResetButton({ themeSettings, themeId, close, onReset }: ResetButtonProp
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
 
-                onClick={async () => {
-                    await close(); // close the modal first to stop rendering
+                onClick={() => {
+                    close(); // close the modal first to stop rendering
                     delete themeSettings[themeId];
                     onReset();
                 }}>

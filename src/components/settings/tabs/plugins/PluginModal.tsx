@@ -22,6 +22,7 @@ import { generateId } from "@api/Commands";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Paragraph } from "@components/Paragraph";
@@ -34,7 +35,7 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, M
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Button, Clickable, FluxDispatcher, React, Toasts, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, React, Toasts, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -229,8 +230,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                 {({ onMouseEnter, onMouseLeave }) => (
                                     <Button
                                         className={cl("disable-warning")}
-                                        size={Button.Sizes.SMALL}
-                                        color={Button.Colors.BRAND}
+                                        size="small"
+                                        variant="primary"
                                         onClick={handleResetClick}
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
@@ -351,16 +352,15 @@ export function openWarningModal(plugin?: Plugin | null, pluginModalProps?: Moda
                 <Flex className="vc-button-container">
                     <Flex className="button-group">
                         <Button
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
+                            size="small"
+                            variant="secondary"
                             onClick={warningModalProps.onClose}
-                            look={Button.Looks.FILLED}
                         >
                             Cancel
                         </Button>
                         {!Settings.ignoreResetWarning && (
                             <Button
-                                size={Button.Sizes.SMALL}
+                                size="small"
                                 className={cl("disable-warning")}
                                 onClick={() => {
                                     Settings.ignoreResetWarning = true;
@@ -370,7 +370,7 @@ export function openWarningModal(plugin?: Plugin | null, pluginModalProps?: Moda
                             </Button>
                         )}
                         <Button
-                            size={Button.Sizes.SMALL}
+                            size="small"
                             onClick={() => {
                                 if (isPlugin) {
                                     if (plugin && pluginModalProps)

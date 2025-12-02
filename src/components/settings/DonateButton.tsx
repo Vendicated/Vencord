@@ -16,41 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
 import { Heart } from "@components/Heart";
 import { openInviteModal } from "@utils/discord";
 import { ButtonProps } from "@vencord/discord-types";
-import { Button, showToast } from "@webpack/common";
-
-export function VCDonateButton({
-    look = Button.Looks.LINK,
-    color = Button.Colors.TRANSPARENT,
-    ...props
-}: Partial<ButtonProps>) {
-    return (
-        <Button
-            {...props}
-            look={look}
-            color={color}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
-            className="vc-donate-button"
-        >
-            <Heart />
-            Donate
-        </Button>
-    );
-}
+import { showToast } from "@webpack/common";
 
 export function DonateButton({
-    look = Button.Looks.LINK,
-    color = Button.Colors.TRANSPARENT,
+    equicord = false,
     ...props
-}: Partial<ButtonProps>) {
+}: Partial<ButtonProps> & { equicord?: boolean; }) {
+    const link = equicord ? "https://github.com/sponsors/thororen1234" : "https://github.com/sponsors/Vendicated";
     return (
         <Button
             {...props}
-            look={look}
-            color={color}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/thororen1234")}
+            variant="none"
+            size="medium"
+            type="button"
+            onClick={() => VencordNative.native.openExternal(link)}
             className="vc-donate-button"
         >
             <Heart />
@@ -60,15 +43,14 @@ export function DonateButton({
 }
 
 export function InviteButton({
-    look = Button.Looks.LINK,
-    color = Button.Colors.TRANSPARENT,
     ...props
 }: Partial<ButtonProps>) {
     return (
         <Button
             {...props}
-            look={look}
-            color={color}
+            variant="none"
+            size="medium"
+            type="button"
             onClick={async e => {
                 e.preventDefault();
                 openInviteModal("equicord-1173279886065029291").catch(() =>

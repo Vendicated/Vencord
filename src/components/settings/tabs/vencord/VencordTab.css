@@ -47,3 +47,8 @@
     text-align: center;
     margin-top: 10px;
 }
+
+.vc-vencord-tab-settings-link {
+    color: var(--text-link);
+    display: inline-block;
+}

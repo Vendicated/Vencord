@@ -5,7 +5,7 @@
  */
 
 import { filters, mapMangledModuleLazy } from "@webpack";
-import type { ReactNode } from "react";
+import type { ComponentType, CSSProperties, ReactNode } from "react";
 
 const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO", "ERROR"),
@@ -15,35 +15,37 @@ const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positi
 export interface AlertProps {
     children: ReactNode;
     className?: string;
+    style?: CSSProperties;
+    icon?: ComponentType<{ className?: string; color?: string; }>;
 }
 
-function Warning({ children, className }: AlertProps) {
+function Warning({ children, className, style, icon }: AlertProps) {
     return (
-        <HelpMessage messageType={HelpMessageTypes.WARNING} className={className}>
+        <HelpMessage messageType={HelpMessageTypes.WARNING} className={className} style={style} icon={icon}>
             {children}
         </HelpMessage>
     );
 }
 
-function Info({ children, className }: AlertProps) {
+function Info({ children, className, style, icon }: AlertProps) {
     return (
-        <HelpMessage messageType={HelpMessageTypes.INFO} className={className}>
+        <HelpMessage messageType={HelpMessageTypes.INFO} className={className} style={style} icon={icon}>
             {children}
         </HelpMessage>
     );
 }
 
-function Error({ children, className }: AlertProps) {
+function Error({ children, className, style, icon }: AlertProps) {
     return (
-        <HelpMessage messageType={HelpMessageTypes.ERROR} className={className}>
+        <HelpMessage messageType={HelpMessageTypes.ERROR} className={className} style={style} icon={icon}>
             {children}
         </HelpMessage>
     );
 }
 
-function Positive({ children, className }: AlertProps) {
+function Positive({ children, className, style, icon }: AlertProps) {
     return (
-        <HelpMessage messageType={HelpMessageTypes.POSITIVE} className={className}>
+        <HelpMessage messageType={HelpMessageTypes.POSITIVE} className={className} style={style} icon={icon}>
             {children}
         </HelpMessage>
     );
