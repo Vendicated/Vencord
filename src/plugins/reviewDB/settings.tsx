@@ -60,7 +60,7 @@ export const settings = definePluginSettings({
                 <Button onClick={openBlockModal}>Manage Blocked Users</Button>
 
                 <Button
-                    color="primary"
+                    color="positive"
                     onClick={() => {
                         VencordNative.native.openExternal("https://github.com/sponsors/mantikafasi");
                     }}

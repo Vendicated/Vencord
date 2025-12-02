@@ -170,7 +170,7 @@ function SettingsAboutComponent() {
                             const colorString = encode(color1, color2);
                             copyWithToast(colorString);
                         }}
-                        color="primary"
+                        color="secondary"
                         size="medium"
                         style={{ marginBottom: "auto" }}
                     >
@@ -241,7 +241,7 @@ export default definePlugin({
                 const colorString = encode(primary, accent);
                 copyWithToast(colorString);
             }}
-            color="primary"
+            color="secondary"
             size="medium"
             className={Margins.left16}
         >

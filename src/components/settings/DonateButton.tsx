@@ -16,24 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { TextButton } from "@components/Button";
+import { Button, ButtonVariant } from "@components/Button";
 import { Heart } from "@components/Heart";
-import { ButtonProps } from "@vencord/discord-types";
 
 export default function DonateButton({
-    color = "secondary",
+    variant = "secondary",
     ...props
-}: Partial<ButtonProps>) {
+}) {
     return (
-        <TextButton
+        <Button
             {...props}
             type="button"
-            color={color}
+            variant={variant as ButtonVariant}
             onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
             className="vc-donate-button"
         >
             <Heart />
             Donate
-        </TextButton>
+        </Button>
     );
 }

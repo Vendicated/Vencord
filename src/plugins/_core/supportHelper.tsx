@@ -252,7 +252,7 @@ export default definePlugin({
             buttons.push(
                 <Button
                     key="vc-update"
-                    color="primary"
+                    color="positive"
                     onClick={async () => {
                         try {
                             if (await forceUpdate())
@@ -275,14 +275,14 @@ export default definePlugin({
                 buttons.push(
                     <Button
                         key="vc-dbg"
-                        color="primary"
+                        color="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                     >
                         Run /vencord-debug
                     </Button>,
                     <Button
                         key="vc-plg-list"
-                        color="primary"
+                        color="secondary"
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
                         Run /vencord-plugins
