@@ -612,6 +612,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     alfred: {
         name: "alfred",
         id: 1038466644353232967n
+    },
+    roli2py: {
+        name: "roli2py",
+        id: 403229667093512194n
     }
 } satisfies Record<string, Dev>);
 
