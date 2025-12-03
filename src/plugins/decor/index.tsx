@@ -96,16 +96,19 @@ export default definePlugin({
                 }
             ]
         },
-        // Messages
-        {
-            find: '"Message Username"',
+        ...[
+            '"Message Username"', // Messages
+            ".placeholderUsername})]", // Nameplate preview
+            ".EDIT_PROFILE_BANNER})", // Avatar preview
+        ].map(find => ({
+            find,
             replacement: [
                 {
                     match: /(?<=userValue.{0,25}void 0:)((\i)\.avatarDecoration)/,
                     replace: "$self.useUserDecorAvatarDecoration($2)??$1"
                 }
             ]
-        },
+        })),
     ],
     settings,
 
