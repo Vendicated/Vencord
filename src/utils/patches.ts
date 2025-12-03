@@ -24,8 +24,10 @@ import { Patch, PatchReplacement, ReplaceFn } from "./types";
 // @ts-expect-error "RegExp.escape" is very new and not yet in DOM types
 const escapeRegex = RegExp.escape || ((s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
 
-export function getReplacement(isString: boolean, hashed: string) {
+export function getReplacement(isString: boolean, hashed: string, hash: boolean = false) {
     const hasSpecialChars = !Number.isNaN(Number(hashed[0])) || hashed.includes("+") || hashed.includes("/");
+
+    if (hash) return hashed;
 
     if (hasSpecialChars) {
         return isString
@@ -48,7 +50,13 @@ function canonicalizeMatchCompatString(str: string) {
     const re = /#{intl::([\w$+/]*)(?:::(\w+))?}/g;
     for (const match of str.matchAll(re)) {
         result += escapeRegex(str.slice(lastIndex, match.index));
-        result += match[2] === "raw" ? getReplacement(false, match[1]) : getCompatReplacement(match[1]);
+        if (match[2] === "raw") {
+            result += getReplacement(false, match[1]);
+        } else if (match[2] === "hash") {
+            result += getReplacement(false, runtimeHashMessageKey(match[1]), true);
+        } else {
+            result += getCompatReplacement(match[1]);
+        }
         lastIndex = (match.index ?? 0) + match[0].length;
     }
     result += escapeRegex(str.slice(lastIndex));
@@ -63,6 +71,7 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T extend
     let partialCanon = typeof match === "string" ? match : match.source;
     partialCanon = partialCanon.replaceAll(/#{intl::([\w$+/]*)(?:::(\w+))?}/g, (_, key, modifier) => {
         if (modifier === "raw") return getReplacement(false, key);
+        if (modifier === "hash") return getReplacement(false, runtimeHashMessageKey(key), true);
         return getCompatReplacement(key);
     });
 
