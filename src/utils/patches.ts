@@ -50,13 +50,7 @@ function canonicalizeMatchCompatString(str: string) {
     const re = /#{intl::([\w$+/]*)(?:::(\w+))?}/g;
     for (const match of str.matchAll(re)) {
         result += escapeRegex(str.slice(lastIndex, match.index));
-        if (match[2] === "raw") {
-            result += getReplacement(false, match[1]);
-        } else if (match[2] === "hash") {
-            result += getReplacement(false, runtimeHashMessageKey(match[1]), true);
-        } else {
-            result += getCompatReplacement(match[1]);
-        }
+        result += match[2] === "raw" ? getReplacement(false, match[1]) : match[2] === "hash" ? getReplacement(false, runtimeHashMessageKey(match[1]), true) : getCompatReplacement(match[1]);
         lastIndex = (match.index ?? 0) + match[0].length;
     }
     result += escapeRegex(str.slice(lastIndex));
