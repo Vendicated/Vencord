@@ -48,7 +48,7 @@ export function InviteButton({
     return (
         <Button
             {...props}
-            variant="none"
+            variant="link"
             size="medium"
             type="button"
             onClick={async e => {

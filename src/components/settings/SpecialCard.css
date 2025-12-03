@@ -1,6 +1,6 @@
 .vc-donate-button {
     overflow: visible !important;
-    color: var(--text-default)
+    color: black;
 }
 
 .vc-donate-button .vc-heart-icon {
