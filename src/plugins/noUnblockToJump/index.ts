@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "#{intl::UNIGNORE_TO_JUMP_BODY}",
             replacement: {
-                match: /return \i\.\i\.isBlockedForMessage\(/,
+                match: /if\(\i\.\i\.isBlockedForMessage\(/,
                 replace: "return true;$&"
             }
         }
