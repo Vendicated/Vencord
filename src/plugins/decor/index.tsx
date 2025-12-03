@@ -33,8 +33,8 @@ export default definePlugin({
         {
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /(?<=function \i\((\i)\){)(?=let{avatarDecoration)/,
-                replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL($1);if(vcDecorDecoration)return vcDecorDecoration;"
+                match: /(?<=function \i\(\i\){)(?=let{avatarDecoration)/,
+                replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL(arguments[0]);if(vcDecorDecoration)return vcDecorDecoration;"
             }
         },
         // Patch profile customization settings to include Decor section
