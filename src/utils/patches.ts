@@ -49,7 +49,7 @@ function canonicalizeMatchCompatString(str: string) {
     const re = /#{intl::([\w$+/]*)(?:::(\w+))?}/g;
     for (const match of str.matchAll(re)) {
         result += escapeRegex(str.slice(lastIndex, match.index));
-        result += getCompatReplacement(match[1]);
+        result += match[2] === "raw" ? getReplacement(false, match[1]) : getCompatReplacement(match[1]);
         lastIndex = (match.index ?? 0) + match[0].length;
     }
     result += escapeRegex(str.slice(lastIndex));
