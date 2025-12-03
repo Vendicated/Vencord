@@ -164,7 +164,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                         : permission.type === PermissionType.User
                                                             ? (user != null && getUniqueUsername(user)) ?? "Unknown User"
                                                             : (
-                                                                <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
+                                                                <Flex gap="0.2em">
                                                                     @owner
                                                                     <OwnerCrownIcon height={18} width={18} aria-hidden="true" />
                                                                 </Flex>
