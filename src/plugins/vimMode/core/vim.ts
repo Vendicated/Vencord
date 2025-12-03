@@ -37,7 +37,6 @@ class Vim {
     handleInsertModeKey(key: string): { block: boolean; } {
         if (key === "Escape") {
             VimStore.setMode(Mode.NORMAL);
-            return { block: true };
         }
         return { block: false };
     }
@@ -193,6 +192,10 @@ class Vim {
         const { key } = e;
 
         if (MODIFIER_KEYS.has(key)) {
+            return { block: false };
+        }
+
+        if (state.mode === Mode.NORMAL && key === "Escape") {
             return { block: false };
         }
 
