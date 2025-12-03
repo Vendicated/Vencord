@@ -30,7 +30,7 @@ const settings = definePluginSettings({
             { label: "Username then nickname", value: "user-nick", default: true },
             { label: "Nickname then username", value: "nick-user" },
             { label: "Username only", value: "user" },
-            { label: "Nickname only", value: "nick" },
+            { label: "Nickname only (fallback to username)", value: "nick" },
         ],
     },
     friendNicknames: {
