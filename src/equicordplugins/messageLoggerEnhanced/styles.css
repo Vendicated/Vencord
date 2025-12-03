@@ -89,7 +89,7 @@
 .folder-upload-input {
     cursor: pointer;
     padding: 10px 0 10px 10px;
-    color: var(--header-secondary);
+    color: var(--text-default);
 }
 
 .folder-upload-button {

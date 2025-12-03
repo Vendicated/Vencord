@@ -226,7 +226,7 @@
 }
 
 .vc-more-stickers-picker-content-header-header {
-    color: var(--header-secondary);
+    color: var(--text-default);
     display: flex;
     -ms-flex-align: center;
     align-items: center;

@@ -35,7 +35,7 @@ function PopOverIcon() {
     return (
 
         <svg
-            fill="var(--header-secondary)"
+            fill="var(--text-default)"
             width={24} height={24}
             viewBox={"0 0 64 64"}
         >

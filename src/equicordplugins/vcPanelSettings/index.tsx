@@ -220,7 +220,7 @@ function VoiceSettings() {
     const [showSettings, setShowSettings] = useState(settings.store.uncollapseSettingsByDefault);
     return <div style={{ marginTop: "20px" }}>
         <div style={{ marginBottom: "10px" }}>
-            <Link className="vc-panelsettings-underline-on-hover" style={{ color: "var(--header-secondary)" }} onClick={() => { setShowSettings(!showSettings); }}>{!showSettings ? "► Settings" : "▼ Hide"}</Link>
+            <Link className="vc-panelsettings-underline-on-hover" style={{ color: "var(--text-default)" }} onClick={() => { setShowSettings(!showSettings); }}>{!showSettings ? "► Settings" : "▼ Hide"}</Link>
         </div>
 
         {

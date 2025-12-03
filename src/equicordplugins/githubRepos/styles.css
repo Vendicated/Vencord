@@ -39,7 +39,7 @@
 }
 
 .vc-github-repos-header {
-    color: var(--header-secondary);
+    color: var(--text-default);
     display: flex;
     justify-content: space-between;
 }
@@ -208,7 +208,7 @@
 }
 
 .vc-github-repos-loading {
-    color: var(--header-secondary);
+    color: var(--text-default);
 }
 
 .vc-github-repos-count {

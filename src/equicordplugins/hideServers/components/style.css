@@ -8,7 +8,7 @@
     max-width: 48px;
     font-size: 60%;
     background-color: var(--background-primary);
-    color: var(--header-secondary);
+    color: var(--text-default);
 }
 
 .vc-hideservers-list {
