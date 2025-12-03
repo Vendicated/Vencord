@@ -1137,7 +1137,7 @@ export default definePlugin({
         },
         {
             // Adds the "Questify" sort option to the sort dropdown.
-            find: "NOT_SHAREABLE}",
+            find: '" has no rewards configured"',
             replacement: {
                 match: /(?=case (\i.\i).SUGGESTED)/,
                 replace: "case $1.QUESTIFY:return \"Questify\";"
