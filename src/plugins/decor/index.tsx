@@ -98,8 +98,8 @@ export default definePlugin({
         },
         ...[
             '"Message Username"', // Messages
-            ".placeholderUsername})]", // Nameplate preview
-            ".EDIT_PROFILE_BANNER})", // Avatar preview
+            ".nameplatePreview,{", // Nameplate preview
+            "#{intl::ayozFl::raw}", // Avatar preview
         ].map(find => ({
             find,
             replacement: [
