@@ -1,0 +1,47 @@
+.vc-url-hl-highlight {
+    color: var(--vc-url-hl-color) !important;
+}
+
+.vc-url-hl-marked {
+    color: var(--vc-url-hl-color) !important;
+    font-weight: 600;
+}
+
+.vc-url-hl-pattern-wrapper {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    align-items: center;
+    padding-bottom: 12px;
+}
+
+.vc-url-hl-color-picker {
+    display: flex;
+    align-items: center;
+}
+
+.vc-url-hl-color-picker [class^="swatch"] {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+}
+
+.vc-url-hl-remove-button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+}
+
+.vc-url-hl-add-button {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.vc-url-hl-icon {
+    width: 20px;
+    height: 20px;
+}
