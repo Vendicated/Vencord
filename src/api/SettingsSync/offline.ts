@@ -38,6 +38,7 @@ export async function importSettings(data: string) {
         Object.assign(PlainSettings, parsed.settings);
         await VencordNative.settings.set(parsed.settings);
         await VencordNative.quickCss.set(parsed.quickCss);
+        if (parsed.dataStore) await DataStore.setMany(parsed.dataStore);
     } else
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
