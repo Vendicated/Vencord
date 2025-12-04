@@ -1,7 +1,15 @@
-.vc-contrib-button,
 .vc-invite-button,
 .vc-donate-button {
     overflow: visible !important;
+    color: black;
+    background-color: color-mix(in srgb, #c3a3ce 15%, pink);
+}
+
+.vc-invite-button:hover,
+.vc-donate-button:hover {
+    overflow: visible !important;
+    color: black;
+    background-color: color-mix(in srgb, hotpink 15%, pink);
 }
 
 .vc-invite-link {
@@ -15,6 +23,12 @@
     overflow: visible !important;
     margin-top: 1em;
     color: black;
+    background-color: color-mix(in srgb, #EDCC87 95%, black);
+}
+
+.vc-contrib-button:hover {
+    color: black;
+    background-color: color-mix(in srgb, #EDCC87 90%, black);
 }
 
 .vc-contrib-github {
@@ -32,7 +46,7 @@
 }
 
 .vc-invite-button:hover .vc-invite-link,
-.vc-contrib-github:hover .vc-contrib-github,
+.vc-contrib-button:hover .vc-contrib-github,
 .vc-donate-button:hover .vc-heart-icon {
     transform: scale(1.1);
     z-index: 10;

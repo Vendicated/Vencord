@@ -20,9 +20,9 @@ export function DonateButtonComponent() {
         <Flex>
             <DonateButton
                 equicord={true}
-                style={{ marginTop: "1em", color: "black" }} />
+                style={{ marginTop: "1em" }} />
             <InviteButton
-                style={{ marginTop: "1em", color: "black" }} />
+                style={{ marginTop: "1em" }} />
         </Flex>
     );
 }

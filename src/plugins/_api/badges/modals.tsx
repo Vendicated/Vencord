@@ -57,7 +57,7 @@ export function VencordDonorModal() {
                 </ModalContent>
                 <ModalFooter>
                     <Flex justifyContent="center" style={{ width: "100%" }}>
-                        <DonateButton style={{ color: "var(--text-default)" }} />
+                        <DonateButton />
                     </Flex>
                 </ModalFooter>
             </ModalRoot>
@@ -113,7 +113,7 @@ export function EquicordDonorModal() {
                 </ModalContent>
                 <ModalFooter>
                     <Flex justifyContent="center" style={{ width: "100%" }}>
-                        <DonateButton equicord={true} style={{ color: "var(--text-default)" }} />
+                        <DonateButton equicord={true} />
                     </Flex>
                 </ModalFooter>
             </ModalRoot>
