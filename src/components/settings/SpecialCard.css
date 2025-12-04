@@ -1,13 +1,38 @@
+.vc-contrib-button,
+.vc-invite-button,
 .vc-donate-button {
     overflow: visible !important;
+}
+
+.vc-invite-link {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.vc-contrib-button {
+    overflow: visible !important;
+    margin-top: 1em;
     color: black;
 }
 
+.vc-contrib-github {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+}
+
+.vc-invite-button .vc-invite-link,
+.vc-contrib-button .vc-contrib-github,
 .vc-donate-button .vc-heart-icon {
     transition: transform 0.3s;
     margin-right: 0.5em;
 }
 
+.vc-invite-button:hover .vc-invite-link,
+.vc-contrib-github:hover .vc-contrib-github,
 .vc-donate-button:hover .vc-heart-icon {
     transform: scale(1.1);
     z-index: 10;

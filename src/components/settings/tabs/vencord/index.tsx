@@ -17,7 +17,7 @@ import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
-import { DonateButton, InviteButton, openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
+import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -28,6 +28,7 @@ import { relaunch } from "@utils/native";
 import { GuildMemberStore, React, Select, UserStore } from "@webpack/common";
 import BadgeAPI from "plugins/_api/badges";
 
+import { DonateButtonComponent } from "./DonateButton";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
@@ -156,9 +157,18 @@ function EquicordSettings() {
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
-                    buttonTitle="See what you've contributed to"
-                    buttonOnClick={() => openContributorModal(user)}
-                />
+                >
+                    <Button
+                        variant="none"
+                        size="medium"
+                        type="button"
+                        onClick={() => openContributorModal(user)}
+                        className="vc-contrib-button"
+                    >
+                        <GithubIcon aria-hidden fill={"#000000"} className={"vc-contrib-github"} />
+                        See what you've contributed to
+                    </Button>
+                </SpecialCard>
             )}
 
             <section>
@@ -327,18 +337,6 @@ function EquicordSettings() {
                 </Flex>
             </section>
         </SettingsTab>
-    );
-}
-
-function DonateButtonComponent() {
-    return (
-        <Flex>
-            <DonateButton
-                equicord={true}
-                style={{ marginTop: "1em" }} />
-            <InviteButton
-                style={{ marginTop: "1em" }} />
-        </Flex>
     );
 }
 

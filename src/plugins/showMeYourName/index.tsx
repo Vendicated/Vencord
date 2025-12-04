@@ -1016,7 +1016,7 @@ export default definePlugin({
                 },
                 {
                     // Track hovering over reaction popouts.
-                    match: /(return\(0,\i.\i\)\(\i.\i,{className:\i.reactorDefault,)(onContextMenu)/,
+                    match: /(return\(0,\i.\i\)\(\i.\i,{className:\i.reactor,)(onContextMenu)/,
                     replace: "$1onMouseEnter:()=>{$self.addHoveringReactionPopout(arguments[0].user.id)},onMouseLeave:()=>{$self.removeHoveringReactionPopout(arguments[0].user.id)},$2"
                 }
             ]

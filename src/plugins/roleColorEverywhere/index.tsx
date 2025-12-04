@@ -135,7 +135,7 @@ export default definePlugin({
         },
         // Reaction List
         {
-            find: ".reactorDefault",
+            find: ".tagFaded:null",
             replacement: {
                 match: /tag:"strong"(?=.{0,50}\i\.name)(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
                 replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"

@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DonateButton } from "@components/settings/DonateButton";
+import { Flex } from "@components/Flex";
+import { DonateButton, InviteButton } from "@components/settings/DonateButton";
 import BadgeAPI from "@plugins/_api/badges";
 import { DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
 import { GuildMemberStore } from "@webpack/common";
@@ -16,8 +17,12 @@ export const isDonor = (userId: string) => !!(
 
 export function DonateButtonComponent() {
     return (
-        <DonateButton
-            style={{ marginTop: "1em" }}
-        />
+        <Flex>
+            <DonateButton
+                equicord={true}
+                style={{ marginTop: "1em", color: "black" }} />
+            <InviteButton
+                style={{ marginTop: "1em", color: "black" }} />
+        </Flex>
     );
 }
