@@ -227,8 +227,8 @@ export default definePlugin({
                         <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
                     </div>,
                     confirmText: "Understood",
-                    secondaryConfirmText: "Don't show again",
-                    onConfirmSecondary: () => settings.store.dismissedDevBuildWarning = true
+                    cancelText: "Don't show again",
+                    onCancel: () => settings.store.dismissedDevBuildWarning = true
                 });
             }
         }
