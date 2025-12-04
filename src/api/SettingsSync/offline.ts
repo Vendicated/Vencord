@@ -42,11 +42,20 @@ export async function importSettings(data: string) {
         throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
 }
 
-export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
+export async function exportSettings({ useDataStore = true, minify }: { useDataStore?: boolean; minify?: boolean; }) {
     const settings = VencordNative.settings.get();
     const quickCss = await VencordNative.quickCss.get();
-    const dataStore = await DataStore.entries();
-    return JSON.stringify({ settings, quickCss, dataStore }, null, minify ? undefined : 4);
+    const dataStore = useDataStore ? await DataStore.entries() : undefined;
+
+    return JSON.stringify(
+        {
+            settings,
+            quickCss,
+            ...(useDataStore && { dataStore })
+        },
+        null,
+        minify ? undefined : 4
+    );
 }
 
 export async function exportPlugins({ minify }: { minify?: boolean; } = {}) {

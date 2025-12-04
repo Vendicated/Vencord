@@ -17,7 +17,7 @@ import { exportSettings, importSettings } from "./offline";
 const logger = new Logger("SettingsSync:Cloud", "#39b7e0");
 
 export async function putCloudSettings(manual?: boolean) {
-    const settings = await exportSettings({ minify: true });
+    const settings = await exportSettings({ useDataStore: false, minify: true });
 
     try {
         const res = await fetch(new URL("/v1/settings", getCloudUrl()), {
