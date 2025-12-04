@@ -288,7 +288,7 @@
 
 .vc-channeltabs-tab-selected {
     transform: translateY(-1px);
-    background-color: var(--background-secondary-alt);
+    background-color: var(--background-base-low);
     border: 1px solid var(--brand-500);
     border-bottom: 2px solid var(--brand-500);
     box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
@@ -361,7 +361,7 @@
     padding: 4px;
     margin: 0 4px;
     border-radius: 4px;
-    background-color: var(--background-secondary-alt);
+    background-color: var(--background-base-low);
     transition: all 0.2s ease;
     flex-shrink: 0;
 }
