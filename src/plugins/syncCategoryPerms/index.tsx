@@ -184,7 +184,6 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
                     body: `This will sync the permissions from category ${channel.name} to all ${channelsInCategory.length} channel${channelsInCategory.length === 1 ? "" : "s"} inside it.\n\nThis will overwrite any existing permission overrides on those channels. Are you sure you want to continue?`,
                     confirmText: "Sync Permissions",
                     cancelText: "Cancel",
-                    confirmColor: "vc-sync-perms-danger-btn",
                     onConfirm: () => syncCategoryPermissions(channel.id)
                 });
             }}
