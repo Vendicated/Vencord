@@ -200,12 +200,6 @@ export default definePlugin({
             find: ".overlay:void 0,status:",
             replacement: [
                 {
-                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
-                    match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
-                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
-                    noWarn: true
-                },
-                {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
                     replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
                 }
@@ -239,7 +233,7 @@ export default definePlugin({
         },
         // User Dms top large icon
         {
-            find: 'experimentLocation:"empty_messages"',
+            find: ".EMPTY_GROUP_DM)",
             replacement: {
                 match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
                 replace: (_, avatarUrl) => `onClick:()=>$self.openAvatar(${avatarUrl}),`

@@ -14,11 +14,11 @@ import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, Text, Tooltip } from "@webpack/common";
-import { FunctionComponent, ReactNode } from "react";
+import { ChannelStore, GuildMemberStore, Text, TooltipContainer } from "@webpack/common";
+import { ReactNode } from "react";
 
-const countDownFilter = canonicalizeMatch("#{intl::MAX_AGE_NEVER}");
-const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(countDownFilter));
+const countDownFilter = canonicalizeMatch(/#{intl::MAX_AGE_NEVER}/);
+const CountDown = findComponentLazy(m => m.prototype?.render && countDownFilter.test(m.prototype.render.toString()));
 
 const enum DisplayStyle {
     Tooltip = "tooltip",
@@ -83,13 +83,13 @@ export default definePlugin({
         }
     ],
 
-    TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: FunctionComponent<any>; text: ReactNode; }) => {
+    TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: ReactNode; text: ReactNode; }) => {
         if (settings.store.displayStyle === DisplayStyle.Tooltip)
-            return <Tooltip text={renderTimeout(message, false)}>{children}</Tooltip>;
+            return <TooltipContainer text={renderTimeout(message, false)}>{children}</TooltipContainer>;
 
         return (
             <div className="vc-std-wrapper">
-                <Tooltip text={text}>{children}</Tooltip>
+                <TooltipContainer text={text}>{children}</TooltipContainer>
                 <Text variant="text-md/normal" color="status-danger">
                     {renderTimeout(message, true)} timeout remaining
                 </Text>
