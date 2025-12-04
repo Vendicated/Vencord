@@ -64,7 +64,7 @@ async function syncChannelWithRetry(channelId: string, permissionOverwrites: any
 
 async function syncCategoryPermissions(categoryId: string) {
     const category = ChannelStore.getChannel(categoryId);
-    if (!category || category.type !== 4) {
+    if (!category || !category.isCategory()) {
         showToast("Invalid category", Toasts.Type.FAILURE);
         return;
     }
@@ -144,7 +144,7 @@ async function syncCategoryPermissions(categoryId: string) {
 
 const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
     // Only show for categories where user has manage channels permission
-    if (!channel || channel.type !== 4) return;
+    if (!channel || !channel.isCategory()) return;
 
     const canManage = PermissionStore.can(PermissionsBits.MANAGE_CHANNELS, channel);
     if (!canManage) return;
