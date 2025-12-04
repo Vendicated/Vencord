@@ -72,6 +72,10 @@ function getChannelsInCategory(categoryId: string): any[] {
 
 async function syncCategoryPermissions(categoryId: string) {
     const category = ChannelStore.getChannel(categoryId);
+    if (!category || !category.isCategory()) {
+        showToast("Invalid category", Toasts.Type.FAILURE);
+        return;
+    }
     if (!category || !category.isCategory()) return;
 
     const categoryPermissions = category.permissionOverwrites;
