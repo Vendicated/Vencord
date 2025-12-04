@@ -9,8 +9,8 @@ $modifier: var(--input-border);
     flex: auto;
     margin-right: 15px;
     margin-bottom: 6px;
-    background-color: var(--background-tertiary);
-    border: solid 2px var(--background-secondary);
+    background-color: var(--background-base-low);
+    border: solid 2px var(--background-secondary-alt);
 }
 
 .vc-notebook-header {
@@ -22,8 +22,8 @@ $modifier: var(--input-border);
     padding-top: 15px;
     padding-left: 10px;
     padding-bottom: 0px;
-    background-color: var(--background-tertiary);
-    box-shadow: 0 1px 0 0 var(--background-tertiary), 0 1px 2px 0 var(--background-tertiary) !important;
+    background-color: var(--background-base-low);
+    box-shadow: 0 1px 0 0 var(--background-base-low), 0 1px 2px 0 var(--background-base-low) !important;
 }
 
 .vc-notebook-heading {
@@ -77,8 +77,8 @@ $modifier: var(--input-border);
 }
 
 .vc-notebook-tabbar {
-    border-bottom: 1px solid var(--background-tertiary);
-    background-color: var(--background-tertiary);
+    border-bottom: 1px solid var(--background-base-low);
+    background-color: var(--background-base-low);
     white-space: nowrap;
     overflow: hidden;
     height: 36px;

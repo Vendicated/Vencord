@@ -368,7 +368,7 @@ export function CommandPaletteSettingsPanel() {
                     const isCollapsed = collapsed[command.id] ?? false;
 
                     return (
-                        <div key={command.id} style={{ padding: 14, borderRadius: 8, background: "var(--background-primary)", border: "1px solid var(--background-tertiary)", display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div key={command.id} style={{ padding: 14, borderRadius: 8, background: "var(--background-primary)", border: "1px solid var(--background-base-low)", display: "flex", flexDirection: "column", gap: 12 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <Forms.FormTitle tag="h5" style={{ color: "var(--text-normal, #dcddde)" }}>{command.label || "Untitled Command"}</Forms.FormTitle>
                                 <Button
@@ -432,7 +432,7 @@ export function CommandPaletteSettingsPanel() {
                                     </Button>
 
                                     {showAdvanced && (
-                                        <div style={{ display: "flex", flexDirection: "column", gap: 12, background: "var(--background-secondary)", borderRadius: 8, padding: 12 }}>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 12, background: "var(--background-secondary-alt)", borderRadius: 8, padding: 12 }}>
                                             <TextInput
                                                 label="Description"
                                                 value={command.description ?? ""}
@@ -489,7 +489,7 @@ export function CommandPaletteSettingsPanel() {
                                                 </Forms.FormText>
                                                 {categoryId && (
                                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 999, padding: "2px 10px", fontSize: 12, background: "var(--background-tertiary)", color: "var(--text-normal, #dcddde)" }}>
+                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 999, padding: "2px 10px", fontSize: 12, background: "var(--background-base-low)", color: "var(--text-normal, #dcddde)" }}>
                                                             {categoryLabel}
                                                             <span style={{ color: "var(--text-muted, #a5a6ab)" }}>· {categoryId}</span>
                                                         </span>

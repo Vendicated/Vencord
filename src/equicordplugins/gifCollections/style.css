@@ -1,6 +1,6 @@
 .collections-sort-container {
     padding: 12px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     border-radius: 8px;
     margin-bottom: 16px;
 }
@@ -62,8 +62,8 @@
 
 .custom-modal-header {
     padding: 16px;
-    background-color: var(--background-secondary);
-    border-bottom: 1px solid var(--background-tertiary);
+    background-color: var(--background-secondary-alt);
+    border-bottom: 1px solid var(--background-base-low);
 }
 
 .custom-modal-title {
@@ -109,7 +109,7 @@
 
 .custom-modal-footer {
     padding: 16px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     display: flex;
     justify-content: flex-end;
 }
@@ -169,9 +169,9 @@
     width: 100%;
     margin-bottom: 12px;
     padding: 8px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-faint);
     border-radius: 4px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     color: var(--text-default);
     outline: none;
 }
@@ -179,7 +179,7 @@
 .collection-button {
     text-align: center;
     padding: 8px;
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     color: var(--text-default);
     border: none;
     border-radius: 4px;

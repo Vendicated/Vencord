@@ -11,7 +11,7 @@
 }
 
 .vc-more-stickers-picker-container {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     overflow: hidden;
     border-radius: 4px;
     width: 100%;
@@ -66,7 +66,7 @@
 }
 
 .vc-more-stickers-category-wrapper {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     position: absolute;
     overflow: hidden;
     width: 48px;
@@ -217,7 +217,7 @@
     top: 0;
     -ms-flex-align: center;
     align-items: center;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     box-sizing: border-box;
     display: flex;
     height: 32px;
@@ -404,7 +404,7 @@
 .vc-more-stickers-picker-settings-cog-container {
     position: fixed;
     transform: translateY(-100%);
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     padding: 8px;
     padding-right: 4px;
     border-bottom-left-radius: 5px;
@@ -446,7 +446,7 @@
 
 .vc-more-stickers-settings .bg {
     border-radius: 8px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     padding: 16px;
     margin: 8px 16px 16px;
 }
@@ -462,7 +462,7 @@
     top: 0;
     right: 0;
     border-radius: 8px;
-    background: var(--background-secondary);
+    background: var(--background-secondary-alt);
     width: 26px;
     height: 0;
     align-items: center;

@@ -2,7 +2,7 @@
 .vc-soundlog-sound {
     box-sizing: border-box;
     position: relative;
-    background: var(--background-secondary);
+    background: var(--background-secondary-alt);
     border-radius: var(--radius-sm);
     height: 40px;
     width: 100%;
@@ -60,7 +60,7 @@
 .vc-soundlog-user-name {
     text-transform: none;
     flex-grow: 0;
-    background: var(--background-tertiary);
+    background: var(--background-base-low);
     border-radius: 0 9999px 9999px 0;
     padding: 6px 0.8em 6px 0.5em;
     font-size: 20px;
@@ -79,7 +79,7 @@
     position: absolute;
     height: 100%;
     width: 16px;
-    background: var(--background-tertiary);
+    background: var(--background-base-low);
     z-index: -1;
     left: -16px;
     top: 0;

@@ -6,8 +6,8 @@
 .eq-googlefonts-card {
     padding: 16px;
     cursor: pointer !important;
-    background: var(--background-secondary);
-    border: 1px solid var(--background-tertiary);
+    background: var(--background-secondary-alt);
+    border: 1px solid var(--background-base-low);
 }
 
 .eq-googlefonts-card:hover {

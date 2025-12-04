@@ -24,7 +24,7 @@ h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
 .vc-bi-header-text {
     flex: 1;
     white-space: normal;
-    color: var(--text-secondary);
+    color: var(--text-subtle);
 }
 
 .vc-bi-tooltip-icon {

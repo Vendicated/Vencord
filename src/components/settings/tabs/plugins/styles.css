@@ -88,7 +88,7 @@
 }
 
 .vc-plugins-restart-button {
-    background-color: var(--background-color) !important;
+    background-color: var(--background-base-low) !important;
     border: 1px solid var(--info-warning-foreground) !important;
     margin-top: 0.5em;
 }
@@ -112,7 +112,7 @@
 
 .vc-plugins-info-card:hover,
 .vc-plugin-stats:hover {
-    background-color: var(--background-tertiary) !important;
+    background-color: var(--background-base-low) !important;
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }

@@ -4,8 +4,8 @@
     border-width: 1px;
     border-style: solid;
     border-radius: 5px;
-    border-color: var(--background-tertiary);
-    background-color: var(--background-secondary);
+    border-color: var(--background-base-low);
+    background-color: var(--background-secondary-alt);
 }
 
 .vc-friend-codes-card-title span {

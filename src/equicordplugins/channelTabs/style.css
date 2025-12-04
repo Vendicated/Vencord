@@ -64,12 +64,12 @@
     flex-direction: column-reverse;
     -webkit-app-region: no-drag;
     background-color: var(--background-primary);
-    box-shadow: inset 0 1px 0 var(--background-tertiary);
+    box-shadow: inset 0 1px 0 var(--background-base-low);
 }
 
 .vc-channeltabs-container-top {
     padding-left: 4px;
-    box-shadow: inset 0 -1px 0 var(--background-tertiary);
+    box-shadow: inset 0 -1px 0 var(--background-base-low);
 }
 
 .vc-channeltabs-container-top-macos {
@@ -288,7 +288,7 @@
 
 .vc-channeltabs-tab-selected {
     transform: translateY(-1px);
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     border: 1px solid var(--brand-500);
     border-bottom: 2px solid var(--brand-500);
     box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
@@ -343,7 +343,7 @@
 .vc-channeltabs-tab:hover:not(.vc-channeltabs-tab-selected) {
     transform: translateY(-1px) scale(1.02);
     background-color: var(--background-secondary-alt);
-    border-color: var(--background-modifier-accent);
+    border-color: var(--border-subtle);
     box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
 }
 
@@ -361,7 +361,7 @@
     padding: 4px;
     margin: 0 4px;
     border-radius: 4px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     transition: all 0.2s ease;
     flex-shrink: 0;
 }
@@ -1091,7 +1091,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 12px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     border-radius: 8px;
     transition: background-color 0.2s ease;
 }
@@ -1116,7 +1116,7 @@
 
 .channelTabs-keybind-button {
     padding: 8px 16px;
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     border: 2px solid var(--input-border);
     border-radius: 8px;
     cursor: pointer;

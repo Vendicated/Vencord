@@ -34,7 +34,7 @@
     min-width: 100px;
     height: 40px;
     background-color: var(--brand);
-    color: var(--text-primary);
+    color: var(--text-strong);
     border-radius: 8px;
     margin: 0 3px;
 }

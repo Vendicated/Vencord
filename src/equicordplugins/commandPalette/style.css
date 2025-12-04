@@ -689,7 +689,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 12px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     border-radius: 8px;
     transition: background-color 0.2s ease;
 }
@@ -714,7 +714,7 @@
 
 .vc-cp-keybind-button {
     padding: 8px 16px;
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     border: 2px solid var(--input-border);
     border-radius: 8px;
     cursor: pointer;

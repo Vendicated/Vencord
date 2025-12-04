@@ -15,7 +15,7 @@
 }
 
 .vc-changelog-entry:hover {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
@@ -27,7 +27,7 @@
 }
 
 .vc-changelog-entry.required:hover {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     border-left-color: var(--status-warning-foreground);
 }
 
@@ -114,7 +114,7 @@
 }
 
 .vc-changelog-new-plugin-card {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     border-radius: 6px;
     padding: 0.5em;
     transition: all 0.1s ease-out;
@@ -132,7 +132,7 @@
 }
 
 .vc-changelog-new-plugin-card.required:hover {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     border-left-color: var(--status-warning-foreground);
 }
 
@@ -229,7 +229,7 @@
 }
 
 .vc-changelog-log-header:hover {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
 }
 
 .vc-changelog-log-info {

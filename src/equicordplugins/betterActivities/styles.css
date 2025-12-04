@@ -91,5 +91,5 @@
 }
 
 .vc-bactivities-controls-tooltip {
-    --background-floating: var(--background-secondary);
+    --background-floating: var(--background-secondary-alt);
 }

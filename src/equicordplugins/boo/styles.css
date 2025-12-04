@@ -34,7 +34,7 @@
     cursor: pointer;
     border-radius: 8px;
     margin-bottom: 8px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     display: flex;
     align-items: center;
     gap: 8px;

@@ -5,7 +5,7 @@
     grid-template-columns: 2.25rem 24px 40px max-content;
     gap: 4px;
     width: 4px;
-    background-color: var(--background-modifier-active);
+    background-color: var(--border-subtle);
 }
 
 .vc-voice-channel-log-date-separator,

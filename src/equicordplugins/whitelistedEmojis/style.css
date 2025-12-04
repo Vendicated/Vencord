@@ -1,13 +1,13 @@
 .emoji-container {
     display: grid;
     gap: 10px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     max-height: 300px;
     overflow-y: auto;
 }
 
 .guild-section {
-    border: 1px solid var(--background-tertiary);
+    border: 1px solid var(--background-base-low);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -17,7 +17,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     cursor: pointer;
 }
 

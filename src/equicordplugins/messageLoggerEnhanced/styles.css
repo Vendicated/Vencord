@@ -83,7 +83,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
 }
 
 .folder-upload-input {

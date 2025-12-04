@@ -3,12 +3,12 @@
 .vc-command-palette-root {
     border-radius: 10px;
     overflow: hidden;
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
 }
 
 .vc-command-palette-option {
     padding: 5px;
-    background-color: var(--background-tertiary);
+    background-color: var(--background-base-low);
     color: var(--white-500);
     font-family: var(--font-display);
     text-align: left;

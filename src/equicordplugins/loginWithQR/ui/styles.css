@@ -6,7 +6,7 @@
     width: 30rem;
     height: 13rem;
     border-radius: 1rem;
-    background-color: var(--background-secondary);
+    background-color: var(--background-secondary-alt);
     border-style: dashed;
     border-color: var(--input-border);
     border-width: 4px;
@@ -31,7 +31,7 @@
 }
 
 .qrlogin-modal-filepaste-disabled {
-    background-color: var(--background-secondary) !important;
+    background-color: var(--background-secondary-alt) !important;
     opacity: 0.5;
     cursor: unset;
 }

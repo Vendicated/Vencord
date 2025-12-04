@@ -55,13 +55,11 @@
   width: 164px;
   margin-top: 5%;
   margin-left: 15%;
-  background-image: repeating-linear-gradient(
-    45deg,
-    #ffffff1a 0,
-    #ffffff1a 10px,
-    #0000001a 10px,
-    #0000001a 20px
-  );
+  background-image: repeating-linear-gradient(45deg,
+      #ffffff1a 0,
+      #ffffff1a 10px,
+      #0000001a 10px,
+      #0000001a 20px);
   border-radius: 10px;
 }
 
@@ -75,7 +73,7 @@
 
 .vc-icon-container:hover {
   border-radius: 5px;
-  border: 3px solid var(--background-tertiary);
+  border: 3px solid var(--background-base-low);
   box-sizing: border-box;
 }
 

@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
 import "./style.css";
 
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { DataStore } from "@api/index";
 import { definePluginSettings, Settings } from "@api/Settings";
+import { Button, ErrorBoundary, Heading, TextButton } from "@components/index";
 import { Devs, EquicordDevs } from "@utils/constants";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, Menu, MessageStore, RelationshipStore, StreamerModeStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { Button, ErrorBoundary, Heading, TextButton } from "@components/index";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/index";
 
 const wrapEmojis = findByCodeLazy("lastIndex;return");
 const AccessibilityStore = findStoreLazy("AccessibilityStore");
@@ -689,7 +689,7 @@ function CustomNicknameModal({ modalProps, user }: { modalProps: ModalProps; use
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
             <ModalContent>
-                <Heading tag="h3" style={{ marginBottom: 8, fontSize: "16px", fontWeight: "400", lineHeight: "1.25", color: "var(--text-secondary)" }}>
+                <Heading tag="h3" style={{ marginBottom: 8, fontSize: "16px", fontWeight: "400", lineHeight: "1.25", color: "var(--text-subtle)" }}>
                     {"Set a custom SMYN nickname for this user. Make use of it by specifying {custom} in the SMYN template settings."}
                 </Heading>
                 <div style={{ paddingTop: "10px", flexGrow: 0 }}></div>

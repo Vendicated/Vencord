@@ -4,7 +4,7 @@
 }
 
 .vc-donatebutton {
-    background-color: var(--background-color) !important;
+    background-color: var(--background-base-low) !important;
     border-color: var(--vc-donatebutton) !important;
     filter: brightness(1);
     border-width: .1rem !important;
