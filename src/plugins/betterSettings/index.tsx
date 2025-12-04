@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -13,8 +14,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
-
-import PluginsSubmenu from "./PluginsSubmenu";
 
 type SettingsEntry = { section: string, label: string; };
 
@@ -125,19 +124,20 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /=\[\];return (\i)(?=\.forEach)/,
-                    replace: "=$self.wrapMap([]);return $self.transformSettingsEntries($1)",
+                    match: /=\[\];if\((\i)(?=\.forEach)/,
+                    replace: "=$self.wrapMap([]);if($self.transformSettingsEntries($1)",
                     predicate: () => settings.store.organizeMenu
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
-                    replace: "$&case 'VencordPlugins':return $self.PluginsSubmenu();"
+                    replace: "$&case 'VencordPlugins':return $self.buildPluginMenuEntries(true);$&case 'VencordThemes':return $self.buildThemeMenuEntries();"
                 }
             ]
         },
     ],
 
-    PluginsSubmenu,
+    buildPluginMenuEntries,
+    buildThemeMenuEntries,
 
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
@@ -171,10 +171,11 @@ export default definePlugin({
     },
 
     wrapMap(toWrap: any[]) {
+        const otherOptions = getIntlMessage("OTHER_OPTIONS");
         // @ts-expect-error
         toWrap.map = function (render: (item: SettingsEntry) => ReactElement<any>) {
             return this
-                .filter(a => a.items.length > 0)
+                .filter(a => a.items.length > 0 && a.label !== otherOptions)
                 .map(({ label, items }) => {
                     const children = items.map(render);
                     if (label) {

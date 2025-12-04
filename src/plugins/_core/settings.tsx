@@ -49,6 +49,7 @@ interface SettingsLayoutBuilder {
 
 function getSettingsCfg(): any { try { return Settings.plugins.Settings; } catch { return null; } }
 
+const isNewUIForcedOff = () => !!getSettingsCfg()?.disableNewUI;
 const getSettingsLocationSafe = (): string => getSettingsCfg()?.settingsLocation ?? "aboveNitro";
 
 const findIndexByKey = (layout: SettingsLayoutNode[], key: string) => layout.findIndex(s => typeof s?.key === "string" && s.key === key);
@@ -108,7 +109,7 @@ export default definePlugin({
             replacement: {
                 match: /enabled:![01],showLegacyOpen:/g,
                 replace: (m: string) =>
-                    !!getSettingsCfg()?.disableNewUI
+                    isNewUIForcedOff()
                         ? "enabled:false,showLegacyOpen:"
                         : m
             }
@@ -126,6 +127,7 @@ export default definePlugin({
         const layout = originalLayoutBuilder.buildLayout();
         if (originalLayoutBuilder.key !== "$Root") return layout;
         if (!Array.isArray(layout)) return layout;
+        if (isNewUIForcedOff()) return layout;
 
         if (layout.some(s => s?.key === "vencord_section")) return layout;
 
