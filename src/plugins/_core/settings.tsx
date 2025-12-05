@@ -17,7 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon } from "@components/Icons";
+import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
@@ -28,15 +28,19 @@ import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 import gitHash from "~git-hash";
 
-type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
-type SectionTypes = Record<SectionType, SectionType>;
-
 const enum LayoutType {
     SECTION = 1,
     ENTRY = 2,
     PANEL = 3,
     PANE = 4
 }
+
+const FallbackSectionTypes = {
+    HEADER: "HEADER",
+    DIVIDER: "DIVIDER",
+    CUSTOM: "CUSTOM"
+};
+type SectionTypes = typeof FallbackSectionTypes;
 
 type SettingsLocation =
     | "top"
@@ -57,12 +61,17 @@ interface SettingsLayoutNode {
     render?(): ReactNode;
 }
 
+interface EntryOptions {
+    key: string,
+    title: string,
+    panelTitle?: string,
+    Component: ComponentType<any>,
+    Icon: ComponentType<any>;
+}
 interface SettingsLayoutBuilder {
     key?: string;
     buildLayout(): SettingsLayoutNode[];
 }
-
-const findIndexByKey = (layout: SettingsLayoutNode[], key: string) => layout.findIndex(s => typeof s?.key === "string" && s.key === key);
 
 const settings = definePluginSettings({
     settingsLocation: {
@@ -138,20 +147,10 @@ export default definePlugin({
         }
     ],
 
-    buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
-        const layout = originalLayoutBuilder.buildLayout();
-        if (originalLayoutBuilder.key !== "$Root") return layout;
-        if (!Array.isArray(layout)) return layout;
+    buildEntry(options: EntryOptions): SettingsLayoutNode {
+        const { key, title, panelTitle = title, Component, Icon } = options;
 
-        if (layout.some(s => s?.key === "vencord_section")) return layout;
-
-        const makeEntry = ({ key, title, panelTitle = title, Component, Icon }: {
-            key: string,
-            title: string,
-            panelTitle?: string,
-            Component: ComponentType<any>,
-            Icon: ComponentType<any>;
-        }): SettingsLayoutNode => ({
+        return ({
             key,
             type: LayoutType.ENTRY,
             legacySearchKey: title.toUpperCase(),
@@ -174,52 +173,75 @@ export default definePlugin({
                 }
             ]
         });
+    },
+
+    buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
+        const layout = originalLayoutBuilder.buildLayout();
+        if (originalLayoutBuilder.key !== "$Root") return layout;
+        if (!Array.isArray(layout)) return layout;
+
+        if (layout.some(s => s?.key === "vencord_section")) return layout;
+
+        const { buildEntry } = this;
 
         const vencordEntries: SettingsLayoutNode[] = [
-            makeEntry({
+            buildEntry({
                 key: "vencord_main",
                 title: "Vencord",
                 panelTitle: "Vencord Settings",
                 Component: VencordTab,
                 Icon: MainSettingsIcon
             }),
-            makeEntry({
+            buildEntry({
                 key: "vencord_plugins",
                 title: "Plugins",
                 Component: PluginsTab,
                 Icon: PluginsIcon
             }),
-            makeEntry({
+            buildEntry({
                 key: "vencord_themes",
                 title: "Themes",
                 Component: ThemesTab,
                 Icon: PaintbrushIcon
             }),
-            !IS_UPDATER_DISABLED && UpdaterTab && makeEntry({
+            !IS_UPDATER_DISABLED && UpdaterTab && buildEntry({
                 key: "vencord_updater",
                 title: "Updater",
                 panelTitle: "Vencord Updater",
                 Component: UpdaterTab,
                 Icon: UpdaterIcon
             }),
-            makeEntry({
+            buildEntry({
                 key: "vencord_cloud",
                 title: "Cloud",
                 panelTitle: "Vencord Cloud",
                 Component: CloudTab,
                 Icon: CloudIcon
             }),
-            makeEntry({
+            buildEntry({
                 key: "vencord_backup_restore",
                 title: "Backup & Restore",
                 Component: BackupAndRestoreTab,
                 Icon: BackupRestoreIcon
             }),
-            IS_DEV && PatchHelperTab && makeEntry({
+            IS_DEV && PatchHelperTab && buildEntry({
                 key: "vencord_patch_helper",
                 title: "Patch Helper",
                 Component: PatchHelperTab,
                 Icon: PatchHelperIcon
+            }),
+            ...this.customEntries.map(buildEntry),
+            // TODO: Remove deprecated customSections in a future update
+            ...this.customSections.map((func, i) => {
+                const { section, element, label } = func(FallbackSectionTypes);
+                if (Object.values(FallbackSectionTypes).includes(section)) return null;
+
+                return buildEntry({
+                    key: `vencord_deprecated_custom_${section}`,
+                    title: label,
+                    Component: element,
+                    Icon: PlaceholderIcon
+                });
             })
         ].filter(isTruthy);
 
@@ -241,7 +263,9 @@ export default definePlugin({
             bottom: "logout_section"
         };
 
-        let idx = findIndexByKey(layout, places[settingsLocation] ?? places.top);
+        const key = places[settingsLocation] ?? places.top;
+        let idx = layout.findIndex(s => typeof s?.key === "string" && s.key === key);
+
         if (idx === -1) {
             idx = 2;
         } else if (settingsLocation.startsWith("below")) {
@@ -253,7 +277,9 @@ export default definePlugin({
         return layout;
     },
 
+    /** @deprecated Use customEntries */
     customSections: [] as ((SectionTypes: SectionTypes) => any)[],
+    customEntries: [] as EntryOptions[],
 
     makeSettingsCategories(SectionTypes: SectionTypes) {
         return [
@@ -354,11 +380,7 @@ export default definePlugin({
         return (...args: any[]) => {
             const elements = originalHook(...args);
             if (!this.patchedSettings.has(elements))
-                elements.unshift(...this.makeSettingsCategories({
-                    HEADER: "HEADER",
-                    DIVIDER: "DIVIDER",
-                    CUSTOM: "CUSTOM"
-                }));
+                elements.unshift(...this.makeSettingsCategories(FallbackSectionTypes));
 
             return elements;
         };
