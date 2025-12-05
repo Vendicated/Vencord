@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
@@ -38,6 +38,14 @@ const enum LayoutType {
     PANE = 4
 }
 
+type SettingsLocation =
+    | "top"
+    | "aboveNitro"
+    | "belowNitro"
+    | "aboveActivity"
+    | "belowActivity"
+    | "bottom";
+
 interface SettingsLayoutNode {
     type: LayoutType;
     key?: string;
@@ -54,15 +62,30 @@ interface SettingsLayoutBuilder {
     buildLayout(): SettingsLayoutNode[];
 }
 
-const getSettingsLocationSafe = (): string => Settings.plugins.Settings?.settingsLocation ?? "aboveNitro";
-
 const findIndexByKey = (layout: SettingsLayoutNode[], key: string) => layout.findIndex(s => typeof s?.key === "string" && s.key === key);
+
+const settings = definePluginSettings({
+    settingsLocation: {
+        type: OptionType.SELECT,
+        description: "Where to put the Vencord settings section",
+        options: [
+            { label: "At the very top", value: "top" },
+            { label: "Above the Nitro section", value: "aboveNitro", default: true },
+            { label: "Below the Nitro section", value: "belowNitro" },
+            { label: "Above Activity Settings", value: "aboveActivity" },
+            { label: "Below Activity Settings", value: "belowActivity" },
+            { label: "At the very bottom", value: "bottom" },
+        ] as { label: string; value: SettingsLocation; default?: boolean; }[]
+    }
+});
 
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
     authors: [Devs.Ven, Devs.Megu],
     required: true,
+
+    settings,
 
     patches: [
         {
@@ -207,47 +230,25 @@ export default definePlugin({
             buildLayout: () => vencordEntries
         };
 
-        const { settingsLocation } = Settings.plugins.Settings;
-        let insertIndex = layout.length;
+        const { settingsLocation } = settings.store;
 
-        switch (settingsLocation) {
-            case "top": {
-                const idx = findIndexByKey(layout, "user_section");
-                insertIndex = idx === -1 ? Math.min(1, layout.length) : idx;
-                break;
-            }
-            case "aboveNitro": {
-                const idx = findIndexByKey(layout, "billing_section");
-                insertIndex = idx === -1 ? layout.length : idx;
-                break;
-            }
-            case "belowNitro": {
-                const idx = findIndexByKey(layout, "billing_section");
-                insertIndex = idx === -1 ? layout.length : idx + 1;
-                break;
-            }
-            case "aboveActivity": {
-                const idx = findIndexByKey(layout, "activity_section");
-                insertIndex = idx === -1 ? layout.length : idx;
-                break;
-            }
-            case "belowActivity": {
-                const idx = findIndexByKey(layout, "activity_section");
-                insertIndex = idx === -1 ? layout.length : idx + 1;
-                break;
-            }
-            case "bottom": {
-                const idx = findIndexByKey(layout, "logout_section");
-                insertIndex = idx === -1 ? layout.length : idx;
-                break;
-            }
-            default: {
-                insertIndex = Math.min(2, layout.length);
-                break;
-            }
+        const places: Record<SettingsLocation, string> = {
+            top: "user_section",
+            aboveNitro: "billing_section",
+            belowNitro: "billing_section",
+            aboveActivity: "activity_section",
+            belowActivity: "activity_section",
+            bottom: "logout_section"
+        };
+
+        let idx = findIndexByKey(layout, places[settingsLocation] ?? places.top);
+        if (idx === -1) {
+            idx = 2;
+        } else if (settingsLocation.startsWith("below")) {
+            idx += 1;
         }
 
-        layout.splice(insertIndex, 0, vencordSection);
+        layout.splice(idx, 0, vencordSection);
 
         return layout;
     },
@@ -310,12 +311,12 @@ export default definePlugin({
         ].filter(Boolean);
     },
 
-    isRightSpot({ header, settings }: { header?: string; settings?: string[]; }) {
-        const firstChild = settings?.[0];
+    isRightSpot({ header, settings: s }: { header?: string; settings?: string[]; }) {
+        const firstChild = s?.[0];
         // lowest two elements... sanity backup
         if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
 
-        const { settingsLocation } = Settings.plugins.Settings;
+        const { settingsLocation } = settings.store;
 
         if (settingsLocation === "bottom") return firstChild === "LOGOUT";
         if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
@@ -323,7 +324,7 @@ export default definePlugin({
         if (!header) return;
 
         try {
-            const names = {
+            const names: Record<Exclude<SettingsLocation, "bottom" | "belowActivity">, string> = {
                 top: getIntlMessage("USER_SETTINGS"),
                 aboveNitro: getIntlMessage("BILLING_SETTINGS"),
                 belowNitro: getIntlMessage("APP_SETTINGS"),
@@ -361,21 +362,6 @@ export default definePlugin({
 
             return elements;
         };
-    },
-
-    options: {
-        settingsLocation: {
-            type: OptionType.SELECT,
-            description: "Where to put the Vencord settings section",
-            options: [
-                { label: "At the very top", value: "top" },
-                { label: "Above the Nitro section", value: "aboveNitro", default: true },
-                { label: "Below the Nitro section", value: "belowNitro" },
-                { label: "Above Activity Settings", value: "aboveActivity" },
-                { label: "Below Activity Settings", value: "belowActivity" },
-                { label: "At the very bottom", value: "bottom" },
-            ]
-        }
     },
 
     get electronVersion() {
