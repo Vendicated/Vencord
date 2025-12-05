@@ -118,7 +118,7 @@ export default definePlugin({
         {
             find: "}addReaction(",
             replacement: {
-                match: /this\.customRenderedContent=(\i)\.customRenderedContent,/,
+                match: /this\.channel_id=(\i)\.channel_id,/,
                 replace: "$&this.scheduledMessageData=$1.scheduledMessageData,"
             }
         }
