@@ -16,12 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
+import NoReplyMentionPlugin from "@plugins/noReplyMention";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { MessageFlags } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore, WindowStore } from "@webpack/common";
-import NoReplyMentionPlugin from "plugins/noReplyMention";
+import { FluxDispatcher, MessageTypeSets, PermissionsBits, PermissionStore, UserStore, WindowStore } from "@webpack/common";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
@@ -73,7 +75,7 @@ export default definePlugin({
         WindowStore.removeChangeListener(focusChanged);
     },
 
-    onMessageClick(msg: any, channel, event) {
+    onMessageClick(msg, channel, event) {
         const isMe = msg.author.id === UserStore.getCurrentUser().id;
         if (!isDeletePressed) {
             if (event.detail < 2) return;
@@ -89,11 +91,10 @@ export default definePlugin({
             } else {
                 if (!settings.store.enableDoubleClickToReply) return;
 
-                const EPHEMERAL = 64;
-                if (msg.hasFlag(EPHEMERAL)) return;
+                if (!MessageTypeSets.REPLYABLE.has(msg.type) || msg.hasFlag(MessageFlags.EPHEMERAL)) return;
 
                 const isShiftPress = event.shiftKey && !settings.store.requireModifier;
-                const shouldMention = Vencord.Plugins.isPluginEnabled(NoReplyMentionPlugin.name)
+                const shouldMention = isPluginEnabled(NoReplyMentionPlugin.name)
                     ? NoReplyMentionPlugin.shouldMention(msg, isShiftPress)
                     : !isShiftPress;
 

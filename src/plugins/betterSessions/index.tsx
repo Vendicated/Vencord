@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -31,7 +33,7 @@ import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, s
 const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
-const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
+const TimestampClasses = findByPropsLazy("timestamp", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
 const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
@@ -92,7 +94,7 @@ export default definePlugin({
                 <span>{title}</span>
                 {(savedSession == null || savedSession.isNew) && (
                     <div
-                        className="vc-plugins-badge"
+                        className="vc-addon-badge"
                         style={{
                             backgroundColor: "#ED4245",
                             marginLeft: "2px"
@@ -108,7 +110,7 @@ export default definePlugin({
 
     renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => {
         return (
-            <Tooltip text={session.approx_last_used_time.toLocaleString()} tooltipClassName={TimestampClasses.timestampTooltip}>
+            <Tooltip text={session.approx_last_used_time.toLocaleString()}>
                 {props => (
                     <span {...props} className={TimestampClasses.timestamp}>
                         {timeLabel}
@@ -123,6 +125,7 @@ export default definePlugin({
 
         return (
             <BlobMask
+                isFolder
                 style={{ cursor: "unset" }}
                 selected={false}
                 lowerBadge={
@@ -153,7 +156,7 @@ export default definePlugin({
                     className={SessionIconClasses.sessionIcon}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
-                    <DeviceIcon width={28} height={28} color="currentColor" />
+                    <DeviceIcon size="md" color="currentColor" />
                 </div>
             </BlobMask>
         );

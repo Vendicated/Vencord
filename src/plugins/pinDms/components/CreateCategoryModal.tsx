@@ -5,12 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { Divider } from "@components/Divider";
+import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
+import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
-
-import { DEFAULT_COLOR, SWATCHES } from "../constants";
-import { categoryLen, createCategory, getCategory } from "../data";
 
 interface ColorPickerWithSwatchesProps {
     defaultColor: number;
@@ -81,15 +81,15 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
             {/* form is here so when you press enter while in the text input it submits */}
             <form onSubmit={onSave}>
                 <ModalContent className={cl("content")}>
-                    <Forms.FormSection>
+                    <section>
                         <Forms.FormTitle>Name</Forms.FormTitle>
                         <TextInput
                             value={name}
                             onChange={e => setName(e)}
                         />
-                    </Forms.FormSection>
-                    <Forms.FormDivider />
-                    <Forms.FormSection>
+                    </section>
+                    <Divider />
+                    <section>
                         <Forms.FormTitle>Color</Forms.FormTitle>
                         <ColorPickerWithSwatches
                             key={category.id}
@@ -107,7 +107,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                                 />
                             )}
                         />
-                    </Forms.FormSection>
+                    </section>
                 </ModalContent>
                 <ModalFooter>
                     <Button type="submit" onClick={onSave} disabled={!name}>{categoryId ? "Save" : "Create"}</Button>
