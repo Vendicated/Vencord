@@ -34,8 +34,12 @@ const settings = definePluginSettings({
         description: "URL to load database from",
         type: OptionType.STRING,
         default: "https://userpfp.github.io/UserPFP/source/data.json",
+        hidden: !IS_DEV,
         isValid: (value => {
-            if (!value) return false;
+            if (!value) {
+                value = "https://userpfp.github.io/UserPFP/source/data.json";
+                return false;
+            }
             return true;
         })
     }
