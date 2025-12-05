@@ -37,14 +37,14 @@ const enum LayoutType {
 };
 
 interface SettingsLayoutNode {
+	type: LayoutType;
     key?: string;
-    type: number;
     legacySearchKey?: string;
-    useLabel?: () => string;
-    useTitle?: () => string;
-    buildLayout?: () => SettingsLayoutNode[];
-    icon?: () => React.ReactNode;
-    render?: () => React.ReactNode;
+    useLabel?(): string;
+    useTitle?(): string;
+    buildLayout?(): SettingsLayoutNode[];
+    icon?(): React.ReactNode;
+    render?(): React.ReactNode;
 }
 
 interface SettingsLayoutBuilder {
