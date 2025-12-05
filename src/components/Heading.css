@@ -7,7 +7,7 @@
 .vc-h3,
 .vc-h4,
 .vc-h5 {
-    color: var(--header-secondary);
+    color: var(--header-primary);
 }
 
 .vc-h1 {
