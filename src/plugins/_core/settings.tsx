@@ -24,6 +24,7 @@ import { getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
+import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 import gitHash from "~git-hash";
 
@@ -31,21 +32,21 @@ type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
 type SectionTypes = Record<SectionType, SectionType>;
 
 const enum LayoutType {
-	SECTION = 1,
-	ENTRY = 2,
-	PANEL = 3,
-	PANE = 4
+    SECTION = 1,
+    ENTRY = 2,
+    PANEL = 3,
+    PANE = 4
 }
 
 interface SettingsLayoutNode {
-	type: LayoutType;
+    type: LayoutType;
     key?: string;
     legacySearchKey?: string;
     useLabel?(): string;
     useTitle?(): string;
     buildLayout?(): SettingsLayoutNode[];
-    icon?(): React.ReactNode;
-    render?(): React.ReactNode;
+    icon?(): ReactNode;
+    render?(): ReactNode;
 }
 
 interface SettingsLayoutBuilder {
@@ -69,9 +70,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\.compactInfo.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\),/,
-                    replace: (m, component, props) => {
-                        return `${m}$self.makeInfoElements(${component}, ${props}),`;
-                    }
+                    replace: "$&$self.makeInfoElements($1,$2),"
                 },
                 {
                     match: /\.info.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
@@ -123,12 +122,13 @@ export default definePlugin({
 
         if (layout.some(s => s?.key === "vencord_section")) return layout;
 
-        const makeEntry = (
+        const makeEntry = ({ key, title, panelTitle = title, Component, Icon }: {
             key: string,
             title: string,
-            Component: React.ComponentType<any>,
-            Icon: React.ComponentType<any>
-        ): SettingsLayoutNode => ({
+            panelTitle?: string,
+            Component: ComponentType<any>,
+            Icon: ComponentType<any>;
+        }): SettingsLayoutNode => ({
             key,
             type: LayoutType.ENTRY,
             legacySearchKey: title.toUpperCase(),
@@ -138,14 +138,14 @@ export default definePlugin({
                 {
                     key: key + "_panel",
                     type: LayoutType.PANEL,
-                    useTitle: () => title,
+                    useTitle: () => panelTitle,
                     buildLayout: () => [
                         {
                             key: key + "_pane",
                             type: LayoutType.PANE,
                             buildLayout: () => [],
                             render: () => <Component />,
-                            useTitle: () => title
+                            useTitle: () => panelTitle
                         }
                     ]
                 }
@@ -153,18 +153,51 @@ export default definePlugin({
         });
 
         const vencordEntries: SettingsLayoutNode[] = [
-            makeEntry("vencord_main", "Vencord", VencordTab, MainSettingsIcon),
-            makeEntry("vencord_plugins", "Plugins", PluginsTab, PluginsIcon),
-            makeEntry("vencord_themes", "Themes", ThemesTab, PaintbrushIcon),
-
-            !IS_UPDATER_DISABLED && UpdaterTab &&
-            makeEntry("vencord_updater", "Updater", UpdaterTab, UpdaterIcon),
-
-            makeEntry("vencord_cloud", "Cloud", CloudTab, CloudIcon),
-            makeEntry("vencord_backup_restore", "Backup & Restore", BackupAndRestoreTab, BackupRestoreIcon),
-
-            IS_DEV && PatchHelperTab &&
-            makeEntry("vencord_patch_helper", "Patch Helper", PatchHelperTab, PatchHelperIcon)
+            makeEntry({
+                key: "vencord_main",
+                title: "Vencord",
+                panelTitle: "Vencord Settings",
+                Component: VencordTab,
+                Icon: MainSettingsIcon
+            }),
+            makeEntry({
+                key: "vencord_plugins",
+                title: "Plugins",
+                Component: PluginsTab,
+                Icon: PluginsIcon
+            }),
+            makeEntry({
+                key: "vencord_themes",
+                title: "Themes",
+                Component: ThemesTab,
+                Icon: PaintbrushIcon
+            }),
+            !IS_UPDATER_DISABLED && UpdaterTab && makeEntry({
+                key: "vencord_updater",
+                title: "Updater",
+                panelTitle: "Vencord Updater",
+                Component: UpdaterTab,
+                Icon: UpdaterIcon
+            }),
+            makeEntry({
+                key: "vencord_cloud",
+                title: "Cloud",
+                panelTitle: "Vencord Cloud",
+                Component: CloudTab,
+                Icon: CloudIcon
+            }),
+            makeEntry({
+                key: "vencord_backup_restore",
+                title: "Backup & Restore",
+                Component: BackupAndRestoreTab,
+                Icon: BackupRestoreIcon
+            }),
+            IS_DEV && PatchHelperTab && makeEntry({
+                key: "vencord_patch_helper",
+                title: "Patch Helper",
+                Component: PatchHelperTab,
+                Icon: PatchHelperIcon
+            })
         ].filter(isTruthy);
 
         const vencordSection: SettingsLayoutNode = {
@@ -174,7 +207,7 @@ export default definePlugin({
             buildLayout: () => vencordEntries
         };
 
-        const settingsLocation = getSettingsLocationSafe();
+        const { settingsLocation } = Settings.plugins.Settings;
         let insertIndex = layout.length;
 
         switch (settingsLocation) {
@@ -282,7 +315,7 @@ export default definePlugin({
         // lowest two elements... sanity backup
         if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
 
-        const settingsLocation = getSettingsLocationSafe();
+        const { settingsLocation } = Settings.plugins.Settings;
 
         if (settingsLocation === "bottom") return firstChild === "LOGOUT";
         if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
@@ -383,7 +416,7 @@ export default definePlugin({
         return "\n" + this.getInfoRows().join("\n");
     },
 
-    makeInfoElements(Component: React.ComponentType<React.PropsWithChildren>, props: React.PropsWithChildren) {
+    makeInfoElements(Component: ComponentType<PropsWithChildren>, props: PropsWithChildren) {
         return this.getInfoRows().map((text, i) =>
             <Component key={i} {...props}>{text}</Component>
         );

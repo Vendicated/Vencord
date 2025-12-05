@@ -69,7 +69,7 @@ function ThemesTab() {
 
 function UserscriptThemesTab() {
     return (
-        <SettingsTab title="Themes">
+        <SettingsTab>
             <Card variant="danger">
                 <Forms.FormTitle tag="h5">Themes are not supported on the Userscript!</Forms.FormTitle>
 
