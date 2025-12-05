@@ -349,7 +349,7 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
                                         size={Button.Sizes.SMALL}
                                         style={{ flex: "0 0 auto" }}
                                     >
-                                        📁 Upload Sound
+                                        Upload Sound
                                     </Button>
                                     <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", flex: 1 }}>
                                         {userForm.filename
@@ -363,7 +363,7 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                                         <Text variant="text-sm/normal" style={{ minWidth: "60px" }}>
-                                            🔊 Volume: {(userForm.volume * 100).toFixed(0)}%
+                                            Volume: {(userForm.volume * 100).toFixed(0)}%
                                         </Text>
                                         <input
                                             type="range"
@@ -434,7 +434,7 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
                                                     textOverflow: "ellipsis",
                                                     whiteSpace: "nowrap"
                                                 }}>
-                                                    🔊 {entry.filename || (entry.soundUrl.startsWith("data:") ? "Uploaded file" : entry.soundUrl.substring(0, 40))}
+                                                    file: {entry.filename || (entry.soundUrl.startsWith("data:") ? "Uploaded file" : entry.soundUrl.substring(0, 40))}
                                                     {!entry.filename && entry.soundUrl.length > 40 && !entry.soundUrl.startsWith("data:") ? "..." : ""}
                                                 </Text>
                                                 <Text variant="text-xs/normal" style={{ color: "var(--text-muted)" }}>
@@ -515,7 +515,7 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
                                         size={Button.Sizes.SMALL}
                                         style={{ flex: "0 0 auto" }}
                                     >
-                                        📁 Upload Sound
+                                        Upload Sound
                                     </Button>
                                     <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", flex: 1 }}>
                                         {guildForm.filename
@@ -529,7 +529,7 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                                         <Text variant="text-sm/normal" style={{ minWidth: "60px" }}>
-                                            🔊 Volume: {(guildForm.volume * 100).toFixed(0)}%
+                                            Volume: {(guildForm.volume * 100).toFixed(0)}%
                                         </Text>
                                         <input
                                             type="range"
@@ -601,7 +601,7 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
                                                     textOverflow: "ellipsis",
                                                     whiteSpace: "nowrap"
                                                 }}>
-                                                    🔊 {entry.filename || (entry.soundUrl.startsWith("data:") ? "Uploaded file" : entry.soundUrl.substring(0, 40))}
+                                                    file: {entry.filename || (entry.soundUrl.startsWith("data:") ? "Uploaded file" : entry.soundUrl.substring(0, 40))}
                                                     {!entry.filename && entry.soundUrl.length > 40 && !entry.soundUrl.startsWith("data:") ? "..." : ""}
                                                 </Text>
                                                 <Text variant="text-xs/normal" style={{ color: "var(--text-muted)" }}>
@@ -646,7 +646,7 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
                     backgroundColor: "var(--background-tertiary)",
                     borderRadius: "8px"
                 }}>
-                    <Text variant="text-sm/semibold">💡 Tips:</Text>
+                    <Text variant="text-sm/semibold">Tips:</Text>
                     <ul style={{ margin: "8px 0 0 0", paddingLeft: "20px", fontSize: "12px", color: "var(--text-muted)" }}>
                         <li><strong>Get User ID:</strong> Right-click on a user → Copy User ID (Developer Mode ON)</li>
                         <li><strong>Get Server ID:</strong> Right-click on a server icon → Copy Server ID (Developer Mode ON)</li>
