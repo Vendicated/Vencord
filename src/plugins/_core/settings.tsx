@@ -29,7 +29,12 @@ import gitHash from "~git-hash";
 type SectionType = "HEADER" | "DIVIDER" | "CUSTOM";
 type SectionTypes = Record<SectionType, SectionType>;
 
-const LayoutType = { SECTION: 1, ENTRY: 2, PANEL: 3, PANE: 4 } as const;
+const enum LayoutType {
+	SECTION = 1,
+	ENTRY = 2,
+	PANEL = 3,
+	PANE = 4
+};
 
 interface SettingsLayoutNode {
     key?: string;
