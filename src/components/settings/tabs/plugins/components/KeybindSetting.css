@@ -1,0 +1,20 @@
+.vc-plugins-setting-keybind-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5em;
+}
+
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-icon > svg.disabled {
+    opacity: .3;
+}
+
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord > div > div {
+    position: unset;
+}
+
+.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord > div > div > input:focus {
+    border-radius: var(--radius-sm);
+    background-color: rgb(255 255 255 / 5%) !important;
+}
