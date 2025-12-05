@@ -1,0 +1,276 @@
+/* Modal Header */
+.vc-scheduled-msg-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    gap: 16px;
+}
+
+.vc-scheduled-msg-modal-title {
+    flex: 1;
+    margin: 0 !important;
+    color: var(--header-primary);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Modal Content */
+.vc-scheduled-msg-modal-content {
+    padding: 0 16px 16px;
+}
+
+/* Modal Footer */
+.vc-scheduled-msg-modal-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+}
+
+/* Channel Info */
+.vc-scheduled-msg-channel-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--background-secondary);
+    border-radius: 8px;
+}
+
+.vc-scheduled-msg-channel-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Dark theme channel text */
+.theme-dark .vc-scheduled-msg-channel-text {
+    color: #dbdee1 !important;
+}
+
+.theme-dark .vc-scheduled-msg-channel-text strong {
+    color: #f2f3f5 !important;
+}
+
+/* Light theme channel text */
+.theme-light .vc-scheduled-msg-channel-text {
+    color: #313338 !important;
+}
+
+.theme-light .vc-scheduled-msg-channel-text strong {
+    color: #060607 !important;
+}
+
+/* Field Labels */
+.vc-scheduled-msg-field-label {
+    margin: 16px 0 8px !important;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+/* Dark theme field labels */
+.theme-dark .vc-scheduled-msg-field-label {
+    color: #b5bac1 !important;
+}
+
+/* Light theme field labels */
+.theme-light .vc-scheduled-msg-field-label {
+    color: #4e5058 !important;
+}
+
+/* Schedule Type Buttons */
+.vc-scheduled-msg-schedule-type-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* DateTime Input */
+.vc-scheduled-msg-datetime-input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    background: var(--input-background);
+    font-size: 16px;
+}
+
+.vc-scheduled-msg-datetime-input:focus {
+    outline: none;
+}
+
+/* Dark theme datetime */
+.theme-dark .vc-scheduled-msg-datetime-input {
+    color: #dbdee1 !important;
+    color-scheme: dark;
+}
+
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-fields-wrapper,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-text,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-month-field,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-day-field,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-year-field,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-hour-field,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-minute-field,
+.theme-dark .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-ampm-field {
+    color: #dbdee1 !important;
+}
+
+/* Light theme datetime */
+.theme-light .vc-scheduled-msg-datetime-input {
+    color: #313338 !important;
+    color-scheme: light;
+}
+
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-calendar-picker-indicator {
+    filter: none;
+}
+
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-fields-wrapper,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-text,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-month-field,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-day-field,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-year-field,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-hour-field,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-minute-field,
+.theme-light .vc-scheduled-msg-datetime-input::-webkit-datetime-edit-ampm-field {
+    color: #313338 !important;
+}
+
+/* Error Display */
+.vc-scheduled-msg-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--info-danger-background);
+    border-radius: 5px;
+    color: var(--text-normal);
+    font-size: 14px;
+}
+
+.vc-scheduled-msg-error svg {
+    flex-shrink: 0;
+    color: var(--status-danger);
+}
+
+/* Empty State */
+.vc-scheduled-msg-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px 32px;
+    color: var(--text-muted);
+}
+
+.vc-scheduled-msg-empty-state svg {
+    opacity: 0.5;
+}
+
+/* Message List */
+.vc-scheduled-msg-message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.vc-scheduled-msg-message-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    background: var(--background-secondary);
+    border-radius: 8px;
+}
+
+.vc-scheduled-msg-message-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-scheduled-msg-message-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.vc-scheduled-msg-message-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.vc-scheduled-msg-message-channel {
+    font-weight: 600;
+    color: var(--header-primary);
+}
+
+.vc-scheduled-msg-message-time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.vc-scheduled-msg-message-content {
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+/* Dark theme message content */
+.theme-dark .vc-scheduled-msg-message-content {
+    color: #dbdee1 !important;
+}
+
+/* Light theme message content */
+.theme-light .vc-scheduled-msg-message-content {
+    color: #313338 !important;
+}
+
+/* Phantom Message Styles */
+.vc-scheduled-msg-phantom {
+    opacity: 0.5 !important;
+}
+
+.vc-scheduled-msg-phantom:hover {
+    opacity: 0.7 !important;
+}
+
+/* Scheduled message accessory */
+.vc-scheduled-msg-accessory {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 4px 8px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    pointer-events: none;
+    width: fit-content;
+}
