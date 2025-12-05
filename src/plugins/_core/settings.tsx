@@ -21,9 +21,9 @@ import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHe
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
+import { isTruthy } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
-import { isTruthy } from "@utils/guards";
 
 import gitHash from "~git-hash";
 
