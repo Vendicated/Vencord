@@ -23,6 +23,7 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
+import { isTruthy } from "@utils/guards";
 
 import gitHash from "~git-hash";
 
@@ -34,7 +35,7 @@ const enum LayoutType {
 	ENTRY = 2,
 	PANEL = 3,
 	PANE = 4
-};
+}
 
 interface SettingsLayoutNode {
 	type: LayoutType;
@@ -52,9 +53,7 @@ interface SettingsLayoutBuilder {
     buildLayout(): SettingsLayoutNode[];
 }
 
-function getSettingsCfg(): any { try { return Settings.plugins.Settings; } catch { return null; } }
-
-const getSettingsLocationSafe = (): string => getSettingsCfg()?.settingsLocation ?? "aboveNitro";
+const getSettingsLocationSafe = (): string => Settings.plugins.Settings?.settingsLocation ?? "aboveNitro";
 
 const findIndexByKey = (layout: SettingsLayoutNode[], key: string) => layout.findIndex(s => typeof s?.key === "string" && s.key === key);
 
@@ -109,16 +108,6 @@ export default definePlugin({
             }
         },
         {
-            find: "2025-09-user-settings-redesign-1",
-            replacement: {
-                match: /enabled:![01],showLegacyOpen:/g,
-                replace: (m: string) =>
-                    !!getSettingsCfg()?.disableNewUI
-                        ? "enabled:false,showLegacyOpen:"
-                        : m
-            }
-        },
-        {
             find: ".buildLayout().map",
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
@@ -167,17 +156,16 @@ export default definePlugin({
             makeEntry("vencord_main", "Vencord", VencordTab, MainSettingsIcon),
             makeEntry("vencord_plugins", "Plugins", PluginsTab, PluginsIcon),
             makeEntry("vencord_themes", "Themes", ThemesTab, PaintbrushIcon),
+
+            !IS_UPDATER_DISABLED && UpdaterTab &&
+            makeEntry("vencord_updater", "Updater", UpdaterTab, UpdaterIcon),
+
             makeEntry("vencord_cloud", "Cloud", CloudTab, CloudIcon),
-            makeEntry("vencord_backup_restore", "Backup & Restore", BackupAndRestoreTab, BackupRestoreIcon)
-        ];
+            makeEntry("vencord_backup_restore", "Backup & Restore", BackupAndRestoreTab, BackupRestoreIcon),
 
-        if (!IS_UPDATER_DISABLED && UpdaterTab) {
-            vencordEntries.push(makeEntry("vencord_updater", "Updater", UpdaterTab, UpdaterIcon));
-        }
-
-        if (IS_DEV && PatchHelperTab) {
-            vencordEntries.push(makeEntry("vencord_patch_helper", "Patch Helper", PatchHelperTab, PatchHelperIcon));
-        }
+            IS_DEV && PatchHelperTab &&
+            makeEntry("vencord_patch_helper", "Patch Helper", PatchHelperTab, PatchHelperIcon)
+        ].filter(isTruthy);
 
         const vencordSection: SettingsLayoutNode = {
             key: "vencord_section",
@@ -215,10 +203,13 @@ export default definePlugin({
                 insertIndex = idx === -1 ? layout.length : idx + 1;
                 break;
             }
-            case "bottom":
-            default: {
+            case "bottom": {
                 const idx = findIndexByKey(layout, "logout_section");
                 insertIndex = idx === -1 ? layout.length : idx;
+                break;
+            }
+            default: {
+                insertIndex = Math.min(2, layout.length);
                 break;
             }
         }
@@ -351,12 +342,6 @@ export default definePlugin({
                 { label: "Below Activity Settings", value: "belowActivity" },
                 { label: "At the very bottom", value: "bottom" },
             ]
-        },
-        disableNewUI: {
-            type: OptionType.BOOLEAN,
-            description: "Force Discord to use the old settings UI",
-            default: false,
-            restartNeeded: true
         }
     },
 

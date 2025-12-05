@@ -96,7 +96,7 @@ function CloudTab() {
     const settings = useSettings(["cloud.authenticated", "cloud.url"]);
 
     return (
-        <SettingsTab title="Vencord Cloud">
+        <SettingsTab>
             <section className={Margins.top16}>
                 <Forms.FormTitle tag="h5">Cloud Settings</Forms.FormTitle>
 
