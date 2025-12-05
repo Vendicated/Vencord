@@ -23,17 +23,19 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
+import { waitFor } from "@webpack";
 import { React } from "@webpack/common";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 import gitHash from "~git-hash";
 
-const enum LayoutType {
-    SECTION = 1,
-    ENTRY = 2,
-    PANEL = 3,
-    PANE = 4
-}
+let LayoutTypes = {
+    SECTION: 1,
+    SIDEBAR_ITEM: 2,
+    PANEL: 3,
+    PANE: 4
+};
+waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL", "PANE"], v => LayoutTypes = v);
 
 const FallbackSectionTypes = {
     HEADER: "HEADER",
@@ -51,7 +53,7 @@ type SettingsLocation =
     | "bottom";
 
 interface SettingsLayoutNode {
-    type: LayoutType;
+    type: number;
     key?: string;
     legacySearchKey?: string;
     useLabel?(): string;
@@ -152,19 +154,19 @@ export default definePlugin({
 
         return ({
             key,
-            type: LayoutType.ENTRY,
+            type: LayoutTypes.SIDEBAR_ITEM,
             legacySearchKey: title.toUpperCase(),
             useTitle: () => title,
             icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [
                 {
                     key: key + "_panel",
-                    type: LayoutType.PANEL,
+                    type: LayoutTypes.PANEL,
                     useTitle: () => panelTitle,
                     buildLayout: () => [
                         {
                             key: key + "_pane",
-                            type: LayoutType.PANE,
+                            type: LayoutTypes.PANE,
                             buildLayout: () => [],
                             render: () => <Component />,
                             useTitle: () => panelTitle
@@ -247,7 +249,7 @@ export default definePlugin({
 
         const vencordSection: SettingsLayoutNode = {
             key: "vencord_section",
-            type: LayoutType.SECTION,
+            type: LayoutTypes.SECTION,
             useLabel: () => "Vencord",
             buildLayout: () => vencordEntries
         };
