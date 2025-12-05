@@ -5,11 +5,15 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { Devs, EquicordDevs, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_SUPPORT_CHANNEL_IDS } from "@utils/constants";
+import { isAnyPluginDev } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import { Alerts, NavigationRouter, UserStore } from "@webpack/common";
 
 import { PluginButtons } from "./pluginButtons";
 import { PluginCards } from "./pluginCards";
+
+let clicked = false;
 
 const settings = definePluginSettings({
     disableDMContextMenu: {
@@ -89,6 +93,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.noMirroredCamera
         },
+        // Remove Activity Section above Member List
         {
             find: ".MEMBERLIST_CONTENT_FEED_TOGGLED,",
             predicate: () => settings.store.removeActivitySection,
@@ -97,6 +102,7 @@ export default definePlugin({
                 replace: "true||$&"
             },
         },
+        // Always show open legacy settings
         ...[
             ".DEVELOPER_SECTION,",
             '"LegacySettingsSidebarItem"'
@@ -117,5 +123,28 @@ export default definePlugin({
                 <PluginCards message={props.message} />
             </>
         );
+    },
+    flux: {
+        async CHANNEL_SELECT({ channelId }) {
+            const isSupportChannel = SUPPORT_CHANNEL_IDS.includes(channelId);
+            if (!isSupportChannel) return;
+
+            const selfId = UserStore.getCurrentUser()?.id;
+            if (!selfId || isAnyPluginDev(selfId)) return;
+            if (VC_SUPPORT_CHANNEL_IDS.includes(channelId) && !clicked) {
+                return Alerts.show({
+                    title: "Vencord Support Channel Warning",
+                    body: "Before asking for help. Check updates and if this issue is actually caused by Equicord!",
+                    confirmText: "Equicord Support",
+                    onConfirm() {
+                        NavigationRouter.transitionTo(`/channels/${GUILD_ID}/${SUPPORT_CHANNEL_ID}`);
+                    },
+                    cancelText: "Okay continue",
+                    onCancel() {
+                        clicked = true;
+                    },
+                });
+            }
+        },
     }
 });
