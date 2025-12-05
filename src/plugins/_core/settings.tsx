@@ -17,12 +17,12 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon } from "@components/Icons";
+import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { IconProps, OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { React } from "@webpack/common";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
@@ -67,8 +67,8 @@ interface EntryOptions {
     key: string,
     title: string,
     panelTitle?: string,
-    Component: ComponentType<any>,
-    Icon: ComponentType<any>;
+    Component: ComponentType<{}>,
+    Icon: ComponentType<IconProps>;
 }
 interface SettingsLayoutBuilder {
     key?: string;
@@ -242,7 +242,7 @@ export default definePlugin({
                     key: `vencord_deprecated_custom_${section}`,
                     title: label,
                     Component: element,
-                    Icon: PlaceholderIcon
+                    Icon: section === "Vesktop" ? VesktopSettingsIcon : PlaceholderIcon
                 });
             })
         ].filter(isTruthy);
