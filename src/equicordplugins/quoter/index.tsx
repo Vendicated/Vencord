@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import { FormSwitch } from "@components/FormSwitch";
@@ -84,9 +83,7 @@ export default definePlugin({
                 />
             );
 
-            const group = findGroupChildrenByChildId("copy-text", children);
-            if (!group) children.push(buttonElement);
-            else group.splice(group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, buttonElement);
+            children.push(buttonElement);
         }
     }
 });
