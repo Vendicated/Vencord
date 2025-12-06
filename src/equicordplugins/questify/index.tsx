@@ -967,11 +967,18 @@ export default definePlugin({
         },
         {
             // Hides the sponsored banner on the Quests page.
-            find: "assetSponsorImage.url,",
-            replacement: {
-                match: /(?<=campaignId]\),)/,
-                replace: "$self.shouldHideSponsoredQuestBanner()?null:"
-            }
+            find: "{isInDiscoverQuestHomeTab:",
+            group: true,
+            replacement: [
+                {
+                    match: /(?<=resetSortingFiltering\(\)},\[\]\);)/,
+                    replace: "const shouldHideSponsoredQuestBanner=$self.shouldHideSponsoredQuestBanner();"
+                },
+                {
+                    match: /(?<=if\(null!=\i\))return(.{0,60}?}\))/,
+                    replace: "if(!shouldHideSponsoredQuestBanner)return $1"
+                }
+            ]
         },
         {
             // Hides the Quest icon from members list items when
