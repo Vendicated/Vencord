@@ -24,6 +24,21 @@ const toastFailure = (err: any) =>
 
 const logger = new Logger("SettingsSync:Offline", "#39b7e0");
 
+function isSafeObject(obj: any) {
+    if (obj == null || typeof obj !== "object") return true;
+
+    for (const key in obj) {
+        if (["__proto__", "constructor", "prototype"].includes(key)) {
+            return false;
+        }
+        if (!isSafeObject(obj[key])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 export async function importSettings(data: string) {
     try {
         var parsed = JSON.parse(data);
@@ -31,6 +46,9 @@ export async function importSettings(data: string) {
         console.log(data);
         throw new Error("Failed to parse JSON: " + String(err));
     }
+
+    if (!isSafeObject(parsed))
+        throw new Error("Unsafe Settings");
 
     if ("settings" in parsed && "quickCss" in parsed) {
         Object.assign(PlainSettings, parsed.settings);
