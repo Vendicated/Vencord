@@ -76,11 +76,9 @@ export default definePlugin({
     },
 
     onMessageClick(msg, channel, event) {
-        const isMe = msg.author.id === UserStore.getCurrentUser().id;
-        const isSelfInvokedUserApp = msg.interactionMetadata ? (() => {
-            if (msg.interactionMetadata.authorizing_integration_owners[0]) return false;
-            else return msg.interactionMetadata.authorizing_integration_owners[1] === UserStore.getCurrentUser().id;
-        })() : false;
+        const myId = AuthenticationStore.getId();
+        const isMe = msg.author.id === myId;
+        const isSelfInvokedUserApp = msg.interactionMetadata?.authorizing_integration_owners[ApplicationIntegrationType.USER_INSTALL]) === myId;
         if (!isDeletePressed) {
             if (event.detail < 2) return;
             if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
