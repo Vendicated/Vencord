@@ -20,6 +20,11 @@ export interface SoundEntry {
     volume: number;
 }
 
+export interface SoundData {
+    soundUrl: string;
+    volume: number;
+}
+
 export const settings = definePluginSettings({
     soundEntries: {
         type: OptionType.STRING,
@@ -46,13 +51,13 @@ export function saveSoundEntries(entries: SoundEntry[]): void {
 }
 
 export function buildSoundMap(entries: SoundEntry[]): {
-    userSounds: Record<string, { soundUrl: string; volume: number; }>;
-    displayNameSounds: Record<string, { soundUrl: string; volume: number; }>;
-    guildSounds: Record<string, { soundUrl: string; volume: number; }>;
+    userSounds: Record<string, SoundData>;
+    displayNameSounds: Record<string, SoundData>;
+    guildSounds: Record<string, SoundData>;
 } {
-    const userSounds: Record<string, { soundUrl: string; volume: number; }> = {};
-    const displayNameSounds: Record<string, { soundUrl: string; volume: number; }> = {};
-    const guildSounds: Record<string, { soundUrl: string; volume: number; }> = {};
+    const userSounds: Record<string, SoundData> = {};
+    const displayNameSounds: Record<string, SoundData> = {};
+    const guildSounds: Record<string, SoundData> = {};
 
     entries.forEach(entry => {
         if (entry.type === "user") {

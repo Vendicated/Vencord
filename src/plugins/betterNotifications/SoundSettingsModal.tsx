@@ -6,7 +6,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, TabBar, Text, TextInput, useRef, useState } from "@webpack/common";
+import { Button, TabBar, Text, TextInput, Toasts, useRef, useState } from "@webpack/common";
 
 import { getSoundEntries, saveSoundEntries, SoundEntry } from "./settings";
 
@@ -134,13 +134,12 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        if (!file.type.startsWith("audio/")) {
-            alert("Please select an audio file only (mp3, wav, ogg, etc.)");
-            return;
-        }
-
         if (file.size > 10 * 1024 * 1024) {
-            alert("File size too large! Maximum 10MB");
+            Toasts.show({
+                message: "File size too large! Maximum 10MB",
+                type: Toasts.Type.FAILURE,
+                id: Toasts.genId()
+            });
             return;
         }
 
@@ -148,7 +147,11 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
             const base64 = await convertFileToBase64(file);
             setUserForm(prev => ({ ...prev, soundUrl: base64, filename: file.name }));
         } catch (error) {
-            alert("Error reading file");
+            Toasts.show({
+                message: "Error reading file",
+                type: Toasts.Type.FAILURE,
+                id: Toasts.genId()
+            });
             console.error("File upload error:", error);
         }
 
@@ -210,13 +213,12 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        if (!file.type.startsWith("audio/")) {
-            alert("Please select an audio file only (mp3, wav, ogg, etc.)");
-            return;
-        }
-
         if (file.size > 10 * 1024 * 1024) {
-            alert("File size too large! Maximum 10MB");
+            Toasts.show({
+                message: "File size too large! Maximum 10MB",
+                type: Toasts.Type.FAILURE,
+                id: Toasts.genId()
+            });
             return;
         }
 
@@ -224,7 +226,11 @@ function SoundSettingsModal({ modalProps }: { modalProps: ModalProps; }) {
             const base64 = await convertFileToBase64(file);
             setGuildForm(prev => ({ ...prev, soundUrl: base64, filename: file.name }));
         } catch (error) {
-            alert("Error reading file");
+            Toasts.show({
+                message: "Error reading file",
+                type: Toasts.Type.FAILURE,
+                id: Toasts.genId()
+            });
             console.error("File upload error:", error);
         }
 
