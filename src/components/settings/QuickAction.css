@@ -27,7 +27,6 @@
 
 .vc-settings-quickActions-pill:hover {
     background: var(--button-secondary-background-hover);
-    color: var(--text-default);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
