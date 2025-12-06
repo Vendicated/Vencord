@@ -225,18 +225,19 @@ export default definePlugin({
     patches: [
         {
             find: ".platformSelectorPrimary,",
-            replacement: [
-                {
-                    match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0/,
-                    replace: "onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)",
-                    predicate: () => !isPluginEnabled(questify.name),
-                },
-                {
-                    match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",.{0,150}fullWidth:!0)/,
-                    replace: ",onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)",
-                    predicate: () => isPluginEnabled(questify.name),
-                },
-            ],
+            predicate: () => !isPluginEnabled(questify.name),
+            replacement: {
+                match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0/,
+                replace: "onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)"
+            },
+        },
+        {
+            find: ".platformSelectorPrimary,",
+            predicate: () => isPluginEnabled(questify.name),
+            replacement: {
+                match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",.{0,150}fullWidth:!0)/,
+                replace: ",onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)"
+            },
         },
     ],
     mobileQuestPatch(questId) {
