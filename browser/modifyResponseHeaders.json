@@ -16,7 +16,7 @@
         },
         "condition": {
             "resourceTypes": ["main_frame", "sub_frame"],
-            "urlFilter": "https://*.discord.com/*"
+            "urlFilter": "||discord.com^"
         }
     },
     {
@@ -33,7 +33,7 @@
         },
         "condition": {
             "resourceTypes": ["stylesheet"],
-            "urlFilter": "https://raw.githubusercontent.com/*"
+            "urlFilter": "||raw.githubusercontent.com^"
         }
     }
 ]
