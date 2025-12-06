@@ -124,7 +124,7 @@ function Controls() {
 
     // the 1 is using position absolute so it does not make the button jump around
     return (
-        <Flex className={cl("button-row")} style={{ gap: 0 }}>
+        <Flex className={cl("button-row")} gap="0">
             <Button
                 className={classes(cl("button"), cl("shuffle"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
                 onClick={() => SpotifyStore.setShuffle(!shuffle)}
