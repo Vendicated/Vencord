@@ -45,8 +45,6 @@ function Updater() {
 
     return (
         <SettingsTab>
-            <Forms.FormTitle tag="h5" className={Margins.bottom16}>Updater Settings</Forms.FormTitle>
-
             <FormSwitch
                 title="Automatically update"
                 description="Automatically update Vencord without confirmation prompt"
