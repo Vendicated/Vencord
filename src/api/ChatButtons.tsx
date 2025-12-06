@@ -174,7 +174,7 @@ addContextMenuPatch("textarea-context", (children, args) => {
     if (idx === -1) return;
 
     group.splice(idx, 0,
-        <Menu.MenuItem id="vc-chat-buttons" key="vencord-chat-buttons" label="Vencord Buttons">
+        <Menu.MenuItem id="vc-chat-buttons" key="vencord-chat-buttons" label="Equicord Buttons">
             {buttons.map(([id]) => (
                 <Menu.MenuCheckboxItem
                     label={id}
