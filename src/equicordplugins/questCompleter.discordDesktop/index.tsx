@@ -228,7 +228,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0/,
-                    replace: "onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id),",
+                    replace: "onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)",
                     predicate: () => !isPluginEnabled(questify.name),
                 },
                 {
