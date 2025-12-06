@@ -469,7 +469,7 @@ function ThemesTab() {
         }));
 
         return (
-            <>;
+            <>
                 <section>
                     <Heading>Online Themes</Heading>
                     <Card className="vc-settings-theme-add-card">
