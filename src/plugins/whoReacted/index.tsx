@@ -143,9 +143,9 @@ export default definePlugin({
 
         const hasNoBlockedUsers = Vencord.Plugins.isPluginEnabled(NoBlockedUsersPlugin.name) && NoBlockedUsersPlugin.settings.store.hideUsersFromReactions;
 
-        const users = !hasNoBlockedUsers ?
-            [...reactions.values()].filter(Boolean) :
-            [...reactions.values()].filter(Boolean).filter(user => !NoBlockedUsersPlugin.shouldHide(user.id));
+        const users = hasNoBlockedUsers
+            ? [...reactions.values()].filter(user => user && !NoBlockedUsersPlugin.shouldHide(user.id))
+            : [...reactions.values()].filter(Boolean);
 
         if (users.length === 0) return null;
 
