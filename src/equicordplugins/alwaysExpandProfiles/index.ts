@@ -7,7 +7,6 @@
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { User } from "@vencord/discord-types";
 
 export default definePlugin({
     name: "AlwaysExpandProfiles",
@@ -17,13 +16,13 @@ export default definePlugin({
         {
             find: '"view-profile"',
             replacement: {
-                match: /(user:(\i).*?"PRESS_VIEW_PROFILE".{0,200}return)/,
-                replace: "$1 $self.openUserModal($2);"
+                match: /("PRESS_VIEW_PROFILE".{0,200})return(?<=userId:(\i\.id).*?)/,
+                replace: "$1return $self.openUserModal($2);"
             },
             all: true
         },
     ],
-    openUserModal(user: User) {
-        openUserProfile(user.id);
+    openUserModal(userId: string) {
+        openUserProfile(userId);
     }
 });
