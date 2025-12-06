@@ -20,7 +20,9 @@ import "./style.css";
 
 import { HeaderBarButton } from "@api/HeaderBar";
 import { showNotification } from "@api/Notifications";
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
+import questify from "@equicordplugins/questify";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -223,10 +225,18 @@ export default definePlugin({
     patches: [
         {
             find: ".platformSelectorPrimary,",
-            replacement: {
-                match: /(?<=questId:(\i\.id).*?"secondary",)disabled:!0/,
-                replace: "onClick:()=>$self.mobileQuestPatch($1)"
-            },
+            replacement: [
+                {
+                    match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0/,
+                    replace: "onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id),",
+                    predicate: () => !isPluginEnabled(questify.name),
+                },
+                {
+                    match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",.{0,150}fullWidth:!0)/,
+                    replace: ",onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)",
+                    predicate: () => isPluginEnabled(questify.name),
+                },
+            ],
         },
     ],
     mobileQuestPatch(questId) {

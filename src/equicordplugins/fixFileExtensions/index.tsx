@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Settings } from "@api/Settings";
-import { tarExtMatcher } from "@plugins/anonymiseFileNames";
+import { isPluginEnabled } from "@api/PluginManager";
+import anonymiseFileNames, { tarExtMatcher } from "@plugins/anonymiseFileNames";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
 import { CloudUpload } from "@vencord/discord-types";
@@ -40,7 +40,7 @@ export default definePlugin({
                     replace: "$&$1.forEach($self.fixExt);"
                 }
             ],
-            predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
+            predicate: () => !isPluginEnabled(anonymiseFileNames.name),
         },
     ],
     fixExt(upload: CloudUpload) {

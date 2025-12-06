@@ -8,8 +8,10 @@ import "./style.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { isPluginEnabled } from "@api/PluginManager";
+import { definePluginSettings } from "@api/Settings";
 import { Button, ErrorBoundary, Heading, TextButton } from "@components/index";
+import mentionAvatars from "@plugins/mentionAvatars";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
@@ -934,7 +936,7 @@ export default definePlugin({
                 {
                     match: /(?<=onContextMenu:\i\},\i\),{children:)/,
                     replace: "showMeYourNameMention??",
-                    predicate: () => !Settings.plugins.MentionAvatars.enabled,
+                    predicate: () => !isPluginEnabled(mentionAvatars.name),
                 }
             ]
         },
