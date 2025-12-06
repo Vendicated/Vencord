@@ -149,6 +149,13 @@ export default definePlugin({
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
                 replace: "$self.buildLayout($1)"
             }
+        },
+        {
+            find: "getWebUserSettingFromSection",
+            replacement: {
+                match: /new Map\(\[(?=\[.{0,10}\.ACCOUNT,.{0,10}\.ACCOUNT_PANEL)/,
+                replace: "new Map([...$self.getSettingsSectionMappings(),"
+            }
         }
     ],
 
@@ -178,6 +185,18 @@ export default definePlugin({
                 }
             ]
         });
+    },
+
+    getSettingsSectionMappings() {
+        return [
+            ["VencordSettings", "vencord_main_panel"],
+            ["VencordPlugins", "vencord_plugins_panel"],
+            ["VencordThemes", "vencord_themes_panel"],
+            ["VencordUpdater", "vencord_updater_panel"],
+            ["VencordCloud", "vencord_cloud_panel"],
+            ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
+            ["VencordPatchHelper", "vencord_patch_helper_panel"]
+        ];
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
@@ -294,7 +313,7 @@ export default definePlugin({
                 className: "vc-settings-header"
             },
             {
-                section: "settings/tabs",
+                section: "VencordSettings",
                 label: "Vencord",
                 element: VencordTab,
                 className: "vc-settings"
@@ -324,7 +343,7 @@ export default definePlugin({
                 className: "vc-cloud"
             },
             {
-                section: "settings/tabsSync",
+                section: "VencordBackupAndRestore",
                 label: "Backup & Restore",
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
