@@ -15,14 +15,6 @@ import { Devs } from "@utils/constants";
 function getCustomSoundUrl(message: any) {
     if (!message || !message.author) return null;
 
-    const currentUser = UserStore?.getCurrentUser?.();
-    if (currentUser && message.author.id === currentUser.id) return null;
-
-    const currentChannelId = SelectedChannelStore?.getChannelId?.();
-    const messageChannelId = message.channel_id;
-
-    if (currentChannelId === messageChannelId) return null;
-
     const soundEntries = getSoundEntries();
     const { userSounds, displayNameSounds, guildSounds } = buildSoundMap(soundEntries);
 
@@ -89,7 +81,6 @@ export default definePlugin({
     ],
 
     handleSoundLogic(shouldPlayOriginal: boolean, message: any) { // return true to play custom sound, false to play original
-        console.log("[BetterNotifications] handleSoundLogic called with:", { shouldPlayOriginal, message });
         if (shouldPlayOriginal) {
             const customSound = getCustomSoundUrl(message);
             if (customSound) {
