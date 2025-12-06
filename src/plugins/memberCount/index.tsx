@@ -19,9 +19,9 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
