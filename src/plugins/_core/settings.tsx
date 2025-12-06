@@ -103,14 +103,17 @@ export default definePlugin({
             find: ".versionHash",
             replacement: [
                 {
-                    match: /\.compactInfo.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\),/,
-                    replace: "$&$self.makeInfoElements($1,$2),"
+                    match: /\.compactInfo.+?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.versionHash,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
+                    replace: (m, _buildOverride, makeRow, component, props) => {
+                        props = props.replace(/children:\[.+\]/, "");
+                        return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;
+                    }
                 },
                 {
                     match: /\.info.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.versionHash,.+?\})\)," "/,
                     replace: (m, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
-                        return `${m},$self.makeInfoElements(${component}, ${props})`;
+                        return `${m},$self.makeInfoElements(${component},${props})`;
                     }
                 },
                 {
