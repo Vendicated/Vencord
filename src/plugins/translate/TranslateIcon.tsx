@@ -42,7 +42,7 @@ export const TranslateIcon: IconComponent = ({ height = 20, width = 20, classNam
 export let setShouldShowTranslateEnabledTooltip: undefined | ((show: boolean) => void);
 
 export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
-    const { autoTranslate, showChatBarButton } = settings.use(["autoTranslate", "showChatBarButton"]);
+    const { autoTranslate } = settings.use(["autoTranslate"]);
 
     const [shouldShowTranslateEnabledTooltip, setter] = useState(false);
     useEffect(() => {
@@ -50,7 +50,7 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         return () => setShouldShowTranslateEnabledTooltip = undefined;
     }, []);
 
-    if (!isMainChat || !showChatBarButton) return null;
+    if (!isMainChat) return null;
 
     const toggle = () => {
         const newState = !autoTranslate;
