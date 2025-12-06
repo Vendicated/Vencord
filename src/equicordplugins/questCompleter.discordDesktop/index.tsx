@@ -20,9 +20,7 @@ import "./style.css";
 
 import { HeaderBarButton } from "@api/HeaderBar";
 import { showNotification } from "@api/Notifications";
-import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
-import questify from "@equicordplugins/questify";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -33,8 +31,6 @@ const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 const RunningGameStore = findStoreLazy("RunningGameStore");
 const QuestsStore = findByPropsLazy("getQuest");
-
-let questIdCheck = 0;
 
 function ToolBarHeader() {
     return (
@@ -222,34 +218,6 @@ export default definePlugin({
     description: "A plugin to complete quests without having the game installed.",
     authors: [Devs.amia],
     settings,
-    patches: [
-        {
-            find: ".platformSelectorPrimary,",
-            predicate: () => !isPluginEnabled(questify.name),
-            replacement: {
-                match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",)disabled:!0/,
-                replace: "onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)"
-            },
-        },
-        {
-            find: ".platformSelectorPrimary,",
-            predicate: () => isPluginEnabled(questify.name),
-            replacement: {
-                match: /(?<=fullWidth:!0}\)}\):.{0,200}?secondary",.{0,150}fullWidth:!0)/,
-                replace: ",onClick:()=>$self.mobileQuestPatch(arguments[0]?.quest?.id)"
-            },
-        },
-    ],
-    mobileQuestPatch(questId) {
-        if (questId === questIdCheck) return;
-        questIdCheck = questId;
-        Vencord.Webpack.Common.RestAPI.post({
-            url: `/quests/${questId}/enroll`,
-            body: {
-                location: 11
-            }
-        });
-    },
     headerBarButton: {
         icon: QuestIcon,
         render: ToolBarHeader
