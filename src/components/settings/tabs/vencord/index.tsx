@@ -135,7 +135,7 @@ function VencordSettings() {
     const user = UserStore?.getCurrentUser();
 
     return (
-        <SettingsTab title="Vencord Settings">
+        <SettingsTab>
             {isDonor(user?.id)
                 ? (
                     <SpecialCard

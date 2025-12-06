@@ -27,7 +27,7 @@ import { Button, Text } from "@webpack/common";
 
 function BackupAndRestoreTab() {
     return (
-        <SettingsTab title="Backup & Restore">
+        <SettingsTab>
             <Flex flexDirection="column" gap="0.5em">
                 <Card variant="warning">
                     <Heading tag="h4">Warning</Heading>
