@@ -520,7 +520,7 @@ function ThemesTab() {
     }
 
     return (
-        <SettingsTab title="Themes">
+        <SettingsTab>
             <TabBar
                 type="top"
                 look="brand"
@@ -623,7 +623,7 @@ export function CspErrorCard() {
 
 function UserscriptThemesTab() {
     return (
-        <SettingsTab title="Themes">
+        <SettingsTab>
             <Card className="vc-settings-card">
                 <Heading>Themes are not supported on the Userscript!</Heading>
 

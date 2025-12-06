@@ -636,3 +636,53 @@ export function VesktopSettingsIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function EyeIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M15.56 11.77c.2-.1.44.02.44.23a4 4 0 1 1-4-4c.21 0 .33.25.23.44a2.5 2.5 0 0 0 3.32 3.32Z"
+            />
+            <path
+                clipRule="evenodd"
+                fillRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M22.89 11.7c.07.2.07.4 0 .6C22.27 13.9 19.1 21 12 21c-7.11 0-10.27-7.11-10.89-8.7a.83.83 0 0 1 0-.6C1.73 10.1 4.9 3 12 3c7.11 0 10.27 7.11 10.89 8.7Zm-4.5-3.62A15.11 15.11 0 0 1 20.85 12c-.38.88-1.18 2.47-2.46 3.92C16.87 17.62 14.8 19 12 19c-2.8 0-4.87-1.38-6.39-3.08A15.11 15.11 0 0 1 3.15 12c.38-.88 1.18-2.47 2.46-3.92C7.13 6.38 9.2 5 12 5c2.8 0 4.87 1.38 6.39 3.08Z"
+            />
+        </Icon>
+    );
+}
+
+export function ColorPaletteIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M12.37 9.04c.25-.26.73-.2 1.06.13L15 10.7c.33.33.39.8.13 1.06L4.92 21.84c-.27.26-.74.2-1.07-.13l-1.56-1.54c-.33-.32-.39-.8-.13-1.05l10.2-10.08ZM16.09 5.16c.25-.26.73-.2 1.06.13l1.56 1.54c.33.32.39.8.13 1.05l-2.1 2.08c-.26.25-.74.2-1.07-.13l-1.56-1.54c-.33-.33-.38-.8-.13-1.05l2.1-2.08ZM17.48 14.36a.56.56 0 0 1 1.04 0l.85 2.27 2.27.85c.48.18.48.86 0 1.04l-2.27.85-.85 2.27a.56.56 0 0 1-1.04 0l-.85-2.27-2.27-.85a.56.56 0 0 1 0-1.04l2.27-.85.85-2.27ZM7.6 2.32a.5.5 0 0 1 .94 0L9.17 4l1.66.62a.5.5 0 0 1 0 .93l-1.66.63-.63 1.66a.5.5 0 0 1-.93 0l-.63-1.66-1.66-.63a.5.5 0 0 1 0-.93l1.66-.62.63-1.67Z"
+            />
+        </Icon>
+    );
+}
+
+export function MagnifyingGlassIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                clipRule="evenodd"
+                fillRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M15.62 17.03a9 9 0 1 1 1.41-1.41l4.68 4.67a1 1 0 0 1-1.42 1.42l-4.67-4.68ZM17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+            />
+        </Icon>
+    );
+}

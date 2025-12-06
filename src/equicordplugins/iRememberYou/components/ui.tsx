@@ -6,8 +6,10 @@
 
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
+import { Card } from "@components/Card";
 import { HeadingPrimary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { SettingsTab, wrapTab } from "@components/settings";
 import { openUserProfile } from "@utils/discord";
 import { Avatar, Clickable, React, TextInput, Tooltip, } from "@webpack/common";
 
@@ -19,14 +21,6 @@ function tooltipText(user: IStorageUser) {
     const { updatedAt } = user.extra || {};
     const updatedAtContent = updatedAt ? new Intl.DateTimeFormat().format(updatedAt) : null;
     return `${user.username ?? user.tag}, updated at ${updatedAtContent}`;
-}
-
-function SectionDescription() {
-    return (
-        <BaseText>
-            {"Provides a list of users you have mentioned or replied to, or those who own the servers you belong to (owner*), or are members of your guild"}
-        </BaseText>
-    );
 }
 
 function UsersCollectionRows({ usersCollection }: { usersCollection: Data["usersCollection"]; }) {
@@ -100,18 +94,20 @@ function SearchElement({ usersCollection }: { usersCollection: Data["usersCollec
     );
 }
 
-export function DataUI({ plugin, usersCollection }: { plugin: any; usersCollection: Data["usersCollection"]; }) {
+export function DataUI({ usersCollection }: { usersCollection: Data["usersCollection"]; }) {
     return (
-        <main className={cl("header")}>
-            <BaseText size="lg" weight="bold" tag="h1">
-                IRememberYou
-            </BaseText>
-
-            <SectionDescription />
-            <SearchElement usersCollection={usersCollection} />
+        <SettingsTab>
+            <Card>
+                <Paragraph>
+                    Provides a list of users you have mentioned or replied to, or those who own the servers you belong to (owner*), or are members of your guild
+                </Paragraph>
+                <SearchElement usersCollection={usersCollection} />
+            </Card>
             <div className={cl("rows")}>
                 <UsersCollectionRows usersCollection={usersCollection} />
             </div>
-        </main>
+        </SettingsTab>
     );
 }
+
+export default wrapTab(DataUI, "IRememberYouTab");

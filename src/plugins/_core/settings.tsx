@@ -86,34 +86,6 @@ const settings = definePluginSettings({
     }
 });
 
-export function buildEntry(options: EntryOptions): SettingsLayoutNode {
-    const { key, title, panelTitle = title, Component, Icon } = options;
-
-    return ({
-        key,
-        type: LayoutTypes.SIDEBAR_ITEM,
-        legacySearchKey: title.toUpperCase(),
-        useTitle: () => title,
-        icon: () => <Icon width={20} height={20} />,
-        buildLayout: () => [
-            {
-                key: key + "_panel",
-                type: LayoutTypes.PANEL,
-                useTitle: () => panelTitle,
-                buildLayout: () => [
-                    {
-                        key: key + "_pane",
-                        type: LayoutTypes.PANE,
-                        buildLayout: () => [],
-                        render: () => <Component />,
-                        useTitle: () => panelTitle
-                    }
-                ]
-            }
-        ]
-    });
-}
-
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
@@ -126,6 +98,11 @@ export default definePlugin({
         {
             find: ".versionHash",
             replacement: [
+                // for whatever reason the first letter of RELEASE_CHANNEL is now lowercase, so we fix that here because it looks better imo
+                {
+                    match: /\.RELEASE_CHANNEL/,
+                    replace: "$&.replace(/^./, c => c.toUpperCase())"
+                },
                 {
                     match: /\.compactInfo.+?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.versionHash,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
                     replace: (m, _buildOverride, makeRow, component, props) => {
@@ -185,55 +162,85 @@ export default definePlugin({
         }
     ],
 
+    buildEntry(options: EntryOptions): SettingsLayoutNode {
+        const { key, title, panelTitle = title, Component, Icon } = options;
+
+        return ({
+            key,
+            type: LayoutTypes.SIDEBAR_ITEM,
+            legacySearchKey: title.toUpperCase(),
+            useTitle: () => title,
+            icon: () => <Icon width={20} height={20} />,
+            buildLayout: () => [
+                {
+                    key: key + "_panel",
+                    type: LayoutTypes.PANEL,
+                    useTitle: () => panelTitle,
+                    buildLayout: () => [
+                        {
+                            key: key + "_pane",
+                            type: LayoutTypes.PANE,
+                            buildLayout: () => [],
+                            render: () => <Component />,
+                            useTitle: () => panelTitle
+                        }
+                    ]
+                }
+            ]
+        });
+    },
+
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
         const layout = originalLayoutBuilder.buildLayout();
         if (originalLayoutBuilder.key !== "$Root") return layout;
         if (!Array.isArray(layout)) return layout;
 
-        if (layout.some(s => s?.key === "vencord_section")) return layout;
+        if (layout.some(s => s?.key === "equicord_section")) return layout;
+
+        const { buildEntry } = this;
 
         const vencordEntries: SettingsLayoutNode[] = [
             buildEntry({
-                key: "vencord_main",
+                key: "equicord_main",
                 title: "Equicord",
                 panelTitle: "Equicord Settings",
                 Component: VencordTab,
                 Icon: MainSettingsIcon
             }),
             buildEntry({
-                key: "vencord_plugins",
+                key: "equicord_plugins",
                 title: "Plugins",
                 Component: PluginsTab,
                 Icon: PluginsIcon
             }),
             buildEntry({
-                key: "vencord_themes",
+                key: "equicord_themes",
                 title: "Themes",
                 Component: ThemesTab,
                 Icon: PaintbrushIcon
             }),
             !IS_UPDATER_DISABLED && UpdaterTab && buildEntry({
-                key: "vencord_updater",
+                key: "equicord_updater",
                 title: "Updater",
                 panelTitle: "Equicord Updater",
                 Component: UpdaterTab,
                 Icon: UpdaterIcon
             }),
             buildEntry({
-                key: "vencord_cloud",
+                key: "equicord_cloud",
                 title: "Cloud",
                 panelTitle: "Equicord Cloud",
                 Component: CloudTab,
                 Icon: CloudIcon
             }),
             buildEntry({
-                key: "vencord_backup_restore",
+                key: "equicord_backup_restore",
                 title: "Backup & Restore",
                 Component: BackupAndRestoreTab,
                 Icon: BackupRestoreIcon
             }),
             IS_DEV && PatchHelperTab && buildEntry({
-                key: "vencord_patch_helper",
+                key: "equicord_patch_helper",
                 title: "Patch Helper",
                 Component: PatchHelperTab,
                 Icon: PatchHelperIcon
@@ -245,7 +252,7 @@ export default definePlugin({
                 if (Object.values(FallbackSectionTypes).includes(section)) return null;
 
                 return buildEntry({
-                    key: `vencord_deprecated_custom_${section}`,
+                    key: `equicord_deprecated_custom_${section}`,
                     title: label,
                     Component: element,
                     Icon: section === "Vesktop" ? VesktopSettingsIcon : PlaceholderIcon
@@ -254,9 +261,9 @@ export default definePlugin({
         ].filter(isTruthy);
 
         const vencordSection: SettingsLayoutNode = {
-            key: "vencord_section",
+            key: "equicord_section",
             type: LayoutTypes.SECTION,
-            useLabel: () => "Vencord",
+            useLabel: () => "Equicord",
             buildLayout: () => vencordEntries
         };
 

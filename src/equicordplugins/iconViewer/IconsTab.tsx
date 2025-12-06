@@ -68,7 +68,7 @@ function IconsTab() {
     const MemoRenderIcons = React.memo(RenderIcons);
 
     return (
-        <SettingsTab title="Icons">
+        <SettingsTab>
             <div className={classes(Margins.top16, "vc-icon-tab-search-bar-grid")}>
                 <TextInput autoFocus value={search} placeholder="Search for an icon..." onChange={setSearch} />
                 <TooltipContainer text="Search by function context">

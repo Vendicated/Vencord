@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import settings from "@plugins/_core/settings";
+import { MagnifyingGlassIcon } from "@components/Icons";
+import SettingsPlugin from "@plugins/_core/settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
@@ -26,30 +27,18 @@ export default definePlugin({
     },
     settingsAboutComponent: SettingsAbout,
     start() {
-        const customSettingsSections = (
-            settings as any as {
-                customSections: ((ID: Record<string, unknown>) => any)[];
-            }
-        ).customSections;
+        const customEntriesSections = SettingsPlugin.customEntries;
 
-        const IconViewerSection = () => ({
-            section: "VencordDiscordIcons",
-            label: "Icons",
-            element: IconsTab,
-            className: "vc-discord-icons",
-            id: "IconViewer"
+        customEntriesSections.push({
+            key: "icon_viewer",
+            title: "Icon Finder",
+            Component: IconsTab,
+            Icon: MagnifyingGlassIcon
         });
-
-        customSettingsSections.push(IconViewerSection);
     },
     stop() {
-        const customSettingsSections = (
-            settings as any as {
-                customSections: ((ID: Record<string, unknown>) => any)[];
-            }
-        ).customSections;
-
-        const i = customSettingsSections.findIndex(section => section({}).id === "IconViewer");
-        if (i !== -1) customSettingsSections.splice(i, 1);
+        const customEntriesSections = SettingsPlugin.customEntries;
+        const i = customEntriesSections.findIndex(entry => entry.key === "icon_viewer");
+        if (i !== -1) customEntriesSections.splice(i, 1);
     },
 });

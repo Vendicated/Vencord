@@ -45,6 +45,7 @@ function BackupAndRestoreTab() {
                         <li>&mdash; Custom QuickCSS</li>
                         <li>&mdash; Theme Links</li>
                         <li>&mdash; Plugin Settings</li>
+                        <li>&mdash; DataStore Data</li>
                     </ul>
                 </Paragraph>
 
