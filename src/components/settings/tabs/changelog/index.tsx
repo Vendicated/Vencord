@@ -478,87 +478,90 @@ function ChangelogContent() {
 
     return (
         <>
-            <Paragraph className={Margins.bottom16}>
-                View the most recent changes to Equicord. This fetches commits
-                directly from the repository to show you what's new.
-            </Paragraph>
+            <Card defaultPadding={true} className={Margins.bottom16}>
+                <Paragraph>
+                    View the most recent changes to Equicord.
+                    <br />
+                    This fetches commits directly from the repository to show you what's new.
+                    <br />
+                    <br />
+                    Repository: {" "}
+                    {repoPending ? (
+                        repo
+                    ) : repoErr ? (
+                        "Failed to retrieve - check console"
+                    ) : (
+                        <Link href={repo}>
+                            {repo.split("/").slice(-2).join("/")}
+                        </Link>
+                    )}
+                    {" "}
+                    (Current:{" "}
+                    <span className="vc-changelog-current-hash">
+                        {gitHashShort}
+                    </span>
+                    )
+                </Paragraph>
+                <br />
+                <div className="vc-changelog-controls">
+                    <Button
+                        size="small"
+                        disabled={isLoading || repoPending || !!repoErr}
+                        onClick={fetchChangelog}
+                        variant={recentlyChecked ? "positive" : "primary"}
+                    >
+                        {isLoading
+                            ? "Loading..."
+                            : recentlyChecked
+                                ? "Repository Up to Date"
+                                : "Fetch from Repository"}
+                    </Button>
 
-            <Heading>Repository</Heading>
-            <Paragraph className={Margins.bottom16}>
-                {repoPending ? (
-                    repo
-                ) : repoErr ? (
-                    "Failed to retrieve - check console"
-                ) : (
-                    <Link href={repo}>
-                        {repo.split("/").slice(-2).join("/")}
-                    </Link>
-                )}{" "}
-                (Current:{" "}
-                <span className="vc-changelog-current-hash">
-                    {gitHashShort}
-                </span>
-                )
-            </Paragraph>
-
-            <div className="vc-changelog-controls">
-                <Button
-                    size="small"
-                    disabled={isLoading || repoPending || !!repoErr}
-                    onClick={fetchChangelog}
-                    variant={recentlyChecked ? "positive" : "primary"}
-                >
-                    {isLoading
-                        ? "Loading..."
-                        : recentlyChecked
-                            ? "Repository Up to Date"
-                            : "Fetch from Repository"}
-                </Button>
-
-                {changelogHistory.length > 0 && (
-                    <>
-                        <Button
-                            size="small"
-                            variant={showHistory ? "primary" : "secondary"}
-                            onClick={() => setShowHistory(!showHistory)}
-                            style={{ marginLeft: "8px" }}
-                        >
-                            {showHistory ? "Hide Logs" : "Show Logs"}
-                        </Button>
-                        <Button
-                            size="small"
-                            variant="dangerPrimary"
-                            onClick={() => {
-                                Alerts.show({
-                                    title: "Clear All Logs",
-                                    body: "Are you sure you would like to clear all logs? This can't be undone.",
-                                    confirmText: "Clear All",
-                                    confirmColor: "danger",
-                                    cancelText: "Cancel",
-                                    onConfirm: async () => {
-                                        await clearChangelogHistory();
-                                        await loadChangelogHistory();
-                                        setShowHistory(false);
-                                        Toasts.show({
-                                            message:
-                                                "All logs have been cleared",
-                                            id: Toasts.genId(),
-                                            type: Toasts.Type.SUCCESS,
-                                            options: {
-                                                position:
-                                                    Toasts.Position.BOTTOM,
-                                            },
-                                        });
-                                    },
-                                });
-                            }}
-                            style={{ marginLeft: "8px" }}
-                        >
-                            Clear All Logs
-                        </Button>
-                    </>
-                )}
-            </div>
+                    {changelogHistory.length > 0 && (
+                        <>
+                            <Button
+                                size="small"
+                                variant={showHistory ? "primary" : "secondary"}
+                                onClick={() => setShowHistory(!showHistory)}
+                                style={{ marginLeft: "8px" }}
+                            >
+                                {showHistory ? "Hide Logs" : "Show Logs"}
+                            </Button>
+                            <Button
+                                size="small"
+                                variant="dangerPrimary"
+                                onClick={() => {
+                                    Alerts.show({
+                                        title: "Clear All Logs",
+                                        body: "Are you sure you would like to clear all logs? This can't be undone.",
+                                        confirmText: "Clear All",
+                                        confirmColor: "danger",
+                                        cancelText: "Cancel",
+                                        onConfirm: async () => {
+                                            await clearChangelogHistory();
+                                            await loadChangelogHistory();
+                                            setShowHistory(false);
+                                            Toasts.show({
+                                                message:
+                                                    "All logs have been cleared",
+                                                id: Toasts.genId(),
+                                                type: Toasts.Type.SUCCESS,
+                                                options: {
+                                                    position:
+                                                        Toasts.Position.BOTTOM,
+                                                },
+                                            });
+                                        },
+                                    });
+                                }}
+                                style={{ marginLeft: "8px" }}
+                            >
+                                Clear All Logs
+                            </Button>
+                        </>
+                    )}
+                </div>
+            </Card>
 
             {error && (
                 <ErrorCard style={{ padding: "1em", marginBottom: "1em" }}>
