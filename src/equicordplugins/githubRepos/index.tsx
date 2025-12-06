@@ -53,7 +53,7 @@ const ProfilePopoutComponent = ErrorBoundary.wrap(
     },
     {
         noop: true,
-        fallback: () => <BaseText size="xs" weight="semibold" className="vc-github-repos-error" style={{ color: "var(--text-danger)" }}>
+        fallback: () => <BaseText size="xs" weight="semibold" className="vc-github-repos-error" style={{ color: "var(--text-feedback-critical)" }}>
             Error, Failed to render GithubRepos
         </BaseText>
     }

@@ -159,7 +159,7 @@
 }
 
 .text-danger {
-    color: var(--text-danger) !important;
+    color: var(--text-feedback-critical) !important;
     font-size: 1.2rem;
     font-weight: bold;
 }
@@ -224,7 +224,7 @@
 /* Specific to disable all modal */
 
 .warning-text {
-    color: var(--text-danger) !important;
+    color: var(--text-feedback-critical) !important;
     font-size: 1.2rem !important;
 }
 

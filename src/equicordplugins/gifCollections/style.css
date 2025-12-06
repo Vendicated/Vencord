@@ -148,13 +148,13 @@
 }
 
 .input-warning {
-    outline: 1px solid var(--text-danger);
+    outline: 1px solid var(--text-feedback-critical);
 }
 
 .warning-text {
     margin-top: 16px;
     font-size: 14px;
-    color: var(--text-danger);
+    color: var(--text-feedback-critical);
 }
 
 .collection-buttons {

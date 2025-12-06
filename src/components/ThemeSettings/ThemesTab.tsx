@@ -82,7 +82,7 @@ function Validator({ link, onValidate }: { link: string; onValidate: (valid: boo
             : "Valid!";
 
     return <Paragraph style={{
-        color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--status-positive)"
+        color: pending ? "var(--text-muted)" : err ? "var(--text-feedback-critical)" : "var(--status-positive)"
     }}>{text}</Paragraph>;
 }
 

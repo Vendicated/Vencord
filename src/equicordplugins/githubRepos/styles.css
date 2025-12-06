@@ -216,7 +216,7 @@
 }
 
 .vc-github-repos-error {
-    color: var(--text-danger);
+    color: var(--text-feedback-critical);
 }
 
 .vc-github-repos-link {

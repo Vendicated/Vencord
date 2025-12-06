@@ -50,5 +50,5 @@
 }
 
 .vc-vmsg-error {
-    color: var(--text-danger);
+    color: var(--text-feedback-critical);
 }

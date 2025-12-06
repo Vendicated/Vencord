@@ -142,7 +142,7 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
             )}
 
             {compileResult && (
-                <Paragraph style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-danger)" }}>
+                <Paragraph style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-feedback-critical)" }}>
                     {compileResult[1]}
                 </Paragraph>
             )}

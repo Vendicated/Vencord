@@ -5,7 +5,7 @@
 
 .vc-discord-dev-banner-error {
     margin-top: 8px;
-    color: var(--text-danger);
+    color: var(--text-feedback-critical);
 }
 
 .vc-discord-dev-banner-icons {

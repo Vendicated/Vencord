@@ -120,7 +120,7 @@ function KeybindInput({ label, description, settingKey, enabledKey }: KeybindInp
                     {description}
                 </Text>
                 {!isEnabled && (
-                    <Text variant="text-xs/normal" style={{ color: "var(--text-danger)" }}>
+                    <Text variant="text-xs/normal" style={{ color: "var(--text-feedback-critical)" }}>
                         This shortcut is currently disabled
                     </Text>
                 )}

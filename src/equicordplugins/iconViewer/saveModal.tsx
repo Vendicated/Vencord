@@ -69,7 +69,7 @@ export function SelectComponent({ option, onChange, onError, className }: IDivEl
             isSelected={v => v === state}
             serialize={v => String(v)}
         />
-        {error && <Paragraph style={{ color: "var(--text-danger)" }}>{error}</Paragraph>}
+        {error && <Paragraph style={{ color: "var(--text-feedback-critical)" }}>{error}</Paragraph>}
     </div>);
 }
 

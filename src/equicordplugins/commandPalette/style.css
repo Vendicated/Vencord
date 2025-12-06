@@ -769,7 +769,7 @@
 }
 
 .vc-cp-keybind-conflict {
-    color: var(--text-danger);
+    color: var(--text-feedback-critical);
     font-size: 12px;
     font-weight: 500;
     margin-top: 2px;
