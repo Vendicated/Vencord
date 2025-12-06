@@ -1,7 +1,7 @@
 {
     "name": "@vencord/types",
     "private": false,
-    "version": "1.13.2",
+    "version": "1.13.7",
     "description": "",
     "types": "index.d.ts",
     "scripts": {
