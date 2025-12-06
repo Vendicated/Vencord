@@ -9,7 +9,7 @@ import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { SettingsRouter, useState } from "@webpack/common";
+import { openUserSettingsPanel, useState } from "@webpack/common";
 
 import { registerAction } from "./commands";
 import { openCommandPalette } from "./components/CommandPalette";
@@ -94,12 +94,14 @@ export default definePlugin({
     start() {
         document.addEventListener("keydown", this.event);
 
-        registerAction({
-            id: "openDevSettings",
-            label: "Open Dev tab",
-            callback: () => SettingsRouter.open("EquicordPatchHelper"),
-            registrar: "Equicord"
-        });
+        if (IS_DEV) {
+            registerAction({
+                id: "openDevSettings",
+                label: "Open Dev tab",
+                callback: () => openUserSettingsPanel("equicord_patch_helper"),
+                registrar: "Equicord"
+            });
+        }
     },
 
     stop() {

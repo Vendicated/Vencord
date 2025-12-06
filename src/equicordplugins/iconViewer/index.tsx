@@ -8,7 +8,7 @@ import { MagnifyingGlassIcon } from "@components/Icons";
 import SettingsPlugin from "@plugins/_core/settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { SettingsRouter } from "@webpack/common";
+import { openUserSettingsPanel } from "@webpack/common";
 
 import IconsTab from "./IconsTab";
 import { SettingsAbout } from "./subComponents";
@@ -22,7 +22,7 @@ export default definePlugin({
     startAt: StartAt.WebpackReady,
     toolboxActions: {
         "Open Icons Tab"() {
-            SettingsRouter.open("VencordDiscordIcons");
+            openUserSettingsPanel("icon_viewer");
         },
     },
     settingsAboutComponent: SettingsAbout,

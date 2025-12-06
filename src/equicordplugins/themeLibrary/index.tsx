@@ -8,7 +8,7 @@ import { ColorPaletteIcon } from "@components/Icons";
 import SettingsPlugin from "@plugins/_core/settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { SettingsRouter } from "@webpack/common";
+import { openUserSettingsPanel } from "@webpack/common";
 
 import { settings } from "./utils/settings";
 
@@ -19,7 +19,7 @@ export default definePlugin({
     settings,
     toolboxActions: {
         "Open Theme Library": () => {
-            SettingsRouter.open("ThemeLibrary");
+            openUserSettingsPanel("theme_library");
         },
     },
 

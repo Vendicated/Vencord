@@ -10,7 +10,7 @@ import { gitHashShort } from "@shared/vencordUserAgent";
 import { copyToClipboard } from "@utils/clipboard";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { checkForUpdates, getRepo } from "@utils/updater";
-import { GuildStore, NavigationRouter, SettingsRouter, Toasts } from "@webpack/common";
+import { GuildStore, NavigationRouter, openUserSettingsPanel, Toasts } from "@webpack/common";
 
 import gitRemote from "~git-remote";
 import Plugins from "~plugins";
@@ -26,12 +26,12 @@ export interface ButtonAction {
 }
 
 export const actions: ButtonAction[] = [
-    { id: "openEquicordSettings", label: "Open Equicord tab", callback: async () => await SettingsRouter.open("EquicordSettings"), registrar: "Equicord" },
-    { id: "openPluginSettings", label: "Open Plugin tab", callback: () => SettingsRouter.open("EquicordPlugins"), registrar: "Equicord" },
-    { id: "openThemesSettings", label: "Open Themes tab", callback: () => SettingsRouter.open("EquicordThemes"), registrar: "Equicord" },
-    { id: "openUpdaterSettings", label: "Open Updater tab", callback: () => SettingsRouter.open("EquicordUpdater"), registrar: "Equicord" },
-    { id: "openEquicordCloudSettings", label: "Open Cloud tab", callback: () => SettingsRouter.open("EquicordCloud"), registrar: "Equicord" },
-    { id: "openBackupSettings", label: "Open Backup & Restore tab", callback: () => SettingsRouter.open("EquicordSettingsSync"), registrar: "Equicord" },
+    { id: "openEquicordSettings", label: "Open Equicord tab", callback: async () => await openUserSettingsPanel("equicord_main"), registrar: "Equicord" },
+    { id: "openPluginSettings", label: "Open Plugin tab", callback: () => openUserSettingsPanel("equicord_plugins"), registrar: "Equicord" },
+    { id: "openThemesSettings", label: "Open Themes tab", callback: () => openUserSettingsPanel("equicord_themes"), registrar: "Equicord" },
+    { id: "openUpdaterSettings", label: "Open Updater tab", callback: () => openUserSettingsPanel("equicord_updater"), registrar: "Equicord" },
+    { id: "openEquicordCloudSettings", label: "Open Cloud tab", callback: () => openUserSettingsPanel("equicord_cloud"), registrar: "Equicord" },
+    { id: "openBackupSettings", label: "Open Backup & Restore tab", callback: () => openUserSettingsPanel("equicord_backup_restore"), registrar: "Equicord" },
     { id: "restartClient", label: "Restart Client", callback: () => relaunch(), registrar: "Equicord" },
     { id: "openQuickCSSFile", label: "Open Quick CSS File", callback: () => VencordNative.quickCss.openEditor(), registrar: "Equicord" },
     { id: "openSettingsFolder", label: "Open Settings Folder", callback: async () => showItemInFolder(await VencordNative.settings.getSettingsDir()), registrar: "Equicord" },
@@ -140,7 +140,7 @@ export const actions: ButtonAction[] = [
                     permanent: true,
                     noPersist: true,
                     onClick() {
-                        SettingsRouter.open("EquicordUpdater");
+                        openUserSettingsPanel("equicord_updater");
                     }
                 }), 10_000);
             } else {
