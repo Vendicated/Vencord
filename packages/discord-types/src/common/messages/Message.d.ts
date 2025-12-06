@@ -79,7 +79,7 @@ export class Message extends DiscordRecord {
         ephemerality_reason?: number;
         user: User;
         authorizing_integration_owners: {
-            [key: number]: string;
+            [key: ApplicationIntegrationType]: string;
         };
         original_response_message_id?: string;
         interacted_message_id?: string;
