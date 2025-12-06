@@ -183,7 +183,7 @@ function Updater() {
     };
 
     return (
-        <SettingsTab title="Equicord Updater">
+        <SettingsTab>
             <Heading>Updater Settings</Heading>
             <FormSwitch
                 title="Automatically update"

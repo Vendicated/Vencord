@@ -16,20 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
-import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { onlyOnce } from "@utils/onlyOnce";
 import type { ComponentType, PropsWithChildren } from "react";
 
-export function SettingsTab({ title, children }: PropsWithChildren<{ title: string; }>) {
+export function SettingsTab({ children }: PropsWithChildren) {
     return (
-        <section>
-            <BaseText tag="h2" size="xl" weight="semibold" className={Margins.bottom16}>{title}</BaseText>
-            {children}
-        </section>
+        <section className="vc-settings-tab">{children}</section>
     );
 }
 

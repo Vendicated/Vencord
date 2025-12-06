@@ -20,10 +20,10 @@ import { ILanguageRegistration } from "@vap/shiki";
 
 import { SHIKI_REPO, SHIKI_REPO_COMMIT } from "./themes";
 
-export const JSON_REPO = "thororen1234/shikijsons";
-export const JSON_REPO_COMMIT = "f418661f27c3b6b23e5b92156fb77b3e221ef823";
-export const JSON_URL = `https://raw.githubusercontent.com/${JSON_REPO}/${JSON_REPO_COMMIT}/grammars.json`;
-export const shikiRepoGrammar = (name: string) => `https://raw.githubusercontent.com/${SHIKI_REPO}/${SHIKI_REPO_COMMIT}/packages/tm-grammars/grammars/${name}.json`;
+export const JSON_REPO = "Vencord/ShikiPluginAssets";
+export const JSON_REPO_COMMIT = "75d69df9fdf596a31eef8b7f6f891231a6feab44";
+export const JSON_URL = `https://cdn.jsdelivr.net/gh/${JSON_REPO}@${JSON_REPO_COMMIT}/grammars.json`;
+export const shikiRepoGrammar = (name: string) => `https://cdn.jsdelivr.net/gh/${SHIKI_REPO}@${SHIKI_REPO_COMMIT}/packages/tm-grammars/grammars/${name}.json`;
 
 export interface Language {
     name: string;
@@ -38,7 +38,6 @@ export interface Language {
 export interface LanguageJson {
     name: string;
     displayName: string;
-    fileName: string;
     scopeName: string;
     devicon?: string;
     aliases?: string[];

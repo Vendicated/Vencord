@@ -50,7 +50,7 @@ function parseTime(time: string) {
     return `<t:${Math.round(ms)}:t>`;
 }
 
-const Formats = ["", "t", "T", "d", "D", "f", "F", "R"] as const;
+const Formats = ["", "t", "T", "d", "D", "f", "F", "s", "S", "R"] as const;
 type Format = typeof Formats[number];
 
 const cl = classNameFactory("vc-st-");
@@ -146,8 +146,8 @@ const SendTimestampIcon: IconComponent = ({ height = 20, width = 20, className }
     );
 };
 
-const SendTimestampButton: ChatBarButtonFactory = ({ isMainChat }) => {
-    if (!isMainChat) return null;
+const SendTimestampButton: ChatBarButtonFactory = ({ isAnyChat }) => {
+    if (!isAnyChat) return null;
 
     return (
         <ChatBarButton

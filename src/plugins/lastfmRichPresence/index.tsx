@@ -251,7 +251,7 @@ export default definePlugin({
 
     async getActivity(): Promise<Activity | null> {
         if (settings.store.hideWithActivity) {
-            if (PresenceStore.getActivities(AuthenticationStore.getId()).some(a => a.application_id !== DISCORD_APP_ID)) {
+            if (PresenceStore.getActivities(AuthenticationStore.getId()).some(a => a.application_id !== DISCORD_APP_ID && a.type !== ActivityType.CUSTOM_STATUS)) {
                 return null;
             }
         }

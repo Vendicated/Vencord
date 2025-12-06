@@ -368,8 +368,7 @@ export default function PluginSettings() {
     const visiblePlugins = plugins.slice(0, visibleCount);
 
     return (
-        <SettingsTab title="Plugins">
-
+        <SettingsTab>
             <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openWarningModal={openWarningModal} resetCheckAndDo={resetCheckAndDo} />
 
             <div className={cl("stats-container")}>

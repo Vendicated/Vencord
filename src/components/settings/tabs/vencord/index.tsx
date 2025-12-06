@@ -120,7 +120,7 @@ function EquicordSettings() {
         ];
 
     return (
-        <SettingsTab title="Equicord Settings">
+        <SettingsTab>
             {(isEquicordDonor(user?.id) || isVencordDonor(user?.id)) ? (
                 <SpecialCard
                     title="Donations"

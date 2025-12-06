@@ -27,7 +27,7 @@ import { Margins } from "@utils/margins";
 
 function BackupAndRestoreTab() {
     return (
-        <SettingsTab title="Backup & Restore">
+        <SettingsTab>
             <Flex flexDirection="column" gap="0.5em">
                 <Alert.Warning>
                     Importing a settings file will overwrite your current settings.

@@ -109,7 +109,7 @@ function CloudTab() {
     }
 
     return (
-        <SettingsTab title="Equicord Cloud">
+        <SettingsTab>
             <section className={Margins.top16}>
                 <Heading>Cloud Settings</Heading>
 
@@ -136,7 +136,7 @@ function CloudTab() {
                             settings.cloud.authenticated = v;
                     }}
                 />
-                <Heading>Backend URL</Heading>
+                <Heading className={Margins.top16}>Backend URL</Heading>
                 <Paragraph className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
                 </Paragraph>
