@@ -14,7 +14,7 @@ import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, MessageStore, UserStore } from "@webpack/common";
 
-import { OpenLogsButton } from "./components/LogsButton";
+import { LogsIcon, OpenLogsButton } from "./components/LogsButton";
 import { openLogModal } from "./components/LogsModal";
 import * as idb from "./db";
 import { addMessage } from "./LoggedMessageManager";
@@ -300,9 +300,13 @@ export default definePlugin({
             openLogModal();
         }
     },
-    renderHeaderBarButton() {
-        if (!settings.store.ShowLogsButton) return null;
-        return OpenLogsButton();
+
+    headerBarButton: {
+        icon: LogsIcon,
+        render() {
+            if (!settings.store.ShowLogsButton) return null;
+            return OpenLogsButton();
+        }
     },
 
     processMessageFetch,

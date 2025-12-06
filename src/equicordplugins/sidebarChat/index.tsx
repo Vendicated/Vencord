@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { HeaderBarButton } from "@api/HeaderBar";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
@@ -46,14 +47,9 @@ import {
 
 import { settings, SidebarStore } from "./store";
 
-// ??? no clue why this HeaderBarIcon doesnt work, its the same as the one below
-const { HeaderBar, /* HeaderBarIcon*/ } = mapMangledModuleLazy(".themedMobile]:", {
-    HeaderBarIcon: filters.componentByCode('size:"custom",'),
+const { HeaderBar } = mapMangledModuleLazy(".themedMobile]:", {
     HeaderBar: filters.byCode(".themedMobile]:"),
 });
-
-// from toolbox
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
 const { ForumView } = mapMangledModuleLazy("forum-grid-header-section-", {
     ForumView: filters.byCode("sidebarState")
@@ -314,9 +310,9 @@ const Header = ({ guild, channel }: { guild: Guild; channel: Channel; }) => {
         <HeaderBar
             toolbar={
                 <>
-                    <HeaderBarIcon icon={ArrowsLeftRightIcon} tooltip="Switch channels" onClick={switchChannels} />
-                    <HeaderBarIcon icon={WindowLaunchIcon} tooltip="Popout Chat" onClick={openPopout} />
-                    <HeaderBarIcon icon={XSmallIcon} tooltip="Close Sidebar Chat" onClick={closeSidebar} />
+                    <HeaderBarButton icon={ArrowsLeftRightIcon} tooltip="Switch channels" onClick={switchChannels} />
+                    <HeaderBarButton icon={WindowLaunchIcon} tooltip="Popout Chat" onClick={openPopout} />
+                    <HeaderBarButton icon={XSmallIcon} tooltip="Close Sidebar Chat" onClick={closeSidebar} />
                 </>
             }
         >

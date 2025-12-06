@@ -18,6 +18,7 @@
 
 import "./style.css";
 
+import { HeaderBarButton } from "@api/HeaderBar";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -27,7 +28,6 @@ import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpac
 import { ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, UserStore } from "@webpack/common";
 
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 const RunningGameStore = findStoreLazy("RunningGameStore");
 const QuestsStore = findByPropsLazy("getQuest");
@@ -36,7 +36,7 @@ let questIdCheck = 0;
 
 function ToolBarHeader() {
     return (
-        <HeaderBarIcon
+        <HeaderBarButton
             tooltip="Complete Quest"
             position="bottom"
             className="vc-quest-completer"
@@ -239,5 +239,8 @@ export default definePlugin({
             }
         });
     },
-    renderHeaderBarButton: ToolBarHeader
+    headerBarButton: {
+        icon: QuestIcon,
+        render: ToolBarHeader
+    }
 });

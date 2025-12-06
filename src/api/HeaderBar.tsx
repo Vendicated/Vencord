@@ -5,10 +5,20 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Logger } from "@utils/Logger";
+import { findComponentByCodeLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
-import type { JSX } from "react";
+import type { ComponentType, JSX, MouseEventHandler, ReactNode, RefObject } from "react";
+
+const logger = new Logger("HeaderBarAPI");
 
 export type HeaderBarButtonFactory = () => JSX.Element | null;
+
+export interface HeaderBarButtonData {
+    render: HeaderBarButtonFactory;
+    icon: ComponentType<any>;
+    priority?: number;
+}
 
 interface HeaderBarButton {
     render: HeaderBarButtonFactory;
@@ -18,6 +28,23 @@ interface HeaderBarButton {
 export const buttons = new Map<string, HeaderBarButton>();
 
 const listeners = new Set<() => void>();
+
+export interface HeaderBarButtonProps {
+    icon: ComponentType<any>;
+    tooltip: ReactNode;
+    onClick?: MouseEventHandler<HTMLDivElement>;
+    onContextMenu?: MouseEventHandler<HTMLDivElement>;
+    className?: string;
+    iconClassName?: string;
+    position?: "top" | "bottom" | "left" | "right";
+    selected?: boolean;
+    disabled?: boolean;
+    showBadge?: boolean;
+    badgePosition?: "top" | "bottom";
+    ref?: RefObject<any>;
+}
+
+export const HeaderBarButton = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"') as ComponentType<HeaderBarButtonProps>;
 
 /**
  * Add a button to the header bar.
@@ -51,7 +78,7 @@ function HeaderBarButtons() {
     const sorted = Array.from(buttons).sort(([, a], [, b]) => a.priority - b.priority);
 
     return sorted.map(([id, { render: Button }]) => (
-        <ErrorBoundary noop key={id}>
+        <ErrorBoundary noop key={id} onError={e => logger.error(`Failed to render ${id}`, e.error)}>
             <Button />
         </ErrorBoundary>
     ));

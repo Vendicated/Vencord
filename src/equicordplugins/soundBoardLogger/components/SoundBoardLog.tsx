@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { HeaderBarButton } from "@api/HeaderBar";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -15,14 +16,11 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
-import { findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
 
 import { LogIcon } from "./Icons";
 import { openMoreUsersModal } from "./MoreUsersModal";
 import { openUserModal } from "./UserModal";
-
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
 export async function openSoundBoardLog(): Promise<void> {
 
@@ -37,7 +35,7 @@ export async function openSoundBoardLog(): Promise<void> {
 
 export function OpenSBLogsButton() {
     return (
-        <HeaderBarIcon
+        <HeaderBarButton
             className="chatBarLogIcon"
             onClick={() => openSoundBoardLog()}
             tooltip={"Open SoundBoard Log"}

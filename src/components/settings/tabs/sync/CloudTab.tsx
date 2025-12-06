@@ -20,6 +20,7 @@ import { useSettings } from "@api/Settings";
 import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
 import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, putCloudSettings } from "@api/SettingsSync/cloudSync";
 import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
@@ -111,19 +112,19 @@ function CloudTab() {
     return (
         <SettingsTab>
             <section className={Margins.top16}>
-                <Heading>Cloud Settings</Heading>
-
-                <Paragraph size="md" className={Margins.bottom20}>
-                    Equicord comes with a cloud integration allowing settings to be synced across apps and devices.
-                    <br />
-                    We use our own <Link href="https://github.com/Equicord/Equicloud">Equicloud backend</Link> to provide our cloud instance with enhanced features.
-                    <br />
-                    Our <Link href="https://equicord.org/cloud/policy">privacy policy</Link> allows you to see what information we store, how we use it, and data retention.
-                    <br />
-                    Equicloud is BSD 3.0 licensed so you can host it yourself if you would like.
-                    <br />
-                    You can swap between Equicord and Vencord's different cloud instances below if needed.
-                </Paragraph>
+                <Card defaultPadding={true} className={Margins.bottom16}>
+                    <Paragraph size="md">
+                        Equicord comes with a cloud integration allowing settings to be synced across apps and devices.
+                        <br />
+                        We use our own <Link href="https://github.com/Equicord/Equicloud">Equicloud backend</Link> to provide our cloud instance with enhanced features.
+                        <br />
+                        Our <Link href="https://equicord.org/cloud/policy">privacy policy</Link> allows you to see what information we store, how we use it, and data retention.
+                        <br />
+                        Equicloud is BSD 3.0 licensed so you can host it yourself if you would like.
+                        <br />
+                        You can swap between Equicord and Vencord's different cloud instances below if needed.
+                    </Paragraph>
+                </Card>
                 <FormSwitch
                     key="backend"
                     title="Enable Cloud Integrations"

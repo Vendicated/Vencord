@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
+import { BackupRestoreIcon, CloudIcon, LogIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
 import {
     BackupAndRestoreTab,
     ChangelogTab,
@@ -225,6 +225,12 @@ export default definePlugin({
                 panelTitle: "Equicord Updater",
                 Component: UpdaterTab,
                 Icon: UpdaterIcon
+            }),
+            buildEntry({
+                key: "equicord_changelog",
+                title: "Changelog",
+                Component: ChangelogTab,
+                Icon: LogIcon,
             }),
             buildEntry({
                 key: "equicord_cloud",

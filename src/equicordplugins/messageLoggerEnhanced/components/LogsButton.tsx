@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { HeaderBarButton } from "@api/HeaderBar";
 import { findComponentByCodeLazy } from "@webpack";
 
 import { openLogModal } from "./LogsModal";
 
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 const Icon = findComponentByCodeLazy("0-1.27-.97l-2.5.7a3");
 
 export function OpenLogsButton() {
     return (
-        <HeaderBarIcon
+        <HeaderBarButton
             className="vc-log-toolbox-btn"
             onClick={() => openLogModal()}
             tooltip={"Open Logs"}
@@ -33,3 +33,5 @@ export function OpenLogsButton() {
         />
     );
 }
+
+export { Icon as LogsIcon };

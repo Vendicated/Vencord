@@ -9,6 +9,7 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
+import { LogIcon } from "./components/Icons";
 import { OpenSBLogsButton } from "./components/SoundBoardLog";
 import settings from "./settings";
 import { updateLoggedSounds } from "./store";
@@ -21,7 +22,11 @@ export default definePlugin({
     description: "Logs all soundboards that are played in a voice chat and allows you to download them",
     dependencies: ["AudioPlayerAPI"],
     settings,
-    renderHeaderBarButton: OpenSBLogsButton,
+
+    headerBarButton: {
+        icon: LogIcon,
+        render: OpenSBLogsButton
+    },
     start() {
         enableStyle(styles);
         FluxDispatcher.subscribe("VOICE_CHANNEL_EFFECT_SEND", async sound => {
