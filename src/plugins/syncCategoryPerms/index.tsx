@@ -62,83 +62,87 @@ async function syncChannelWithRetry(channelId: string, permissionOverwrites: any
     return false;
 }
 
+function getChannelsInCategory(categoryId: string): any[] {
+    const category = ChannelStore.getChannel(categoryId);
+    if (!category || !category.isCategory()) return [];
+
+    const allChannels = Object.values(ChannelStore.getMutableGuildChannelsForGuild(category.guild_id));
+    return allChannels.filter((channel: any) => channel.parent_id === categoryId);
+}
+
 async function syncCategoryPermissions(categoryId: string) {
     const category = ChannelStore.getChannel(categoryId);
-    if (!category || !category.isCategory()) {
-        showToast("Invalid category", Toasts.Type.FAILURE);
-        return;
-    }
+    if (!category || !category.isCategory()) return;
 
-    const guildId = category.guild_id;
     const categoryPermissions = category.permissionOverwrites;
-
-    // Get all channels in the guild
-    const allChannels = Object.values(ChannelStore.getMutableGuildChannelsForGuild(guildId));
-
-    // Filter channels that are in this category
-    const channelsInCategory = allChannels.filter(
-        (channel: any) => channel.parent_id === categoryId
-    );
+    const channelsInCategory = getChannelsInCategory(categoryId);
 
     if (channelsInCategory.length === 0) {
         showToast("No channels found in this category", Toasts.Type.MESSAGE);
         return;
     }
 
-    showToast(
-        `Syncing permissions for ${channelsInCategory.length} channel${channelsInCategory.length === 1 ? "" : "s"}...`,
-        Toasts.Type.MESSAGE
+    // Only sync channels that need updating
+    const unsyncedChannels = channelsInCategory.filter(channel =>
+        !permissionsMatch(channel.permissionOverwrites, categoryPermissions)
     );
 
-    try {
-        // Sync permissions in batches to avoid rate limiting
-        const BATCH_SIZE = 3;
-        const DELAY_MS = 1000;
+    if (unsyncedChannels.length === 0) {
+        showToast("All channels already have matching permissions", Toasts.Type.MESSAGE);
+        return;
+    }
 
-        let successCount = 0;
-        let failCount = 0;
+    let successCount = 0;
+    let failCount = 0;
+    const totalChannels = unsyncedChannels.length;
 
-        for (let i = 0; i < channelsInCategory.length; i += BATCH_SIZE) {
-            const batch = channelsInCategory.slice(i, i + BATCH_SIZE);
+    // Process channels in batches to avoid rate limiting
+    const batchSize = 3;
+    const delayBetweenBatches = 1000; // 1 second
 
-            const results = await Promise.all(
-                batch.map((channel: any) =>
-                    syncChannelWithRetry(channel.id, categoryPermissions)
-                )
-            );
+    for (let i = 0; i < unsyncedChannels.length; i += batchSize) {
+        const batch = unsyncedChannels.slice(i, i + batchSize);
+        const currentProgress = Math.min(i + batchSize, totalChannels);
 
-            results.forEach(success => {
-                if (success) {
-                    successCount++;
-                } else {
-                    failCount++;
-                }
-            });
+        // Show progress toast
+        showToast(
+            `Syncing permissions... ${currentProgress}/${totalChannels} channels`,
+            Toasts.Type.MESSAGE,
+            { duration: 1000 }
+        );
 
-            // Add delay between batches to avoid rate limiting
-            if (i + BATCH_SIZE < channelsInCategory.length) {
-                await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+        const results = await Promise.allSettled(
+            batch.map(channel =>
+                syncChannelWithRetry(channel.id, categoryPermissions)
+            )
+        );
+
+        results.forEach(result => {
+            if (result.status === "fulfilled" && result.value) {
+                successCount++;
+            } else {
+                failCount++;
             }
-        }
+        });
 
-        console.log(`[syncCategoryPerms] Sync completed: ${successCount} succeeded, ${failCount} failed (${channelsInCategory.length} total)`);
-
-        if (failCount === 0) {
-            showToast(
-                `Successfully synced permissions for ${successCount} channel${successCount === 1 ? "" : "s"}`,
-                Toasts.Type.SUCCESS
-            );
-        } else if (successCount > 0) {
-            showToast(
-                `Synced ${successCount} channel${successCount === 1 ? "" : "s"}, ${failCount} failed`,
-                Toasts.Type.MESSAGE
-            );
-        } else {
-            showToast("Failed to sync permissions", Toasts.Type.FAILURE);
+        // Don't delay after the last batch
+        if (i + batchSize < unsyncedChannels.length) {
+            await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
         }
-    } catch (error) {
-        console.error("Failed to sync category permissions:", error);
-        showToast("Failed to sync permissions", Toasts.Type.FAILURE);
+    }
+
+    console.log(`[syncCategoryPerms] Sync complete: ${successCount} succeeded, ${failCount} failed out of ${totalChannels} total channels`);
+
+    if (failCount === 0) {
+        showToast(
+            `Successfully synced permissions for all ${successCount} channel${successCount === 1 ? "" : "s"}!`,
+            Toasts.Type.SUCCESS
+        );
+    } else {
+        showToast(
+            `Synced ${successCount} channel${successCount === 1 ? "" : "s"}, ${failCount} failed. Check console for details.`,
+            Toasts.Type.FAILURE
+        );
     }
 }
 
@@ -154,23 +158,20 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
             id="sync-category-perms"
             label="Sync Permissions to All Channels"
             action={() => {
-                const allChannels = Object.values(ChannelStore.getMutableGuildChannelsForGuild(channel.guild_id));
-                const channelsInCategory = allChannels.filter(
-                    (ch: any) => ch.parent_id === channel.id
-                );
+                const channelsInCategory = getChannelsInCategory(channel.id);
 
                 if (channelsInCategory.length === 0) {
                     showToast("No channels found in this category", Toasts.Type.MESSAGE);
                     return;
                 }
 
-                // Check if all channels already have matching permissions
+                // Check how many channels need updating
                 const categoryPermissions = channel.permissionOverwrites;
-                const allSynced = channelsInCategory.every((ch: any) =>
-                    permissionsMatch(ch.permissionOverwrites, categoryPermissions)
+                const unsyncedChannels = channelsInCategory.filter((ch: any) =>
+                    !permissionsMatch(ch.permissionOverwrites, categoryPermissions)
                 );
 
-                if (allSynced) {
+                if (unsyncedChannels.length === 0) {
                     Alerts.show({
                         title: "Permissions Already Synced",
                         body: `All ${channelsInCategory.length} channel${channelsInCategory.length === 1 ? "" : "s"} in ${channel.name} already have the same permissions as the category.`,
@@ -181,7 +182,7 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
 
                 Alerts.show({
                     title: "Sync Category Permissions",
-                    body: `This will sync the permissions from category ${channel.name} to all ${channelsInCategory.length} channel${channelsInCategory.length === 1 ? "" : "s"} inside it.\n\nThis will overwrite any existing permission overrides on those channels. Are you sure you want to continue?`,
+                    body: `This will sync all ${channelsInCategory.length} channel${channelsInCategory.length === 1 ? "" : "s"} in ${channel.name}. ${unsyncedChannels.length} channel${unsyncedChannels.length === 1 ? "" : "s"} will have ${unsyncedChannels.length === 1 ? "its" : "their"} permissions updated.\n\nThis will overwrite any existing permission overrides. Are you sure you want to continue?`,
                     confirmText: "Sync Permissions",
                     cancelText: "Cancel",
                     onConfirm: () => syncCategoryPermissions(channel.id)
