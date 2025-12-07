@@ -47,7 +47,7 @@ export const managedStyleRootNode = document.createElement("vencord-managed-styl
  */
 export const userStyleRootNode = document.createElement("vencord-user-styles");
 
-vencordRootNode.style = "display: none;";
+vencordRootNode.style.display = "none";
 vencordRootNode.append(coreStyleRootNode, managedStyleRootNode, userStyleRootNode);
 
 export function initStyles() {
