@@ -37,12 +37,12 @@
     overflow: visible !important;
     margin-top: 1em;
     color: black;
-    background-color: color-mix(in srgb, #EDCC87 95%, black);
+    background-color: color-mix(in srgb, #EDCC87 60%, lightyellow);
 }
 
 .vc-contrib-button:hover {
     color: black;
-    background-color: color-mix(in srgb, #EDCC87 90%, black);
+    background-color: color-mix(in srgb, #EDCC87 75%, lightyellow);
 }
 
 .vc-contrib-github {
