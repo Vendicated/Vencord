@@ -107,11 +107,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
     },
-    showTMDBButton: {
-        description: "Show TheMovieDB button in Rich Presence",
-        type: OptionType.BOOLEAN,
-        default: true,
-    },
     overrideRichPresenceType: {
         description: "Override the rich presence type",
         type: OptionType.SELECT,
