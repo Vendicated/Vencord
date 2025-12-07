@@ -159,6 +159,13 @@ export default definePlugin({
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
                 replace: "$self.buildLayout($1)"
             }
+        },
+        {
+            find: "getWebUserSettingFromSection",
+            replacement: {
+                match: /new Map\(\[(?=\[.{0,10}\.ACCOUNT,.{0,10}\.ACCOUNT_PANEL)/,
+                replace: "new Map([...$self.getSettingsSectionMappings(),"
+            }
         }
     ],
 
@@ -190,6 +197,22 @@ export default definePlugin({
         });
     },
 
+    getSettingsSectionMappings() {
+        return [
+            ["EquicordSettings", "equicord_main_panel"],
+            ["EquicordPlugins", "equicord_plugins_panel"],
+            ["EquicordThemes", "equicord_themes_panel"],
+            ["EquicordUpdater", "equicord_updater_panel"],
+            ["EquicordChangelog", "equicord_changelog_panel"],
+            ["EquicordCloud", "equicord_cloud_panel"],
+            ["EquicordBackupAndRestore", "equicord_backup_restore_panel"],
+            ["EquicordPatchHelper", "equicord_patch_helper_panel"],
+            ["EquicordDiscordIcons", "equicord_icon_viewer"],
+            ["EquicordThemeLibrary", "equicord_theme_library"],
+            ["EquicordIRememberYou", "equicord_i_remember_you"],
+        ];
+    },
+
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
         const layout = originalLayoutBuilder.buildLayout();
         if (originalLayoutBuilder.key !== "$Root") return layout;
@@ -199,7 +222,7 @@ export default definePlugin({
 
         const { buildEntry } = this;
 
-        const vencordEntries: SettingsLayoutNode[] = [
+        const equicordEntries: SettingsLayoutNode[] = [
             buildEntry({
                 key: "equicord_main",
                 title: "Equicord",
@@ -266,11 +289,11 @@ export default definePlugin({
             })
         ].filter(isTruthy);
 
-        const vencordSection: SettingsLayoutNode = {
+        const equicordSection: SettingsLayoutNode = {
             key: "equicord_section",
             type: LayoutTypes.SECTION,
             useLabel: () => "Equicord",
-            buildLayout: () => vencordEntries
+            buildLayout: () => equicordEntries
         };
 
         const { settingsLocation } = settings.store;
@@ -293,7 +316,7 @@ export default definePlugin({
             idx += 1;
         }
 
-        layout.splice(idx, 0, vencordSection);
+        layout.splice(idx, 0, equicordSection);
 
         return layout;
     },
@@ -351,7 +374,7 @@ export default definePlugin({
                 className: "vc-cloud",
             },
             {
-                section: "settings/tabsSync",
+                section: "EquicordBackupAndRestore",
                 label: "Backup & Restore",
                 searchableTitles: ["Backup & Restore"],
                 element: BackupAndRestoreTab,
