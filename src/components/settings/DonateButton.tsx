@@ -25,6 +25,7 @@ import { showToast } from "@webpack/common";
 
 export function DonateButton({
     equicord = false,
+    className,
     ...props
 }: Partial<ButtonProps> & { equicord?: boolean; }) {
     const link = equicord ? "https://github.com/sponsors/thororen1234" : "https://github.com/sponsors/Vendicated";
@@ -35,7 +36,7 @@ export function DonateButton({
             size="medium"
             type="button"
             onClick={() => VencordNative.native.openExternal(link)}
-            className="vc-donate-button"
+            className={className || "vc-donate-button"}
         >
             <Heart />
             Donate
@@ -44,6 +45,7 @@ export function DonateButton({
 }
 
 export function InviteButton({
+    className,
     ...props
 }: Partial<ButtonProps>) {
     return (
@@ -58,7 +60,7 @@ export function InviteButton({
                     showToast("Invalid or expired invite"),
                 );
             }}
-            className="vc-invite-button"
+            className={className || "vc-donate-button"}
         >
             Invite
             <OpenExternalIcon className="vc-invite-link" />

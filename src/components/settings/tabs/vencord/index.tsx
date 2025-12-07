@@ -136,7 +136,7 @@ function EquicordSettings() {
                     backgroundImage={DONOR_BACKGROUND_IMAGE}
                     backgroundColor="#ED87A9"
                 >
-                    <DonateButtonComponent />
+                    <DonateButtonComponent donated={true} />
                 </SpecialCard>
             ) : (
                 <SpecialCard
