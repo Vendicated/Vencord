@@ -27,7 +27,7 @@
 }
 
 .vc-plugins-setting-description {
-    color: var(--header-secondary);
+    color: var(--text-default);
 }
 
 .vc-plugins-setting-error {
