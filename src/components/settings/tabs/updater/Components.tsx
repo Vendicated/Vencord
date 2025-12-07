@@ -49,7 +49,7 @@ export function Changes({ updates, repo, repoPending }: CommonProps & { updates:
                         <Span size="sm" color="text-default">
                             {message}
                         </Span>
-                        <Span size="sm" color="text-muted">
+                        <Span size="sm" color="text-subtle">
                             — {author}
                         </Span>
                     </Flex>

@@ -61,7 +61,7 @@
 }
 
 .vc-settings-theme-links::placeholder {
-    color: var(--text-muted) !important;
+    color: var(--text-subtle) !important;
 }
 
 .vc-settings-theme-links:focus {

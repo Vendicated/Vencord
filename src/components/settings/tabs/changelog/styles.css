@@ -41,12 +41,12 @@
 .vc-changelog-entry-hash {
     font-size: 0.875em;
     font-family: var(--font-code);
-    color: var(--text-muted);
+    color: var(--text-subtle);
 }
 
 .vc-changelog-entry-author {
     font-size: 0.875em;
-    color: var(--text-muted);
+    color: var(--text-subtle);
     font-weight: 500;
 }
 
@@ -57,14 +57,14 @@
 }
 
 .vc-changelog-entry.required .vc-changelog-entry-hash {
-    color: var(--text-muted);
+    color: var(--text-subtle);
     font-weight: 600;
 }
 
 .vc-changelog-loading {
     text-align: center;
     padding: 2em;
-    color: var(--text-muted);
+    color: var(--text-subtle);
 }
 
 .vc-changelog-empty {
@@ -72,7 +72,7 @@
     padding: 2em;
     background-color: var(--background-base-lower-alt);
     border-radius: 8px;
-    color: var(--text-muted);
+    color: var(--text-subtle);
 }
 
 .vc-changelog-controls {
@@ -168,7 +168,7 @@
 
 .vc-changelog-new-plugin-tag.more {
     background-color: var(--background-base-lower-alt);
-    color: var(--text-muted);
+    color: var(--text-subtle);
 }
 
 .vc-changelog-new-plugin-tag.required {
@@ -249,13 +249,13 @@
 
 .vc-changelog-log-meta {
     font-size: 0.875em;
-    color: var(--text-muted);
+    color: var(--text-subtle);
     line-height: 1.3;
 }
 
 .vc-changelog-log-toggle {
     transition: transform 0.2s ease;
-    color: var(--text-muted);
+    color: var(--text-subtle);
     font-size: 0.75em;
     flex-shrink: 0;
 }
@@ -356,7 +356,7 @@
 }
 
 .vc-changelog-log-commits-list::-webkit-scrollbar-thumb {
-    background: var(--text-muted);
+    background: var(--text-subtle);
     border-radius: 3px;
 }
 
@@ -389,7 +389,7 @@
 
 .vc-changelog-history-list::-webkit-scrollbar-thumb,
 .vc-changelog-log-content::-webkit-scrollbar-thumb {
-    background: var(--text-muted);
+    background: var(--text-subtle);
     border-radius: 3px;
 }
 
@@ -513,7 +513,7 @@
 /* Required plugin styling */
 .vc-changelog-dep-text {
     font-size: 0.875em;
-    color: var(--text-muted);
+    color: var(--text-subtle);
     margin-left: 1em;
     font-style: italic;
 }

@@ -84,7 +84,7 @@
 }
 
 .vc-plugins-info-icon:not(:hover, :focus) {
-    color: var(--text-muted);
+    color: var(--text-subtle);
 }
 
 .vc-plugins-restart-button {

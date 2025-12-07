@@ -99,11 +99,13 @@ function EquicordSettings() {
             !IS_WEB && {
                 key: "transparent",
                 title: "Enable Window Transparency",
-                description: "Make the Discord window transparent. A theme that supports transparency is required or this will do nothing. Stops the window from being resizable as a side effect.",
+                description: "Make the Discord window transparent. A theme that supports transparency is required or this will do nothing.",
                 restartRequired: true,
                 warning: {
-                    enabled: IS_WINDOWS,
-                    message: "This will prevent you from snapping the window to screen edges.",
+                    enabled: true,
+                    message: IS_WINDOWS
+                        ? "This will stop the window from being resizable and prevents you from snapping the window to screen edges."
+                        : "This will stop the window from being resizable.",
                 },
             },
             IS_DISCORD_DESKTOP && {

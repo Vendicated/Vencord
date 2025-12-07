@@ -31,7 +31,7 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
                 <div className="vc-form-switch-text">
                     <Flex flexDirection="column" gap="4px">
                         <Span size="md" weight="medium" color="header-primary">{title}</Span>
-                        {description && <Span size="sm" color="text-muted">{description}</Span>}
+                        {description && <Span size="sm" color="text-subtle">{description}</Span>}
                     </Flex>
                 </div>
                 <div className="vc-form-switch-control">
