@@ -1,0 +1,14 @@
+.vc-link {
+    color: var(--text-link);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.vc-link:hover {
+    text-decoration: underline;
+}
+
+.vc-link-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}

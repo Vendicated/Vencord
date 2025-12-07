@@ -137,7 +137,7 @@ function VerifyModal({
                         <BaseText
                             size="md"
                             weight="semibold"
-                            color="text-normal"
+                            color="text-default"
                             style={{ width: "30rem", textAlign: "center" }}
                         >
                             {getIntlMessage("QR_CODE_LOGIN_SUCCESS_FLAVOR")}
@@ -163,7 +163,7 @@ function VerifyModal({
                         <BaseText
                             size="md"
                             weight="semibold"
-                            color="text-normal"
+                            color="text-default"
                             style={{ width: "30rem" }}
                         >
                             {getIntlMessage("QR_CODE_NOT_FOUND_DESCRIPTION")}

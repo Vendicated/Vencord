@@ -16,7 +16,6 @@ import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { HashLink } from "@components/settings/tabs/updater/Components";
-import { gitHashShort } from "@shared/vencordUserAgent";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import { getRepo, UpdateLogger } from "@utils/updater";
@@ -478,127 +477,114 @@ function ChangelogContent() {
 
     return (
         <>
-            <Card defaultPadding={true} className={Margins.bottom16}>
-                <Paragraph>
-                    View the most recent changes to Equicord.
-                    <br />
-                    This fetches commits directly from the repository to show you what's new.
-                    <br />
-                    <br />
-                    Repository: {" "}
-                    {repoPending ? (
-                        repo
-                    ) : repoErr ? (
-                        "Failed to retrieve - check console"
-                    ) : (
-                        <Link href={repo}>
-                            {repo.split("/").slice(-2).join("/")}
-                        </Link>
-                    )}
-                    {" "}
-                    (Current:{" "}
-                    <span className="vc-changelog-current-hash">
-                        {gitHashShort}
-                    </span>
-                    )
-                </Paragraph>
-                <br />
-                <div className="vc-changelog-controls">
-                    <Button
-                        size="small"
-                        disabled={isLoading || repoPending || !!repoErr}
-                        onClick={fetchChangelog}
-                        variant={recentlyChecked ? "positive" : "primary"}
-                    >
-                        {isLoading
-                            ? "Loading..."
-                            : recentlyChecked
-                                ? "Repository Up to Date"
-                                : "Fetch from Repository"}
-                    </Button>
+            <Heading className={Margins.top16}>Fetch Changes</Heading>
+            <Paragraph className={Margins.bottom16}>
+                Check the repository for new commits, plugin updates, and code changes. This will compare your current version with the latest available and show you what's new.
+            </Paragraph>
 
-                    {changelogHistory.length > 0 && (
-                        <>
-                            <Button
-                                size="small"
-                                variant={showHistory ? "primary" : "secondary"}
-                                onClick={() => setShowHistory(!showHistory)}
-                                style={{ marginLeft: "8px" }}
-                            >
-                                {showHistory ? "Hide Logs" : "Show Logs"}
-                            </Button>
-                            <Button
-                                size="small"
-                                variant="dangerPrimary"
-                                onClick={() => {
-                                    Alerts.show({
-                                        title: "Clear All Logs",
-                                        body: "Are you sure you would like to clear all logs? This can't be undone.",
-                                        confirmText: "Clear All",
-                                        confirmColor: "danger",
-                                        cancelText: "Cancel",
-                                        onConfirm: async () => {
-                                            await clearChangelogHistory();
-                                            await loadChangelogHistory();
-                                            setShowHistory(false);
-                                            Toasts.show({
-                                                message:
-                                                    "All logs have been cleared",
-                                                id: Toasts.genId(),
-                                                type: Toasts.Type.SUCCESS,
-                                                options: {
-                                                    position:
-                                                        Toasts.Position.BOTTOM,
-                                                },
-                                            });
-                                        },
-                                    });
-                                }}
-                                style={{ marginLeft: "8px" }}
-                            >
-                                Clear All Logs
-                            </Button>
-                        </>
-                    )}
-                </div>
-            </Card>
+            <div className="vc-changelog-controls">
+                <Button
+                    size="small"
+                    disabled={isLoading || repoPending || !!repoErr}
+                    onClick={fetchChangelog}
+                    variant={recentlyChecked ? "positive" : "primary"}
+                >
+                    {isLoading
+                        ? "Loading..."
+                        : recentlyChecked
+                            ? "Repository Up to Date"
+                            : "Fetch from Repository"}
+                </Button>
+
+                {changelogHistory.length > 0 && (
+                    <>
+                        <Button
+                            size="small"
+                            variant={showHistory ? "primary" : "secondary"}
+                            onClick={() => setShowHistory(!showHistory)}
+                            style={{ marginLeft: "8px" }}
+                        >
+                            {showHistory ? "Hide Logs" : "Show Logs"}
+                        </Button>
+                        <Button
+                            size="small"
+                            variant="dangerPrimary"
+                            onClick={() => {
+                                Alerts.show({
+                                    title: "Clear All Logs",
+                                    body: "Are you sure you would like to clear all logs? This can't be undone.",
+                                    confirmText: "Clear All",
+                                    confirmColor: "danger",
+                                    cancelText: "Cancel",
+                                    onConfirm: async () => {
+                                        await clearChangelogHistory();
+                                        await loadChangelogHistory();
+                                        setShowHistory(false);
+                                        Toasts.show({
+                                            message: "All logs have been cleared",
+                                            id: Toasts.genId(),
+                                            type: Toasts.Type.SUCCESS,
+                                            options: {
+                                                position: Toasts.Position.BOTTOM,
+                                            },
+                                        });
+                                    },
+                                });
+                            }}
+                            style={{ marginLeft: "8px" }}
+                        >
+                            Clear All Logs
+                        </Button>
+                    </>
+                )}
+            </div>
 
             {error && (
-                <ErrorCard style={{ padding: "1em", marginBottom: "1em" }}>
-                    <p>{error}</p>
-                    <Paragraph
-                        style={{
-                            marginTop: "0.5em",
-                            color: "var(--text-muted)",
-                        }}
-                    >
+                <ErrorCard style={{ padding: "1em", marginTop: "1em" }}>
+                    <Paragraph>{error}</Paragraph>
+                    <Paragraph color="text-muted" style={{ marginTop: "0.5em" }}>
                         Make sure you have an internet connection and try again.
                     </Paragraph>
                 </ErrorCard>
             )}
 
-            <Divider className={Margins.bottom16} />
+            <Divider className={Margins.top20} />
 
-            {/* Current Changes Section */}
-            {hasCurrentChanges ? (
-                <div className="vc-changelog-current">
-                    <Heading className={Margins.bottom8}>
-                        Recent Changes
-                    </Heading>
+            <Heading className={Margins.top20}>Repository</Heading>
+            <Paragraph className={Margins.bottom8}>
+                This is the GitHub repository where Equicord fetches updates from.
+            </Paragraph>
+            <Paragraph color="text-muted">
+                {repoPending ? (
+                    repo
+                ) : repoErr ? (
+                    "Failed to retrieve - check console"
+                ) : (
+                    <Link href={repo}>
+                        {repo.split("/").slice(-2).join("/")}
+                    </Link>
+                )}
+                {" "}(<HashLink repo={repo} hash={gitHash} disabled={repoPending} />)
+            </Paragraph>
 
-                    {/* New Plugins Section */}
+            {hasCurrentChanges && (
+                <>
+                    <Divider className={Margins.top20} />
+
+                    <Heading className={Margins.top20}>Recent Changes</Heading>
+                    <Paragraph className={Margins.bottom16}>
+                        These are the new commits and plugin updates since your last version. You can see what features were added, bugs were fixed, and which plugins received updates.
+                    </Paragraph>
+
                     {newPlugins.length > 0 && (
                         <div className={Margins.bottom16}>
                             <NewPluginsSection
                                 newPlugins={newPlugins}
-                                onPluginToggle={(pluginName, enabled) => {
-                                    // Handle plugin toggle if needed
-                                }}
+                                onPluginToggle={() => { }}
                             />
                         </div>
                     )}
 
-                    {/* Updated Plugins Section */}
                     {updatedPlugins.length > 0 && (
                         <div className={Margins.bottom16}>
                             <Heading className={Margins.bottom8}>
@@ -608,12 +594,10 @@ function ChangelogContent() {
                         </div>
                     )}
 
-                    {/* Code Changes */}
                     {changelog.length > 0 && (
                         <div>
                             <Heading className={Margins.bottom8}>
-                                Code Changes ({changelog.length}{" "}
-                                {changelog.length === 1 ? "commit" : "commits"})
+                                Code Changes ({changelog.length} {changelog.length === 1 ? "commit" : "commits"})
                             </Heading>
                             <div className="vc-changelog-commits-list">
                                 {changelog.map(entry => (
@@ -627,34 +611,28 @@ function ChangelogContent() {
                             </div>
                         </div>
                     )}
-                </div>
-            ) : (
-                !isLoading &&
-                !error && (
-                    <Card className="vc-changelog-empty">
-                        <Paragraph>
-                            No commits available ahead of your current version.
-                            Click "Fetch from Repository" to check for new
-                            changes.
-                        </Paragraph>
-                    </Card>
-                )
+                </>
             )}
 
-            {/* History Section */}
+            {!hasCurrentChanges && !isLoading && !error && (
+                <>
+                    <Divider className={Margins.top20} />
+                    <Heading className={Margins.top20}>Recent Changes</Heading>
+                    <Paragraph color="text-muted">
+                        No commits available ahead of your current version. Click "Fetch from Repository" to check for new changes.
+                    </Paragraph>
+                </>
+            )}
+
             {showHistory && changelogHistory.length > 0 && (
-                <div className="vc-changelog-history">
-                    <Divider
-                        className={Margins.top16}
-                        style={{ marginBottom: "1em" }}
-                    />
-                    <Heading className={Margins.bottom8}>
-                        Update Logs ({changelogHistory.length}{" "}
-                        {changelogHistory.length === 1 ? "log" : "logs"})
+                <>
+                    <Divider className={Margins.top20} />
+
+                    <Heading className={Margins.top20}>
+                        Update Logs ({changelogHistory.length} {changelogHistory.length === 1 ? "log" : "logs"})
                     </Heading>
                     <Paragraph className={Margins.bottom16}>
-                        Previous update sessions with their commit history and
-                        plugin changes.
+                        A history of your previous update sessions with their commit history and plugin changes. Click on a log to expand it and see the details.
                     </Paragraph>
 
                     <div className="vc-changelog-history-list">
@@ -678,11 +656,7 @@ function ChangelogContent() {
                                             await loadChangelogHistory();
                                             setExpandedLogs(
                                                 new Set(
-                                                    Array.from(
-                                                        expandedLogs,
-                                                    ).filter(
-                                                        id => id !== logId,
-                                                    ),
+                                                    Array.from(expandedLogs).filter(id => id !== logId),
                                                 ),
                                             );
                                             Toasts.show({
@@ -690,8 +664,7 @@ function ChangelogContent() {
                                                 id: Toasts.genId(),
                                                 type: Toasts.Type.SUCCESS,
                                                 options: {
-                                                    position:
-                                                        Toasts.Position.BOTTOM,
+                                                    position: Toasts.Position.BOTTOM,
                                                 },
                                             });
                                         },
@@ -700,7 +673,7 @@ function ChangelogContent() {
                             />
                         ))}
                     </div>
-                </div>
+                </>
             )}
         </>
     );

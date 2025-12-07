@@ -10,8 +10,8 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
+import { Span } from "@components/Span";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { changes, checkForUpdates, update, updateError } from "@utils/updater";
 import { Alerts, React, Toasts, useState } from "@webpack/common";
@@ -33,25 +33,26 @@ export function HashLink({ repo, hash, disabled = false }: { repo: string, hash:
 
 export function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
     return (
-        <Card style={{ padding: "0 0.5em" }} defaultPadding={false}>
-            {updates.map(({ hash, author, message }) => (
+        <Card className={Margins.top16} style={{ padding: 0 }} defaultPadding={false}>
+            {updates.map(({ hash, author, message }, i) => (
                 <div
                     key={hash}
                     style={{
-                        marginTop: "0.5em",
-                        marginBottom: "0.5em"
+                        padding: "12px 16px",
+                        borderBottom: i < updates.length - 1 ? "1px solid var(--border-subtle)" : undefined
                     }}
                 >
-                    <code>
-                        <HashLink {...{ repo, hash }} disabled={repoPending} />
-                    </code>
-
-                    <span style={{
-                        marginLeft: "0.5em",
-                        color: "var(--text-default)"
-                    }}>
-                        {message} - {author}
-                    </span>
+                    <Flex style={{ alignItems: "center", gap: 8 }}>
+                        <code style={{ color: "var(--text-link)" }}>
+                            <HashLink {...{ repo, hash }} disabled={repoPending} />
+                        </code>
+                        <Span size="sm" color="text-default">
+                            {message}
+                        </Span>
+                        <Span size="sm" color="text-muted">
+                            — {author}
+                        </Span>
+                    </Flex>
                 </div>
             ))}
         </Card>
@@ -61,8 +62,8 @@ export function Changes({ updates, repo, repoPending }: CommonProps & { updates:
 export function Newer(props: CommonProps) {
     return (
         <>
-            <Paragraph className={Margins.bottom8}>
-                Your local copy has more recent commits. Please stash or reset them.
+            <Paragraph>
+                Your local copy has more recent commits than the remote repository. This usually happens when you've made local changes. Please stash or reset them before updating.
             </Paragraph>
             <Changes {...props} updates={changes} />
         </>
@@ -80,47 +81,25 @@ export function Updatable(props: CommonProps) {
         <>
             {!updates && updateError ? (
                 <>
-                    <Paragraph>Failed to check updates. Check the console for more info</Paragraph>
-                    <ErrorCard style={{ padding: "1em" }}>
+                    <Span size="md" weight="medium" color="header-primary">Error checking for updates</Span>
+                    <ErrorCard className={Margins.top8} style={{ padding: "1em" }}>
                         <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
                     </ErrorCard>
                 </>
+            ) : isOutdated ? (
+                <>
+                    <Paragraph>
+                        There {updates.length === 1 ? "is 1 update" : `are ${updates.length} updates`} available. Click the button below to download and install.
+                    </Paragraph>
+                    <Changes updates={updates} {...props} />
+                </>
             ) : (
-                <Paragraph className={Margins.bottom8}>
-                    {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
+                <Paragraph>
+                    You're running the latest version of Equicord.
                 </Paragraph>
             )}
 
-            {isOutdated && <Changes updates={updates} {...props} />}
-
-            <Flex className={classes(Margins.bottom8, Margins.top8)}>
-                {isOutdated && (
-                    <Button
-                        size="small"
-                        disabled={isUpdating || isChecking}
-                        onClick={runWithDispatch(setIsUpdating, async () => {
-                            if (await update()) {
-                                setUpdates([]);
-
-                                await new Promise<void>(r => {
-                                    Alerts.show({
-                                        title: "Update Success!",
-                                        body: "Successfully updated. Restart now to apply the changes?",
-                                        confirmText: "Restart",
-                                        cancelText: "Not now!",
-                                        onConfirm() {
-                                            relaunch();
-                                            r();
-                                        },
-                                        onCancel: r
-                                    });
-                                });
-                            }
-                        })}
-                    >
-                        Update Now
-                    </Button>
-                )}
+            <Flex className={Margins.top16} gap="8px">
                 <Button
                     size="small"
                     disabled={isUpdating || isChecking}
@@ -145,6 +124,34 @@ export function Updatable(props: CommonProps) {
                 >
                     Check for Updates
                 </Button>
+                {isOutdated && (
+                    <Button
+                        size="small"
+                        variant="primary"
+                        disabled={isUpdating || isChecking}
+                        onClick={runWithDispatch(setIsUpdating, async () => {
+                            if (await update()) {
+                                setUpdates([]);
+
+                                await new Promise<void>(r => {
+                                    Alerts.show({
+                                        title: "Update Success!",
+                                        body: "Successfully updated. Restart now to apply the changes?",
+                                        confirmText: "Restart",
+                                        cancelText: "Not now!",
+                                        onConfirm() {
+                                            relaunch();
+                                            r();
+                                        },
+                                        onCancel: r
+                                    });
+                                });
+                            }
+                        })}
+                    >
+                        Update Now
+                    </Button>
+                )}
             </Flex>
         </>
     );

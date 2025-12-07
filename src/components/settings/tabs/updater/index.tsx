@@ -17,154 +17,24 @@
 */
 
 import { useSettings } from "@api/Settings";
-import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
-import { ErrorCard } from "@components/ErrorCard";
-import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
-import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Parser, React, Toasts } from "@webpack/common";
+import { getRepo, isNewer, UpdateLogger } from "@utils/updater";
+import { React } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
-import { Changes, HashLink } from "./Components";
-
-function withDispatcher(dispatcher: React.Dispatch<React.SetStateAction<boolean>>, action: () => any) {
-    return async () => {
-        dispatcher(true);
-        try {
-            await action();
-        } catch (e: any) {
-            UpdateLogger.error("Failed to update", e);
-
-            let err: string;
-            if (!e) {
-                err = "An unknown error occurred (error is undefined).\nPlease try again.";
-            } else if (e.code && e.cmd) {
-                const { code, path, cmd, stderr } = e;
-
-                if (code === "ENOENT")
-                    err = `Command \`${path}\` not found.\nPlease install it and try again`;
-                else {
-                    err = `An error occurred while running \`${cmd}\`:\n`;
-                    err += stderr || `Code \`${code}\`. See the console for more info`;
-                }
-
-            } else {
-                err = "An unknown error occurred. See the console for more info.";
-            }
-
-            Alerts.show({
-                title: "Oops!",
-                body: (
-                    <ErrorCard>
-                        {err.split("\n").map((line, idx) => <div key={idx}>{Parser.parse(line)}</div>)}
-                    </ErrorCard>
-                )
-            });
-        }
-        finally {
-            dispatcher(false);
-        }
-    };
-}
+import { HashLink, Newer, Updatable } from "./Components";
 
 interface CommonProps {
     repo: string;
     repoPending: boolean;
-}
-
-function Updatable(props: CommonProps) {
-    const [updates, setUpdates] = React.useState(changes);
-    const [isChecking, setIsChecking] = React.useState(false);
-    const [isUpdating, setIsUpdating] = React.useState(false);
-    const isOutdated = (updates?.length ?? 0) > 0;
-
-    return (
-        <>
-            <Flex className={classes(Margins.bottom8, Margins.top8)}>
-                {isOutdated && <Button
-                    size="small"
-                    disabled={isUpdating || isChecking}
-                    onClick={withDispatcher(setIsUpdating, async () => {
-                        if (await update()) {
-                            setUpdates([]);
-                            return await new Promise<void>(r => {
-                                Alerts.show({
-                                    title: "Update Success!",
-                                    body: "Successfully updated. Restart now to apply the changes?",
-                                    confirmText: "Restart",
-                                    cancelText: "Not now!",
-                                    onConfirm() {
-                                        relaunch();
-                                        r();
-                                    },
-                                    onCancel: r
-                                });
-                            });
-                        }
-                    })}
-                >
-                    Update Now
-                </Button>}
-                <Button
-                    size="small"
-                    disabled={isUpdating || isChecking}
-                    onClick={withDispatcher(setIsChecking, async () => {
-                        const outdated = await checkForUpdates();
-                        if (outdated) {
-                            setUpdates(changes);
-                        } else {
-                            setUpdates([]);
-                            Toasts.show({
-                                message: "No updates found!",
-                                id: Toasts.genId(),
-                                type: Toasts.Type.MESSAGE,
-                                options: {
-                                    position: Toasts.Position.BOTTOM
-                                }
-                            });
-                        }
-                    })}
-                >
-                    Check for Updates
-                </Button>
-            </Flex>
-            {!updates && updateError ? (
-                <>
-                    <Paragraph>Failed to check updates. Check the console for more info</Paragraph>
-                    <ErrorCard style={{ padding: "1em" }}>
-                        <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
-                    </ErrorCard>
-                </>
-            ) : (
-                <Paragraph className={Margins.bottom8}>
-                    {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
-                </Paragraph>
-            )}
-
-            {isOutdated && <Changes updates={updates} {...props} />}
-        </>
-    );
-}
-
-function Newer(props: CommonProps) {
-    return (
-        <>
-            <Paragraph className={Margins.bottom8}>
-                Your local copy has more recent commits. Please stash or reset them.
-            </Paragraph>
-            <Changes {...props} updates={changes} />
-        </>
-    );
 }
 
 function Updater() {
@@ -184,24 +54,34 @@ function Updater() {
 
     return (
         <SettingsTab>
-            <Heading>Updater Settings</Heading>
+            <Heading className={Margins.top16}>Update Preferences</Heading>
+            <Paragraph className={Margins.bottom20}>
+                Control how Equicord keeps itself up to date. You can choose to update automatically in the background or be notified when new updates are available.
+            </Paragraph>
+
             <FormSwitch
                 title="Automatically update"
-                description="Automatically update Equicord without confirmation prompt"
+                description="When enabled, Equicord will automatically download and install updates in the background without asking for confirmation. You'll need to restart Discord to apply the changes."
                 value={settings.autoUpdate}
                 onChange={(v: boolean) => settings.autoUpdate = v}
+                hideBorder
             />
             <FormSwitch
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => settings.autoUpdateNotification = v}
                 title="Get notified when an automatic update completes"
-                description="Shows a notification when Equicord automatically updates"
+                description="Receive a notification when Equicord finishes downloading an update in the background, so you know when to restart Discord."
                 disabled={!settings.autoUpdate}
+                hideBorder
             />
 
-            <Heading>Repo</Heading>
+            <Divider className={Margins.top20} />
 
-            <Paragraph>
+            <Heading className={Margins.top20}>Repository</Heading>
+            <Paragraph className={Margins.bottom8}>
+                This is the GitHub repository where Equicord fetches updates from.
+            </Paragraph>
+            <Paragraph color="text-muted">
                 {repoPending
                     ? repo
                     : err
@@ -215,12 +95,11 @@ function Updater() {
                 {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
             </Paragraph>
 
-            <Divider className={Margins.top8 + " " + Margins.bottom8} />
+            <Divider className={Margins.top20} />
 
-            <Heading>Updates</Heading>
-
+            <Heading className={Margins.top20}>Updates</Heading>
             {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
-        </SettingsTab >
+        </SettingsTab>
     );
 }
 

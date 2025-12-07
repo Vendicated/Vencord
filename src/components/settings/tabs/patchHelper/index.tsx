@@ -16,18 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
-import { HeadingTertiary } from "@components/Heading";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { Span } from "@components/Span";
 import { debounce } from "@shared/debounce";
 import { copyWithToast } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { stripIndent } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
-import { Button, React, TextInput, useMemo, useState } from "@webpack/common";
+import { React, TextInput, useMemo, useState } from "@webpack/common";
 
 import { FullPatchInput } from "./FullPatchInput";
 import { PatchPreview } from "./PatchPreview";
@@ -105,7 +108,13 @@ function PatchHelper() {
 
     return (
         <SettingsTab>
-            <HeadingTertiary>Full patch</HeadingTertiary>
+            <Heading className={Margins.top16}>Patch Helper</Heading>
+            <Paragraph className={Margins.bottom16}>
+                A developer tool to help you create patches for Equicord plugins.
+            </Paragraph>
+
+            <Heading className="">Full Patch</Heading>
+            <Paragraph className={Margins.bottom8}>Paste your full JSON patch here to fill out the fields</Paragraph>
             <FullPatchInput
                 setFind={onFindChange}
                 setParsedFind={setParsedFind}
@@ -113,48 +122,58 @@ function PatchHelper() {
                 setReplacement={setReplacement}
             />
 
-            <HeadingTertiary className={Margins.top8}>Find</HeadingTertiary>
-            <TextInput
-                type="text"
-                value={find}
-                onChange={onFindChange}
-                error={findError}
-            />
-
-            <HeadingTertiary className={Margins.top8}>Match</HeadingTertiary>
-            <TextInput
-                type="text"
-                value={match}
-                onChange={onMatchChange}
-                error={matchError}
-            />
-
-            <div className={Margins.top8} />
-            <ReplacementInput
-                replacement={replacement}
-                setReplacement={setReplacement}
-                replacementError={replacementError}
-            />
-
-            <Divider />
-            {module && (
-                <PatchPreview
-                    module={module}
-                    match={match}
-                    replacement={replacement}
-                    setReplacementError={setReplacementError}
+            <div className={Margins.top20}>
+                <Heading className="">Find</Heading>
+                <TextInput
+                    type="text"
+                    value={find}
+                    onChange={onFindChange}
+                    error={findError}
                 />
+            </div>
+            <div className={Margins.top20}>
+                <Heading className="">Match</Heading>
+                <TextInput
+                    type="text"
+                    value={match}
+                    onChange={onMatchChange}
+                    error={matchError}
+                />
+            </div>
+
+            <div className={Margins.top20}>
+                <ReplacementInput
+                    replacement={replacement}
+                    setReplacement={setReplacement}
+                    replacementError={replacementError}
+                />
+            </div>
+
+            {module && (
+                <>
+                    <Divider className={Margins.top16 + " " + Margins.bottom16} />
+                    <Span size="md" weight="medium" color="header-primary">Preview</Span>
+                    <PatchPreview
+                        module={module}
+                        match={match}
+                        replacement={replacement}
+                        setReplacementError={setReplacementError}
+                    />
+                </>
             )}
 
             {!!(find && match && replacement) && (
                 <>
-                    <HeadingTertiary className={Margins.top20}>Code</HeadingTertiary>
-                    <CodeBlock lang="js" content={code} />
-                    <Flex className={Margins.top16}>
-                        <Button onClick={() => copyWithToast(code)}>
+                    <Divider className={Margins.top16 + " " + Margins.bottom16} />
+                    <Span size="md" weight="medium" color="header-primary">Generated Code</Span>
+                    <div style={{ width: "100%", marginTop: 8 }}>
+                        <CodeBlock lang="js" content={code} />
+                    </div>
+                    <Flex className={Margins.top8} gap="8px">
+                        <Button size="small" onClick={() => copyWithToast(code)}>
                             Copy to Clipboard
                         </Button>
-                        <Button onClick={() => copyWithToast("```ts\n" + code + "\n```")}>
+                        <Button size="small" onClick={() => copyWithToast("```ts\n" + code + "\n```")}>
                             Copy as Codeblock
                         </Button>
                     </Flex>
@@ -164,4 +183,4 @@ function PatchHelper() {
     );
 }
 
-export default IS_DEV ? wrapTab(PatchHelper, "PatchHelper") : null;
+export default IS_DEV ? wrapTab(PatchHelper, "Patch Helper") : null;

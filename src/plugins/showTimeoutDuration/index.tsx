@@ -91,7 +91,7 @@ export default definePlugin({
         return (
             <div className="vc-std-wrapper">
                 <TooltipContainer text={text}>{children}</TooltipContainer>
-                <BaseText size="md" color="status-danger">
+                <BaseText size="md" color="text-danger">
                     {renderTimeout(message, true)} timeout remaining
                 </BaseText>
             </div>

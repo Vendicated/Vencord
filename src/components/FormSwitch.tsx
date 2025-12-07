@@ -9,7 +9,7 @@ import "./FormSwitch.css";
 import { classes } from "@utils/misc";
 import type { PropsWithChildren, ReactNode } from "react";
 
-import { Divider } from "./Divider";
+import { Flex } from "./Flex";
 import { Span } from "./Span";
 import { Switch } from "./Switch";
 
@@ -26,24 +26,22 @@ export interface FormSwitchProps {
 
 export function FormSwitch({ onChange, title, value, description, disabled, className, hideBorder }: FormSwitchProps) {
     return (
-        <label className="vc-form-switch-wrapper">
-            <div className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
-                <div className={"vc-form-switch-text"}>
-                    <Span size="md" weight="medium">{title}</Span>
-                    {description && <Span size="sm" weight="normal">{description}</Span>}
+        <div className={classes("vc-form-switch-container", hideBorder && "vc-form-switch-no-border")}>
+            <label className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
+                <div className="vc-form-switch-text">
+                    <Flex flexDirection="column" gap="4px">
+                        <Span size="md" weight="medium" color="header-primary">{title}</Span>
+                        {description && <Span size="sm" color="text-muted">{description}</Span>}
+                    </Flex>
                 </div>
-
-                <Switch checked={value} onChange={onChange} disabled={disabled} />
-            </div>
-            {!hideBorder && <Divider className="vc-form-switch-border" />}
-        </label>
+                <div className="vc-form-switch-control">
+                    <Switch checked={value} onChange={onChange} disabled={disabled} />
+                </div>
+            </label>
+        </div>
     );
 }
-
-// #region Old compatibility
 
 export function FormSwitchCompat({ note, children, ...restProps }: PropsWithChildren<any>) {
     return <FormSwitch title={children ?? ""} description={note} {...restProps} />;
 }
-
-// #endregion

@@ -1,15 +1,20 @@
-.vc-form-switch-wrapper {
+.vc-form-switch-container {
+    padding-bottom: 20px;
     margin-bottom: 20px;
-    cursor: pointer;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.vc-form-switch-no-border {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .vc-form-switch {
     display: flex;
-    width: 100%;
-
-    > :last-child {
-        margin-left: auto;
-    }
+    align-items: flex-start;
+    justify-content: space-between;
+    cursor: pointer;
+    gap: 16px;
 }
 
 .vc-form-switch-disabled {
@@ -19,12 +24,12 @@
 }
 
 .vc-form-switch-text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    max-width: 80%;
 }
 
-.vc-form-switch-border {
-    margin-top: 20px;
+.vc-form-switch-control {
+    flex-shrink: 0;
+    padding-top: 2px;
 }
