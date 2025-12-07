@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { BackupRestoreIcon, CloudIcon, LogIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
+import { BackupRestoreIcon, CloudIcon, LogIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
 import {
     BackupAndRestoreTab,
     ChangelogTab,
@@ -207,6 +207,7 @@ export default definePlugin({
             ["EquicordCloud", "equicord_cloud_panel"],
             ["EquicordBackupAndRestore", "equicord_backup_restore_panel"],
             ["EquicordPatchHelper", "equicord_patch_helper_panel"],
+            ["Equibop", "EquibopSettings", "equicord_equibop_settings_panel"],
             ["EquicordDiscordIcons", "equicord_icon_viewer"],
             ["EquicordThemeLibrary", "equicord_theme_library"],
             ["EquicordIRememberYou", "equicord_i_remember_you"],
@@ -278,13 +279,13 @@ export default definePlugin({
             // TODO: Remove deprecated customSections in a future update
             ...this.customSections.map((func, i) => {
                 const { section, element, label } = func(FallbackSectionTypes);
-                if (Object.values(FallbackSectionTypes).includes(section)) return null;
+                if (section !== "Equibop") return null;
 
                 return buildEntry({
                     key: `equicord_deprecated_custom_${section}`,
                     title: label,
                     Component: element,
-                    Icon: section === "Vesktop" ? VesktopSettingsIcon : PlaceholderIcon
+                    Icon: VesktopSettingsIcon
                 });
             })
         ].filter(isTruthy);
