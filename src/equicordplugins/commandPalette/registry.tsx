@@ -12,8 +12,9 @@ import { openPluginModal } from "@components/settings/tabs";
 import { toggleEnabled } from "@equicordplugins/equicordHelper/utils";
 import type { Plugin } from "@utils/types";
 import { changes, checkForUpdates } from "@utils/updater";
+import { Guild } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MediaEngineStore, openUserSettingsPanel, React, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
+import { ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MediaEngineStore, NavigationRouter, openUserSettingsPanel, React, ReadStateUtils, RelationshipStore, SelectedChannelStore, SelectedGuildStore, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
 import type { FC, ReactElement, ReactNode } from "react";
 import { Settings } from "Vencord";
 
@@ -96,6 +97,8 @@ const CUSTOM_PROVIDER_ID = "custom-commands";
 const TOOLBOX_ACTIONS_CATEGORY_ID = "plugins-actions";
 const TOOLBOX_ACTIONS_PROVIDER_ID = "plugin-toolbox-actions";
 const CHATBAR_ACTIONS_CATEGORY_ID = "chatbar-actions";
+const GUILD_CATEGORY_ID = "guilds-actions";
+const FRIENDS_CATEGORY_ID = "friends-actions";
 
 const commandTagIds = new Map<string, string[]>();
 const tagMetadata = new Map<string, { label: string; count: number; }>();
@@ -109,6 +112,8 @@ const TAG_PLUGINS = "Plugins";
 const TAG_SESSION = "Session";
 const TAG_CONTEXT = "Context";
 const TAG_CUSTOM = "Custom";
+const TAG_GUILDS = "Guilds";
+const TAG_FRIENDS = "Friends";
 
 export function normalizeTag(tag: string): string {
     return tag.trim().toLowerCase();
@@ -662,6 +667,8 @@ const CATEGORY_WEIGHTS = new Map<string, number>([
     ["plugins-changes", 40],
     [TOOLBOX_ACTIONS_CATEGORY_ID, 45],
     [CHATBAR_ACTIONS_CATEGORY_ID, 45],
+    [GUILD_CATEGORY_ID, 40],
+    [FRIENDS_CATEGORY_ID, 40]
 ]);
 
 const CATEGORY_GROUP_LABELS = new Map<string | undefined, string>([
@@ -678,6 +685,8 @@ const CATEGORY_GROUP_LABELS = new Map<string | undefined, string>([
     ["plugins-changes", "Plugin Controls"],
     [TOOLBOX_ACTIONS_CATEGORY_ID, "Plugin Controls"],
     [CHATBAR_ACTIONS_CATEGORY_ID, "Plugin Controls"],
+    [GUILD_CATEGORY_ID, "Guilds"],
+    [FRIENDS_CATEGORY_ID, "Friends"]
 ]);
 
 const DEFAULT_CATEGORY_WEIGHT = 50;
@@ -695,7 +704,9 @@ const CATEGORY_DEFAULT_TAGS = new Map<string, string[]>([
     ["plugins-settings", [TAG_PLUGINS]],
     ["plugins-changes", [TAG_PLUGINS]],
     [TOOLBOX_ACTIONS_CATEGORY_ID, [TAG_PLUGINS, TAG_UTILITY]],
-    [CHATBAR_ACTIONS_CATEGORY_ID, [TAG_PLUGINS, TAG_UTILITY]]
+    [CHATBAR_ACTIONS_CATEGORY_ID, [TAG_PLUGINS, TAG_UTILITY]],
+    [GUILD_CATEGORY_ID, [TAG_GUILDS]],
+    [FRIENDS_CATEGORY_ID, [TAG_FRIENDS]]
 ]);
 
 const PINNED_STORAGE_KEY = "CommandPalettePinned";
@@ -1260,6 +1271,16 @@ const BUILT_IN_CATEGORIES: CommandCategory[] = [
         id: SESSION_TOOLS_CATEGORY_ID,
         label: "Session Tools",
         description: "Utilities for managing your Discord session"
+    },
+    {
+        id: GUILD_CATEGORY_ID,
+        label: "Guilds",
+        description: "Quickly navigate to your guilds"
+    },
+    {
+        id: FRIENDS_CATEGORY_ID,
+        label: "Friends",
+        description: "Quickly DM your friends"
     }
 ];
 
@@ -2252,6 +2273,50 @@ function registerSessionCommands() {
     }
 }
 
+function registerGuildCommands() {
+    const guilds = GuildStore.getGuilds?.() ?? {};
+
+    Object.values(guilds).forEach((guild: Guild) => {
+        registerCommand({
+            id: `open-guild-${guild.id}`,
+            label: `Navigate to ${guild.name}`,
+            keywords: ["guild", "server", guild.name.toLowerCase()],
+            categoryId: GUILD_CATEGORY_ID,
+            tags: [TAG_GUILDS, TAG_NAVIGATION],
+            handler: () => {
+                NavigationRouter.transitionToGuild(guild.id);
+            }
+        } satisfies CommandEntry);
+    });
+}
+
+function registerFriendCommands() {
+    const friendIds = RelationshipStore.getFriendIDs();
+
+    friendIds.forEach((userId: string) => {
+        const user = UserStore.getUser(userId);
+        if (!user) return;
+
+        const displayName = RelationshipStore.getNickname(userId) || user.globalName || null;
+
+        const username = displayName
+            ? `${displayName} (@${user.username})`
+            : user.username;
+
+        registerCommand({
+            id: `open-friend-${user.id}`,
+            label: `Open DM with ${username}`,
+            keywords: ["friend", "dm", username.toLowerCase()],
+            categoryId: FRIENDS_CATEGORY_ID,
+            tags: [TAG_FRIENDS, TAG_NAVIGATION],
+            handler: () => {
+                const channelId = ChannelStore.getDMFromUserId(user.id);
+                NavigationRouter.transitionTo(`/channels/@me/${channelId}`);
+            }
+        } satisfies CommandEntry);
+    });
+}
+
 function ensurePalettePlugin(): Plugin | null {
     const plugin = Vencord.Plugins.plugins[COMMAND_PALETTE_PLUGIN_NAME] as Plugin | undefined;
     if (!plugin) {
@@ -2698,6 +2763,8 @@ export function registerBuiltInCommands() {
     registerContextualCommands();
     registerCustomCommandProvider();
     registerSessionCommands();
+    registerGuildCommands();
+    registerFriendCommands();
 
     void pinsReady.then(async () => {
         if (prunePinned()) {
