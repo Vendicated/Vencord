@@ -1,0 +1,10 @@
+/*
+ * Discord has dumb max height logic for their context menus.
+ * If a context menu is at the bottom of the screen, its submenus are capped to its max height and can't even grow upwards
+ * We unset the variable they use to cap height. This allows submenus to grow as tall as they want
+ */
+
+#user-settings-cog,
+[aria-activedescendant^="user-settings-cog"] {
+    --reference-position-layer-max-height: initial !important;
+}
