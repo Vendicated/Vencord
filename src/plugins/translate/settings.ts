@@ -45,11 +45,6 @@ export const settings = definePluginSettings({
         hidden: true
     },
 
-    showChatBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show translate button in chat bar",
-        default: true
-    },
     service: {
         type: OptionType.SELECT,
         description: IS_WEB ? "Translation service (Not supported on Web!)" : "Translation service",

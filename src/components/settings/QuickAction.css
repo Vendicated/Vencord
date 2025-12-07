@@ -15,7 +15,7 @@
 .vc-settings-quickActions-pill {
     all: unset;
     background: var(--button-secondary-background);
-    color: var(--header-secondary);
+    color: var(--text-default);
     display: flex;
     align-items: center;
     gap: 0.5em;

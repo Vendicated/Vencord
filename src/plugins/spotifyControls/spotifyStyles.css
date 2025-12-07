@@ -149,7 +149,7 @@
 }
 
 .vc-spotify-comma {
-    color: var(--header-secondary);
+    color: var(--text-default);
 }
 
 .vc-spotify-artist[role="link"]:hover,
