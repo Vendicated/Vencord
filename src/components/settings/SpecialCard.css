@@ -16,14 +16,14 @@
 .vc-donate-support-button {
     overflow: visible !important;
     color: black;
-    background-color: color-mix(in srgb, #c3a3ce 25%, rgb(240, 178, 240));
+    background-color: color-mix(in srgb, #c3a3ce 25%, rgb(240 178 240));
 }
 
 .vc-invite-support-button:hover,
 .vc-donate-support-button:hover {
     overflow: visible !important;
     color: black;
-    background-color: color-mix(in srgb, #c3a3ce 50%, rgb(240, 178, 240));
+    background-color: color-mix(in srgb, #c3a3ce 50%, rgb(240 178 240));
 }
 
 .vc-invite-link {
