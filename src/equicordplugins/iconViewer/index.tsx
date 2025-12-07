@@ -22,23 +22,33 @@ export default definePlugin({
     startAt: StartAt.WebpackReady,
     toolboxActions: {
         "Open Icons Tab"() {
-            openUserSettingsPanel("icon_viewer");
+            openUserSettingsPanel("equicord_icon_viewer");
         },
     },
     settingsAboutComponent: SettingsAbout,
     start() {
-        const customEntriesSections = SettingsPlugin.customEntries;
+        const { customEntries, customSections } = SettingsPlugin;
 
-        customEntriesSections.push({
-            key: "icon_viewer",
+        customEntries.push({
+            key: "equicord_icon_viewer",
             title: "Icon Finder",
             Component: IconsTab,
             Icon: MagnifyingGlassIcon
         });
+
+        customSections.push(() => ({
+            section: "EquicordDiscordIcons",
+            label: "Icon Finder",
+            element: IconsTab,
+            className: "vc-discord-icons",
+            id: "IconViewer"
+        }));
     },
     stop() {
-        const customEntriesSections = SettingsPlugin.customEntries;
-        const i = customEntriesSections.findIndex(entry => entry.key === "icon_viewer");
-        if (i !== -1) customEntriesSections.splice(i, 1);
+        const { customEntries, customSections } = SettingsPlugin;
+        const entry = customEntries.findIndex(entry => entry.key === "equicord_icon_viewer");
+        const section = customSections.findIndex(section => section({} as any).id === "IconViewer");
+        if (entry !== -1) customEntries.splice(entry, 1);
+        if (section !== -1) customSections.splice(section, 1);
     },
 });

@@ -24,19 +24,29 @@ export default definePlugin({
     },
 
     start() {
-        const customEntriesSections = SettingsPlugin.customEntries;
+        const { customEntries, customSections } = SettingsPlugin;
 
-        customEntriesSections.push({
-            key: "theme_library",
+        customEntries.push({
+            key: "equicord_theme_library",
             title: "Theme Library",
             Component: require("./components/ThemeTab").default,
             Icon: ColorPaletteIcon
         });
+
+        customSections.push(() => ({
+            section: "EquicordThemeLibrary",
+            label: "Theme Library",
+            searchableTitles: ["Theme Library"],
+            element: require("./components/ThemeTab").default,
+            id: "ThemeLibrary",
+        }));
     },
 
     stop() {
-        const customEntriesSections = SettingsPlugin.customEntries;
-        const i = customEntriesSections.findIndex(entry => entry.key === "theme_library");
-        if (i !== -1) customEntriesSections.splice(i, 1);
+        const { customEntries, customSections } = SettingsPlugin;
+        const entry = customEntries.findIndex(entry => entry.key === "equicord_theme_library");
+        const section = customSections.findIndex(section => section({} as any).id === "ThemeLibrary");
+        if (entry !== -1) customEntries.splice(entry, 1);
+        if (section !== -1) customSections.splice(section, 1);
     },
 });

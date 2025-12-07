@@ -24,13 +24,21 @@ export default definePlugin({
     patches: [],
 
     async start() {
-        const customEntriesSections = SettingsPlugin.customEntries;
-        customEntriesSections.push({
-            key: "i_remember_you",
+        const { customEntries, customSections } = SettingsPlugin;
+
+        customEntries.push({
+            key: "equicord_i_remember_you",
             title: "I Remember You",
             Component: () => <DataUI usersCollection={data.usersCollection} />,
             Icon: EyeIcon
         });
+
+        customSections.push(() => ({
+            section: "EquicordIRememberYou",
+            label: "IRememberYou",
+            element: () => <DataUI plugin={this} usersCollection={data.usersCollection} />,
+            id: "IRememberYou"
+        }));
 
         const data = (this.dataManager = await new Data().withStart());
 
@@ -45,9 +53,11 @@ export default definePlugin({
 
     stop() {
         const dataManager = this.dataManager as Data;
-        const customEntriesSections = SettingsPlugin.customEntries;
-        const i = customEntriesSections.findIndex(entry => entry.key === "i_remember_you");
-        if (i !== -1) customEntriesSections.splice(i, 1);
+        const { customEntries, customSections } = SettingsPlugin;
+        const entry = customEntries.findIndex(entry => entry.key === "equicord_i_remember_you");
+        const section = customSections.findIndex(section => section({} as any).id === "IRememberYou");
+        if (entry !== -1) customEntries.splice(entry, 1);
+        if (section !== -1) customSections.splice(section, 1);
 
         removeMessagePreSendListener(dataManager._onMessagePreSend_preSend);
         clearInterval(dataManager._storageAutoSaveProtocol_interval);
