@@ -115,7 +115,7 @@ export function notify(text: string, icon?: string, onClick?: () => void) {
         showNotice(text, "OK", () => popNotice());
 
     showNotification({
-        title: "Relationship Notifier",
+        category: "RelationshipNotifier",
         body: text,
         icon,
         onClick

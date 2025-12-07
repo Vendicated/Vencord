@@ -81,6 +81,16 @@
 .vc-notification-log-modal {
     max-width: 962px;
     width: clamp(var(--modal-width-large, 800px), 962px, 85vw);
+    height: 85vh;
+    max-height: 900px;
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-notification-log-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .vc-notification-log-empty {
@@ -91,8 +101,9 @@
 
 .vc-notification-log-container {
     padding: 1em;
-    max-height: min(750px, 75vh);
+    height: 100%;
     width: 100%;
+    overflow-y: auto;
 }
 
 .vc-notification-log-wrapper {
@@ -138,4 +149,32 @@
 .vc-notification-log-danger-btn {
     color: var(--white-500);
     background-color: var(--button-danger-background);
+}
+
+.vc-notification-log-tab-bar-wrapper {
+    padding: 16px 16px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.vc-notification-log-tab-bar-wrapper::-webkit-scrollbar {
+    height: 4px;
+}
+
+.vc-notification-log-tab-bar-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vc-notification-log-tab-bar-wrapper::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thin-thumb);
+    border-radius: 2px;
+}
+
+.vc-notification-log-tab-bar-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thin-hover);
+}
+
+.vc-notification-log-tab-bar {
+    margin-bottom: 0;
+    min-width: fit-content;
 }

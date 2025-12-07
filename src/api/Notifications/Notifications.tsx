@@ -41,7 +41,7 @@ function getRoot() {
 }
 
 export interface NotificationData {
-    title: string;
+    title?: string;
     body: string;
     /**
      * Same as body but can be a custom component.
@@ -61,6 +61,8 @@ export interface NotificationData {
     noPersist?: boolean;
     /** Whether this notification should be dismissed when clicked (defaults to true) */
     dismissOnClick?: boolean;
+    /** Category for filtering in Notification Log */
+    category?: string;
 }
 
 function _showNotification(notification: NotificationData, id: number) {
@@ -96,8 +98,8 @@ export async function showNotification(data: NotificationData) {
     persistNotification(data);
 
     if (shouldBeNative() && await requestPermission()) {
-        const { title, body, icon, image, onClick = null, onClose = null } = data;
-        const n = new Notification(title, {
+        const { title = data.category, body, icon, image, onClick = null, onClose = null } = data;
+        const n = new Notification(title || "", {
             body,
             icon,
             // @ts-expect-error ts is drunk

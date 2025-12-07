@@ -27,6 +27,7 @@ import { NotificationData } from "./Notifications";
 
 export default ErrorBoundary.wrap(function NotificationComponent({
     title,
+    category,
     body,
     richBody,
     color,
@@ -38,6 +39,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
     className,
     dismissOnClick
 }: NotificationData & { className?: string; }) {
+    const displayTitle = title || category || "";
     const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
     const hasFocus = useStateFromStores([WindowStore], () => WindowStore.isFocused());
 
@@ -83,7 +85,7 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                 {icon && <img className="vc-notification-icon" src={icon} alt="" />}
                 <div className="vc-notification-content">
                     <div className="vc-notification-header">
-                        <h2 className="vc-notification-title">{title}</h2>
+                        <h2 className="vc-notification-title">{displayTitle}</h2>
                         <button
                             className="vc-notification-close-btn"
                             onClick={e => {

@@ -23,14 +23,14 @@ import { Flex } from "@components/Flex";
 import { openNotificationSettingsModal } from "@components/settings/tabs/vencord/NotificationSettings";
 import { closeModal, ModalCloseButton, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { Alerts, Button, Forms, ListScrollerThin, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
+import { Alerts, Button, Forms, ListScrollerThin, React, TabBar, Text, Timestamp, useEffect, useMemo, useReducer, useState } from "@webpack/common";
 import { nanoid } from "nanoid";
 import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
 import type { NotificationData } from "./Notifications";
 
-interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color"> {
+interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color" | "category"> {
     timestamp: number;
     id: string;
 }
@@ -123,12 +123,14 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
                     </div>
                 }
             />
-        </div >
+        </div>
     );
 }
 
-export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
-    if (!log.length && !pending)
+export function NotificationLog({ log, pending, filter }: { log: PersistentNotificationData[], pending: boolean; filter?: (notification: PersistentNotificationData) => boolean; }) {
+    const filteredLog = filter ? log.filter(filter) : log;
+
+    if (!filteredLog.length && !pending)
         return (
             <div className={cl("container")}>
                 <div className={cl("empty")} />
@@ -141,17 +143,56 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
     return (
         <ListScrollerThin
             className={cl("container")}
-            sections={[log.length]}
+            sections={[filteredLog.length]}
             sectionHeight={0}
             rowHeight={120}
             renderSection={() => null}
-            renderRow={item => <NotificationEntry data={log[item.row]} key={log[item.row].id} />}
+            renderRow={item => <NotificationEntry data={filteredLog[item.row]} key={filteredLog[item.row].id} />}
         />
     );
 }
 
+function getCategory(notification: PersistentNotificationData): string {
+    return notification.category || (notification.title?.replace(/\s+/g, "") ?? "");
+}
+
+interface LogTab {
+    id: string;
+    label: string;
+    filter: (notification: PersistentNotificationData) => boolean;
+}
+
 function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
     const [log, pending] = useLogs();
+    const [selectedTab, setSelectedTab] = useState("all");
+
+    const tabs = useMemo<LogTab[]>(() => {
+        const categoryMap = new Map<string, string>();
+
+        for (const notification of log) {
+            const normalized = getCategory(notification);
+            if (!normalized) continue;
+
+            if (!categoryMap.has(normalized)) {
+                categoryMap.set(normalized, notification.category || notification.title || normalized);
+            }
+        }
+
+        const categoryTabs = Array.from(categoryMap.entries())
+            .sort(([, a], [, b]) => a.localeCompare(b))
+            .map(([id, label]) => ({
+                id,
+                label,
+                filter: (n) => getCategory(n) === id
+            }));
+
+        return [
+            { id: "all", label: "All", filter: () => true },
+            ...categoryTabs
+        ];
+    }, [log]);
+
+    const currentFilter = tabs.find(t => t.id === selectedTab)?.filter;
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE} className={cl("modal")}>
@@ -160,8 +201,29 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
-            <div style={{ width: "100%" }}>
-                <NotificationLog log={log} pending={pending} />
+            {tabs.length > 0 && (
+                <div className={cl("tab-bar-wrapper")}>
+                    <TabBar
+                        type="top"
+                        look="brand"
+                        className={cl("tab-bar")}
+                        selectedItem={selectedTab}
+                        onItemSelect={setSelectedTab}
+                    >
+                        {tabs.map(tab => (
+                            <TabBar.Item
+                                key={tab.id}
+                                id={tab.id}
+                            >
+                                {tab.label}
+                            </TabBar.Item>
+                        ))}
+                    </TabBar>
+                </div>
+            )}
+
+            <div className={cl("content")}>
+                <NotificationLog log={log} pending={pending} filter={currentFilter ?? (() => true)} />
             </div>
 
             <ModalFooter>
