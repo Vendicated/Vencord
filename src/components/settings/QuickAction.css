@@ -15,7 +15,7 @@
 .vc-settings-quickActions-pill {
     all: unset;
     background: var(--button-secondary-background);
-    color: var(--text-default);
+    color: var(--header-secondary);
     display: flex;
     align-items: center;
     gap: 0.5em;
@@ -27,7 +27,6 @@
 
 .vc-settings-quickActions-pill:hover {
     background: var(--button-secondary-background-hover);
-    color: var(--text-default);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
