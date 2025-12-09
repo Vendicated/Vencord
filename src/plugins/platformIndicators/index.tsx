@@ -31,7 +31,6 @@ import desktopIcon from "file://icons/desktopIcon.svg?minify";
 import embeddedIcon from "file://icons/embeddedIcon.svg?minify";
 import mobileIcon from "file://icons/mobileIcon.svg?minify";
 import webIcon from "file://icons/webIcon.svg?minify";
-import type { JSX } from "react";
 
 export interface Session {
     sessionId: string;
@@ -51,7 +50,7 @@ const SessionsStore = findStoreLazy("SessionsStore") as {
 function Icon(svg: string, opts?: { width?: number; height?: number; }) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
         <Tooltip text={tooltip} >
-            {(tooltipProps: object) => (
+            {tooltipProps => (
                 <img
                     {...tooltipProps}
                     src={"data:image/svg+xml," + encodeURIComponent(svg.replace("#000000", color))}
@@ -64,14 +63,12 @@ function Icon(svg: string, opts?: { width?: number; height?: number; }) {
     );
 }
 
-type IconComponent = (porps: { color: string; tooltip: string; small: boolean; }) => JSX.Element;
-
 const Icons = {
     desktop: Icon(desktopIcon),
     web: Icon(webIcon),
     mobile: Icon(mobileIcon, { height: 17, width: 17 }),
     embedded: Icon(embeddedIcon),
-} satisfies Record<DiscordPlatform, IconComponent>;
+} satisfies Record<DiscordPlatform, unknown>;
 
 const SVGIcons: Record<DiscordPlatform, string> = {
     desktop: desktopIcon,
