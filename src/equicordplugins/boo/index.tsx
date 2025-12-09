@@ -19,46 +19,8 @@ import { ChannelStore, MessageStore, Tooltip, useEffect, UserStore, useState } f
 import { Boo, clearChannelFromGhost, getBooCount, getGhostedChannels, onBooCountChange } from "./Boo";
 import { GhostedUsersModal } from "./GhostedUsersModal";
 import { IconGhost } from "./IconGhost";
-import { JumpscareOverlay } from "./JumpscareOverlay";
 
 export const cl = classNameFactory("vc-boo-");
-
-let jumpscareTimerId: NodeJS.Timeout | null = null;
-let showJumpscareOverlay = false;
-const jumpscareCallbacks: Set<() => void> = new Set();
-
-function triggerJumpscare() {
-    showJumpscareOverlay = true;
-    for (const callback of jumpscareCallbacks) {
-        callback();
-    }
-}
-
-function closeJumpscare() {
-    showJumpscareOverlay = false;
-    for (const callback of jumpscareCallbacks) {
-        callback();
-    }
-}
-
-function resetJumpscareTimer() {
-    if (jumpscareTimerId) {
-        clearTimeout(jumpscareTimerId);
-        jumpscareTimerId = null;
-    }
-
-    const count = getBooCount();
-    if (count > 0 && settings.store.scary) {
-        // this is such a bad way to do this LMFAO
-        const milliseconds = 60 * 60 * 1000;
-
-        jumpscareTimerId = setTimeout(() => {
-            if (getBooCount() > 0) {
-                triggerJumpscare();
-            }
-        }, milliseconds);
-    }
-}
 
 export const settings = definePluginSettings({
     showIndicator: {
@@ -77,12 +39,6 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Comma-separated list of channel IDs to exempt from ghosting (right-click a DM channel to copy its ID)",
         default: "",
-        restartNeeded: false
-    },
-    scary: {
-        type: OptionType.BOOLEAN,
-        description: "Something might happen if you ignore someone for too long...",
-        default: false,
         restartNeeded: false
     },
     ignoreBots: {
@@ -120,25 +76,10 @@ function BooIndicator() {
     useEffect(() => {
         const unsubscribe = onBooCountChange(newCount => {
             setCount(newCount);
-            resetJumpscareTimer();
         });
-
-        // register jumpscare callback
-        const jumpscareCallback = () => {
-            setShowJumpscare(showJumpscareOverlay);
-        };
-        jumpscareCallbacks.add(jumpscareCallback);
-
-        // lucky lucky
-        resetJumpscareTimer();
 
         return () => {
             unsubscribe();
-            jumpscareCallbacks.delete(jumpscareCallback);
-            if (jumpscareTimerId) {
-                clearTimeout(jumpscareTimerId);
-                jumpscareTimerId = null;
-            }
         };
     }, []);
 
@@ -173,7 +114,6 @@ function BooIndicator() {
 
     return (
         <>
-            {showJumpscare && <JumpscareOverlay onClose={closeJumpscare} />}
             {settings.store.showIndicator && (
                 <div id={cl("container")}>
                     <Tooltip text={getTooltipText()} position="right">

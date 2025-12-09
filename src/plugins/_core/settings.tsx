@@ -207,7 +207,7 @@ export default definePlugin({
             ["EquicordCloud", "equicord_cloud_panel"],
             ["EquicordBackupAndRestore", "equicord_backup_restore_panel"],
             ["EquicordPatchHelper", "equicord_patch_helper_panel"],
-            ["Equibop", "EquibopSettings", "equicord_equibop_settings_panel"],
+            ["EquibopSettings", "equicord_equibop_settings_panel"],
             ["EquicordDiscordIcons", "equicord_icon_viewer"],
             ["EquicordThemeLibrary", "equicord_theme_library"],
             ["EquicordIRememberYou", "equicord_i_remember_you"],
