@@ -892,7 +892,25 @@ function setLastFilterChoices(filters: { group: string; filter: string; }[]): vo
     settings.store.lastQuestPageFilters = JSON.parse(JSON.stringify(filters)).reduce((acc, item) => ({ ...acc, [item.filter]: item }), {});
 }
 
-function getQuestAcceptedButtonProps(quest: Quest, text: string) {
+function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boolean, onClick?: () => void) {
+    const validTasks = [
+        "WATCH_VIDEO",
+        "WATCH_VIDEO_ON_MOBILE",
+        "PLAY_ON_DESKTOP",
+        "PLAY_ON_XBOX",
+        "PLAY_ON_PLAYSTATION",
+        "PLAY_ACTIVITY"
+    ];
+
+    if (!Array.from(validTasks).some(taskType => Object.values(quest.config.taskConfigV2?.tasks || {}).some(task => task.type === taskType))) {
+        return {
+            disabled: disabled,
+            text: text,
+            onClick: onClick,
+            icon: () => { }
+        };
+    }
+
     return {
         disabled: shouldDisableQuestAcceptedButton(quest) ?? true,
         text: getQuestAcceptedButtonText(quest) ?? text,
@@ -1315,13 +1333,13 @@ export default definePlugin({
                     // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress but not active.
                     // Then, when the Quest Accepted button is clicked, resume the automatic completion of the
                     // Quest and disable the button again.
-                    match: /(?<=secondary",)disabled:!0,text:(\i\.intl\.string\(\i\.\i#{intl::QUEST_ACCEPTED}\)),/,
-                    replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1),"
+                    match: /(?<=secondary",)disabled:(!0),text:(\i\.intl\.string\(\i\.\i#{intl::QUEST_ACCEPTED}\)),/,
+                    replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$2,$1,undefined),"
                 },
                 {
                     // Does the above for resuming Play Activity Quests.
-                    match: /(?<=icon:.{0,35}?onClick:.{0,20}?,text:(\i),fullWidth:!0)/,
-                    replace: ",...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1)"
+                    match: /(?<=icon:.{0,35}?onClick:(.{0,20}?),text:(\i),fullWidth:!0)/,
+                    replace: ",...$self.getQuestAcceptedButtonProps(arguments[0].quest,$2,false,$1)"
                 }
             ]
         },
