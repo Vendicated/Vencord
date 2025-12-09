@@ -27,11 +27,11 @@ import definePlugin, { OptionType } from "@utils/types";
 import { DiscordPlatform, User } from "@vencord/discord-types";
 import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import { AuthenticationStore, PresenceStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
-// Base64 data URLs of all the icons
-import desktopIcon from 'file://icons/desktopIcon.svg?minify';
-import mobileIcon from 'file://icons/mobileIcon.svg?minify';
-import webIcon from 'file://icons/webIcon.svg?minify';
-import embeddedIcon from 'file://icons/embeddedIcon.svg?minify';
+import desktopIcon from "file://icons/desktopIcon.svg?minify";
+import embeddedIcon from "file://icons/embeddedIcon.svg?minify";
+import mobileIcon from "file://icons/mobileIcon.svg?minify";
+import webIcon from "file://icons/webIcon.svg?minify";
+import type { JSX } from "react";
 
 export interface Session {
     sessionId: string;
@@ -51,7 +51,7 @@ const SessionsStore = findStoreLazy("SessionsStore") as {
 function Icon(svg: string, opts?: { width?: number; height?: number; }) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
         <Tooltip text={tooltip} >
-            {(tooltipProps: any) => (
+            {(tooltipProps: object) => (
                 <img
                     {...tooltipProps}
                     src={"data:image/svg+xml," + encodeURIComponent(svg.replace("#000000", color))}
@@ -64,14 +64,16 @@ function Icon(svg: string, opts?: { width?: number; height?: number; }) {
     );
 }
 
+type IconComponent = (porps: { color: string; tooltip: string; small: boolean; }) => JSX.Element;
+
 const Icons = {
     desktop: Icon(desktopIcon),
     web: Icon(webIcon),
     mobile: Icon(mobileIcon, { height: 17, width: 17 }),
     embedded: Icon(embeddedIcon),
-} satisfies Record<DiscordPlatform, any>;
+} satisfies Record<DiscordPlatform, IconComponent>;
 
-const B64Icons: Record<DiscordPlatform, string> = {
+const SVGIcons: Record<DiscordPlatform, string> = {
     desktop: desktopIcon,
     web: webIcon,
     mobile: mobileIcon,
@@ -132,7 +134,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
             : platform[0].toUpperCase() + platform.slice(1);
 
         let size = { width: 20, height: 20 };
-        if (platform === 'mobile') {
+        if (platform === "mobile") {
             size = {
                 width: 17,
                 height: 17,
@@ -141,7 +143,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
         return {
             description: tooltip,
-            iconSrc: "data:image/svg+xml," + encodeURIComponent(B64Icons[platform].replace("#000000", useStatusFillColor(status))),
+            iconSrc: "data:image/svg+xml," + encodeURIComponent(SVGIcons[platform].replace("#000000", useStatusFillColor(status))),
             props: {
                 style: size
             },
