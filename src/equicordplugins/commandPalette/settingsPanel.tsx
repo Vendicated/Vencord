@@ -4,8 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button, TextButton } from "@components/Button";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
-import { Button, Forms, React, Select, TextInput } from "@webpack/common";
+import { React, Select, TextInput } from "@webpack/common";
 
 import { openCommandPicker } from "./CommandPicker";
 import {
@@ -169,7 +172,7 @@ function renderActionFields(command: CustomCommandDefinition, onChange: (action:
                         onChange={value => onChange({ type: "command", commandId: value })}
                     />
                     <Button
-                        size={Button.Sizes.SMALL}
+                        size="small"
                         onClick={() => openCommandPicker({
                             initialQuery: action.commandId,
                             onSelect: command => onChange({ type: "command", commandId: command.id })
@@ -187,11 +190,11 @@ function renderActionFields(command: CustomCommandDefinition, onChange: (action:
 
             return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <Forms.FormText style={{ color: "var(--text-muted, #a5a6ab)" }}>
+                    <Paragraph size="sm" style={{ color: "var(--text-muted, #a5a6ab)" }}>
                         Current page: {currentSummary}
-                    </Forms.FormText>
+                    </Paragraph>
                     <Button
-                        size={Button.Sizes.SMALL}
+                        size="small"
                         onClick={() => openCommandPicker({
                             initialSelectedIds: selectedSettings ? [selectedSettings.id] : undefined,
                             filter: entry => entry.categoryId === "discord-settings",
@@ -232,7 +235,7 @@ function renderActionFields(command: CustomCommandDefinition, onChange: (action:
                             checked={Boolean(action.openExternal)}
                             onChange={value => onChange({ type: "url", url: action.url, openExternal: value })}
                         />
-                        <Forms.FormText>Open externally</Forms.FormText>
+                        <Paragraph size="sm">Open externally</Paragraph>
                     </div>
                 </div>
             );
@@ -248,7 +251,7 @@ function renderActionFields(command: CustomCommandDefinition, onChange: (action:
                         onChange={value => onChange({ type: "macro", steps: parseListInput(value) })}
                     />
                     <Button
-                        size={Button.Sizes.SMALL}
+                        size="small"
                         onClick={() => openCommandPicker({
                             allowMultiple: true,
                             initialSelectedIds: action.steps,
@@ -263,25 +266,24 @@ function renderActionFields(command: CustomCommandDefinition, onChange: (action:
                     {action.steps.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                             {action.steps.map((step, index) => (
-                                <Button
+                                <TextButton
                                     key={`${step}-${index}`}
-                                    size={Button.Sizes.MIN}
+                                    variant="secondary"
                                     onClick={() => {
                                         const next = [...action.steps];
                                         next.splice(index, 1);
                                         onChange({ type: "macro", steps: next });
                                     }}
-                                    look={Button.Looks.LINK}
                                 >
                                     {step} ✕
-                                </Button>
+                                </TextButton>
                             ))}
                         </div>
                     )}
                     {invalidSteps.length > 0 && (
-                        <Forms.FormText style={{ color: "var(--status-danger-text, #f04747)" }}>
+                        <Paragraph size="sm" style={{ color: "var(--status-danger-text, #f04747)" }}>
                             Unknown command IDs: {invalidSteps.join(", ")}
-                        </Forms.FormText>
+                        </Paragraph>
                     )}
                 </div>
             );
@@ -350,11 +352,11 @@ export function CommandPaletteSettingsPanel() {
 
     return (
         <section>
-            <Forms.FormTitle tag="h4" style={{ color: "var(--text-normal, #dcddde)" }}>Custom Commands</Forms.FormTitle>
-            <Forms.FormText className="vc-cp-settings-help">
+            <Heading tag="h4" style={{ color: "var(--text-normal, #dcddde)" }}>Custom Commands</Heading>
+            <Paragraph size="sm" className="vc-command-palette-settings-help">
                 {/* Hank, don't abbreviate cyberpunk hank */}
                 1) Name the command · 2) Add optional description/keywords/tags/category · 3) Choose an action and fill its details (IDs should match existing palette commands for aliases and macros).
-            </Forms.FormText>
+            </Paragraph>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {commands.map(command => {
                     const manualAdvanced = advancedOpen[command.id];
@@ -370,14 +372,15 @@ export function CommandPaletteSettingsPanel() {
                     return (
                         <div key={command.id} style={{ padding: 14, borderRadius: 8, background: "var(--background-primary)", border: "1px solid var(--background-base-low)", display: "flex", flexDirection: "column", gap: 12 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <Forms.FormTitle tag="h5" style={{ color: "var(--text-normal, #dcddde)" }}>{command.label || "Untitled Command"}</Forms.FormTitle>
-                                <Button
-                                    size={Button.Sizes.MIN}
-                                    look={Button.Looks.LINK}
+                                <Heading tag="h5" style={{ color: "var(--text-normal, #dcddde)", marginBottom: 0 }}>
+                                    {command.label || "Untitled Command"}
+                                </Heading>
+                                <TextButton
+                                    variant="secondary"
                                     onClick={() => setCollapsed(prev => ({ ...prev, [command.id]: !isCollapsed }))}
                                 >
                                     {isCollapsed ? "Expand" : "Collapse"}
-                                </Button>
+                                </TextButton>
                             </div>
 
                             {!isCollapsed && (
@@ -416,20 +419,19 @@ export function CommandPaletteSettingsPanel() {
                                                 serialize={option => option.value}
                                             />
                                         </div>
-                                        <Forms.FormText style={{ color: "var(--text-muted, #a5a6ab)", fontSize: 12 }}>
+                                        <Paragraph size="xs" style={{ color: "var(--text-muted, #a5a6ab)", fontSize: 12 }}>
                                             {ACTION_HELP_TEXT[command.action.type]}
-                                        </Forms.FormText>
+                                        </Paragraph>
                                     </div>
 
                                     {renderActionFields(command, action => handleUpdate(command.id, prev => duplicateWithUpdates(prev, { action })))}
 
-                                    <Button
-                                        size={Button.Sizes.SMALL}
-                                        look={Button.Looks.LINK}
+                                    <TextButton
+                                        variant="secondary"
                                         onClick={() => setAdvancedOpen(prev => ({ ...prev, [command.id]: !(showAdvanced ?? false) }))}
                                     >
                                         {showAdvanced ? "Hide advanced options" : "Show advanced options"}
-                                    </Button>
+                                    </TextButton>
 
                                     {showAdvanced && (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 12, background: "var(--background-secondary-alt)", borderRadius: 8, padding: 12 }}>
@@ -454,9 +456,9 @@ export function CommandPaletteSettingsPanel() {
                                                 />
                                                 {tagMeta.length > 0 && (
                                                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                                        <Forms.FormText style={{ color: "var(--text-muted, #a5a6ab)", fontSize: 12 }}>
+                                                        <Paragraph size="xs" style={{ color: "var(--text-muted, #a5a6ab)", fontSize: 12 }}>
                                                             Suggestions
-                                                        </Forms.FormText>
+                                                        </Paragraph>
                                                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                                                             {tagMeta
                                                                 .filter(meta => !(command.tags ?? []).some(tag => normalizeTag(tag) === meta.id))
@@ -464,8 +466,8 @@ export function CommandPaletteSettingsPanel() {
                                                                 .map(meta => (
                                                                     <Button
                                                                         key={meta.id}
-                                                                        size={Button.Sizes.MIN}
-                                                                        look={Button.Looks.LINK}
+                                                                        size="min"
+                                                                        variant="secondary"
                                                                         onClick={() => handleUpdate(command.id, prev => duplicateWithUpdates(prev, {
                                                                             tags: normalizeTagList([...(prev.tags ?? []), meta.label])
                                                                         }))}
@@ -484,9 +486,9 @@ export function CommandPaletteSettingsPanel() {
                                                     select={value => handleUpdate(command.id, prev => duplicateWithUpdates(prev, { categoryId: value || undefined }))}
                                                     serialize={option => option.value}
                                                 />
-                                                <Forms.FormText style={{ color: "var(--text-muted, #a5a6ab)", fontSize: 12 }}>
+                                                <Paragraph size="xs" style={{ color: "var(--text-muted, #a5a6ab)", fontSize: 12 }}>
                                                     Choose where this command appears in the palette.
-                                                </Forms.FormText>
+                                                </Paragraph>
                                                 {categoryId && (
                                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                                                         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 999, padding: "2px 10px", fontSize: 12, background: "var(--background-base-low)", color: "var(--text-normal, #dcddde)" }}>
@@ -501,7 +503,7 @@ export function CommandPaletteSettingsPanel() {
                                                     checked={Boolean(command.danger)}
                                                     onChange={value => handleUpdate(command.id, prev => duplicateWithUpdates(prev, { danger: value }))}
                                                 />
-                                                <Forms.FormText>Show as dangerous</Forms.FormText>
+                                                <Paragraph size="sm">Show as dangerous</Paragraph>
                                             </div>
                                         </div>
                                     )}
@@ -509,8 +511,8 @@ export function CommandPaletteSettingsPanel() {
                             )}
 
                             <Button
-                                color={Button.Colors.RED}
-                                size={Button.Sizes.SMALL}
+                                variant="dangerPrimary"
+                                size="small"
                                 onClick={() => handleRemove(command.id)}
                             >
                                 Remove Command
@@ -519,11 +521,7 @@ export function CommandPaletteSettingsPanel() {
                     );
                 })}
             </div>
-            <Button
-                color={Button.Colors.BRAND}
-                style={{ marginTop: 16 }}
-                onClick={handleAdd}
-            >
+            <Button variant="primary" style={{ marginTop: 16 }} onClick={handleAdd}>
                 Add Command
             </Button>
         </section>

@@ -682,37 +682,32 @@
 }
 
 /* Keybind recorder styles */
-.vc-cp-keybind-input {
+.vc-command-palette-keybind-input {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 12px;
-    background-color: var(--background-secondary-alt);
+    padding: 12px 0;
     border-radius: 8px;
     transition: background-color 0.2s ease;
 }
 
-.vc-cp-keybind-input:hover {
-    background-color: var(--background-secondary-alt);
-}
-
-.vc-cp-keybind-info {
+.vc-command-palette-keybind-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
     flex: 1;
 }
 
-.vc-cp-keybind-controls {
+.vc-command-palette-keybind-controls {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 8px;
 }
 
-.vc-cp-keybind-button {
+.vc-command-palette-keybind-button {
     padding: 8px 16px;
     background-color: var(--background-base-low);
     border: 2px solid var(--input-border);
@@ -728,55 +723,48 @@
     box-shadow: 0 0 0 1px var(--background-modifier-accent);
 }
 
-.vc-cp-keybind-button:hover:not(:disabled) {
+.vc-command-palette-keybind-button:hover:not(:disabled) {
     background-color: var(--background-modifier-hover);
     border-color: var(--brand-experiment);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
 }
 
-.vc-cp-keybind-button:active:not(:disabled) {
+.vc-command-palette-keybind-button.listening:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--brand-experiment) 0%, var(--brand-experiment-560) 100%);
+    border-color: var(--status-danger, #f04747);
+    box-shadow: none;
+    transform: translateY(-1px);
+}
+
+.vc-command-palette-keybind-button:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
 }
 
-.vc-cp-keybind-button:disabled {
+.vc-command-palette-keybind-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.vc-cp-keybind-button.listening {
+.vc-command-palette-keybind-button.listening {
     background: linear-gradient(135deg, var(--brand-experiment) 0%, var(--brand-experiment-560) 100%);
     color: var(--white);
-    border-color: var(--brand-experiment);
-    animation: vc-cp-keybind-pulse 1.5s ease-in-out infinite;
-    box-shadow: 0 0 12px var(--brand-experiment);
+    border-color: var(--status-danger, #f04747);
+    animation: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgb(var(--status-danger-rgb, 240 71 71) / 60%);
 }
 
-@keyframes vc-cp-keybind-pulse {
-
-    /* stylelint-disable-next-line rule-empty-line-before */
-    0%,
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.85;
-        transform: scale(1.02);
-    }
-}
-
-.vc-cp-keybind-conflict {
+.vc-command-palette-keybind-conflict {
     color: var(--text-feedback-critical);
     font-size: 12px;
     font-weight: 500;
     margin-top: 2px;
-    animation: vc-cp-keybind-shake 0.3s ease;
+    animation: vc-command-palette-keybind-shake 0.3s ease;
 }
 
-@keyframes vc-cp-keybind-shake {
+@keyframes vc-command-palette-keybind-shake {
 
     /* stylelint-disable-next-line rule-empty-line-before */
     0%,

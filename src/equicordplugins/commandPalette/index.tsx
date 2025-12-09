@@ -5,10 +5,11 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Text, useEffect, useRef, useState } from "@webpack/common";
+import { useEffect, useState } from "@webpack/common";
 
 import { cleanupCommandPaletteRuntime, registerBuiltInCommands, wrapChatBarChildren } from "./registry";
 import { CommandPaletteSettingsPanel } from "./settingsPanel";
@@ -16,7 +17,6 @@ import { openCommandPalette } from "./ui";
 
 const DEFAULT_KEYS = IS_MAC ? ["Meta", "Shift", "P"] : ["Control", "Shift", "P"];
 
-const cl = classNameFactory("vc-cp-");
 const isRecordingGlobal = false;
 let openScheduled = false;
 
@@ -37,7 +37,6 @@ function formatKeybind(keybind: string | string[]): string {
 function KeybindRecorder() {
     const [isListening, setIsListening] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const buttonRef = useRef<HTMLButtonElement>(null);
     const currentKeybind = settings.use(["hotkey"]).hotkey;
 
     useEffect(() => {
@@ -52,11 +51,11 @@ function KeybindRecorder() {
             }
 
             const keys: string[] = [];
-            if (IS_MAC && event.ctrlKey) {
-                if (event.ctrlKey) keys.push("CONTROL");
-                if (event.metaKey) keys.push("CTRL");
-            } else if (event.ctrlKey) {
-                keys.push("CTRL");
+            if (event.metaKey) {
+                keys.push("META");
+            }
+            if (event.ctrlKey) {
+                keys.push(IS_MAC ? "CONTROL" : "CTRL");
             }
             if (event.shiftKey) keys.push("SHIFT");
             if (event.altKey) keys.push("ALT");
@@ -79,8 +78,6 @@ function KeybindRecorder() {
         document.addEventListener("keydown", handleKeyDown, true);
         window.addEventListener("blur", handleBlur);
 
-        buttonRef.current?.focus();
-
         return () => {
             document.removeEventListener("keydown", handleKeyDown, true);
             window.removeEventListener("blur", handleBlur);
@@ -93,31 +90,34 @@ function KeybindRecorder() {
     };
 
     return (
-        <div className="vc-cp-keybind-input">
-            <div className="vc-cp-keybind-info">
-                <Text variant="text-md/semibold">Command Palette Hotkey</Text>
-                <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>
+        <div className="vc-command-palette-keybind-input">
+            <div className="vc-command-palette-keybind-info">
+                <BaseText size="md" weight="semibold">Command Palette Hotkey</BaseText>
+                <BaseText size="sm" weight="normal" style={{ color: "var(--text-muted)" }}>
                     Hotkey used to open the command palette
-                </Text>
+                </BaseText>
                 {error && (
-                    <Text variant="text-xs/normal" className="vc-cp-keybind-conflict">
+                    <BaseText size="xs" weight="normal" className="vc-command-palette-keybind-conflict">
                         {error}
-                    </Text>
+                    </BaseText>
                 )}
             </div>
-            <div className="vc-cp-keybind-controls">
-                <button
-                    ref={buttonRef}
-                    className={`vc-cp-keybind-button ${isListening ? "listening" : ""}`}
+            <div className="vc-command-palette-keybind-controls">
+                <Button
+                    type="button"
+                    variant="secondary"
+                    className={`vc-command-palette-keybind-button ${isListening ? "listening" : ""}`}
                     onClick={() => setIsListening(true)}
                 >
-                    {isListening ? "Press any key..." : formatKeybind(currentKeybind)}
-                </button>
-                <Button
-                    size={Button.Sizes.SMALL}
-                    color={Button.Colors.PRIMARY}
-                    onClick={handleReset}
-                >
+                    {isListening ? (
+                        <BaseText size="sm" weight="normal" style={{ color: "var(--white)", opacity: 0.8 }}>
+                            Press any key...
+                        </BaseText>
+                    ) : (
+                        formatKeybind(currentKeybind)
+                    )}
+                </Button>
+                <Button size="small" variant="secondary" onClick={handleReset}>
                     Reset
                 </Button>
             </div>
