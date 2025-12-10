@@ -131,7 +131,7 @@ export const ContextMenu = $ContextMenu;
 export const ChatButtons = $ChatButtons;
 
 /**
- * An API allowing you to add buttons to the header bar.
+ * An API allowing you to add buttons to the header bar or channel toolbar.
  */
 export const HeaderBar = $HeaderBar;
 

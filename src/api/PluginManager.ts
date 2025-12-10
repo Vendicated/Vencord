@@ -41,7 +41,7 @@ export { Plugins as plugins };
 
 import { traceFunction } from "../debug/Tracer";
 import { addAudioProcessor, removeAudioProcessor } from "./AudioPlayer";
-import { addHeaderBarButton, removeHeaderBarButton } from "./HeaderBar";
+import { addChannelToolbarButton, addHeaderBarButton, removeChannelToolbarButton, removeHeaderBarButton } from "./HeaderBar";
 
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -253,7 +253,13 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     // Custom
     if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
-    if (headerBarButton) addHeaderBarButton(name, headerBarButton.render, headerBarButton.priority);
+    if (headerBarButton) {
+        if (headerBarButton.location === "channeltoolbar") {
+            addChannelToolbarButton(name, headerBarButton.render, headerBarButton.priority);
+        } else {
+            addHeaderBarButton(name, headerBarButton.render, headerBarButton.priority);
+        }
+    }
     if (audioProcessor) addAudioProcessor(name, audioProcessor);
 
     return true;
@@ -321,7 +327,13 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     // Custom
     if (renderNicknameIcon) removeNicknameIcon(name);
-    if (headerBarButton) removeHeaderBarButton(name);
+    if (headerBarButton) {
+        if (headerBarButton.location === "channeltoolbar") {
+            removeChannelToolbarButton(name);
+        } else {
+            removeHeaderBarButton(name);
+        }
+    }
     if (audioProcessor) removeAudioProcessor(name);
 
     return true;
