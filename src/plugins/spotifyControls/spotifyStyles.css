@@ -24,7 +24,7 @@
     margin: 0 2px;
     border-radius: var(--radius-sm);
     background: none;
-    color: var(--interactive-icon-default);
+    color: var(--interactive-icon-default, var(--interactive-normal));
     padding: 0;
     width: 32px;
     height: 32px;
@@ -34,8 +34,8 @@
 }
 
 .vc-spotify-button:hover {
-    color: var(--interactive-icon-hover);
-    background-color: var(--background-mod-strong);
+    color: var(--interactive-icon-hover, var(--interactive-hover));
+    background-color: var(--background-mod-strong, var(--background-modifier-selected));
 }
 
 .vc-spotify-button-icon {
@@ -179,7 +179,7 @@
 }
 
 #vc-spotify-progress-bar > [class^="slider"] [class^="barFill"] {
-    background-color: var(--interactive-icon-active);
+    background-color: var(--interactive-icon-active, var(--interactive-active));
 }
 
 #vc-spotify-progress-bar > [class^="slider"]:hover [class^="barFill"] {
@@ -192,9 +192,9 @@
     width: 16px !important;
     margin-top: calc(17px/-2 + var(--bar-offset)/2);
     margin-left: -0.5px;
-    background-color: var(--interactive-icon-active);
-    border-color: var(--interactive-icon-default);
-    color: var(--interactive-icon-default);
+    background-color: var(--interactive-icon-active, var(--interactive-active));
+    border-color: var(--interactive-icon-default, var(--interactive-normal));
+    color: var(--interactive-icon-default, var(--interactive-normal));
     opacity: 0;
     transition: opacity 0.1s;
 }
