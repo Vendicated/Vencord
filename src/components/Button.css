@@ -10,7 +10,7 @@
     text-align: start;
     transition: 50ms ease-in;
     transition-property: background-color, color, border-color, opacity;
-    background: var(--control-secondary-background-primary);
+    background: var(--control-secondary-background-default);
     color: var(--text-default);
     white-space: nowrap;
 
