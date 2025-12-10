@@ -79,7 +79,7 @@ export function Updatable(props: CommonProps) {
 
     return (
         <>
-            <Flex className={Margins.bottom16} gap="8px">
+            <Flex className={Margins.bottom8} gap="8px">
                 <Button
                     size="small"
                     disabled={isUpdating || isChecking}
