@@ -35,7 +35,7 @@
 
 .vc-spotify-button:hover {
     color: var(--interactive-icon-hover);
-    background-color: var(--background-modifier-strong);
+    background-color: var(--background-mod-strong);
 }
 
 .vc-spotify-button-icon {
