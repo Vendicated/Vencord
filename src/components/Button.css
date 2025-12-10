@@ -186,7 +186,7 @@
 }
 
 .vc-text-btn-secondary {
-    color: var(--text-default);
+    color: var(--text-strong, var(--text-default));
 }
 
 .vc-text-btn-danger {
