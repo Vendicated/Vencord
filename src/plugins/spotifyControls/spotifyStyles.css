@@ -1,6 +1,6 @@
 #vc-spotify-player {
     padding: 12px;
-    background: var(--bg-overlay-floating, var(--background-base-low, var(--background-base-lower-alt)));
+    background: var(--background-base-low, var(--background-base-lower-alt));
     margin: 0;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -13,11 +13,11 @@
 }
 
 .theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--background-base-lower-alt));
+    background: var(--background-base-lower-alt);
 }
 
 .theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--background-base-lower-alt));
+    background: var(--background-base-lower-alt);
 }
 
 .vc-spotify-button {
