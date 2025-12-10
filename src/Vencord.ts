@@ -16,31 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
+import "~plugins";
+
 export * as Api from "./api";
+export * as Plugins from "./api/PluginManager";
 export * as Components from "./components";
-export * as Plugins from "./plugins";
 export * as Util from "./utils";
-export * as QuickCss from "./utils/quickCss";
 export * as Updater from "./utils/updater";
 export * as Webpack from "./webpack";
+export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
-import "./utils/quickCss";
-import "./webpack/patchWebpack";
-
-import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
+import { addVencordUiStyles } from "@components/css";
+import { openSettingsTabModal, UpdaterTab } from "@components/settings";
+import { debounce } from "@shared/debounce";
+import { IS_WINDOWS } from "@utils/constants";
+import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";
-import { showNotification } from "./api/Notifications";
-import { PlainSettings, Settings } from "./api/Settings";
-import { patches, PMLogger, startAllPlugins } from "./plugins";
+import { NotificationData, showNotification } from "./api/Notifications";
+import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
+import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
+import { getCloudSettings, putCloudSettings } from "./api/SettingsSync/cloudSync";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
-import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
+import { patches } from "./webpack/patchWebpack";
 
 if (IS_REPORTER) {
     require("./debug/runReporter");
@@ -83,6 +88,60 @@ async function syncSettings() {
             });
         }
     }
+
+    const saveSettingsOnFrequentAction = debounce(async () => {
+        if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
+            await putCloudSettings();
+            delete localStorage.Vencord_settingsDirty;
+        }
+    }, 60_000);
+
+    SettingsStore.addGlobalChangeListener(() => {
+        localStorage.Vencord_settingsDirty = true;
+        saveSettingsOnFrequentAction();
+    });
+}
+
+let notifiedForUpdatesThisSession = false;
+
+async function runUpdateCheck() {
+    if (IS_UPDATER_DISABLED) return;
+
+    const notify = (data: NotificationData) => {
+        if (notifiedForUpdatesThisSession) return;
+        notifiedForUpdatesThisSession = true;
+
+        setTimeout(() => showNotification({
+            permanent: true,
+            noPersist: true,
+            ...data
+        }), 10_000);
+    };
+
+    try {
+        const isOutdated = await checkForUpdates();
+        if (!isOutdated) return;
+
+        if (Settings.autoUpdate) {
+            await update();
+            if (Settings.autoUpdateNotification) {
+                notify({
+                    title: "Vencord has been updated!",
+                    body: "Click here to restart",
+                    onClick: relaunch
+                });
+            }
+            return;
+        }
+
+        notify({
+            title: "A Vencord update is available!",
+            body: "Click here to view the update",
+            onClick: () => openSettingsTabModal(UpdaterTab!)
+        });
+    } catch (err) {
+        UpdateLogger.error("Failed to check for updates", err);
+    }
 }
 
 async function init() {
@@ -92,32 +151,11 @@ async function init() {
     syncSettings();
 
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
-        try {
-            const isOutdated = await checkForUpdates();
-            if (!isOutdated) return;
+        runUpdateCheck();
 
-            if (Settings.autoUpdate) {
-                await update();
-                if (Settings.autoUpdateNotification)
-                    setTimeout(() => showNotification({
-                        title: "Vencord has been updated!",
-                        body: "Click here to restart",
-                        permanent: true,
-                        noPersist: true,
-                        onClick: relaunch
-                    }), 10_000);
-                return;
-            }
-
-            setTimeout(() => showNotification({
-                title: "A Vencord update is available!",
-                body: "Click here to view the update",
-                permanent: true,
-                noPersist: true,
-                onClick: openUpdaterModal!
-            }), 10_000);
-        } catch (err) {
-            UpdateLogger.error("Failed to check for updates", err);
+        // this tends to get really annoying, so only do this if the user has auto-update without notification enabled
+        if (Settings.autoUpdate && !Settings.autoUpdateNotification) {
+            setInterval(runUpdateCheck, 1000 * 60 * 30); // 30 minutes
         }
     }
 
@@ -135,16 +173,17 @@ async function init() {
     }
 }
 
+initPluginManager();
 startAllPlugins(StartAt.Init);
 init();
 
 document.addEventListener("DOMContentLoaded", () => {
+    addVencordUiStyles();
+
     startAllPlugins(StartAt.DOMContentLoaded);
 
-    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && navigator.platform.toLowerCase().startsWith("win")) {
-        document.head.append(Object.assign(document.createElement("style"), {
-            id: "vencord-native-titlebar-style",
-            textContent: "[class*=titleBar]{display: none!important}"
-        }));
+    // FIXME
+    if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
+        createAndAppendStyle("vencord-native-titlebar-style").textContent = "[class*=titleBar]{display: none!important}";
     }
 }, { once: true });

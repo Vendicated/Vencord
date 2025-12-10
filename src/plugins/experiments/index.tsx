@@ -20,7 +20,8 @@ import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
-import { Devs } from "@utils/constants";
+import { Paragraph } from "@components/Paragraph";
+import { Devs, IS_MAC } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy } from "@webpack";
@@ -30,6 +31,9 @@ import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "combo");
 const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
+
+const modKey = IS_MAC ? "cmd" : "ctrl";
+const altKey = IS_MAC ? "opt" : "alt";
 
 const settings = definePluginSettings({
     toolbarDevMenu: {
@@ -48,7 +52,7 @@ export default definePlugin({
         Devs.Ven,
         Devs.Nickyux,
         Devs.BanTheNons,
-        Devs.Nuckyz
+        Devs.Nuckyz,
     ],
 
     settings,
@@ -64,28 +68,35 @@ export default definePlugin({
         {
             find: 'type:"user",revision',
             replacement: {
-                match: /!(\i)&&"CONNECTION_OPEN".+?;/g,
-                replace: "$1=!0;"
+                match: /!(\i)(?=&&"CONNECTION_OPEN")/,
+                replace: "!($1=true)"
             }
         },
         {
-            find: 'H1,title:"Experiments"',
+            find: 'placeholder:"Search experiments"',
             replacement: {
-                match: 'title:"Experiments",children:[',
-                replace: "$&$self.WarningCard(),"
+                match: /(?<=children:\[)(?=\(0,\i\.jsx?\)\(\i\.\i,{placeholder:"Search experiments")/,
+                replace: "$self.WarningCard(),"
             }
         },
-        // change top right chat toolbar button from the help one to the dev one
+        // Change top right toolbar button from the help one to the dev one
         {
-            find: "toolbar:function",
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"
             },
             predicate: () => settings.store.toolbarDevMenu
         },
-
-        // makes the Favourites Server experiment allow favouriting DMs and threads
+        // Disable opening the bug report menu when clicking the top right toolbar dev button
+        {
+            find: 'navId:"staff-help-popout"',
+            replacement: {
+                match: /(isShown.+?)onClick:\i/,
+                replace: (_, rest) => `${rest}onClick:()=>{}`
+            }
+        },
+        // Make the Favourites Server experiment allow favouriting DMs and threads
         {
             find: "useCanFavoriteChannel",
             replacement: {
@@ -93,12 +104,27 @@ export default definePlugin({
                 replace: "false",
             }
         },
-        // enable option to always record clips even if you are not streaming
+        // Enable experiment embed on sent experiment links
         {
-            find: "isDecoupledGameClippingEnabled(){",
+            find: ".experimentOverride,children:",
+            replacement: [
+                {
+                    match: /\i\.isStaff\(\)/,
+                    replace: "true"
+                },
+                // Fix some tricky experiments name causing a client crash
+                {
+                    match: /\.isStaffPersonal\(\).+?if\(null==(\i)\|\|null==\i(?=\)return null;)/,
+                    replace: "$&||({})[$1]!=null"
+                }
+            ]
+        },
+        // Fix another function which cases crashes with tricky experiment names and the experiment embed
+        {
+            find: "}getServerAssignment(",
             replacement: {
-                match: /\i\.isStaff\(\)/,
-                replace: "true"
+                match: /}getServerAssignment\((\i),\i,\i\){/,
+                replace: "$&if($1==null)return;"
             }
         }
     ],
@@ -107,20 +133,17 @@ export default definePlugin({
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
-        const isMacOS = navigator.platform.includes("Mac");
-        const modKey = isMacOS ? "cmd" : "ctrl";
-        const altKey = isMacOS ? "opt" : "alt";
         return (
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
-                <Forms.FormText variant="text-md/normal">
+                <Paragraph size="md">
                     You can open Discord's DevTools via {" "}
                     <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
                         <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
                         <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
                         <kbd className={KbdStyles.key}>O</kbd>{" "}
                     </div>
-                </Forms.FormText>
+                </Paragraph>
             </React.Fragment>
         );
     },

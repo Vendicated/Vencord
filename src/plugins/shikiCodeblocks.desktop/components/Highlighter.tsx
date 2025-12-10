@@ -17,15 +17,15 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { resolveLang } from "@plugins/shikiCodeblocks.desktop/api/languages";
+import { shiki } from "@plugins/shikiCodeblocks.desktop/api/shiki";
+import { useShikiSettings } from "@plugins/shikiCodeblocks.desktop/hooks/useShikiSettings";
+import { useTheme } from "@plugins/shikiCodeblocks.desktop/hooks/useTheme";
+import { hex2Rgb } from "@plugins/shikiCodeblocks.desktop/utils/color";
+import { cl, shouldUseHljs } from "@plugins/shikiCodeblocks.desktop/utils/misc";
 import { useAwaiter, useIntersection } from "@utils/react";
 import { hljs, React } from "@webpack/common";
 
-import { resolveLang } from "../api/languages";
-import { shiki } from "../api/shiki";
-import { useShikiSettings } from "../hooks/useShikiSettings";
-import { useTheme } from "../hooks/useTheme";
-import { hex2Rgb } from "../utils/color";
-import { cl, shouldUseHljs } from "../utils/misc";
 import { ButtonRow } from "./ButtonRow";
 import { Code } from "./Code";
 import { Header } from "./Header";
@@ -41,7 +41,6 @@ export interface HighlighterProps {
     lang?: string;
     content: string;
     isPreview: boolean;
-    tempSettings?: Record<string, any>;
 }
 
 export const createHighlighter = (props: HighlighterProps) => (
@@ -55,13 +54,12 @@ export const Highlighter = ({
     lang,
     content,
     isPreview,
-    tempSettings,
 }: HighlighterProps) => {
     const {
         tryHljs,
         useDevIcon,
         bgOpacity,
-    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"], tempSettings);
+    } = useShikiSettings(["tryHljs", "useDevIcon", "bgOpacity"]);
     const { id: currentThemeId, theme: currentTheme } = useTheme();
 
     const shikiLang = lang ? resolveLang(lang) : null;
@@ -78,12 +76,12 @@ export const Highlighter = ({
     });
 
     const themeBase: ThemeBase = {
-        plainColor: currentTheme?.fg || "var(--text-normal)",
+        plainColor: currentTheme?.fg || "var(--text-default)",
         accentBgColor:
             currentTheme?.colors?.["statusBar.background"] || (useHljs ? "#7289da" : "#007BC8"),
         accentFgColor: currentTheme?.colors?.["statusBar.foreground"] || "#FFF",
         backgroundColor:
-            currentTheme?.colors?.["editor.background"] || "var(--background-secondary)",
+            currentTheme?.colors?.["editor.background"] || "var(--background-base-lower)",
     };
 
     let langName;

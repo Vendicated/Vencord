@@ -16,18 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { runtimeHashMessageKey } from "@utils/intlHash";
-import type { Channel } from "discord-types/general";
-
-// eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
-import type * as t from "./types/utils";
+import type * as t from "@vencord/discord-types";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
+import type * as TSPattern from "ts-pattern";
 
 export let FluxDispatcher: t.FluxDispatcher;
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
-    // Non import call to avoid circular dependency
-    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
+    // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
+    // For this reason, use a non import access here.
+    Vencord.Api.PluginManager.subscribeAllPluginsFluxEvents(m);
 
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
@@ -36,7 +34,7 @@ waitFor(["dispatch", "subscribe"], m => {
     m.subscribe("CONNECTION_OPEN", cb);
 });
 
-export let ComponentDispatch;
+export let ComponentDispatch: any;
 waitFor(["dispatchToLastSubscribed"], m => ComponentDispatch = m);
 
 export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
@@ -50,7 +48,7 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
 
-export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModuleLazy("@ts-pattern/matcher", {
+export const { match, P }: { match: typeof TSPattern["match"], P: typeof TSPattern["P"]; } = mapMangledModuleLazy("@ts-pattern/matcher", {
     match: filters.byCode("return new"),
     P: filters.byProps("when")
 });
@@ -58,9 +56,9 @@ export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = ma
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
 export const i18n = mapMangledModuleLazy('defaultLocale:"en-US"', {
-    intl: filters.byProps("string", "format"),
-    t: filters.byProps(runtimeHashMessageKey("DISCORD"))
-});
+    t: m => m?.[Symbol.toStringTag] === "IntlMessagesProxy",
+    intl: m => m != null && Object.getPrototypeOf(m)?.withFormatters != null
+}, true);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
@@ -140,16 +138,14 @@ export const UserUtils = {
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
-    promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
+    promptToUpload: findByCodeLazy("=!0,showLargeMessageDialog:") as (files: File[], channel: t.Channel, draftType: Number) => void
 };
 
-export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
-    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
-};
-
-export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
-    copy: filters.byCode(".copy("),
-    SUPPORTS_COPY: e => typeof e === "boolean"
+export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
+    fetchAssetIds: filters.byCode('.startsWith("http:")', ".dispatch({"),
+    getAssetFromImageURL: filters.byCode("].serialize(", ',":"'),
+    getAssetImage: filters.byCode("getAssetImage: size must === ["),
+    getAssets: filters.byCode(".assets")
 });
 
 export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transitioning to ", {
@@ -180,6 +176,7 @@ export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
 export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 export const InviteActions = findByPropsLazy("resolveInvite");
+export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
@@ -208,6 +205,9 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
 export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
     dateFormat: filters.byCode('":'),
-    isSameDay: filters.byCode("Math.abs(+"),
+    // TODO: the +? are for compat with the old version - Remove them once no longer needed
+    isSameDay: filters.byCode(/Math\.abs\(\+?\i-\+?\i\)/),
     diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });
+
+export const MessageTypeSets: t.MessageTypeSets = findByPropsLazy("REPLYABLE", "FORWARDABLE");

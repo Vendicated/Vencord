@@ -17,21 +17,28 @@
 */
 
 import { ProfileBadge } from "@api/Badges";
-import { ChatBarButtonFactory } from "@api/ChatButtons";
-import { Command } from "@api/Commands";
+import { ChatBarButtonData } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import { MessagePopoverButtonFactory } from "@api/MessagePopover";
-import { FluxEvents } from "@webpack/types";
-import { JSX } from "react";
-import { Promisable } from "type-fest";
+import { MessagePopoverButtonData } from "@api/MessagePopover";
+import { Command, FluxEvents } from "@vencord/discord-types";
+import { ReactNode } from "react";
+import { LiteralUnion } from "type-fest";
 
 // exists to export default definePlugin({...})
-export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
-    return p;
+export default function definePlugin<P extends PluginDef>(p: P & Record<PropertyKey, any>) {
+    return p as typeof p & Plugin;
+}
+
+export function makeRange(start: number, end: number, step = 1) {
+    const ranges: number[] = [];
+    for (let value = start; value <= end; value += step) {
+        ranges.push(Math.round(value * 100) / 100);
+    }
+    return ranges;
 }
 
 export type ReplaceFn = (match: string, ...groups: string[]) => string;
@@ -41,8 +48,17 @@ export interface PatchReplacement {
     match: string | RegExp;
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
-    /** A function which returns whether this patch replacement should be applied */
+    /** Do not warn if this replacement did no changes */
+    noWarn?: boolean;
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
+    /** The minimum build number for this patch to be applied */
+    fromBuild?: number;
+    /** The maximum build number for this patch to be applied */
+    toBuild?: number;
 }
 
 export interface Patch {
@@ -57,8 +73,15 @@ export interface Patch {
     noWarn?: boolean;
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
-    /** A function which returns whether this patch should be applied */
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
+    /** The minimum build number for this patch to be applied */
+    fromBuild?: number;
+    /** The maximum build number for this patch to be applied */
+    toBuild?: number;
 }
 
 export interface PluginAuthor {
@@ -72,6 +95,8 @@ export interface Plugin extends PluginDef {
     isDependency?: boolean;
 }
 
+export type IconComponent = (props: IconProps & Record<string, any>) => ReactNode;
+export type IconProps = { height?: number | string; width?: number | string; className?: string; };
 export interface PluginDef {
     name: string;
     description: string;
@@ -121,32 +146,32 @@ export interface PluginDef {
      */
     settings?: DefinedSettings;
     /**
-     * Check that this returns true before allowing a save to complete.
-     * If a string is returned, show the error to the user.
-     */
-    beforeSave?(options: Record<string, any>): Promisable<true | string>;
-    /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
-    settingsAboutComponent?: React.ComponentType<{
-        tempSettings?: Record<string, any>;
-    }>;
+    settingsAboutComponent?: React.ComponentType<{}>;
     /**
      * Allows you to subscribe to Flux events
      */
-    flux?: {
-        [E in FluxEvents]?: (event: any) => void | Promise<void>;
-    };
+    flux?: Partial<{
+        [E in LiteralUnion<FluxEvents, string>]: (event: any) => void | Promise<void>;
+    }>;
     /**
      * Allows you to manipulate context menus
      */
     contextMenus?: Record<string, NavContextMenuPatchCallback>;
     /**
      * Allows you to add custom actions to the Vencord Toolbox.
-     * The key will be used as text for the button
+     *
+     * Can either be an object mapping labels to action functions or a Function returning Menu components.
+     * Please note that you can only use Menu components.
+     *
+     * @example
+     * toolboxActions: {
+     *   "Click Me": () => alert("Hi")
+     * }
      */
-    toolboxActions?: Record<string, () => void>;
+    toolboxActions?: Record<string, () => void> | (() => ReactNode);
 
     tags?: string[];
 
@@ -157,17 +182,27 @@ export interface PluginDef {
 
     userProfileBadge?: ProfileBadge;
 
+    messagePopoverButton?: MessagePopoverButtonData;
+    chatBarButton?: ChatBarButtonData;
+
     onMessageClick?: MessageClickListener;
     onBeforeMessageSend?: MessageSendListener;
     onBeforeMessageEdit?: MessageEditListener;
 
-    renderMessagePopoverButton?: MessagePopoverButtonFactory;
     renderMessageAccessory?: MessageAccessoryFactory;
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
 
-    renderChatBarButton?: ChatBarButtonFactory;
+    // TODO: Remove eventually
+    /**
+     * @deprecated Use {@link chatBarButton} instead
+     */
+    renderChatBarButton?: never;
+    /**
+     * @deprecated Use {@link messagePopoverButton} instead
+     */
+    renderMessagePopoverButton?: never;
 }
 
 export const enum StartAt {
@@ -184,6 +219,10 @@ export const enum ReporterTestable {
     Start = 1 << 2,
     Patches = 1 << 3,
     FluxEvents = 1 << 4
+}
+
+export function defineDefault<T = any>(value: T) {
+    return value;
 }
 
 export const enum OptionType {
@@ -304,13 +343,6 @@ export interface IPluginOptionComponentProps {
      */
     setValue(newValue: any): void;
     /**
-     * Set to true to prevent the user from saving.
-     *
-     * NOTE: This will not show the error to the user. It will only stop them saving.
-     * Make sure to show the error in your component.
-     */
-    setError(error: boolean): void;
-    /**
      * The options object
      */
     option: PluginSettingComponentDef;
@@ -318,7 +350,8 @@ export interface IPluginOptionComponentProps {
 
 export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => JSX.Element;
+    component: (props: IPluginOptionComponentProps) => ReactNode | Promise<ReactNode>;
+    default?: any;
 }
 
 /** Maps a `PluginSettingDef` to its value type */
@@ -399,3 +432,5 @@ export type PluginNative<PluginExports extends Record<string, (event: Electron.I
     ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
     : never;
 };
+
+export type AllOrNothing<T> = T | { [K in keyof T]?: never; };
