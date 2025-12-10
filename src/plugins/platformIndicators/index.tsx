@@ -46,16 +46,19 @@ export interface Session {
 const SessionsStore = findStoreLazy("SessionsStore") as {
     getSessions(): Record<string, Session>;
 };
+const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
+    useStatusFillColor: filters.byCode(".hex")
+});
 
-function Icon(svg: string, opts?: { width?: number; height?: number; }) {
+function Icon(svg: string, size = 20) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
         <Tooltip text={tooltip} >
             {tooltipProps => (
                 <img
                     {...tooltipProps}
                     src={"data:image/svg+xml," + encodeURIComponent(svg.replace("#000000", color))}
-                    height={(opts?.height ?? 20) - (small ? 3 : 0)}
-                    width={(opts?.width ?? 20) - (small ? 3 : 0)}
+                    height={size - (small ? 3 : 0)}
+                    width={size - (small ? 3 : 0)}
                 >
                 </img>
             )}
@@ -66,7 +69,7 @@ function Icon(svg: string, opts?: { width?: number; height?: number; }) {
 const Icons = {
     desktop: Icon(desktopIcon),
     web: Icon(webIcon),
-    mobile: Icon(mobileIcon, { height: 17, width: 17 }),
+    mobile: Icon(mobileIcon, 17),
     embedded: Icon(embeddedIcon),
 } satisfies Record<DiscordPlatform, unknown>;
 
@@ -76,25 +79,6 @@ const SVGIcons: Record<DiscordPlatform, string> = {
     mobile: mobileIcon,
     embedded: embeddedIcon,
 };
-
-function getStatusFillColor(status: OnlineStatus): string {
-    switch (status) {
-        case "online":
-            return "var(--green-new-38, #43a25a)";
-        case "idle":
-            return "var(--yellow-new-30, #ca9654)";
-        case "dnd":
-            return "var(--red-new-46, #d83a42)";
-        case "streaming":
-            return "var(--twitch, #9147ff)";
-        default:
-            return "var(--neutral-34, #82838b)";
-    }
-}
-
-const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
-    useStatusFillColor: filters.byCode(".hex")
-});
 
 const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: OnlineStatus; small: boolean; }) => {
     const tooltip = platform === "embedded"
@@ -131,6 +115,14 @@ function ensureOwnStatus(user: User) {
 }
 
 function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
+    const colorMap = {
+        online: useStatusFillColor("online"),
+        idle: useStatusFillColor("idle"),
+        dnd: useStatusFillColor("dnd"),
+        offline: useStatusFillColor("offline"),
+        streaming: useStatusFillColor("streaming"),
+    };
+
     const user = UserStore.getUser(userId);
 
     if (!user || user.bot) return [];
@@ -149,7 +141,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
         return {
             description: tooltip,
-            iconSrc: "data:image/svg+xml," + encodeURIComponent(SVGIcons[platform].replace("#000000", getStatusFillColor(status))),
+            iconSrc: "data:image/svg+xml," + encodeURIComponent(SVGIcons[platform].replace("#000000", colorMap[status] ?? colorMap.offline)),
             props: {
                 style: { width: size, height: size },
             },
