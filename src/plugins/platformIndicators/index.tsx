@@ -130,19 +130,13 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
             ? "Console"
             : platform[0].toUpperCase() + platform.slice(1);
 
-        let size = { width: 20, height: 20 };
-        if (platform === "mobile") {
-            size = {
-                width: 17,
-                height: 17,
-            };
-        }
+        const size = platform === "mobile" ? 17 : 20;
 
         return {
             description: tooltip,
             iconSrc: "data:image/svg+xml," + encodeURIComponent(SVGIcons[platform].replace("#000000", useStatusFillColor(status))),
             props: {
-                style: size
+                style: { width: size, height: size },
             },
             key: `vc-platform-indicator-${platform}`,
         } satisfies ProfileBadge;
