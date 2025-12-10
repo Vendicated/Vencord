@@ -47,7 +47,7 @@
 
 .vc-cloud-erase-data-danger-btn {
     color: var(--white-500);
-    background-color: var(--button-danger-background);
+    background-color: var(--redesign-button-danger-background);
 }
 
 .vc-settings-modal {
