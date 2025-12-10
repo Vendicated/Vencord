@@ -74,7 +74,7 @@ export function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacemen
                 onChange={setPatch}
                 onBlur={update}
             />
-            {error !== "" && <Paragraph style={{ color: "var(--text-feedback-critical)" }}>{error}</Paragraph>}
+            {error !== "" && <Paragraph style={{ color: "var(--text-feedback-critical, var(--text-danger))" }}>{error}</Paragraph>}
         </>
     );
 }

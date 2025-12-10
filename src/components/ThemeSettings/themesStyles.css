@@ -4,37 +4,10 @@
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
-.vc-settings-theme-card {
+.vc-settings-csp-list {
     display: flex;
     flex-direction: column;
-    background-color: var(--background-base-lower-alt);
-    color: var(--interactive-icon-active);
-    border-radius: 8px;
-    padding: 1em;
-    width: 100%;
-    transition: 0.1s ease-out;
-    transition-property: box-shadow, transform, background, opacity;
-}
-
-.vc-settings-theme-card-text {
-    text-overflow: ellipsis;
-    height: 1.2em;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.vc-settings-theme-author::before {
-    content: "by ";
-}
-
-.vc-settings-theme-link-input {
-    width: 100%;
-}
-
-.vc-settings-theme-add-card {
-    padding: 1em;
-    margin-bottom: 16px;
+    gap: 8px;
 }
 
 .vc-settings-usercss-ie-buttons > div {

@@ -95,7 +95,7 @@ function renderFindError(find: string) {
         return null;
     } catch (e) {
         return (
-            <span style={{ color: "var(--text-feedback-critical)" }}>
+            <span style={{ color: "var(--text-feedback-critical, var(--text-danger))" }}>
                 {String(e)}
             </span>
         );

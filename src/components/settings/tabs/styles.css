@@ -49,7 +49,7 @@
     display: inline-block !important;
     color: var(--text-default) !important;
     padding: 0.5em 1em;
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--input-border-default, var(--input-border));
     max-height: unset;
     background-color: transparent;
     box-sizing: border-box;
@@ -76,7 +76,7 @@
 
 .vc-cloud-erase-data-danger-btn {
     color: var(--white-500);
-    background-color: var(--redesign-button-danger-background);
+    background-color: var(--redesign-button-danger-background, var(--button-danger-background));
 }
 
 .vc-settings-modal {
