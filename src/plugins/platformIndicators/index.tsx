@@ -24,7 +24,7 @@ import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecor
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { DiscordPlatform, User } from "@vencord/discord-types";
+import { DiscordPlatform, OnlineStatus, User } from "@vencord/discord-types";
 import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import { AuthenticationStore, PresenceStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import desktopIcon from "file://icons/desktopIcon.svg?minify";
@@ -77,11 +77,26 @@ const SVGIcons: Record<DiscordPlatform, string> = {
     embedded: embeddedIcon,
 };
 
+function getStatusFillColor(status: OnlineStatus): string {
+    switch (status) {
+        case "online":
+            return "var(--green-new-38, #43a25a)";
+        case "idle":
+            return "var(--yellow-new-30, #ca9654)";
+        case "dnd":
+            return "var(--red-new-46, #d83a42)";
+        case "streaming":
+            return "var(--twitch, #9147ff)";
+        default:
+            return "var(--neutral-34, #82838b)";
+    }
+}
+
 const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
     useStatusFillColor: filters.byCode(".hex")
 });
 
-const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: string; small: boolean; }) => {
+const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: OnlineStatus; small: boolean; }) => {
     const tooltip = platform === "embedded"
         ? "Console"
         : platform[0].toUpperCase() + platform.slice(1);
@@ -134,7 +149,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
         return {
             description: tooltip,
-            iconSrc: "data:image/svg+xml," + encodeURIComponent(SVGIcons[platform].replace("#000000", useStatusFillColor(status))),
+            iconSrc: "data:image/svg+xml," + encodeURIComponent(SVGIcons[platform].replace("#000000", getStatusFillColor(status))),
             props: {
                 style: { width: size, height: size },
             },
