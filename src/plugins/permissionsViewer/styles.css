@@ -66,7 +66,7 @@
 }
 
 .vc-permviewer-modal-list-item:hover {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
 }
 
 .vc-permviewer-modal-list-item-active {
@@ -135,13 +135,13 @@
 }
 
 .vc-permviewer-modal-perms-item .vc-info-icon:hover {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
 }
 
 /* copy pasted from discord cause impossible to webpack find */
 .vc-permviewer-role-button {
     border-radius: var(--radius-sm);
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     border: 1px solid var(--user-profile-border);
     /* stylelint-disable-next-line value-no-vendor-prefix */
     width: -moz-fit-content;
