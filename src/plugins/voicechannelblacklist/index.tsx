@@ -7,7 +7,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { Alerts, ChannelStore, Menu, PermissionStore, RestAPI, UserStore } from "@webpack/common";
 
@@ -31,9 +31,32 @@ interface BlacklistEntry {
 
 let blacklist: BlacklistEntry[] = [];
 let monitorInterval: NodeJS.Timeout | null = null;
-let kickCache = new Set<string>(); // Cache to prevent duplicate kicks
+let kickCache = new Set<string>();
 
-const settings = definePluginSettings({});
+const settings = definePluginSettings({
+    muteUser: {
+        type: OptionType.BOOLEAN,
+        description: "Server Mute blacklisted users",
+        default: true,
+    },
+    deafenUser: {
+        type: OptionType.BOOLEAN,
+        description: "Server Deafen blacklisted users",
+        default: true,
+    },
+    disconnectUser: {
+        type: OptionType.BOOLEAN,
+        description: "Disconnect blacklisted users from channel",
+        default: true,
+    },
+    monitorSpeed: {
+        type: OptionType.SLIDER,
+        description: "Monitor check interval (milliseconds)",
+        default: 100,
+        markers: [50, 100, 250, 500, 1000],
+        stickToMarkers: true,
+    },
+});
 
 function hasPerms(channelId: string): boolean {
     try {
@@ -48,65 +71,67 @@ function hasPerms(channelId: string): boolean {
     }
 }
 
-function disconnectInstant(guildId: string, userId: string, channelId: string) {
-    // Check cache to prevent spam
+function kickUserWithSettings(guildId: string, userId: string, channelId: string) {
     const cacheKey = `${userId}-${channelId}`;
     if (kickCache.has(cacheKey)) {
-        console.log("[VCBlacklist] Already kicking, skip:", userId);
         return;
     }
     
-    // Check if still blacklisted before disconnect
     if (!isBlacklisted(userId, channelId)) {
-        console.log("[VCBlacklist] User removed from blacklist, skip disconnect:", userId);
         return;
     }
     
     kickCache.add(cacheKey);
     
-    // PRIORITY 1: DISCONNECT IMMEDIATELY
-    RestAPI.patch({
-        url: `/guilds/${guildId}/members/${userId}`,
-        body: { channel_id: null }
-    }).then(() => {
-        console.log("[VCBlacklist] DISCONNECT SUCCESS:", userId);
-        // Remove from cache after 1 second
+    const actions: Promise<any>[] = [];
+    
+
+    if (settings.store.muteUser || settings.store.deafenUser) {
+        const body: any = {};
+        if (settings.store.muteUser) body.mute = true;
+        if (settings.store.deafenUser) body.deaf = true;
+        
+        actions.push(
+            RestAPI.patch({
+                url: `/guilds/${guildId}/members/${userId}`,
+                body: body
+            }).catch(() => {})
+        );
+    }
+    
+    if (settings.store.disconnectUser) {
+        setTimeout(() => {
+            RestAPI.patch({
+                url: `/guilds/${guildId}/members/${userId}`,
+                body: { channel_id: null }
+            }).catch(() => {});
+        }, 100);
+    }
+    
+    Promise.all(actions).then(() => {
         setTimeout(() => kickCache.delete(cacheKey), 1000);
-    }).catch((err) => {
-        console.error("[VCBlacklist] DISCONNECT ERROR:", err);
+    }).catch(() => {
         kickCache.delete(cacheKey);
     });
     
-    // Then mute and deafen
-    setTimeout(() => {
-        if (isBlacklisted(userId, channelId)) {
-            RestAPI.patch({
-                url: `/guilds/${guildId}/members/${userId}`,
-                body: { mute: true, deaf: true }
-            }).catch(() => {});
-        }
-    }, 100);
+    console.log("[VCBlacklist] Actions applied to:", userId);
 }
 
 function isBlacklisted(userId: string, channelId: string): boolean {
-    const result = blacklist.some(e => e.userId === userId && e.channelId === channelId);
-    return result;
+    return blacklist.some(e => e.userId === userId && e.channelId === channelId);
 }
 
 function addBlacklist(userId: string, channelId: string) {
     if (!isBlacklisted(userId, channelId)) {
         blacklist.push({ userId, channelId });
-        console.log("[VCBlacklist] ADDED to blacklist:", userId, channelId, "Total:", blacklist.length);
+        console.log("[VCBlacklist] Added:", userId, channelId);
     }
 }
 
 function removeBlacklist(userId: string, channelId: string) {
     const beforeLength = blacklist.length;
     blacklist = blacklist.filter(e => !(e.userId === userId && e.channelId === channelId));
-    const afterLength = blacklist.length;
-    console.log("[VCBlacklist] REMOVED from blacklist:", userId, channelId, "Before:", beforeLength, "After:", afterLength);
-    
-    // Clear kick cache for this user
+    console.log("[VCBlacklist] Removed:", userId, channelId);
     kickCache.delete(`${userId}-${channelId}`);
 }
 
@@ -142,7 +167,7 @@ function monitorBlacklist() {
                 if (userState && userState.channelId === channelId) {
                     const channel = ChannelStore.getChannel(channelId);
                     if (channel && hasPerms(channelId)) {
-                        disconnectInstant(channel.guild_id, userId, channelId);
+                        kickUserWithSettings(channel.guild_id, userId, channelId);
                     }
                 }
             }
@@ -153,8 +178,9 @@ function monitorBlacklist() {
 function startMonitoring() {
     if (monitorInterval) return;
     
-    monitorInterval = setInterval(monitorBlacklist, 100);
-    console.log("[VCBlacklist] Monitoring started (100ms)");
+    const interval = settings.store.monitorSpeed;
+    monitorInterval = setInterval(monitorBlacklist, interval);
+    console.log(`[VCBlacklist] Monitoring started (${interval}ms)`);
 }
 
 function stopMonitoring() {
@@ -196,7 +222,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
                         });
                     } else {
                         addBlacklist(user.id, channelId);
-                        disconnectInstant(voiceChannel.guild_id, user.id, channelId);
+                        kickUserWithSettings(voiceChannel.guild_id, user.id, channelId);
                     }
                 }}
             />
@@ -267,7 +293,7 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
 
 export default definePlugin({
     name: "VoiceChannelBlacklist",
-    description: "Instantly kick specific users from voice channels. Right-click a user to blacklist them - they'll be auto-kicked every time they try to join that channel. Perfect for keeping trolls out of your voice rooms.",
+    description: "Block users from voice channels with customizable actions",
     authors: [Devs.viciouscal],
     settings,
 
@@ -298,8 +324,7 @@ export default definePlugin({
                 if (isBlacklisted(userId, channelId)) {
                     const channel = ChannelStore.getChannel(channelId);
                     if (channel && hasPerms(channelId)) {
-                        console.log("[VCBlacklist] Flux event detected blacklisted user:", userId);
-                        disconnectInstant(channel.guild_id, userId, channelId);
+                        kickUserWithSettings(channel.guild_id, userId, channelId);
                     }
                 }
             }
