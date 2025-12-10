@@ -79,26 +79,6 @@ export function Updatable(props: CommonProps) {
 
     return (
         <>
-            {!updates && updateError ? (
-                <>
-                    <Span size="md" weight="medium" color="header-primary">Error checking for updates</Span>
-                    <ErrorCard className={Margins.top8} style={{ padding: "1em" }}>
-                        <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
-                    </ErrorCard>
-                </>
-            ) : isOutdated ? (
-                <>
-                    <Paragraph>
-                        There {updates.length === 1 ? "is 1 update" : `are ${updates.length} updates`} available. Click the button below to download and install.
-                    </Paragraph>
-                    <Changes updates={updates} {...props} />
-                </>
-            ) : (
-                <Paragraph>
-                    You're running the latest version of Equicord.
-                </Paragraph>
-            )}
-
             <Flex className={Margins.top16} gap="8px">
                 <Button
                     size="small"
@@ -153,6 +133,25 @@ export function Updatable(props: CommonProps) {
                     </Button>
                 )}
             </Flex>
+            {!updates && updateError ? (
+                <>
+                    <Span size="md" weight="medium" color="header-primary">Error checking for updates</Span>
+                    <ErrorCard className={Margins.top8} style={{ padding: "1em" }}>
+                        <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
+                    </ErrorCard>
+                </>
+            ) : isOutdated ? (
+                <>
+                    <Paragraph>
+                        There {updates.length === 1 ? "is 1 update" : `are ${updates.length} updates`} available. Click the button below to download and install.
+                    </Paragraph>
+                    <Changes updates={updates} {...props} />
+                </>
+            ) : (
+                <Paragraph>
+                    You're running the latest version of Equicord.
+                </Paragraph>
+            )}
         </>
     );
 }
