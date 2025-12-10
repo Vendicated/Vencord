@@ -17,7 +17,7 @@ export default definePlugin({
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
                 match: /(?<=\i\.Fragment,\{children:\[.{1,500}className:\i\}\))(?=\])/,
-                replace: ",...Vencord.Api.HeaderBar._addButtons()"
+                replace: ",...Vencord.Api.HeaderBar._addHeaderBarButtons()"
             }
         },
         {
