@@ -1,0 +1,13 @@
+.vc-collapsed {
+    position: fixed;
+    height: 100%;
+    z-index: 500;
+    left: 0;
+    transform: translateX(calc(-100%));
+    transition: transform 0.3s, filter 0.3s;
+}
+
+.vc-revealed {
+    transform: translateX(0);
+    filter: drop-shadow(0 0 10px hsl(var(--black-500-hsl) / 32%));
+}
