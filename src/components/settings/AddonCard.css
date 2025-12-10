@@ -1,6 +1,6 @@
 .vc-addon-card {
-    background-color: var(--card-primary-bg);
-    color: var(--interactive-active);
+    background-color: var(--background-surface-high);
+    color: var(--interactive-icon-active);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     display: block;
@@ -41,6 +41,7 @@
     -webkit-box-orient: vertical;
     /* stylelint-disable-next-line property-no-unknown */
     box-orient: vertical;
+    color: var(--text-default);
 }
 
 .vc-addon-name-author {

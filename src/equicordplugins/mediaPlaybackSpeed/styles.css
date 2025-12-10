@@ -2,9 +2,9 @@
     background-color: transparent;
     height: 100%;
     z-index: 2;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
 }
 
 .vc-media-playback-speed-icon:hover {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
 }

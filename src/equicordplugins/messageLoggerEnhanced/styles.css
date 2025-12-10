@@ -15,7 +15,7 @@
     position: absolute;
     top: -24px;
     right: -24px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     cursor: pointer;
 }
 
@@ -72,11 +72,11 @@
 }
 
 .vc-log-toolbox-btn svg {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
 }
 
 :is(.vc-log-toolbox-btn:hover, .vc-log-toolbox-btn[class*="selected"]) svg {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
 }
 
 .folder-upload-container {

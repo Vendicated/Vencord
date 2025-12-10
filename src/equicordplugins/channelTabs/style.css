@@ -140,7 +140,7 @@
 }
 
 .vc-channeltabs-bookmark-star:hover {
-    stroke: var(--interactive-hover);
+    stroke: var(--interactive-icon-hover);
 }
 
 .vc-channeltabs-bookmark-star-checked {
@@ -194,7 +194,7 @@
     min-width: 0;
     margin: 0 4px;
     background-color: transparent;
-    border: 1px solid var(--background-modifier-accent);
+    border: 1px solid var(--background-mod-muted);
     transition:
         transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
         background-color 0.15s ease,
@@ -367,7 +367,7 @@
 }
 
 .vc-channeltabs-new-button:hover {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
     transform: scale(1.1);
 }
 
@@ -381,7 +381,7 @@
 }
 
 .vc-channeltabs-new-button:hover svg {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
     animation: vc-channeltabs-plus-spin 0.3s ease-in-out;
 }
 
@@ -409,7 +409,7 @@
 }
 
 .vc-channeltabs-close-button:hover {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
     transform: rotate(90deg);
 }
 
@@ -455,7 +455,7 @@
 
 /* stylelint-disable-next-line no-descending-specificity */
 .vc-channeltabs-close-button.vc-channeltabs-close-button-compact:hover {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
     transform: translateX(0) scale(1) rotate(90deg) !important;
     transition:
         opacity 0.3s ease-out 0.2s,
@@ -864,7 +864,7 @@
 .vc-channeltabs-container.vc-channeltabs-no-drag-animation .vc-channeltabs-tab-drop-target {
     transform: none !important;
     background-color: transparent !important;
-    border-color: var(--background-modifier-accent) !important;
+    border-color: var(--background-mod-muted) !important;
     box-shadow: none !important;
 }
 
@@ -894,8 +894,8 @@
 
 /* Selected tab border - disable if setting is off */
 .vc-channeltabs-container.vc-channeltabs-no-selected-border .vc-channeltabs-tab-selected {
-    border: 1px solid var(--background-modifier-accent) !important;
-    border-bottom: 1px solid var(--background-modifier-accent) !important;
+    border: 1px solid var(--background-mod-muted) !important;
+    border-bottom: 1px solid var(--background-mod-muted) !important;
 }
 
 /* Selected tab background - disable if setting is off */
@@ -1048,13 +1048,13 @@
 
 /* Folder expansion */
 .vc-channeltabs-bookmark.vc-channeltabs-folder-expanded {
-    background-color: var(--background-modifier-selected);
+    background-color: var(--background-mod-strong);
 }
 
 /* Folder item styling - indented and visually connected to folder */
 .vc-channeltabs-bookmark.vc-channeltabs-folder-item {
     margin-left: 0.5rem;
-    border-left: 2px solid var(--background-modifier-accent);
+    border-left: 2px solid var(--background-mod-muted);
     padding-left: 0.5rem;
     opacity: 0.9;
     background-color: var(--background-secondary-alt);
@@ -1062,7 +1062,7 @@
 
 .vc-channeltabs-bookmark.vc-channeltabs-folder-item:hover {
     opacity: 1;
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
 }
 
 /* Active bookmark visual indicator */
@@ -1127,11 +1127,11 @@
     color: var(--header-primary);
     transition: all 0.2s ease;
     outline: none;
-    box-shadow: 0 0 0 1px var(--background-modifier-accent);
+    box-shadow: 0 0 0 1px var(--background-mod-muted);
 }
 
 .channelTabs-keybind-button:hover:not(:disabled) {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
     border-color: var(--brand-experiment);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgb(0 0 0 / 20%);

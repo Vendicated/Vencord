@@ -13,7 +13,7 @@
 .vc-custom-sounds-seasonal-title {
     margin-top: 16px;
     padding-top: 8px;
-    border-top: 1px solid var(--background-modifier-accent);
+    border-top: 1px solid var(--background-mod-muted);
 }
 
 .vc-custom-sounds-sound-section {

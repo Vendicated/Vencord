@@ -94,8 +94,8 @@
     margin-top: 18px;
     width: 20rem;
     background: linear-gradient(to right,
-            var(--button-danger-background) calc(var(--progress) - 1%),
-            var(--button-danger-background-active) var(--progress)) !important;
+            var(--redesign-button-danger-background) calc(var(--progress) - 1%),
+            var(--redesign-button-danger-pressed-background) var(--progress)) !important;
     border-radius: 420rem;
 
     --progress: 0%;

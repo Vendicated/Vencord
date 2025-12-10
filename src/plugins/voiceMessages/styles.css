@@ -21,7 +21,7 @@
 }
 
 .vc-vmsg-preview-indicator {
-    background: var(--button-secondary-background);
+    background: var(--redesign-button-secondary-background);
     width: 16px;
     height: 16px;
     border-radius: 50%;

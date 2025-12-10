@@ -17,10 +17,10 @@
 
 .vc-command-palette-key-hover {
     padding: 5px;
-    background-color: var(--background-modifier-selected);
+    background-color: var(--background-mod-strong);
     border-radius: 3px;
     font-family: var(--font-display);
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
     padding-left: 0.8rem;
 }
 
@@ -46,7 +46,7 @@
 
 .vc-command-palette-registrar {
     position: absolute;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     white-space: nowrap;
     text-overflow: ellipsis;
     right: 1.6rem;
@@ -102,11 +102,11 @@
     height: 30px;
     width: 128px;
     color: var(--white-500);
-    background-color: var(--button-secondary-background);
+    background-color: var(--redesign-button-secondary-background);
     border-radius: 10px;
     transition: background-color 0.15s ease;
 }
 
 .vc-command-palette-key-recorder-button:hover {
-    background-color: var(--button-secondary-background-hover);
+    background-color: var(--redesign-button-secondary-background);
 }

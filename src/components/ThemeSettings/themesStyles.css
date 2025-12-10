@@ -8,7 +8,7 @@
     display: flex;
     flex-direction: column;
     background-color: var(--background-base-lower-alt);
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
     border-radius: 8px;
     padding: 1em;
     width: 100%;
@@ -38,13 +38,13 @@
 }
 
 .vc-settings-usercss-ie-buttons > div {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     opacity: .5;
     padding: 4px;
 }
 
 .vc-settings-usercss-ie-buttons > div:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
     opacity: 1;
 }
 

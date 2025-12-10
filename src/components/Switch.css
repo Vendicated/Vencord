@@ -15,7 +15,7 @@
 
 .vc-switch-checked {
     background: var(--brand-500);
-    border-color: var(--control-border-primary-default);
+    border-color: var(--control-primary-border-default);
 }
 
 .vc-switch-disabled {

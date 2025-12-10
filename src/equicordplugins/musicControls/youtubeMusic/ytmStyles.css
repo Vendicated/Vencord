@@ -60,7 +60,7 @@
     margin-top: calc(13px/-2 + var(--bar-offset)/2);
     margin-left: -0.5px;
     border: unset;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     opacity: 0;
     transition: opacity 0.1s;
 }
@@ -86,7 +86,7 @@
     margin: 0 2px;
     border-radius: var(--radius-sm);
     background: none;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     padding: 0;
     width: 32px;
     height: 32px;
@@ -97,8 +97,8 @@
 }
 
 .vc-ytm-button:hover {
-    color: var(--interactive-hover);
-    background-color: var(--background-modifier-selected);
+    color: var(--interactive-icon-hover);
+    background-color: var(--background-mod-strong);
 }
 
 .vc-ytm-button svg {

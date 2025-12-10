@@ -1,7 +1,7 @@
 .vc-error-card {
     padding: 1em;
-    background-color: var(--info-danger-background, rgb(237 66 69 / 10%));
-    border: 1px solid var(--info-danger-foreground, #ed4245);
+    background-color: var(--background-feedback-critical, rgb(237 66 69 / 10%));
+    border: 1px solid var(--text-status-dnd, #ed4245);
     border-radius: var(--radius-sm, 8px);
     color: var(--text-default);
 }

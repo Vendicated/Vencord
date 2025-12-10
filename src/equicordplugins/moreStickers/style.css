@@ -1,13 +1,13 @@
 /* stylelint-disable function-url-quotes */
 .vc-more-stickers-icon {
-    fill: var(--interactive-normal);
+    fill: var(--interactive-icon-default);
     margin-top: 20%;
 }
 
 .vc-more-stickers-icon:hover,
 .vc-more-stickers-icon:focus-visible,
 .vc-more-stickers-icon-active {
-    fill: var(--interactive-active);
+    fill: var(--interactive-icon-active);
 }
 
 .vc-more-stickers-picker-container {
@@ -160,7 +160,7 @@
 
 .vc-more-stickers-sticker-category {
     border-radius: 4px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     cursor: pointer;
     height: 32px;
     margin-bottom: 8px;
@@ -168,16 +168,16 @@
 
 .vc-more-stickers-sticker-category:hover,
 .vc-more-stickers-sticker-category-active {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
 }
 
 .vc-more-stickers-clear-icon {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     cursor: pointer;
 }
 
 .vc-more-stickers-clear-icon:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
 }
 
 .vc-more-stickers-picker-content-list-wrapper {
@@ -272,7 +272,7 @@
 }
 
 .vc-more-stickers-picker-content-header-header:hover {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
     cursor: pointer;
 }
 
@@ -380,7 +380,7 @@
 }
 
 .vc-more-stickers-picker-content-inspector-title-secondary {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;

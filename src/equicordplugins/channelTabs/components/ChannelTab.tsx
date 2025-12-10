@@ -492,7 +492,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
                 setTimeout(() => closeTab(id), 150);
             }}
         >
-            <XIcon size={16} fill="var(--interactive-normal)" />
+            <XIcon size={16} fill="var(--interactive-icon-default)" />
         </button>}
 
         {!compact && settings.store.showResizeHandle && <div

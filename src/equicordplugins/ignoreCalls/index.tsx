@@ -139,7 +139,7 @@ export default definePlugin({
                                 });
                             }}
                         >
-                            <Deafen color={"var(--interactive-active)"} />
+                            <Deafen color={"var(--interactive-icon-active)"} />
                         </Button>
                     )}
                 </Tooltip>

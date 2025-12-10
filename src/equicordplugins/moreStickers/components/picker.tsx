@@ -42,7 +42,7 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                     }}
                 >
                     <RecentlyUsedIcon width={24} height={24} color={
-                        activePack === RecentPack ? " var(--interactive-active)" : "var(--interactive-normal)"
+                        activePack === RecentPack ? " var(--interactive-icon-active)" : "var(--interactive-icon-default)"
                     } />
                 </StickerCategory>
                 {

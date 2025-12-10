@@ -30,7 +30,7 @@
 
 .remove-all-button {
     cursor: pointer;
-    background-color: var(--button-danger-background);
+    background-color: var(--redesign-button-danger-background);
     color: var(--white-500);
     transition: background-color 0.2s ease;
 }
@@ -78,7 +78,7 @@
 
 .remove-button {
     cursor: pointer;
-    background-color: var(--button-danger-background);
+    background-color: var(--redesign-button-danger-background);
     color: var(--white-500);
     transition: background-color 0.2s ease;
     margin-top: 10px;

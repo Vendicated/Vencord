@@ -33,15 +33,15 @@
 
 .vc-warning-card {
     padding: 1em;
-    background: var(--info-warning-background);
-    border: 1px solid var(--info-warning-foreground);
-    color: var(--info-warning-foreground);
+    background: var(--background-feedback-warning);
+    border: 1px solid var(--text-status-idle);
+    color: var(--text-status-idle);
 }
 
 .vc-backup-restore-card {
-    background-color: var(--info-warning-background);
-    border-color: var(--info-warning-foreground);
-    color: var(--info-warning-foreground);
+    background-color: var(--background-feedback-warning);
+    border-color: var(--text-status-idle);
+    color: var(--text-status-idle);
 }
 
 .vc-settings-theme-links {
@@ -76,7 +76,7 @@
 
 .vc-cloud-erase-data-danger-btn {
     color: var(--white-500);
-    background-color: var(--button-danger-background);
+    background-color: var(--redesign-button-danger-background);
 }
 
 .vc-settings-modal {

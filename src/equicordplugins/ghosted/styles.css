@@ -42,7 +42,7 @@
 }
 
 .vc-boo-ghosted-entry:hover {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
 }
 
 .vc-boo-user-info {

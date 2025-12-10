@@ -128,7 +128,7 @@
 }
 
 .vc-github-repos-table tbody tr:hover {
-    background-color: var(--background-modifier-hover);
+    background-color: var(--background-mod-subtle);
 }
 
 .vc-github-repos-table td {
@@ -183,8 +183,8 @@
 }
 
 .vc-github-repos-table-star-icon {
-    color: var(--info-warning-foreground);
-    fill: var(--info-warning-foreground);
+    color: var(--text-status-idle);
+    fill: var(--text-status-idle);
 }
 
 .vc-github-repos-modal-footer-close {
@@ -221,11 +221,11 @@
 
 .vc-github-repos-link {
     cursor: pointer;
-    fill: var(--interactive-normal);
+    fill: var(--interactive-icon-default);
 }
 
 .vc-github-repos-name {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
 }
 
 .vc-github-repos-header-repo {

@@ -11,7 +11,7 @@
 }
 
 .vc-bbr-remove-button:hover {
-    color: var(--button-danger-background-hover);
+    color: var(--redesign-button-danger-pressed-background);
 }
 
 .vc-bbr-add-button {

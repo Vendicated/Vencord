@@ -33,12 +33,12 @@
     transition: background-color .2s ease;
 
     &:hover {
-        color: var(--interactive-hover)
+        color: var(--interactive-icon-hover)
     }
 }
 
 .vc-plugins-settings-button:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
 }
 
 .vc-plugins-filter-controls {
@@ -78,9 +78,9 @@
 
 .vc-plugins-restart-card {
     padding: 1em;
-    background: var(--info-warning-background);
-    border: 1px solid var(--info-warning-foreground);
-    color: var(--info-warning-foreground);
+    background: var(--background-feedback-warning);
+    border: 1px solid var(--text-status-idle);
+    color: var(--text-status-idle);
 }
 
 .vc-plugins-info-icon:not(:hover, :focus) {
@@ -89,12 +89,12 @@
 
 .vc-plugins-restart-button {
     background-color: var(--background-base-low) !important;
-    border: 1px solid var(--info-warning-foreground) !important;
+    border: 1px solid var(--text-status-idle) !important;
     margin-top: 0.5em;
 }
 
 .vc-plugins-restart-button:hover {
-    background-color: var(--info-warning-foreground) !important;
+    background-color: var(--text-status-idle) !important;
 }
 
 .vc-plugin-stats {
@@ -175,29 +175,29 @@
 
 .vc-plugins-disable-warning,
 .vc-plugin-modal-disable-warning {
-    background-color: color-mix(in srgb, var(--button-danger-background) 10%, transparent) !important;
+    background-color: color-mix(in srgb, var(--redesign-button-danger-background) 10%, transparent) !important;
     border-style: solid !important;
     border-width: .1rem !important;
-    border-color: color-mix(in srgb, var(--button-danger-background) 80%, transparent) !important;
+    border-color: color-mix(in srgb, var(--redesign-button-danger-background) 80%, transparent) !important;
     border-radius: 5px !important;
-    color: color-mix(in srgb, var(--button-danger-background) 100%, transparent) !important;
+    color: color-mix(in srgb, var(--redesign-button-danger-background) 100%, transparent) !important;
 }
 
 .vc-plugins-disable-warning:hover,
 .vc-plugin-modal-disable-warning:hover {
-    background-color: color-mix(in srgb, var(--button-danger-background-hover) 40%, transparent) !important;
+    background-color: color-mix(in srgb, var(--redesign-button-danger-background) 40%, transparent) !important;
 }
 
 .vc-plugins-confirm-reset,
 .vc-plugin-modal-confirm-reset {
-    background-color: var(--button-danger-background) !important;
-    color: var(--header-primary);
+    background-color: var(--redesign-button-danger-background) !important;
+    color: var(--redesign-button-danger-pressed-text);
 }
 
 .vc-plugins-confirm-reset:hover,
 .vc-plugin-modal-confirm-reset:hover {
-    background-color: var(--button-danger-background-hover) !important;
-    filter: saturate(80%);
+    background-color: var(--redesign-button-danger-pressed-background) !important;
+    color: var(--redesign-button-danger-pressed-text);
 }
 
 .vc-modal-close-button {
@@ -250,20 +250,20 @@
 }
 
 .visual-refresh .vc-plugins-info-card {
-    background-color: var(--card-primary-bg) !important;
+    background-color: var(--background-surface-high) !important;
     border: 1px solid var(--border-subtle) !important;
 
     &:hover {
-        background-color: var(--card-primary-bg) !important;
+        background-color: var(--background-surface-high) !important;
     }
 }
 
 .visual-refresh .vc-plugin-stats {
-    background-color: var(--card-primary-bg) !important;
+    background-color: var(--background-surface-high) !important;
     border: 1px solid var(--border-subtle) !important;
 
     &:hover {
-        background-color: var(--card-primary-bg) !important;
+        background-color: var(--background-surface-high) !important;
     }
 }
 

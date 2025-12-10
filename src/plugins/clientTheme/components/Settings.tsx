@@ -6,7 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import { ErrorCard } from "@components/ErrorCard";
-import { HeadingPrimary,HeadingSecondary } from "@components/Heading";
+import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { relativeLuminance } from "@plugins/clientTheme/utils/colorUtils";
 import { createOrUpdateThemeColorVars } from "@plugins/clientTheme/utils/styleUtils";

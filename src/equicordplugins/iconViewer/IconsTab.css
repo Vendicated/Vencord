@@ -5,7 +5,7 @@
 
 .vc-icon-icon {
     margin-left: 5%;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     transition: transform 0.15s ease, color 0.15s ease;
 }
 
@@ -13,12 +13,12 @@
 .vc-icon-icon polygon,
 .vc-icon-icon circle,
 .vc-icon-icon rect {
-    fill: var(--interactive-normal);
+    fill: var(--interactive-icon-default);
     transition: fill 0.15s ease;
 }
 
 .vc-icon-container:hover .vc-icon-icon {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
     transform: scale(1.020);
 }
 
@@ -26,7 +26,7 @@
 .vc-icon-container:hover .vc-icon-icon polygon,
 .vc-icon-container:hover .vc-icon-icon circle,
 .vc-icon-container:hover .vc-icon-icon rect {
-    fill: var(--interactive-active);
+    fill: var(--interactive-icon-active);
 }
 
 .vc-icon-modal-main-container {
@@ -109,7 +109,7 @@
 }
 
 .vc-icon-modal-color-tooltip:hover {
-    background-color: var(--info-help-background);
+    background-color: var(--background-feedback-info);
 }
 
 .vc-save-modal {

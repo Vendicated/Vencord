@@ -44,7 +44,7 @@ $modifier: var(--input-border);
     cursor: pointer;
     padding-left: 0px;
     margin: 0px 14px 6px 0px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     transition: opacity 0.2s ease-in-out;
 }
 
@@ -115,7 +115,7 @@ $modifier: var(--input-border);
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     border-bottom-width: 2px;
     border-bottom-style: solid;
     /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
