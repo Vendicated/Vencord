@@ -56,11 +56,13 @@ interface SettingsLayoutNode {
     type: number;
     key?: string;
     legacySearchKey?: string;
+    getLegacySearchKey?(): string;
     useLabel?(): string;
     useTitle?(): string;
     buildLayout?(): SettingsLayoutNode[];
     icon?(): ReactNode;
     render?(): ReactNode;
+    StronglyDiscouragedCustomComponent?(): ReactNode;
 }
 
 interface EntryOptions {
@@ -165,7 +167,9 @@ export default definePlugin({
         return ({
             key,
             type: LayoutTypes.SIDEBAR_ITEM,
+            // FIXME
             legacySearchKey: title.toUpperCase(),
+            getLegacySearchKey: () => title.toUpperCase(),
             useTitle: () => title,
             icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [
@@ -178,6 +182,8 @@ export default definePlugin({
                             key: key + "_pane",
                             type: LayoutTypes.PANE,
                             buildLayout: () => [],
+                            // FIXME
+                            StronglyDiscouragedCustomComponent: () => <Component />,
                             render: () => <Component />,
                             useTitle: () => panelTitle
                         }
