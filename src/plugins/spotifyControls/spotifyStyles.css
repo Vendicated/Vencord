@@ -1,6 +1,6 @@
 #vc-spotify-player {
     padding: 12px;
-    background: var(--background-base-low, var(--background-base-lower-alt));
+    background: var(--background-base-low);
     margin: 0;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -10,14 +10,6 @@
     --vc-spotify-green: var(--spotify, #1db954);
     --vc-spotify-green-90: color-mix(in hsl, var(--vc-spotify-green), transparent 90%);
     --vc-spotify-green-80: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
-}
-
-.theme-light #vc-spotify-player {
-    background: var(--background-base-lower-alt);
-}
-
-.theme-dark #vc-spotify-player {
-    background: var(--background-base-lower-alt);
 }
 
 .vc-spotify-button {

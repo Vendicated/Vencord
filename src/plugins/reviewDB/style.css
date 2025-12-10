@@ -8,13 +8,14 @@
 }
 
 .vc-rdb-input {
-    padding-left: 12px;
+    padding-inline: 12px;
     margin-top: 6px;
     margin-bottom: 12px;
     resize: none;
     overflow: hidden;
     background: transparent;
-    border: 1px solid var(--profile-message-input-border-color);
+    border: 1px solid var(--input-border-default, var(--border-muted));
+    box-sizing: border-box;
 }
 
 .vc-rdb-modal-footer-wrapper {
