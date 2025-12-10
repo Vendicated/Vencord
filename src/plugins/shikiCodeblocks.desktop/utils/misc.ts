@@ -17,13 +17,12 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { resolveLang } from "@plugins/shikiCodeblocks.desktop/api/languages";
+import { HighlighterProps } from "@plugins/shikiCodeblocks.desktop/components/Highlighter";
+import { HljsSetting } from "@plugins/shikiCodeblocks.desktop/types";
 import { hljs } from "@webpack/common";
 
-import { resolveLang } from "../api/languages";
-import { HighlighterProps } from "../components/Highlighter";
-import { HljsSetting } from "../types";
-
-export const cl = classNameFactory("shiki-");
+export const cl = classNameFactory("vc-shiki-");
 
 export const shouldUseHljs = ({
     lang,

@@ -28,6 +28,7 @@ const Engines = {
     Yandex: "https://yandex.com/images/search?rpt=imageview&url=",
     SauceNAO: "https://saucenao.com/search.php?url=",
     IQDB: "https://iqdb.org/?url=",
+    Bing: "https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:",
     TinEye: "https://www.tineye.com/search?url=",
     ImgOps: "https://imgops.com/start?url="
 } as const;
@@ -50,17 +51,15 @@ function makeSearchItem(src: string) {
                         key={key}
                         id={key}
                         label={
-                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                            <Flex alignItems="center" gap="0.5em">
                                 <img
                                     style={{
-                                        borderRadius: i >= 3 // Do not round Google, Yandex & SauceNAO
-                                            ? "50%"
-                                            : void 0
+                                        borderRadius: "50%",
                                     }}
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={new URL("/favicon.ico", Engines[engine]).toString().replace("lens.", "")}
+                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).host}.ico`}
                                 />
                                 {engine}
                             </Flex>
@@ -73,7 +72,7 @@ function makeSearchItem(src: string) {
                 key="search-image-all"
                 id="search-image-all"
                 label={
-                    <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                    <Flex alignItems="center" gap="0.5em">
                         <OpenExternalIcon height={16} width={16} />
                         All
                     </Flex>
@@ -108,7 +107,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::MESSAGE_ACTIONS_MENU_LABEL}",
+            find: "#{intl::MESSAGE_ACTIONS_MENU_LABEL}),shouldHideMediaOptions:",
             replacement: {
                 match: /favoriteableType:\i,(?<=(\i)\.getAttribute\("data-type"\).+?)/,
                 replace: (m, target) => `${m}reverseImageSearchType:${target}.getAttribute("data-role"),`

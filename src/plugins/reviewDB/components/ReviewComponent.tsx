@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Auth, getToken } from "@plugins/reviewDB/auth";
+import { Review, ReviewType } from "@plugins/reviewDB/entities";
+import { blockUser, deleteReview, reportReview, unblockUser } from "@plugins/reviewDB/reviewDbApi";
+import { settings } from "@plugins/reviewDB/settings";
+import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "@plugins/reviewDB/utils";
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { LazyComponent } from "@utils/react";
 import { filters, findBulk } from "@webpack";
 import { Alerts, Parser, Timestamp, useState } from "@webpack/common";
 
-import { Auth, getToken } from "../auth";
-import { Review, ReviewType } from "../entities";
-import { blockUser, deleteReview, reportReview, unblockUser } from "../reviewDbApi";
-import { settings } from "../settings";
-import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "../utils";
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
@@ -159,7 +159,7 @@ export default LazyComponent(() => {
                         onClick={() => openBlockModal()}
                     />
                 )}
-                {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+                {review.sender.badges.map((badge, idx) => <ReviewBadge key={idx} {...badge} />)}
 
                 {
                     !settings.store.hideTimestamps && review.type !== ReviewType.System && (
@@ -170,7 +170,13 @@ export default LazyComponent(() => {
 
                 <div className={cl("review-comment")}>
                     {(review.comment.length > 200 && !showAll)
-                        ? [Parser.parseGuildEventDescription(review.comment.substring(0, 200)), "...", <br />, (<a onClick={() => setShowAll(true)}>Read more</a>)]
+                        ? (
+                            <>
+                                {Parser.parseGuildEventDescription(review.comment.substring(0, 200))}...
+                                <br />
+                                <a onClick={() => setShowAll(true)}>Read more</a>]
+                            </>
+                        )
                         : Parser.parseGuildEventDescription(review.comment)}
                 </div>
 

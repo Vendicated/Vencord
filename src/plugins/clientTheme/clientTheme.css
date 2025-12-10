@@ -1,34 +1,26 @@
-.client-theme-settings {
+.vc-clientTheme-settings {
     display: flex;
     flex-direction: column;
 }
 
-.client-theme-container {
+.vc-clientTheme-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
 
-.client-theme-settings-labels {
+.vc-clientTheme-labels {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
 }
 
-.client-theme-container > [class^="colorSwatch"] > [class^="swatch"] {
-    border: thin solid var(--background-modifier-accent) !important;
+.vc-clientTheme-container [class^="swatch"] {
+    border: thin solid var(--input-border-default, var(--input-border)) !important;
 }
 
-.client-theme-warning * {
-    color: var(--text-danger);
-}
-
-.client-theme-contrast-warning {
-    background-color: var(--background-primary);
-    padding: 0.5rem;
-    border-radius: .5rem;
+.vc-clientTheme-buttons-container {
+    margin-top: 16px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    gap: 4px;
 }

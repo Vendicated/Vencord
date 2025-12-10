@@ -24,7 +24,7 @@ export default definePlugin({
     patches: [
         // DM User Sidebar
         {
-            find: ".PANEL}),nicknameIcons",
+            find: ".SIDEBAR}),nicknameIcons",
             replacement: {
                 match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id)}\)}\)/,
                 replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:true})"
@@ -32,7 +32,15 @@ export default definePlugin({
         },
         // User Profile Modal
         {
-            find: "action:\"PRESS_APP_CONNECTION\"",
+            find: ".connections,userId:",
+            replacement: {
+                match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
+                replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:false}),"
+            }
+        },
+        // User Profile Modal v2
+        {
+            find: ".MODAL_V2,onClose:",
             replacement: {
                 match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
                 replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:false}),"
@@ -62,7 +70,7 @@ export default definePlugin({
                                         width="16"
                                         height="16"
                                         viewBox="0 0 24 24"
-                                        fill="var(--interactive-normal)"
+                                        fill="var(--interactive-icon-default, var(--interactive-normal))"
                                     >
                                         <path d="M13 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
                                         <path d="M3 5v-.75C3 3.56 3.56 3 4.25 3s1.24.56 1.33 1.25C6.12 8.65 9.46 12 13 12h1a8 8 0 0 1 8 8 2 2 0 0 1-2 2 .21.21 0 0 1-.2-.15 7.65 7.65 0 0 0-1.32-2.3c-.15-.2-.42-.06-.39.17l.25 2c.02.15-.1.28-.25.28H9a2 2 0 0 1-2-2v-2.22c0-1.57-.67-3.05-1.53-4.37A15.85 15.85 0 0 1 3 5Z" />
