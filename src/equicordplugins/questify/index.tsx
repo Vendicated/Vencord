@@ -1207,7 +1207,7 @@ export default definePlugin({
                 },
                 {
                     // If we already applied Questify's sort, skip further sorting.
-                    match: /(?<=(\i)\)\);)(return )((\i).sort)/,
+                    match: /(?<=sortMethod:(\i).{0,100}?\)\);)(return )((\i).sort)/,
                     replace: "$2$1===\"questify\"?$4:$3"
                 },
                 {
