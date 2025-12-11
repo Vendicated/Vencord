@@ -546,7 +546,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 312974985876471810n
     },
     coopeeo: {
-        name: "Cooper",
+        name: "August",
         id: 594864203102158859n
     },
     Joona: {
