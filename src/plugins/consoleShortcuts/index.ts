@@ -41,7 +41,7 @@ const makeVesktopSwitcher = (branch: string) => () => {
 
     Vesktop.Settings.store.discordBranch = branch;
     VesktopNative.app.relaunch();
-}
+};
 
 const define: typeof Object.defineProperty =
     (obj, prop, desc) => {
