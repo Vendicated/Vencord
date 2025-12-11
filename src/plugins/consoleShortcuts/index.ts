@@ -35,12 +35,12 @@ const DESKTOP_ONLY = (f: string) => () => {
     throw new Error(`'${f}' is Discord Desktop only.`);
 };
 
-function makeVesktopSwitcher(branch: string): () => void {
-    return function () {
-        if (Vesktop.Settings.store.discordBranch === branch) throw new Error(`Already on ${branch}`);
-        Vesktop.Settings.store.discordBranch = branch;
-        VesktopNative.app.relaunch();
-    };
+const makeVesktopSwitcher = (branch: string) => () => {
+    if (Vesktop.Settings.store.discordBranch === branch)
+        throw new Error(`Already on ${branch}`);
+
+    Vesktop.Settings.store.discordBranch = branch;
+    VesktopNative.app.relaunch();
 }
 
 const define: typeof Object.defineProperty =
