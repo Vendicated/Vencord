@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "AlwaysAnimate",
-    description: "Animates anything that can be animated",
+    description: "Animates anything that can be animated without having to hover (but will be CPU intensive)",
     authors: [Devs.FieryFlames],
 
     patches: [
