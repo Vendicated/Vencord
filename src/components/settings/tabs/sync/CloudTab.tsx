@@ -96,10 +96,8 @@ function CloudTab() {
     const settings = useSettings(["cloud.authenticated", "cloud.url"]);
 
     return (
-        <SettingsTab title="Vencord Cloud">
+        <SettingsTab>
             <section className={Margins.top16}>
-                <Forms.FormTitle tag="h5">Cloud Settings</Forms.FormTitle>
-
                 <Paragraph size="md" className={Margins.bottom20}>
                     Vencord comes with a cloud integration that adds goodies like settings sync across devices.
                     It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
@@ -118,7 +116,7 @@ function CloudTab() {
                             settings.cloud.authenticated = v;
                     }}
                 />
-                <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
+                <Forms.FormTitle tag="h5" className={Margins.top16}>Backend URL</Forms.FormTitle>
                 <Forms.FormText className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
                 </Forms.FormText>
