@@ -27,9 +27,9 @@
 }
 
 .vc-plugins-setting-description {
-    color: var(--header-secondary);
+    color: var(--text-default);
 }
 
 .vc-plugins-setting-error {
-    color: var(--text-danger);
+    color: var(--text-feedback-critical, var(--text-danger, #FF5C5C));
 }
