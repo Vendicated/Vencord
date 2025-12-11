@@ -1,6 +1,6 @@
 # ShowHiddenThings
 
-Displays various hidden & moderator-only things regardless of permissions.
+Displays hidden moderator-only things, regardless of permissions.
 
 ## Features
 
@@ -13,7 +13,3 @@ Displays various hidden & moderator-only things regardless of permissions.
 - Show the member mod view context menu item in all servers
 
 ![](https://github.com/Vendicated/Vencord/assets/47677887/3dac95dd-841c-4c15-ad87-2db7bd1e4dab)
-
-- Disable filters in Server Discovery search that hide servers that don't meet discovery criteria
-
-- Disable filters in Server Discovery search that hide NSFW & disallowed servers
