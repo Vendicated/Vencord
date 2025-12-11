@@ -31,6 +31,7 @@ import desktopIcon from "file://icons/desktopIcon.svg?minify";
 import embeddedIcon from "file://icons/embeddedIcon.svg?minify";
 import mobileIcon from "file://icons/mobileIcon.svg?minify";
 import webIcon from "file://icons/webIcon.svg?minify";
+import type { JSX } from "react";
 
 export interface Session {
     sessionId: string;
@@ -56,36 +57,46 @@ function Icon(svg: string, size = 20) {
             {tooltipProps => (
                 <img
                     {...tooltipProps}
-                    src={"data:image/svg+xml," + encodeURIComponent(svg.replace("#000000", color))}
+                    src={"data:image/svg+xml;utf8," + encodeURIComponent(svg.replace("#000000", color))}
                     height={size - (small ? 3 : 0)}
                     width={size - (small ? 3 : 0)}
-                >
-                </img>
+                />
             )}
         </Tooltip>
     );
 }
 
-const Icons = {
-    desktop: Icon(desktopIcon),
-    web: Icon(webIcon),
-    mobile: Icon(mobileIcon, 17),
-    embedded: Icon(embeddedIcon),
-} satisfies Record<DiscordPlatform, unknown>;
-
-const SVGIcons: Record<DiscordPlatform, string> = {
-    desktop: desktopIcon,
-    web: webIcon,
-    mobile: mobileIcon,
-    embedded: embeddedIcon,
+type IconData = {
+    svg: string,
+    size: number,
+    component: (props: { color: string, tooltip: string, small: boolean; }) => JSX.Element;
 };
 
-const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: OnlineStatus; small: boolean; }) => {
-    const tooltip = platform === "embedded"
+const Icons: Record<DiscordPlatform, IconData> = {
+    desktop: iconData(desktopIcon),
+    web: iconData(webIcon),
+    mobile: iconData(mobileIcon),
+    embedded: iconData(embeddedIcon),
+};
+
+function iconData(svg: string, size: number = 20): IconData {
+    return {
+        svg,
+        size,
+        component: Icon(svg, size),
+    };
+}
+
+function getPlatformTooltip(platform: DiscordPlatform): string {
+    return platform === "embedded"
         ? "Console"
         : platform[0].toUpperCase() + platform.slice(1);
+}
 
-    const Icon = Icons[platform] ?? Icons.desktop;
+const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: OnlineStatus; small: boolean; }) => {
+    const tooltip = getPlatformTooltip(platform as DiscordPlatform);
+
+    const Icon = (Icons[platform] ?? Icons.desktop).component;
 
     return <Icon color={useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
@@ -133,17 +144,15 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     if (!status) return [];
 
     return Object.entries(status).map(([platform, status]) => {
-        const tooltip = platform === "embedded"
-            ? "Console"
-            : platform[0].toUpperCase() + platform.slice(1);
+        const tooltip = getPlatformTooltip(platform as DiscordPlatform);
 
-        const size = platform === "mobile" ? 17 : 20;
+        const icon = Icons[platform as DiscordPlatform] ?? Icons.desktop;
 
         return {
             description: tooltip,
-            iconSrc: "data:image/svg+xml," + encodeURIComponent(SVGIcons[platform].replace("#000000", colorMap[status] ?? colorMap.offline)),
+            iconSrc: "data:image/svg+xml;utf8," + encodeURIComponent(icon.svg.replace("#000000", colorMap[status] ?? colorMap.offline)),
             props: {
-                style: { width: size, height: size },
+                style: { width: icon.size, height: icon.size },
             },
             key: `vc-platform-indicator-${platform}`,
         } satisfies ProfileBadge;
