@@ -95,12 +95,17 @@ async function generateDebugInfoMessage() {
         return `${name} (${navigator.userAgent})`;
     })();
 
+    const spoofInfo = IS_EQUIBOP ? tryOrElse(() => VesktopNative.app.getPlatformSpoofInfo?.(), null) : null;
+    const platformDisplay = spoofInfo?.spoofed
+        ? `${platformName()} (spoofed from ${spoofInfo.originalPlatform})`
+        : platformName();
+
     const info = {
         Equicord:
             `v${VERSION} • [${gitHashShort}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
             `${IS_EQUIBOP ? "" : SettingsPlugin.getVersionInfo()} - ${Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
-        Platform: platformName()
+        Platform: platformDisplay
     };
 
     if (IS_DISCORD_DESKTOP) {
@@ -121,6 +126,7 @@ async function generateDebugInfoMessage() {
         "Link Embeds Disabled": tryOrElse(() => !ShowEmbeds.getSetting(), false),
         "Equicord DevBuild": !IS_STANDALONE,
         "Equibop DevBuild": IS_EQUIBOP && tryOrElse(() => VesktopNative.app.isDevBuild?.(), false),
+        "Platform Spoofed": spoofInfo?.spoofed ?? false,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
         ">2 Weeks Outdated": BUILD_TIMESTAMP < Date.now() - 12096e5,
         [`Potentially Problematic Plugins: ${potentiallyProblematicPlugins.join(", ")}`]: potentiallyProblematicPlugins.length
