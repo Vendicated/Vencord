@@ -55,7 +55,7 @@ function FriendsIndicator() {
             width: "100%",
             fontSize: "12px",
             fontWeight: "600",
-            color: "var(--header-secondary)",
+            color: "var(--text-default)",
             textTransform: "uppercase",
             textAlign: "center",
         }}>
@@ -79,7 +79,7 @@ function ServersIndicator() {
             width: "100%",
             fontSize: "12px",
             fontWeight: "600",
-            color: "var(--header-secondary)",
+            color: "var(--text-default)",
             textTransform: "uppercase",
             textAlign: "center",
         }}>

@@ -16,12 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CATEGORY_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -33,7 +35,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel } from "@vencord/discord-types";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -95,7 +97,6 @@ async function generateDebugInfoMessage() {
     }
 
     const commonIssues = {
-        "NoRPC enabled": Vencord.Plugins.isPluginEnabled("NoRPC"),
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
         "Vencord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
@@ -114,7 +115,7 @@ function generatePluginList() {
     const isApiPlugin = (plugin: string) => plugin.endsWith("API") || plugins[plugin].required;
 
     const enabledPlugins = Object.keys(plugins)
-        .filter(p => Vencord.Plugins.isPluginEnabled(p) && !isApiPlugin(p));
+        .filter(p => isPluginEnabled(p) && !isApiPlugin(p));
 
     const enabledStockPlugins = enabledPlugins.filter(p => !PluginMeta[p].userPlugin);
     const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin);
@@ -187,7 +188,7 @@ export default definePlugin({
                                 Please first update before asking for support!
                             </Forms.FormText>
                         </div>,
-                        onCancel: () => openUpdaterModal!(),
+                        onCancel: () => openSettingsTabModal(UpdaterTab!),
                         cancelText: "View Updates",
                         confirmText: "Update & Restart Now",
                         onConfirm: forceUpdate,
@@ -320,7 +321,7 @@ export default definePlugin({
         if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id)) return null;
 
         return (
-            <Card className={`vc-warning-card ${Margins.top8}`}>
+            <Card variant="warning" className={Margins.top8} defaultPadding>
                 Please do not private message Vencord plugin developers for support!
                 <br />
                 Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}

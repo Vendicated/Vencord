@@ -28,7 +28,7 @@
 .vc-pindms-collapse-icon {
     width: 16px;
     height: 16px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default, var(--interactive-normal));
     transform: rotate(90deg)
 }
 

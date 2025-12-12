@@ -255,7 +255,7 @@ export default definePlugin({
                     </ErrorCard>
                 )}
 
-                <Flex flexDirection="column" style={{ gap: ".5em" }} className={Margins.top16}>
+                <Flex flexDirection="column" gap=".5em" className={Margins.top16}>
                     <Forms.FormText>
                         Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                         get the application ID.
@@ -276,7 +276,7 @@ export default definePlugin({
 
                 <Divider className={Margins.top8} />
 
-                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-faint)" }}>
+                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-muted, var(--background-mod-faint))" }}>
                     {activity && <ActivityView
                         activity={activity}
                         user={UserStore.getCurrentUser()}

@@ -91,11 +91,24 @@ export default definePlugin({
             replacement: [
                 // Use Decor avatar decoration hook
                 {
-                    match: /(?<=\i\)\({avatarDecoration:)(\i)(?=,)(?<=currentUser:(\i).+?)/,
+                    match: /(?<=\i\)\({avatarDecoration:)\i(?=,)(?<=currentUser:(\i).+?)/,
                     replace: "$self.useUserDecorAvatarDecoration($1)??$&"
                 }
             ]
-        }
+        },
+        ...[
+            '"Message Username"', // Messages
+            ".nameplatePreview,{", // Nameplate preview
+            "#{intl::ayozFl::raw}", // Avatar preview
+        ].map(find => ({
+            find,
+            replacement: [
+                {
+                    match: /(?<=userValue.{0,25}void 0:)((\i)\.avatarDecoration)/,
+                    replace: "$self.useUserDecorAvatarDecoration($2)??$1"
+                }
+            ]
+        })),
     ],
     settings,
 
