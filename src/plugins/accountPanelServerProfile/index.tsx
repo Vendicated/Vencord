@@ -4,14 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import alwaysExpandProfiles from "@plugins/alwaysExpandProfiles";
 import { Devs } from "@utils/constants";
-import { getCurrentChannel } from "@utils/discord";
+import { fetchUserProfile, getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { ContextMenuApi, Menu } from "@webpack/common";
+import { ContextMenuApi, Menu, UserStore } from "@webpack/common";
 
 interface UserProfileProps {
     popoutProps: Record<string, any>;
@@ -36,7 +38,13 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
                 id="vc-ap-view-alternate-popout"
                 label={prioritizeServerProfile ? "View Account Profile" : "View Server Profile"}
                 disabled={getCurrentChannel()?.getGuildId() == null}
-                action={e => {
+                action={async e => {
+                    if (isPluginEnabled(alwaysExpandProfiles.name)) {
+                        const user = await fetchUserProfile(UserStore.getCurrentUser().id, {
+                            guild_id: getCurrentChannel()?.getGuildId()
+                        }, false);
+                        return alwaysExpandProfiles.openUserModal(user!.userId);
+                    }
                     openAlternatePopout = true;
                     accountPanelRef.current?.click();
                 }}
