@@ -26,7 +26,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
+import { ChannelStore, PermissionsBits, PermissionStore, Tooltip, useStateFromStores } from "@webpack/common";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
@@ -165,9 +165,10 @@ export default definePlugin({
             predicate: () => settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
             replacement: [
                 // Make the channel appear as muted if it's hidden
+                // use a hook to update when channel visibility changes
                 {
-                    match: /\.subtitle,.+?;(?=return\(0,\i\.jsxs?\))(?<={channel:(\i),name:\i,muted:(\i).+?;)/,
-                    replace: (m, channel, muted) => `${m}${muted}=$self.isHiddenChannel(${channel})?true:${muted};`
+                    match: /(?<={channel:(\i),name:\i,)muted:(\i)/,
+                    replace: (_, channel, muted) => `_muted:${muted}=$self.useIsHiddenChannel(${channel})?true:arguments[0].muted`
                 },
                 // Add the hidden eye icon if the channel is hidden
                 {
@@ -501,6 +502,12 @@ export default definePlugin({
             console.error("[ViewHiddenChannels#isHiddenChannel]: ", e);
             return false;
         }
+    },
+
+    useIsHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
+        return useStateFromStores([PermissionStore, ChannelStore], () => {
+            return this.isHiddenChannel(channel, checkConnect);
+        }, [channel, checkConnect]);
     },
 
     resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
