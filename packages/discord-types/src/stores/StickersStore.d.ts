@@ -7,9 +7,9 @@ export class StickersStore extends FluxStore {
     getRawStickersByGuild(): StickerGuildMap;
     getPremiumPacks(): PremiumStickerPack[];
 
-    getStickerById(id: string): Sticker | undefined;
+    getStickerById(id: string): GuildSticker | undefined;
     getStickerPack(id: string): PremiumStickerPack | undefined;
-    getStickersByGuildId(guildId: string): Sticker[] | undefined;
+    getStickersByGuildId(guildId: string): GuildSticker[] | undefined;
 
     isPremiumPack(id: string): boolean;
 }

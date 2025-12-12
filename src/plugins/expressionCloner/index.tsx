@@ -28,10 +28,22 @@ import definePlugin from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, ContextMenuApi, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
+
+interface ForumTagContextMenuProps {
+    tag: {
+        emojiId: null | string;
+    };
+}
+
+interface OnboardingContextMenuProps {
+    option: {
+        emoji: { id: string; name: string; animated: boolean; } | { id: null; };
+    };
+}
 
 const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
 
@@ -76,7 +88,7 @@ function getUrl(data: Data) {
     return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExtMap[data.format_type]}?size=4096&lossless=true`;
 }
 
-async function fetchSticker(id: string) {
+async function fetchSticker(id: string): Promise<GuildSticker> {
     const cached = StickersStore.getStickerById(id);
     if (cached) return cached;
 
@@ -89,7 +101,7 @@ async function fetchSticker(id: string) {
         sticker: body
     });
 
-    return body as Sticker;
+    return body as GuildSticker;
 }
 
 async function cloneSticker(guildId: string, sticker: Sticker) {
@@ -201,7 +213,6 @@ const getFontSize = (s: string) => {
     const sizes = [20, 20, 18, 18, 16, 14, 12];
     return sizes[s.length] ?? 4;
 };
-
 const nameValidator = /^\w+$/i;
 
 function CloneModal({ data }: { data: Sticker | Emoji; }) {
@@ -302,7 +313,14 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
     );
 }
 
-function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Omit<Sticker | Emoji, "t">>) {
+/**
+ * makes the return type of the arg fetchData of {@link buildMenuItem} based on the type arg
+ */
+type Discriminate<
+    U extends { "t": string; },
+    K extends U["t"]
+> = U extends { "t": K; } ? U : never;
+function buildMenuItem<T extends (Emoji | Sticker)["t"]>(type: T, fetchData: () => Promisable<Omit<Discriminate<Sticker | Emoji, T>, "t">>) {
     return (
         <Menu.MenuItem
             id="emote-cloner"
@@ -311,7 +329,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
             action={() =>
                 openModalLazy(async () => {
                     const res = await fetchData();
-                    const data = { t: type, ...res } as Sticker | Emoji;
+                    const data = { t: type, ...res } as any as Sticker | Emoji;
                     const url = getUrl(data);
 
                     return modalProps => (
@@ -339,7 +357,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
     );
 }
 
-function isGifUrl(url: string) {
+function isEmojiAnimated(url: string) {
     const u = new URL(url);
     return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
@@ -360,7 +378,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
                     name,
-                    isAnimated: isGifUrl(itemHref ?? itemSrc)
+                    isAnimated: isEmojiAnimated(itemHref ?? itemSrc)
                 }));
             case "sticker":
                 const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
@@ -384,11 +402,43 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
         children.push(buildMenuItem("Emoji", () => ({
             id,
             name,
-            isAnimated: firstChild && isGifUrl(firstChild.src)
+            isAnimated: firstChild && isEmojiAnimated(firstChild.src)
         })));
     } else if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
         children.push(buildMenuItem("Sticker", () => fetchSticker(id)));
     }
+};
+let emojiUrlRegex: RegExp;
+// Patches user statuses with a custom emoji
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, { target, src }: {
+    target?: HTMLImageElement;
+    src?: string;
+}) => {
+    const [, id] = src?.match(emojiUrlRegex) ?? [];
+
+    if (!id) return;
+
+    const name = target?.alt || "EmojiName";
+    children.push(buildMenuItem("Emoji", () => ({
+        id,
+        name,
+        isAnimated: isEmojiAnimated(src!)
+    })));
+    return;
+};
+
+const forumTagContextMenuPatch: NavContextMenuPatchCallback = (children, { tag }: ForumTagContextMenuProps) => {
+    if (!tag?.emojiId) return;
+    // same function discord calls on the emoji id
+    const emoji = EmojiStore.getUsableCustomEmojiById(tag.emojiId);
+
+    if (!emoji) return;
+
+    children.push(buildMenuItem("Emoji", () => ({
+        id: emoji.id,
+        name: emoji.name,
+        isAnimated: emoji.animated,
+    })));
 };
 
 migratePluginSettings("ExpressionCloner", "EmoteCloner");
@@ -396,9 +446,55 @@ export default definePlugin({
     name: "ExpressionCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner", "EmoteCloner", "EmojiCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.sadan],
+
+    patches: [
+        {
+            find: "emoji.animated||",
+            replacement: {
+                match: /(?=onClick:)(?=.*\(\)=>(\i)\(!1\))/,
+                replace: "onContextMenu:$self.OnboardingContextMenu.bind(null,arguments[0],$1),"
+            }
+        },
+        // needed because the context menu wont show up if dev mode is disabled (only used for copying ids)
+        {
+            find: '"forum-tag-"',
+            replacement: {
+                match: /(?<=&&)(\i)(?=&&)(?<=\1=\i\.\i\.getSetting\(\).+?)/,
+                // make sure there is a custom emoji as well
+                replace: "(arguments[0]?.tag?.emojiId != null || $1)"
+            }
+        }
+    ],
+
+    start() {
+        const { CDN_HOST } = window.GLOBAL_ENV;
+        emojiUrlRegex = new RegExp(`^${location.protocol}//${CDN_HOST}/emojis/(\\d+)\\.\\w+.+$`);
+    },
+
     contextMenus: {
         "message": messageContextMenuPatch,
-        "expression-picker": expressionPickerPatch
-    }
+        "expression-picker": expressionPickerPatch,
+        "image-context": imageContextMenuPatch,
+        "forum-tag": forumTagContextMenuPatch,
+    },
+
+    OnboardingContextMenu({ option: { emoji } }: OnboardingContextMenuProps, setMouseDown: (v: boolean) => void, ev: React.MouseEvent) {
+        // covers no emoji and unicode emojis
+        if (emoji?.id == null) return;
+
+        ContextMenuApi.openContextMenu(ev, () => {
+            return <Menu.Menu
+                navId="onboarding-question-context"
+                onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            >
+                {buildMenuItem("Emoji", () => ({
+                    ...emoji,
+                    isAnimated: emoji.animated
+                }))}
+            </Menu.Menu>;
+        });
+        // fixes really annoying visual quirk due to discords code
+        setMouseDown(false);
+    },
 });
