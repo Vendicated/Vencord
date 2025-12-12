@@ -203,7 +203,7 @@ export default definePlugin({
 
                 return {
                     color: value.replace("{DEFAULT}", "--text-default"),
-                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                    "--text-strong": value.replace("{DEFAULT}", "--text-strong"),
                     "--text-muted": value.replace("{DEFAULT}", "--text-muted")
                 };
             }

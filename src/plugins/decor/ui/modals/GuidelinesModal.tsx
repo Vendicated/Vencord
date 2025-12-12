@@ -25,7 +25,7 @@ function GuidelinesModal(props: ModalProps) {
             <BaseText
                 size="lg"
                 weight="semibold"
-                color="header-primary"
+                color="text-strong"
                 tag="h1"
                 style={{ flexGrow: 1 }}
             >
