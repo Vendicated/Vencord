@@ -37,7 +37,7 @@
 }
 
 .vc-notification-title {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.25rem;
