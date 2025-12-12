@@ -49,6 +49,7 @@ export let TypingStore: t.TypingStore;
 export let RelationshipStore: t.RelationshipStore;
 export let MediaEngineStore: t.MediaEngineStore;
 export let SpellCheckStore: t.SpellCheckStore;
+export let UploadAttachmentStore: GenericStore;
 export let VoiceStateStore: t.VoiceStateStore;
 
 export let EmojiStore: t.EmojiStore;
@@ -90,6 +91,7 @@ waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("VoiceStateStore", m => VoiceStateStore = m);
 waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("OverridePremiumTypeStore", m => OverridePremiumTypeStore = m);
+waitForStore("UploadAttachmentStore", m => UploadAttachmentStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.

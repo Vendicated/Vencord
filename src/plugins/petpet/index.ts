@@ -22,8 +22,7 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { CommandArgument, CommandContext } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { DraftType, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
+import { DraftType, UploadAttachmentStore, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const DEFAULT_DELAY = 20;
@@ -36,8 +35,6 @@ const getFrames = makeLazy(() => Promise.all(
         (_, i) => loadImage(`https://raw.githubusercontent.com/VenPlugs/petpet/main/frames/pet${i}.gif`)
     ))
 );
-
-const UploadStore = findByPropsLazy("getUploads");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
@@ -60,7 +57,7 @@ async function resolveImage(options: CommandArgument[], ctx: CommandContext, noS
     for (const opt of options) {
         switch (opt.name) {
             case "image":
-                const upload = UploadStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
+                const upload = UploadAttachmentStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
                 if (upload) {
                     if (!upload.isImage) {
                         UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
