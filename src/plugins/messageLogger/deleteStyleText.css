@@ -4,5 +4,5 @@
     --text-muted: var(--status-danger, #f04747);
     --embed-title: var(--red-460, #be3535);
     --text-link: var(--red-460, #be3535);
-    --header-primary: var(--red-460, #be3535);
+    --text-strong: var(--red-460, #be3535);
 }

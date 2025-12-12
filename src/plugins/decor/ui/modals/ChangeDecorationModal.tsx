@@ -143,7 +143,7 @@ function ChangeDecorationModal(props: ModalProps) {
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
             <Text
-                color="header-primary"
+                color="text-strong"
                 variant="heading-lg/semibold"
                 tag="h1"
                 style={{ flexGrow: 1 }}
@@ -204,7 +204,7 @@ function ChangeDecorationModal(props: ModalProps) {
                     {typeof activeSelectedDecoration === "object" &&
                         <Text
                             variant="text-sm/semibold"
-                            color="header-primary"
+                            color="text-strong"
                         >
                             {activeSelectedDecoration?.alt}
                         </Text>
