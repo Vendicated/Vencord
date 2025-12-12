@@ -69,6 +69,7 @@
         "standalone-electron-types": "^34.2.0",
         "stylelint": "^16.25.0",
         "stylelint-config-standard": "^39.0.1",
+        "svgo": "^4.0.0",
         "ts-patch": "^3.3.0",
         "ts-pattern": "^5.6.0",
         "tsx": "^4.20.6",
