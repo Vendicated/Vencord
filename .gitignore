@@ -3,6 +3,7 @@ node_modules
 
 *.exe
 vencord_installer
+vencord.asar
 
 .idea
 .DS_Store
