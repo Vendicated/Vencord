@@ -23,7 +23,7 @@
 .vc-custom-sounds-url-input {
     width: 100%;
     padding: 8px;
-    background: var(--input-background);
+    background: var(--input-background-default, var(--input-background));
     border: none;
     border-radius: 3px;
     color: var(--text-normal);
@@ -42,7 +42,7 @@
 .vc-custom-sounds-search input {
     width: 100%;
     padding: 8px;
-    background: var(--input-background);
+    background: var(--input-background-default, var(--input-background));
     border: none;
     border-radius: 3px;
     color: var(--text-normal);

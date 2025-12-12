@@ -7,7 +7,7 @@
     --toastnotifications-padding: 1.25rem;
 
     /* Title */
-    --toastnotifications-title-color: var(--header-primary);
+    --toastnotifications-title-color: var(--text-strong);
     --toastnotifications-title-font-size: 1rem;
     --toastnotifications-title-font-weight: 600;
     --toastnotifications-title-line-height: 1.25rem;

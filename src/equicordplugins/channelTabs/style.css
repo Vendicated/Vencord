@@ -79,7 +79,7 @@
 .vc-channeltabs-separator {
     width: 98%;
     height: 1px;
-    background: var(--input-border);
+    background: var(--input-border-default, var(--input-border));
     margin: 4px auto;
 }
 
@@ -501,7 +501,7 @@
     padding: 0.125rem 0;
     min-width: 0;
     border-radius: 0.25rem;
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--input-border-default, var(--input-border));
 }
 
 .vc-channeltabs-preview-tab-compact {
@@ -1117,14 +1117,14 @@
 .channelTabs-keybind-button {
     padding: 8px 16px;
     background-color: var(--background-base-low);
-    border: 2px solid var(--input-border);
+    border: 2px solid var(--input-border-default, var(--input-border));
     border-radius: 8px;
     cursor: pointer;
     min-width: 140px;
     text-align: center;
     font-family: var(--font-code);
     font-weight: 600;
-    color: var(--header-primary);
+    color: var(--text-strong);
     transition: all 0.2s ease;
     outline: none;
     box-shadow: 0 0 0 1px var(--background-mod-muted);

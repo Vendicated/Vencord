@@ -2,7 +2,7 @@
 /* stylelint-disable length-zero-no-unit */
 
 /*
-$modifier: var(--input-border);
+$modifier: var(--input-border-default, var(--input-border));
 */
 
 .vc-notebook-search {
@@ -65,7 +65,7 @@ $modifier: var(--input-border);
     border: 0;
     height: 2px;
     margin: 12px 0px 16px 0px;
-    background-color: var(--input-border);
+    background-color: var(--input-border-default, var(--input-border));
 }
 
 .vc-holy-note [class*="buttonContainer"] {

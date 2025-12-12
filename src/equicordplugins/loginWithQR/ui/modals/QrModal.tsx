@@ -375,7 +375,7 @@ function QrModal(props: ModalProps) {
                 <BaseText
                     size="lg"
                     weight="semibold"
-                    color="header-primary"
+                    color="text-strong"
                     tag="h1"
                     style={{ flexGrow: 1 }}
                 >
@@ -470,12 +470,12 @@ function QrModal(props: ModalProps) {
                             {error.current}
                         </BaseText>
                     ) : state === LoginStateType.Camera ? (
-                        <BaseText size="md" weight="semibold" color="header-primary">
+                        <BaseText size="md" weight="semibold" color="text-strong">
                             Scanning...
                         </BaseText>
                     ) : (
                         <>
-                            <BaseText size="md" weight="semibold" color="header-primary">
+                            <BaseText size="md" weight="semibold" color="text-strong">
                                 Drag and drop an image here, or click to select an image
                             </BaseText>
                             <BaseText size="sm" weight="medium" color="text-muted">

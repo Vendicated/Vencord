@@ -35,7 +35,6 @@ export const TextWeights = {
 } as const;
 
 export const TextColors = {
-    "header-primary": "var(--header-primary)",
     "text-default": "var(--text-default)",
     "text-muted": "var(--text-muted)",
     "text-link": "var(--text-link)",

@@ -4,7 +4,7 @@
 }
 
 .questify-setting {
-    border-left: 3px solid var(--header-primary);
+    border-left: 3px solid var(--text-strong);
     padding: 3px 0 3px 8px;
     border-radius: 3px;
     user-select: text;
@@ -54,7 +54,7 @@
 
 .questify-volume-slider-container {
     margin: 8px 0 0;
-    background-color: var(--input-background);
+    background-color: var(--input-background-default, var(--input-background));
     padding: 7px 12px 7px 7px;
     border-radius: 3px;
     border: 1px solid var(--border-normal);
@@ -77,7 +77,7 @@
 .questify-alert-icon {
     flex: 0;
     place-content: center center;
-    background-color: var(--input-background);
+    background-color: var(--input-background-default, var(--input-background));
     border-radius: 3px;
     padding: 0 10px;
     color: var(--text-default);
@@ -98,7 +98,8 @@
 }
 
 .questify-button-red {
-    background-color: var(--red-500) !important; /* Necessary !important */
+    background-color: var(--red-500) !important;
+    /* Necessary !important */
 }
 
 .questify-button-red:hover {
@@ -107,7 +108,8 @@
 }
 
 .questify-button-blue {
-    background-color: var(--blue-500) !important; /* Necessary !important */
+    background-color: var(--blue-500) !important;
+    /* Necessary !important */
 }
 
 .questify-button-blue:hover {
@@ -116,7 +118,7 @@
 }
 
 #questify-dummy-quest-button {
-    border-left: 5px solid var(--header-primary);
+    border-left: 5px solid var(--text-strong);
     border-radius: 4px;
 }
 
@@ -144,7 +146,7 @@
 }
 
 .questify-color-picker-with-buttons {
-    background-color: var(--input-background);
+    background-color: var(--input-background-default, var(--input-background));
     border: 1px solid var(--border-normal);
     border-radius: 3px;
     padding: 8px;
@@ -231,7 +233,8 @@
 
 /* Background of Quest tile. */
 .questify-quest-item-restyle > div {
-    background-color: var(--questify-color) !important; /* Necessary !important */
+    background-color: var(--questify-color) !important;
+    /* Necessary !important */
 }
 
 /* Normal button text + SVG button text color. */
@@ -253,18 +256,21 @@
 
 /* Quest name color. */
 .questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > [class^="eyebrow"] {
-    color: var(--questify-quest-name) !important; /* Necessary !important */
+    color: var(--questify-quest-name) !important;
+    /* Necessary !important */
 }
 
 /* Reward title + Orbs reward title text color. */
 .questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > div[class^="text-md"],
 .questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > div[class^="text-md"] > span {
-    color: var(--questify-reward-title) !important; /* Necessary !important */
+    color: var(--questify-reward-title) !important;
+    /* Necessary !important */
 }
 
 /* Quest description text color. */
 .questify-quest-item-restyle > div > div[class^="rewardDescriptionContainer"] > div[class^="textContainer"] > div[class^="text-sm"] {
-    color: var(--questify-reward-description) !important; /* Necessary !important */
+    color: var(--questify-reward-description) !important;
+    /* Necessary !important */
 }
 
 /* Hides the gray placeholder elements which distract from the restyles. */
@@ -274,7 +280,8 @@
 
 /* Promoted by XYZ text color. */
 .questify-quest-item-restyle > div[class^="container"] > div[class^="positionContentOverBackground"] > div[class^="contents"] > div[class^="bottomRow"] > div[class^="text-sm"] {
-    color: var(--questify-reward-description) !important; /* Necessary !important */
+    color: var(--questify-reward-description) !important;
+    /* Necessary !important */
 }
 
 /* Drop shadow for >87.5% luminance (near-white) restyle gradients so logos are legible. */
@@ -327,11 +334,13 @@
 
 /* Quest tile button color. */
 .questify-quest-item-restyle > :nth-child(2) > div button {
-    background-color: var(--questify-button-normal) !important; /* Necessary !important */
+    background-color: var(--questify-button-normal) !important;
+    /* Necessary !important */
 }
 
 .questify-quest-item-restyle > :nth-child(2) > div button:not([disabled]):hover {
-    background-color: var(--questify-button-hover) !important; /* Necessary !important */
+    background-color: var(--questify-button-hover) !important;
+    /* Necessary !important */
     transition: background-color 0.2s ease-in-out;
 }
 

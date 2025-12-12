@@ -10,7 +10,7 @@
 .vc-scheduled-msg-modal-title {
     flex: 1;
     margin: 0 !important;
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 20px;
     font-weight: 600;
 }
@@ -98,7 +98,7 @@
     padding: 10px;
     border: none;
     border-radius: 3px;
-    background: var(--input-background);
+    background: var(--input-background-default, var(--input-background));
     font-size: 16px;
 }
 
@@ -224,7 +224,7 @@
 
 .vc-scheduled-msg-message-channel {
     font-weight: 600;
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .vc-scheduled-msg-message-time {

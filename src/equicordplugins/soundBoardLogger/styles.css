@@ -110,12 +110,12 @@
 
 /* input style from https://github.com/Vendicated/Vencord/blob/ea11f2244fde469ce308f8a4e7224430be62f8f1/src/plugins/sendTimestamps/styles.css#L1-L13 */
 .vc-soundlog-clone-input {
-    background-color: var(--input-background);
+    background-color: var(--input-background-default, var(--input-background));
     color: var(--text-default);
     width: 100%;
     padding: 8px 8px 8px 12px;
     outline: none;
-    border: 1px solid var(--input-background);
+    border: 1px solid var(--input-background-default, var(--input-background));
     border-radius: 4px;
     font-weight: 500;
     font-style: inherit;

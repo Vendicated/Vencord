@@ -19,7 +19,7 @@
 
 .vc-rdms-name {
     margin-top: 8px;
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 12px;
     max-width: 152px;
     white-space: nowrap;

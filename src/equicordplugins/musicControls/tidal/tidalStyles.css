@@ -1,6 +1,6 @@
 #eq-tdl-player {
     padding: 12px;
-    background: var(--bg-overlay-floating, var(--background-base-low, var(--background-base-lower-alt)));
+    background: var(--background-base-low);
     margin: 0;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -19,7 +19,7 @@
 
 .eq-tdl-artist,
 .eq-tdl-album {
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .eq-tdl-secondary-song-info {
@@ -166,7 +166,7 @@
 }
 
 #eq-tdl-song-title {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 14px;
     font-weight: 600;
 }

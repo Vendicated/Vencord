@@ -47,7 +47,7 @@ export const settings = definePluginSettings({
             <div style={{
                 width: "100%",
                 height: 1,
-                borderTop: "thin solid var(--input-border)",
+                borderTop: "thin solid var(--input-border-default, var(--input-border))",
                 paddingTop: 5,
                 paddingBottom: 5
             }} />

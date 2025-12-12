@@ -8,13 +8,13 @@
 .collections-sort-title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--header-primary);
+    color: var(--text-strong);
     margin-bottom: 8px;
 }
 
 .collections-sort-divider {
     margin: 10px 0;
-    border-top: 1px solid var(--input-border);
+    border-top: 1px solid var(--input-border-default, var(--input-border));
 }
 
 .collections-sort-description,
@@ -51,7 +51,7 @@
 }
 
 .collections-sort-label:hover {
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .custom-modal {
@@ -69,7 +69,7 @@
 .custom-modal-title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .custom-modal-content {

@@ -128,7 +128,7 @@ function VerifyModal({
                         <BaseText
                             size="xl"
                             weight="bold"
-                            color="header-primary"
+                            color="text-strong"
                             tag="h1"
                             className={cl("device-header")}
                         >
@@ -154,7 +154,7 @@ function VerifyModal({
                         <BaseText
                             size="xl"
                             weight="bold"
-                            color="header-primary"
+                            color="text-strong"
                             tag="h1"
                             className={cl("device-header")}
                         >
@@ -180,7 +180,7 @@ function VerifyModal({
                         <BaseText
                             size="xl"
                             weight="bold"
-                            color="header-primary"
+                            color="text-strong"
                             tag="h1"
                             className={cl("device-header")}
                         >

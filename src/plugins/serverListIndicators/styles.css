@@ -31,7 +31,7 @@
     opacity: 0;
     border-radius: 0 4px 4px 0;
     left: -4px;
-    background-color: var(--header-primary);
+    background-color: var(--text-strong);
     transition: height 0.15s ease-out, width 0.15s ease-out,
         opacity 0.15s ease-out;
 }

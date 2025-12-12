@@ -1,6 +1,6 @@
 #vc-ytm-player {
     padding: 12px;
-    background: var(--bg-overlay-floating, var(--background-base-low, var(--background-base-lower-alt)));
+    background: var(--background-base-low);
     margin: 0;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -19,7 +19,7 @@
 
 .vc-ytm-artist,
 .vc-ytm-album {
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .vc-ytm-secondary-song-info {
@@ -166,7 +166,7 @@
 }
 
 #vc-ytm-song-title {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 14px;
     font-weight: 600;
 }
