@@ -18,11 +18,14 @@
     color: var(--text-default);
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5em;
-    padding: 8px 9px;
+    padding: 8px 12px 8px 8px;
     border-radius: 8px;
     transition: 0.1s ease-out;
     box-sizing: border-box;
+    line-height: 1;
+    cursor: pointer;
 }
 
 .vc-settings-quickActions-pill:hover {
@@ -39,4 +42,5 @@
 .vc-settings-quickActions-img {
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
 }

@@ -44,6 +44,8 @@ export interface Settings {
     eagerPatches: boolean;
     enabledThemes: string[];
     enabledThemeLinks: string[];
+    enableOnlineThemes: boolean;
+    pinnedThemes: string[];
     themeNames: Record<string, string>;
     enableReactDevtools: boolean;
     themeLinks: string[];
@@ -110,6 +112,8 @@ const DefaultSettings: Settings = {
     eagerPatches: IS_REPORTER,
     enabledThemes: [],
     enabledThemeLinks: [],
+    enableOnlineThemes: true,
+    pinnedThemes: [],
     themeNames: {},
     enableReactDevtools: false,
     frameless: false,

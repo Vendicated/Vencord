@@ -79,7 +79,7 @@ export function AddonCard({ disabled, isNew, sourceBadge, tooltip, name, infoBut
                     </BaseText>
 
                     {!!author && (
-                        <BaseText size="md" className={cl("author")}>
+                        <BaseText size="md" color="text-subtle" className={cl("author")}>
                             {author}
                         </BaseText>
                     )}
@@ -115,7 +115,7 @@ export function AddonCard({ disabled, isNew, sourceBadge, tooltip, name, infoBut
                 {truncated}
             </div>
 
-            {footer}
+            {footer && <div className={cl("footer")}>{footer}</div>}
         </div>
     );
 }

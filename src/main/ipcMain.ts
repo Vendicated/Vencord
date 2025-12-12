@@ -25,7 +25,7 @@ import { IpcEvents } from "@shared/IpcEvents";
 import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
 import monacoHtml from "file://monacoWin.html?minify&base64";
 import { FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
-import { open, readdir, readFile } from "fs/promises";
+import { open, readdir, readFile, unlink } from "fs/promises";
 import { join, normalize } from "path";
 
 import { registerCspIpcHandlers } from "./csp/manager";
@@ -43,15 +43,21 @@ export function ensureSafePath(basePath: string, path: string) {
     return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
 }
 
-function readCss() {
-    return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
+async function readCss() {
+    try {
+        return await readFile(QUICKCSS_PATH, "utf-8");
+    } catch {
+        return "";
+    }
 }
 
-function listThemes(): Promise<{ fileName: string; content: string; }[]> {
-    return readdir(THEMES_DIR)
-        .then(files =>
-            Promise.all(files.map(async fileName => ({ fileName, content: await getThemeData(fileName) }))))
-        .catch(() => []);
+async function listThemes(): Promise<{ fileName: string; content: string; }[]> {
+    try {
+        const files = await readdir(THEMES_DIR);
+        return await Promise.all(files.map(async fileName => ({ fileName, content: await getThemeData(fileName) })));
+    } catch {
+        return [];
+    }
 }
 
 function getThemeData(fileName: string) {
@@ -83,6 +89,11 @@ ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
 ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
+ipcMain.handle(IpcEvents.DELETE_THEME, (_, fileName) => {
+    const safePath = ensureSafePath(THEMES_DIR, fileName);
+    if (!safePath) return Promise.reject(`Unsafe path ${fileName}`);
+    return unlink(safePath);
+});
 ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
     // win & mac only
     "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`

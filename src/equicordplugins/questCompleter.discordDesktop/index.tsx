@@ -21,6 +21,7 @@ import "./style.css";
 import { HeaderBarButton } from "@api/HeaderBar";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
+import { Alert } from "@components/Alert";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -215,9 +216,14 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "QuestCompleter",
-    description: "A plugin to complete quests without having the game installed.",
+    description: "Adds a button to the header bar to complete quests without having the game installed.",
     authors: [Devs.amia],
     settings,
+    settingsAboutComponent: () => (
+        <Alert.Info>
+            You must manually accept the quest first before clicking the button.
+        </Alert.Info>
+    ),
     headerBarButton: {
         icon: QuestIcon,
         render: ToolBarHeader

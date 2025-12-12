@@ -30,9 +30,9 @@ export function QuickAction(props: QuickActionProps) {
     );
 }
 
-export function QuickActionCard(props: PropsWithChildren) {
+export function QuickActionCard(props: PropsWithChildren<{ columns?: number; }>) {
     return (
-        <Card className={cl("card")}>
+        <Card className={cl("card")} style={props.columns ? { gridTemplateColumns: `repeat(${props.columns}, 1fr)` } : undefined}>
             {props.children}
         </Card>
     );

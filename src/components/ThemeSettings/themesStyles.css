@@ -1,7 +1,25 @@
 .vc-settings-theme-grid {
     display: grid;
-    gap: 16px;
+    gap: 8px;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.vc-settings-theme-link-row {
+    display: grid;
+    height: 40px;
+    gap: 8px;
+    grid-template-columns: 1fr auto;
+}
+
+.vc-settings-theme-filter-row {
+    display: grid;
+    height: 40px;
+    gap: 8px;
+    grid-template-columns: 1fr 150px;
+}
+
+.vc-settings-theme-error-card {
+    padding: 16px;
 }
 
 .vc-settings-csp-list {
@@ -10,14 +28,15 @@
     gap: 8px;
 }
 
-.vc-settings-usercss-ie-buttons > div {
-    color: var(--interactive-icon-default);
-    opacity: .5;
+.vc-settings-usercss-ie-buttons>div {
+    color: var(--interactive-icon-default, var(--interactive-normal));
+    opacity: 0.5;
     padding: 4px;
+    cursor: pointer;
 }
 
-.vc-settings-usercss-ie-buttons > div:hover {
-    color: var(--interactive-icon-hover);
+.vc-settings-usercss-ie-buttons>div:hover {
+    color: var(--interactive-icon-hover, var(--interactive-hover));
     opacity: 1;
 }
 
@@ -26,14 +45,38 @@
     justify-content: space-between;
     align-items: center;
     gap: 8px;
+    padding: 8px 0;
+}
 
+.vc-settings-csp-row a {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
 
-    & a {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        line-height: 1.2em;
-    }
+.vc-settings-theme-menu-button {
+    cursor: pointer;
+    color: var(--interactive-icon-default, var(--interactive-normal));
+    display: flex;
+    align-items: center;
+    height: 24px;
+}
 
-    --custom-button-button-md-height: 26px;
+.vc-settings-theme-menu-button:hover {
+    color: var(--interactive-icon-hover, var(--interactive-hover));
+}
+
+.vc-settings-theme-footer-pin-icon {
+    display: flex;
+}
+
+.vc-settings-theme-footer-pin-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.vc-settings-theme-footer-pin-icon svg path {
+    fill: var(--text-muted);
 }

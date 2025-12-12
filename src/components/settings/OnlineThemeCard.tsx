@@ -105,7 +105,7 @@ export function OnlineThemeCard({
                     </BaseText>
 
                     {!!author && (
-                        <BaseText size="md" className={cl("author")}>
+                        <BaseText size="md" color="text-subtle" className={cl("author")}>
                             {author}
                         </BaseText>
                     )}
@@ -129,7 +129,7 @@ export function OnlineThemeCard({
                 {truncated}
             </div>
 
-            {footer}
+            {footer && <div className={cl("footer")}>{footer}</div>}
         </div>
     );
 }

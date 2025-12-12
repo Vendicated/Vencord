@@ -102,3 +102,7 @@
     color: inherit;
     font: inherit;
 }
+
+.vc-addon-footer {
+    font-size: small;
+}

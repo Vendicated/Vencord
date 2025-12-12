@@ -236,7 +236,7 @@ function EquicordSettings() {
             </Alert.Info>
 
             {Switches.filter((s): s is Exclude<typeof s, false> => !!s).map(
-                (s, i, arr) => (
+                s => (
                     <FormSwitch
                         key={s.key}
                         value={settings[s.key]}
@@ -254,7 +254,7 @@ function EquicordSettings() {
                                 s.description
                             )
                         }
-                        hideBorder={i === arr.length - 1}
+                        hideBorder
                     />
                 ),
             )}
