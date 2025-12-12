@@ -1,10 +1,9 @@
 .vc-typing-user {
     cursor: pointer;
 
-    [class^="wrapper"] {
+    > div[role="img"] {
         display: inline-block;
         margin-right: 0.25em;
         vertical-align: -4px;
     }
 }
-
