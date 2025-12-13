@@ -25,9 +25,10 @@ import { Heart } from "@components/Heart";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
+import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { copyWithToast, shouldShowContributorBadge } from "@utils/misc";
+import { shouldShowContributorBadge } from "@utils/misc";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { User } from "@vencord/discord-types";
@@ -102,7 +103,7 @@ export default definePlugin({
                     replace: "...$1.props,$&"
                 },
                 {
-                    match: /(?<="aria-label":(\i)\.description,.{0,200})children:/,
+                    match: /(?<="aria-label":(\i)\.description,.{0,200}?)children:/g,
                     replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
                 // handle onClick and onContextMenu
@@ -212,7 +213,7 @@ export default definePlugin({
                                         margin: 0
                                     }}
                                 >
-                                    <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
+                                    <Flex justifyContent="center" alignItems="center" gap="0.5em">
                                         <Heart />
                                         Vencord Donor
                                     </Flex>
@@ -243,7 +244,7 @@ export default definePlugin({
                                 </div>
                             </ModalContent>
                             <ModalFooter>
-                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                <Flex justifyContent="center" style={{ width: "100%" }}>
                                     <DonateButton />
                                 </Flex>
                             </ModalFooter>

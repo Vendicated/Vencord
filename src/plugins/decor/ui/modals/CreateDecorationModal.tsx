@@ -6,16 +6,15 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
+import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
+import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
+import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
+import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
-
-import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
-import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
-import { AvatarDecorationModalPreview } from "../components";
 
 const FileUpload = findComponentByCodeLazy(".fileUpload),");
 
@@ -116,7 +115,7 @@ function CreateDecorationModal(props: ModalProps) {
                     </div>
                     <div>
                         <AvatarDecorationModalPreview
-                            avatarDecorationOverride={decoration}
+                            avatarDecoration={decoration}
                             user={UserStore.getCurrentUser()}
                         />
                     </div>
