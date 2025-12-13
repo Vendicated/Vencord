@@ -48,7 +48,7 @@ function ToolBarHeader() {
 async function openCompleteQuestUI() {
     const quest = [...QuestsStore.quests.values()].find(x => x.id !== "1412491570820812933" && x.userStatus?.enrolledAt && !x.userStatus?.completedAt && new Date(x.config.expiresAt).getTime() > Date.now());
 
-    if (!quest && !settings.store.disableNotifications) {
+    if (!quest) {
         showNotification({
             title: "Quest Completer",
             body: "No Quests To Complete. Click to navigate to the quests tab",
@@ -208,8 +208,8 @@ async function openCompleteQuestUI() {
 
 const settings = definePluginSettings({
     disableNotifications: {
-        description: "Disable notifications when no quests are available or when a quest is completed",
         type: OptionType.BOOLEAN,
+        description: "Disable notifications when no quests are available or when a quest is completed - still shows no quests notif",
         default: false,
     },
 });
