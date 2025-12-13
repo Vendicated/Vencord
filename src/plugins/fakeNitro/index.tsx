@@ -295,7 +295,7 @@ export default definePlugin({
                 {
                     // Patch the rendered message content to add fake nitro emojis or remove sticker links
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
-                    match: /(?=return{hasSpoilerEmbeds:\i,content:(\i)})/,
+                    match: /(?=return{hasSpoilerEmbeds:\i,content:(\i))/,
                     replace: (_, content) => `${content}=$self.patchFakeNitroEmojisOrRemoveStickersLinks(${content},arguments[2]?.formatInline);`
                 }
             ]
@@ -493,10 +493,11 @@ export default definePlugin({
                     } catch { }
 
                     const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
+                    const isAnimated = fakeNitroMatch[2] === "gif" || url?.searchParams.get("animated") === "true";
 
                     return Parser.defaultRules.customEmoji.react({
                         jumboable: !inline && content.length === 1 && typeof content[0].type !== "string",
-                        animated: fakeNitroMatch[2] === "gif",
+                        animated: isAnimated,
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
                         fake: true
