@@ -703,7 +703,7 @@ export default definePlugin({
     },
 
     getStickerLink({ format_type, id }: Sticker) {
-        const ext = format_type === StickerFormatType.GIF;
+        const ext = format_type === StickerFormatType.GIF ? "gif" : "png";
         return `https://media.discordapp.net/stickers/${id}.${ext}?size=${settings.store.stickerSize}`;
     },
 
