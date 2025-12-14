@@ -121,7 +121,7 @@
 }
 
 #vc-spotify-song-title {
-    color: var(--header-primary);
+    color: var(--text-default);
     font-size: 14px;
     font-weight: 600;
 }
