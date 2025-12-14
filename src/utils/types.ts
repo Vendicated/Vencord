@@ -127,6 +127,10 @@ export interface PluginDef {
      */
     enabledByDefault?: boolean;
     /**
+     * Whether enabling or disabling this plugin requires a restart. Defaults to true if the plugin has patches.
+     */
+    requiresRestart?: boolean;
+    /**
      * When to call the start() method
      * @default StartAt.WebpackReady
      */
