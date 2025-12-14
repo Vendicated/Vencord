@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./pluginCards.css";
+
 import { isPluginEnabled, isPluginRequired } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";

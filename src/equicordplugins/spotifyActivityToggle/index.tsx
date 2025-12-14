@@ -6,24 +6,23 @@
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
+import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
 import equicordToolbox from "@equicordplugins/equicordToolbox";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
-import { Constants, Menu, React, RestAPI, useEffect, useState } from "@webpack/common";
+import { Constants, Menu, RestAPI, useEffect, useState } from "@webpack/common";
 
 let spotifyId: string | null = null;
-let showActivity: boolean = false;
+let showActivity = false;
+let isLoaded = false;
+let forceUpdate: (() => void) | null = null;
 
-const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
-
-function makeSpotifyIcon(enabled: boolean) {
+function SpotifyIcon({ className, enabled }: { className?: string; enabled: boolean; }) {
     const redLinePath = "M48.54 4.54a2.2 2.2 0 0 0-3.08-3.08l-44 44a2.2 2.2 0 1 0 3.08 3.08Z";
     const maskBlackPath = "M50.376 8.248 41.752-.376-.376 41.752 8.248 50.376Z";
 
     return (
-        <svg width="20" height="20" viewBox="0 0 50 50">
+        <svg className={className} width="20" height="20" viewBox="0 0 50 50">
             <path
                 fill={!enabled ? "var(--status-danger)" : "currentColor"}
                 mask={!enabled ? "url(#spotifyActivityMask)" : void 0}
@@ -40,34 +39,32 @@ function makeSpotifyIcon(enabled: boolean) {
     );
 }
 
-function SpotifyActivityToggleButton(props: { nameplate?: any; }) {
+function SpotifyActivityToggleButton({ iconForeground, hideTooltips, nameplate }: UserAreaRenderProps) {
     const { location } = settings.use(["location"]);
-    const [showActivityState, setShowActivityState] = useState(showActivity);
+    const [, rerender] = useState(0);
 
     useEffect(() => {
-        setShowActivityState(showActivity);
+        forceUpdate = () => rerender(n => n + 1);
+        return () => { forceUpdate = null; };
     }, []);
 
-    if (showActivity === null) return null;
-    if (!spotifyId || location !== "PANEL" && isPluginEnabled(equicordToolbox.name)) return null;
+    if (!isLoaded || !spotifyId || location !== "PANEL" && isPluginEnabled(equicordToolbox.name)) return null;
 
     return (
-        <Button
-            tooltipText={showActivityState ? "Turn off Spotify activity" : "Turn on Spotify activity"}
-            icon={makeSpotifyIcon(showActivityState)}
+        <UserAreaButton
+            tooltipText={hideTooltips ? void 0 : showActivity ? "Turn off Spotify activity" : "Turn on Spotify activity"}
+            icon={<SpotifyIcon className={iconForeground} enabled={showActivity} />}
             role="switch"
-            aria-checked={showActivityState}
-            redGlow={!showActivityState}
-            plated={props?.nameplate != null}
+            aria-checked={showActivity}
+            redGlow={!showActivity}
+            plated={nameplate != null}
             onClick={async () => {
-                const newValue = !showActivityState;
-                setShowActivityState(newValue);
+                showActivity = !showActivity;
+                forceUpdate?.();
 
                 await RestAPI.patch({
                     url: Constants.Endpoints.CONNECTION("spotify", spotifyId),
-                    body: {
-                        show_activity: newValue,
-                    },
+                    body: { show_activity: showActivity },
                 });
             }}
         />
@@ -77,7 +74,7 @@ function SpotifyActivityToggleButton(props: { nameplate?: any; }) {
 const settings = definePluginSettings({
     location: {
         type: OptionType.SELECT,
-        description: "Where to show the spotify toggle button",
+        description: "Where to show the Spotify toggle button.",
         options: [
             { label: "Next to Mute/Deafen", value: "PANEL", default: true },
             { label: "Equicord Toolbox", value: "TOOLBOX" }
@@ -93,15 +90,12 @@ export default definePlugin({
     description: "Adds a toggle button for Spotify activity visibility.",
     authors: [Devs.thororen],
     settings,
-    patches: [
-        {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
-            replacement: {
-                match: /className:\i\.buttons,.{0,50}children:\[/,
-                replace: "$&$self.SpotifyActivityToggleButton(arguments[0]),"
-            }
-        }
-    ],
+
+    userAreaButton: {
+        icon: (props: { className?: string; }) => <SpotifyIcon {...props} enabled={showActivity} />,
+        render: SpotifyActivityToggleButton
+    },
+
     toolboxActions() {
         const { location } = settings.use(["location"]);
 
@@ -112,28 +106,29 @@ export default definePlugin({
                 id="spotify-activity-toggle-toolbox"
                 label={showActivity ? "Disable Spotify Activity" : "Enable Spotify Activity"}
                 action={async () => {
-                    const newValue = !showActivity;
-                    showActivity = newValue;
+                    showActivity = !showActivity;
 
                     await RestAPI.patch({
                         url: Constants.Endpoints.CONNECTION("spotify", spotifyId),
-                        body: { show_activity: newValue },
+                        body: { show_activity: showActivity },
                     });
                 }}
             />
         );
     },
-    async start() {
-        const { body } = await RestAPI.get({
-            url: Constants.Endpoints.CONNECTIONS,
-        });
-        if (!body) return;
 
-        const spotifyConn = body.find(c => c.type === "spotify");
-        if (spotifyConn) {
-            spotifyId = spotifyConn.id;
-            showActivity = spotifyConn.show_activity;
+    flux: {
+        async CONNECTION_OPEN() {
+            const { body } = await RestAPI.get({ url: Constants.Endpoints.CONNECTIONS });
+            if (!body) return;
+
+            const spotifyConn = body.find((c: { type: string; }) => c.type === "spotify");
+            if (spotifyConn) {
+                spotifyId = spotifyConn.id;
+                showActivity = spotifyConn.show_activity;
+            }
+            isLoaded = true;
+            forceUpdate?.();
         }
     },
-    SpotifyActivityToggleButton: ErrorBoundary.wrap(SpotifyActivityToggleButton, { noop: true }),
 });

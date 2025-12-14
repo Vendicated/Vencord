@@ -4,19 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
-import ErrorBoundary from "@components/ErrorBoundary";
+import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
 import { debounce } from "@shared/debounce";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ChannelActions, ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, MediaEngineStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
 
-import style from "./styles.css?managed";
-
 const ChatVoiceIcon = findComponentByCodeLazy("0l1.8-1.8c.17");
-const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
 const startStream = findByCodeLazy('type:"STREAM_START"');
 const getDesktopSources = findByCodeLazy("desktop sources");
 
@@ -160,21 +158,28 @@ interface VoiceState {
     requestToSpeakTimestamp: string | null;
 }
 
+function RandomVoiceIcon({ className }: { className?: string; }) {
+    return (
+        <svg className={className} width="18" height="18" viewBox="0 0 24 24">
+            <g fill="currentColor">
+                <path d="M19,9H14a5.006,5.006,0,0,0-5,5v5a5.006,5.006,0,0,0,5,5h5a5.006,5.006,0,0,0,5-5V14A5.006,5.006,0,0,0,19,9Zm-5,6a1,1,0,1,1,1-1A1,1,0,0,1,14,15Zm5,5a1,1,0,1,1,1-1A1,1,0,0,1,19,20ZM15.6,5,12.069,1.462A5.006,5.006,0,0,0,5,1.462L1.462,5a5.006,5.006,0,0,0,0,7.071L5,15.6a4.961,4.961,0,0,0,2,1.223V14a7.008,7.008,0,0,1,7-7h2.827A4.961,4.961,0,0,0,15.6,5ZM5,10A1,1,0,1,1,6,9,1,1,0,0,1,5,10ZM9,6a1,1,0,1,1,1-1A1,1,0,0,1,9,6Z" />
+            </g>
+        </svg>
+    );
+}
+
 export default definePlugin({
     name: "RandomVoice",
     description: "Adds a Button near the Mute button to join a random voice call.",
     authors: [EquicordDevs.xijexo, EquicordDevs.omaw, Devs.thororen],
-    patches: [
-        {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
-            replacement: {
-                match: /className:\i\.buttons,.{0,60}children:\[/,
-                replace: "$&$self.randomVoice(),"
-            }
-        }
-    ],
+
+    userAreaButton: {
+        icon: RandomVoiceIcon,
+        render: RandomVoiceButton
+    },
+
     flux: {
-        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
+        VOICE_STATE_UPDATES() {
             const currentUserId = UserStore.getCurrentUser().id;
             const myChannelId = VoiceStateStore.getVoiceStateForUser(currentUserId)?.channelId;
             if (!myChannelId || !settings.store.leaveEmpty) return;
@@ -185,40 +190,24 @@ export default definePlugin({
             );
 
             if (othersInChannel.length === 0) {
-                randomVoice();
+                getChannels();
             }
         },
     },
-    start() {
-        enableStyle(style);
-    },
-    stop() {
-        disableStyle(style);
-    },
+
     settings,
-    randomVoice: ErrorBoundary.wrap(randomVoice, { noop: true }),
 });
 
-function randomVoice() {
+function RandomVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRenderProps) {
     return (
-        <>
-            <Button
-                onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <ContextMenu />)}
-                onClick={() => getChannels()}
-                role="switch"
-                tooltipText={"Random Voice"}
-                icon={<svg
-                    width="18"
-                    height="18"
-                    id="test"
-                    viewBox="0 0 24 24"
-                >
-                    <g fill={"currentColor"}>
-                        <path d="M19,9H14a5.006,5.006,0,0,0-5,5v5a5.006,5.006,0,0,0,5,5h5a5.006,5.006,0,0,0,5-5V14A5.006,5.006,0,0,0,19,9Zm-5,6a1,1,0,1,1,1-1A1,1,0,0,1,14,15Zm5,5a1,1,0,1,1,1-1A1,1,0,0,1,19,20ZM15.6,5,12.069,1.462A5.006,5.006,0,0,0,5,1.462L1.462,5a5.006,5.006,0,0,0,0,7.071L5,15.6a4.961,4.961,0,0,0,2,1.223V14a7.008,7.008,0,0,1,7-7h2.827A4.961,4.961,0,0,0,15.6,5ZM5,10A1,1,0,1,1,6,9,1,1,0,0,1,5,10ZM9,6a1,1,0,1,1,1-1A1,1,0,0,1,9,6Z" />
-                    </g>
-                </svg>}
-            />
-        </>
+        <UserAreaButton
+            onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <ContextMenu />)}
+            onClick={() => getChannels()}
+            role="switch"
+            tooltipText={hideTooltips ? void 0 : "Random Voice"}
+            icon={<RandomVoiceIcon className={iconForeground} />}
+            plated={nameplate != null}
+        />
     );
 }
 
@@ -320,8 +309,7 @@ function ContextMenu() {
                                     height={"22"}
                                     viewBox={"0 0 26 26"}
                                 >
-                                    <g fill={"#b5bac1"}
-                                    >
+                                    <g fill="currentColor">
                                         <path d="M12,2a10.032,10.032,0,0,1,7.122,3H16a1,1,0,0,0-1,1h0a1,1,0,0,0,1,1h4.143A1.858,1.858,0,0,0,22,5.143V1a1,1,0,0,0-1-1h0a1,1,0,0,0-1,1V3.078A11.981,11.981,0,0,0,.05,10.9a1.007,1.007,0,0,0,1,1.1h0a.982.982,0,0,0,.989-.878A10.014,10.014,0,0,1,12,2Z" /><path d="M22.951,12a.982.982,0,0,0-.989.878A9.986,9.986,0,0,1,4.878,19H8a1,1,0,0,0,1-1H9a1,1,0,0,0-1-1H3.857A1.856,1.856,0,0,0,2,18.857V23a1,1,0,0,0,1,1H3a1,1,0,0,0,1-1V20.922A11.981,11.981,0,0,0,23.95,13.1a1.007,1.007,0,0,0-1-1.1Z" />
                                     </g>
 
@@ -589,7 +577,6 @@ function ContextMenu() {
             >
                 <Menu.MenuItem id="voiceOptions" label="Voice Options" action={() => { }} >
                     <>
-                        { }
                         <Menu.MenuCheckboxItem
                             key="selfMute"
                             id="selfMute"

@@ -1,4 +1,4 @@
-[class^="buttons__"] > [class^="buttons__"]:not([class^="expression-picker"]) {
+[class^="buttons__"]>[class^="buttons__"]:not([class^="expression-picker"]) {
     width: 150px;
     margin-left: -15px;
 }

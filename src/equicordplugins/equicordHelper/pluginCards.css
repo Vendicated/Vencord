@@ -1,0 +1,17 @@
+.vc-plugins-management-cards.vc-plugins-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.vc-plugins-management-cards .vc-addon-card {
+    width: auto;
+}
+
+.vc-plugins-management-cards .vc-addon-title-container {
+    width: max-content;
+}
+
+.vc-plugins-management-cards .vc-addon-title {
+    position: static;
+    overflow: visible;
+}
