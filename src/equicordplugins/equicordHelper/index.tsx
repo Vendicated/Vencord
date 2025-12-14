@@ -27,16 +27,19 @@ const settings = definePluginSettings({
     noMirroredCamera: {
         type: OptionType.BOOLEAN,
         description: "Prevents the camera from being mirrored on your screen",
+        restartNeeded: true,
         default: false,
     },
     removeActivitySection: {
         type: OptionType.BOOLEAN,
         description: "Removes the activity section above member list",
+        restartNeeded: true,
         default: false,
     },
     showYourOwnActivityButtons: {
         type: OptionType.BOOLEAN,
         description: "Discord hides your own activity buttons for some reason",
+        restartNeeded: true,
         default: false,
     }
 });
@@ -109,6 +112,14 @@ export default definePlugin({
                 replace: "true||$&"
             },
         },
+        {
+            find: ".buttons.length)>=1",
+            predicate: () => settings.store.showYourOwnActivityButtons && !isPluginEnabled(customRPC.name),
+            replacement: {
+                match: /.getId\(\)===\i.id/,
+                replace: "$& && false"
+            }
+        },
         // Always show open legacy settings
         ...[
             ".DEVELOPER_SECTION,",
@@ -122,14 +133,6 @@ export default definePlugin({
                 },
             ]
         })),
-        {
-            find: ".buttons.length)>=1",
-            predicate: () => settings.store.showYourOwnActivityButtons && !isPluginEnabled(customRPC.name),
-            replacement: {
-                match: /.getId\(\)===\i.id/,
-                replace: "$& && false"
-            }
-        }
     ],
     renderMessageAccessory(props) {
         return (
