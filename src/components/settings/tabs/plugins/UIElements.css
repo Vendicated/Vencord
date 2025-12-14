@@ -40,3 +40,12 @@
         margin-left: auto;
     }
 }
+
+.vc-plugin-ui-elements-switches-row {
+    -webkit-user-drag: element;
+    cursor: grab;
+}
+
+.vc-plugin-ui-elements-switches-row:active {
+    cursor: grabbing;
+}
