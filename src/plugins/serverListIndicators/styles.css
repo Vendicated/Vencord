@@ -20,6 +20,10 @@
     transition: border-radius 0.15s ease-out, background-color 0.15s ease-out;
 }
 
+.custom-theme-background #vc-indicators-indicator-items {
+    background-color: var(--background-mod-strong);
+}
+
 #vc-indicators-indicator-items::before {
     position: absolute;
     content: "";
