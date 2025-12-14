@@ -16,7 +16,7 @@
     margin: 0 2px;
     border-radius: var(--radius-sm);
     background: none;
-    color: var(--interactive-icon-default, var(--interactive-normal));
+    color: var(--interactive-icon-default);
     padding: 0;
     width: 32px;
     height: 32px;
@@ -26,8 +26,8 @@
 }
 
 .vc-spotify-button:hover {
-    color: var(--interactive-icon-hover, var(--interactive-hover));
-    background-color: var(--background-mod-strong, var(--background-modifier-selected));
+    color: var(--interactive-icon-hover);
+    background-color: var(--background-mod-strong);
 }
 
 .vc-spotify-button-icon {
@@ -121,7 +121,7 @@
 }
 
 #vc-spotify-song-title {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 14px;
     font-weight: 600;
 }
@@ -137,7 +137,7 @@
 .vc-spotify-album {
     font-size: 12px;
     text-decoration: none;
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .vc-spotify-comma {
@@ -171,7 +171,7 @@
 }
 
 #vc-spotify-progress-bar > [class^="slider"] [class^="barFill"] {
-    background-color: var(--interactive-icon-active, var(--interactive-active));
+    background-color: var(--interactive-icon-active);
 }
 
 #vc-spotify-progress-bar > [class^="slider"]:hover [class^="barFill"] {
@@ -184,9 +184,9 @@
     width: 16px !important;
     margin-top: calc(17px/-2 + var(--bar-offset)/2);
     margin-left: -0.5px;
-    background-color: var(--interactive-icon-active, var(--interactive-active));
-    border-color: var(--interactive-icon-default, var(--interactive-normal));
-    color: var(--interactive-icon-default, var(--interactive-normal));
+    background-color: var(--interactive-icon-active);
+    border-color: var(--interactive-icon-default);
+    color: var(--interactive-icon-default);
     opacity: 0;
     transition: opacity 0.1s;
 }

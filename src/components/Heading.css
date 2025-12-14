@@ -1,13 +1,13 @@
 .vc-h1,
 .vc-h2 {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-weight: 600;
 }
 
 .vc-h3,
 .vc-h4,
 .vc-h5 {
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .vc-h1 {
@@ -41,7 +41,7 @@
 }
 
 .vc-h5 {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 8px;
