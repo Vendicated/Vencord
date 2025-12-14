@@ -231,7 +231,7 @@ export default definePlugin({
             replacement: {
                 match: /.getId\(\)===\i.id/,
                 replace: "$& && false"
-            }
+            },
         }
     ],
 
