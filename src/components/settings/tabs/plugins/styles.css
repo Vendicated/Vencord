@@ -29,16 +29,16 @@
     padding: 0;
     background: transparent;
     margin-right: 8px;
-    color: var(--icon-muted, var(--icon-secondary));
+    color: var(--icon-muted);
     transition: background-color .2s ease;
 
     &:hover {
-        color: var(--interactive-icon-hover, var(--interactive-hover))
+        color: var(--interactive-icon-hover)
     }
 }
 
 .vc-plugins-settings-button:hover {
-    color: var(--interactive-icon-hover, var(--interactive-hover));
+    color: var(--interactive-icon-hover);
 }
 
 .vc-plugins-filter-controls {
@@ -78,9 +78,8 @@
 
 .vc-plugins-restart-card {
     padding: 1em;
-    background: var(--icon-status-idle, var(--info-warning-foreground)) !important;
-    border: 1px solid var(--icon-status-idle, var(--info-warning-foreground)) !important;
-    ;
+    background: var(--icon-status-idle) !important;
+    border: 1px solid var(--icon-status-idle) !important;
     color: var(--text-status-idle);
 }
 

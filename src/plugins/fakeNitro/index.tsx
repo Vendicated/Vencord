@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
-import type { Emoji, Message } from "@vencord/discord-types";
+import type { Emoji, Message, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, GuildMemberStore, lodash, OverridePremiumTypeStore, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators } from "@webpack/common";
@@ -707,8 +707,9 @@ export default definePlugin({
         }
     },
 
-    getStickerLink(stickerId: string) {
-        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${settings.store.stickerSize}`;
+    getStickerLink({ format_type, id }: Sticker) {
+        const ext = format_type === StickerFormatType.GIF ? "gif" : "png";
+        return `https://media.discordapp.net/stickers/${id}.${ext}?size=${settings.store.stickerSize}`;
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
@@ -845,14 +846,7 @@ export default definePlugin({
                 if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
-                // [12/12/2023]
-                // Work around an annoying bug where getStickerLink will return StickerType.GIF,
-                // but will give us a normal non animated png for no reason
-                // TODO: Remove this workaround when it's not needed anymore
-                let link = this.getStickerLink(sticker.id);
-                if (sticker.format_type === StickerFormatType.GIF && link.includes(".png")) {
-                    link = link.replace(".png", ".gif");
-                }
+                const link = this.getStickerLink(sticker);
 
                 if (sticker.format_type === StickerFormatType.APNG) {
                     if (!hasAttachmentPerms(channelId)) {

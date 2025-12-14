@@ -16,68 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "./intlHash";
+import { runtimeHashMessageKey } from "./intlHash";
 import { Patch, PatchReplacement, ReplaceFn } from "./types";
 
-// TODO: remove legacy hashing function once Discord ships new one everywhere for a while
-
-// @ts-expect-error "RegExp.escape" is very new and not yet in DOM types
-const escapeRegex = RegExp.escape || ((s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-
-export function getReplacement(isString: boolean, hashed: string, hash: boolean = false) {
-    const hasSpecialChars = !Number.isNaN(Number(hashed[0])) || hashed.includes("+") || hashed.includes("/");
-
-    if (hash) return hashed;
-
-    if (hasSpecialChars) {
-        return isString
-            ? `["${hashed}"]`
-            : String.raw`(?:\["${hashed}"\])`.replaceAll("+", "\\+");
-    }
-
-    return isString ? `.${hashed}` : String.raw`(?:\.${hashed})`;
-}
-
-function getCompatReplacement(key: string) {
-    const hashed = getReplacement(false, runtimeHashMessageKey(key));
-    const legacyHashed = getReplacement(false, runtimeHashMessageKeyLegacy(key));
-    return String.raw`(?:${hashed}|${legacyHashed})`;
-}
-
-function canonicalizeMatchCompatString(str: string) {
-    let result = "";
-    let lastIndex = 0;
-    const re = /#{intl::([\w$+/]*)(?:::(\w+))?}/g;
-    for (const match of str.matchAll(re)) {
-        result += escapeRegex(str.slice(lastIndex, match.index));
-        result += match[2] === "raw" ? getReplacement(false, match[1]) : match[2] === "hash" ? getReplacement(false, runtimeHashMessageKey(match[1]), true) : getCompatReplacement(match[1]);
-        lastIndex = (match.index ?? 0) + match[0].length;
-    }
-    result += escapeRegex(str.slice(lastIndex));
-    return new RegExp(result);
-}
-
-export function canonicalizeMatch<T extends RegExp | string>(match: T): T extends RegExp ? RegExp : string | RegExp {
-    if (typeof match === "string") {
-        return canonicalizeMatchCompatString(match) as any;
-    }
-
+export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     let partialCanon = typeof match === "string" ? match : match.source;
     partialCanon = partialCanon.replaceAll(/#{intl::([\w$+/]*)(?:::(\w+))?}/g, (_, key, modifier) => {
-        if (modifier === "raw") return getReplacement(false, key);
-        if (modifier === "hash") return getReplacement(false, runtimeHashMessageKey(key), true);
-        return getCompatReplacement(key);
+        const hashed = modifier === "raw" ? key : runtimeHashMessageKey(key);
+        if (modifier === "hash") return hashed;
+
+        const isString = typeof match === "string";
+        const hasSpecialChars = !Number.isNaN(Number(hashed[0])) || hashed.includes("+") || hashed.includes("/");
+
+        if (hasSpecialChars) {
+            return isString
+                ? `["${hashed}"]`
+                : String.raw`(?:\["${hashed}"\])`.replaceAll("+", "\\+");
+        }
+
+        return isString ? `.${hashed}` : String.raw`(?:\.${hashed})`;
     });
 
     if (typeof match === "string") {
-        return partialCanon as any;
+        return partialCanon as T;
     }
 
     const canonSource = partialCanon.replaceAll("\\i", String.raw`(?:[A-Za-z_$][\w$]*)`);
     const canonRegex = new RegExp(canonSource, match.flags);
     canonRegex.toString = match.toString.bind(match);
 
-    return canonRegex as any;
+    return canonRegex as T;
 }
 
 export function canonicalizeReplace<T extends string | ReplaceFn>(replace: T, pluginPath: string): T {
