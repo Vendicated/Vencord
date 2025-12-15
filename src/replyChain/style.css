@@ -1,0 +1,306 @@
+/* View Chain Button - pill style matching modal design */
+.vc-better-replies-chain-btn {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--brand-500);
+    color: var(--brand-500);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    margin-left: 8px;
+    margin-right: 8px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.vc-better-replies-chain-btn:hover {
+    background: var(--brand-500);
+    color: #fff;
+}
+
+/* Modal Content - Discord message style */
+.vc-better-replies-modal-content {
+    padding: clamp(4px, 2vw, 16px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    color: var(--text-default);
+    flex: 1;
+}
+
+/* Message item - nice rounded card design */
+.vc-better-replies-modal-item {
+    display: flex;
+    align-items: center;
+    padding: clamp(8px, 2vw, 16px);
+    margin: 4px 0;
+    border-radius: 12px;
+    position: relative;
+    background-color: var(--background-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.15s ease;
+    min-height: 72px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.vc-better-replies-modal-item:hover {
+    background-color: var(--background-secondary-alt);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Current message highlight */
+.vc-better-replies-modal-current {
+    background: linear-gradient(135deg,
+            rgba(88, 101, 242, 0.15) 0%,
+            rgba(88, 101, 242, 0.08) 100%);
+    border: 1px solid var(--brand-500);
+}
+
+.vc-better-replies-modal-current:hover {
+    background: linear-gradient(135deg,
+            rgba(88, 101, 242, 0.2) 0%,
+            rgba(88, 101, 242, 0.12) 100%);
+}
+
+/* Avatar column */
+.vc-better-replies-avatar-wrapper {
+    flex-shrink: 0;
+    margin-right: 16px;
+    cursor: pointer;
+}
+
+.vc-better-replies-modal-avatar {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+/* Message content wrapper */
+.vc-better-replies-modal-body {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 120px);
+    margin-right: 12px;
+}
+
+/* Right column for indicators and jump button */
+.vc-better-replies-right-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 100px;
+    position: relative;
+}
+
+/* Header with author name and badges */
+.vc-better-replies-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    line-height: 1.375rem;
+}
+
+.vc-better-replies-modal-author {
+    font-weight: 500;
+    color: var(--text-default);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.vc-better-replies-modal-author:hover {
+    text-decoration: underline;
+}
+
+/* Custom tag designs */
+.vc-better-replies-og-tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(67, 181, 129, 0.15);
+    color: #43b581;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(67, 181, 129, 0.3);
+}
+
+.vc-better-replies-current-tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(88, 101, 242, 0.15);
+    color: var(--brand-500);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(88, 101, 242, 0.3);
+}
+
+/* Custom Jump button - centered vertically */
+.vc-better-replies-jump-btn {
+    margin-left: auto !important;
+    background: transparent !important;
+    border: 1px solid var(--brand-500) !important;
+    color: var(--brand-500) !important;
+    padding: 6px 14px !important;
+    border-radius: 100px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    transition: all 0.15s ease !important;
+}
+
+.vc-better-replies-jump-btn:hover {
+    background: var(--brand-500) !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+}
+
+/* Message content - 2 lines max with line clamp */
+.vc-better-replies-modal-message {
+    color: var(--text-default);
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+    word-break: break-word;
+    white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: 2.25rem;
+}
+
+/* Connector arrow between messages */
+.vc-better-replies-modal-connector {
+    display: flex;
+    align-items: center;
+    padding: 4px 0 4px 28px;
+}
+
+.vc-better-replies-arrow {
+    color: var(--interactive-icon-default);
+    opacity: 0.5;
+}
+
+/* Pagination */
+.vc-better-replies-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 0;
+    margin-top: 8px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.vc-better-replies-page-indicator {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.vc-better-replies-pagination-info {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 8px 0;
+    margin-bottom: 4px;
+}
+
+/* Content indicators */
+.vc-better-replies-no-content {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Indicators container - positioned in top right corner of card */
+.vc-better-replies-indicators {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.vc-better-replies-attachment-indicator,
+.vc-better-replies-sticker-indicator,
+.vc-better-replies-embed-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    background: var(--background-modifier-accent);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.vc-better-replies-paperclip,
+.vc-better-replies-sticker-icon,
+.vc-better-replies-link-icon {
+    vertical-align: middle;
+}
+
+/* Ensure emojis render properly */
+.vc-better-replies-modal-message img.emoji {
+    width: 1.375rem;
+    height: 1.375rem;
+    vertical-align: bottom;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+    .vc-better-replies-modal-item {
+        flex-direction: column;
+    }
+
+    .vc-better-replies-avatar-wrapper {
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+
+    .vc-better-replies-modal-header {
+        flex-wrap: wrap;
+    }
+
+    .vc-better-replies-jump-btn {
+        margin-left: 0 !important;
+        margin-top: 8px;
+        width: 100%;
+    }
+
+    .vc-better-replies-modal-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .vc-better-replies-og-tag,
+    .vc-better-replies-current-tag {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+    }
+}
+
+@media (max-width: 400px) {
+    .vc-better-replies-modal-author {
+        font-size: 0.875rem;
+    }
+
+    .vc-better-replies-modal-message {
+        font-size: 0.875rem;
+    }
+
+    .vc-better-replies-pagination {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
