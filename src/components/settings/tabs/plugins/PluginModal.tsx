@@ -34,7 +34,7 @@ import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Clickable, FluxDispatcher, React, Toasts, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
@@ -47,6 +47,7 @@ import { GithubButton, WebsiteButton } from "./LinkIconButton";
 const cl = classNameFactory("vc-plugin-modal-");
 
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+const CloseButton = findComponentByCodeLazy("CLOSE_BUTTON_LABEL");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
 interface PluginModalProps extends ModalProps {
@@ -158,29 +159,26 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader separator={false} className={Margins.bottom8}>
-                <BaseText size="xl" weight="bold" style={{ flexGrow: 1 }}>{plugin.name}</BaseText>
-                <ModalCloseButton onClick={onClose} />
+            <ModalHeader separator={false} className={cl("header")}>
+                <div className={cl("header-content")}>
+                    <BaseText size="lg" weight="semibold" className={cl("title")}>{plugin.name}</BaseText>
+                    <BaseText size="sm" className={cl("description")}>{plugin.description}</BaseText>
+                    {!!plugin.settingsAboutComponent && (
+                        <div className={Margins.top8}>
+                            <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
+                                <plugin.settingsAboutComponent />
+                            </ErrorBoundary>
+                        </div>
+                    )}
+                </div>
+                <div className={cl("header-trailing")}>
+                    <CloseButton onClick={onClose} />
+                </div>
             </ModalHeader>
 
             <ModalContent className={Margins.bottom16}>
                 <section>
-                    <Flex className={cl("info")}>
-                        <Paragraph className={cl("description")}>{plugin.description}</Paragraph>
-                        {!pluginMeta.userPlugin && (
-                            <div className="vc-settings-modal-links">
-                                <WebsiteButton
-                                    text="View more info"
-                                    href={isEquicordPlugin ? `https://equicord.org/plugins/${plugin.name}` : `https://vencord.dev/plugins/${plugin.name}`}
-                                />
-                                <GithubButton
-                                    text="View source code"
-                                    href={`https://github.com/${gitRemote}/tree/main/${pluginMeta.folderName}`}
-                                />
-                            </div>
-                        )}
-                    </Flex>
-                    <BaseText size="lg" weight="semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</BaseText>
+                    <BaseText size="lg" weight="semibold" color="text-strong" className={Margins.bottom8}>Authors</BaseText>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -207,25 +205,15 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     </div>
                 </section>
 
-                {!!plugin.settingsAboutComponent && (
-                    <div className={Margins.top16}>
-                        <section>
-                            <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
-                                <plugin.settingsAboutComponent />
-                            </ErrorBoundary>
-                        </section>
-                    </div>
-                )}
-
                 <section>
-                    <BaseText size="lg" weight="semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
+                    <BaseText size="lg" weight="semibold" color="text-strong" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
                     {renderSettings()}
                 </section>
             </ModalContent>
-            {
-                hasSettings && <ModalFooter>
+            {hasSettings && (
+                <ModalFooter>
                     <Flex flexDirection="column" style={{ width: "100%" }}>
-                        <Flex style={{ justifyContent: "space-between" }}>
+                        <Flex style={{ justifyContent: "space-between", alignItems: "center" }}>
                             <Tooltip text="Reset to default settings" shouldShow={!isObjectEmpty(pluginSettings)}>
                                 {({ onMouseEnter, onMouseLeave }) => (
                                     <Button
@@ -240,10 +228,22 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     </Button>
                                 )}
                             </Tooltip>
+                            {!pluginMeta.userPlugin && (
+                                <div className={cl("links")}>
+                                    <WebsiteButton
+                                        text="View more info"
+                                        href={isEquicordPlugin ? `https://equicord.org/plugins/${plugin.name}` : `https://vencord.dev/plugins/${plugin.name}`}
+                                    />
+                                    <GithubButton
+                                        text="View source code"
+                                        href={`https://github.com/${gitRemote}/tree/main/${pluginMeta.folderName}`}
+                                    />
+                                </div>
+                            )}
                         </Flex>
                     </Flex>
                 </ModalFooter>
-            }
+            )}
         </ModalRoot >
     );
 }
