@@ -40,7 +40,7 @@
 
 .vc-rdb-modal-footer .vc-rdb-input {
     margin-bottom: 0;
-    background: var(--input-background-default, var(--input-background));
+    background: var(--input-background-default);
 }
 
 .vc-rdb-modal-footer [class|="pageControlContainer"] {
@@ -62,7 +62,7 @@
 }
 
 .vc-rdb-review:hover {
-    background: var(--message-background-hover, var(--background-message-hover)) !important;
+    background: var(--message-background-hover) !important;
     border-radius: 8px;
 }
 
