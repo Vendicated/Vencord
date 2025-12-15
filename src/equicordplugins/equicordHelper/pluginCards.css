@@ -1,7 +1,7 @@
 .vc-plugins-management-cards.vc-plugins-grid {
     display: flex;
     flex-wrap: wrap;
-    width: 600px;
+    width: 100%;
 }
 
 .vc-plugins-management-cards .vc-addon-card {
@@ -15,4 +15,8 @@
 .vc-plugins-management-cards .vc-addon-title {
     position: static;
     overflow: visible;
+}
+
+.vc-plugins-management-cards .vc-addon-note {
+    max-width: 400px;
 }
