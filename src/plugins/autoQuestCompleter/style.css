@@ -1,0 +1,146 @@
+/* Quick Actions Card */
+.vc-quest-actions-card {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5em;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+.vc-quest-action-btn {
+    all: unset;
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: 0.1s ease-out;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.vc-quest-action-btn:hover {
+    background: var(--background-modifier-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
+}
+
+.vc-quest-action-btn:focus-visible {
+    outline: 2px solid var(--focus-primary);
+    outline-offset: 2px;
+}
+
+/* Empty State Card */
+.vc-quest-empty-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Quest List */
+.vc-quest-quest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Quest Card */
+.vc-quest-quest-card {
+    padding: 12px 16px;
+}
+
+.vc-quest-quest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-quest-quest-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-quest-quest-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--header-primary);
+    margin-bottom: 2px;
+}
+
+.vc-quest-quest-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.vc-quest-quest-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Icon Button */
+.vc-quest-icon-btn {
+    all: unset;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.1s ease;
+}
+
+.vc-quest-icon-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--interactive-hover);
+}
+
+/* Status */
+.vc-quest-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.vc-quest-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* Progress */
+.vc-quest-progress {
+    margin-top: 10px;
+}
+
+.vc-quest-progress-bar {
+    height: 4px;
+    background: var(--background-modifier-accent);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.vc-quest-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.vc-quest-progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
