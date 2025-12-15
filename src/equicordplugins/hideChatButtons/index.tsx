@@ -63,7 +63,8 @@ function ButtonsInnerComponent({ buttons }: { buttons: ReactNode[]; }) {
         <div key="chat-bar-buttons-menu" id="chat-bar-buttons-menu" style={{
             display: "flex",
             flexWrap: "nowrap",
-            overflowX: "auto"
+            overflowX: "auto",
+            overflowY: "hidden"
         }}>
             {open && buttons.map((b, i) => <React.Fragment key={i}>{b}</React.Fragment>)}
             <HideToggleButton onClick={() => setOpen(!open)} open={open} />
@@ -89,7 +90,10 @@ export default definePlugin({
     buttonsInner(buttons: ReactNode[]) {
         return <ButtonsInnerComponent buttons={buttons} />;
     },
-    async start() {
+    start() {
         hidechatbuttonsopen = settings.store.Open;
+    },
+    stop() {
+        hidechatbuttonsopen = undefined;
     }
 });
