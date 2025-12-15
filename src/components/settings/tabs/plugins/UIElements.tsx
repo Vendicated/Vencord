@@ -19,10 +19,94 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Clickable, useEffect, useState } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
+import { Clickable, useCallback, useEffect, useRef, useState } from "@webpack/common";
+import { ReactNode } from "react";
 
+interface RowProps {
+    id: string;
+    index: number;
+    moveRow: (from: number, to: number) => void;
+    children: ReactNode;
+}
+
+interface DragItem {
+    id: string;
+    index: number;
+}
 
 const cl = classNameFactory("vc-plugin-ui-elements-");
+
+const useDrag = findByCodeLazy("useDrag", ".collect")
+const useDrop = findByCodeLazy("options)", ".collect")
+
+const UI_ELEMENT_TYPE = "ui-element";
+
+export function DraggableRow({
+    id,
+    index,
+    moveRow,
+    children,
+}: RowProps) {
+    const ref = useRef<HTMLDivElement>(null);
+    const handleRef = useRef<HTMLDivElement>(null);
+
+    const [, drop] = useDrop({
+        accept: UI_ELEMENT_TYPE,
+        hover(item: DragItem, monitor: any) {
+            if (!ref.current) return;
+
+            const dragIndex = item.index;
+            const hoverIndex = index;
+            if (dragIndex === hoverIndex) return;
+
+            const rect = ref.current.getBoundingClientRect();
+            const middleY = (rect.bottom - rect.top) / 2;
+            const offsetY = monitor.getClientOffset()!.y - rect.top;
+
+            if (
+                (dragIndex < hoverIndex && offsetY < middleY) ||
+                (dragIndex > hoverIndex && offsetY > middleY)
+            ) {
+                return;
+            }
+
+            moveRow(dragIndex, hoverIndex);
+            item.index = hoverIndex;
+        },
+    });
+
+    const [{ isDragging }, drag] = useDrag({
+        type: UI_ELEMENT_TYPE,
+        item: { id, index },
+        collect: (monitor: any) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
+
+    // Only the handle is draggable
+    drag(handleRef);
+    drop(ref);
+
+    return (
+        <div
+            ref={ref}
+            className={cl("switches-row-wrapper")}
+            data-dragging={isDragging}
+        >
+            <div
+                ref={handleRef}
+                className={cl("drag-handle")}
+                aria-hidden
+            >
+                ⠿
+            </div>
+
+            {children}
+        </div>
+    );
+}
+
 
 export function getOrderedNames(buttonMap: Map<string, any>, settings: SettingsPluginUiElements) {
     const known = new Set(buttonMap.keys());
@@ -64,7 +148,7 @@ function Section(props: {
     title: string;
     description: string;
     settings: SettingsPluginUiElements;
-    buttonMap: Map<string, { icon: IconComponent; }>;
+    buttonMap: Map<string, { icon: IconComponent }>;
 }) {
     const { buttonMap, description, title, settings } = props;
 
@@ -76,23 +160,13 @@ function Section(props: {
         setOrder(getOrderedNames(buttonMap, settings));
     }, [buttonMap, settings]);
 
-    const onDragStart = (e: React.DragEvent, index: number) => {
-        e.dataTransfer.setData("text/plain", index.toString());
-        e.dataTransfer.effectAllowed = "move";
-    };
-
-    const onDrop = (e: React.DragEvent, dropIndex: number) => {
-        e.preventDefault();
-        const dragIndex = Number(e.dataTransfer.getData("text/plain"));
-
-        if (dragIndex === dropIndex) return;
-
+    const moveRow = useCallback((from: number, to: number) => {
         setOrder(prev => {
             const next = [...prev];
-            const [moved] = next.splice(dragIndex, 1);
-            next.splice(dropIndex, 0, moved);
+            const [moved] = next.splice(from, 1);
+            next.splice(to, 0, moved);
 
-            // Persist order into settings
+            // Persist order into settings (same as before)
             const reordered: SettingsPluginUiElements = {};
             for (const name of next) {
                 reordered[name] = settings[name] ?? {};
@@ -103,38 +177,39 @@ function Section(props: {
 
             return next;
         });
-    };
+    }, [settings]);
 
     return (
         <section>
-            <BaseText tag="h3" size="xl" weight="bold">{title}</BaseText>
-            <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20)}>{description}</Paragraph>
+            <BaseText tag="h3" size="xl" weight="bold">
+                {title}
+            </BaseText>
+
+            <Paragraph
+                size="sm"
+                className={classes(Margins.top8, Margins.bottom20)}
+            >
+                {description}
+            </Paragraph>
 
             <div className={cl("switches")}>
                 {order.map((name, index) => {
                     const Icon = buttonMap.get(name)?.icon ?? PlaceholderIcon;
 
                     return (
-                        <Paragraph
-                            key={name}
-                            size="md"
-                            weight="semibold"
-                            className={cl("switches-row")}
-                            draggable
-                            onDragStart={e => onDragStart(e, index)}
-                            onDragOver={e => e.preventDefault()}
-                            onDrop={e => onDrop(e, index)}
-                        >
-                            <Icon height={20} width={20} />
-                            {name}
-                            <Switch
-                                checked={settings[name]?.enabled ?? true}
-                                onChange={v => {
-                                    settings[name] ??= {} as any;
-                                    settings[name].enabled = v;
-                                }}
-                            />
-                        </Paragraph>
+                        <DraggableRow key={name} id={name} index={index} moveRow={moveRow}>
+                            <Paragraph size="md" weight="semibold" className={cl("switches-row")}>
+                                <Icon height={20} width={20} />
+                                {name}
+                                <Switch
+                                    checked={settings[name]?.enabled ?? true}
+                                    onChange={v => {
+                                        settings[name] ??= {} as any;
+                                        settings[name].enabled = v;
+                                    }}
+                                />
+                            </Paragraph>
+                        </DraggableRow>
                     );
                 })}
             </div>
