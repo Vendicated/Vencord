@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
-import definePlugin, { makeRange, OptionType } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 let closeSuppressCount = 0;
 const settings = definePluginSettings({
@@ -15,13 +15,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
-    gifAmount: {
-        description: "Keeps the gif picker open after selecting a gif",
-        type: OptionType.SLIDER,
-        default: 2,
-        markers: makeRange(1, 20, 1),
-        stickToMarkers: true
-    }
 });
 
 export default definePlugin({
@@ -67,8 +60,7 @@ export default definePlugin({
 
     onGifSelect() {
         if (!settings.store.keepOpen) return;
-
-        closeSuppressCount = settings.store.gifAmount;
+        closeSuppressCount = 2;
     },
 
     consumeCloseSuppress() {

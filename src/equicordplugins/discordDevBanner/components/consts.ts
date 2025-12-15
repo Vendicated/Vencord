@@ -25,7 +25,7 @@ export const names: Record<string, string> = {
     staging: "Staging"
 };
 
-export const discordVariables = [
+export const settingVariables = [
     "Discord Variables:",
     "{discordIcon} - Discord icon",
     "{devbannerIcon} - Dev banner icon",
@@ -33,32 +33,34 @@ export const discordVariables = [
     "{buildChannel} - Discord build channel (e.g. Stable)",
     "{buildNumber} - Discord build number (e.g. 123456)",
     "{buildHash} - Discord build hash (e.g. 123456789)",
-];
-
-export const equicordVariables = [
+    "",
     "Equicord Variables:",
     "{equicordIcon} - Equicord icon",
     "{equicordName} - The word 'Equicord'",
     "{equicordVersion} - Version of Equicord (e.g. 1.0.0)",
     "{equicordHash} - Equicord build hash (e.g. 123456789)",
     "{equicordPlatform} - Platform Equicord is running on (e.g. Dev)",
-];
-
-export const electronVariables = [
+    "",
+    "Equibop Specific Variables:",
+    "{equibopHash} - Equibop build hash (e.g. 123456789)",
+    "{equibopPlatform} - Platform Equibop is running on (e.g. Dev)",
+    "",
+    "Client Variables:",
+    "{clientIcon} - Desktop icon",
+    "{clientName} - The name of your current client",
+    "{clientVersion} - Version of your client (e.g. 1.0.0)",
+    "",
     "Electron Variables:",
     "{electronIcon} - Electron icon",
     "{electronName} - The word 'Electron'",
     "{electronVersion} - Electron runtime version (e.g. 25.0.0)",
-];
-
-export const chromiumVariables = [
+    "",
     "Chromium Variables:",
     "{chromiumIcon} - Chromium icon",
     "{chromiumName} - The word 'Chromium'",
     "{chromiumVersion} - Chromium engine version (e.g. 125.0.0.0)",
-];
-
-export const miscVariables = [
+    "",
     "Miscellaneous Variables:",
-    "{newline} or \\n - Newline character"
+    "{newline} or \\n - Newline character",
+    "",
 ];

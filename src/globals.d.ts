@@ -63,6 +63,7 @@ declare global {
     export var Vesktop: any;
     export var Equibop: any;
     export var VesktopNative: any;
+    export var unsafeWindow: any;
 
     interface Window extends Record<PropertyKey, any> { }
 }

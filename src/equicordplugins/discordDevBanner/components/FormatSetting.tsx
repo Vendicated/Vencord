@@ -7,7 +7,7 @@
 import { Paragraph } from "@components/Paragraph";
 import { useState } from "@webpack/common";
 
-import { chromiumVariables, discordVariables, electronVariables, equicordVariables, makeDevBanner, miscVariables, settings } from ".";
+import { makeDevBanner, settings, settingVariables } from ".";
 
 
 export function FormatSetting(setValue) {
@@ -32,16 +32,7 @@ export function FormatSetting(setValue) {
             <Paragraph className={"vc-discord-dev-banner-text"}>
                 The format for the Discord Dev Banner. You can use the following variables:
                 {"\n\n"}
-                {discordVariables.join("\n")}
-                {"\n\n"}
-                {equicordVariables.join("\n")}
-                {"\n\n"}
-                {electronVariables.join("\n")}
-                {"\n\n"}
-                {chromiumVariables.join("\n")}
-                {"\n\n"}
-                {miscVariables.join("\n")}
-                {"\n\n"}
+                {settingVariables.join("\n")}
             </Paragraph>
 
             <Paragraph className="vc-discord-dev-banner-text">Preview:</Paragraph>

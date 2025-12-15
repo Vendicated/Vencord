@@ -6,4 +6,5 @@
 
 export * from "./consts";
 export * from "./FormatSetting";
+export * from "./icons";
 export * from "./makeDevBanner";
