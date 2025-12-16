@@ -126,6 +126,6 @@ export function platformName() {
     if (typeof DiscordNative === "undefined") return navigator.platform;
     if (DiscordNative.process.platform === "win32") return `${getWindowsName(DiscordNative.os.release)}`;
     if (DiscordNative.process.platform === "darwin") return `${getMacOSName(DiscordNative.os.release)} (${DiscordNative.process.arch === "arm64" ? "Apple Silicon" : "Intel Silicon"})`;
-    if (DiscordNative.process.platform === "linux") return `Linux (${DiscordNative.os.release})`;
+    if (DiscordNative.process.platform === "linux") return `${navigator.platform} (${DiscordNative.os.release})`;
     return DiscordNative.process.platform;
 }
