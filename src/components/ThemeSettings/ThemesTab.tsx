@@ -381,7 +381,7 @@ function ThemesTab() {
     const [themeNames, setThemeNames] = useState<Record<string, string>>(() => {
         return settings.themeNames ?? {};
     });
-    const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
+    const [themeDir] = useAwaiter(VencordNative.themes.getThemesDir);
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState(ThemeFilter.All);
 
@@ -686,8 +686,7 @@ function ThemesTab() {
                 ) : (
                     <QuickAction
                         text="Open Themes Folder"
-                        action={() => showItemInFolder(themeDir!)}
-                        disabled={themeDirPending}
+                        action={() => VencordNative.themes.openFolder()}
                         Icon={FolderIcon}
                     />
                 )}

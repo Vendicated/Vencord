@@ -1,20 +1,50 @@
-.vc-newPluginsManager-restart-tooltip {
-    max-width: 280px;
+.vc-new-plugins-header {
+    align-items: flex-start;
+    position: relative;
+    padding: 16px 16px 0 24px;
 }
 
-.vc-newPluginsManager-restart-list {
+.vc-new-plugins-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.vc-new-plugins-header-trailing {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.vc-new-plugins-title {
+    color: var(--text-strong);
+    padding-right: 32px;
+}
+
+.vc-new-plugins-description {
+    color: var(--text-subtle);
+    padding-right: 60px;
+}
+
+.vc-new-plugins-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.vc-new-plugins-footer {
+    width: 100%;
+    align-items: center;
+    flex-direction: row-reverse;
+    gap: 16px;
+}
+
+.vc-new-plugins-restart-list {
     padding-left: 1.25em;
+    margin-top: 8px;
 }
 
-.vc-newPluginsManager-restart-list li {
+.vc-new-plugins-restart-list li {
     list-style: disc;
-}
-
-.vc-newPluginsManager-close > div {
-    display: flex;
-}
-
-.vc-newPluginsManager-disable-wrapper {
-    display: flex;
-    margin: auto 0;
 }
