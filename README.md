@@ -68,17 +68,19 @@ Build Equicord:
 pnpm build
 ```
 
+Inject Equicord into your desktop client:
+
+```shell
+pnpm inject
+```
+
 Build Equicord for web:
 
 ```shell
 pnpm buildWeb
 ```
 
-Inject Equicord into your client:
-
-```shell
-pnpm inject
-```
+To add Equicord's web extension after building it simply find the correct zip in the dist directory and follow the guide on how to install a custom extension for your browser if its supported
 
 ## Credits
 
