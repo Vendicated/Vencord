@@ -569,6 +569,7 @@ async function startVideoProgressTracking(quest: Quest, questDuration: number): 
     const questName = normalizeQuestName(quest.config.messages.questName);
     const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : null;
     const initialProgress = Math.floor(((new Date()).getTime() - (questEnrolledAt ?? new Date()).getTime()) / 1000) || 1; // Max up to 10 seconds into the future can be reported.
+    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: initialProgress, duration: questDuration, type: "watch" });
 
     if (!questEnrolledAt) {
         const enrollmentTimeout = 60000;
@@ -577,6 +578,7 @@ async function startVideoProgressTracking(quest: Quest, questDuration: number): 
 
         if (!enrolled) {
             QuestifyLogger.warn(`[${getFormattedNow()}] Quest ${questName} not enrolled within ${enrollmentTimeout / 1000} seconds.`);
+            activeQuestIntervals.delete(quest.id);
             return;
         }
     }
@@ -652,6 +654,7 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
     const initialProgress = quest.userStatus?.progress?.[playType?.type || ""]?.value || 0;
     const remaining = Math.max(0, questDuration - initialProgress);
     const heartbeatInterval = 20; // Heartbeats must be at most 2 minutes apart.
+    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: initialProgress, duration: questDuration, type: "play" });
 
     if (!questEnrolledAt) {
         const enrollmentTimeout = 60000;
@@ -660,6 +663,7 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
         if (!enrolled) {
             QuestifyLogger.warn(`[${getFormattedNow()}] Quest ${questName} not enrolled after waiting for ${enrollmentTimeout / 1000} seconds.`);
+            activeQuestIntervals.delete(quest.id);
             return;
         }
     }
@@ -755,24 +759,24 @@ function processQuestForAutoComplete(quest: Quest): boolean {
     const existingInterval = activeQuestIntervals.get(quest.id);
 
     if (quest.userStatus?.completedAt || existingInterval) {
-        return true;
+        return false;
     } else if (!playType && !watchType) {
         QuestifyLogger.warn(`[${getFormattedNow()}] Could not recognize the Quest type for ${questName}.`);
-        return true;
+        return false;
     } else if ((watchType && !completeVideoQuestsInBackground) || (playType && (!completeGameQuestsInBackground || !IS_DISCORD_DESKTOP))) {
-        return true;
+        return false;
     } else if (!questDuration) {
         QuestifyLogger.warn(`[${getFormattedNow()}] Could not find duration for Quest ${questName}.`);
-        return true;
+        return false;
     } else if (watchType) {
         startVideoProgressTracking(quest, questDuration);
-        return false;
+        return true;
     } else if (playType) {
         startPlayGameProgressTracking(quest, questDuration);
-        return false;
+        return true;
     }
 
-    return true; // true means continue as normal, false means prevent default action.
+    return false;
 }
 
 function shouldDisableQuestAcceptedButton(quest: Quest): boolean | null {
@@ -1261,29 +1265,20 @@ export default definePlugin({
             }
         },
         {
-            // Sets intervals to progress Video Quests and Play Game Quests in the background.
+            // Sets intervals to progress Play Game Quests in the background and patches some common click handlers.
             find: "IN_PROGRESS:if(",
             group: true,
             replacement: [
                 {
                     // Resume Video Quest
                     match: /(onClick:\(\)=>)(\(0,\i.openVideoQuestModal\)\({quest:(\i))/,
-                    replace: "$1$self.processQuestForAutoComplete($3)&&$2"
+                    replace: "$1!$self.processQuestForAutoComplete($3)&&$2"
                 },
                 {
-                    // Start Video & Play Game Quests.
+                    // Start Play Game Quests.
+                    // Video Quests are handled in the next patch group.
                     match: /(?<=onClick:async\(\)=>{)/,
-                    replace: "const startingAutoComplete=$self.processQuestForAutoComplete(arguments[0].quest);"
-                },
-                {
-                    // Prevent the new Video Quest entry point.
-                    match: /(?<=QUEST_HOME_DESKTOP\))/,
-                    replace: "&&false"
-                },
-                {
-                    // Conditionally open the Video Quest modal.
-                    match: /(\i\?)?(\(0,\i.openVideoQuestModal\)\({quest:(\i))/,
-                    replace: "$1startingAutoComplete&&$2"
+                    replace: "const startingAutoComplete=arguments[0].isVideoQuest?false:!$self.processQuestForAutoComplete(arguments[0].quest);"
                 },
                 {
                     // The "Resume (XX:XX)" text is changed to "Watching (XX:XX)" if the Quest is active.
@@ -1303,19 +1298,18 @@ export default definePlugin({
                 {
                     // Stop Play Activity Quests from launching the activity.
                     match: /(?<=,)(\i\(\))(\)}};)/,
-                    replace: "startingAutoComplete&&$1$2"
+                    replace: "!startingAutoComplete&&$1$2"
                 }
             ]
         },
-        // This patch covers the new entry point blocked in the above group.
-        // If the old entry point gets removed in the future, this will be useful.
-        // {
-        //     find: "CAPTCHA_FAILED:",
-        //     replacement: {
-        //         match: /(?<=SUCCESS:)(\i\({)/,
-        //         replace: "$self.processQuestForAutoComplete(arguments[0])&&$1"
-        //     }
-        // },
+        {
+            // Sets intervals to progress Video Quests in the background.
+            find: "CAPTCHA_FAILED:",
+            replacement: {
+                match: /(?<=SUCCESS:)(\i\({)/,
+                replace: "!$self.processQuestForAutoComplete(arguments[0])&&$1"
+            }
+        },
         {
             // Sets intervals to progress Play Game Quests in the background.
             // Triggers if a Quest has already been started but was interrupted, such as by a reload.
