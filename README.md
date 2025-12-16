@@ -80,7 +80,9 @@ Build Equicord for web:
 pnpm buildWeb
 ```
 
-To add Equicord's web extension after building it simply find the correct zip in the dist directory and follow the guide on how to install a custom extension for your browser if its supported
+After building Equicord's web extension, locate the appropriate ZIP file in the `dist` directory and follow your browser’s guide for installing custom extensions, if supported.
+
+Note: Firefox extension zip requires Firefox for developers
 
 ## Credits
 
