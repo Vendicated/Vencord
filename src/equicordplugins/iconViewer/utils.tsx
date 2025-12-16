@@ -6,7 +6,7 @@
 
 import { saveFile } from "@utils/web";
 import * as t from "@vencord/discord-types";
-import { filters, findAll, findByPropsLazy, waitFor } from "@webpack";
+import { findAll, findByPropsLazy, waitFor } from "@webpack";
 import { createRoot, ReactDOM } from "@webpack/common";
 export let _cssColors: string[] = [];
 export type IconsDef = { [k: string]: t.Icon; };
@@ -91,10 +91,16 @@ export function convertComponentToHtml(component?: React.ReactElement): string {
     return content;
 }
 
-export const findAllByCode = (code: string) => findAll(filters.byCode(code));
+export function findAllIcons() {
+    return findAll(m => {
+        if (typeof m !== "function") return false;
+        const str = m.toString?.() || "";
+        if (str.includes("direction:")) return false;
+        return str.includes("viewBox:") && str.includes("color:") && (str.includes("foreground:") || str.includes("colorClass:"));
+    });
+}
 
 waitFor(["colors", "layout"], m => {
     _cssColors = Object.keys(m.colors);
     cssColors.length = _cssColors.length;
 });
-
