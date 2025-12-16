@@ -112,6 +112,7 @@ export function getWindowsName(release: string) {
 
 export function getMacOSName(release: string) {
     const major = parseInt(release.split(".")[0]);
+    if (major === 25) return "MacOS 26 (Tahoe)";
     if (major === 24) return "MacOS 15 (Sequoia)";
     if (major === 23) return "MacOS 14 (Sonoma)";
     if (major === 22) return "MacOS 13 (Ventura)";
