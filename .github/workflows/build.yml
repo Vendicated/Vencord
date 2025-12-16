@@ -78,7 +78,7 @@ jobs:
                   git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git plugins
                   cd plugins
 
-                  cp ../dist/release/*plugins.json .
+                  cp ../dist/release/*.json .
                   git add -A
 
                   git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
