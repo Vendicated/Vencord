@@ -6,6 +6,6 @@
     padding-right: 4px;
 }
 
-div[class^='list_'][class*='collapsed_'] .voice-user-buttons {
+div[class*='list'][class*='collapsed'] .voice-user-buttons {
     display: none;
 }

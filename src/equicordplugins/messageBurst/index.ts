@@ -23,7 +23,7 @@ function shouldEdit(channel: Channel, message: Message, timePeriod: number, shou
         should = false;
     }
 
-    if (document.querySelector('[class^="replyBar__"]')) {
+    if (document.querySelector('[class*="replyBar"]')) {
         should = false;
     }
 

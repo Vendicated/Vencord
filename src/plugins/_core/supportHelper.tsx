@@ -204,9 +204,6 @@ function generatePluginList() {
         Alerts.show({
             title: "You are attempting to get support!",
             body: <div>
-                <style>
-                    {'[class*="backdrop_"][style*="backdrop-filter"]{backdrop-filter:blur(16px) brightness(0.25) !important;}'}
-                </style>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
                     <img src="https://media.tenor.com/QtGqjwBpRzwAAAAi/wumpus-dancing.gif" />
                 </div>

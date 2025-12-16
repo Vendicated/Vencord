@@ -14,7 +14,7 @@
     overflow: hidden;
 }
 
-.vc-channeltabs-tab [class^="wrapper_"] {
+.vc-channeltabs-tab [class*="wrapper"] {
     min-width: 1.5rem;
 }
 
@@ -314,14 +314,14 @@
     fill: var(--white-500);
 }
 
-.vc-channeltabs-container [class^="iconContainer_"] {
+.vc-channeltabs-container [class*="iconContainer"] {
     margin: 0 -0.25rem 0 0;
     pointer-events: none;
     height: 1rem;
     transform: scale(0.8);
 }
 
-.vc-channeltabs-container [class^="numberBadge"] {
+.vc-channeltabs-container [class*="numberBadge"] {
     background-color: var(--channeltabs-red) !important;
     color: var(--channeltabs-white);
     border-radius: 50%;
@@ -1023,12 +1023,12 @@
 }
 
 /* Enhanced caching mode - smoother transitions */
-[class*="chat_"] {
+[class*="chat"] {
     transition: opacity 0.1s ease;
 }
 
 /* Prevent flash when switching tabs with cache enabled */
-[class*="scrollerInner_"] {
+[class*="scrollerInner"] {
     scroll-behavior: auto;
 }
 

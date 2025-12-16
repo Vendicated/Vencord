@@ -36,7 +36,7 @@ export default definePlugin({
 
         if (Settings.plugins.USRBG.enabled && Settings.plugins.USRBG.voiceBackground) {
             if (usrbg.userHasBackground(participantUserId)) {
-                document.querySelectorAll('[class*="background_"]').forEach(element => {
+                document.querySelectorAll('[class*="background"]').forEach(element => {
                     (element as HTMLElement).style.backgroundColor = "transparent";
                 });
                 return {

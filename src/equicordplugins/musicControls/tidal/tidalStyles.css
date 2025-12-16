@@ -34,26 +34,26 @@
     margin-bottom: 5px;
 }
 
-#eq-tdl-progress-bar > [class^="slider"] {
+#eq-tdl-progress-bar > [class*="slider"] {
     flex-grow: 1;
     width: 100%;
     padding: 0 !important;
 }
 
-#eq-tdl-progress-bar > [class^="slider"] [class^="bar"] {
+#eq-tdl-progress-bar > [class*="slider"] [class*="bar"] {
     height: 3px !important;
     top: calc(12px - 4px / 2 + var(--bar-offset));
 }
 
-#eq-tdl-progress-bar > [class^="slider"] [class^="barFill"] {
+#eq-tdl-progress-bar > [class*="slider"] [class*="barFill"] {
     background-image: var(--eq-tdl-slider-gradient);
 }
 
-#eq-tdl-progress-bar > [class^="slider"]:hover [class^="barFill"] {
+#eq-tdl-progress-bar > [class*="slider"]:hover [class*="barFill"] {
     background-image: var(--eq-tdl-slider-gradient);
 }
 
-#eq-tdl-progress-bar > [class^="slider"] [class^="grabber"] {
+#eq-tdl-progress-bar > [class*="slider"] [class*="grabber"] {
     background-color: var(--eq-tdl-slider-grabber);
     width: 12px !important;
     height: 12px !important;
@@ -65,7 +65,7 @@
     transition: opacity 0.1s;
 }
 
-#eq-tdl-progress-bar:hover > [class^="slider"] [class^="grabber"] {
+#eq-tdl-progress-bar:hover > [class*="slider"] [class*="grabber"] {
     opacity: 1;
 }
 

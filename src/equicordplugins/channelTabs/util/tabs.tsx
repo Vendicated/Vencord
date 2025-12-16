@@ -335,7 +335,7 @@ export function moveDraggedTabs(index1: number, index2: number) {
 
 function getScrollContainer(): HTMLElement | null {
     // discord's main chat scroller
-    return document.querySelector('[class*="scrollerInner_"]') as HTMLElement;
+    return document.querySelector('[class*="scrollerInner"]') as HTMLElement;
 }
 
 function evictStaleCache() {

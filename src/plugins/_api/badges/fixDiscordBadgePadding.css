@@ -3,7 +3,3 @@
     /* Discord has gap set to 2px instead of 1px, which causes the 12th badge to wrap to a new line. */
     gap: 1px;
 }
-
-[class*="container_"] [class*="tags_"] [class*="container_"] {
-    gap: 1px;
-}

@@ -120,7 +120,7 @@ export default definePlugin({
                                 message: "Use the bottom panel to navigate between replies.",
                                 type: Toasts.Type.MESSAGE
                             });
-                            const container = document.querySelector("[class^=channelBottomBarArea_]");
+                            const container = document.querySelector("[class*=channelBottomBarArea_]");
                             if (!container) {
                                 Toasts.show({
                                     id: Toasts.genId(),

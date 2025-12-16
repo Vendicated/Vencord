@@ -1,4 +1,4 @@
-h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
+h3[class*="h5"]:has([class="vc-bi-header-inner"]) {
     display: flex;
     margin: 0 !important;
 }

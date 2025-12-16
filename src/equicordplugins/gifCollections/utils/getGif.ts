@@ -29,7 +29,7 @@ export function getGifByTarget(url: string, target?: HTMLDivElement | null): Gif
 
 
 export function getGifByMessageAndTarget(target: HTMLDivElement, message: Message) {
-    const url = target.closest('[class^="imageWrapper"]')?.querySelector("video")?.src ?? target.closest('[class^="imageWrapper"]')?.querySelector("img")?.src;
+    const url = target.closest('[class*="imageWrapper"]')?.querySelector("video")?.src ?? target.closest('[class*="imageWrapper"]')?.querySelector("img")?.src;
 
     if (!url) return null;
 

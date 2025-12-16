@@ -20,7 +20,7 @@
     align-items: center;
 }
 
-.vc-url-hl-color-picker [class^="swatch"] {
+.vc-url-hl-color-picker [class*="swatch"] {
     width: 32px;
     height: 32px;
     border-radius: 4px;

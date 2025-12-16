@@ -94,7 +94,7 @@ export default definePlugin({
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
         if (className.includes("tile_")) {
             if (this.userHasBackground(participantUserId)) {
-                document.querySelectorAll('[class*="background_"]').forEach(element => {
+                document.querySelectorAll('[class*="background"]').forEach(element => {
                     (element as HTMLElement).style.backgroundColor = "transparent";
                 });
                 return {
