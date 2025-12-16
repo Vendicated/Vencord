@@ -15,7 +15,7 @@
     justify-content: flex-start;
 }
 
-.vc-clientTheme-container [class^="swatch"] {
+.vc-clientTheme-container [class*="swatch"] {
     border: thin solid var(--input-border-default) !important;
 }
 

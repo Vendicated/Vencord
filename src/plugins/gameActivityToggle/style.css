@@ -1,3 +1,3 @@
-[class^="panels"] [class^="avatarWrapper_"] {
+[class*="panels"] [class*="avatarWrapper"] {
     min-width: 0;
 }

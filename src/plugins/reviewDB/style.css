@@ -1,4 +1,4 @@
-[class|="section"]:not([class|="lastSection"]) + .vc-rdb-view {
+[class*="section"]:not([class*="lastSection"]) + .vc-rdb-view {
     margin-top: 12px;
 }
 
@@ -43,7 +43,7 @@
     background: var(--input-background-default);
 }
 
-.vc-rdb-modal-footer [class|="pageControlContainer"] {
+.vc-rdb-modal-footer [class*="pageControlContainer"] {
     margin-top: 0;
 }
 

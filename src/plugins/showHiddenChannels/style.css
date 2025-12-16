@@ -94,7 +94,7 @@
     color: var(--text-default);
 }
 
-.vc-shc-allowed-users-and-roles-container > [class^="members"] {
+.vc-shc-allowed-users-and-roles-container > [class*="members"] {
     margin-left: 12px;
     flex-wrap: wrap;
     justify-content: center;
