@@ -86,7 +86,7 @@ function ReloadRequiredCard({ required, enabledPlugins, openWarningModal, resetC
                     size="small"
                     className={"vc-plugins-disable-warning vc-modal-align-reset"}
                     onClick={() => {
-                        return openWarningModal(null, null, null, false, enabledPlugins.length, resetCheckAndDo);
+                        return openWarningModal(null, undefined, false, enabledPlugins.length, resetCheckAndDo);
                     }}
                 >
                     Disable All Plugins
