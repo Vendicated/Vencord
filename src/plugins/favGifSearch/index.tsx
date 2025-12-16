@@ -132,7 +132,7 @@ export default definePlugin({
 
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
-    const ref = useRef<{ containerRef?: React.RefObject<HTMLDivElement>; } | null>(null);
+    const ref = useRef<HTMLElement>(null);
 
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
@@ -147,10 +147,10 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
 
         // scroll back to top
-        ref.current?.containerRef?.current
+        ref.current
             ?.closest("#gif-picker-tab-panel")
-            ?.querySelector("[class|=\"content\"]")
-            ?.firstElementChild?.scrollTo(0, 0);
+            ?.querySelector('[class*="scrollerBase"]')
+            ?.scrollTo(0, 0);
 
 
         const result =
