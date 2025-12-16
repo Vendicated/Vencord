@@ -71,7 +71,7 @@
     color: var(--text-default);
 }
 
-.vc-gp-server-info-pair [class^="timestamp"] {
+.vc-gp-server-info-pair [class*="timestamp"] {
     margin-left: 0;
 }
 
@@ -160,10 +160,10 @@
     font-weight: 600;
 }
 
-.vc-gp-scroller [class^="listRow"] {
+.vc-gp-scroller [class*="listRow"] {
     margin: 1px 0;
 }
 
-.vc-gp-scroller [class^="listRow"]:hover {
+.vc-gp-scroller [class*="listRow"]:hover {
     background-color: var(--background-mod-subtle);
 }
