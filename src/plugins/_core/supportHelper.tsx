@@ -135,7 +135,7 @@ async function generateDebugInfoMessage() {
     let clientString = `${clientInfo.name}`;
     clientString += `${clientInfo.version ? ` v${clientInfo.version}` : ""}`;
     clientString += `${clientInfo.info ? ` • ${clientInfo.info}` : ""}`;
-    clientString += `${clientInfo.shortHash ? ` • [${clientInfo.shortHash}](${clientInfo.hash})` : ""}`;
+    clientString += `${clientInfo.shortHash ? ` • [${clientInfo.shortHash}](<https://github.com/Equicord/Equibop/commit/${clientInfo.hash}>)` : ""}`;
 
     const spoofInfo = IS_EQUIBOP ? tryOrElse(() => VesktopNative.app.getPlatformSpoofInfo?.(), null) : null;
     const platformDisplay = spoofInfo?.spoofed
