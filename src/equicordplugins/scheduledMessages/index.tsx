@@ -9,7 +9,6 @@ import "./styles.css";
 import { MessageOptions } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 
 import { isScheduleModeEnabled, ScheduledMessagesButton, setScheduleModeEnabled } from "./components/ChatBarButton";
@@ -29,8 +28,6 @@ import {
     startScheduler,
     stopScheduler
 } from "./utils";
-
-const logger = new Logger("ScheduledMessages");
 
 export const settings = definePluginSettings({
     maxMessagesPerMinute: {
@@ -66,28 +63,21 @@ export const settings = definePluginSettings({
 function handleReactionEvent(event: FluxReactionEvent): void {
     const { messageId, channelId, emoji } = event;
 
-    logger.info("handleReactionEvent:", { type: event.type, messageId, optimistic: event.optimistic, emoji: emoji?.name });
 
-    if (!messageId || !channelId || !emoji) {
-        logger.warn("handleReactionEvent: Missing required fields");
-        return;
-    }
+    if (!messageId || !channelId || !emoji) return;
 
     const isPhantom = isPhantomMessage(messageId);
-    logger.info("handleReactionEvent: isPhantomMessage =", isPhantom);
 
     if (!isPhantom) return;
 
     if (event.optimistic) {
         // User-initiated reaction change - update our data
-        logger.info("handleReactionEvent: Processing optimistic", event.type);
         if (event.type === "MESSAGE_REACTION_ADD") {
             handleReactionAdd(messageId, channelId, emoji);
         } else if (event.type === "MESSAGE_REACTION_REMOVE") {
             handleReactionRemove(messageId, channelId, emoji);
         }
     } else {
-        logger.info("handleReactionEvent: Non-optimistic event, scheduling resync");
         setTimeout(() => {
             resyncPhantomReactions(messageId, channelId);
         }, 50);
