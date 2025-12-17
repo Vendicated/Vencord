@@ -56,8 +56,8 @@ export async function importSettings(data: string, type: BackupType = "all", clo
 
     switch (type) {
         case "all": {
-            if (!cloud && (!("settings" in parsed) || !("quickCss" in parsed) || !("dataStore" in parsed)))
-                throw new Error("Invalid Settings. Missing one or more required keys.");
+            if (!cloud && (!("settings" in parsed)))
+                throw new Error("Invalid Settings. Plugin settings is required for this import try a different one.");
 
             if (parsed.settings) {
                 Object.assign(PlainSettings, parsed.settings);
@@ -68,10 +68,10 @@ export async function importSettings(data: string, type: BackupType = "all", clo
             break;
         }
         case "plugins": {
-            if (!parsed.settings?.settings) throw new Error("Plugin settings missing");
+            if (!parsed.settings) throw new Error("Plugin settings missing");
 
-            Object.assign(PlainSettings, parsed.settings.settings);
-            await VencordNative.settings.set(parsed.settings.settings);
+            Object.assign(PlainSettings, parsed.settings);
+            await VencordNative.settings.set(parsed.settings);
             break;
         }
         case "css": {
@@ -99,7 +99,7 @@ export async function exportSettings({ syncDataStore = true, type = "all", minif
             return JSON.stringify({ settings, quickCss, ...(syncDataStore && { dataStore }) }, null, minify ? undefined : 4);
         }
         case "plugins": {
-            return JSON.stringify({ settings: { settings } }, null, minify ? undefined : 4);
+            return JSON.stringify({ settings }, null, minify ? undefined : 4);
         }
         case "css": {
             return JSON.stringify({ quickCss }, null, minify ? undefined : 4);
@@ -108,21 +108,6 @@ export async function exportSettings({ syncDataStore = true, type = "all", minif
             return JSON.stringify({ dataStore }, null, minify ? undefined : 4);
         }
     }
-}
-
-export async function exportPlugins({ minify }: { minify?: boolean; } = {}) {
-    const { plugins } = VencordNative.settings.get();
-    return JSON.stringify({ settings: { plugins } }, null, minify ? undefined : 4);
-}
-
-export async function exportCSS({ minify }: { minify?: boolean; } = {}) {
-    const quickCss = await VencordNative.quickCss.get();
-    return JSON.stringify({ quickCss }, null, minify ? undefined : 4);
-}
-
-export async function exportDataStores({ minify }: { minify?: boolean; } = {}) {
-    const dataStore = await DataStore.entries();
-    return JSON.stringify({ dataStore }, null, minify ? undefined : 4);
 }
 
 export async function downloadSettingsBackup(type: BackupType = "all", { minify }: { minify?: boolean; } = {}) {
@@ -141,7 +126,7 @@ export async function uploadSettingsBackup(type: BackupType = "all", showToast =
     if (IS_DISCORD_DESKTOP) {
         const [file] = await DiscordNative.fileManager.openFiles({
             filters: [
-                { name: "Vencord Settings Backup", extensions: ["json"] },
+                { name: "Equicord Settings Backup", extensions: ["json"] },
                 { name: "all", extensions: ["*"] }
             ]
         });

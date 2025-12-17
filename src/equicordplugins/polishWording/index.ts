@@ -275,7 +275,6 @@ function capitalize(textInput: string): string {
         }
     }
 
-    // Stand-alone i's turn into I, unless there's the word 'is' after, cus then it's a vowel and not someone talking about themselves
     result = result.replace(/\bi\b(?!\s+is\b)(?=['\s]|$)/g, "I");
 
     return result;
