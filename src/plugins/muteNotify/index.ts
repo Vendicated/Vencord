@@ -32,7 +32,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: "Notification sound frequency",
         default: 1920, // B6 note
-        min: 0,
+        min: 200,
         max: 2000,
         step: 10,
         markers: [700, 1920, 2000],
@@ -43,6 +43,7 @@ const settings = definePluginSettings({
 let audioContext: AudioContext | null = null;
 let analyser: AnalyserNode | null = null;
 let microphone: MediaStreamAudioSourceNode | null = null;
+let mediaStream: MediaStream | null = null;
 let checkInterval: number | null = null;
 let isBeeping = false;
 let lastBeepTime = 0;
@@ -141,13 +142,13 @@ async function startMonitoring() {
         analyser.fftSize = 256;
 
         // Get microphone stream
-        const stream = await navigator.mediaDevices.getUserMedia({
+        mediaStream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 deviceId: MediaEngineStore.getInputDeviceId()
             }
         });
 
-        microphone = audioContext.createMediaStreamSource(stream);
+        microphone = audioContext.createMediaStreamSource(mediaStream);
         microphone.connect(analyser);
 
         // Start checking audio levels
@@ -163,6 +164,11 @@ function stopMonitoring() {
     if (checkInterval !== null) {
         clearInterval(checkInterval);
         checkInterval = null;
+    }
+
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
     }
 
     if (microphone) {
