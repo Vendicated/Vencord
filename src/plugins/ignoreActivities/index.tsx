@@ -64,7 +64,7 @@ function ToggleActivityComponent(activity: IgnoredActivity, isPlaying = false) {
     const { ignoredActivities } = s;
 
     if (ignoredActivities.some(act => act.id === activity.id)) return ToggleIconOff(activity, "var(--status-danger)");
-    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--interactive-normal)");
+    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--interactive-icon-default)");
 }
 
 function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: IgnoredActivity) {

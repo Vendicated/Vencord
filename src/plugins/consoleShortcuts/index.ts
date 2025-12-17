@@ -35,6 +35,14 @@ const DESKTOP_ONLY = (f: string) => () => {
     throw new Error(`'${f}' is Discord Desktop only.`);
 };
 
+const makeVesktopSwitcher = (branch: string) => () => {
+    if (Vesktop.Settings.store.discordBranch === branch)
+        throw new Error(`Already on ${branch}`);
+
+    Vesktop.Settings.store.discordBranch = branch;
+    VesktopNative.app.relaunch();
+};
+
 const define: typeof Object.defineProperty =
     (obj, prop, desc) => {
         if (Object.hasOwn(desc, "value"))
@@ -170,7 +178,7 @@ function makeShortcuts() {
         openModal: { getter: () => ModalAPI.openModal },
         openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
-        Stores: Webpack.fluxStores,
+        Stores: { getter: () => Object.fromEntries(Webpack.fluxStores) },
 
         // e.g. "2024-05_desktop_visual_refresh", 0
         setExperiment: (id: string, bucket: number) => {
@@ -180,6 +188,11 @@ function makeShortcuts() {
                 experimentBucket: bucket,
             });
         },
+        ...IS_VESKTOP ? {
+            vesktopStable: makeVesktopSwitcher("stable"),
+            vesktopCanary: makeVesktopSwitcher("canary"),
+            vesktopPtb: makeVesktopSwitcher("ptb"),
+        } : {},
     };
 }
 

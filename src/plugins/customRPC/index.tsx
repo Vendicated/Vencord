@@ -60,15 +60,19 @@ export const settings = definePluginSettings({
     appID?: string;
     appName?: string;
     details?: string;
+    detailsURL?: string;
     state?: string;
+    stateURL?: string;
     type?: ActivityType;
     streamLink?: string;
     timestampMode?: TimestampMode;
     startTime?: number;
     endTime?: number;
     imageBig?: string;
+    imageBigURL?: string;
     imageBigTooltip?: string;
     imageSmall?: string;
+    imageSmallURL?: string;
     imageSmallTooltip?: string;
     buttonOneText?: string;
     buttonOneURL?: string;
@@ -83,14 +87,18 @@ async function createActivity(): Promise<Activity | undefined> {
         appID,
         appName,
         details,
+        detailsURL,
         state,
+        stateURL,
         type,
         streamLink,
         startTime,
         endTime,
         imageBig,
+        imageBigURL,
         imageBigTooltip,
         imageSmall,
+        imageSmallURL,
         imageSmallTooltip,
         buttonOneText,
         buttonOneURL,
@@ -137,6 +145,14 @@ async function createActivity(): Promise<Activity | undefined> {
             break;
     }
 
+    if (detailsURL) {
+        activity.details_url = detailsURL;
+    }
+
+    if (stateURL) {
+        activity.state_url = stateURL;
+    }
+
     if (buttonOneText) {
         activity.buttons = [
             buttonOneText,
@@ -154,7 +170,8 @@ async function createActivity(): Promise<Activity | undefined> {
     if (imageBig) {
         activity.assets = {
             large_image: await getApplicationAsset(imageBig),
-            large_text: imageBigTooltip || undefined
+            large_text: imageBigTooltip || undefined,
+            large_url: imageBigURL || undefined
         };
     }
 
@@ -162,7 +179,8 @@ async function createActivity(): Promise<Activity | undefined> {
         activity.assets = {
             ...activity.assets,
             small_image: await getApplicationAsset(imageSmall),
-            small_text: imageSmallTooltip || undefined
+            small_text: imageSmallTooltip || undefined,
+            small_url: imageSmallURL || undefined
         };
     }
 
@@ -197,17 +215,20 @@ export default definePlugin({
     description: "Add a fully customisable Rich Presence (Game status) to your Discord profile",
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
     dependencies: ["UserSettingsAPI"],
-    start: setRpc,
-    stop: () => setRpc(true),
+    // This plugin's patch is not important for functionality, so don't require a restart
+    requiresRestart: false,
     settings,
 
+    start: setRpc,
+    stop: () => setRpc(true),
+
+    // Discord hides buttons on your own Rich Presence for some reason. This patch disables that behaviour
     patches: [
         {
-            find: ".party?(0",
-            all: true,
+            find: ".buttons.length)>=1",
             replacement: {
-                match: /\i\.id===\i\.id\?null:/,
-                replace: ""
+                match: /.getId\(\)===\i.id/,
+                replace: "$& && false"
             }
         }
     ],
@@ -237,7 +258,7 @@ export default definePlugin({
                     </ErrorCard>
                 )}
 
-                <Flex flexDirection="column" style={{ gap: ".5em" }} className={Margins.top16}>
+                <Flex flexDirection="column" gap=".5em" className={Margins.top16}>
                     <Forms.FormText>
                         Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
                         get the application ID.
@@ -258,7 +279,7 @@ export default definePlugin({
 
                 <Divider className={Margins.top8} />
 
-                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-faint)" }}>
+                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--background-mod-muted)" }}>
                     {activity && <ActivityView
                         activity={activity}
                         user={UserStore.getCurrentUser()}

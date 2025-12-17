@@ -1,0 +1,20 @@
+.vc-card-base {
+    background: var(--card-background-default);
+    border-radius: var(--radius-sm, 8px)
+}
+
+.vc-card-normal {
+    border: 1px solid var(--border-subtle);
+}
+
+.vc-card-warning {
+    border: 1px solid var(--icon-status-idle);
+}
+
+.vc-card-danger {
+    border: 1px solid var(--icon-status-dnd);
+}
+
+.vc-card-defaultPadding {
+    padding: 1em;
+}
