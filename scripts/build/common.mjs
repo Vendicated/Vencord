@@ -26,7 +26,7 @@ import esbuild, { build, context } from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
-import { join, relative } from "path";
+import { join, relative, resolve } from "path";
 import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
@@ -42,6 +42,7 @@ export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now
 export const watch = process.argv.includes("--watch");
 export const IS_DEV = watch || process.argv.includes("--dev");
 export const IS_REPORTER = process.argv.includes("--reporter");
+export const IS_ANTI_CRASH_TEST = process.argv.includes("--anti-crash-test");
 export const IS_STANDALONE = process.argv.includes("--standalone");
 
 export const IS_UPDATER_DISABLED = process.argv.includes("--disable-updater");
@@ -189,7 +190,8 @@ export const globPlugins = kind => ({
             code += `export default {${pluginsCode}};export const PluginMeta={${metaCode}};export const ExcludedPlugins={${excludedCode}};`;
             return {
                 contents: code,
-                resolveDir: "./src"
+                resolveDir: "./src",
+                watchDirs: pluginDirs.map(d => resolve("src", d)),
             };
         });
     }

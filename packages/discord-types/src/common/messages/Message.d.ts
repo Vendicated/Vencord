@@ -2,8 +2,9 @@ import { CommandOption } from './Commands';
 import { User, UserJSON } from '../User';
 import { Embed, EmbedJSON } from './Embed';
 import { DiscordRecord } from "../Record";
+import { ApplicationIntegrationType, MessageFlags, MessageType, StickerFormatType } from "../../../enums";
 
-/**
+/*
  * TODO: looks like discord has moved over to Date instead of Moment;
  */
 export class Message extends DiscordRecord {
@@ -34,7 +35,7 @@ export class Message extends DiscordRecord {
     customRenderedContent: unknown;
     editedTimestamp: Date;
     embeds: Embed[];
-    flags: number;
+    flags: MessageFlags;
     giftCodes: string[];
     id: string;
     interaction: {
@@ -70,6 +71,19 @@ export class Message extends DiscordRecord {
         type: number;
         version: string;
     }[];
+    interactionMetadata?: {
+        id: string;
+        type: number;
+        name?: string;
+        command_type?: number;
+        ephemerality_reason?: number;
+        user: User;
+        authorizing_integration_owners: Record<ApplicationIntegrationType, string>;
+        original_response_message_id?: string;
+        interacted_message_id?: string;
+        target_user?: User;
+        target_message_id?: string;
+    };
     interactionError: unknown[];
     isSearchHit: boolean;
     loggingName: unknown;
@@ -92,14 +106,14 @@ export class Message extends DiscordRecord {
     reactions: MessageReaction[];
     state: string;
     stickerItems: {
-        format_type: number;
+        format_type: StickerFormatType;
         id: string;
         name: string;
     }[];
     stickers: unknown[];
     timestamp: moment.Moment;
     tts: boolean;
-    type: number;
+    type: MessageType;
     webhookId: string | undefined;
 
     /**
@@ -120,10 +134,13 @@ export class Message extends DiscordRecord {
     removeReaction(emoji: ReactionEmoji, fromCurrentUser: boolean): Message;
 
     getChannelId(): string;
-    hasFlag(flag: number): boolean;
+    hasFlag(flag: MessageFlags): boolean;
     isCommandType(): boolean;
     isEdited(): boolean;
     isSystemDM(): boolean;
+
+    /** Vencord added */
+    deleted?: boolean;
 }
 
 /** A smaller Message object found in FluxDispatcher and elsewhere. */
@@ -192,3 +209,9 @@ export interface MessageReaction {
     emoji: ReactionEmoji;
     me: boolean;
 }
+
+// Object.keys(findByProps("REPLYABLE")).map(JSON.stringify).join("|")
+export type MessageTypeSets = Record<
+    "UNDELETABLE" | "GUILD_DISCOVERY_STATUS" | "USER_MESSAGE" | "NOTIFIABLE_SYSTEM_MESSAGE" | "REPLYABLE" | "FORWARDABLE" | "REFERENCED_MESSAGE_AVAILABLE" | "AVAILABLE_IN_GUILD_FEED" | "DEADCHAT_PROMPTS" | "NON_COLLAPSIBLE" | "NON_PARSED" | "AUTOMOD_INCIDENT_ACTIONS" | "SELF_MENTIONABLE_SYSTEM" | "SCHEDULABLE",
+    Set<MessageType>
+>;
