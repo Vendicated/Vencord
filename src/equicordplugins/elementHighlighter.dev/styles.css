@@ -1,0 +1,104 @@
+.vc-element-highlight-active {
+    cursor: crosshair !important;
+}
+
+.vc-element-highlight-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999998;
+    border: 2px solid var(--text-brand);
+    background: var(--brand-15a);
+    border-radius: 4px;
+    pointer-events: none;
+    will-change: transform, width, height;
+    contain: layout style;
+}
+
+.vc-element-highlight-tooltip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999999;
+    background: rgb(0 0 0 / 70%);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: var(--font-code);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-default);
+    pointer-events: none;
+    white-space: nowrap;
+    will-change: transform;
+    contain: layout style;
+}
+
+.vc-element-highlight-tag {
+    color: var(--text-muted);
+}
+
+.vc-element-highlight-size {
+    color: var(--text-muted);
+    margin-left: 6px;
+}
+
+.vc-element-highlight-color {
+    margin-top: 4px;
+}
+
+.vc-element-highlight-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid rgb(255 255 255 / 20%);
+    vertical-align: middle;
+    margin-right: 6px;
+    background:
+        linear-gradient(var(--c), var(--c)),
+        repeating-conic-gradient(rgb(255 255 255 / 20%) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px;
+}
+
+.vc-element-highlight-hex {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.vc-element-highlight-info {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 2px;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-element-highlight-label {
+    color: var(--text-subtle);
+}
+
+.vc-element-highlight-keybind-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-element-highlight-keybind-button {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.vc-element-highlight-keybind-button.vc-element-highlight-listening {
+    padding: 4px 8px;
+    background-color: var(--input-background);
+    border-radius: 4px;
+    color: var(--text-muted);
+}
