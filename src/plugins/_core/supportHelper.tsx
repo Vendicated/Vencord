@@ -164,7 +164,7 @@ async function generateDebugInfoMessage() {
         potentiallyProblematicPlugins.push("CustomIdle");
     }
 
-    const potentiallyProblematicPluginsNote = "-# Note: said plugin(s) might be the not be the cause of your problem. They are just plug-ins that cause common issues.";
+    const potentiallyProblematicPluginsNote = "-# Note: These plugins might not be the cause of your problem. They are simply plugins that cause common issues.";
 
     const commonIssues = {
         "Activity Sharing Disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
