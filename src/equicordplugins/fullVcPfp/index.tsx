@@ -29,8 +29,8 @@ export default definePlugin({
             find: '"VideoBackground-web"',
             predicate: () => isPluginEnabled(usrbg.name) && usrbg.settings.store.voiceBackground,
             replacement: {
-                match: /(?<=,\{style:)(?=\i\?)/,
-                replace: "$self.userHasBackground(arguments[0]?.userId)?$self.patchStyles():",
+                match: /backgroundColor:.{0,25},\{style:(?=\i\?)/,
+                replace: "$&$self.userHasBackground(arguments[0]?.userId)?null:",
             }
         }
     ],
@@ -54,12 +54,6 @@ export default definePlugin({
         }
 
         return style;
-    },
-
-    patchStyles() {
-        return {
-            backgroundColor: "transparent"
-        };
     },
 
     userHasBackground(userId: string) {
