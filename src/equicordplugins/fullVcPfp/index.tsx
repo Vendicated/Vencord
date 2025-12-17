@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Settings } from "@api/Settings";
+import { isPluginEnabled } from "@api/PluginManager";
 import { disableStyle, enableStyle } from "@api/Styles";
 import usrbg from "@plugins/usrbg";
 import { EquicordDevs } from "@utils/constants";
@@ -24,34 +24,46 @@ export default definePlugin({
                 match: /(?<=function\((\i),\i\)\{)/,
                 replace: "$1.style=$self.getVoiceBackgroundStyles($1);",
             }
+        },
+        {
+            find: '"VideoBackground-web"',
+            predicate: () => isPluginEnabled(usrbg.name) && usrbg.settings.store.voiceBackground,
+            replacement: {
+                match: /(?<=,\{style:)(?=\i\?)/,
+                replace: "$self.userHasBackground(arguments[0]?.userId)?$self.patchStyles():",
+            }
         }
     ],
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
-        if (!className.includes("tile_")) return;
-        if (!participantUserId) return;
+        if (!className.includes("tile") || !participantUserId) return;
 
         const user = UserStore.getUser(participantUserId);
         const avatarUrl = IconUtils.getUserAvatarURL(user, false, 1024);
+        const style: Record<string, string> = {
+            "--full-res-avatar": `url(${avatarUrl})`
+        };
 
-        if (Settings.plugins.USRBG.enabled && Settings.plugins.USRBG.voiceBackground) {
-            if (usrbg.userHasBackground(participantUserId)) {
-                document.querySelectorAll('[class*="background"]').forEach(element => {
-                    (element as HTMLElement).style.backgroundColor = "transparent";
-                });
-                return {
-                    backgroundImage: `url(${usrbg.getImageUrl(participantUserId)})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    "--full-res-avatar": `url(${avatarUrl})`
-                };
-            }
+        if (isPluginEnabled(usrbg.name) && usrbg.settings.store.voiceBackground && this.userHasBackground(participantUserId)) {
+            Object.assign(style, {
+                backgroundImage: `url(${usrbg.getImageUrl(participantUserId)})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat"
+            });
         }
 
+        return style;
+    },
+
+    patchStyles() {
         return {
-            "--full-res-avatar": `url(${avatarUrl})`,
+            backgroundColor: "transparent"
         };
+    },
+
+    userHasBackground(userId: string) {
+        return usrbg.userHasBackground(userId);
     },
 
     start() {
