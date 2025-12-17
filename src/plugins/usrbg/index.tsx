@@ -100,13 +100,15 @@ export default definePlugin({
     ),
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
-        if (className.includes("tile") && this.userHasBackground(participantUserId)) {
-            return {
-                backgroundImage: `url(${this.getImageUrl(participantUserId)})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat"
-            };
+        if (className.includes("tile")) {
+            if (this.userHasBackground(participantUserId)) {
+                return {
+                    backgroundImage: `url(${this.getImageUrl(participantUserId)})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat"
+                };
+            }
         }
     },
 
