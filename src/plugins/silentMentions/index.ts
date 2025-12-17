@@ -46,7 +46,7 @@ export default definePlugin({
             match: /body:(\w+)/,
             replace: "body: $self.alter($1)"
         }]
-    },{
+    }, {
         find: /startsWith\(.+?sentinel/,
         replacement: [{
             // this ensures that the autocomplete popup is shown
@@ -57,11 +57,11 @@ export default definePlugin({
             match: /(else if\(null!=(\w+)&&\w+\(.+?typeInfo:(\w+).+?query:\w+.substring\()(.+?)\)}/,
             replace: "$1$3.sentinel=='@' && $2.startsWith($self.sentinel()) ? $self.sentinel().length : $4)}"
         }]
-    },{
+    }, {
         find: /return"<@&".concat/,
         replacement: [{
             // this avoids deletion of the prefix on autocomplete accept
-            match: /(onSelect\((\w+)\).+?!1;)(.+?Information\),)(.+?insertText\(\w+\(\w+\),)/,
+            match: /(onSelect\((\w+)\).+?MENTION;)(.+?Information\),)(.+?insertText\(\w+\(\w+\),)/,
             replace: "$1const _p = $2.options.currentFullWord.startsWith($self.sentinel()) ? $self.prefix() : '';$3_p+$4_p+"
         }]
     }],
