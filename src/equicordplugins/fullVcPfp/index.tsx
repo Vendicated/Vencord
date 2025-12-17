@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { isPluginEnabled } from "@api/PluginManager";
 import { disableStyle, enableStyle } from "@api/Styles";
-import usrbg from "@plugins/usrbg";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { IconUtils, UserStore } from "@webpack/common";
@@ -22,17 +20,9 @@ export default definePlugin({
             find: "\"data-selenium-video-tile\":",
             replacement: {
                 match: /(?<=function\((\i),\i\)\{)/,
-                replace: "$1.style=$self.getVoiceBackgroundStyles($1);",
+                replace: "Object.assign($1.style=$1.style||{},$self.getVoiceBackgroundStyles($1));",
             }
         },
-        {
-            find: '"VideoBackground-web"',
-            predicate: () => isPluginEnabled(usrbg.name) && usrbg.settings.store.voiceBackground,
-            replacement: {
-                match: /backgroundColor:.{0,25},\{style:(?=\i\?)/,
-                replace: "$&$self.userHasBackground(arguments[0]?.userId)?null:",
-            }
-        }
     ],
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
@@ -40,24 +30,10 @@ export default definePlugin({
 
         const user = UserStore.getUser(participantUserId);
         const avatarUrl = IconUtils.getUserAvatarURL(user, false, 1024);
-        const style: Record<string, string> = {
+
+        return {
             "--full-res-avatar": `url(${avatarUrl})`
         };
-
-        if (isPluginEnabled(usrbg.name) && usrbg.settings.store.voiceBackground && this.userHasBackground(participantUserId)) {
-            Object.assign(style, {
-                backgroundImage: `url(${usrbg.getImageUrl(participantUserId)})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat"
-            });
-        }
-
-        return style;
-    },
-
-    userHasBackground(userId: string) {
-        return usrbg.userHasBackground(userId);
     },
 
     start() {
