@@ -68,7 +68,6 @@
         "@types/react-dom": "^19.0.4",
         "@types/yazl": "^3.3.0",
         "@vencord/discord-types": "link:packages/discord-types",
-        "adm-zip": "^0.5.16",
         "diff": "^8.0.2",
         "esbuild": "^0.27.0",
         "eslint": "9.39.1",
@@ -93,7 +92,7 @@
         "typescript-transform-paths": "^3.5.5",
         "zip-local": "^0.3.5"
     },
-    "packageManager": "pnpm@10.22.0",
+    "packageManager": "pnpm@10.26.0",
     "pnpm": {
         "patchedDependencies": {
             "@types/less@3.0.8": "patches/@types__less@3.0.8.patch"

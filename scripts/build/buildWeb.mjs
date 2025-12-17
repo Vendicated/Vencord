@@ -22,9 +22,9 @@
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import path, { join } from "path";
+import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_COMPANION_TEST, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues, IS_ANTI_CRASH_TEST } from "./common.mjs";
-import AdmZip from "adm-zip";
 
 /**
  * @type {import("esbuild").BuildOptions}
@@ -204,15 +204,14 @@ if (!process.argv.includes("--skip-extension")) {
         buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
     ]);
 
-    const chromiumZip = new AdmZip();
-    chromiumZip.addLocalFolder("dist/browser/chromium-unpacked");
-    chromiumZip.writeZip(path.resolve("dist/extension-chrome.zip"));
-    console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
-
-    const firefoxZip = new AdmZip();
-    firefoxZip.addLocalFolder("dist/browser/firefox-unpacked");
-    firefoxZip.writeZip(path.resolve("dist/extension-firefox.zip"));
-    console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
+    Zip.zip("dist/browser/chromium-unpacked", (_err, zip) => {
+        zip.compress().save("dist/extension-chrome.zip");
+        console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
+    });
+    Zip.zip("dist/browser/firefox-unpacked", (_err, zip) => {
+        zip.compress().save("dist/extension-firefox.zip");
+        console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
+    });
 } else {
     await appendCssRuntime;
 }
