@@ -21,9 +21,16 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-type RegExpReducible<T> = RegExpStringIterator<T> & { reduce: T[]["reduce"]; };
+const UTC_CLASS_PREFIX = "utc_";
 
-const classMap = new Map<string, string>();
+const ClassMap = new Map<string, string>();
+
+const utcRegex = new RegExp(`${UTC_CLASS_PREFIX}\\S+\\s*`, "g");
+
+const classNameRegex = /([\w\d_$]+?)-(\w+)/g;
+
+const classPrefixHashRegex = /[_\d$]/;
+
 
 export default definePlugin({
     name: "UTC",
@@ -34,25 +41,36 @@ export default definePlugin({
         {
             find: ".jsx=",
             replacement: {
-                match: /return{\$\$typeof:\i+,type:(\i+).+?props:(\i+)/,
-                replace: " $2.className && $1 !== 'html' && ($2.className = $self.getClassName($2.className));$&",
+                match: /return{\$\$typeof:\i,type:(\i).+?props:(\i)/,
+                replace: "$self.patchClassName($2,$1);$&",
             },
         },
     ],
 
-    getClassName(className: string) {
-        if (classMap.has(className)) return classMap.get(className)!;
+    patchClassName(props: Record<string, string>, type: string) {
+        if (!props.className || type === "html") return;
 
-        const baseClasses = className.includes("utc_") ? className.replaceAll(/utc_\S+\s*/g, "").trim() : className;
+        props.className = this.getClassName(props.className);
+    },
 
-        const suffixMatch = baseClasses.matchAll(/(\w+?)_/g) as RegExpReducible<RegExpExecArray>;
+    getClassName(input: string) {
+        const cached = ClassMap.get(input);
+        if (cached) return cached;
 
-        const suffix = suffixMatch.reduce((suffix, [_, name]) => `${suffix}_${name}`, "");
+        const baseClasses = input.includes(UTC_CLASS_PREFIX)
+            ? input.replaceAll(utcRegex, "").trim()
+            : input;
 
-        const unified = suffix.length ? `${baseClasses} utc${suffix}` : baseClasses;
+        const utcSuffixes = [...baseClasses.matchAll(classNameRegex)].reduce(
+            (suffix, [_, prefix, name]) =>
+                classPrefixHashRegex.test(prefix) && !suffix.includes(name)
+                    ? `${suffix} utc_${name}`
+                    : suffix,
+            "",
+        );
 
-        classMap.set(className, unified);
-
+        const unified = `${baseClasses}${utcSuffixes}`;
+        ClassMap.set(input, unified);
         return unified;
     },
 
