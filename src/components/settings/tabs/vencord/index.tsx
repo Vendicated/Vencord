@@ -27,7 +27,7 @@ import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openContributorModal } from "@components/settings/tabs/plugins/ContributorModal";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { IS_MAC, IS_WINDOWS } from "@utils/constants";
+import { IS_MAC, IS_WINDOWS, IS_LINUX } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
@@ -61,13 +61,13 @@ function Switches() {
             title: "Enable React Developer Tools",
             restartRequired: true
         },
-        !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
+        !IS_WEB && (!IS_DISCORD_DESKTOP || !(IS_WINDOWS || IS_LINUX) ? {
             key: "frameless",
             title: "Disable the window frame",
             restartRequired: true
         } : {
             key: "winNativeTitleBar",
-            title: "Use Windows' native title bar instead of Discord's custom one",
+            title: "Use the operating system's native title bar instead of Discord's custom one",
             restartRequired: true
         }),
         !IS_WEB && {

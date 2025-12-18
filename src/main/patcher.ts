@@ -78,7 +78,7 @@ if (!IS_VANILLA) {
 
                 if (settings.frameless) {
                     options.frame = false;
-                } else if (process.platform === "win32" && settings.winNativeTitleBar) {
+                } else if ((process.platform === "win32" || process.platform === "linux") && settings.winNativeTitleBar) {
                     delete options.frame;
                 }
 
