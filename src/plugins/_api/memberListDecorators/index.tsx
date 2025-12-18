@@ -41,8 +41,8 @@ export default definePlugin({
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
-                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
+                match: /((?<=:|\[)\i\.isSystemDM\(\)\?.+?:null)/,
+                replace: "Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1"
             }
         }
     ]
