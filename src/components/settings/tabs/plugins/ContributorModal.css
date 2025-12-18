@@ -41,6 +41,8 @@
 }
 
 .vc-author-modal-links {
+    display: flex;
+    gap: 6px;
     margin-left: auto;
 }
 
