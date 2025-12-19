@@ -39,7 +39,7 @@ import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
-import { getCloudSettings, putCloudSettings } from "./api/SettingsSync/cloudSync";
+import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
@@ -52,6 +52,11 @@ if (IS_REPORTER) {
 }
 
 async function syncSettings() {
+    if (localStorage.Vencord_cloudSyncDirection === undefined) {
+        // by default, sync bi-directionally
+        localStorage.Vencord_cloudSyncDirection = "both";
+    }
+
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
@@ -70,12 +75,12 @@ async function syncSettings() {
 
     if (
         Settings.cloud.settingsSync && // if it's enabled
-        Settings.cloud.authenticated // if cloud integrations are enabled
+        Settings.cloud.authenticated && // if cloud integrations are enabled
+        localStorage.Vencord_cloudSyncDirection !== "manual" // if we're not in manual mode
     ) {
-        if (localStorage.Vencord_settingsDirty) {
+        if (localStorage.Vencord_settingsDirty && shouldCloudSync("push")) {
             await putCloudSettings();
-            delete localStorage.Vencord_settingsDirty;
-        } else if (await getCloudSettings(false)) { // if we synchronized something (false means no sync)
+        } else if (shouldCloudSync("pull") && await getCloudSettings(false)) { // if we synchronized something (false means no sync)
             // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
             // potential notifications that might occur. getCloudSettings() will always send a notification regardless if
             // there was an error to notify the user, but besides that we only want to show one notification instead of all
@@ -90,9 +95,8 @@ async function syncSettings() {
     }
 
     const saveSettingsOnFrequentAction = debounce(async () => {
-        if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
+        if (Settings.cloud.settingsSync && Settings.cloud.authenticated && shouldCloudSync("push")) {
             await putCloudSettings();
-            delete localStorage.Vencord_settingsDirty;
         }
     }, 60_000);
 
