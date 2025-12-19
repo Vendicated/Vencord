@@ -120,8 +120,6 @@ function CloudSetupSection() {
                     Reauthorise
                 </ButtonWithIcon>
             </Grid>
-
-            <Divider className={Margins.top16} />
         </section>
     );
 }
@@ -220,6 +218,14 @@ function ResetSection() {
             <Grid columns={2} gap="1em">
                 <ButtonWithIcon
                     variant="dangerPrimary"
+                    disabled={!authenticated || !settingsSync}
+                    onClick={() => deleteCloudSettings()}
+                    Icon={DeleteIcon}
+                >
+                    Delete Settings from Cloud
+                </ButtonWithIcon>
+                <ButtonWithIcon
+                    variant="dangerPrimary"
                     disabled={!authenticated}
                     onClick={() => Alerts.show({
                         title: "Are you sure?",
@@ -233,14 +239,6 @@ function ResetSection() {
                 >
                     Delete your Cloud Account
                 </ButtonWithIcon>
-                <ButtonWithIcon
-                    variant="dangerPrimary"
-                    disabled={!authenticated || !settingsSync}
-                    onClick={() => deleteCloudSettings()}
-                    Icon={DeleteIcon}
-                >
-                    Delete Settings from Cloud
-                </ButtonWithIcon>
             </Grid>
         </section>
     );
@@ -249,9 +247,11 @@ function ResetSection() {
 function CloudTab() {
     return (
         <SettingsTab>
-            <Flex flexDirection="column" gap="2em">
+            <Flex flexDirection="column" gap="1em">
                 <CloudSetupSection />
+                <Divider />
                 <SettingsSyncSection />
+                <Divider />
                 <ResetSection />
             </Flex>
         </SettingsTab>
