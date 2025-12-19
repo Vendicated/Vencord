@@ -75,7 +75,7 @@ function SettingsSyncSection() {
                             onMouseLeave={onMouseLeave}
                             onMouseEnter={onMouseEnter}
                             size={"small"}
-                            color={"red"}
+                            color={"dangerPrimary"}
                             disabled={!sectionEnabled}
                             onClick={() => getCloudSettings(true, true)}
                         >
@@ -85,7 +85,7 @@ function SettingsSyncSection() {
                 </Tooltip>
                 <Button
                     size={"small"}
-                    color={"red"}
+                    color={"dangerPrimary"}
                     disabled={!sectionEnabled}
                     onClick={() => deleteCloudSettings()}
                 >
@@ -178,7 +178,7 @@ function CloudTab() {
                     </Button>
                     <Button
                         size={"medium"}
-                        color={"red"}
+                        color={"dangerPrimary"}
                         disabled={!settings.cloud.authenticated}
                         onClick={() => Alerts.show({
                             title: "Are you sure?",
