@@ -9,7 +9,7 @@ import { Logger } from "@utils/Logger";
 import { findComponentByCodeLazy } from "@webpack";
 import type { ComponentType, MouseEventHandler, ReactNode } from "react";
 
-const PanelButton = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON") as ComponentType<UserAreaButtonProps>;
+const PanelButton = findComponentByCodeLazy("tooltipPositionKey", ".greenTooltip") as ComponentType<UserAreaButtonProps>;
 
 export interface UserAreaButtonProps {
     icon: ReactNode;
