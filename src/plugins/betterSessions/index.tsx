@@ -140,7 +140,7 @@ export default definePlugin({
                             overflow: "hidden",
 
                             borderRadius: "50%",
-                            backgroundColor: "var(--interactive-normal)",
+                            backgroundColor: "var(--interactive-icon-default)",
                             color: "var(--background-base-lower)",
                         }}
                     >

@@ -29,16 +29,16 @@
     padding: 0;
     background: transparent;
     margin-right: 8px;
-    color: var(--icon-secondary);
+    color: var(--icon-muted);
     transition: background-color .2s ease;
 
     &:hover {
-        color: var(--interactive-hover)
+        color: var(--interactive-icon-hover)
     }
 }
 
 .vc-plugins-settings-button:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
 }
 
 .vc-plugins-filter-controls {
@@ -74,7 +74,7 @@
 
 .vc-plugins-restart-button {
     margin-top: 0.5em;
-    background: var(--info-warning-foreground) !important;
+    background: var(--icon-status-idle) !important;
 }
 
 .vc-plugins-info-icon:not(:hover, :focus) {
