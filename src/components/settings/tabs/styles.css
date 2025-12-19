@@ -53,12 +53,12 @@
 
 .vc-cloud-icon-with-button {
     display: flex;
-    gap: 0.25em;
+    gap: 0.5em;
     padding-inline: 0.5em 1em;
 }
 
 .vc-cloud-button-icon {
-    height: 1em;
+    height: 1.25em;
 }
 
 .vc-settings-modal {
