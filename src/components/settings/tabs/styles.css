@@ -51,6 +51,16 @@
     background-color: var(--redesign-button-danger-background);
 }
 
+.vc-cloud-icon-with-button {
+    display: flex;
+    gap: 0.25em;
+    padding-inline: 0.5em 1em;
+}
+
+.vc-cloud-button-icon {
+    height: 1em;
+}
+
 .vc-settings-modal {
     padding: 1.5em !important;
 }
