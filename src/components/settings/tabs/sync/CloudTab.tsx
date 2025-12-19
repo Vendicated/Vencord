@@ -63,7 +63,7 @@ function SettingsSyncSection() {
             />
             <div className="vc-cloud-settings-sync-grid">
                 <Button
-                    size={"small"}
+                    size="small"
                     disabled={!sectionEnabled}
                     onClick={() => putCloudSettings(true)}
                 >
@@ -74,8 +74,8 @@ function SettingsSyncSection() {
                         <Button
                             onMouseLeave={onMouseLeave}
                             onMouseEnter={onMouseEnter}
-                            size={"small"}
-                            color={"dangerPrimary"}
+                            size="small"
+                            variant="dangerPrimary"
                             disabled={!sectionEnabled}
                             onClick={() => getCloudSettings(true, true)}
                         >
@@ -84,8 +84,8 @@ function SettingsSyncSection() {
                     )}
                 </Tooltip>
                 <Button
-                    size={"small"}
-                    color={"dangerPrimary"}
+                    size="small"
+                    variant="dangerPrimary"
                     disabled={!sectionEnabled}
                     onClick={() => deleteCloudSettings()}
                 >
@@ -166,7 +166,7 @@ function CloudTab() {
 
                 <Grid columns={2} gap="1em" className={Margins.top8}>
                     <Button
-                        size={"medium"}
+                        size="medium"
                         disabled={!settings.cloud.authenticated}
                         onClick={async () => {
                             await deauthorizeCloud();
@@ -177,8 +177,8 @@ function CloudTab() {
                         Reauthorise
                     </Button>
                     <Button
-                        size={"medium"}
-                        color={"dangerPrimary"}
+                        size="medium"
+                        variant="dangerPrimary"
                         disabled={!settings.cloud.authenticated}
                         onClick={() => Alerts.show({
                             title: "Are you sure?",
