@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -10,13 +10,12 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { openUserSettingsPanel } from "@webpack/common";
 
-import IconsTab from "./IconsTab";
-import { SettingsAbout } from "./subComponents";
-
+import IconsTab from "./components/IconsTab";
+import { SettingsAbout } from "./components/Modals";
 
 export default definePlugin({
     name: "IconViewer",
-    description: "Adds a new tab to settings, to preview all icons",
+    description: "Adds a new tab to settings to preview all icons.",
     authors: [EquicordDevs.iamme],
     dependencies: ["Settings"],
     startAt: StartAt.WebpackReady,
@@ -46,9 +45,9 @@ export default definePlugin({
     },
     stop() {
         const { customEntries, customSections } = SettingsPlugin;
-        const entry = customEntries.findIndex(entry => entry.key === "equicord_icon_viewer");
-        const section = customSections.findIndex(section => section({} as any).id === "IconViewer");
-        if (entry !== -1) customEntries.splice(entry, 1);
-        if (section !== -1) customSections.splice(section, 1);
+        const entryIdx = customEntries.findIndex(e => e.key === "equicord_icon_viewer");
+        const sectionIdx = customSections.findIndex(s => s({} as any).id === "IconViewer");
+        if (entryIdx !== -1) customEntries.splice(entryIdx, 1);
+        if (sectionIdx !== -1) customSections.splice(sectionIdx, 1);
     },
 });

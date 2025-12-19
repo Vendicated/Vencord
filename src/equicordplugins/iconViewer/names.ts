@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as t from "@vencord/discord-types";
+import { Icon } from "@vencord/discord-types";
 
 // name: pattern
-export const IconsFinds = {
+export const IconsFinds: Record<string, string> = {
     Discord: "1.6 5.64-2.87",
     XboxNeutral: "8.68-.62c.89-.81 1.5",
     PlaystationNeutral: "2.04Zm-9.35",
@@ -137,12 +137,12 @@ export const IconsFinds = {
 
 // 13l4.91-8.05a1.8
 
-export const namePatterns = new Map(Object.entries(IconsFinds).map(([name, pattern]) => [name, pattern]));
+const namePatterns = new Map(Object.entries(IconsFinds));
 
-export function getNameByIcon(Icon: t.Icon, defaultName: any) {
+export function getNameByIcon(Icon: Icon, defaultName: string) {
     for (const [name, pattern] of namePatterns) {
         if (String(Icon).includes(pattern)) {
-            namePatterns.delete(name); // remove pattern from map after being found prevent overshadowing
+            namePatterns.delete(name);
             return name;
         }
     }
