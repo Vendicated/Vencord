@@ -40,6 +40,7 @@ export function findAllIcons() {
         if (typeof m !== "function") return false;
         const str = m.toString?.() ?? "";
         if (str.includes("direction:")) return false;
+        if (str.includes('viewBox:"0 0 272 143"')) return false;
         return str.includes("viewBox:") && str.includes("color:") && (str.includes("foreground:") || str.includes("colorClass:"));
     });
 }
