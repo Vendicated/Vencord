@@ -40,9 +40,13 @@
     border-radius: 50%;
 }
 
+.vc-author-modal-root+[class*="footer"] {
+    padding: 16px;
+}
+
 .vc-author-modal-links {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     margin-left: auto;
 }
 

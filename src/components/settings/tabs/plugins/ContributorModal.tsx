@@ -14,8 +14,8 @@ import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { EquicordDevsById, VencordDevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
-import { classes, pluralise } from "@utils/misc";
-import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { pluralise } from "@utils/misc";
+import { ModalContent, ModalFooter, ModalRoot, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
 import { showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
@@ -30,9 +30,7 @@ export function openContributorModal(user: User) {
     openModal(modalProps =>
         <ModalRoot {...modalProps}>
             <ErrorBoundary>
-                <ModalContent className={cl("root")}>
-                    <ContributorModal user={user} />
-                </ModalContent>
+                <ContributorModal user={user} />
             </ErrorBoundary>
         </ModalRoot>
     );
@@ -67,53 +65,61 @@ function ContributorModal({ user }: { user: User; }) {
 
     const ContributedHyperLink = <Link href="https://github.com/Equicord/Equicord">contributed</Link>;
 
+    const hasLinks = website || githubName;
+
     return (
         <>
-            <div className={cl("header")}>
-                <img
-                    className={cl("avatar")}
-                    src={user.getAvatarURL(void 0, 512, true)}
-                    alt=""
-                />
-                <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
-
-                <div className={classes("vc-settings-modal-links", cl("links"))}>
-                    {website && (
-                        <WebsiteButton
-                            text={website}
-                            href={`https://${website}`}
-                        />
-                    )}
-                    {githubName && (
-                        <GithubButton
-                            text={githubName}
-                            href={`https://github.com/${githubName}`}
-                        />
-                    )}
+            <ModalContent className={cl("root")}>
+                <div className={cl("header")}>
+                    <img
+                        className={cl("avatar")}
+                        src={user.getAvatarURL(void 0, 512, true)}
+                        alt=""
+                    />
+                    <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
                 </div>
-            </div>
 
-            {plugins.length ? (
-                <Paragraph>
-                    {user.username} has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Paragraph>
-            ) : (
-                <Paragraph>
-                    {user.username} has not made any plugins. They likely {ContributedHyperLink} in other ways!
-                </Paragraph>
-            )}
+                {plugins.length ? (
+                    <Paragraph>
+                        {user.username} has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
+                    </Paragraph>
+                ) : (
+                    <Paragraph>
+                        {user.username} has not made any plugins. They likely {ContributedHyperLink} in other ways!
+                    </Paragraph>
+                )}
 
-            {!!plugins.length && (
-                <div className={cl("plugins")}>
-                    {plugins.map(p =>
-                        <PluginCard
-                            key={p.name}
-                            plugin={p}
-                            disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast("Restart to apply changes!")}
-                        />
-                    )}
-                </div>
+                {!!plugins.length && (
+                    <div className={cl("plugins")}>
+                        {plugins.map(p =>
+                            <PluginCard
+                                key={p.name}
+                                plugin={p}
+                                disabled={p.required ?? false}
+                                onRestartNeeded={() => showToast("Restart to apply changes!")}
+                            />
+                        )}
+                    </div>
+                )}
+            </ModalContent>
+
+            {hasLinks && (
+                <ModalFooter>
+                    <div className={cl("links")}>
+                        {website && (
+                            <WebsiteButton
+                                text={website}
+                                href={`https://${website}`}
+                            />
+                        )}
+                        {githubName && (
+                            <GithubButton
+                                text={githubName}
+                                href={`https://github.com/${githubName}`}
+                            />
+                        )}
+                    </div>
+                </ModalFooter>
             )}
         </>
     );
