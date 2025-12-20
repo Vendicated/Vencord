@@ -8,7 +8,6 @@ import { Settings } from "@api/Settings";
 import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
-import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
 
@@ -546,11 +545,6 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 (replacement.toBuild != null && buildNumber > replacement.toBuild)
             ) {
                 continue;
-            }
-
-            // TODO: remove once Vesktop has been updated to use addPatch
-            if (patch.plugin === "Vesktop") {
-                canonicalizeReplacement(replacement, "VCDP");
             }
 
             const lastCode = code;
