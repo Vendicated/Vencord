@@ -17,8 +17,9 @@
 */
 
 export const enum IpcEvents {
+    INIT_FILE_WATCHERS = "VencordInitFileWatchers",
     QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
-    THEME_UPDATE = "VencordThemeUpdate",
+    OPEN_QUICKCSS = "VencordOpenQuickCss",
     GET_QUICK_CSS = "VencordGetQuickCss",
     SET_QUICK_CSS = "VencordSetQuickCss",
     UPLOAD_THEME = "VencordUploadTheme",
@@ -30,18 +31,16 @@ export const enum IpcEvents {
     GET_SETTINGS_DIR = "VencordGetSettingsDir",
     GET_SETTINGS = "VencordGetSettings",
     SET_SETTINGS = "VencordSetSettings",
+    THEME_UPDATE = "VencordThemeUpdate",
     OPEN_EXTERNAL = "VencordOpenExternal",
-    OPEN_QUICKCSS = "VencordOpenQuickCss",
     GET_UPDATES = "VencordGetUpdates",
     GET_REPO = "VencordGetRepo",
     UPDATE = "VencordUpdate",
     BUILD = "VencordBuild",
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
+    GET_MONACO_THEME = "VencordGetMonacoTheme",
 
     GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
-
-    OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
-    VOICE_MESSAGES_READ_RECORDING = "VencordVMReadRecording",
 
     CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
     CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",
@@ -49,4 +48,7 @@ export const enum IpcEvents {
 
     OPEN_THEMES_FOLDER = "VencordOpenThemesFolder",
     OPEN_SETTINGS_FOLDER = "VencordOpenSettingsFolder",
+    GET_RENDERER_CSS = "VencordGetRendererCss",
+    RENDERER_CSS_UPDATE = "VencordRendererCssUpdate",
+    PRELOAD_GET_RENDERER_JS = "VencordPreloadGetRendererJs",
 }

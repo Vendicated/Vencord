@@ -276,6 +276,7 @@ export interface UsernameUtils {
     humanizeStatus: any;
 }
 
+// TODO: fix type
 export class DisplayProfile {
     userId: string;
     banner?: string;
