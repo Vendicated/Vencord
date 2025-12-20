@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CarouselControlsProps } from "@equicordplugins/betterActivities/types";
-import { cl } from "@equicordplugins/betterActivities/utils";
 import { React, Tooltip } from "@webpack/common";
 
+import { CarouselControlsProps } from "../types";
+import { cl } from "../utils";
 import { Caret } from "./Caret";
 
 export function CarouselControls({ activities, currentActivity, onActivityChange }: CarouselControlsProps) {
@@ -43,12 +43,12 @@ export function CarouselControls({ activities, currentActivity, onActivityChange
                 </span>;
             }}</Tooltip>
 
-            <div className="carousel">
+            <div className={cl("controls-carousel")}>
                 {activities.map((activity, index) => (
                     <div
                         key={"dot--" + index}
                         onClick={() => onActivityChange(activity)}
-                        className={`dot ${currentActivity === activity ? "selected" : ""}`} />
+                        className={cl("controls-dot", currentActivity === activity && "controls-selected")} />
                 ))}
             </div>
 

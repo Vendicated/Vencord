@@ -45,6 +45,7 @@
     border-radius: 3px;
     flex: 1 0;
     margin-top: 10px;
+    background-color: var(--user-profile-overlay-background);
 }
 
 .vc-bactivities-controls [class*="vc-activities-caret-"] {
@@ -65,12 +66,12 @@
     background: var(--input-border-default, var(--input-border));
 }
 
-.vc-bactivities-controls .carousel {
+.vc-bactivities-controls .vc-bactivities-controls-carousel {
     display: flex;
     align-items: center;
 }
 
-.vc-bactivities-controls .carousel .dot {
+.vc-bactivities-controls .vc-bactivities-controls-carousel .vc-bactivities-controls-dot {
     margin: 0 4px;
     width: 10px;
     cursor: pointer;
@@ -81,11 +82,11 @@
     opacity: 0.6;
 }
 
-.vc-bactivities-controls .carousel .dot:hover:not(.selected) {
+.vc-bactivities-controls .vc-bactivities-controls-carousel .vc-bactivities-controls-dot:hover:not(.vc-bactivities-controls-selected) {
     opacity: 1;
 }
 
-.vc-bactivities-controls .carousel .dot.selected {
+.vc-bactivities-controls .vc-bactivities-controls-carousel .vc-bactivities-controls-dot.vc-bactivities-controls-selected {
     opacity: 1;
     background: var(--dot-color, var(--brand-500));
 }
