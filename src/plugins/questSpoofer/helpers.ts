@@ -47,9 +47,7 @@ export async function fetchQuests() {
             if (userStatus.completed_at) return false;
 
             const expires = new Date(q.config.expires_at).getTime();
-            if (expires <= Date.now()) return false;
-
-            return true;
+            return expires > Date.now();
         });
     } catch (err) {
         QuestSpooferLogger.error("Failed to fetch quests from API:", err);

@@ -7,10 +7,6 @@
  */
 
 import { QuestSpooferLogger } from "@plugins/questSpoofer/constants";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { showToast, Toasts } from "@webpack/common";
-
 import {
     _resetProcessedQuestsForTesting,
     isAutoQuestListenerActive,
@@ -18,7 +14,10 @@ import {
     runQuestSpoofer,
     startAutoQuestListener,
     stopAutoQuestListener,
-} from "./runner";
+} from "@plugins/questSpoofer/runner";
+import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { showToast, Toasts } from "@webpack/common";
 
 export default definePlugin({
     name: "QuestSpoofer",
