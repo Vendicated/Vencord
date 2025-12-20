@@ -57,7 +57,7 @@ function Icon(svg: string, size = 20) {
             {tooltipProps => (
                 <img
                     {...tooltipProps}
-                    src={"data:image/svg+xml;utf8," + encodeURIComponent(svg.replace("#000000", color))}
+                    src={"data:image/svg+xml;utf8," + encodeURIComponent(svg.replace("#123456", color))}
                     height={size - (small ? 3 : 0)}
                     width={size - (small ? 3 : 0)}
                 />
@@ -150,7 +150,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
         return {
             description: tooltip,
-            iconSrc: "data:image/svg+xml;utf8," + encodeURIComponent(icon.svg.replace("#000000", colorMap[status] ?? colorMap.offline)),
+            iconSrc: "data:image/svg+xml;utf8," + encodeURIComponent(icon.svg.replace("#123456", colorMap[status] ?? colorMap.offline)),
             props: {
                 style: { width: icon.size, height: icon.size },
             },
