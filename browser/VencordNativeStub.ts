@@ -28,7 +28,7 @@ import { getThemeInfo } from "@main/themes";
 import { debounce } from "@shared/debounce";
 import { localStorage } from "@utils/localStorage";
 import { getStylusWebStoreUrl } from "@utils/web";
-import { EXTENSION_BASE_URL } from "@utils/web-metadata";
+import { EXTENSION_BASE_URL, metaReady, RENDERER_CSS_URL } from "@utils/web-metadata";
 
 // listeners for ipc.on
 const cssListeners = new Set<(css: string) => void>();
@@ -55,7 +55,18 @@ window.VencordNative = {
 
     native: {
         getVersions: () => ({}),
-        openExternal: async (url) => void open(url, "_blank")
+        openExternal: async (url) => void open(url, "_blank"),
+        getRendererCss: async () => {
+            if (IS_USERSCRIPT)
+                // need to wait for next tick for _vcUserScriptRendererCss to be set
+                return Promise.resolve().then(() => window._vcUserScriptRendererCss);
+
+            await metaReady;
+
+            return fetch(RENDERER_CSS_URL)
+                .then(res => res.text());
+        },
+        onRendererCssUpdate: NOOP,
     },
 
     updater: {
@@ -92,18 +103,20 @@ window.VencordNative = {
                 return;
             }
 
-            const { getTheme, Theme } = require("@utils/discord");
-
             win.baseUrl = EXTENSION_BASE_URL;
             win.setCss = setCssDebounced;
             win.getCurrentCss = () => VencordNative.quickCss.get();
-            win.getTheme = () =>
-                getTheme() === Theme.Light
-                    ? "vs-light"
-                    : "vs-dark";
+            win.getTheme = this.getEditorTheme;
 
             win.document.write(monacoHtmlLocal);
         },
+        getEditorTheme: () => {
+            const { getTheme, Theme } = require("@utils/discord");
+
+            return getTheme() === Theme.Light
+                ? "vs-light"
+                : "vs-dark";
+        }
     },
 
     settings: {

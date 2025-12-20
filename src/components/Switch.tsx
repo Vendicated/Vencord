@@ -18,7 +18,7 @@
 
 import "./Switch.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { useState } from "@webpack/common";
 import type { FocusEvent } from "react";
