@@ -61,7 +61,7 @@ if (IS_DEV) {
         setTimeout(() => {
             try {
                 if (existsSync(settings)) copyFileSync(settings, SETTINGS_FILE);
-                if (existsSync(quickCss)) copyFileSync(quickCss, QUICKCSS_PATH);
+                if (existsSync(quickCss)) copyFileSync(quickCss, QUICK_CSS_PATH);
                 writeFileSync(DEV_MIGRATED, "migrated");
                 app.relaunch();
                 app.exit(0);
