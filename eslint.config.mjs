@@ -67,7 +67,7 @@ export default tseslint.config(
             "simple-header/header": [
                 "error",
                 {
-                    "files": ["scripts/header-new.txt", "scripts/header-old.txt"],
+                    "files": ["scripts/header-new.txt"],
                     "templates": { "author": [".*", "Vendicated and contributors"] }
                 }
             ],

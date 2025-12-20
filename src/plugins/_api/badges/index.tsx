@@ -1,30 +1,18 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import "./fixDiscordBadgePadding.css";
+import "@plugins/_api/badges/fixDiscordBadgePadding.css";
 
-import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import {_getBadges, addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge} from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
-import { Devs } from "@utils/constants";
+import { Devs, OWNER_BADGE } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -43,7 +31,33 @@ const ContributorBadge: ProfileBadge = {
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
+const FormerStaff: ProfileBadge = {
+    description: "Former Staff",
+    iconSrc: OWNER_BADGE,
+    position: BadgePosition.END,
+    onClick: () => openStaffModal(FormerStaff),
+    shouldShow: ({ userId }) => ["1093444260491165777", "773166395147157504"].includes(userId),
+    props: {
+        style: {
+            filter: "grayscale(100%)"
+        }
+    },
+};
+
+const OwnerBadge: ProfileBadge = {
+    description: "Owner",
+    iconSrc: OWNER_BADGE,
+    position: BadgePosition.END,
+    shouldShow: ({ userId }) => ["893759402832699392"].includes(userId),
+    onClick: () => openEaglePage(),
+};
+
+function openEaglePage() {
+    VencordNative.native.openExternal("https://prodbyeagle.vercel.app/").then(r => console.log(r));
+}
+
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let EagleBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
 async function loadBadges(noCache = false) {
     const init = {} as RequestInit;
@@ -52,6 +66,12 @@ async function loadBadges(noCache = false) {
 
     DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
         .then(r => r.json());
+
+    EagleBadges = await fetch("https://raw.githubusercontent.com/prodbyeagle/dotfiles/refs/heads/main/Vencord/eagleCord/badges.json", init)
+        .then(r => r.json());
+
+    addProfileBadge(OwnerBadge);
+    addProfileBadge(FormerStaff);
 }
 
 let intervalId: any;
@@ -83,8 +103,8 @@ function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
 
 export default definePlugin({
     name: "BadgeAPI",
-    description: "API to add badges to users",
-    authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
+    description: "API to add badges to users. (modded by prodbyeagle)",
+    authors: [Devs.Megu, Devs.Ven, Devs.TheSun, Devs.Eagle],
     required: true,
     patches: [
         {
@@ -159,7 +179,7 @@ export default definePlugin({
 
 
     getBadgeMouseEventHandlers(badge: ProfileBadge & BadgeUserArgs) {
-        const handlers = {} as Record<string, (e: React.MouseEvent) => void>;
+        const handlers = {} as Record<string, (e: MouseEvent) => void>;
 
         if (!badge) return handlers; // sanity check
 
@@ -241,5 +261,69 @@ export default definePlugin({
                 ));
             },
         } satisfies ProfileBadge));
+    },
+
+    getEagleCordBadges(userId: string) {
+        return EagleBadges[userId]?.map(badge => ({
+            iconSrc: badge.badge,
+            description: badge.tooltip,
+            position: BadgePosition.START,
+            props: {
+                style: {
+                    borderRadius: "50%",
+                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                }
+            },
+            onContextMenu(event, badge) {
+                ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
+            },
+            onClick() {
+                const modalKey = openModal(props => (
+                    <ErrorBoundary
+                        noop
+                        onError={() => {
+                            closeModal(modalKey);
+                        }}
+                    >
+                        <ModalRoot {...props}>
+                            <ModalHeader>
+                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                    <Forms.FormTitle
+                                        style={{
+                                            width: "100%",
+                                            textAlign: "center",
+                                            margin: 0,
+                                        }}
+                                    >
+                                        🦅 EagleCord
+                                    </Forms.FormTitle>
+                                </Flex>
+                            </ModalHeader>
+
+                            <ModalContent>
+                                <Flex style={{ justifyContent: "center", gap: "1rem" }}>
+                                    <img
+                                        src={badge.badge}
+                                        alt="EagleCord Badge"
+                                        style={{
+                                            width: 128,
+                                            height: 128,
+                                        }}
+                                    />
+                                </Flex>
+                                <div style={{ padding: "1em", textAlign: "center" }}>
+                                    <Forms.FormText>{badge.tooltip}</Forms.FormText>
+                                    <Forms.FormText className={Margins.top20}>
+                                        {badge.tooltip === "EagleCord User"
+                                            ? "This badge is given by 'prodbyeagle'. The Creator of EagleCord"
+                                            : "This is a custom badge from the EagleCord project, made by the user you are currently visiting."}
+                                    </Forms.FormText>
+                                </div>
+                            </ModalContent>
+                        </ModalRoot>
+                    </ErrorBoundary>
+                ));
+            },
+        }) satisfies ProfileBadge);
     }
 });
