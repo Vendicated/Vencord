@@ -1,20 +1,10 @@
-/*!
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+/*
+ * EagleCord, a Vencord mod
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 // DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
 import "~plugins";
@@ -63,7 +53,7 @@ async function syncSettings() {
         !await dsGet("Vencord_cloudSecret") // this has been enabled due to local settings share or some other bug
     ) {
         // show a notification letting them know and tell them how to fix it
-        showNotification({
+        await showNotification({
             title: "Cloud Integrations",
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
@@ -85,7 +75,7 @@ async function syncSettings() {
             // potential notifications that might occur. getCloudSettings() will always send a notification regardless if
             // there was an error to notify the user, but besides that we only want to show one notification instead of all
             // of the possible ones it has (such as when your settings are newer).
-            showNotification({
+            await showNotification({
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
@@ -152,10 +142,10 @@ async function init() {
     await onceReady;
     startAllPlugins(StartAt.WebpackReady);
 
-    syncSettings();
+    await syncSettings();
 
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
-        runUpdateCheck();
+        await runUpdateCheck();
 
         // this tends to get really annoying, so only do this if the user has auto-update without notification enabled
         if (Settings.autoUpdate && !Settings.autoUpdateNotification) {

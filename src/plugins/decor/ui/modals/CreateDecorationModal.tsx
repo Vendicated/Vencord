@@ -1,6 +1,8 @@
 /*
+ * EagleCord, a Vencord mod
+ *
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -129,11 +131,11 @@ function CreateDecorationModal(props: ModalProps) {
                                 const inviteAccepted = await openInviteModal(INVITE_KEY);
                                 if (inviteAccepted) {
                                     closeAllModals();
-                                    FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                    await FluxDispatcher.dispatch({type: "LAYER_POP_ALL"});
                                 }
                             } else {
                                 closeAllModals();
-                                FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                await FluxDispatcher.dispatch({type: "LAYER_POP_ALL"});
                                 NavigationRouter.transitionToGuild(GUILD_ID);
                             }
                         }}

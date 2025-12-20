@@ -1,4 +1,6 @@
 /*
+ * EagleCord, a Vencord mod
+ *
  * Vencord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -96,7 +98,7 @@ export async function authorizeCloud() {
         const oauthConfiguration = await fetch(new URL("/v1/oauth/settings", getCloudUrl()));
         var { clientId, redirectUri } = await oauthConfiguration.json();
     } catch {
-        showNotification({
+        await showNotification({
             title: "Cloud Integration",
             body: "Setup failed (couldn't retrieve OAuth configuration)."
         });
@@ -126,13 +128,13 @@ export async function authorizeCloud() {
                 if (secret) {
                     logger.info("Authorized with secret");
                     await setAuthorization(secret);
-                    showNotification({
+                    await showNotification({
                         title: "Cloud Integration",
                         body: "Cloud integrations enabled!"
                     });
                     Settings.cloud.authenticated = true;
                 } else {
-                    showNotification({
+                    await showNotification({
                         title: "Cloud Integration",
                         body: "Setup failed (no secret returned?)."
                     });
@@ -140,7 +142,7 @@ export async function authorizeCloud() {
                 }
             } catch (e: any) {
                 logger.error("Failed to authorize", e);
-                showNotification({
+                await showNotification({
                     title: "Cloud Integration",
                     body: `Setup failed (${e.toString()}).`
                 });

@@ -1,6 +1,8 @@
 /*
+ * EagleCord, a Vencord mod
+ *
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -363,7 +365,7 @@ function sendOtherNotif(content: string, titleString: string) {
 
 async function sendToOverlay(notif: NotificationObject) {
     if (!IS_WEB && settings.store.preferUDP) {
-        Native.sendToOverlay(notif);
+        await Native.sendToOverlay(notif);
         return;
     }
     const apiObject: ApiObject = {

@@ -1,6 +1,8 @@
 /*
+ * EagleCord, a Vencord mod
+ *
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -66,7 +68,7 @@ export function authorize(callback?: any) {
                     }
 
                     const { token } = await res.json();
-                    updateAuth({ token });
+                    await updateAuth({token});
                     showToast("Successfully logged in!", Toasts.Type.SUCCESS);
                     callback?.();
                 } catch (e) {

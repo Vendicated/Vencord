@@ -1,6 +1,8 @@
 /*
+ * EagleCord, a Vencord mod
+ *
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -141,7 +143,7 @@ export default tseslint.config(
             "simple-import-sort/imports": "error",
             "simple-import-sort/exports": "error",
             "unused-imports/no-unused-imports": "error",
-            "path-alias/no-relative": "warn"
+            // "path-alias/no-relative": "warn"
         }
     }
 );

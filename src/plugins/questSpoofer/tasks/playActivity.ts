@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { QuestSpooferLogger } from "@plugins/questSpoofer/constants";
 import {
     ChannelStore,
     GuildChannelStore,
@@ -13,8 +14,6 @@ import {
     showToast,
     Toasts,
 } from "@webpack/common";
-
-import { QuestSpooferLogger } from "@plugins/questSpoofer/constants";
 
 /**
  * Spoofs the PLAY_ACTIVITY quest by sending periodic heartbeats

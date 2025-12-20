@@ -1,20 +1,10 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * EagleCord, a Vencord mod
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./styles.css";
 
@@ -171,7 +161,7 @@ export default definePlugin({
             if (savedSessionsCache.has(session.id_hash)) continue;
 
             savedSessionsCache.set(session.id_hash, { name: "", isNew: true });
-            showNotification({
+            await showNotification({
                 title: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
                 permanent: true,
@@ -179,7 +169,7 @@ export default definePlugin({
             });
         }
 
-        saveSessionsToDataStore();
+        await saveSessionsToDataStore();
     },
 
     flux: {
@@ -211,7 +201,7 @@ export default definePlugin({
     async start() {
         await fetchNamesFromDataStore();
 
-        this.checkNewSessions();
+        await this.checkNewSessions();
         if (settings.store.backgroundCheck) {
             this.checkInterval = setInterval(this.checkNewSessions, settings.store.checkInterval * 60 * 1000);
         }

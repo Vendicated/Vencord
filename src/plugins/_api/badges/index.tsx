@@ -8,7 +8,7 @@
 
 import "@plugins/_api/badges/fixDiscordBadgePadding.css";
 
-import {_getBadges, addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge} from "@api/Badges";
+import { _getBadges, addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";

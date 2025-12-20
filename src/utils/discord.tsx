@@ -1,20 +1,10 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * EagleCord, a Vencord mod
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import type { MessageObject } from "@api/MessageEvents";
 import type { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
@@ -60,7 +50,7 @@ export async function openInviteModal(code: string) {
     const { invite } = await InviteActions.resolveInvite(code, "Desktop Modal");
     if (!invite) throw new Error("Invalid invite: " + code);
 
-    FluxDispatcher.dispatch({
+    await FluxDispatcher.dispatch({
         type: "INVITE_MODAL_OPEN",
         invite,
         code,
@@ -209,7 +199,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     const cached = UserProfileStore.getUserProfile(id);
     if (cached) return cached;
 
-    FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId: id });
+    await FluxDispatcher.dispatch({type: "USER_PROFILE_FETCH_START", userId: id});
 
     const { body } = await RestAPI.get({
         url: Constants.Endpoints.USER_PROFILE(id),
@@ -221,10 +211,14 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
         oldFormErrors: true,
     });
 
-    FluxDispatcher.dispatch({ type: "USER_UPDATE", user: body.user });
+    await FluxDispatcher.dispatch({type: "USER_UPDATE", user: body.user});
     await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", userProfile: body });
     if (options?.guild_id && body.guild_member)
-        FluxDispatcher.dispatch({ type: "GUILD_MEMBER_PROFILE_UPDATE", guildId: options.guild_id, guildMember: body.guild_member });
+        await FluxDispatcher.dispatch({
+            type: "GUILD_MEMBER_PROFILE_UPDATE",
+            guildId: options.guild_id,
+            guildMember: body.guild_member
+        });
 
     return UserProfileStore.getUserProfile(id);
 }

@@ -1,6 +1,8 @@
 /*
+ * EagleCord, a Vencord mod
+ *
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -49,7 +51,7 @@ export const useCurrentUserDecorationsStore = proxyLazy(() => zustandCreate((set
     async select(decoration: Decoration | null) {
         if (get().selectedDecoration === decoration) return;
         set({ selectedDecoration: decoration });
-        setUserDecoration(decoration);
+        await setUserDecoration(decoration);
         useUsersDecorationsStore.getState().set(UserStore.getCurrentUser().id, decoration ? decorationToAsset(decoration) : null);
     },
     clear: () => set({ decorations: [], selectedDecoration: null })

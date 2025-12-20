@@ -1,4 +1,6 @@
 /*
+ * EagleCord, a Vencord mod
+ *
  * Vencord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -116,7 +118,7 @@ export function LocalThemesTab() {
                                                 ref={fileInputRef}
                                                 onChange={async e => {
                                                     await onFileUpload(e);
-                                                    refreshLocalThemes();
+                                                    await refreshLocalThemes();
                                                 }}
                                                 multiple={true}
                                                 filters={[{ extensions: ["css"] }]}
@@ -162,7 +164,7 @@ export function LocalThemesTab() {
                             onDelete={async () => {
                                 onLocalThemeChange(theme.fileName, false);
                                 await VencordNative.themes.deleteTheme(theme.fileName);
-                                refreshLocalThemes();
+                                await refreshLocalThemes();
                             }}
                             theme={theme}
                         />
