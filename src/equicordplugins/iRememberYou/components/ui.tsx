@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@utils/css";
 import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
 import { HeadingPrimary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings";
+import { classNameFactory } from "@utils/css";
 import { openUserProfile } from "@utils/discord";
 import { Avatar, Clickable, React, TextInput, Tooltip, } from "@webpack/common";
 

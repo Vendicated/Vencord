@@ -20,7 +20,6 @@ import "./themesStyles.css";
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
-import { classNameFactory } from "@utils/css";
 import { Alert } from "@components/Alert";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
@@ -34,6 +33,7 @@ import { Paragraph } from "@components/Paragraph";
 import { AddonCard, openPluginModal, QuickAction, QuickActionCard, SettingsTab, wrapTab } from "@components/settings";
 import { OnlineThemeCard } from "@components/settings/OnlineThemeCard";
 import { CspBlockedUrls, useCspErrors } from "@utils/cspViolations";
+import { classNameFactory } from "@utils/css";
 import { copyWithToast, openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";

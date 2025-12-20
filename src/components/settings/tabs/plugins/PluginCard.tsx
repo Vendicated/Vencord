@@ -6,9 +6,9 @@
 
 import { showNotice } from "@api/Notices";
 import { isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
-import { classNameFactory } from "@utils/css";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
+import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";

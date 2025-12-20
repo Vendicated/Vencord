@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@utils/css";
 import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { InfoIcon } from "@components/Icons";
@@ -13,6 +12,7 @@ import { settings } from "@equicordplugins/messageLoggerEnhanced/index";
 import { LoggedMessage, LoggedMessageJSON } from "@equicordplugins/messageLoggerEnhanced/types";
 import { messageJsonToMessageClass } from "@equicordplugins/messageLoggerEnhanced/utils";
 import { importLogs } from "@equicordplugins/messageLoggerEnhanced/utils/settingsUtils";
+import { classNameFactory } from "@utils/css";
 import { copyWithToast, openUserProfile } from "@utils/discord";
 import { closeAllModals, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";

@@ -5,10 +5,10 @@
  */
 
 import { AudioPlayerInterface, playAudio } from "@api/AudioPlayer";
-import { classNameFactory } from "@utils/css";
 import { Card } from "@components/Card";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import { makeRange } from "@utils/types";

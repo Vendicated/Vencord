@@ -6,11 +6,11 @@
 
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@utils/css";
 import { HeadingSecondary } from "@components/Heading";
 import { OpenExternalIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { copyToClipboard } from "@utils/clipboard";
+import { classNameFactory } from "@utils/css";
 import { OptionType } from "@utils/types";
 import { Button, Toasts } from "@webpack/common";
 

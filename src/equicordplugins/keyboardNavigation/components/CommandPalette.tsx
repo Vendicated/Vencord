@@ -6,8 +6,8 @@
 
 import "./style.css";
 
-import { classNameFactory } from "@utils/css";
 import { actions } from "@equicordplugins/keyboardNavigation/commands";
+import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { closeAllModals, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { React, TextInput, useEffect, useState } from "@webpack/common";

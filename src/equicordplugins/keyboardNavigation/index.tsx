@@ -5,8 +5,8 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@utils/css";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { openUserSettingsPanel, useState } from "@webpack/common";
