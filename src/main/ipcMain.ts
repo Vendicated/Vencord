@@ -32,7 +32,7 @@ import { registerCspIpcHandlers } from "./csp/manager";
 import { ALLOWED_PROTOCOLS, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
 
-const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
+const RENDERER_CSS_PATH = join(__dirname, IS_EQUIBOP ? "equibop/renderer.css" : "desktop/renderer.css");
 
 mkdirSync(THEMES_DIR, { recursive: true });
 
