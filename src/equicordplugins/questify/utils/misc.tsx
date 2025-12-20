@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { questIsIgnored, settings } from "@equicordplugins/questify/settings";
 import { Logger } from "@utils/Logger";
 import { findByPropsLazy } from "@webpack";

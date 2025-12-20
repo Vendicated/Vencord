@@ -8,7 +8,7 @@ import "./VencordTab.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Alert } from "@components/Alert";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";

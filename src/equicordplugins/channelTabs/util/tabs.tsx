@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { isPluginEnabled } from "@api/PluginManager";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 

@@ -6,7 +6,7 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";

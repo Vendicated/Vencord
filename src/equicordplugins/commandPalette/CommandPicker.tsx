@@ -6,7 +6,7 @@
 
 import "./style.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { React, TextInput, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
 

@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 
 import { settings } from "./settings";
 

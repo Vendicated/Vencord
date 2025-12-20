@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Flex } from "@components/Flex";
 import { HeadingTertiary } from "@components/Heading";
 import { DeleteIcon } from "@components/Icons";

@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Button } from "@components/Button";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
@@ -31,7 +31,7 @@ let pendingY = 0;
 let pendingElement: Element | null = null;
 
 const colorCache = new WeakMap<Element, string | null>();
-let cachedRules: { selector: string; specificity: number; color: string }[] = [];
+let cachedRules: { selector: string; specificity: number; color: string; }[] = [];
 
 function KeybindRecorder() {
     const [isListening, setIsListening] = useState(false);

@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { getCurrentChannel, getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";

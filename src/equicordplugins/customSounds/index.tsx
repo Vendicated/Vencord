@@ -9,7 +9,7 @@ import "./styles.css";
 import { AudioProcessor, PreprocessAudioData } from "@api/AudioPlayer";
 import { get as getFromDataStore } from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Heading } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";

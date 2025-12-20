@@ -20,7 +20,7 @@ import "./themesStyles.css";
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Alert } from "@components/Alert";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";

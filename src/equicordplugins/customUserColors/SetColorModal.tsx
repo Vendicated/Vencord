@@ -5,7 +5,7 @@
  */
 
 import { set } from "@api/DataStore";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";

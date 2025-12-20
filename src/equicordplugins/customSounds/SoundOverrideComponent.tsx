@@ -5,7 +5,7 @@
  */
 
 import { AudioPlayerInterface, playAudio } from "@api/AudioPlayer";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Card } from "@components/Card";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";

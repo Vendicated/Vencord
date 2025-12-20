@@ -8,7 +8,7 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { EquicordDevs, IS_MAC } from "@utils/constants";
 import { closeModal, openModal } from "@utils/modal";
 import definePlugin, { makeRange, OptionType } from "@utils/types";

@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { findComponentByCodeLazy } from "@webpack";
 import { ComponentType, HTMLAttributes } from "react";
 

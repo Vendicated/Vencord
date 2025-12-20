@@ -5,7 +5,7 @@
  */
 
 import { playAudio } from "@api/AudioPlayer";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/react";
 import { saveFile } from "@utils/web";

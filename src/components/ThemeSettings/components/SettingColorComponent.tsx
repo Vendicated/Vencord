@@ -6,7 +6,7 @@
 
 import "./colorStyles.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { findByCodeLazy } from "@webpack";
 import { ColorPicker, useMemo } from "@webpack/common";
 

@@ -6,7 +6,7 @@
 
 import { showNotice } from "@api/Notices";
 import { isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { Logger } from "@utils/Logger";

@@ -20,7 +20,7 @@ import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Microphone } from "@components/Icons";

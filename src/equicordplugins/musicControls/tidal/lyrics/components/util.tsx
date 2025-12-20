@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { settings } from "@equicordplugins/musicControls/settings";
 import { TidalLrcStore } from "@equicordplugins/musicControls/tidal/lyrics/providers/store";
 import { EnhancedLyric } from "@equicordplugins/musicControls/tidal/lyrics/types";

@@ -26,8 +26,10 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { shouldShowContributorBadge, shouldShowEquicordContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common";
+import { ContextMenuApi, Menu, Toasts, UserStore } from "@webpack/common";
+
 import Plugins, { PluginMeta } from "~plugins";
+
 import { EquicordDonorModal, VencordDonorModal } from "./modals";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";

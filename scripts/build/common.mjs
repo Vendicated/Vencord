@@ -27,7 +27,6 @@ import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
 import { dirname, join, relative, resolve } from "path";
-import { optimize as optimizeSvg } from "svgo";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
 
@@ -283,12 +282,6 @@ export const fileUrlPlugin = {
                         removeStyleLinkTypeAttributes: true,
                         useShortDoctype: true
                     });
-                } else if (path.endsWith(".svg")) {
-                    content = optimizeSvg(await readFile(path, "utf-8"), {
-                        datauri: base64 ? "base64" : void 0,
-                        multipass: true,
-                        floatPrecision: 2,
-                    }).data;
                 } else if (/[mc]?[jt]sx?$/.test(path)) {
                     const res = await esbuild.build({
                         entryPoints: [path],

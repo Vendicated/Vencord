@@ -6,7 +6,7 @@
 
 import "./style.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { actions } from "@equicordplugins/keyboardNavigation/commands";
 import { Logger } from "@utils/Logger";
 import { closeAllModals, ModalRoot, ModalSize, openModal } from "@utils/modal";

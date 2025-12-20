@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 import { Avatar, Button, ChannelStore, MessageStore, React, Text, UserStore } from "@webpack/common";

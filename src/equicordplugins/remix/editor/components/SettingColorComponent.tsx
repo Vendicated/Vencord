@@ -9,7 +9,7 @@
 
 import "./colorStyles.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { ColorPicker } from "@webpack/common";
 
 const cl = classNameFactory("vc-remix-settings-color-");

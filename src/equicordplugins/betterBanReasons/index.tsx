@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { Heading } from "@components/Heading";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
