@@ -7,16 +7,17 @@
 import { set } from "@api/DataStore";
 import { classNameFactory } from "@api/Styles";
 import { Button } from "@components/Button";
-import { Heading } from "@components/Heading";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { TextInput, useState } from "@webpack/common";
 
-import { avatars, KEY_DATASTORE } from ".";
+import { data, KEY_DATASTORE } from ".";
 const cl = classNameFactory("vc-custom-avatars-");
 
 export function SetAvatarModal({ userId, modalProps }: { userId: string, modalProps: ModalProps; }) {
+    const { avatars } = data;
     const initialAvatarUrl = avatars[userId] || "";
     const [url, setUrl] = useState(initialAvatarUrl);
 
