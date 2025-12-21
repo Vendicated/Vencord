@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Alert } from "@components/Alert";
+import { Notice } from "@components/Notice";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -25,9 +25,9 @@ export default definePlugin({
     description: "Prevents in-call/PiP previews (screenshare, streams, etc) from pausing even if the client loses focus",
     authors: [EquicordDevs.vappstar],
     settingsAboutComponent: () => (
-        <Alert.Warning>
+        <Notice.Warning>
             This plugin will cause discord to use more resources than normal
-        </Alert.Warning>
+        </Notice.Warning>
     ),
     patches: [
         {

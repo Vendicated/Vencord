@@ -19,7 +19,6 @@
 import { useSettings } from "@api/Settings";
 import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
 import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, putCloudSettings } from "@api/SettingsSync/cloudSync";
-import { Alert } from "@components/Alert";
 import { Button } from "@components/Button";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
@@ -28,6 +27,7 @@ import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { CloudDownloadIcon, CloudUploadIcon } from "@components/Icons";
 import { Link } from "@components/Link";
+import { Notice } from "@components/Notice";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { localStorage } from "@utils/localStorage";
@@ -97,11 +97,11 @@ function CloudTab() {
                 Equicord's cloud integration allows you to sync your settings across multiple devices and Discord installations. Your data is securely stored and can be easily restored at any time.
             </Paragraph>
 
-            <Alert.Info className={Margins.bottom16}>
+            <Notice.Info className={Margins.bottom16}>
                 We use our own <Link href="https://github.com/Equicord/Equicloud">Equicloud backend</Link> with enhanced features.
                 View our <Link href="https://equicord.org/cloud/policy">privacy policy</Link> to see what we store and how we use your data.
                 Equicloud is BSD 3.0 licensed, so you can self-host if preferred.
-            </Alert.Info>
+            </Notice.Info>
 
             <FormSwitch
                 title="Enable Cloud Integration"
@@ -218,9 +218,9 @@ function CloudTab() {
             </Flex>
 
             {!isAuthenticated && (
-                <Alert.Warning className={Margins.top8}>
+                <Notice.Warning className={Margins.top8}>
                     Enable cloud integration above to use settings sync features.
-                </Alert.Warning>
+                </Notice.Warning>
             )}
 
             <Divider className={Margins.top20} />

@@ -6,7 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { Alert } from "@components/Alert";
+import { Notice } from "@components/Notice";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, User, VoiceState } from "@vencord/discord-types";
@@ -78,9 +78,9 @@ export default definePlugin({
     authors: [EquicordDevs.TheArmagan],
     settings,
     settingsAboutComponent: () => (
-        <Alert.Info>
+        <Notice.Info>
             This Plugin is used to follow a Friend/Friends into voice chat(s).
-        </Alert.Info>
+        </Notice.Info>
     ),
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {

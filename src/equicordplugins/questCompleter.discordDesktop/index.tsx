@@ -21,7 +21,7 @@ import "./style.css";
 import { HeaderBarButton } from "@api/HeaderBar";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
-import { Alert } from "@components/Alert";
+import { Notice } from "@components/Notice";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -220,9 +220,9 @@ export default definePlugin({
     authors: [Devs.amia],
     settings,
     settingsAboutComponent: () => (
-        <Alert.Info>
+        <Notice.Info>
             You must manually accept the quest first before clicking the button.
-        </Alert.Info>
+        </Notice.Info>
     ),
     headerBarButton: {
         icon: QuestIcon,

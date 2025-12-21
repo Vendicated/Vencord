@@ -17,11 +17,11 @@
 */
 
 import { downloadSettingsBackup, uploadSettingsBackup } from "@api/SettingsSync/offline";
-import { Alert } from "@components/Alert";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
+import { Notice } from "@components/Notice";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { Margins } from "@utils/margins";
@@ -34,9 +34,9 @@ function BackupAndRestoreTab() {
                 Import and export your Equicord settings as a JSON file. This allows you to easily transfer your settings to another device, or recover them after reinstalling Equicord or Discord.
             </Paragraph>
 
-            <Alert.Warning className={Margins.bottom20}>
+            <Notice.Warning className={Margins.bottom20}>
                 Importing a settings file will overwrite your current settings. Make sure to export a backup first if you want to keep your current configuration.
-            </Alert.Warning>
+            </Notice.Warning>
 
             <Heading>What's included in a backup</Heading>
             <Paragraph className={Margins.bottom20}>

@@ -1,0 +1,89 @@
+.vc-compfinder-tabbar {
+    margin-bottom: 16px;
+    flex-wrap: wrap !important;
+    gap: 8px 16px;
+}
+
+.vc-compfinder-tabbar > div {
+    flex-wrap: wrap !important;
+    gap: 8px 16px;
+}
+
+.vc-compfinder-tab {
+    padding: 8px 12px;
+    margin: 0 !important;
+}
+
+.vc-compfinder-content {
+    padding-top: 16px;
+}
+
+.vc-compfinder-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-compfinder-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.vc-compfinder-grid-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-compfinder-switch-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+}
+
+.vc-compfinder-demo-button {
+    padding: 8px 16px;
+    background: var(--background-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    color: var(--text-normal);
+    cursor: pointer;
+}
+
+.vc-compfinder-demo-button:hover {
+    background: var(--background-secondary-alt);
+}
+
+.vc-compfinder-modal-header {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+}
+
+.vc-compfinder-modal-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.vc-compfinder-modal-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.vc-compfinder-modal-content {
+    padding-bottom: var(--space-16);
+}
+
+.vc-compfinder-modal-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 8px;
+}

@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export * from "./Alert";
 export * from "./BaseText";
 export * from "./Button";
 export * from "./Card";
@@ -21,6 +20,7 @@ export * from "./Heart";
 export * from "./Icons";
 export * from "./Link";
 export * from "./margins";
+export * from "./Notice";
 export * from "./Paragraph";
 export * from "./settings";
 export * from "./Span";
