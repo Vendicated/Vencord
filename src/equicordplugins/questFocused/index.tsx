@@ -21,17 +21,16 @@ export default definePlugin({
         // Block pausing
         {
             find: "[QV] | updatePlayerState | playerState",
-            replacement: {
-                match: /(?<=case \i\.\i\.PAUSED:.{0,25})\i\.current\.pause\(\),/,
-                replace: ""
-            }
-        },
-        {
-            find: "[QV] | updatePlayerState | playerState:",
-            replacement: {
-                match: /(?<=case \i\.\i\.PLAYING:)\i\.current\.paused/,
-                replace: "false"
-            }
-        },
+            replacement: [
+                {
+                    match: /(?<=case \i\.\i\.PLAYING:)\i\.current\.paused/,
+                    replace: "false"
+                },
+                {
+                    match: /(?<=case \i\.\i\.PAUSED:.{0,25})\i\.current\.pause\(\),/,
+                    replace: ""
+                }
+            ]
+        }
     ],
 });
