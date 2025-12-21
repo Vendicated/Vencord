@@ -11,9 +11,11 @@ import "@plugins/_api/badges/fixDiscordBadgePadding.css";
 import { _getBadges, addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Heart } from "@components/Heart";
+import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
-import { openContributorModal } from "@components/settings/tabs";
+import { openContributorModal, openStaffModal } from "@components/settings/tabs";
 import { Devs, OWNER_BADGE } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -21,7 +23,7 @@ import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common";
+import { ContextMenuApi, Menu, Toasts, UserStore } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
@@ -55,7 +57,7 @@ const OwnerBadge: ProfileBadge = {
 };
 
 function openEaglePage() {
-    VencordNative.native.openExternal("https://prodbyeagle.vercel.app/").then(r => console.log(r));
+    VencordNative.native.openExternal("https://prodbyeagle.dev").then(r => console.log(r));
 }
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
@@ -181,7 +183,7 @@ export default definePlugin({
 
 
     getBadgeMouseEventHandlers(badge: ProfileBadge & BadgeUserArgs) {
-        const handlers = {} as Record<string, (e: MouseEvent) => void>;
+        const handlers = {} as Record<string, (e: React.MouseEvent) => void>;
 
         if (!badge) return handlers; // sanity check
 
@@ -192,6 +194,7 @@ export default definePlugin({
 
         return handlers;
     },
+
 
     getDonorBadges(userId: string) {
         return DonorBadges[userId]?.map(badge => ({
@@ -211,11 +214,11 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated").then(r => console.error(r));
                     }}>
                         <ModalRoot {...props}>
                             <ModalHeader>
-                                <Forms.FormTitle
+                                <Heading
                                     tag="h2"
                                     style={{
                                         width: "100%",
@@ -227,7 +230,7 @@ export default definePlugin({
                                         <Heart />
                                         Vencord Donor
                                     </Flex>
-                                </Forms.FormTitle>
+                                </Heading>
                             </ModalHeader>
                             <ModalContent>
                                 <Flex>
@@ -245,12 +248,12 @@ export default definePlugin({
                                     />
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
-                                    <Forms.FormText>
+                                    <Paragraph>
                                         This Badge is a special perk for Vencord Donors
-                                    </Forms.FormText>
-                                    <Forms.FormText className={Margins.top20}>
+                                    </Paragraph>
+                                    <Paragraph className={Margins.top20}>
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 </div>
                             </ModalContent>
                             <ModalFooter>
@@ -290,7 +293,8 @@ export default definePlugin({
                         <ModalRoot {...props}>
                             <ModalHeader>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <Forms.FormTitle
+                                    <Heading
+                                        tag="h1"
                                         style={{
                                             width: "100%",
                                             textAlign: "center",
@@ -298,7 +302,7 @@ export default definePlugin({
                                         }}
                                     >
                                         🦅 EagleCord
-                                    </Forms.FormTitle>
+                                    </Heading>
                                 </Flex>
                             </ModalHeader>
 
@@ -314,12 +318,12 @@ export default definePlugin({
                                     />
                                 </Flex>
                                 <div style={{ padding: "1em", textAlign: "center" }}>
-                                    <Forms.FormText>{badge.tooltip}</Forms.FormText>
-                                    <Forms.FormText className={Margins.top20}>
+                                    <Paragraph>{badge.tooltip}</Paragraph>
+                                    <Paragraph className={Margins.top20}>
                                         {badge.tooltip === "EagleCord User"
                                             ? "This badge is given by 'prodbyeagle'. The Creator of EagleCord"
                                             : "This is a custom badge from the EagleCord project, made by the user you are currently visiting."}
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 </div>
                             </ModalContent>
                         </ModalRoot>

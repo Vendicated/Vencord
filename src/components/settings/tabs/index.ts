@@ -11,7 +11,7 @@ import "./styles.css";
 export * from "./BaseTab";
 export { default as PatchHelperTab } from "./patchHelper";
 export { default as PluginsTab } from "./plugins";
-export { openContributorModal } from "./plugins/ContributorModal";
+export { openContributorModal, openStaffModal } from "./plugins/ContributorModal";
 export { openPluginModal } from "./plugins/PluginModal";
 export { default as BackupAndRestoreTab } from "./sync/BackupAndRestoreTab";
 export { default as CloudTab } from "./sync/CloudTab";
