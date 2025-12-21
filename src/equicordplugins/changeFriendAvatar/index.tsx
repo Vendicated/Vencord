@@ -5,8 +5,10 @@
  */
 
 import { get } from "@api/DataStore";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { isPluginEnabled } from "@api/PluginManager";
+import { definePluginSettings } from "@api/Settings";
 import { PencilIcon } from "@components/Icons";
+import userpfp from "@equicordplugins/userpfp";
 import { EquicordDevs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -28,18 +30,11 @@ const settings = definePluginSettings({
     }
 });
 
-export function getCustomAvatar(userId: string, withHash?: boolean): string | undefined {
-    if (!avatars[userId] || !Settings.plugins.ChangeFriendAvatar?.enabled)
-        return;
-    return avatars[userId];
-}
-
 export default definePlugin({
     name: "ChangeFriendAvatar",
     description: "Set custom avatar URLs for any user",
     authors: [EquicordDevs.soapphia],
     settings,
-    getCustomAvatar,
 
     patches: [
         {
@@ -77,6 +72,18 @@ export default definePlugin({
     },
 
     getAvatarHook: (original: any) => (user: User, animated: boolean, size: number) => {
+        if (isPluginEnabled(userpfp.name) && userpfp.data?.avatars?.[user.id]) {
+            if (userpfp.settings.store.preferNitro && user.avatar?.startsWith("a_")) return original(user, animated, size);
+
+            const res = new URL(userpfp.data.avatars[user.id]);
+            res.searchParams.set("animated", animated ? "true" : "false");
+            if (res && !animated) {
+                res.pathname = res.pathname.replaceAll(/\.gifv?/g, ".png");
+            }
+
+            return res.toString();
+        }
+
         if (!avatars[user.id]) return original(user, animated, size);
 
         const customUrl = avatars[user.id];

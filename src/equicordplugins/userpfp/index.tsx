@@ -6,10 +6,12 @@
 
 import "./styles.css";
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
+import changeFriendAvatar from "@equicordplugins/changeFriendAvatar";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { openInviteModal } from "@utils/discord";
@@ -50,6 +52,7 @@ export default definePlugin({
     description: "Allows you to use an animated avatar without Nitro",
     authors: [EquicordDevs.nexpid, Devs.thororen],
     settings,
+    data,
     settingsAboutComponent: () => (
         <Flex className={cl("settings")}>
             <Button
@@ -71,6 +74,7 @@ export default definePlugin({
     patches: [
         {
             find: "getUserAvatarURL:",
+            predicate: () => !isPluginEnabled(changeFriendAvatar.name),
             replacement: [
                 {
                     match: /(getUserAvatarURL:)(\i),/,
