@@ -132,7 +132,8 @@ export const IconsFinds: Record<string, string> = {
     Key: "23-.24ZM10 16a2",
     InBox: "3H5ZM4 5.5C4",
     BookmarkOutline: "0-1-1ZM7 2a3",
-    Food: "7.58V8a1 1"
+    Food: "7.58V8a1 1",
+    CircleShield: "8 10.9999V17.9999C8"
 };
 
 // 13l4.91-8.05a1.8

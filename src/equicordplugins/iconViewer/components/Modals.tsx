@@ -229,6 +229,7 @@ function IconModal({ iconName, Icon, findPattern, onClose, transitionState }: { 
     const colorData = cssColors[color];
     const colorKeys = useMemo(() => getCssColorKeys(), []);
 
+    const fill = iconName === "CircleShield" ? "var(--background-base-low)" : colorData?.css;
     const findCode = findPattern
         ? `const ${iconName}Icon = findComponentByCode(${JSON.stringify(findPattern)})`
         : null;
@@ -270,13 +271,13 @@ function IconModal({ iconName, Icon, findPattern, onClose, transitionState }: { 
                         onContextMenu={openColorMenu}
                         onWheel={onWheel}
                     >
-                        <Icon className="vc-ic-icon-large" color={colorData?.css} />
+                        <Icon className="vc-ic-icon-large" color={colorData?.css} fill={fill} />
                     </div>
                     <Flex flexDirection="column" className="vc-ic-icon-info">
                         <Flex className="vc-ic-icon-sizes">
                             {iconSizes.map(size => (
                                 <TooltipContainer text={size} key={size}>
-                                    <Icon size={size} color={colorData?.css} />
+                                    <Icon size={size} color={colorData?.css} fill={fill} />
                                 </TooltipContainer>
                             ))}
                         </Flex>
