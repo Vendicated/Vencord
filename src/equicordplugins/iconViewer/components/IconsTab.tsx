@@ -47,7 +47,7 @@ function searchMatch(search: string, name: string, Icon: Icon, searchByFunction:
 
 function IconItem({ iconName, Icon }: { iconName: string; Icon: Icon; }) {
     const fill = iconName === "CircleShield" ? "var(--background-base-low)" : "var(--interactive-icon-default)";
-    console.log(iconName);
+
     return (
         <div className="vc-icon-box">
             <Clickable onClick={() => openIconModal(iconName, Icon, IconsFinds[iconName])}>
