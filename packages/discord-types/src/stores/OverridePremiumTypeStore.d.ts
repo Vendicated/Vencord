@@ -1,9 +1,9 @@
 import { FluxStore } from "..";
 
 type State = {
-    createdAtOverride: Date;
+    createdAtOverride: Date | undefined;
     premiumTypeActual: number;
-    premiumTypeOverride: number;
+    premiumTypeOverride: number | undefined;
 };
 
 export class OverridePremiumTypeStore extends FluxStore {
