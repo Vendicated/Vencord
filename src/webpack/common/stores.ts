@@ -47,9 +47,6 @@ export let SelectedGuildStore: t.SelectedGuildStore;
 export let ChannelStore: t.ChannelStore;
 export let TypingStore: t.TypingStore;
 export let RelationshipStore: t.RelationshipStore;
-export let MediaEngineStore: t.MediaEngineStore;
-export let SpellCheckStore: t.SpellCheckStore;
-export let UploadAttachmentStore: GenericStore;
 export let VoiceStateStore: t.VoiceStateStore;
 
 export let EmojiStore: t.EmojiStore;
@@ -58,7 +55,12 @@ export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
 export let StreamerModeStore: t.StreamerModeStore;
-export let OverridePremiumTypeStore: GenericStore;
+
+export let MediaEngineStore: t.MediaEngineStore;
+export let SpellCheckStore: t.SpellCheckStore;
+export let UploadAttachmentStore: t.UploadAttachmentStore;
+export let OverridePremiumTypeStore: t.OverridePremiumTypeStore;
+
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -73,7 +75,6 @@ waitForStore("ChannelStore", m => ChannelStore = m);
 waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
 waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
 waitForStore("GuildStore", m => GuildStore = m);
-waitForStore("GuildRoleStore", m => GuildRoleStore = m);
 waitForStore("GuildMemberStore", m => GuildMemberStore = m);
 waitForStore("RelationshipStore", m => RelationshipStore = m);
 waitForStore("MediaEngineStore", m => MediaEngineStore = m);

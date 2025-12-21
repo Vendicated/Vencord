@@ -7,5 +7,4 @@ export class UploadAttachmentStore extends FluxStore {
     getUploadCount(channelId: string, draftType: DraftType): number;
     getUpload(channelId: string, commandName: string, draftType: DraftType): CloudUpload;
     findUpload(channelId: string, draftType: string, predicate: (upload: CloudUpload) => boolean): CloudUpload | undefined;
-
 }
