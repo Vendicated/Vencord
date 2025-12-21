@@ -26,7 +26,7 @@ export default definePlugin({
     ],
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
-        if (!className.includes("tile")) return;
+        if (!className.includes("tile") || !participantUserId) return;
 
         const user = UserStore.getUser(participantUserId);
         const avatarUrl = IconUtils.getUserAvatarURL(user, false, 1024);
