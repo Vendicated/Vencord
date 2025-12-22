@@ -19,8 +19,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { Channel, Message, RelationshipType, User } from "@vencord/discord-types";
-import { MessageType } from "@vencord/discord-types/enums";
+import { Channel, Message, User } from "@vencord/discord-types";
+import { MessageType, RelationshipType } from "@vencord/discord-types/enums";
 import { findByPropsLazy, findStore } from "@webpack";
 import { Button, ChannelStore, GuildRoleStore, NavigationRouter, RelationshipStore, SelectedChannelStore, StreamerModeStore, UserStore } from "@webpack/common";
 import { ReactNode } from "react";
