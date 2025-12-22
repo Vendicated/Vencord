@@ -98,6 +98,16 @@ export function _getBadges(args: BadgeUserArgs) {
         );
     }
 
+    const eagleBadges = BadgeAPIPlugin.getEagleCordBadges(args.userId);
+    if (eagleBadges) {
+        badges.unshift(
+            ...eagleBadges.map(badge => ({
+                ...args,
+                ...badge,
+            }))
+        );
+    }
+
     return badges;
 }
 

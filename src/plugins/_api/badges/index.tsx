@@ -16,7 +16,7 @@ import { Heart } from "@components/Heart";
 import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal, openStaffModal } from "@components/settings/tabs";
-import { Devs, OWNER_BADGE } from "@utils/constants";
+import { Devs, EAGLECORD_ICON_IMAGE, OWNER_BADGE } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -25,11 +25,9 @@ import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModa
 import definePlugin from "@utils/types";
 import { ContextMenuApi, Menu, Toasts, UserStore } from "@webpack/common";
 
-const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
-
 const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
-    iconSrc: CONTRIBUTOR_BADGE,
+    iconSrc: EAGLECORD_ICON_IMAGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
@@ -138,6 +136,11 @@ export default definePlugin({
     // for access from the console or other plugins
     get DonorBadges() {
         return DonorBadges;
+    },
+
+    // for access from the console or other plugins
+    get EagleBadges() {
+        return EagleBadges;
     },
 
     toolboxActions: {
