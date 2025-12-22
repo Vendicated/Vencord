@@ -15,6 +15,7 @@ export * from "./PermissionStore";
 export * from "./PresenceStore";
 export * from "./ReadStateStore";
 export * from "./RelationshipStore";
+export * from "./RunningGameStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
 export * from "./SpellCheckStore";
