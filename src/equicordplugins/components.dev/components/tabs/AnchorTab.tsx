@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-
-import { Anchor } from "..";
+import { Anchor , Paragraph } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 export default function AnchorTab() {

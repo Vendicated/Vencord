@@ -4,20 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useState } from "@webpack/common";
-
-import { ColorPicker, ColorPickerWithSwatches, ColorSwatch, CustomColorButton, DefaultColorButton } from "..";
+import { ColorPicker, ColorPickerWithSwatches, ColorSwatch, CustomColorButton, DefaultColorButton, Paragraph, PresetColors, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 const DEFAULT_COLOR = 0x5865F2;
-
-const PRESET_COLORS = [
-    0x1ABC9C, 0x2ECC71, 0x3498DB, 0x9B59B6, 0xE91E63,
-    0xF1C40F, 0xE67E22, 0xE74C3C, 0x95A5A6, 0x607D8B,
-    0x11806A, 0x1F8B4C, 0x206694, 0x71368A, 0xAD1457,
-    0xC27C0E, 0xA84300, 0x992D22, 0x979C9F, 0x546E7A,
-];
 
 function intToHex(color: number): string {
     return "#" + color.toString(16).padStart(6, "0");
@@ -84,7 +74,7 @@ export default function ColorPickerTab() {
                     Individual color swatch buttons. Click to select.
                 </Paragraph>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {PRESET_COLORS.slice(0, 10).map(color => (
+                    {PresetColors.slice(0, 10).map(color => (
                         <ColorSwatch
                             key={color}
                             color={color}
@@ -102,27 +92,27 @@ export default function ColorPickerTab() {
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                     <div style={{ textAlign: "center" }}>
                         <ColorSwatch color={0x5865F2} />
-                        <Paragraph color="text-muted" size="xs">Normal</Paragraph>
+                        <Paragraph color="text-muted" style={{ fontSize: 10 }}>Normal</Paragraph>
                     </div>
                     <div style={{ textAlign: "center" }}>
                         <ColorSwatch color={0x5865F2} isSelected />
-                        <Paragraph color="text-muted" size="xs">Selected</Paragraph>
+                        <Paragraph color="text-muted" style={{ fontSize: 10 }}>Selected</Paragraph>
                     </div>
                     <div style={{ textAlign: "center" }}>
                         <ColorSwatch color={0x5865F2} isDefault />
-                        <Paragraph color="text-muted" size="xs">Default</Paragraph>
+                        <Paragraph color="text-muted" style={{ fontSize: 10 }}>Default</Paragraph>
                     </div>
                     <div style={{ textAlign: "center" }}>
                         <ColorSwatch color={0x5865F2} isCustom />
-                        <Paragraph color="text-muted" size="xs">Custom</Paragraph>
+                        <Paragraph color="text-muted" style={{ fontSize: 10 }}>Custom</Paragraph>
                     </div>
                     <div style={{ textAlign: "center" }}>
                         <ColorSwatch color={0x5865F2} disabled />
-                        <Paragraph color="text-muted" size="xs">Disabled</Paragraph>
+                        <Paragraph color="text-muted" style={{ fontSize: 10 }}>Disabled</Paragraph>
                     </div>
                     <div style={{ textAlign: "center" }}>
                         <ColorSwatch />
-                        <Paragraph color="text-muted" size="xs">No Color</Paragraph>
+                        <Paragraph color="text-muted" style={{ fontSize: 10 }}>No Color</Paragraph>
                     </div>
                 </div>
             </SectionWrapper>
@@ -174,7 +164,7 @@ export default function ColorPickerTab() {
                 <CustomColorButton
                     customColor={customBtnColor}
                     value={customBtnColor}
-                    presets={PRESET_COLORS}
+                    presets={[...PresetColors]}
                 />
             </SectionWrapper>
 
@@ -184,7 +174,7 @@ export default function ColorPickerTab() {
                 </Paragraph>
                 <ColorPickerWithSwatches
                     defaultColor={DEFAULT_COLOR}
-                    colors={PRESET_COLORS}
+                    colors={[...PresetColors]}
                     value={swatchColor}
                     onChange={setSwatchColor}
                     renderDefaultButton={() => null}
@@ -199,7 +189,7 @@ export default function ColorPickerTab() {
                 <ColorPickerWithSwatches
                     defaultColor={DEFAULT_COLOR}
                     customColor={customSwatchColor}
-                    colors={PRESET_COLORS}
+                    colors={[...PresetColors]}
                     value={customSwatchColor}
                     onChange={setCustomSwatchColor}
                     renderDefaultButton={props => (

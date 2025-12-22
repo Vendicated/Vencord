@@ -4,28 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-
-import { ManaTextButton } from "..";
+import { ManaTextButton, ManaTextButtonTextVariants, ManaTextButtonVariants, Paragraph } from "..";
 import { SectionWrapper } from "../SectionWrapper";
-
-const VARIANTS = ["primary", "secondary", "always-white", "critical"] as const;
-
-const TEXT_VARIANTS = [
-    "text-xs/normal",
-    "text-sm/normal",
-    "text-sm/medium",
-    "text-md/normal",
-    "text-md/medium",
-    "text-lg/medium",
-] as const;
 
 export default function TextButtonTab() {
     return (
         <div className="vc-compfinder-section">
             <SectionWrapper title="Variants">
                 <div className="vc-compfinder-grid">
-                    {VARIANTS.map(variant => (
+                    {ManaTextButtonVariants.map(variant => (
                         <ManaTextButton
                             key={variant}
                             text={variant}
@@ -37,7 +24,7 @@ export default function TextButtonTab() {
 
             <SectionWrapper title="Text Variants">
                 <div className="vc-compfinder-grid-vertical">
-                    {TEXT_VARIANTS.map(textVariant => (
+                    {ManaTextButtonTextVariants.map(textVariant => (
                         <ManaTextButton
                             key={textVariant}
                             text={textVariant}

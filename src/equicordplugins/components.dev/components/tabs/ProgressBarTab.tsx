@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useEffect, useState } from "@webpack/common";
-
-import { ProgressBar } from "..";
+import { Paragraph, ProgressBar, useEffect, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 export default function ProgressBarTab() {

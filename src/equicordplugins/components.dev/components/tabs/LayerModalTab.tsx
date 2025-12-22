@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Heading } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { openModal } from "@utils/modal";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { useState } from "@webpack/common";
 
-import { ManaButton } from "..";
+import { Heading, ManaButton, Paragraph, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 const LayerModal = findComponentByCodeLazy('"data-mana-component":"layer-modal"') as React.ComponentType<{

@@ -4,13 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { UserStore } from "@webpack/common";
-
-import { Avatar } from "..";
+import { Avatar, AvatarSizes, Paragraph, UserStore } from "..";
 import { SectionWrapper } from "../SectionWrapper";
-
-const SIZES = ["SIZE_16", "SIZE_20", "SIZE_24", "SIZE_32", "SIZE_40", "SIZE_48", "SIZE_56", "SIZE_80", "SIZE_120"] as const;
 
 export default function AvatarTab() {
     const currentUser = UserStore.getCurrentUser();
@@ -23,7 +18,7 @@ export default function AvatarTab() {
                     Avatar component from @webpack/common with various sizes.
                 </Paragraph>
                 <div className="vc-compfinder-grid" style={{ alignItems: "flex-end" }}>
-                    {SIZES.map(size => (
+                    {AvatarSizes.map(size => (
                         <div key={size} style={{ textAlign: "center" }}>
                             <Avatar
                                 src={avatarUrl}
@@ -109,7 +104,7 @@ export default function AvatarTab() {
 
             <SectionWrapper title="Props">
                 <Paragraph color="text-muted">• src - Avatar image URL</Paragraph>
-                <Paragraph color="text-muted">• size - SIZE_16 to SIZE_120</Paragraph>
+                <Paragraph color="text-muted">• size - SIZE_16, SIZE_20, SIZE_24, SIZE_32, SIZE_40, SIZE_44, SIZE_48, SIZE_56, SIZE_72, SIZE_80, SIZE_96, SIZE_120, SIZE_152</Paragraph>
                 <Paragraph color="text-muted">• status - online, idle, dnd, offline</Paragraph>
                 <Paragraph color="text-muted">• isMobile - Show mobile indicator</Paragraph>
                 <Paragraph color="text-muted">• isTyping - Show typing indicator</Paragraph>

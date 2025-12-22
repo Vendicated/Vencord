@@ -4,20 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-
-import { ManaButton, ManaTooltip } from "..";
+import { ManaButton, ManaTooltip, Paragraph, TooltipColors, TooltipPositions } from "..";
 import { SectionWrapper } from "../SectionWrapper";
-
-const POSITIONS = ["top", "bottom", "left", "right"] as const;
-const COLORS = ["primary", "black", "grey", "brand", "green", "yellow", "red"] as const;
 
 export default function TooltipTab() {
     return (
         <div className="vc-compfinder-section">
             <SectionWrapper title="Positions">
                 <div className="vc-compfinder-grid">
-                    {POSITIONS.map(position => (
+                    {TooltipPositions.map(position => (
                         <ManaTooltip key={position} text={`Tooltip on ${position}`} position={position}>
                             {props => (
                                 <ManaButton {...props} variant="secondary" text={position} />
@@ -29,7 +24,7 @@ export default function TooltipTab() {
 
             <SectionWrapper title="Colors">
                 <div className="vc-compfinder-grid">
-                    {COLORS.map(color => (
+                    {TooltipColors.map(color => (
                         <ManaTooltip key={color} text={`${color} tooltip`} color={color}>
                             {props => (
                                 <ManaButton {...props} variant="secondary" text={color} />

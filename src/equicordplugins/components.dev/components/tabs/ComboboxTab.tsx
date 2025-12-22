@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useState } from "@webpack/common";
-
-import { ManaButton, ManaCombobox } from "..";
+import { ManaButton, ManaCombobox, Paragraph, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 const SAMPLE_ITEMS = [

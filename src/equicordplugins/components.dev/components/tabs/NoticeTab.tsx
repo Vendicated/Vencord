@@ -4,13 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button } from "@components/Button";
-import { Paragraph } from "@components/Paragraph";
-
-import { Notice, NoticeType } from "..";
+import { Button, Notice, NoticeTypes, Paragraph } from "..";
 import { SectionWrapper } from "../SectionWrapper";
-
-const NOTICE_TYPES: NoticeType[] = ["info", "warn", "danger", "positive", "preview"];
 
 export default function NoticeTab() {
     return (
@@ -20,7 +15,7 @@ export default function NoticeTab() {
                     Notice component for displaying informational messages with different severity levels.
                 </Paragraph>
                 <div className="vc-compfinder-grid">
-                    {NOTICE_TYPES.map(type => (
+                    {NoticeTypes.map(type => (
                         <div key={type} style={{ textAlign: "center" }}>
                             <Notice messageType={type}>
                                 This is a {type} notice message.

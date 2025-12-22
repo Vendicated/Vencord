@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export type NoticeType = "warn" | "info" | "danger" | "positive" | "preview";
+import type { NoticeTypeValue } from "../constants";
+
+export type NoticeType = NoticeTypeValue;
 
 export interface NoticeProps {
     children: React.ReactNode;

@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-
-import { BadgeShapes, CircleBadge, IconBadge, NumberBadge, TextBadge } from "..";
+import { BadgeShapes, CircleBadge, IconBadge, NumberBadge, Paragraph,TextBadge } from "..";
 import { EquicordIcon } from "../icons/EquicordIcon";
 import { SectionWrapper } from "../SectionWrapper";
 

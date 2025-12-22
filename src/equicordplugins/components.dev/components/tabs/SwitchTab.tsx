@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
 import { findComponentByCodeLazy } from "@webpack";
-import { useState } from "@webpack/common";
 
-import { ManaSwitch } from "..";
+import { ManaSwitch, Paragraph, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 interface SwitchWithLabelProps {

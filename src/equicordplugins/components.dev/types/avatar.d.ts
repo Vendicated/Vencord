@@ -4,9 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export type AvatarSize = "SIZE_16" | "SIZE_20" | "SIZE_24" | "SIZE_32" | "SIZE_40" | "SIZE_48" | "SIZE_56" | "SIZE_80" | "SIZE_120";
+import type { AvatarSize, AvatarStatus } from "../constants";
 
-export type AvatarStatus = "online" | "idle" | "dnd" | "offline" | "streaming";
+export type { AvatarSize, AvatarStatus };
+
+export interface AvatarSizeConfig {
+    size: number;
+    status: number;
+    stroke: number;
+    offset: number;
+}
 
 export interface AvatarProps {
     src?: string;
@@ -18,8 +25,10 @@ export interface AvatarProps {
     isSpeaking?: boolean;
     statusTooltip?: boolean;
     statusTooltipDelay?: number;
+    avatarDecoration?: string;
     "aria-hidden"?: boolean;
     "aria-label"?: string;
     imageClassName?: string;
     className?: string;
+    onClick?: (e: React.MouseEvent) => void;
 }

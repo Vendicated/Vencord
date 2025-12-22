@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useRef, useState } from "@webpack/common";
-
-import { ManaButton, ManaPopover, PopoverAction } from "..";
+import { ManaButton, ManaPopover, Paragraph, PopoverAction, useRef, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 function PopoverDemo({ title, body, size, actions, position, label }: { title: string; body: string; size?: "sm" | "md" | "lg"; actions?: PopoverAction[]; position?: "top" | "bottom" | "left" | "right"; label: string; }) {

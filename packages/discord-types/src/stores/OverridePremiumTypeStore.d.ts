@@ -8,8 +8,8 @@ type State = {
 
 export class OverridePremiumTypeStore extends FluxStore {
     getState(): State;
-    getCreatedAtOverride(): Date;
+    getCreatedAtOverride(): Date | undefined;
     getPremiumTypeActual(): number;
-    getPremiumTypeOverride(): number;
+    getPremiumTypeOverride(): number | undefined;
     get premiumType(): number;
 }

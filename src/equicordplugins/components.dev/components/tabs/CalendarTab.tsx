@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useState } from "@webpack/common";
-
-import { ManaCalendar, ManaDatePicker } from "..";
+import { ManaCalendar, ManaDatePicker, Paragraph, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 export default function CalendarTab() {

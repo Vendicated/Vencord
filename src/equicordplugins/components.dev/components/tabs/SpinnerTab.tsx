@@ -4,20 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useState } from "@webpack/common";
-
-import { ManaButton, Spinner } from "..";
+import { ManaButton, Paragraph, Spinner, SpinnerTypes, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
-
-const SPINNER_TYPES = [
-    "wanderingCubes",
-    "chasingDots",
-    "pulsingEllipsis",
-    "spinningCircle",
-    "spinningCircleSimple",
-    "lowMotion"
-] as const;
 
 export default function SpinnerTab() {
     const [animated, setAnimated] = useState(true);
@@ -29,7 +17,7 @@ export default function SpinnerTab() {
                     All available spinner variants.
                 </Paragraph>
                 <div className="vc-compfinder-grid">
-                    {SPINNER_TYPES.map(type => (
+                    {SpinnerTypes.map(type => (
                         <div key={type} style={{ textAlign: "center", padding: 16 }}>
                             <Spinner type={type} />
                             <Paragraph color="text-muted" style={{ fontSize: 10, marginTop: 8 }}>
@@ -75,7 +63,7 @@ export default function SpinnerTab() {
 
             <SectionWrapper title="Props">
                 <Paragraph color="text-muted">
-                    • type?: "wanderingCubes" | "chasingDots" | "pulsingEllipsis" | "spinningCircle" | "spinningCircleSimple" | "lowMotion"
+                    • type?: SpinnerType - Spinner variant
                 </Paragraph>
                 <Paragraph color="text-muted">
                     • animated?: boolean - Enable/disable animation (default: true)
@@ -89,6 +77,15 @@ export default function SpinnerTab() {
                 <Paragraph color="text-muted">
                     • aria-label?: string - Accessibility label
                 </Paragraph>
+            </SectionWrapper>
+
+            <SectionWrapper title="Type Values">
+                <Paragraph color="text-muted">• "wanderingCubes"</Paragraph>
+                <Paragraph color="text-muted">• "chasingDots"</Paragraph>
+                <Paragraph color="text-muted">• "pulsingEllipsis"</Paragraph>
+                <Paragraph color="text-muted">• "spinningCircle"</Paragraph>
+                <Paragraph color="text-muted">• "spinningCircleSimple"</Paragraph>
+                <Paragraph color="text-muted">• "lowMotion"</Paragraph>
             </SectionWrapper>
         </div>
     );

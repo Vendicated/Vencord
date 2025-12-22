@@ -4,69 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-
+import { CodeColors, FontSizeMap, Paragraph, TextColors, TextSizes, TextWeights } from "..";
 import { SectionWrapper } from "../SectionWrapper";
-
-const TEXT_COLORS = [
-    "text-default",
-    "text-muted",
-    "text-subtle",
-    "text-strong",
-    "text-normal",
-    "text-link",
-    "text-brand",
-    "text-disabled",
-    "text-invert",
-    "text-feedback-critical",
-    "text-feedback-warning",
-    "text-feedback-info",
-    "text-feedback-positive",
-    "text-status-online",
-    "text-status-idle",
-    "text-status-dnd",
-    "text-status-offline",
-    "text-overlay-dark",
-    "text-overlay-light",
-] as const;
-
-const TEXT_SIZES = [
-    { name: "xxs", value: "0.625rem (10px)" },
-    { name: "xs", value: "0.75rem (12px)" },
-    { name: "sm", value: "0.875rem (14px)" },
-    { name: "md", value: "1rem (16px)" },
-    { name: "lg", value: "1.25rem (20px)" },
-    { name: "xl", value: "1.5rem (24px)" },
-    { name: "xxl", value: "2rem (32px)" },
-] as const;
-
-const TEXT_WEIGHTS = [
-    { name: "thin", value: "100" },
-    { name: "extralight", value: "200" },
-    { name: "light", value: "300" },
-    { name: "normal", value: "400" },
-    { name: "medium", value: "500" },
-    { name: "semibold", value: "600" },
-    { name: "bold", value: "700" },
-    { name: "extrabold", value: "800" },
-] as const;
-
-const FONT_SIZE_MAP: Record<string, string> = {
-    xxs: "0.625rem",
-    xs: "0.75rem",
-    sm: "0.875rem",
-    md: "1rem",
-    lg: "1.25rem",
-    xl: "1.5rem",
-    xxl: "2rem",
-};
 
 export default function TypographyTab() {
     return (
         <div className="vc-compfinder-section">
             <SectionWrapper title="Text Colors (CSS Variables)">
                 <div className="vc-compfinder-grid-vertical">
-                    {TEXT_COLORS.map(color => (
+                    {TextColors.map(color => (
                         <div key={color} style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             <span style={{ color: `var(--${color})`, minWidth: 200 }}>
                                 {color}
@@ -81,13 +27,13 @@ export default function TypographyTab() {
 
             <SectionWrapper title="Text Sizes">
                 <div className="vc-compfinder-grid-vertical">
-                    {TEXT_SIZES.map(({ name, value }) => (
+                    {TextSizes.map(({ name, value, pixels }) => (
                         <div key={name} style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
-                            <span style={{ fontSize: FONT_SIZE_MAP[name], minWidth: 200 }}>
+                            <span style={{ fontSize: FontSizeMap[name], minWidth: 200 }}>
                                 {name}
                             </span>
                             <code style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-                                {value}
+                                {value} ({pixels})
                             </code>
                         </div>
                     ))}
@@ -96,7 +42,7 @@ export default function TypographyTab() {
 
             <SectionWrapper title="Text Weights">
                 <div className="vc-compfinder-grid-vertical">
-                    {TEXT_WEIGHTS.map(({ name, value }) => (
+                    {TextWeights.map(({ name, value }) => (
                         <div key={name} style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             <span style={{ fontWeight: value, minWidth: 200 }}>
                                 {name}
@@ -122,20 +68,7 @@ export default function TypographyTab() {
 
             <SectionWrapper title="Code Colors">
                 <div className="vc-compfinder-grid-vertical">
-                    {[
-                        "text-code",
-                        "text-code-keyword",
-                        "text-code-string",
-                        "text-code-comment",
-                        "text-code-builtin",
-                        "text-code-variable",
-                        "text-code-tag",
-                        "text-code-title",
-                        "text-code-section",
-                        "text-code-bullet",
-                        "text-code-addition",
-                        "text-code-deletion",
-                    ].map(color => (
+                    {CodeColors.map(color => (
                         <div key={color} style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             <span style={{ color: `var(--${color})`, minWidth: 200, fontFamily: "monospace" }}>
                                 {color}

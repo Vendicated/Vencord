@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useState } from "@webpack/common";
-
-import { ManaCheckbox } from "..";
+import { ManaCheckbox, Paragraph, useState } from "..";
 import { EquicordIcon } from "../icons/EquicordIcon";
 import { SectionWrapper } from "../SectionWrapper";
 

@@ -4,11 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { PopoverSize, TooltipAlign, TooltipColor, TooltipPosition } from "../constants";
+
+export type { PopoverSize, TooltipAlign, TooltipColor, TooltipPosition };
+
 export interface ManaTooltipProps {
     text: string;
-    position?: "top" | "bottom" | "left" | "right";
-    align?: "start" | "center" | "end";
-    color?: "primary" | "black" | "grey" | "brand" | "green" | "yellow" | "red";
+    position?: TooltipPosition;
+    align?: TooltipAlign;
+    color?: TooltipColor;
     spacing?: number;
     hideOnClick?: boolean;
     delay?: number;
@@ -22,8 +26,8 @@ export interface ManaRichTooltipProps {
     assetSize?: number;
     asContainer?: boolean;
     element?: "span" | "div";
-    position?: "top" | "bottom" | "left" | "right";
-    align?: "start" | "center" | "end";
+    position?: TooltipPosition;
+    align?: TooltipAlign;
     spacing?: number;
     ariaHidden?: boolean;
     children: React.ReactNode | ((props: any) => React.ReactNode);
@@ -40,14 +44,14 @@ export interface ManaPopoverProps {
     body?: string;
     badge?: React.ReactNode;
     graphic?: { src: string; aspectRatio?: string; };
-    size?: "sm" | "md" | "lg";
+    size?: PopoverSize;
     actions?: PopoverAction[];
     textLink?: { text: string; onClick?: () => void; };
     gradientColor?: string;
     onRequestClose?: (reason: string) => void;
     targetElementRef: React.RefObject<HTMLElement | null>;
     shouldShow: boolean;
-    position?: "top" | "bottom" | "left" | "right";
+    position?: TooltipPosition;
     alignmentStrategy?: "edge" | "trigger-center";
     align?: "left" | "center" | "right";
 }

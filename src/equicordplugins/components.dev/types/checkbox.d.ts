@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { CheckboxLabelType, CheckboxUsageVariant } from "../constants";
+
+export type { CheckboxLabelType, CheckboxUsageVariant };
+
 export interface ManaCheckboxProps {
     checked: boolean;
     onChange?: (checked: boolean) => void;
@@ -12,8 +16,8 @@ export interface ManaCheckboxProps {
     label?: string;
     description?: string;
     leadingIcon?: React.ComponentType<any>;
-    labelType?: "primary" | "secondary";
-    usageVariant?: "single" | "indicator";
+    labelType?: CheckboxLabelType;
+    usageVariant?: CheckboxUsageVariant;
 }
 
 export interface CheckboxGroupOption {

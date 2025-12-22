@@ -4,14 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paragraph } from "@components/Paragraph";
-import { useState } from "@webpack/common";
-
-import { ManaButton } from "..";
+import { ManaButton, ManaButtonSizes, ManaButtonVariants, Paragraph, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
-
-const VARIANTS = ["primary", "secondary", "critical-primary", "critical-secondary", "overlay-primary", "overlay-secondary", "expressive"] as const;
-const SIZES = ["xs", "sm", "md"] as const;
 
 export default function ButtonsTab() {
     const [loading, setLoading] = useState(false);
@@ -20,7 +14,7 @@ export default function ButtonsTab() {
         <div className="vc-compfinder-section">
             <SectionWrapper title="Variants (size: md)">
                 <div className="vc-compfinder-grid">
-                    {VARIANTS.map(variant => (
+                    {ManaButtonVariants.map(variant => (
                         <ManaButton key={variant} variant={variant} size="md" text={variant} />
                     ))}
                 </div>
@@ -28,7 +22,7 @@ export default function ButtonsTab() {
 
             <SectionWrapper title="Sizes (variant: primary)">
                 <div className="vc-compfinder-grid">
-                    {SIZES.map(size => (
+                    {ManaButtonSizes.map(size => (
                         <ManaButton key={size} variant="primary" size={size} text={`Size: ${size}`} />
                     ))}
                 </div>
@@ -54,7 +48,7 @@ export default function ButtonsTab() {
 
             <SectionWrapper title="All Variants Disabled">
                 <div className="vc-compfinder-grid">
-                    {VARIANTS.map(variant => (
+                    {ManaButtonVariants.map(variant => (
                         <ManaButton key={variant} variant={variant} size="md" text={variant} disabled />
                     ))}
                 </div>
