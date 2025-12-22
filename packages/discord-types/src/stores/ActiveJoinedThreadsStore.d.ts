@@ -1,5 +1,9 @@
 import { Channel, FluxStore } from "..";
-import { ThreadJoined } from "./GuildChannelStore";
+
+export interface ThreadJoined {
+    channel: Channel;
+    joinTimestamp: number;
+}
 
 export type ThreadsForParent = Record<string, ThreadJoined>;
 export type ThreadsForGuild = Record<string, ThreadsForParent>;

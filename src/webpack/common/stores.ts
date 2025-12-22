@@ -60,6 +60,11 @@ export let MediaEngineStore: t.MediaEngineStore;
 export let SpellCheckStore: t.SpellCheckStore;
 export let UploadAttachmentStore: t.UploadAttachmentStore;
 export let OverridePremiumTypeStore: t.OverridePremiumTypeStore;
+export let RunningGameStore: t.RunningGameStore;
+export let ActiveJoinedThreadsStore: t.ActiveJoinedThreadsStore;
+export let UserGuildSettingsStore: t.UserGuildSettingsStore;
+export let ChannelRTCStore: t.ChannelRTCStore;
+export let FriendsStore: t.FriendsStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -92,6 +97,11 @@ waitForStore("VoiceStateStore", m => VoiceStateStore = m);
 waitForStore("StreamerModeStore", m => StreamerModeStore = m);
 waitForStore("OverridePremiumTypeStore", m => OverridePremiumTypeStore = m);
 waitForStore("UploadAttachmentStore", m => UploadAttachmentStore = m);
+waitForStore("RunningGameStore", m => RunningGameStore = m);
+waitForStore("ActiveJoinedThreadsStore", m => ActiveJoinedThreadsStore = m);
+waitForStore("UserGuildSettingsStore", m => UserGuildSettingsStore = m);
+waitForStore("ChannelRTCStore", m => ChannelRTCStore = m);
+waitForStore("FriendsStore", m => FriendsStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.

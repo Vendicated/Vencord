@@ -23,18 +23,7 @@ import { TextButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ThreadJoined } from "@vencord/discord-types";
-import { findStoreLazy } from "@webpack";
-import { FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
-
-type ThreadsJoined = Record<string, ThreadJoined>;
-type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
-
-interface ActiveJoinedThreadsStore {
-    getActiveJoinedThreadsForGuild(guildId: string): ThreadsJoinedByParent;
-}
-
-const ActiveJoinedThreadsStore: ActiveJoinedThreadsStore = findStoreLazy("ActiveJoinedThreadsStore");
+import { ActiveJoinedThreadsStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
 
 function onClick() {
     const channels: Array<any> = [];

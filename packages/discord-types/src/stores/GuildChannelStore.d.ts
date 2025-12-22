@@ -1,13 +1,8 @@
-import { Channel, FluxStore } from "..";
+import { Channel, FluxStore, ThreadJoined } from "..";
 
 export interface ChannelWithComparator {
     channel: Channel;
     comparator: number;
-}
-
-export interface ThreadJoined {
-    channel: Channel;
-    joinTimestamp: number;
 }
 
 export interface GuildChannels {
