@@ -61,7 +61,6 @@ export let SpellCheckStore: t.SpellCheckStore;
 export let UploadAttachmentStore: t.UploadAttachmentStore;
 export let OverridePremiumTypeStore: t.OverridePremiumTypeStore;
 
-
 /**
  * @see jsdoc of {@link t.useStateFromStores}
  */

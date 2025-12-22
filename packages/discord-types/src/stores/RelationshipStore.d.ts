@@ -1,38 +1,53 @@
 import { FluxStore } from "..";
 
+export const enum RelationshipType {
+    NONE = 0,
+    FRIEND = 1,
+    BLOCKED = 2,
+    INCOMING_REQUEST = 3,
+    OUTGOING_REQUEST = 4,
+    IMPLICIT = 5,
+    SUGGESTION = 6
+}
+
 export class RelationshipStore extends FluxStore {
-    getFriendIDs(): string[];
-    getIgnoredIDs(): string[];
     getBlockedIDs(): string[];
     getBlockedOrIgnoredIDs(): string[];
-
-    getPendingCount(): number;
-    getRelationshipCount(): number;
-
-    /** Related to friend nicknames. */
-    getNickname(userId: string): string;
-
-    /** @returns Enum value from constants.RelationshipTypes */
-    getRelationshipType(userId: string): number;
-    isBlockedOrIgnored(userId: string): boolean;
-    isBlockedOrIgnoredForMessage(userId: string): boolean;
-    isBlocked(userId: string): boolean;
-    isBlockedForMessage(userId: string): boolean;
-    isFriend(userId: string): boolean;
-    isIgnored(userId: string): boolean;
-    isIgnoredForMessage(userId: string): boolean;
-    isUnfilteredPendingIncoming(userId: string): boolean;
-    isSpam(userId): boolean;
-    getSince(userId: string): string;
-    getSinces(): Record<number, string>;
-
     getFriendCount(): number;
-    getRelationshipCount(): number;
+    getFriendIDs(): string[];
+    getIgnoredIDs(): string[];
+
+    getMutableRelationships(): Map<string, number>;
+    getNickname(userId: string): string;
+    getOriginApplicationId(applicationId: string): string;
     getOutgoingCount(): number;
     getPendingCount(): number;
     getPendingIgnoredCount(): number;
-    getSpamCount(): number;
+    getRelationshipCount(): number;
 
-    getMutableRelationships(): Map<string, number>;
+    /** @returns Enum value from constants.RelationshipTypes */
+    getRelationshipType(userId: string): RelationshipType;
+    getSince(userId: string): string;
+    getSinces(): Record<number, string>;
+    getSpamCount(): number;
     getVersion(): number;
+    getPendingCount(): number;
+    getRelationshipCount(): number;
+
+    isBlocked(userId: string): boolean;
+    isBlockedForMessage(userId: string): boolean;
+
+    /**
+     * @see {@link isBlocked}
+     * @see {@link isIgnored}
+     */
+    isBlockedOrIgnored(userId: string): boolean;
+    isBlockedOrIgnoredForMessage(userId: string): boolean;
+
+    isFriend(userId: string): boolean;
+    isIgnored(userId: string): boolean;
+    isIgnoredForMessage(userId: string): boolean;
+    isStranger(userId: string): boolean;
+    isSpam(userId: string): boolean;
+    isUnfilteredPendingIncoming(userId: string): boolean;
 }
