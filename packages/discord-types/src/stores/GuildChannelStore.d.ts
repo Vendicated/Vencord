@@ -5,10 +5,15 @@ export interface ChannelWithComparator {
     comparator: number;
 }
 
+export interface ThreadJoined {
+    channel: Channel;
+    joinTimestamp: number;
+}
+
 export interface GuildChannels {
     4: ChannelWithComparator[];
     id: string;
-    SELECTABLE: ChannelWithComparator[];
+    SELECTABLE: ChannelWithComparator[] | ThreadJoined[];
     VOCAL: ChannelWithComparator[];
     count: number;
 }

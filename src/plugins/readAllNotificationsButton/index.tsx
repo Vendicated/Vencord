@@ -23,14 +23,9 @@ import { TextButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Channel } from "@vencord/discord-types";
+import { ThreadJoined } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
-
-interface ThreadJoined {
-    channel: Channel;
-    joinTimestamp: number;
-}
 
 type ThreadsJoined = Record<string, ThreadJoined>;
 type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
@@ -45,11 +40,11 @@ function onClick() {
     const channels: Array<any> = [];
 
     Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE
-            .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+        GuildChannelStore.getChannels(guild.id).SELECTABLE // Array<{ channel, comparator }>
+            .concat(GuildChannelStore.getChannels(guild.id).VOCAL) // Array<{ channel, comparator }>
             .concat(
                 Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
-                    .flatMap(threadChannels => Object.values(threadChannels)) as any
+                    .flatMap(threadChannels => Object.values(threadChannels))
             )
             .forEach((c: { channel: { id: string; }; }) => {
                 if (!ReadStateStore.hasUnread(c.channel.id)) return;
