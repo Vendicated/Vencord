@@ -31,9 +31,9 @@ export let MessageStore: Omit<t.MessageStore, "getMessages"> & GenericStore & {
     getMessages(chanId: string): any;
 };
 
-export let PermissionStore: GenericStore;
-export let GuildChannelStore: GenericStore;
-export let ReadStateStore: GenericStore;
+export let PermissionStore: t.PermissionStore;
+export let GuildChannelStore: t.GuildChannelStore;
+export let ReadStateStore: t.ReadStateStore;
 export let PresenceStore: t.PresenceStore;
 
 export let GuildStore: t.GuildStore;

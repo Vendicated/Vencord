@@ -45,11 +45,11 @@ function onClick() {
     const channels: Array<any> = [];
 
     Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE // Array<{ channel, comparator }>
-            .concat(GuildChannelStore.getChannels(guild.id).VOCAL) // Array<{ channel, comparator }>
+        GuildChannelStore.getChannels(guild.id).SELECTABLE
+            .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
             .concat(
                 Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
-                    .flatMap(threadChannels => Object.values(threadChannels))
+                    .flatMap(threadChannels => Object.values(threadChannels)) as any
             )
             .forEach((c: { channel: { id: string; }; }) => {
                 if (!ReadStateStore.hasUnread(c.channel.id)) return;
