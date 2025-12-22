@@ -1,13 +1,5 @@
 import { Channel, FluxStore } from "..";
-
-export const enum ReadStateType {
-    CHANNEL = 0,
-    GUILD_EVENT = 1,
-    NOTIFICATION_CENTER = 2,
-    GUILD_HOME = 3,
-    GUILD_ONBOARDING_QUESTION = 4,
-    MESSAGE_REQUESTS = 5,
-}
+import { ReadStateType } from "../../enums";
 
 export interface GuildChannelUnreadState {
     mentionCount: number;
