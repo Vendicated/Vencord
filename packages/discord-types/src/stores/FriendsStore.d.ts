@@ -1,22 +1,9 @@
 import { FluxStore, Guild, User } from "..";
+import { GiftIntentType, RelationshipType } from "../../enums";
 
 export type FriendsSection = "ADD_FRIEND" | "ALL" | "ONLINE" | "PENDING" | "PENDING_IGNORED" | "SPAM" | "SUGGESTIONS";
 
-export enum RelationshipType {
-    NONE = 0,
-    FRIEND = 1,
-    BLOCKED = 2,
-    PENDING_INCOMING = 3,
-    PENDING_OUTGOING = 4,
-    IMPLICIT = 5,
-    SUGGESTION = 6
-}
-
 export type StatusType = "online" | "offline" | "idle" | "dnd" | "invisible" | "streaming" | "unknown";
-
-export enum GiftIntentType {
-    FRIEND_ANNIVERSARY = 0
-}
 
 export interface ApplicationStream {
     channelId: string;
@@ -48,8 +35,8 @@ export interface FriendsRow {
 
 export interface RelationshipCounts {
     [RelationshipType.FRIEND]: number;
-    [RelationshipType.PENDING_INCOMING]: number;
-    [RelationshipType.PENDING_OUTGOING]: number;
+    [RelationshipType.INCOMING_REQUEST]: number;
+    [RelationshipType.OUTGOING_REQUEST]: number;
     [RelationshipType.BLOCKED]: number;
     99: number;
 }

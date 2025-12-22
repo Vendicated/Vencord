@@ -7,3 +7,7 @@ export const enum RelationshipType {
     IMPLICIT = 5,
     SUGGESTION = 6
 }
+
+export enum GiftIntentType {
+    FRIEND_ANNIVERSARY = 0
+}
