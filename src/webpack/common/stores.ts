@@ -32,7 +32,7 @@ export let MessageStore: Omit<t.MessageStore, "getMessages"> & GenericStore & {
 };
 
 export let PermissionStore: t.PermissionStore;
-export let GuildChannelStore: GenericStore;
+export let GuildChannelStore: t.GuildChannelStore;
 export let ReadStateStore: t.ReadStateStore;
 export let PresenceStore: t.PresenceStore;
 
