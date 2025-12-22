@@ -1,4 +1,5 @@
 // please keep in alphabetical order
+export * from "./ActiveJoinedThreadsStore";
 export * from "./AuthenticationStore";
 export * from "./ChannelStore";
 export * from "./DraftStore";
