@@ -1,9 +1,12 @@
 // please keep in alphabetical order
+export * from "./ActiveJoinedThreadsStore";
 export * from "./AuthenticationStore";
+export * from "./ChannelRTCStore";
 export * from "./ChannelStore";
 export * from "./DraftStore";
 export * from "./EmojiStore";
 export * from "./FluxStore";
+export * from "./FriendsStore";
 export * from "./GuildChannelStore";
 export * from "./GuildMemberStore";
 export * from "./GuildRoleStore";
@@ -15,6 +18,7 @@ export * from "./PermissionStore";
 export * from "./PresenceStore";
 export * from "./ReadStateStore";
 export * from "./RelationshipStore";
+export * from "./RunningGameStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
 export * from "./SpellCheckStore";
@@ -23,6 +27,7 @@ export * from "./StreamerModeStore";
 export * from "./ThemeStore";
 export * from "./TypingStore";
 export * from "./UploadAttachmentStore";
+export * from "./UserGuildSettingsStore";
 export * from "./UserProfileStore";
 export * from "./UserStore";
 export * from "./VoiceStateStore";
