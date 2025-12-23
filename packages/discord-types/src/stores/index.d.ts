@@ -1,4 +1,5 @@
 // please keep in alphabetical order
+export * from "./AccessibilityStore";
 export * from "./ActiveJoinedThreadsStore";
 export * from "./ApplicationStore";
 export * from "./AuthenticationStore";

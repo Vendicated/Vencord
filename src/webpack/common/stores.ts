@@ -35,6 +35,7 @@ export let PermissionStore: t.PermissionStore;
 export let GuildChannelStore: t.GuildChannelStore;
 export let ReadStateStore: t.ReadStateStore;
 export let PresenceStore: t.PresenceStore;
+export let AccessibilityStore: t.AccessibilityStore;
 
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
@@ -72,6 +73,7 @@ export let FriendsStore: t.FriendsStore;
  */
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
+waitForStore("AccessibilityStore", s => AccessibilityStore = s);
 waitForStore("ApplicationStore", s => ApplicationStore = s);
 waitForStore("AuthenticationStore", s => AuthenticationStore = s);
 waitForStore("DraftStore", s => DraftStore = s);
