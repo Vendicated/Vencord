@@ -13,12 +13,12 @@ export interface BadgeShapesType {
 
 export interface NumberBadgeProps {
     count: number;
-    maxDigits?: number;
     color?: string;
     disableColor?: boolean;
     shape?: string;
     className?: string;
     style?: React.CSSProperties;
+    renderBadgeCount?: (count: number) => string;
 }
 
 export interface TextBadgeProps {

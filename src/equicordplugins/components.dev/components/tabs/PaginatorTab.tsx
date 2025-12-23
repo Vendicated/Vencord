@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Paginator2 as Paginator, Paragraph, useState } from "..";
+import { Paginator, Paragraph, useState } from "..";
 import { SectionWrapper } from "../SectionWrapper";
 
 export default function PaginatorTab() {

@@ -165,3 +165,22 @@ export type PopoverSize = typeof PopoverSizes[number];
 
 export const SliderOrientations = ["horizontal", "vertical"] as const;
 export type SliderOrientation = typeof SliderOrientations[number];
+
+export const ToastType = {
+    MESSAGE: "message",
+    SUCCESS: "success",
+    FAILURE: "failure",
+    CUSTOM: "custom",
+    CLIP: "clip",
+    LINK: "link",
+    FORWARD: "forward",
+    INVITE: "invite",
+    BOOKMARK: "bookmark",
+    CLOCK: "clock",
+    AI: "ai",
+} as const;
+
+export const ToastPosition = {
+    TOP: 0,
+    BOTTOM: 1,
+} as const;

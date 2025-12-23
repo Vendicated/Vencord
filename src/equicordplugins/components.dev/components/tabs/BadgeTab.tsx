@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BadgeShapes, CircleBadge, IconBadge, NumberBadge, Paragraph,TextBadge } from "..";
+import { BadgeShapes, CircleBadge, IconBadge, NumberBadge, Paragraph, TextBadge } from "..";
 import { EquicordIcon } from "../icons/EquicordIcon";
 import { SectionWrapper } from "../SectionWrapper";
 
@@ -84,7 +84,7 @@ export default function BadgeTab() {
 
             <SectionWrapper title="Props">
                 <Paragraph color="text-muted">
-                    NumberBadge: count, maxDigits?, color?, disableColor?, shape?, className?, style?
+                    NumberBadge: count, color?, disableColor?, shape?, className?, style?, renderBadgeCount?
                 </Paragraph>
                 <Paragraph color="text-muted">
                     TextBadge: text, color?, disableColor?, shape?, className?, style?

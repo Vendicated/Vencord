@@ -63,11 +63,14 @@ export interface ManaTextAreaProps {
     disabled?: boolean;
     readOnly?: boolean;
     rows?: number;
+    autoFocus?: boolean;
     autosize?: boolean;
     maxLength?: number;
     minLength?: number;
     showCharacterCount?: boolean;
+    showRemainingCharacterCount?: boolean;
     error?: string | boolean;
+    defaultDirty?: boolean;
     fullWidth?: boolean;
     focusProps?: Record<string, any>;
     inputRef?: React.Ref<HTMLTextAreaElement>;

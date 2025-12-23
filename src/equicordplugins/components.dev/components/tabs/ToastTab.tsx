@@ -14,8 +14,10 @@ const TOAST_TYPES = [
     { type: ToastType.CLIP, label: "CLIP", description: "Clip/copy toast" },
     { type: ToastType.LINK, label: "LINK", description: "Link copied toast" },
     { type: ToastType.FORWARD, label: "FORWARD", description: "Forward action toast" },
+    { type: ToastType.INVITE, label: "INVITE", description: "Invite action toast" },
     { type: ToastType.BOOKMARK, label: "BOOKMARK", description: "Bookmark action toast" },
     { type: ToastType.CLOCK, label: "CLOCK", description: "Clock/timer toast" },
+    { type: ToastType.AI, label: "AI", description: "AI action toast" },
 ] as const;
 
 export default function ToastTab() {
@@ -108,8 +110,10 @@ export default function ToastTab() {
                 <Paragraph color="text-muted">• CLIP - Clip/scissors icon</Paragraph>
                 <Paragraph color="text-muted">• LINK - Link icon</Paragraph>
                 <Paragraph color="text-muted">• FORWARD - Forward arrow icon</Paragraph>
+                <Paragraph color="text-muted">• INVITE - Invite icon</Paragraph>
                 <Paragraph color="text-muted">• BOOKMARK - Bookmark icon</Paragraph>
                 <Paragraph color="text-muted">• CLOCK - Clock icon</Paragraph>
+                <Paragraph color="text-muted">• AI - AI icon</Paragraph>
             </SectionWrapper>
 
             <SectionWrapper title="ToastPosition">

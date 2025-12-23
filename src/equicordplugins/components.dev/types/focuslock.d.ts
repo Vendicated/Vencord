@@ -1,0 +1,11 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+export interface FocusLockProps {
+    containerRef: React.RefObject<HTMLElement | null>;
+    keyboardModeEnabled?: boolean;
+    children?: React.ReactNode;
+}

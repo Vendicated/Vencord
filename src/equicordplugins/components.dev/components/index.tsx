@@ -9,43 +9,31 @@ import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { proxyLazy } from "@utils/lazy";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findLazy } from "@webpack";
+import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findLazy, mapMangledModuleLazy } from "@webpack";
 import {
     GuildStore,
+    ListScrollerAuto,
+    ListScrollerNone,
+    ListScrollerThin,
+    OAuth2AuthorizeModal,
     ScrollerAuto,
     ScrollerNone,
     ScrollerThin,
+    SearchableSelect,
     TabBar,
+    TooltipContainer,
     useEffect,
     useRef,
     UserStore,
     useState,
 } from "@webpack/common";
 
-export {
-    Button,
-    Card,
-    GuildStore,
-    Heading,
-    Paragraph,
-    ScrollerAuto,
-    ScrollerNone,
-    ScrollerThin,
-    TabBar,
-    useEffect,
-    useRef,
-    UserStore,
-    useState,
-};
-
-export * from "../constants";
-
-import {
+import { ToastPosition, ToastType } from "../constants";
+import type {
     AccordionProps,
     AnchorProps,
     AvatarProps,
     BadgeShapesType,
-    CheckboxGroupOption,
     ChipProps,
     CircleBadgeProps,
     ClickableProps,
@@ -58,11 +46,9 @@ import {
     DiscordHeadingProps,
     DiscordTextProps,
     ExpressiveModalProps,
-    GradientColor,
+    FocusLockProps,
     GuildIconProps,
-    HeadingVariant,
     IconBadgeProps,
-    ListboxItem,
     ManaBaseRadioGroupProps,
     ManaButtonProps,
     ManaCalendarProps,
@@ -73,137 +59,61 @@ import {
     ManaListboxProps,
     ManaPopoverProps,
     ManaRichTooltipProps,
-    ManaSelectOption,
     ManaSelectProps,
     ManaSwitchProps,
     ManaTextAreaProps,
     ManaTextButtonProps,
     ManaTextInputProps,
     ManaTooltipProps,
-    ModalAction,
-    ModalNotice,
     ModalProps,
     ModalRenderFn,
     NoticeProps,
-    NoticeType,
     NumberBadgeProps,
     OpenModalOptions,
     PaginatorProps,
-    PopoverAction,
+    PopoutComponent,
     ProgressBarProps,
-    RadioOption,
     SearchBarProps,
     SkeletonProps,
     SliderProps,
     SpinnerComponent,
-    SpinnerProps,
     StandaloneRadioIndicatorProps,
-    TabBarComponent,
-    TabBarHeaderProps,
-    TabBarItemProps,
-    TabBarProps,
-    TabBarSeparatorProps,
     TextBadgeProps,
-    TextColor,
-    TextVariant,
     TimestampProps,
     ToastData,
     ToastOptions,
-    ToastPositionValue,
     ToastsModule,
     ToastTypeValue,
+    UserSummaryItemProps,
 } from "../types";
 
-export type {
-    AccordionProps,
-    AnchorProps,
-    AvatarProps,
-    BadgeShapesType,
-    CheckboxGroupOption,
-    ChipProps,
-    CircleBadgeProps,
-    ColorPickerProps,
-    ColorPickerWithSwatchesProps,
-    ColorSwatchProps,
-    ConfirmModalProps,
-    CustomColorButtonProps,
-    DefaultColorButtonProps,
-    DiscordHeadingProps,
-    DiscordTextProps,
-    ExpressiveModalProps,
-    GradientColor,
-    GuildIconProps,
-    HeadingVariant,
-    IconBadgeProps,
-    ListboxItem,
-    ManaBaseRadioGroupProps,
-    ManaButtonProps,
-    ManaCalendarProps,
-    ManaCheckboxGroupProps,
-    ManaCheckboxProps,
-    ManaComboboxProps,
-    ManaDatePickerProps,
-    ManaListboxProps,
-    ManaPopoverProps,
-    ManaRichTooltipProps,
-    ManaSelectOption,
-    ManaSelectProps,
-    ManaSwitchProps,
-    ManaTextAreaProps,
-    ManaTextButtonProps,
-    ManaTextInputProps,
-    ManaTooltipProps,
-    ModalAction,
-    ModalNotice,
-    ModalProps,
-    ModalRenderFn,
-    NoticeProps,
-    NoticeType,
-    NumberBadgeProps,
-    OpenModalOptions,
-    PaginatorProps,
-    PopoverAction,
-    ProgressBarProps,
-    RadioOption,
-    SearchBarProps,
-    SkeletonProps,
-    SliderProps,
-    SpinnerProps,
-    StandaloneRadioIndicatorProps,
-    TabBarComponent,
-    TabBarHeaderProps,
-    TabBarItemProps,
-    TabBarProps,
-    TabBarSeparatorProps,
-    TextBadgeProps,
-    TextColor,
-    TextVariant,
-    TimestampProps,
-    ToastData,
-    ToastOptions,
-    ToastPositionValue,
-    ToastsModule,
-    ToastTypeValue,
+export * from "../constants";
+export type * from "../types";
+
+export {
+    Button,
+    Card,
+    GuildStore,
+    Heading,
+    ListScrollerAuto,
+    ListScrollerNone,
+    ListScrollerThin,
+    OAuth2AuthorizeModal,
+    Paragraph,
+    ScrollerAuto,
+    ScrollerNone,
+    ScrollerThin,
+    SearchableSelect,
+    TabBar,
+    TooltipContainer,
+    useEffect,
+    useRef,
+    UserStore,
+    useState,
 };
 
-export const ToastType = {
-    MESSAGE: "message",
-    SUCCESS: "success",
-    FAILURE: "failure",
-    CUSTOM: "custom",
-    CLIP: "clip",
-    LINK: "link",
-    FORWARD: "forward",
-    BOOKMARK: "bookmark",
-    CLOCK: "clock",
-} as const;
-
-export const ToastPosition = {
-    TOP: 0,
-    BOTTOM: 1,
-} as const;
-
 export const Anchor = findComponentByCodeLazy("anchorUnderlineOnHover", "useDefaultUnderlineStyles") as React.ComponentType<AnchorProps>;
+export const Clickable = findByCodeLazy("ignoreKeyPress", "renderNonInteractive") as React.ComponentType<ClickableProps>;
 
 export const ManaButton = findComponentByCodeLazy('"data-mana-component":"button"') as React.ComponentType<ManaButtonProps>;
 export const ManaTextButton = findComponentByCodeLazy('"data-mana-component":"text-button"') as React.ComponentType<ManaTextButtonProps>;
@@ -212,25 +122,38 @@ export const ManaTextInput = findComponentByCodeLazy('"data-mana-component":"tex
 export const ManaTextArea = findComponentByCodeLazy('"data-mana-component":"text-area"') as React.ComponentType<ManaTextAreaProps>;
 export const ManaCheckbox = findComponentByCodeLazy('"data-mana-component":"checkbox"') as React.ComponentType<ManaCheckboxProps>;
 export const ManaSelect = findComponentByCodeLazy('"data-mana-component":"select"') as React.ComponentType<ManaSelectProps>;
-export const ManaTooltip = findComponentByCodeLazy("VoidTooltip cannot find DOM node") as React.ComponentType<ManaTooltipProps>;
 export const ManaCalendar = findComponentByCodeLazy('"data-mana-component":"calendar"') as React.ComponentType<ManaCalendarProps>;
 export const ManaDatePicker = findComponentByCodeLazy('"data-mana-component":"date-picker"') as React.ComponentType<ManaDatePickerProps>;
-export const ManaRichTooltip = findComponentByCodeLazy('"data-mana-component":"rich-tooltip"') as React.ComponentType<ManaRichTooltipProps>;
-export const ManaCombobox = findComponentByCodeLazy("itemToString", "multiSelect", "maxVisibleItems") as React.ComponentType<ManaComboboxProps>;
 export const ManaListbox = findComponentByCodeLazy('"data-mana-component":"listbox"') as React.ComponentType<ManaListboxProps>;
 export const ManaCheckboxGroup = findComponentByCodeLazy('"data-mana-component":"checkbox-group"') as React.ComponentType<ManaCheckboxGroupProps>;
 export const ManaBaseRadioGroup = findComponentByCodeLazy('"data-mana-component":"BaseRadioGroup"') as React.ComponentType<ManaBaseRadioGroupProps>;
+export const ManaCombobox = findComponentByCodeLazy("itemToString", "multiSelect", "maxVisibleItems") as React.ComponentType<ManaComboboxProps>;
+export const ManaTooltip = findComponentByCodeLazy("VoidTooltip cannot find DOM node") as React.ComponentType<ManaTooltipProps>;
+export const ManaRichTooltip = findComponentByCodeLazy('"data-mana-component":"rich-tooltip"') as React.ComponentType<ManaRichTooltipProps>;
+export const ManaPopover = findByCodeLazy("title", "body", "badge", "graphic", "actions", "textLink", "gradientColor", "popoverRef") as React.ComponentType<ManaPopoverProps>;
 export const StandaloneRadioIndicator = findComponentByCodeLazy("standaloneRadioIndicator", "animateIn", "animateOut") as React.ComponentType<StandaloneRadioIndicatorProps>;
-export const ManaPopover = findComponentByCodeLazy('"data-mana-component":"popover"') as React.ComponentType<ManaPopoverProps>;
 
 export const Slider = findComponentByCodeLazy("stickToMarkers", "onMarkerRender", "grabberClassName") as React.ComponentType<SliderProps>;
 export const Avatar = findComponentByCodeLazy("statusTooltip", "statusBackdropColor", "isSpeaking") as React.ComponentType<AvatarProps>;
 export const ProgressBar = findComponentByCodeLazy("progressContainer", "labelledBy", "aria-valuenow") as React.ComponentType<ProgressBarProps>;
 export const Spinner = findComponentByCodeLazy("spinningCircleSimple", "pulsingEllipsis", "wanderingCubes") as unknown as SpinnerComponent;
 export const SearchBar = findComponentByCodeLazy("#{intl::SEARCH}", "clearable", "autoComplete") as React.ComponentType<SearchBarProps>;
-export const Paginator2 = findComponentByCodeLazy("#{intl::BACK}", "#{intl::NEXT}", "renderPageWrapper") as React.ComponentType<PaginatorProps>;
+export const Paginator = findComponentByCodeLazy("#{intl::BACK}", "#{intl::NEXT}", "renderPageWrapper") as React.ComponentType<PaginatorProps>;
 export const Notice = findComponentByCodeLazy("messageType", "iconDiv", "actionContainer") as React.ComponentType<NoticeProps>;
+export const Chip = findComponentByCodeLazy('variant:"eyebrow"', "chip,") as React.ComponentType<ChipProps>;
+export const Skeleton = findComponentByCodeLazy("productSkeletonCardContainer", "skipPulseAnimation") as React.ComponentType<SkeletonProps>;
+export const Accordion = findComponentByCodeLazy("accordionContainer", "onExpandedChange", "defaultExpanded") as React.ComponentType<AccordionProps>;
+export const Timestamp = findComponentByCodeLazy("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}", "isVisibleOnlyOnHover") as React.ComponentType<TimestampProps>;
+export const GuildIcon = findComponentByCodeLazy("Masks.CLAN_ICON", "guildIconImage") as React.ComponentType<GuildIconProps>;
 export const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", "showEyeDropper") as React.ComponentType<ColorPickerProps>;
+export const Popout: PopoutComponent = proxyLazy(() => findLazy(m => m?.y?.Animation && m.y.toString?.().includes("renderPopout")).y);
+export const FocusLock = findComponentByCodeLazy(".containerRef,{keyboardModeEnabled:") as React.ComponentType<FocusLockProps>;
+export const UserSummaryItem = findComponentByCodeLazy("popoutUserId") as React.ComponentType<UserSummaryItemProps>;
+
+export const Animations = mapMangledModuleLazy(".assign({colorNames:", {
+    Transition: filters.componentByCode('["items","children"]', ",null,"),
+    animated: filters.byProps("div", "text")
+});
 
 const ColorPickerModule = findLazy(m => {
     const values = Object.values(m);
@@ -273,23 +196,28 @@ function getBadgeExport(check: (fn: Function) => boolean): React.ComponentType<a
     return (() => null) as React.ComponentType<any>;
 }
 
-export const NumberBadge: React.ComponentType<NumberBadgeProps> = proxyLazy(() => getBadgeExport(fn => fn.toString().includes("numberBadge")));
-export const TextBadge: React.ComponentType<TextBadgeProps> = proxyLazy(() => getBadgeExport(fn => fn.toString().includes("textBadge")));
-export const IconBadge: React.ComponentType<IconBadgeProps> = proxyLazy(() => getBadgeExport(fn => fn.toString().includes("iconBadge")));
-export const CircleBadge: React.ComponentType<CircleBadgeProps> = proxyLazy(() => getBadgeExport(fn => fn.toString().includes("disableColor") && !fn.toString().includes("iconBadge") && !fn.toString().includes("textBadge") && !fn.toString().includes("numberBadge") && !fn.toString().includes("premiumBadge")));
-export const BadgeShapes = proxyLazy(() => Object.values(BadgeModule).find(v => typeof v === "object" && (v as BadgeShapesType)?.ROUND) as BadgeShapesType ?? { ROUND: "", ROUND_LEFT: "", ROUND_RIGHT: "", SQUARE: "" });
-
-export const Clickable = findByCodeLazy("ignoreKeyPress", "renderNonInteractive") as React.ComponentType<ClickableProps>;
-
-export const Chip = findComponentByCodeLazy('variant:"eyebrow"', "chip,") as React.ComponentType<ChipProps>;
-
-export const Skeleton = findComponentByCodeLazy("productSkeletonCardContainer", "skipPulseAnimation") as React.ComponentType<SkeletonProps>;
-
-export const Accordion = findComponentByCodeLazy("accordionContainer", "onExpandedChange", "defaultExpanded") as React.ComponentType<AccordionProps>;
-
-export const Timestamp = findComponentByCodeLazy("isVisibleOnlyOnHover", "cozyAlt", "timestampFormat") as React.ComponentType<TimestampProps>;
-
-export const GuildIcon = findComponentByCodeLazy("getGuildIconURL", "acronym") as React.ComponentType<GuildIconProps>;
+export const NumberBadge: React.ComponentType<NumberBadgeProps> = proxyLazy(() =>
+    getBadgeExport(fn => fn.toString().includes("numberBadge"))
+);
+export const TextBadge: React.ComponentType<TextBadgeProps> = proxyLazy(() =>
+    getBadgeExport(fn => fn.toString().includes("textBadge"))
+);
+export const IconBadge: React.ComponentType<IconBadgeProps> = proxyLazy(() =>
+    getBadgeExport(fn => fn.toString().includes("iconBadge"))
+);
+export const CircleBadge: React.ComponentType<CircleBadgeProps> = proxyLazy(() =>
+    getBadgeExport(fn =>
+        fn.toString().includes("disableColor") &&
+        !fn.toString().includes("iconBadge") &&
+        !fn.toString().includes("textBadge") &&
+        !fn.toString().includes("numberBadge") &&
+        !fn.toString().includes("premiumBadge")
+    )
+);
+export const BadgeShapes = proxyLazy(() =>
+    Object.values(BadgeModule).find(v => typeof v === "object" && (v as BadgeShapesType)?.ROUND) as BadgeShapesType ??
+    { ROUND: "", ROUND_LEFT: "", ROUND_RIGHT: "", SQUARE: "" }
+);
 
 const ToastsModule = findByPropsLazy("showToast", "popToast");
 export const Toasts: ToastsModule = proxyLazy(() => ({
@@ -300,7 +228,9 @@ export const Toasts: ToastsModule = proxyLazy(() => ({
     pop: () => ToastsModule.popToast(),
     create: (message: string, type: ToastTypeValue, options?: ToastOptions) => ToastsModule.createToast(message, type, options),
 }));
-export const showToast = (message: string, type: ToastTypeValue = ToastType.MESSAGE) => ToastsModule.showToast(ToastsModule.createToast(message, type));
+
+export const showToast = (message: string, type: ToastTypeValue = ToastType.MESSAGE) =>
+    ToastsModule.showToast(ToastsModule.createToast(message, type));
 
 const ModalModule = findByPropsLazy("Modal", "ConfirmModal");
 const ModalAPIModule = findByPropsLazy("openModal", "closeModal");
@@ -309,20 +239,25 @@ export const Modal: React.ComponentType<ModalProps> = proxyLazy(() => ModalModul
 export const ConfirmModal: React.ComponentType<ConfirmModalProps> = proxyLazy(() => ModalModule.ConfirmModal);
 export const ExpressiveModal: React.ComponentType<ExpressiveModalProps> = proxyLazy(() => ModalModule.ExpressiveModal);
 
-export const openModal = (render: ModalRenderFn, options?: OpenModalOptions): string => ModalAPIModule.openModal(render, options);
-export const closeModal = (modalKey: string): void => ModalAPIModule.closeModal(modalKey);
-export const closeAllModals = (): void => ModalAPIModule.closeAllModals();
-export const hasModalOpen = (modalKey: string): boolean => ModalAPIModule.hasModalOpen(modalKey);
-export const hasAnyModalOpen = (): boolean => ModalAPIModule.hasAnyModalOpen();
+export const openModal = (render: ModalRenderFn, options?: OpenModalOptions): string =>
+    ModalAPIModule.openModal(render, options);
+export const closeModal = (modalKey: string): void =>
+    ModalAPIModule.closeModal(modalKey);
+export const closeAllModals = (): void =>
+    ModalAPIModule.closeAllModals();
+export const hasModalOpen = (modalKey: string): boolean =>
+    ModalAPIModule.hasModalOpen(modalKey);
+export const hasAnyModalOpen = (): boolean =>
+    ModalAPIModule.hasAnyModalOpen();
 
 const DiscordTextModule = findByPropsLazy("Heading", "Text");
+
 export function DiscordHeading(props: DiscordHeadingProps) {
-    const Component = DiscordTextModule.Heading;
-    return <Component {...props} />;
+    return <DiscordTextModule.Heading {...props} />;
 }
+
 export function DiscordText(props: DiscordTextProps) {
-    const Component = DiscordTextModule.Text;
-    return <Component {...props} />;
+    return <DiscordTextModule.Text {...props} />;
 }
 
 export function Divider({ className, style, ...restProps }: React.ComponentPropsWithoutRef<"hr">) {

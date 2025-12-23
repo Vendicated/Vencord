@@ -9,14 +9,29 @@ import type { PopoverSize, TooltipAlign, TooltipColor, TooltipPosition } from ".
 export type { PopoverSize, TooltipAlign, TooltipColor, TooltipPosition };
 
 export interface ManaTooltipProps {
-    text: string;
+    text: string | (() => React.ReactNode);
     position?: TooltipPosition;
     align?: TooltipAlign;
     color?: TooltipColor;
     spacing?: number;
     hideOnClick?: boolean;
     delay?: number;
-    children: (props: any) => React.ReactNode;
+    forceOpen?: boolean;
+    shouldShow?: boolean;
+    allowOverflow?: boolean;
+    overflowOnly?: boolean;
+    clickableOnMobile?: boolean;
+    disableTooltipPointerEvents?: boolean;
+    targetElementRef?: React.RefObject<HTMLElement>;
+    tooltipClassName?: string;
+    tooltipStyle?: React.CSSProperties;
+    tooltipContentClassName?: string;
+    tooltipPointerClassName?: string;
+    onTooltipShow?: () => void;
+    onTooltipHide?: () => void;
+    onAnimationRest?: () => void;
+    "aria-label"?: string | false;
+    children: (props: Record<string, any>) => React.ReactNode;
 }
 
 export interface ManaRichTooltipProps {
@@ -29,8 +44,13 @@ export interface ManaRichTooltipProps {
     position?: TooltipPosition;
     align?: TooltipAlign;
     spacing?: number;
+    caretConfig?: { align?: "start" | "center" | "end"; };
+    layerContext?: any;
+    targetElementRef?: React.RefObject<HTMLElement>;
+    anchorRef?: React.RefObject<HTMLElement>;
+    positionKey?: string;
     ariaHidden?: boolean;
-    children: React.ReactNode | ((props: any) => React.ReactNode);
+    children: React.ReactNode | ((props: Record<string, any>) => React.ReactNode);
 }
 
 export interface PopoverAction {

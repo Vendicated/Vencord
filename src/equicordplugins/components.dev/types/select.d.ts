@@ -25,15 +25,22 @@ export interface ManaSelectProps {
     shouldFocusWrap?: boolean;
     maxOptionsVisible?: number;
     wrapTags?: boolean;
+    formatOption?: (option: ManaSelectOption) => React.ReactNode;
+    name?: string;
+    form?: string;
+    autoComplete?: string;
+    label?: string;
+    required?: boolean;
 }
 
-export interface ManaComboboxProps {
+export interface ManaComboboxProps<T = string> {
     placeholder?: string;
-    value?: string | string[];
-    onChange?: (value: string | string[]) => void;
+    value?: T | T[];
+    onChange?: (value: T | T[]) => void;
     multiSelect?: boolean;
     autoFocus?: boolean;
     maxVisibleItems?: number;
+    itemToString?: (item: T) => string;
     emptyStateText?: string;
     emptyStateHeader?: string;
     onQueryChange?: (query: string) => void;

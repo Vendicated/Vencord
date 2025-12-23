@@ -20,15 +20,24 @@ export interface AvatarProps {
     size?: AvatarSize;
     status?: AvatarStatus;
     statusColor?: string;
+    statusBackdropColor?: string;
     isMobile?: boolean;
     isTyping?: boolean;
     isSpeaking?: boolean;
+    isLatched?: boolean;
+    voiceDb?: number;
+    speakingStylesConfig?: Record<string, any>;
     statusTooltip?: boolean;
     statusTooltipDelay?: number;
-    avatarDecoration?: string;
+    typingIndicatorRef?: React.Ref<any>;
+    avatarContentRef?: React.Ref<any>;
+    CutoutIcon?: React.ComponentType<any>;
+    avatarTooltipAsset?: React.ReactNode;
+    avatarTooltipText?: string;
+    avatarTooltipTitle?: string;
     "aria-hidden"?: boolean;
     "aria-label"?: string;
     imageClassName?: string;
     className?: string;
-    onClick?: (e: React.MouseEvent) => void;
+    ref?: React.Ref<SVGSVGElement>;
 }

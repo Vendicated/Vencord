@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export type ToastTypeValue = "message" | "success" | "failure" | "custom" | "clip" | "link" | "forward" | "bookmark" | "clock";
+export type ToastTypeValue = "message" | "success" | "failure" | "custom" | "clip" | "link" | "forward" | "invite" | "bookmark" | "clock" | "ai";
 
 export type ToastPositionValue = 0 | 1;
 

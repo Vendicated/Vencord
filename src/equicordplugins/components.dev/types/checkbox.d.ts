@@ -18,6 +18,8 @@ export interface ManaCheckboxProps {
     leadingIcon?: React.ComponentType<any>;
     labelType?: CheckboxLabelType;
     usageVariant?: CheckboxUsageVariant;
+    value?: string | number;
+    labeledBy?: string;
 }
 
 export interface CheckboxGroupOption {

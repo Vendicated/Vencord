@@ -25,6 +25,7 @@ import ClickableTab from "./tabs/ClickableTab";
 import ColorPickerTab from "./tabs/ColorPickerTab";
 import ComboboxTab from "./tabs/ComboboxTab";
 import DividerTab from "./tabs/DividerTab";
+import FocusLockTab from "./tabs/FocusLockTab";
 import GuildIconTab from "./tabs/GuildIconTab";
 import HeadingTab from "./tabs/HeadingTab";
 import LayerModalTab from "./tabs/LayerModalTab";
@@ -32,6 +33,7 @@ import ListboxTab from "./tabs/ListboxTab";
 import ModalTab from "./tabs/ModalTab";
 import NoticeTab from "./tabs/NoticeTab";
 import PaginatorTab from "./tabs/PaginatorTab";
+import PopoutTab from "./tabs/PopoutTab";
 import PopoverTab from "./tabs/PopoverTab";
 import ProgressBarTab from "./tabs/ProgressBarTab";
 import RadioGroupTab from "./tabs/RadioGroupTab";
@@ -51,6 +53,7 @@ import TimestampTab from "./tabs/TimestampTab";
 import ToastTab from "./tabs/ToastTab";
 import TooltipTab from "./tabs/TooltipTab";
 import TypographyTab from "./tabs/TypographyTab";
+import UserSummaryItemTab from "./tabs/UserSummaryItemTab";
 
 
 const TABS = [
@@ -68,6 +71,7 @@ const TABS = [
     { id: "colorpicker", label: "ColorPicker" },
     { id: "combobox", label: "Combobox" },
     { id: "divider", label: "Divider" },
+    { id: "focuslock", label: "FocusLock" },
     { id: "guildicon", label: "GuildIcon" },
     { id: "heading", label: "Heading" },
     { id: "layermodal", label: "LayerModal" },
@@ -75,6 +79,7 @@ const TABS = [
     { id: "modal", label: "Modal" },
     { id: "notice", label: "Notice" },
     { id: "paginator", label: "Paginator" },
+    { id: "popout", label: "Popout" },
     { id: "popover", label: "Popover" },
     { id: "progressbar", label: "ProgressBar" },
     { id: "radiogroup", label: "RadioGroup" },
@@ -94,6 +99,7 @@ const TABS = [
     { id: "toast", label: "Toast" },
     { id: "tooltip", label: "Tooltip" },
     { id: "typography", label: "Typography" },
+    { id: "usersummaryitem", label: "UserSummaryItem" },
 
 ].sort((a, b) => a.label.localeCompare(b.label));
 
@@ -114,6 +120,7 @@ const TAB_COMPONENTS: Record<TabId, React.ComponentType> = {
     colorpicker: ColorPickerTab,
     combobox: ComboboxTab,
     divider: DividerTab,
+    focuslock: FocusLockTab,
     guildicon: GuildIconTab,
     heading: HeadingTab,
     layermodal: LayerModalTab,
@@ -121,6 +128,7 @@ const TAB_COMPONENTS: Record<TabId, React.ComponentType> = {
     modal: ModalTab,
     notice: NoticeTab,
     paginator: PaginatorTab,
+    popout: PopoutTab,
     popover: PopoverTab,
     progressbar: ProgressBarTab,
     radiogroup: RadioGroupTab,
@@ -140,6 +148,7 @@ const TAB_COMPONENTS: Record<TabId, React.ComponentType> = {
     toast: ToastTab,
     tooltip: TooltipTab,
     typography: TypographyTab,
+    usersummaryitem: UserSummaryItemTab,
 };
 
 function ComponentsTab() {

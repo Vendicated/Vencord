@@ -4,31 +4,35 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Chip , Paragraph } from "..";
+import { Chip, Paragraph } from "..";
 import { SectionWrapper } from "../SectionWrapper";
+
+const CHIP_COLORS = ["blurple", "purple", "green", "orange", "yellow", "pink", "red", "gray"] as const;
+const CHIP_SHADES = ["Light", "Medium", "Dark"] as const;
 
 export default function ChipTab() {
     return (
         <div className="vc-compfinder-section">
-            <SectionWrapper title="Colors">
-                <div className="vc-compfinder-grid">
-                    <Chip text="Blurple" variant="blurpleMedium" />
-                    <Chip text="Purple" variant="purpleMedium" />
-                    <Chip text="Green" variant="greenMedium" />
-                    <Chip text="Orange" variant="orangeMedium" />
-                    <Chip text="Yellow" variant="yellowMedium" />
-                    <Chip text="Pink" variant="pinkMedium" />
-                    <Chip text="Red" variant="redMedium" />
-                    <Chip text="Gray" variant="grayMedium" />
-                </div>
-            </SectionWrapper>
-
-            <SectionWrapper title="Shades">
-                <div className="vc-compfinder-grid">
-                    <Chip text="Light" variant="blurpleLight" />
-                    <Chip text="Medium" variant="blurpleMedium" />
-                    <Chip text="Dark" variant="blurpleDark" />
-                </div>
+            <SectionWrapper title="All Variants">
+                <Paragraph color="text-muted" style={{ marginBottom: 8 }}>
+                    All 24 chip variants: 8 colors × 3 shades.
+                </Paragraph>
+                {CHIP_SHADES.map(shade => (
+                    <div key={shade} style={{ marginBottom: 16 }}>
+                        <Paragraph color="text-muted" style={{ marginBottom: 8, fontWeight: 600 }}>
+                            {shade}
+                        </Paragraph>
+                        <div className="vc-compfinder-grid">
+                            {CHIP_COLORS.map(color => (
+                                <Chip
+                                    key={`${color}${shade}`}
+                                    text={color}
+                                    variant={`${color}${shade}` as any}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </SectionWrapper>
 
             <SectionWrapper title="Use Cases">
@@ -48,6 +52,15 @@ export default function ChipTab() {
                 </Paragraph>
                 <Paragraph color="text-muted">
                     • variant?: ChipVariant - Color variant (default: "grayLight")
+                </Paragraph>
+                <Paragraph color="text-muted" style={{ marginTop: 8 }}>
+                    <strong>Variant Format:</strong> {"{color}{shade}"} where:
+                </Paragraph>
+                <Paragraph color="text-muted">
+                    • Colors: blurple, purple, green, orange, yellow, pink, red, gray
+                </Paragraph>
+                <Paragraph color="text-muted">
+                    • Shades: Light, Medium, Dark
                 </Paragraph>
             </SectionWrapper>
         </div>

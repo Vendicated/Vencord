@@ -17,6 +17,7 @@ export interface ManaBaseRadioGroupProps {
     value?: string | number;
     onChange?: (value: string | number) => void;
     disabled?: boolean;
+    label?: string;
     "aria-labelledby"?: string;
 }
 
