@@ -1,5 +1,6 @@
 // please keep in alphabetical order
 export * from "./ActiveJoinedThreadsStore";
+export * from "./ApplicationStore";
 export * from "./AuthenticationStore";
 export * from "./ChannelRTCStore";
 export * from "./ChannelStore";
