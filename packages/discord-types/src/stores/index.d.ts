@@ -17,6 +17,7 @@ export * from "./GuildScheduledEventStore";
 export * from "./GuildStore";
 export * from "./MediaEngineStore";
 export * from "./MessageStore";
+export * from "./NotificationSettingsStore";
 export * from "./OverridePremiumTypeStore";
 export * from "./PermissionStore";
 export * from "./PresenceStore";

@@ -62,6 +62,7 @@ export let StreamerModeStore: t.StreamerModeStore;
 export let SpotifyStore: t.SpotifyStore;
 
 export let MediaEngineStore: t.MediaEngineStore;
+export let NotificationSettingsStore: t.NotificationSettingsStore;
 export let SpellCheckStore: t.SpellCheckStore;
 export let UploadAttachmentStore: t.UploadAttachmentStore;
 export let OverridePremiumTypeStore: t.OverridePremiumTypeStore;
@@ -90,6 +91,7 @@ waitForStore("GuildStore", m => GuildStore = m);
 waitForStore("GuildMemberStore", m => GuildMemberStore = m);
 waitForStore("RelationshipStore", m => RelationshipStore = m);
 waitForStore("MediaEngineStore", m => MediaEngineStore = m);
+waitForStore("NotificationSettingsStore", m => NotificationSettingsStore = m);
 waitForStore("SpellcheckStore", m => SpellCheckStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
