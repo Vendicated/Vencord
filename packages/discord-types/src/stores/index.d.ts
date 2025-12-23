@@ -17,6 +17,7 @@ export * from "./GuildScheduledEventStore";
 export * from "./GuildStore";
 export * from "./InstantInviteStore";
 export * from "./InviteStore";
+export * from "./LocaleStore";
 export * from "./MediaEngineStore";
 export * from "./MessageStore";
 export * from "./NotificationSettingsStore";

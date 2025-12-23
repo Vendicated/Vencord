@@ -74,6 +74,7 @@ export let ChannelRTCStore: t.ChannelRTCStore;
 export let FriendsStore: t.FriendsStore;
 export let InstantInviteStore: t.InstantInviteStore;
 export let InviteStore: t.InviteStore;
+export let LocaleStore: t.LocaleStore;
 export let SoundboardStore: t.SoundboardStore;
 
 /**
@@ -121,6 +122,7 @@ waitForStore("ChannelRTCStore", m => ChannelRTCStore = m);
 waitForStore("FriendsStore", m => FriendsStore = m);
 waitForStore("InstantInviteStore", m => InstantInviteStore = m);
 waitForStore("InviteStore", m => InviteStore = m);
+waitForStore("LocaleStore", m => LocaleStore = m);
 waitForStore("SoundboardStore", m => SoundboardStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
