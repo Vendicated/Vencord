@@ -28,6 +28,7 @@ export * from "./RelationshipStore";
 export * from "./RunningGameStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
+export * from "./SoundboardStore";
 export * from "./SpellCheckStore";
 export * from "./SpotifyStore";
 export * from "./StickersStore";

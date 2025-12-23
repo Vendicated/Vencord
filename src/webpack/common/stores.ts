@@ -72,6 +72,9 @@ export let UserGuildSettingsStore: t.UserGuildSettingsStore;
 export let UserSettingsProtoStore: t.UserSettingsProtoStore;
 export let ChannelRTCStore: t.ChannelRTCStore;
 export let FriendsStore: t.FriendsStore;
+export let InstantInviteStore: t.InstantInviteStore;
+export let InviteStore: t.InviteStore;
+export let SoundboardStore: t.SoundboardStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -116,6 +119,9 @@ waitForStore("UserGuildSettingsStore", m => UserGuildSettingsStore = m);
 waitForStore("UserSettingsProtoStore", m => UserSettingsProtoStore = m);
 waitForStore("ChannelRTCStore", m => ChannelRTCStore = m);
 waitForStore("FriendsStore", m => FriendsStore = m);
+waitForStore("InstantInviteStore", m => InstantInviteStore = m);
+waitForStore("InviteStore", m => InviteStore = m);
+waitForStore("SoundboardStore", m => SoundboardStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
