@@ -13,7 +13,7 @@ export async function readRecording(_: any, filePath: string) {
     const filename = basename(filePath);
     const userDataDir = normalize(app.getPath("userData") + "/");
 
-    if (filename !== "recording.ogg" || !filePath.startsWith(userDataDir)) return null;
+    if (!filename.endsWith("recording.ogg") || !filePath.startsWith(userDataDir)) return null;
 
     try {
         const buf = await readFile(filePath);
