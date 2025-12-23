@@ -12,6 +12,7 @@ export * from "./FriendsStore";
 export * from "./GuildChannelStore";
 export * from "./GuildMemberStore";
 export * from "./GuildRoleStore";
+export * from "./GuildScheduledEventStore";
 export * from "./GuildStore";
 export * from "./MediaEngineStore";
 export * from "./MessageStore";

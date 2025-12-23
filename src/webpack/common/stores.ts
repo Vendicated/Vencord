@@ -39,6 +39,7 @@ export let AccessibilityStore: t.AccessibilityStore;
 
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
+export let GuildScheduledEventStore: t.GuildScheduledEventStore;
 export let GuildMemberStore: t.GuildMemberStore;
 export let UserStore: t.UserStore;
 export let AuthenticationStore: t.AuthenticationStore;
@@ -93,6 +94,7 @@ waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
 waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("GuildRoleStore", m => GuildRoleStore = m);
+waitForStore("GuildScheduledEventStore", m => GuildScheduledEventStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
