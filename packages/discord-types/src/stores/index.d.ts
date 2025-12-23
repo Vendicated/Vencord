@@ -31,6 +31,7 @@ export * from "./TypingStore";
 export * from "./UploadAttachmentStore";
 export * from "./UserGuildSettingsStore";
 export * from "./UserProfileStore";
+export * from "./UserSettingsProtoStore";
 export * from "./UserStore";
 export * from "./VoiceStateStore";
 export * from "./WindowStore";

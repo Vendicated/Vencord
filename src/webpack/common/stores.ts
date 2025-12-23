@@ -65,6 +65,7 @@ export let OverridePremiumTypeStore: t.OverridePremiumTypeStore;
 export let RunningGameStore: t.RunningGameStore;
 export let ActiveJoinedThreadsStore: t.ActiveJoinedThreadsStore;
 export let UserGuildSettingsStore: t.UserGuildSettingsStore;
+export let UserSettingsProtoStore: t.UserSettingsProtoStore;
 export let ChannelRTCStore: t.ChannelRTCStore;
 export let FriendsStore: t.FriendsStore;
 
@@ -104,6 +105,7 @@ waitForStore("UploadAttachmentStore", m => UploadAttachmentStore = m);
 waitForStore("RunningGameStore", m => RunningGameStore = m);
 waitForStore("ActiveJoinedThreadsStore", m => ActiveJoinedThreadsStore = m);
 waitForStore("UserGuildSettingsStore", m => UserGuildSettingsStore = m);
+waitForStore("UserSettingsProtoStore", m => UserSettingsProtoStore = m);
 waitForStore("ChannelRTCStore", m => ChannelRTCStore = m);
 waitForStore("FriendsStore", m => FriendsStore = m);
 waitForStore("ThemeStore", m => {
