@@ -26,6 +26,7 @@ export * from "./RunningGameStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
 export * from "./SpellCheckStore";
+export * from "./SpotifyStore";
 export * from "./StickersStore";
 export * from "./StreamerModeStore";
 export * from "./ThemeStore";

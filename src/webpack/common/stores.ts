@@ -59,6 +59,7 @@ export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
 export let StreamerModeStore: t.StreamerModeStore;
+export let SpotifyStore: t.SpotifyStore;
 
 export let MediaEngineStore: t.MediaEngineStore;
 export let SpellCheckStore: t.SpellCheckStore;
@@ -104,6 +105,7 @@ waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("VoiceStateStore", m => VoiceStateStore = m);
 waitForStore("StreamerModeStore", m => StreamerModeStore = m);
+waitForStore("SpotifyStore", m => SpotifyStore = m);
 waitForStore("OverridePremiumTypeStore", m => OverridePremiumTypeStore = m);
 waitForStore("UploadAttachmentStore", m => UploadAttachmentStore = m);
 waitForStore("RunningGameStore", m => RunningGameStore = m);
