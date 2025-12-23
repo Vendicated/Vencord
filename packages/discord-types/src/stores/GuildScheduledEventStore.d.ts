@@ -1,21 +1,7 @@
 import { FluxStore } from "..";
+import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, GuildScheduledEventStatus } from "../../enums";
 
-export const enum GuildScheduledEventStatus {
-    SCHEDULED = 1,
-    ACTIVE = 2,
-    COMPLETED = 3,
-    CANCELED = 4
-}
-
-export const enum GuildScheduledEventEntityType {
-    STAGE_INSTANCE = 1,
-    VOICE = 2,
-    EXTERNAL = 3
-}
-
-export const enum GuildScheduledEventPrivacyLevel {
-    GUILD_ONLY = 2
-}
+export { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, GuildScheduledEventStatus };
 
 export interface GuildScheduledEventEntityMetadata {
     location?: string;
