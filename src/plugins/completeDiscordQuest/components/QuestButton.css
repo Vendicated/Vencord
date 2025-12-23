@@ -1,0 +1,15 @@
+.quest-button-enrollable>span[class*="iconBadge"] {
+    background-color: var(--status-danger);
+}
+
+.quest-button-enrolled>span[class*="iconBadge"] {
+    background-color: var(--status-warning);
+}
+
+.quest-button-claimable>span[class*="iconBadge"] {
+    background-color: var(--status-positive);
+}
+
+.quest-button svg:has(> [mask^="url(#svg-mask-panel-button)"]) {
+    display: none;
+}
