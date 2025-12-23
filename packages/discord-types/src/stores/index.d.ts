@@ -10,6 +10,7 @@ export * from "./EmojiStore";
 export * from "./FluxStore";
 export * from "./FriendsStore";
 export * from "./GuildChannelStore";
+export * from "./GuildMemberCountStore";
 export * from "./GuildMemberStore";
 export * from "./GuildRoleStore";
 export * from "./GuildScheduledEventStore";
