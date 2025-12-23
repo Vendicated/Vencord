@@ -9,7 +9,6 @@ A Vencord plugin that allows you to export Discord message reactions with detail
   - User ID
   - Username
   - Display name
-  - Discriminator (if applicable)
 - **Smart Display**: Only shows the context menu option when a message has reactions
 - **Complete Emoji Info**: Captures both custom and Unicode emojis with proper formatting
 
