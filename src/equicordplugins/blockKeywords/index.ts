@@ -39,7 +39,7 @@ const settings = definePluginSettings({
 });
 
 export function containsBlockedKeywords(message: Message) {
-    if (!blockedKeywords || blockedKeywords.length === 0) { return false; }
+    if (!blockedKeywords) return false;
 
     // can't use forEach because we need to return from inside the loop
     // message content loop
@@ -74,7 +74,7 @@ export default definePlugin({
     patches: [
         {
             find: '"_channelMessages",{})',
-            predicate: () => settings.store.blockedWords.length > 0,
+            predicate: () => settings.store.blockedWords !== "",
             replacement: {
                 match: /static commit\((.{1,2})\){/g,
                 replace: "$&$1=$self.blockMessagesWithKeywords($1);"
@@ -85,7 +85,7 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => settings.store.ignoreBlockedMessages,
+            predicate: () => settings.store.ignoreBlockedMessages && settings.store.blockedWords !== "",
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
@@ -102,12 +102,13 @@ export default definePlugin({
         const blockedWordsList: Array<string> = settings.store.blockedWords.split(",");
         const caseSensitiveFlag = settings.store.caseSensitive ? "" : "i";
 
+        if (!blockedWordsList) return;
+
         if (settings.store.useRegex) {
             blockedKeywords = blockedWordsList.map(word => {
                 return new RegExp(word, caseSensitiveFlag);
             });
-        }
-        else {
+        } else {
             blockedKeywords = blockedWordsList.map(word => {
                 // escape regex chars in word https://stackoverflow.com/a/6969486
                 return new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, caseSensitiveFlag);
