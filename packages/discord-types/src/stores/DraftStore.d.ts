@@ -1,8 +1,6 @@
 import { FluxStore } from "..";
 import { DraftType } from "../../enums";
 
-export { DraftType };
-
 export interface Draft {
     timestamp: number;
     draft: string;

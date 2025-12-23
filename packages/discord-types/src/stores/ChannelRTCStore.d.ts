@@ -1,8 +1,6 @@
 import { FluxStore, User, VoiceState } from "..";
 import { ParticipantType, RTCPlatform } from "../../enums";
 
-export { ParticipantType, RTCPlatform };
-
 export type RTCLayout = "normal" | "minimum" | "no-chat" | "full-screen" | "haven";
 export type RTCMode = "video" | "voice";
 export type RTCLayoutContext = "OVERLAY" | "APP" | "POPOUT" | "CALL_TILE_POPOUT";
