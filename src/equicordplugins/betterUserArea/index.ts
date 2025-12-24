@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, migratePluginToSetting } from "@api/Settings";
+import { definePluginSettings, migratePluginToSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -47,7 +47,7 @@ const settings = definePluginSettings({
     }
 });
 
-migratePluginToSetting("BetterUserArea", "CleanUserArea", "removeNameplate");
+migratePluginToSettings("BetterUserArea", "CleanUserArea", "removeNameplate");
 
 export default definePlugin({
     name: "BetterUserArea",

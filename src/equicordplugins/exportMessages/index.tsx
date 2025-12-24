@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { showNotification } from "@api/Notifications";
-import { definePluginSettings, migratePluginToSetting } from "@api/Settings";
+import { definePluginSettings, migratePluginToSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { copyToClipboard } from "@utils/clipboard";
 import { EquicordDevs } from "@utils/constants";
@@ -19,7 +19,7 @@ import { Menu, Toasts } from "@webpack/common";
 
 import { ContactsList } from "./types";
 
-migratePluginToSetting("ExportMessages", "ExportContacts", "exportContacts");
+migratePluginToSettings("ExportMessages", "ExportContacts", "exportContacts");
 const settings = definePluginSettings({
     openFileAfterExport: {
         type: OptionType.BOOLEAN,
