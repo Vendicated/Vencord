@@ -116,6 +116,14 @@ export interface Quest {
                     type: "PLAY_ACTIVITY";
                     target: number;
                 };
+                ACHIEVEMENT_IN_ACTIVITY?: {
+                    type: "ACHIEVEMENT_IN_ACTIVITY";
+                    target: number;
+                    eventName: "progress";
+                    applications: {
+                        id: string;
+                    }[];
+                };
             };
         };
     },
