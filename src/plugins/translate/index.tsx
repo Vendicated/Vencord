@@ -18,13 +18,10 @@
 
 import "./styles.css";
 
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { ChannelStore, Menu } from "@webpack/common";
 
 import { settings } from "./settings";
@@ -32,8 +29,9 @@ import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIc
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
-const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
-    if (!message.content) return;
+const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
+    const content = getMessageContent(message);
+    if (!content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);
     if (!group) return;
@@ -44,18 +42,29 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
             label="Translate"
             icon={TranslateIcon}
             action={async () => {
-                const trans = await translate("received", message.content);
+                const trans = await translate("received", content);
                 handleTranslate(message.id, trans);
             }}
         />
     ));
 };
 
+
+function getMessageContent(message: Message) {
+    // Message snapshots is an array, which allows for nested snapshots, which Discord does not do yet.
+    // no point collecting content or rewriting this to render in a certain way that makes sense
+    // for something currently impossible.
+    return message.content
+        || message.messageSnapshots?.[0]?.message.content
+        || message.embeds?.find(embed => embed.type === "auto_moderation_message")?.rawDescription || "";
+}
+
+let tooltipTimeout: any;
+
 export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate or DeepL",
     authors: [Devs.Ven, Devs.AshtonMemer],
-    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
     contextMenus: {
         "message": messageCtxPatch
@@ -63,13 +72,18 @@ export default definePlugin({
     // not used, just here in case some other plugin wants it or w/e
     translate,
 
-    start() {
-        addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
+    renderMessageAccessory: props => <TranslationAccessory message={props.message} />,
 
-        addChatBarButton("vc-translate", TranslateChatBarIcon);
+    chatBarButton: {
+        icon: TranslateIcon,
+        render: TranslateChatBarIcon
+    },
 
-        addButton("vc-translate", message => {
-            if (!message.content) return null;
+    messagePopoverButton: {
+        icon: TranslateIcon,
+        render(message: Message) {
+            const content = getMessageContent(message);
+            if (!content) return null;
 
             return {
                 label: "Translate",
@@ -77,31 +91,22 @@ export default definePlugin({
                 message,
                 channel: ChannelStore.getChannel(message.channel_id),
                 onClick: async () => {
-                    const trans = await translate("received", message.content);
+                    const trans = await translate("received", content);
                     handleTranslate(message.id, trans);
                 }
             };
-        });
-
-        let tooltipTimeout: any;
-        this.preSend = addPreSendListener(async (_, message) => {
-            if (!settings.store.autoTranslate) return;
-            if (!message.content) return;
-
-            setShouldShowTranslateEnabledTooltip?.(true);
-            clearTimeout(tooltipTimeout);
-            tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
-
-            const trans = await translate("sent", message.content);
-            message.content = trans.text;
-
-        });
+        }
     },
 
-    stop() {
-        removePreSendListener(this.preSend);
-        removeChatBarButton("vc-translate");
-        removeButton("vc-translate");
-        removeAccessory("vc-translation");
-    },
+    async onBeforeMessageSend(_, message) {
+        if (!settings.store.autoTranslate) return;
+        if (!message.content) return;
+
+        setShouldShowTranslateEnabledTooltip?.(true);
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
+
+        const trans = await translate("sent", message.content);
+        message.content = trans.text;
+    }
 });

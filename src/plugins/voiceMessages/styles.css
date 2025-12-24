@@ -9,14 +9,10 @@
     margin-bottom: 1em;
 }
 
-.vc-vmsg-modal audio {
-    width: 100%;
-}
-
 .vc-vmsg-preview {
-    color: var(--text-normal);
+    color: var(--text-default);
     border-radius: 24px;
-    background-color: var(--background-secondary);
+    background-color: var(--background-base-lower);
     position: relative;
     display: flex;
     align-items: center;
@@ -25,7 +21,7 @@
 }
 
 .vc-vmsg-preview-indicator {
-    background: var(--button-secondary-background);
+    background: var(--redesign-button-secondary-background);
     width: 16px;
     height: 16px;
     border-radius: 50%;
@@ -51,4 +47,8 @@
     font-weight: 600;
     flex: 1;
     text-align: center;
+}
+
+.vc-vmsg-error {
+    color: var(--text-feedback-critical, #FF5C5C);
 }

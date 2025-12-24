@@ -17,12 +17,9 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { enableStyle } from "@api/Styles";
-import { Link } from "@components/Link";
+import { LinkButton } from "@components/Button";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-import style from "./index.css?managed";
 
 const API_URL = "https://usrbg.is-hardly.online/users";
 
@@ -80,7 +77,9 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
+            <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
+                Get your own USRBG banner
+            </LinkButton>
         );
     },
 
@@ -115,8 +114,6 @@ export default definePlugin({
     },
 
     async start() {
-        enableStyle(style);
-
         const res = await fetch(API_URL);
         if (res.ok) {
             this.data = await res.json();

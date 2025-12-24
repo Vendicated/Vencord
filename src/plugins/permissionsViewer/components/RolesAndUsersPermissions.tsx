@@ -19,15 +19,15 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
-import { getUniqueUsername } from "@utils/discord";
+import { cl, getGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
+import { copyToClipboard } from "@utils/clipboard";
+import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Guild, Role, UnicodeEmoji, User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
-import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
-import { UnicodeEmoji } from "@webpack/types";
-import type { Guild, Role, User } from "discord-types/general";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
-import { cl, getPermissionDescription, getPermissionString } from "../utils";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
 
 export const enum PermissionType {
@@ -56,7 +56,7 @@ function getRoleIconSrc(role: Role) {
 }
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
-    permissions.sort((a, b) => a.type - b.type);
+    const guildPermissionSpecMap = useMemo(() => getGuildPermissionSpecMap(guild), [guild.id]);
 
     useStateFromStores(
         [GuildMemberStore],
@@ -64,6 +64,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         null,
         (old, current) => old.length === current.length
     );
+
+    useEffect(() => {
+        permissions.sort((a, b) => a.type - b.type);
+    }, [permissions]);
 
     useEffect(() => {
         const usersToRequest = permissions
@@ -80,7 +84,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const [selectedItemIndex, selectItem] = useState(0);
     const selectedItem = permissions[selectedItemIndex];
 
-    const roles = GuildStore.getRoles(guild.id);
+    const roles = GuildRoleStore.getRolesSnapshot(guild.id);
 
     return (
         <ModalRoot
@@ -88,7 +92,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             size={ModalSize.LARGE}
         >
             <ModalHeader>
-                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} permissions:</Text>
+                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} Permissions</Text>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
@@ -109,6 +113,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                                 return (
                                     <div
+                                        key={index}
                                         className={cl("modal-list-item-btn")}
                                         onClick={() => selectItem(index)}
                                         role="button"
@@ -152,14 +157,14 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     src={user.getAvatarURL(void 0, void 0, false)}
                                                 />
                                             )}
-                                            <Text variant="text-md/normal">
+                                            <Text variant="text-md/normal" className={cl("modal-list-item-text")}>
                                                 {
                                                     permission.type === PermissionType.Role
                                                         ? role?.name ?? "Unknown Role"
                                                         : permission.type === PermissionType.User
                                                             ? (user != null && getUniqueUsername(user)) ?? "Unknown User"
                                                             : (
-                                                                <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
+                                                                <Flex gap="0.2em">
                                                                     @owner
                                                                     <OwnerCrownIcon height={18} width={18} aria-hidden="true" />
                                                                 </Flex>
@@ -173,8 +178,8 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         </ScrollerThin>
                         <div className={cl("modal-divider")} />
                         <ScrollerThin className={cl("modal-perms")} orientation="auto">
-                            {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
-                                <div className={cl("modal-perms-item")}>
+                            {Object.values(PermissionsBits).map(bit => (
+                                <div key={bit} className={cl("modal-perms-item")}>
                                     <div className={cl("modal-perms-item-icon")}>
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
@@ -192,9 +197,14 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             return PermissionDefaultIcon();
                                         })()}
                                     </div>
-                                    <Text variant="text-md/normal">{getPermissionString(permissionName)}</Text>
+                                    <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
 
-                                    <Tooltip text={getPermissionDescription(permissionName) || "No Description"}>
+                                    <Tooltip text={
+                                        (() => {
+                                            const { description } = guildPermissionSpecMap[String(bit)];
+                                            return typeof description === "function" ? i18n.intl.format(description, {}) : description;
+                                        })()
+                                    }>
                                         {props => <InfoIcon {...props} />}
                                     </Tooltip>
                                 </div>
@@ -216,18 +226,18 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
         >
             <Menu.MenuItem
                 id={cl("copy-role-id")}
-                label={i18n.Messages.COPY_ID_ROLE}
+                label={getIntlMessage("COPY_ID_ROLE")}
                 action={() => {
-                    Clipboard.copy(roleId);
+                    copyToClipboard(roleId);
                 }}
             />
 
             {(settings.store as any).unsafeViewAsRole && (
                 <Menu.MenuItem
                     id={cl("view-as-role")}
-                    label={i18n.Messages.VIEW_AS_ROLE}
+                    label={getIntlMessage("VIEW_AS_ROLE")}
                     action={() => {
-                        const role = GuildStore.getRole(guild.id, roleId);
+                        const role = GuildRoleStore.getRole(guild.id, roleId);
                         if (!role) return;
 
                         onClose();
@@ -257,9 +267,9 @@ function UserContextMenu({ userId }: { userId: string; }) {
         >
             <Menu.MenuItem
                 id={cl("copy-user-id")}
-                label={i18n.Messages.COPY_ID_USER}
+                label={getIntlMessage("COPY_ID_USER")}
                 action={() => {
-                    Clipboard.copy(userId);
+                    copyToClipboard(userId);
                 }}
             />
         </Menu.Menu>

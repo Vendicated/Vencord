@@ -25,16 +25,16 @@ import { SafetyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Guild, GuildMember } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, UserStore } from "@webpack/common";
-import type { Guild, GuildMember } from "discord-types/general";
+import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, useRef, UserStore } from "@webpack/common";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
-import { getSortedRoles, sortPermissionOverwrites } from "./utils";
+import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
 
 const PopoutClasses = findByPropsLazy("container", "scroller", "list");
-const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
+const RoleButtonClasses = findByPropsLazy("button", "icon");
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -56,11 +56,6 @@ export const settings = definePluginSettings({
             { label: "Lowest Role", value: PermissionsSortOrder.LowestRole }
         ]
     },
-    defaultPermissionsDropdownState: {
-        description: "Whether the permissions dropdown on user popouts should be open by default",
-        type: OptionType.BOOLEAN,
-        default: false
-    }
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
@@ -76,9 +71,9 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                 const { permissions, header } = match(type)
                     .returnType<{ permissions: RoleOrUserPermission[], header: string; }>()
                     .with(MenuItemParentType.User, () => {
-                        const member = GuildMemberStore.getMember(guildId, id!);
+                        const member = GuildMemberStore.getMember(guildId, id!)!;
 
-                        const permissions: RoleOrUserPermission[] = getSortedRoles(guild, member)
+                        const permissions: RoleOrUserPermission[] = getSortedRolesForMember(guild, member)
                             .map(role => ({
                                 type: PermissionType.Role,
                                 ...role
@@ -112,7 +107,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         };
                     })
                     .otherwise(() => {
-                        const permissions = Object.values(GuildStore.getRoles(guild.id)).map(role => ({
+                        const permissions = GuildRoleStore.getSortedRoles(guild.id).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));
@@ -170,40 +165,45 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".VIEW_ALL_ROLES,",
+            find: "#{intl::COLLAPSE_ROLES}",
             replacement: {
-                match: /\.collapseButton,.+?}\)}\),/,
-                replace: "$&$self.ViewPermissionsButton(arguments[0]),"
+                match: /className:(\i\.expandButton),.+?null,/,
+                replace: "$&$self.ViewPermissionsButton({className:$1,props:arguments[0]}),"
             }
         }
     ],
 
-    ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => (
-        <Popout
-            position="bottom"
-            align="center"
-            renderPopout={() => (
-                <Dialog className={PopoutClasses.container} style={{ width: "500px" }}>
-                    <UserPermissions guild={guild} guildMember={guildMember} forceOpen />
-                </Dialog>
-            )}
-        >
-            {popoutProps => (
-                <TooltipContainer text="View Permissions">
-                    <Button
-                        {...popoutProps}
-                        color={Button.Colors.CUSTOM}
-                        look={Button.Looks.FILLED}
-                        size={Button.Sizes.NONE}
-                        innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon)}
-                        className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, "vc-permviewer-role-button")}
-                    >
-                        <SafetyIcon height="16" width="16" />
-                    </Button>
-                </TooltipContainer>
-            )}
-        </Popout>
-    ), { noop: true }),
+    ViewPermissionsButton: ErrorBoundary.wrap(({ className, props: { guild, guildMember } }: { className: string, props: { guild: Guild; guildMember: GuildMember; }; }) => {
+        const buttonRef = useRef(null);
+
+        return (
+            <Popout
+                position="bottom"
+                align="center"
+                targetElementRef={buttonRef}
+                renderPopout={({ closePopout }) => (
+                    <Dialog className={PopoutClasses.container} style={{ width: "500px" }}>
+                        <UserPermissions guild={guild} guildMember={guildMember} closePopout={closePopout} />
+                    </Dialog>
+                )}
+            >
+                {popoutProps => (
+                    <TooltipContainer text="View Permissions">
+                        <Button
+                            {...popoutProps}
+                            ref={buttonRef}
+                            color={Button.Colors.CUSTOM}
+                            look={Button.Looks.FILLED}
+                            size={Button.Sizes.NONE}
+                            className={classes(className, "vc-permviewer-role-button")}
+                        >
+                            <SafetyIcon height="16" width="16" />
+                        </Button>
+                    </TooltipContainer>
+                )}
+            </Popout>
+        );
+    }, { noop: true }),
 
     contextMenus: {
         "user-context": makeContextMenuPatch("roles", MenuItemParentType.User),

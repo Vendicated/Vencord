@@ -5,9 +5,10 @@
  */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
+import { Message } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 
 export default definePlugin({
@@ -38,7 +39,7 @@ export default definePlugin({
         // add --avatar-url-<resolution> css variable to avatar img elements
         // popout profiles
         {
-            find: ".LABEL_WITH_ONLINE_STATUS",
+            find: "#{intl::LABEL_WITH_ONLINE_STATUS}",
             replacement: {
                 match: /src:null!=\i\?(\i).{1,50}"aria-hidden":!0/,
                 replace: "$&,style:$self.getAvatarStyles($1)"
@@ -54,7 +55,9 @@ export default definePlugin({
         }
     ],
 
-    getAvatarStyles(src: string) {
+    getAvatarStyles(src: string | null) {
+        if (!src || src.startsWith("data:")) return {};
+
         return Object.fromEntries(
             [128, 256, 512, 1024, 2048, 4096].map(size => [
                 `--avatar-url-${size}`,
@@ -64,12 +67,17 @@ export default definePlugin({
     },
 
     getMessageProps(props: { message: Message; }) {
-        const author = props.message?.author;
-        const authorId = author?.id;
-        return {
-            "data-author-id": authorId,
-            "data-author-username": author?.username,
-            "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
-        };
+        try {
+            const author = props.message?.author;
+            const authorId = author?.id;
+            return {
+                "data-author-id": authorId,
+                "data-author-username": author?.username,
+                "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
+            };
+        } catch (e) {
+            new Logger("ThemeAttributes").error("Error in getMessageProps", e);
+            return {};
+        }
     }
 });

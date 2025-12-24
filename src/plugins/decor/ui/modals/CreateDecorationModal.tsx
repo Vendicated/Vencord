@@ -6,21 +6,20 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
+import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
+import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
+import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
+import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
-import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "../";
-import { AvatarDecorationModalPreview } from "../components";
+const FileUpload = findComponentByCodeLazy(".fileUpload),");
 
-const FileUpload = findComponentByCodeLazy("fileUploadInput,");
-
-const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE=3]="POSITIVE', {
-    HelpMessageTypes: filters.byProps("POSITIVE", "WARNING"),
+const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
+    HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
     HelpMessage: filters.byCode(".iconDiv")
 });
 
@@ -65,7 +64,7 @@ function CreateDecorationModal(props: ModalProps) {
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
             <Text
-                color="header-primary"
+                color="text-strong"
                 variant="heading-lg/semibold"
                 tag="h1"
                 style={{ flexGrow: 1 }}
@@ -89,7 +88,8 @@ function CreateDecorationModal(props: ModalProps) {
                 <div className={cl("create-decoration-modal-form-preview-container")}>
                     <div className={cl("create-decoration-modal-form")}>
                         {error !== null && <Text color="text-danger" variant="text-xs/normal">{error.message}</Text>}
-                        <Forms.FormSection title="File">
+                        <section>
+                            <Forms.FormTitle tag="h5">File</Forms.FormTitle>
                             <FileUpload
                                 filename={file?.name}
                                 placeholder="Choose a file"
@@ -97,30 +97,31 @@ function CreateDecorationModal(props: ModalProps) {
                                 filters={[{ name: "Decoration file", extensions: ["png", "apng"] }]}
                                 onFileSelect={setFile}
                             />
-                            <Forms.FormText type="description" className={Margins.top8}>
+                            <Forms.FormText className={Margins.top8}>
                                 File should be APNG or PNG.
                             </Forms.FormText>
-                        </Forms.FormSection>
-                        <Forms.FormSection title="Name">
+                        </section>
+                        <section>
+                            <Forms.FormTitle tag="h5">Name</Forms.FormTitle>
                             <TextInput
                                 placeholder="Companion Cube"
                                 value={name}
                                 onChange={setName}
                             />
-                            <Forms.FormText type="description" className={Margins.top8}>
+                            <Forms.FormText className={Margins.top8}>
                                 This name will be used when referring to this decoration.
                             </Forms.FormText>
-                        </Forms.FormSection>
+                        </section>
                     </div>
                     <div>
                         <AvatarDecorationModalPreview
-                            avatarDecorationOverride={decoration}
+                            avatarDecoration={decoration}
                             user={UserStore.getCurrentUser()}
                         />
                     </div>
                 </div>
-                <Forms.FormText type="description" className={Margins.bottom16}>
-                    <br />You can receive updates on your decoration's review by joining <Link
+                <HelpMessage messageType={HelpMessageTypes.INFO} className={Margins.bottom8}>
+                    To receive updates on your decoration's review, join <Link
                         href={`https://discord.gg/${INVITE_KEY}`}
                         onClick={async e => {
                             e.preventDefault();
@@ -138,29 +139,29 @@ function CreateDecorationModal(props: ModalProps) {
                         }}
                     >
                         Decor's Discord server
-                    </Link>.
-                </Forms.FormText>
+                    </Link> and allow direct messages.
+                </HelpMessage>
             </ErrorBoundary>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
-            <Button
-                onClick={() => {
-                    setSubmitting(true);
-                    createDecoration({ alt: name, file: file! })
-                        .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
-                }}
-                disabled={!file || !name}
-                submitting={submitting}
-            >
-                Submit for Review
-            </Button>
-            <Button
-                onClick={props.onClose}
-                color={Button.Colors.PRIMARY}
-                look={Button.Looks.LINK}
-            >
-                Cancel
-            </Button>
+            <div className={cl("modal-footer-btn-container")}>
+                <Button
+                    onClick={props.onClose}
+                    color={Button.Colors.PRIMARY}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    onClick={() => {
+                        setSubmitting(true);
+                        createDecoration({ alt: name, file: file! })
+                            .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
+                    }}
+                    disabled={!file || !name || submitting}
+                >
+                    Submit for Review
+                </Button>
+            </div>
         </ModalFooter>
     </ModalRoot>;
 }

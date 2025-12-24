@@ -12,11 +12,13 @@ export default definePlugin({
     description: "API to add buttons to the chat input",
     authors: [Devs.Ven],
 
-    patches: [{
-        find: '"sticker")',
-        replacement: {
-            match: /return\(!\i\.\i&&(?=\(\i\.isDM.+?(\i)\.push\(.{0,50}"gift")/,
-            replace: "$&(Vencord.Api.ChatButtons._injectButtons($1,arguments[0]),true)&&"
+    patches: [
+        {
+            find: '"sticker")',
+            replacement: {
+                match: /(?<=className:.{0,20}\.buttons.{0,50}children:)(\i)/,
+                replace: "Vencord.Api.ChatButtons._injectButtons($1,arguments[0])"
+            }
         }
-    }]
+    ]
 });
