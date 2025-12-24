@@ -1,9 +1,9 @@
 import { FluxStore, User, VoiceState } from "..";
+import { ParticipantType, RTCPlatform } from "../../enums";
 
 export type RTCLayout = "normal" | "minimum" | "no-chat" | "full-screen" | "haven";
 export type RTCMode = "video" | "voice";
 export type RTCLayoutContext = "OVERLAY" | "APP" | "POPOUT" | "CALL_TILE_POPOUT";
-export type ParticipantType = "STREAM" | "HIDDEN_STREAM" | "USER" | "ACTIVITY";
 export type ParticipantFilterType = "VIDEO" | "STREAM" | "FILTERED" | "SPEAKING" | "ACTIVITY" | "NOT_POPPED_OUT";
 
 export interface StreamResolution {
@@ -25,10 +25,10 @@ export interface BaseParticipant {
 }
 
 export interface UserParticipant extends BaseParticipant {
-    type: "USER";
+    type: ParticipantType.USER;
     user: User;
     voiceState: VoiceState | null;
-    voicePlatform: number | null;
+    voicePlatform: RTCPlatform | null;
     speaking: boolean;
     voiceDb: number;
     latched: boolean;
@@ -43,7 +43,7 @@ export interface UserParticipant extends BaseParticipant {
 }
 
 export interface StreamParticipant extends BaseParticipant {
-    type: "STREAM" | "HIDDEN_STREAM";
+    type: ParticipantType.STREAM | ParticipantType.HIDDEN_STREAM;
     user: User;
     userNick: string;
     userVideo: boolean;
@@ -54,7 +54,7 @@ export interface StreamParticipant extends BaseParticipant {
 }
 
 export interface ActivityParticipant extends BaseParticipant {
-    type: "ACTIVITY";
+    type: ParticipantType.ACTIVITY;
     applicationId: string;
     activityType: number;
     activityUrl: string;
