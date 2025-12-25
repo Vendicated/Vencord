@@ -1,15 +1,15 @@
 import { FluxStore } from "..";
 
-type State = {
+export interface OverridePremiumTypeState {
     createdAtOverride: Date | undefined;
-    premiumTypeActual: number;
+    premiumTypeActual: number | null;
     premiumTypeOverride: number | undefined;
-};
+}
 
 export class OverridePremiumTypeStore extends FluxStore {
-    getState(): State;
+    getState(): OverridePremiumTypeState;
     getCreatedAtOverride(): Date | undefined;
-    getPremiumTypeActual(): number;
+    getPremiumTypeActual(): number | null;
     getPremiumTypeOverride(): number | undefined;
-    get premiumType(): number;
+    get premiumType(): number | undefined;
 }

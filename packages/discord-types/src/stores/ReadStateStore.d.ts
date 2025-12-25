@@ -10,8 +10,8 @@ export interface GuildChannelUnreadState {
 export interface ReadStateSnapshot {
     unread: boolean;
     mentionCount: number;
-    guildUnread: boolean;
-    guildMentionCount: number;
+    guildUnread: boolean | null;
+    guildMentionCount: number | null;
     takenAt: number;
 }
 
@@ -35,7 +35,7 @@ export class ReadStateStore extends FluxStore {
     ackMessageId(channelId: string, type?: ReadStateType): string | null;
     getAllReadStates(includePrivate?: boolean): SerializedReadState[];
     getChannelIdsForWindowId(windowId: string): string[];
-    getForDebugging(channelId: string): object;
+    getForDebugging(channelId: string): object | undefined;
     getGuildChannelUnreadState(
         channel: Channel,
         isOptInEnabled: boolean,
