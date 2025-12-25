@@ -18,11 +18,11 @@ import { JSX } from "react";
 
 import { addIgnoredQuest, addRerenderCallback, autoFetchCompatible, fetchAndAlertQuests, maximumAutoFetchIntervalValue, minimumAutoFetchIntervalValue, questIsIgnored, removeIgnoredQuest, rerenderQuests, settings, startAutoFetchingQuests, stopAutoFetchingQuests, validateAndOverwriteIgnoredQuests } from "./settings";
 import { ExcludedQuestMap, GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, RGB } from "./utils/components";
-import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, waitUntilEnrolled } from "./utils/misc";
+import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, videoQuestLeeway, waitUntilEnrolled } from "./utils/misc";
 
 const QuestifyNative = VencordNative.pluginHelpers.Questify as PluginNative<typeof import("./native")>;
 const patchedMobileQuests = new Set<string>();
-export const activeQuestIntervals = new Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; duration: number, type: string; }>();
+export const activeQuestIntervals = new Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }>();
 
 function questMenuUnignoreAllClicked(): void {
     validateAndOverwriteIgnoredQuests([]);
@@ -572,8 +572,10 @@ function shouldPreloadQuestAssets(): boolean {
 async function startVideoProgressTracking(quest: Quest, questTarget: number): Promise<void> {
     const questName = normalizeQuestName(quest.config.messages.questName);
     const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : null;
-    const initialProgress = Math.floor(((new Date()).getTime() - (questEnrolledAt ?? new Date()).getTime()) / 1000) || 1; // Max up to 10 seconds into the future can be reported.
-    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: initialProgress, duration: questTarget, type: "watch" });
+    const initialProgress = Math.floor(((new Date()).getTime() - (questEnrolledAt ?? new Date()).getTime()) / 1000) || 1;
+    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: initialProgress, type: "watch" });
+    // Max up to ~25 seconds into the future can be reported.
+    const questTargetWithLeeway = questTarget - videoQuestLeeway;
 
     if (!questEnrolledAt) {
         const enrollmentTimeout = 60000;
@@ -591,10 +593,11 @@ async function startVideoProgressTracking(quest: Quest, questTarget: number): Pr
         return;
     }
 
+    const reportEverySec = 10;
     let progressIntervalId: NodeJS.Timeout;
     let currentProgress = initialProgress;
-    const timeRemaining = Math.max(0, questTarget - currentProgress);
-    const reportEverySec = 10;
+    let currentProgressScaled = initialProgress;
+    const timeRemaining = Math.max(0, questTargetWithLeeway - currentProgressScaled);
 
     async function handleSendComplete() {
         clearInterval(progressIntervalId);
@@ -623,15 +626,33 @@ async function startVideoProgressTracking(quest: Quest, questTarget: number): Pr
             await handleSendComplete();
         }, timeRemaining * 1000);
     } else {
+        const simulatedProgressToCover = questTarget - currentProgressScaled;
+        const speedFactor = simulatedProgressToCover / timeRemaining;
+        const progressIncrementPerInterval = reportEverySec * speedFactor;
+        const numberOfIntervals = Math.floor(timeRemaining / reportEverySec);
+        let intervalsRun = 0;
+
         reportVideoQuestProgress(quest, initialProgress, QuestifyLogger);
 
         progressIntervalId = setInterval(async () => {
+            intervalsRun++;
             currentProgress += reportEverySec;
+            currentProgressScaled += progressIncrementPerInterval;
+            const progressToReport = Math.min(Math.floor(currentProgressScaled), questTarget);
 
-            if (currentProgress >= questTarget - 10) {
-                await handleSendComplete();
-            } else {
-                await reportVideoQuestProgress(quest, currentProgress, QuestifyLogger);
+            if (intervalsRun < numberOfIntervals || (currentProgress < questTarget - videoQuestLeeway - (reportEverySec / 2))) {
+                await reportVideoQuestProgress(quest, progressToReport, QuestifyLogger);
+            }
+
+            if (intervalsRun >= numberOfIntervals) {
+                clearInterval(progressIntervalId);
+
+                const timeSpentInIntervals = numberOfIntervals * reportEverySec;
+                const finalWaitTime = Math.max(0, timeRemaining - timeSpentInIntervals);
+                progressIntervalId = setTimeout(handleSendComplete, finalWaitTime * 1000);
+
+                const intervalData = activeQuestIntervals.get(quest.id);
+                if (intervalData) intervalData.progressTimeout = progressIntervalId;
             }
         }, reportEverySec * 1000);
     }
@@ -648,7 +669,12 @@ async function startVideoProgressTracking(quest: Quest, questTarget: number): Pr
         rerenderQuests();
     }, 1000);
 
-    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initialProgress, duration: questTarget, type: "watch" });
+    const intervalData = activeQuestIntervals.get(quest.id);
+
+    if (intervalData) {
+        intervalData.progressTimeout = progressIntervalId;
+        intervalData.rerenderTimeout = renderIntervalId;
+    }
 
     if (timeRemaining > 0) {
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} will be completed in the background in ${timeRemaining} seconds.`);
@@ -662,7 +688,7 @@ async function startPlayGameProgressTracking(quest: Quest, questTarget: number):
     const initialProgress = quest.userStatus?.progress?.[playType?.type || ""]?.value || 0;
     const remaining = Math.max(0, questTarget - initialProgress);
     const heartbeatInterval = 20; // Heartbeats must be at most 2 minutes apart.
-    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: initialProgress, duration: questTarget, type: "play" });
+    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: initialProgress, type: "play" });
 
     if (!questEnrolledAt) {
         const enrollmentTimeout = 60000;
@@ -755,7 +781,13 @@ async function startPlayGameProgressTracking(quest: Quest, questTarget: number):
         rerenderQuests();
     }, 1000);
 
-    activeQuestIntervals.set(quest.id, { progressTimeout: progressIntervalId, rerenderTimeout: renderIntervalId, progress: initial.progress || initialProgress, duration: questTarget, type: "play" });
+    const intervalData = activeQuestIntervals.get(quest.id);
+
+    if (intervalData) {
+        intervalData.progress = initial.progress || initialProgress;
+        intervalData.progressTimeout = progressIntervalId;
+        intervalData.rerenderTimeout = renderIntervalId;
+    }
 
     if (remaining > 0) {
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} will be completed in the background in ${remaining} seconds.`);
@@ -766,7 +798,7 @@ async function startAchievementActivityProgressTracking(quest: Quest, questTarge
     const questName = normalizeQuestName(quest.config.messages.questName);
     const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : null;
     const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
-    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: 0, duration: questTarget, type: "achievement" });
+    activeQuestIntervals.set(quest.id, { progressTimeout: null as any, rerenderTimeout: null as any, progress: 0, type: "achievement" });
 
     if (!questEnrolledAt) {
         const enrollmentTimeout = 60000;
@@ -842,7 +874,7 @@ function processQuestForAutoComplete(quest: Quest): boolean {
     const questName = normalizeQuestName(quest.config.messages.questName);
     const { completeVideoQuestsInBackground, completeGameQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO || quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE;
+    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
     const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
     const questTarget = playType?.target || watchType?.target || achievementType?.target || 0;
     const existingInterval = activeQuestIntervals.get(quest.id);
@@ -891,9 +923,9 @@ function shouldDisableQuestAcceptedButton(quest: Quest): boolean | null {
 function getQuestUnacceptedButtonText(quest: Quest): string | null {
     const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO || quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE;
+    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
     const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
-    const target = playType?.target || watchType?.target || achievementType?.target || 0;
+    const target = (playType?.target || (watchType?.target ? watchType.target - videoQuestLeeway : undefined) || achievementType?.target || 0);
     const targetFormatted = `${String(Math.floor(target / 60)).padStart(2, "0")}:${String(target % 60).padStart(2, "0")}`;
 
     if (target > 0) {
@@ -918,21 +950,17 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
     if (questEnrolledAt) {
         if (((playType && completeGameQuestsInBackground) || (watchType && completeVideoQuestsInBackground))) {
             const taskType = playType || watchType;
-            const duration = taskType?.target;
-
-            if (!duration) {
-                return null;
-            }
-
-            const progress = Math.min((intervalData?.progress ?? (quest.userStatus?.progress?.[taskType?.type || ""]?.value || 0)), duration);
-            const timeRemaining = Math.max(0, duration - progress);
-            const canCompleteImmediately = watchType && questEnrolledAt && ((new Date().getTime() - questEnrolledAt.getTime()) / 1000) >= duration;
+            const duration = taskType?.target || 0;
+            const durationWithLeeway = watchType ? duration - videoQuestLeeway : duration;
+            const progress = Math.min((intervalData?.progress ?? (quest.userStatus?.progress?.[taskType?.type || ""]?.value || 0)), durationWithLeeway);
+            const timeRemaining = Math.max(0, durationWithLeeway - progress);
+            const canCompleteImmediately = watchType && questEnrolledAt && ((new Date().getTime() - questEnrolledAt.getTime()) / 1000) >= durationWithLeeway;
             const progressFormatted = `${String(Math.floor(timeRemaining / 60)).padStart(2, "0")}:${String(timeRemaining % 60).padStart(2, "0")}`;
 
             if (!!intervalData) {
                 return !canCompleteImmediately && timeRemaining ? `Completing (${progressFormatted})` : "Completing...";
             } else if (watchType || (playType && IS_DISCORD_DESKTOP)) {
-                return canCompleteImmediately ? "Complete (Immediate)" : timeRemaining === duration ? `Complete (${progressFormatted})` : `Resume (${progressFormatted})`;
+                return canCompleteImmediately ? "Complete (Immediate)" : timeRemaining === durationWithLeeway ? `Complete (${progressFormatted})` : `Resume (${progressFormatted})`;
             }
         } else if (achievementType && completeAchievementQuestsInBackground) {
             if (!!intervalData) {
@@ -957,7 +985,16 @@ function getQuestPanelOverride(): Quest | null {
             return;
         }
 
-        const timeRemaining = interval.duration - interval.progress;
+        const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
+        const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
+        const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
+        const duration = playType?.target || (watchType?.target ? watchType.target - videoQuestLeeway : undefined) || achievementType?.target || 0;
+
+        if (!duration) {
+            return;
+        }
+
+        const timeRemaining = duration - interval.progress;
 
         // 3 second buffer to account for per-second rerendering
         // which could cause flickering if multiple Quests were

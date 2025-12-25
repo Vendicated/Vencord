@@ -16,6 +16,7 @@ export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
 export const QuestsStore = findByPropsLazy("getQuest");
 export const questPath = "/quest-home";
+export const videoQuestLeeway = 24;
 export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;
