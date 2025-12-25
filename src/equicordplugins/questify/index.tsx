@@ -371,7 +371,7 @@ function makeDesktopCompatible(quests: Quest[]): void {
             const config = quest.config?.taskConfigV2;
             const tasks = config?.tasks;
 
-            if (tasks?.WATCH_VIDEO_ON_MOBILE && !tasks?.WATCH_VIDEO) {
+            if (tasks?.WATCH_VIDEO_ON_MOBILE && (!tasks?.WATCH_VIDEO || patchedMobileQuests.has(quest.id))) {
                 patchedMobileQuests.add(quest.id);
 
                 tasks.WATCH_VIDEO = {
@@ -872,9 +872,9 @@ async function startAchievementActivityProgressTracking(quest: Quest, questTarge
 
 function processQuestForAutoComplete(quest: Quest): boolean {
     const questName = normalizeQuestName(quest.config.messages.questName);
-    const { completeVideoQuestsInBackground, completeGameQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
+    const { completeVideoQuestsInBackground, completeGameQuestsInBackground, completeAchievementQuestsInBackground, makeMobileQuestsDesktopCompatible } = settings.store;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
+    const watchType = (makeMobileQuestsDesktopCompatible && quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE) || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
     const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
     const questTarget = playType?.target || watchType?.target || achievementType?.target || 0;
     const existingInterval = activeQuestIntervals.get(quest.id);
@@ -921,9 +921,9 @@ function shouldDisableQuestAcceptedButton(quest: Quest): boolean | null {
 }
 
 function getQuestUnacceptedButtonText(quest: Quest): string | null {
-    const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
+    const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground, makeMobileQuestsDesktopCompatible } = settings.store;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
+    const watchType = (makeMobileQuestsDesktopCompatible && quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE) || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
     const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
     const target = (playType?.target || (watchType?.target ? watchType.target - videoQuestLeeway : undefined) || achievementType?.target || 0);
     const targetFormatted = `${String(Math.floor(target / 60)).padStart(2, "0")}:${String(target % 60).padStart(2, "0")}`;
@@ -940,10 +940,10 @@ function getQuestUnacceptedButtonText(quest: Quest): string | null {
 }
 
 function getQuestAcceptedButtonText(quest: Quest): string | null {
-    const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
+    const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground, makeMobileQuestsDesktopCompatible } = settings.store;
     const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : null;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
+    const watchType = (makeMobileQuestsDesktopCompatible && quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE) || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
     const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
     const intervalData = activeQuestIntervals.get(quest.id);
 
@@ -975,6 +975,7 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
 }
 
 function getQuestPanelOverride(): Quest | null {
+    const { makeMobileQuestsDesktopCompatible } = settings.store;
     let closestQuest: Quest | null = null;
     let closestTimeRemaining = Infinity;
 
@@ -986,7 +987,7 @@ function getQuestPanelOverride(): Quest | null {
         }
 
         const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-        const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
+        const watchType = (makeMobileQuestsDesktopCompatible && quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE) || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
         const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
         const duration = playType?.target || (watchType?.target ? watchType.target - videoQuestLeeway : undefined) || achievementType?.target || 0;
 
@@ -1072,7 +1073,11 @@ function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boole
         "ACHIEVEMENT_IN_ACTIVITY"
     ];
 
-    if (!Array.from(validTasks).some(taskType => Object.values(quest.config.taskConfigV2?.tasks || {}).some(task => task.type === taskType))) {
+    const validTask = Array.from(validTasks).some(taskType => Object.values(quest.config.taskConfigV2?.tasks || {}).some(
+        task => task.type === taskType && (task.type !== "WATCH_VIDEO_ON_MOBILE" || settings.store.makeMobileQuestsDesktopCompatible)
+    ));
+
+    if (!validTask) {
         return {
             disabled: disabled,
             text: text,
