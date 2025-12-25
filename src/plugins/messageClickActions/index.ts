@@ -20,10 +20,11 @@ import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import NoReplyMentionPlugin from "@plugins/noReplyMention";
 import { Devs, EquicordDevs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ApplicationIntegrationType, MessageFlags } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
-import { AuthenticationStore, FluxDispatcher, MessageTypeSets, PermissionsBits, PermissionStore, RestAPI, WindowStore } from "@webpack/common";
+import { AuthenticationStore, Constants, FluxDispatcher, MessageTypeSets, PermissionsBits, PermissionStore, RestAPI, WindowStore } from "@webpack/common";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
@@ -80,10 +81,10 @@ async function react(channelId: string, messageId: string, emoji: string) {
 
     try {
         await RestAPI.put({
-            url: `/channels/${channelId}/messages/${messageId}/reactions/${emojiParam}/@me`
+            url: Constants.Endpoints.REACTIONS(channelId, messageId, emojiParam)
         });
     } catch (e) {
-        console.error("[MessageClickActions] Failed to add reaction:", e);
+        new Logger("MessageClickActions").error("Failed to add reaction:", e);
     }
 }
 
@@ -104,6 +105,12 @@ export default definePlugin({
         document.removeEventListener("keydown", keydown);
         document.removeEventListener("keyup", keyup);
         WindowStore.removeChangeListener(focusChanged);
+
+        if (doubleClickTimeout) {
+            clearTimeout(doubleClickTimeout);
+            doubleClickTimeout = null;
+        }
+        pendingDoubleClickAction = null;
     },
 
     onMessageClick(msg, channel, event) {
