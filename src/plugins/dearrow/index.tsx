@@ -63,7 +63,6 @@ async function embedDidMount(this: Component<Props>) {
 
         if (!hasTitle && !hasThumb) return;
 
-
         embed.dearrow = {
             enabled: dearrowByDefault
         };

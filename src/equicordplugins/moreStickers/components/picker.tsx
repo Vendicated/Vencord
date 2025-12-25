@@ -168,7 +168,6 @@ function PickerContentRow({ rowIndex, grid1, grid2, grid3, channelId }: PickerCo
     );
 }
 
-
 function HeaderCollapseIcon({ isExpanded }: { isExpanded: boolean; }) {
     return (
         <svg
@@ -433,7 +432,6 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
         </div>
     );
 }
-
 
 export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
     const [query, setQuery] = React.useState<string | undefined>();

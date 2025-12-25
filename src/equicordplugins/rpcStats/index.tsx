@@ -16,7 +16,6 @@ export async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds("0", [key]))[0];
 }
 
-
 enum StatsDisplay {
     messagesSentToday,
     messagesSentAllTime,

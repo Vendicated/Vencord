@@ -33,7 +33,6 @@ export function MultipleChoice({ modalProps, onSelect, choices }: MultipleChoice
         action => action.label.toLowerCase().includes(queryEh.toLowerCase())
     );
 
-
     const visibleActions = filteredActions.slice(startIndex, startIndex + 20);
 
     const totalActions = filteredActions.length;

@@ -122,7 +122,6 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId, type }: { refe
     );
 }
 
-
 export function ReviewsInputComponent(
     { discordId, isAuthor, refetch, name, modalKey, repliesTo }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; modalKey?: string; repliesTo?: number; }
 ) {

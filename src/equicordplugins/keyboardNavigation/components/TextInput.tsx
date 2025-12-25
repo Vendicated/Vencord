@@ -48,7 +48,6 @@ export function SimpleTextInput({ modalProps, onSelect, placeholder, info }: Sim
     );
 }
 
-
 export function openSimpleTextInput(placeholder?: string, info?: string): Promise<string> {
     return new Promise(resolve => {
         openModal(modalProps => (

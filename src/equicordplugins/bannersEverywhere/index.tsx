@@ -43,7 +43,6 @@ const DATASTORE_KEY = "bannersEverywhere";
 
 const UserProfileStore = findStoreLazy("UserProfileStore");
 
-
 export default definePlugin({
     name: "BannersEverywhere",
     description: "Displays banners in the member list ",

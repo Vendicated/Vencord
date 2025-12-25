@@ -192,7 +192,6 @@ function GuildInfoModal({ guild }: GuildProps) {
     );
 }
 
-
 function Owner(guildId: string, owner: User) {
     const guildAvatar = GuildMemberStore.getMember(guildId, owner.id)?.avatar;
     const ownerAvatarUrl =
@@ -266,7 +265,6 @@ function IgnoredUserTab({ guild, setCount }: RelationshipProps) {
     return UserList("ignored", guild, ignoredIds, setCount);
 }
 
-
 function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: string[], setCount: (count: number) => void) {
     const missing = [] as string[];
     const members = [] as string[];
@@ -314,7 +312,6 @@ function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: st
                 }
             }
         );
-
 
     return (
         <ScrollerThin fade className={cl("scroller")}>

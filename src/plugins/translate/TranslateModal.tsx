@@ -73,7 +73,6 @@ function AutoTranslateToggle() {
     );
 }
 
-
 export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
     return (
         <ModalRoot {...rootProps}>

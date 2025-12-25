@@ -11,7 +11,6 @@ import { ChannelStore, FluxDispatcher, Menu } from "@webpack/common";
 
 import { SetWallpaperModal } from "./modal";
 
-
 const addWallpaperMenu = (channelId?: string, guildId?: string) => {
     const setWallpaper = (url?: string) => {
         FluxDispatcher.dispatch({

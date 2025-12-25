@@ -21,7 +21,6 @@ import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@util
 import { IconComponent } from "@utils/types";
 import { Clickable } from "@webpack/common";
 
-
 const cl = classNameFactory("vc-plugin-ui-elements-");
 
 export function UIElementsButton() {

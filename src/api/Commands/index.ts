@@ -88,7 +88,6 @@ export const _handleCommand = function (cmd: VencordCommand, args: CommandArgume
     }
 } as never;
 
-
 /**
  * Prepare a Command Option for Discord by filling missing fields
  * @param opt

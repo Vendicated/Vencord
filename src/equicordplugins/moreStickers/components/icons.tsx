@@ -20,7 +20,6 @@ export function IconContainer(props: { children: JSX.Element | JSX.Element[]; })
     );
 }
 
-
 export function SearchIcon({ width, height, color }: { width: number, height: number, color: string; }) {
     return (
         <svg role="img" width={width} height={height} viewBox="0 0 24 24">

@@ -325,7 +325,6 @@ export default definePlugin({
     FolderSideBar,
     closeFolders,
 
-
     wrapGuildNodeComponent(node: any, originalComponent: () => ReactNode, isBetterFolders: boolean, expandedFolderIds?: Set<any>) {
         if (
             !isBetterFolders ||

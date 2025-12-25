@@ -88,7 +88,6 @@ const stringifyPolicy = (policy: PolicyMap): string =>
         .map(directive => directive.flat().join(" "))
         .join("; ");
 
-
 const patchCsp = (headers: PolicyMap) => {
     const reportOnlyHeader = findHeader(headers, "content-security-policy-report-only");
     if (reportOnlyHeader)

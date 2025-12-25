@@ -28,7 +28,6 @@ function getProfileColors(userId) {
     }
 }
 
-
 function copyProfileColors(userId) {
     const colors = getProfileColors(userId);
 

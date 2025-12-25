@@ -138,7 +138,6 @@ export default definePlugin({
                     timestamp: new Date()
                 };
 
-
                 if (settings.store.mode !== 2) {
                     addLogEntry(logEntry, oldChannelId);
                     addLogEntry(logEntry, channelId);

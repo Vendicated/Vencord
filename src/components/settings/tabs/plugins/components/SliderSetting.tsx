@@ -52,4 +52,3 @@ export function SliderSetting({ option, pluginSettings, definedSettings, id, onC
         </SettingsSection>
     );
 }
-

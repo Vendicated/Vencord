@@ -39,7 +39,6 @@ export const noteHandler = proxyLazyWebpack(() => {
             };
         }
 
-
         public getNotes(notebook?: string): Record<string, HolyNotes.Note> {
             return noteHandlerCache.get(notebook);
         }
@@ -92,7 +91,6 @@ export const noteHandler = proxyLazyWebpack(() => {
 
             saveCacheToDataStore(from, lodash.omit(origNotebook, note.id) as unknown as HolyNotes.Note[]);
             saveCacheToDataStore(to, newNoteBook as unknown as HolyNotes.Note[]);
-
 
             Toasts.show({
                 id: Toasts.genId(),

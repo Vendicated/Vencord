@@ -445,7 +445,6 @@ export const Packs = () => {
     );
 };
 
-
 export function Header(props: { children: JSX.Element | JSX.Element[]; }) {
     return (
         <div className={cl("header")}>

@@ -71,7 +71,6 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, 
     );
 };
 
-
 export default definePlugin({
     name: "FollowVoiceUser",
     description: "Follow a friend in voice chat.",

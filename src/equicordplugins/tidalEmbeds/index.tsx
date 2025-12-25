@@ -7,7 +7,6 @@
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
 export default definePlugin({
     name: "TidalEmbeds",
     description: "Embeds TIDAL songs to make them playable in Discord.",

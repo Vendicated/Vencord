@@ -193,5 +193,3 @@ export const compileStyle = (style: Style) => {
             return className ? classNameToSelector(className) : match;
         });
 };
-
-

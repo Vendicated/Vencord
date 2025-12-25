@@ -437,8 +437,6 @@ async function handleGuildMessage(message: Message) {
     const all = notifyFor.includes(message.channel_id);
     const friend = settings.store.friendServerNotifications && RelationshipStore.isFriend(message.author.id);
 
-
-
     if (!all && !friend) {
         t = true;
         const isMention: boolean = message.content.includes(`<@${UserStore.getCurrentUser().id}>`);
@@ -553,7 +551,6 @@ async function relationshipAdd(user: User, type: Number) {
         Notification.title = `${user.username} is now your friend`;
         Notification.body = "You can now message them directly.";
         Notification.onClick = () => switchChannels(null, user.id);
-
 
         await showNotification(Notification);
 

@@ -49,7 +49,6 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { m
     ));
 };
 
-
 function getMessageContent(message: Message) {
     // Message snapshots is an array, which allows for nested snapshots, which Discord does not do yet.
     // no point collecting content or rewriting this to render in a certain way that makes sense

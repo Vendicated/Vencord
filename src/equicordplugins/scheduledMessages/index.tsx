@@ -63,7 +63,6 @@ export const settings = definePluginSettings({
 function handleReactionEvent(event: FluxReactionEvent): void {
     const { messageId, channelId, emoji } = event;
 
-
     if (!messageId || !channelId || !emoji) return;
 
     const isPhantom = isPhantomMessage(messageId);

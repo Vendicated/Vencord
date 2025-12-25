@@ -36,7 +36,6 @@ const settings = definePluginSettings({
                     setErrorMessage(null);
                 }
 
-
                 if (changed < value) {
                     setShouldShowWarning(true);
                 } else {
@@ -45,7 +44,6 @@ const settings = definePluginSettings({
                 setState(newValue);
                 setValue(changed);
             }
-
 
             return (
                 <section>

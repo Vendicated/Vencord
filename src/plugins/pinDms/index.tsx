@@ -124,7 +124,6 @@ export default definePlugin({
             ]
         },
 
-
         // forceUpdate moment
         // https://regex101.com/r/kDN9fO/1
         {
@@ -305,7 +304,6 @@ export default definePlugin({
                                 label="Delete Category"
                                 action={() => removeCategory(category.id)}
                             />
-
 
                         </Menu.Menu>
                     ));

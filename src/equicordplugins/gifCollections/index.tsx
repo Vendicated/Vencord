@@ -91,7 +91,6 @@ const addCollectionContextMenuPatch: NavContextMenuPatchCallback = (children, pr
     }
 };
 
-
 export const settings = definePluginSettings({
     itemPrefix: {
         description: "The prefix for gif items",

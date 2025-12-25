@@ -127,7 +127,6 @@ export const canMoveChannelInDirection = (channelId: string, direction: -1 | 1) 
     return canMoveArrayInDirection(category.channels, channelIndex, direction);
 };
 
-
 function swapElementsInArray(array: any[], index1: number, index2: number) {
     if (!array[index1] || !array[index2]) return;
     [array[index1], array[index2]] = [array[index2], array[index1]];

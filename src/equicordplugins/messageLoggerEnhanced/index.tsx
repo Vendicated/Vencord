@@ -84,7 +84,6 @@ async function messageDeleteHandler(payload: MessageDeletePayload & { isBulk: bo
             });
         }
 
-
         if (message == null || message.channel_id == null || !message.deleted) return;
         // Flogger.log("ADDING MESSAGE (DELETED)", message);
         if (payload.isBulk)

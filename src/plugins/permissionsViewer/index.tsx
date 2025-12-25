@@ -143,7 +143,6 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
             .with(MenuItemParentType.Guild, () => MenuItem(props.guild.id))
             .otherwise(() => null);
 
-
         if (item == null) return;
 
         if (group) {

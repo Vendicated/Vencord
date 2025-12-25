@@ -65,7 +65,6 @@ const ContextMenuPatch: NavContextMenuPatchCallback = (children, { channel }: { 
     );
 };
 
-
 const settings = definePluginSettings({
     permanentlyIgnoredUsers: {
         type: OptionType.STRING,

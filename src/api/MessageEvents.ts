@@ -106,7 +106,6 @@ export function removeMessagePreEditListener(listener: MessageEditListener) {
     return editListeners.delete(listener);
 }
 
-
 // Message clicks
 export type MessageClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
 

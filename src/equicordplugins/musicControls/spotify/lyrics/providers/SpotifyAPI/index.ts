@@ -19,7 +19,6 @@ interface Line {
     endTimeMs: string;
 }
 
-
 export async function getLyricsSpotify(trackId: string): Promise<LyricsData | null> {
     const resp = await fetch("https://spotify-lyrics-api-pi.vercel.app/?trackid=" + trackId);
     if (!resp.ok) return null;

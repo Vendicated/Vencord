@@ -347,7 +347,6 @@ export function YtmPlayer() {
     const isPlaying = useStateFromStores([YoutubeMusicStore], () => YoutubeMusicStore.isPlaying);
     const [shouldHide, setShouldHide] = useState(false);
 
-
     React.useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {
@@ -370,4 +369,3 @@ export function YtmPlayer() {
         </div>
     );
 }
-

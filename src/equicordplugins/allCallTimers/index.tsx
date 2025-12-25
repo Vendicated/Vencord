@@ -61,7 +61,6 @@ export const settings = definePluginSettings({
     }
 });
 
-
 // Save the join time of all users in a Map
 type userJoinData = { channelId: string, time: number; guildId: string; };
 const userJoinTimes = new Map<string, userJoinData>();

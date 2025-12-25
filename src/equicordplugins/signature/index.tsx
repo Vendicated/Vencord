@@ -147,10 +147,7 @@ export default definePlugin({
     }],
 });
 
-
 // text processing injection processor
 function textProcessing(input: string) {
     return `${input}\n${settings.store.textHeader ? settings.store.textHeader + " " : ""}${settings.store.name}`;
 }
-
-

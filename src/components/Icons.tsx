@@ -285,7 +285,6 @@ export function PluginIcon(props: IconProps) {
     );
 }
 
-
 export function PlusIcon(props: IconProps) {
     return (
         <Icon

@@ -72,8 +72,6 @@ export const sortMessagesByDate = (timestampA: string, timestampB: string) => {
     }
 };
 
-
-
 // stolen from mlv2
 export function findLastIndex<T>(array: T[], predicate: (e: T, t: number, n: T[]) => boolean) {
     let l = array.length;
@@ -94,7 +92,6 @@ export const mapTimestamp = (m: any) => {
     if (m.embeds) m.embeds = m.embeds.map(e => sanitizeEmbed(m.channel_id, m.id, e));
     return m;
 };
-
 
 export const messageJsonToMessageClass = memoize((log: { message: LoggedMessageJSON; }) => {
     // console.time("message populate");
@@ -127,7 +124,6 @@ export const messageJsonToMessageClass = memoize((log: { message: LoggedMessageJ
     // console.timeEnd("message populate");
     return message;
 });
-
 
 export function parseJSON(json?: string | null) {
     try {

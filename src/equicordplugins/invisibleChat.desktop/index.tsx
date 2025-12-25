@@ -44,7 +44,6 @@ function PopOverIcon() {
     );
 }
 
-
 function Indicator() {
     return (
         <Tooltip text="This message has a hidden message! (InvisibleChat)">

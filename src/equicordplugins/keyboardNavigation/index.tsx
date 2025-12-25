@@ -84,7 +84,6 @@ export const settings = definePluginSettings({
     }
 });
 
-
 export default definePlugin({
     name: "KeyboardNavigation",
     description: "Allows you to navigate the UI with a keyboard.",
@@ -107,7 +106,6 @@ export default definePlugin({
     stop() {
         document.removeEventListener("keydown", this.event);
     },
-
 
     event(e: KeyboardEvent) {
 

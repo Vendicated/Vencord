@@ -16,4 +16,3 @@ export function IconGhost({ fill }) {
         </svg>
     );
 }
-

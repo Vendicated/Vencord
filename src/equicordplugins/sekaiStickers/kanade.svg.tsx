@@ -17,5 +17,4 @@ const kanadeSvg = () => {
     );
 };
 
-
 export { kanadeSvg };

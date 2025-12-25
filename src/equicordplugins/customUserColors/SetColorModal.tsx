@@ -22,7 +22,6 @@ export function SetColorModal({ id, modalProps }: { id: string, modalProps: Moda
     const [colorPickerColor, setColorPickerColor] = useState(initialColor);
     // hex color code as an int (NOT rgb 0-255)
 
-
     function setUserColor(color: number) {
         setColorPickerColor(color);
     }

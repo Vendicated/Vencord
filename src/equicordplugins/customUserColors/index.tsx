@@ -21,7 +21,6 @@ import { SetColorModal } from "./SetColorModal";
 export const DATASTORE_KEY = "equicord-customcolors";
 export let colors: Record<string, string> = {};
 
-
 (async () => {
     colors = await get<Record<string, string>>(DATASTORE_KEY) || {};
 })();

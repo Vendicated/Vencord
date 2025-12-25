@@ -98,7 +98,6 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
     );
 }
 
-
 // #region Old compatibility
 
 export const TextCompat: DiscordText = function TextCompat({ color, variant, ...restProps }) {

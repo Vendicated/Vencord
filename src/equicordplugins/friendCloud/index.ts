@@ -278,7 +278,6 @@ function generatePoissonDiskPosition(
     };
 }
 
-
 function calculateCanvasSize(userCount: number, avatarSize: number): { width: number, height: number; } {
     const padding = 50;
     const textSpace = 60;

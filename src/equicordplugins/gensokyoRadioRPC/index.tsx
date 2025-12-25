@@ -12,7 +12,6 @@ import { Activity } from "@vencord/discord-types";
 import { ActivityFlags, ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
 
-
 const Native = VencordNative.pluginHelpers.GensokyoRadioRPC as PluginNative<typeof import("./native")>;
 
 const applicationId = "1253772057926303804";

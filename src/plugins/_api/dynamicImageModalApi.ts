@@ -7,7 +7,6 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
 export default definePlugin({
     name: "DynamicImageModalAPI",
     authors: [Devs.sadan, Devs.Nuckyz],

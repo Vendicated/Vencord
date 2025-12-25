@@ -13,7 +13,6 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ApplicationAssetUtils, FluxDispatcher, showToast } from "@webpack/common";
 
-
 interface ActivityAssets {
     large_image?: string;
     large_text?: string;

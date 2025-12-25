@@ -527,7 +527,6 @@ export function findComponentByCode(...code: CodeFilter) {
 export function findComponentLazy<T extends object = any>(filter: FilterFn) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["findComponent", [filter]]);
 
-
     return LazyComponent<T>(() => {
         const res = find(filter, { isIndirect: true });
         if (!res)

@@ -35,7 +35,6 @@ const enum IndicatorMode {
     Avatars = 1 << 1
 }
 
-
 function getDisplayName(guildId: string, userId: string) {
     const user = UserStore.getUser(userId);
     return GuildMemberStore.getNick(guildId, userId) ?? (user as any).globalName ?? user.username;

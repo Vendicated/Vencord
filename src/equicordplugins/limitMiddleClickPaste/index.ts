@@ -20,7 +20,6 @@ import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 
-
 const settings = definePluginSettings({
     limitTo: {
         type: OptionType.SELECT,

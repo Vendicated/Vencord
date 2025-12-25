@@ -22,7 +22,6 @@ interface ActivityAssets {
     small_text?: string;
 }
 
-
 interface ActivityButton {
     label: string;
     url: string;
@@ -255,7 +254,6 @@ export default definePlugin({
 
             const res = await fetch(`https://api.stats.fm/api/v1/users/${settings.store.username}/streams/current`);
             if (!res.ok) throw `${res.status} ${res.statusText}`;
-
 
             const json = await res.json() as SFMR;
             if (!json.item) {

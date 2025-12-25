@@ -68,7 +68,6 @@ function restoreGuild(guild: Guild, SortedGuildStore: any) {
     HiddenServersStore.removeHiddenGuild("folder-" + folder.folderId);
 }
 
-
 function GuildRow({ guild }) {
     return (
         <div key={guild.id} className={cl("row")}>

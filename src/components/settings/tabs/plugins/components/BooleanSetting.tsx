@@ -45,4 +45,3 @@ export function BooleanSetting({ option, pluginSettings, definedSettings, id, on
         </SettingsSection>
     );
 }
-

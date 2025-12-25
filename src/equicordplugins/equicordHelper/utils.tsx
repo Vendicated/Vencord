@@ -39,7 +39,6 @@ function restartPrompt(): Promise<boolean> {
     });
 }
 
-
 export async function toggleEnabled(name: string) {
     let restartNeeded = false;
     function onRestartNeeded() {

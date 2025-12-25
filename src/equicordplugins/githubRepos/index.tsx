@@ -38,7 +38,6 @@ export const settings = definePluginSettings({
     },
 });
 
-
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
 const ProfilePopoutComponent = ErrorBoundary.wrap(

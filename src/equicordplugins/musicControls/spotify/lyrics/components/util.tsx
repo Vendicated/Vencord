@@ -24,7 +24,6 @@ export function NoteSvg() {
     );
 }
 
-
 const getIndexes = (lyrics: SyncedLyric[], position: number, delay: number) => {
     const posInSec = (position + delay) / 1000;
 
@@ -81,7 +80,6 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
             setLyricRefs(currentLyrics.map(() => React.createRef()));
         }
     }, [currentLyrics]);
-
 
     useEffect(() => {
         if (currentLyrics && position != null) {

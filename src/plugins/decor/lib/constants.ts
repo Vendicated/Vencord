@@ -15,7 +15,6 @@ export const GUILD_ID = "1096357702931841148";
 export const INVITE_KEY = "dXp2SdxDcP";
 export const DECORATION_FETCH_COOLDOWN = 1000 * 60 * 60 * 4; // 4 hours
 
-
 export async function setBaseUrl(baseUrl: string) {
     try {
         const config = await fetch(`${baseUrl}/api/config`).then(res => res.json());

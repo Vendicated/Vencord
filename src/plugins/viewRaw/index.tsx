@@ -32,7 +32,6 @@ import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { Button, ChannelStore, GuildRoleStore, Menu } from "@webpack/common";
 
-
 const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
     return (
         <svg

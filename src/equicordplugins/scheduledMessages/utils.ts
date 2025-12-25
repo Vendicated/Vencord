@@ -68,7 +68,6 @@ export function getChannelDisplayInfo(channelId: string): { name: string; avatar
     };
 }
 
-
 function getImageDimensions(dataUrl: string): Promise<{ width: number; height: number; }> {
     return new Promise(resolve => {
         const img = new Image();
@@ -291,7 +290,6 @@ function doRecreatePhantomMessage(messageId: string, channelId: string, reaction
         createPhantomMessage(msg);
     }, 50);
 }
-
 
 async function uploadAttachment(channelId: string, att: ScheduledAttachment): Promise<{ id: string; filename: string; uploaded_filename: string; } | null> {
     return new Promise(resolve => {

@@ -16,7 +16,6 @@ import { ChannelContextPatch, GuildContextPatch, UserContextPatch } from "./comp
 import { GlobalDefaultComponent, TipsComponent } from "./components/util";
 import { WallpaperFreeStore } from "./store";
 
-
 export const settings = definePluginSettings({
     globalDefault: {
         description: "Set a global default wallpaper for all channels.",

@@ -36,7 +36,6 @@ function DecodeIcon() {
     );
 }
 
-
 function isValidUtf8String(str) {
     try {
         new TextDecoder("utf-8", { fatal: true }).decode(new Uint8Array(str.split("").map(char => char.charCodeAt(0))));
@@ -63,7 +62,6 @@ function decodeBase64Strings(base64Strings) {
         }
     }).filter(decoded => decoded !== null);
 }
-
 
 function openDecodedBase64Modal(decodedContent) {
     const key = openModal(props => (

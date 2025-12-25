@@ -39,7 +39,6 @@ export async function exportCollections() {
     return JSON.stringify({ collections }, null, 4);
 }
 
-
 export async function importCollections(data: string) {
     try {
         var parsed = JSON.parse(data);
@@ -54,7 +53,6 @@ export async function importCollections(data: string) {
     } else
         throw new Error("Invalid Collections");
 }
-
 
 export async function uploadGifCollections(showToast = true): Promise<void> {
     if (IS_WEB || IS_EQUIBOP || IS_VESKTOP) {
@@ -103,8 +101,6 @@ export async function uploadGifCollections(showToast = true): Promise<void> {
         }
     }
 }
-
-
 
 const toastSuccess = () => Toasts.show({
     type: Toasts.Type.SUCCESS,

@@ -21,7 +21,6 @@ import { JSX } from "react";
 
 import plugins, { ExcludedPlugins } from "~plugins";
 
-
 export function ChatPluginCard({ url, description }: { url: string, description: string; }) {
     const pluginNameFromUrl = new URL(url).pathname.split("/")[2];
 

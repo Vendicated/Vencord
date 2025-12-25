@@ -25,7 +25,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Guild, User } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
 
-
 interface UserContextProps {
     channel: Channel;
     guildId?: string;

@@ -144,7 +144,6 @@ function handleMessageLoad(data: any) {
     currentFetch = null;
 }
 
-
 export default definePlugin({
     name: "MessageFetchTimer",
     description: "Shows how long it took to fetch messages for the current channel",

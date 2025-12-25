@@ -61,10 +61,6 @@ interface ChatBarCommandState {
     getters: Set<() => HTMLElement | null>;
 }
 
-
-
-
-
 export const chatBarCommandStates = new Map<string, ChatBarCommandState>();
 export const chatBarCommandStatesById = new Map<string, ChatBarCommandState>();
 const CHATBAR_DATASET_KEY = "vcCommandPaletteId";
@@ -149,12 +145,6 @@ export function wrapChatBarChildren(children: ReactNode): ReactNode {
 
     return wrappedChildren;
 }
-
-
-
-
-
-
 
 interface ChatBarCommandBridgeProps {
     element: ReactElement;

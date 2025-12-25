@@ -50,7 +50,6 @@ export default definePlugin({
     }
 });
 
-
 async function onMessage(data: string) {
     const json: TosuApi = JSON.parse(data);
     // @ts-ignore

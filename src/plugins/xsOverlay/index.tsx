@@ -215,7 +215,6 @@ export default definePlugin({
                 titleString = `${message.author.username} (${guild.name}, #${channel.name})`;
             }
 
-
             switch (channel.type) {
                 case ChannelTypes.DM:
                     titleString = message.author.username.trim();
@@ -248,7 +247,6 @@ export default definePlugin({
                 typeof e?.content_type === "string"
                 && e?.content_type.startsWith("image")
             );
-
 
             images.forEach(img => {
                 finalMsg += ` [image: ${img.filename}] `;

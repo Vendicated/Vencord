@@ -16,7 +16,6 @@ const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
 
-
 export const ffmpeg = new FFmpeg();
 
 async function resizeImage(url: string) {

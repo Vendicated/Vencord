@@ -34,7 +34,6 @@ const enum IndicatorType {
     BOTH = SERVER | FRIEND,
 }
 
-
 let onlineFriendsCount = 0;
 let guildCount = 0;
 

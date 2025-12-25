@@ -23,7 +23,6 @@ import definePlugin from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
 
-
 const EMBED_SUPPRESSED = 1 << 2;
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (

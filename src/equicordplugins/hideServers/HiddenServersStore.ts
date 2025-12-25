@@ -9,7 +9,6 @@ import { Guild } from "@vencord/discord-types";
 import { findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher, GuildStore } from "@webpack/common";
 
-
 export const HiddenServersStore = proxyLazyWebpack(() => {
     const { Store } = Flux;
 

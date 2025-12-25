@@ -63,8 +63,6 @@ const renderNotebook = ({
     ));
 };
 
-
-
 export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
     const [sortType, setSortType] = React.useState(true);
     const [searchInput, setSearch] = React.useState("");

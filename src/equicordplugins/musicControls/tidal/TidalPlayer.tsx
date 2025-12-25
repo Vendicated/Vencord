@@ -328,7 +328,6 @@ export function TidalPlayer() {
     const isPlaying = useStateFromStores([TidalStore], () => TidalStore.isPlaying);
     const [shouldHide, setShouldHide] = useState(false);
 
-
     React.useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {
@@ -351,4 +350,3 @@ export function TidalPlayer() {
         </div>
     );
 }
-

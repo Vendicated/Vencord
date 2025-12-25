@@ -375,5 +375,3 @@ export default definePlugin({
         if (visEnd === "overlay") unmountOverlay();
     }
 });
-
-

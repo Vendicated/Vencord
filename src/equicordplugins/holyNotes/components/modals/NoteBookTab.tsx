@@ -49,7 +49,6 @@ export function NoteBookTabs({ tabs, selectedTabId, onSelectTab }: { tabs: strin
         }
     }, [tabs, selectedTabId]);
 
-
     React.useEffect(() => {
         handleResize();
 

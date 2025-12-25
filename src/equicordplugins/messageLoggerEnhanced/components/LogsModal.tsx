@@ -232,7 +232,6 @@ function LogsContent({ visibleMessages, canLoadMore, sortNewest, tab, reset, han
 
 const LogsContentMemo = LazyComponent(() => React.memo(LogsContent));
 
-
 function NoResults({ tab }: { tab: LogTabs; }) {
     const generateSuggestedTabs = (tab: LogTabs) => {
         switch (tab) {

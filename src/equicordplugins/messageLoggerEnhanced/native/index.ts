@@ -30,8 +30,6 @@ let imageCacheDir: string;
 const getImageCacheDir = async () => imageCacheDir ?? await getDefaultNativeImageDir();
 const getLogsDir = async () => logsDir ?? await getDefaultNativeDataDir();
 
-
-
 export async function initDirs() {
     const { logsDir: ld, imageCacheDir: icd } = await getSettings();
 
@@ -88,13 +86,11 @@ export async function deleteFileNative(_event: IpcMainInvokeEvent, attachmentId:
     await unlink(imagePath);
 }
 
-
 export async function writeLogs(_event: IpcMainInvokeEvent, contents: string) {
     const logsDir = await getLogsDir();
 
     writeFile(path.join(logsDir, LOGS_DATA_FILENAME), contents);
 }
-
 
 export async function getDefaultNativeImageDir(): Promise<string> {
     return path.join(await getDefaultNativeDataDir(), "savedImages");

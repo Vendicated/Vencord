@@ -79,7 +79,6 @@ const pluginSettings = definePluginSettings(
     }, {} as SettingsDefinition)
 );
 
-
 const Native = VencordNative.pluginHelpers.OpenInApp as PluginNative<typeof import("./native")>;
 
 export default definePlugin({

@@ -27,7 +27,6 @@ function getMessage(opts, other) {
     return `${chosenGifUrl} ${ownerPing}`;
 }
 
-
 const settings = definePluginSettings({
     pingOwnerChance: {
         type: OptionType.BOOLEAN,

@@ -27,7 +27,6 @@ import { findLastIndex, getGuildIdByChannel } from "./misc";
 export * from "./cleanUp";
 export * from "./misc";
 
-
 // stolen from mlv2
 // https://github.com/1Lighty/BetterDiscordPlugins/blob/master/Plugins/MessageLoggerV2/MessageLoggerV2.plugin.js#L2367
 interface Id { id: string, time: number; message?: LoggedMessageJSON; }
@@ -125,7 +124,6 @@ export function shouldIgnore({ channelId, authorId, guildId, flags, bot, ghostPi
     const isBlacklisted = blacklistedIds.some(e => ids.includes(e));
     const isAuthorBlacklisted = blacklistedIds.includes(authorId);
     const isChannelBlacklisted = blacklistedIds.includes(channelId);
-
 
     const shouldIgnoreMutedGuilds = settings.store.ignoreMutedGuilds;
     const shouldIgnoreMutedCategories = settings.store.ignoreMutedCategories;

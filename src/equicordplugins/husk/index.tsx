@@ -27,7 +27,6 @@ import type { SVGProps } from "react";
 // eslint-disable-next-line no-duplicate-imports
 import { PropsWithChildren } from "react";
 
-
 interface BaseIconProps extends IconProps {
     viewBox: string;
 }
@@ -52,7 +51,6 @@ function Icon({ height = 24, width = 24, className, children, viewBox, ...svgPro
         </svg>
     );
 }
-
 
 export function Husk(props: IconProps) {
     return (

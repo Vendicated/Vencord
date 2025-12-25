@@ -129,7 +129,6 @@ export default definePlugin({
     }
 });
 
-
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
     const ref = useRef<HTMLElement>(null);
@@ -145,13 +144,11 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             return;
         }
 
-
         // scroll back to top
         ref.current
             ?.closest("#gif-picker-tab-panel")
             ?.querySelector('[class*="scrollerBase"]')
             ?.scrollTo(0, 0);
-
 
         const result =
             props.favCopy
@@ -192,8 +189,6 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         />
     );
 }
-
-
 
 export function getTargetString(urlStr: string) {
     let url: URL;

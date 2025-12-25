@@ -49,7 +49,6 @@ function isItemAllowed(item: (CustomEmoji | UnicodeEmoji)) {
     return cache_allowedList.some(emoji => emoji.name === item.name);
 }
 
-
 function itemAlreadyInList(item: ContextMenuEmoji) {
     return cache_allowedList.some(emoji => emoji.name === item.name);
 }

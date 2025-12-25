@@ -20,7 +20,6 @@ import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-
 const settings = definePluginSettings({
     speed: {
         description: "Speed of Da Cat :3",

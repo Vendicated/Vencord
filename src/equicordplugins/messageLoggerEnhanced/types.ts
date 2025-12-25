@@ -80,7 +80,6 @@ export interface MessageDeleteBulkPayload {
     channelId: string;
 }
 
-
 export interface MessageUpdatePayload {
     type: string;
     guildId: string;

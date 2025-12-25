@@ -64,7 +64,6 @@ function blockedComponentRender(sticker) {
     return <>{elements}</>;
 }
 
-
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, favoriteableType } = props ?? {};
 
@@ -115,7 +114,6 @@ function toggleBlock(name) {
         settings.store.blockedStickers = settings.store.blockedStickers.split(", ").concat(name).join(", ");
     }
 }
-
 
 function isStickerBlocked(name) {
     if (settings.store.blockedStickers === undefined || settings.store.blockedStickers == null) {

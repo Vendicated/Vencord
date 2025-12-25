@@ -55,7 +55,6 @@ import TooltipTab from "./tabs/TooltipTab";
 import TypographyTab from "./tabs/TypographyTab";
 import UserSummaryItemTab from "./tabs/UserSummaryItemTab";
 
-
 const TABS = [
     { id: "accordion", label: "Accordion" },
     { id: "anchor", label: "Anchor" },

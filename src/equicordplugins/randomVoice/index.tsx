@@ -245,7 +245,6 @@ function ContextMenu() {
             aria-label="Voice state modifier"
         >
 
-
             <Menu.MenuItem
                 id="servers"
                 label="Select Servers"
@@ -714,7 +713,6 @@ function getChannels() {
                 criteriaChannel.push(channelId);
             }
         }
-
 
         if (settings.store.includeStates && !settings.store.avoidStates) {
             if ((settings.store.deafen && !selfDeaf) || (!settings.store.deafen && selfDeaf)) return;

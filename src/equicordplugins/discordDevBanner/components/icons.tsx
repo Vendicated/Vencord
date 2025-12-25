@@ -33,7 +33,6 @@ export const ClientIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement
     </svg>
 );
 
-
 export const DevBannerIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
     <svg
         {...props}

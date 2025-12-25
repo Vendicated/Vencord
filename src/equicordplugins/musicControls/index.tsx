@@ -93,7 +93,6 @@ export default definePlugin({
         },
     ],
 
-
     PanelWrapper({ VencordOriginal, ...props }) {
         const { showTidalControls, showTidalLyrics, showSpotifyLyrics, showSpotifyControls, LyricsPosition, showYoutubeMusicControls } = settings.store;
         return (

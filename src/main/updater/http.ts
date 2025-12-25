@@ -61,7 +61,6 @@ async function fetchUpdates() {
     if (hash === gitHash)
         return false;
 
-
     const asset = data.assets.find(a => a.name === ASAR_FILE);
     PendingUpdate = asset.browser_download_url;
 

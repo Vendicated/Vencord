@@ -17,7 +17,6 @@ const ChannelTypes = findByPropsLazy("DM", "GUILD_TEXT", "PUBLIC_THREAD", "UNKNO
 const ChannelTypesSets = findByPropsLazy("THREADS", "GUILD_TEXTUAL", "ALL_DMS");
 const MessageTypes = findByPropsLazy("REPLY", "STAGE_RAISE_HAND", "CHANNEL_NAME_CHANGE");
 
-
 export default definePlugin({
     name: "NotificationTitle",
     description: "Makes desktop notifications more informative",

@@ -179,7 +179,6 @@ export async function addMessagesBulkIDB(messages: LoggedMessageJSON[], status?:
     messages.forEach(message => cachedMessages.set(message.id, message));
 }
 
-
 export async function deleteMessageIDB(message_id: string) {
     await db.delete("messages", message_id);
 
