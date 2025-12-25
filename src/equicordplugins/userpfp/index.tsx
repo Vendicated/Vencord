@@ -101,7 +101,8 @@ export default definePlugin({
                 },
                 {
                     match: /(getGuildMemberAvatarURLSimple:)(\i),/,
-                    replace: "$1$self.getAvatarServerHook($2),"
+                    replace: "$1$self.getAvatarServerHook($2),",
+                    predicate: () => settings.store.overrideServerAvatars
                 }
             ]
         }
@@ -139,7 +140,6 @@ export default definePlugin({
     getAvatarServerHook: (original: any) => (config: any) => {
         const { userId, avatar, size, canAnimate } = config;
         const { avatars } = data;
-        if (!settings.store.overrideServerAvatars) return original(config);
 
         if (avatars[userId]) {
             const customUrl = avatars[userId];
