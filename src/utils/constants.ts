@@ -615,11 +615,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     jamesbt365: {
         name: "jamesbt365",
-        id: 158567567487795200n,
+        id: 158567567487795200n
     },
     samsam: {
         name: "samsam",
-        id: 400482410279469056n,
+        id: 400482410279469056n
     },
     Cootshk: {
         name: "Cootshk",
@@ -1031,23 +1031,23 @@ export const EquicordDevs = Object.freeze({
     },
     cassie: {
         name: "cassie",
-        id: 280411966126948353n,
+        id: 280411966126948353n
     },
     mochienya: {
         name: "mochie",
-        id: 1043599230247374869n,
+        id: 1043599230247374869n
     },
     okiso: {
         name: "okiso",
-        id: 274178934143451137n,
+        id: 274178934143451137n
     },
     port22exposed: {
         name: "port",
-        id: 1318383159645311009n,
+        id: 1318383159645311009n
     },
     PhoenixAceVFX: {
         name: "PhoenixAceVFX",
-        id: 1016895892055396484n,
+        id: 1016895892055396484n
     },
     TheArmagan: {
         name: "TheArmagan",
@@ -1099,27 +1099,27 @@ export const EquicordDevs = Object.freeze({
     },
     Reycko: {
         name: "Reycko",
-        id: 1123725368004726794n,
+        id: 1123725368004726794n
     },
     Campfire: {
         name: "Campfire",
-        id: 376414446840578081n,
+        id: 376414446840578081n
     },
     Cootshk: {
         name: "Cootshk",
-        id: 921605971577548820n,
+        id: 921605971577548820n
     },
     sliwka: {
         name: "sliwka",
-        id: 1165286199628419129n,
+        id: 1165286199628419129n
     },
     bbgaming25k: {
         name: "bbgaming25k",
-        id: 851222385528274964n,
+        id: 851222385528274964n
     },
     davidkra230: {
         name: "davidkra230",
-        id: 652699312631054356n,
+        id: 652699312631054356n
     },
     GroupXyz: {
         name: "GroupXyz",
@@ -1143,7 +1143,7 @@ export const EquicordDevs = Object.freeze({
     },
     Etorix: {
         name: "Etorix",
-        id: 94597845868355584n,
+        id: 94597845868355584n
     },
     Johannes7k75: {
         name: "Johannes7k75",
@@ -1171,11 +1171,11 @@ export const EquicordDevs = Object.freeze({
     },
     qouesm: {
         name: "qouesm",
-        id: 130388483494641664n,
+        id: 130388483494641664n
     },
     CallMeGii: {
         name: "gii",
-        id: 156481332652802048n,
+        id: 156481332652802048n
     },
     mmeta: {
         name: "mmeta",
@@ -1220,6 +1220,10 @@ export const EquicordDevs = Object.freeze({
     benjii: {
         name: "Benjii",
         id: 463702169443368970n
+    },
+    keircn: {
+        name: "Key",
+        id: 1230319937155760131n
     },
 } satisfies Record<string, Dev>);
 
