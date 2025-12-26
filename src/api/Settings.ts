@@ -254,15 +254,19 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
 export function migratePluginToSettings(newName: string, oldName: string, ...settingNames: string[]) {
     const { plugins } = SettingsStore.plain;
     const newPlugin = plugins[newName];
+    const oldPlugin = plugins[oldName];
 
-    if (!newPlugin) return;
+    if (!newPlugin || !oldPlugin) return;
 
-    for (const settingName of settingNames) {
-        logger.info(`Migrating plugin to setting from old name ${oldName} to ${newName} as ${settingName}`);
-        newPlugin[settingName] = true;
-        newPlugin.enabled = true;
-        delete plugins[oldName];
-        SettingsStore.markAsChanged();
+    if (oldPlugin?.enabled) {
+        for (const settingName of settingNames) {
+            logger.info(`Migrating plugin to setting from old name ${oldName} to ${newName} as ${settingName}`);
+            oldPlugin.enabled = false;
+            newPlugin[settingName] = true;
+            if (!newPlugin?.enabled) newPlugin.enabled = true;
+            delete plugins[oldName];
+            SettingsStore.markAsChanged();
+        }
     }
 }
 
