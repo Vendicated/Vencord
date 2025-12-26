@@ -17,7 +17,7 @@
 */
 
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
-import { ChannelTypes, RelationshipType } from "@vencord/discord-types/enums";
+import { ChannelType, RelationshipType } from "@vencord/discord-types/enums";
 import { UserUtils } from "@webpack/common";
 
 import settings from "./settings";
@@ -81,7 +81,7 @@ export function onGuildDelete({ guild: { id, unavailable } }: GuildDelete) {
 
 export function onChannelDelete({ channel: { id, type } }: ChannelDelete) {
     if (!settings.store.groups) return;
-    if (type !== ChannelTypes.GROUP_DM) return;
+    if (type !== ChannelType.GROUP_DM) return;
 
     if (manuallyRemovedGroup === id) {
         deleteGroup(id);

@@ -1,5 +1,5 @@
 import { Channel, FluxStore, ThreadJoined } from "..";
-import { ChannelTypes } from "../../enums";
+import { ChannelType } from "../../enums";
 
 export interface ChannelWithComparator {
     channel: Channel;
@@ -7,7 +7,7 @@ export interface ChannelWithComparator {
 }
 
 export interface GuildChannels {
-    [ChannelTypes.GUILD_CATEGORY]: ChannelWithComparator[];
+    [ChannelType.GUILD_CATEGORY]: ChannelWithComparator[];
     id: string;
     SELECTABLE: ChannelWithComparator[] | ThreadJoined[];
     VOCAL: ChannelWithComparator[];
@@ -32,7 +32,7 @@ export class GuildChannelStore extends FluxStore {
     getFirstChannelOfType(
         guildId: string,
         predicate: (item: ChannelWithComparator) => boolean,
-        type: "SELECTABLE" | "VOCAL" | ChannelTypes.GUILD_CATEGORY
+        type: "SELECTABLE" | "VOCAL" | ChannelType.GUILD_CATEGORY
     ): Channel | null;
     getSFWDefaultChannel(guildId: string): Channel | null;
     getSelectableChannelIds(guildId: string): string[];

@@ -1,4 +1,4 @@
-import { FluxStore, Guild, User } from "..";
+import { Activity, FluxStore, Guild, User } from "..";
 import { GiftIntentType, RelationshipType } from "../../enums";
 
 export type FriendsSection = "ADD_FRIEND" | "ALL" | "ONLINE" | "PENDING" | "PENDING_IGNORED" | "SPAM" | "SUGGESTIONS";
@@ -23,7 +23,7 @@ export interface FriendsRow {
     type: RelationshipType | 99;
     status: StatusType;
     isMobile: boolean;
-    activities: unknown[];
+    activities: Activity[];
     applicationStream: ApplicationStream | null;
     user: User | null;
     usernameLower: string | null;

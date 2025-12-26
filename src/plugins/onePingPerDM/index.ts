@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { MessageJSON } from "@vencord/discord-types";
-import { ChannelTypes } from "@vencord/discord-types/enums";
+import { ChannelType } from "@vencord/discord-types/enums";
 import { ChannelStore, ReadStateStore, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -56,9 +56,9 @@ export default definePlugin({
     isPrivateChannelRead(message: MessageJSON) {
         const channelType = ChannelStore.getChannel(message.channel_id)?.type;
         if (
-            (channelType !== ChannelTypes.DM && channelType !== ChannelTypes.GROUP_DM) ||
-            (channelType === ChannelTypes.DM && settings.store.channelToAffect === "group_dm") ||
-            (channelType === ChannelTypes.GROUP_DM && settings.store.channelToAffect === "user_dm") ||
+            (channelType !== ChannelType.DM && channelType !== ChannelType.GROUP_DM) ||
+            (channelType === ChannelType.DM && settings.store.channelToAffect === "group_dm") ||
+            (channelType === ChannelType.GROUP_DM && settings.store.channelToAffect === "user_dm") ||
             (settings.store.allowMentions && message.mentions.some(m => m.id === UserStore.getCurrentUser().id)) ||
             (settings.store.allowEveryone && message.mention_everyone)
         ) {
