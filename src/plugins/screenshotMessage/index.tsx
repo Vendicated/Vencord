@@ -12,10 +12,15 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, Menu, showToast, Toasts } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, Menu, MessageStore, showToast, Toasts } from "@webpack/common";
 import * as htmlToImage from "html-to-image";
 
 const logger = new Logger("ScreenshotMessage");
+
+const MessageClasses = findByPropsLazy("message", "cozyMessage", "groupStart");
+const ReplyClasses = findByPropsLazy("repliedMessage", "replyAvatar", "replyBadge");
+const AvatarClasses = findByPropsLazy("avatar", "clickable", "wrapper");
 
 const ScreenshotIcon = ({ className }: { className?: string; }) => (
     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" className={className}>
@@ -62,14 +67,21 @@ const settings = definePluginSettings({
     }
 });
 
+
 function findMessageElement(messageId: string): HTMLElement | null {
     const listItem = document.querySelector<HTMLElement>(`[data-list-item-id*="${messageId}"]`);
     if (!listItem) return null;
-    const messageContainer = listItem.querySelector<HTMLElement>('[class*="message"][class*="cozy"], [class*="message"][class*="compact"]');
-    return messageContainer || listItem;
+
+    const messageClass = MessageClasses?.message || MessageClasses?.cozyMessage;
+    if (messageClass) {
+        const messageContainer = listItem.querySelector<HTMLElement>(`.${messageClass.split(" ")[0]}`);
+        if (messageContainer) return messageContainer;
+    }
+
+    return listItem;
 }
 
-async function embedImages(element: HTMLElement) {
+async function embedImages(element: HTMLElement): Promise<void> {
     const images = Array.from(element.querySelectorAll("img"));
     await Promise.all(images.map(async img => {
         try {
@@ -87,40 +99,116 @@ async function embedImages(element: HTMLElement) {
                 };
                 reader.readAsDataURL(blob);
             });
-        } catch (e) {
-            // ignore errors, cuz why not
-        }
+        } catch {}
     }));
 }
 
+function getAvatarUrl(author: Message["author"], guildId?: string): string {
+    try {
+        const url = (author as any).getAvatarURL?.(guildId, 128, false);
+        if (url) return url;
+    } catch {}
 
-function getAvatarUrl(author: Message["author"]): string {
     if (author.avatar) {
         const ext = author.avatar.startsWith("a_") ? "gif" : "webp";
         return `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.${ext}?size=128`;
     }
-    // Default avatar based on discriminator or user id
+
     const defaultIndex = author.discriminator === "0"
         ? Number(BigInt(author.id) >> 22n) % 6
         : Number(author.discriminator) % 5;
     return `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`;
 }
 
+
 function getDisplayName(author: Message["author"]): string {
     return (author as any).globalName || (author as any).global_name || author.username;
 }
 
-async function renderElementToPngBlob(element: HTMLElement, message: Message): Promise<Blob> {
+function getReferencedMessageData(message: Message): {
+    authorName: string;
+    authorAvatar: string;
+    content: string;
+} | null {
+    const ref = message.messageReference;
+    if (!ref?.message_id) return null;
+
+    try {
+        const channelMessages = MessageStore?.getMessages?.(ref.channel_id || message.channel_id);
+        const referencedMessage = channelMessages?.get?.(ref.message_id) || (message as any).referencedMessage;
+
+        if (referencedMessage?.author) {
+            return {
+                authorName: getDisplayName(referencedMessage.author),
+                authorAvatar: getAvatarUrl(referencedMessage.author),
+                content: referencedMessage.content || "[Attachment]"
+            };
+        }
+    } catch (e) {
+        logger.warn("Failed to get referenced message from store:", e);
+    }
+
+    const directRef = (message as any).referencedMessage;
+    if (directRef?.author) {
+        return {
+            authorName: getDisplayName(directRef.author),
+            authorAvatar: getAvatarUrl(directRef.author),
+            content: directRef.content || "[Attachment]"
+        };
+    }
+
+    return null;
+}
+
+function extractReplyFromElement(element: HTMLElement): {
+    authorName: string;
+    authorAvatar: string;
+    content: string;
+} | null {
+    const replyClass = ReplyClasses?.repliedMessage;
+    const repliedEl = replyClass
+        ? element.querySelector(`.${replyClass.split(" ")[0]}`)
+        : element.querySelector('[class*="repliedMessage"]');
+
+    if (!repliedEl) return null;
+
+    const avatarClass = ReplyClasses?.replyAvatar || AvatarClasses?.avatar;
+    const avatarImg = avatarClass
+        ? repliedEl.querySelector<HTMLImageElement>(`img.${avatarClass.split(" ")[0]}`)
+        : repliedEl.querySelector<HTMLImageElement>('img[class*="avatar"]');
+
+    const usernameEl = repliedEl.querySelector('[class*="username"]');
+    const contentEl = repliedEl.querySelector('[class*="repliedTextContent"], [class*="messageContent"]');
+
+    return {
+        authorName: usernameEl?.textContent || "Unknown",
+        authorAvatar: avatarImg?.src || "",
+        content: contentEl?.textContent || ""
+    };
+}
+
+function getThemeColors(): {
+    background: string;
+    text: string;
+    header: string;
+    muted: string;
+    interactive: string;
+} {
+    const computed = getComputedStyle(document.body);
+    return {
+        background: computed.getPropertyValue("--background-primary").trim() || "#313338",
+        text: computed.getPropertyValue("--text-normal").trim() || "#dbdee1",
+        header: computed.getPropertyValue("--header-primary").trim() || "#f2f3f5",
+        muted: computed.getPropertyValue("--text-muted").trim() || "#949ba4",
+        interactive: computed.getPropertyValue("--interactive-normal").trim() || "#b5bac1"
+    };
+}
+
+
+async function renderMessageToBlob(element: HTMLElement, message: Message): Promise<Blob> {
     const { padding, borderRadius, scale, transparentBackground } = settings.store;
-
-
-    const computedStyle = getComputedStyle(document.body);
-    const themeBackground = computedStyle.getPropertyValue("--background-primary").trim() || "#313338";
-    const backgroundColor = transparentBackground ? "transparent" : themeBackground;
-    const textColor = computedStyle.getPropertyValue("--text-normal").trim() || "#dbdee1";
-    const headerColor = computedStyle.getPropertyValue("--header-primary").trim() || "#f2f3f5";
-    const timestampColor = computedStyle.getPropertyValue("--text-muted").trim() || "#949ba4";
-    const interactiveColor = computedStyle.getPropertyValue("--interactive-normal").trim() || "#b5bac1";
+    const colors = getThemeColors();
+    const backgroundColor = transparentBackground ? "transparent" : colors.background;
 
     const wrapper = document.createElement("div");
     wrapper.style.cssText = `
@@ -129,7 +217,7 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
         left: -9999px;
         width: 800px;
         background: ${backgroundColor};
-        color: ${textColor};
+        color: ${colors.text};
         font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 16px;
         line-height: 1.375;
@@ -142,14 +230,10 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
         border-radius: ${borderRadius}px;
     `;
 
-    const repliedMessageEl = element.querySelector('[class*="repliedMessage"]');
+    const replyData = getReferencedMessageData(message) || extractReplyFromElement(element);
     let replyBar: HTMLElement | null = null;
 
-    if (repliedMessageEl) {
-        const replyAvatarSrc = repliedMessageEl.querySelector<HTMLImageElement>('img[class*="replyAvatar"], img[class*="avatar"]')?.src;
-        const replyUsernameText = repliedMessageEl.querySelector('[class*="username"]')?.textContent || "Unknown";
-        const replyContentText = repliedMessageEl.querySelector('[class*="repliedTextContent"], [class*="messageContent"]')?.textContent || "";
-
+    if (replyData) {
         replyBar = document.createElement("div");
         replyBar.style.cssText = `
             display: flex;
@@ -167,110 +251,68 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
             top: 50%;
             width: 33px;
             height: 13px;
-            border-left: 2px solid ${interactiveColor};
-            border-top: 2px solid ${interactiveColor};
+            border-left: 2px solid ${colors.interactive};
+            border-top: 2px solid ${colors.interactive};
             border-top-left-radius: 6px;
             opacity: 0.4;
         `;
         replyBar.appendChild(spine);
 
-        const replyContentWrapper = document.createElement("div");
-        replyContentWrapper.style.cssText = `
+        const replyContent = document.createElement("div");
+        replyContent.style.cssText = `
             display: flex;
             align-items: center;
             gap: 4px;
             margin-left: 36px;
             font-size: 0.875rem;
-            color: ${timestampColor};
+            color: ${colors.muted};
             overflow: hidden;
         `;
 
-        if (replyAvatarSrc) {
-            const replyAvatar = document.createElement("img");
-            replyAvatar.src = replyAvatarSrc;
-            replyAvatar.alt = "";
-            replyAvatar.style.cssText = `
-                width: 16px;
-                height: 16px;
-                border-radius: 50%;
-                object-fit: cover;
-            `;
-            replyContentWrapper.appendChild(replyAvatar);
+        if (replyData.authorAvatar) {
+            const avatar = document.createElement("img");
+            avatar.src = replyData.authorAvatar;
+            avatar.alt = "";
+            avatar.style.cssText = "width: 16px; height: 16px; border-radius: 50%; object-fit: cover;";
+            replyContent.appendChild(avatar);
         }
 
-        const replyUsername = document.createElement("span");
-        replyUsername.textContent = replyUsernameText;
-        replyUsername.style.cssText = `
-            font-weight: 500;
-            color: ${headerColor};
-            opacity: 0.64;
-            flex-shrink: 0;
-        `;
-        replyContentWrapper.appendChild(replyUsername);
+        const username = document.createElement("span");
+        username.textContent = replyData.authorName;
+        username.style.cssText = `font-weight: 500; color: ${colors.header}; opacity: 0.64; flex-shrink: 0;`;
+        replyContent.appendChild(username);
 
-        const replyContent = document.createElement("span");
-        const contentText = replyContentText || "[Click to see attachment]";
-        replyContent.textContent = contentText.length > 60 ? contentText.substring(0, 60) + "..." : contentText;
-        replyContent.style.cssText = `
-            color: ${textColor};
-            opacity: 0.64;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        `;
-        replyContentWrapper.appendChild(replyContent);
+        const content = document.createElement("span");
+        const text = replyData.content || "[Click to see attachment]";
+        content.textContent = text.length > 60 ? text.substring(0, 60) + "..." : text;
+        content.style.cssText = `color: ${colors.text}; opacity: 0.64; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`;
+        replyContent.appendChild(content);
 
-        replyBar.appendChild(replyContentWrapper);
+        replyBar.appendChild(replyContent);
     }
 
     const messageRow = document.createElement("div");
-    messageRow.style.cssText = `
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 16px;
-    `;
+    messageRow.style.cssText = "display: flex; flex-direction: row; align-items: flex-start; gap: 16px;";
 
     const avatarContainer = document.createElement("div");
-    avatarContainer.style.cssText = `
-        flex-shrink: 0;
-        width: 40px;
-        height: 40px;
-    `;
+    avatarContainer.style.cssText = "flex-shrink: 0; width: 40px; height: 40px;";
 
     const avatar = document.createElement("img");
-    avatar.src = getAvatarUrl(message.author);
+    const channel = ChannelStore?.getChannel(message.channel_id);
+    avatar.src = getAvatarUrl(message.author, channel?.guild_id);
     avatar.alt = "";
-    avatar.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-    `;
+    avatar.style.cssText = "width: 40px; height: 40px; border-radius: 50%; object-fit: cover;";
     avatarContainer.appendChild(avatar);
 
     const contentContainer = document.createElement("div");
-    contentContainer.style.cssText = `
-        flex: 1;
-        min-width: 0;
-    `;
+    contentContainer.style.cssText = "flex: 1; min-width: 0;";
 
     const header = document.createElement("div");
-    header.style.cssText = `
-        display: flex;
-        align-items: baseline;
-        gap: 8px;
-        margin-bottom: 4px;
-    `;
+    header.style.cssText = "display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;";
 
     const username = document.createElement("span");
     username.textContent = getDisplayName(message.author);
-    username.style.cssText = `
-        font-weight: 500;
-        color: ${headerColor};
-        font-size: 1rem;
-        line-height: 1.375;
-    `;
+    username.style.cssText = `font-weight: 500; color: ${colors.header}; font-size: 1rem; line-height: 1.375;`;
 
     const timestamp = document.createElement("span");
     const msgDate = new Date(message.timestamp as any);
@@ -281,11 +323,7 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
         hour: "numeric",
         minute: "2-digit"
     });
-    timestamp.style.cssText = `
-        font-size: 0.75rem;
-        color: ${timestampColor};
-        font-weight: 400;
-    `;
+    timestamp.style.cssText = `font-size: 0.75rem; color: ${colors.muted}; font-weight: 400;`;
 
     header.appendChild(username);
     header.appendChild(timestamp);
@@ -302,6 +340,7 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
     replySelectors.forEach(s => {
         elementClone.querySelectorAll(s).forEach(e => e.remove());
     });
+
     const originalContent = elementClone.querySelector('[class*="messageContent"], [class*="markup"]');
     const messageContent = (originalContent || document.createElement("div")).cloneNode(true) as HTMLElement;
     messageContent.style.cssText = "";
@@ -349,12 +388,8 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
         });
 
         accessoriesContent.querySelectorAll("img").forEach(img => {
-            if (!img.style.maxWidth) {
-                img.style.maxWidth = "400px";
-            }
-            if (!img.style.maxHeight) {
-                img.style.maxHeight = "300px";
-            }
+            if (!img.style.maxWidth) img.style.maxWidth = "400px";
+            if (!img.style.maxHeight) img.style.maxHeight = "300px";
             img.style.borderRadius = "8px";
         });
 
@@ -390,6 +425,7 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
     }
     inner.appendChild(messageRow);
     wrapper.appendChild(inner);
+
     document.body.appendChild(wrapper);
 
     await embedImages(wrapper);
@@ -411,7 +447,7 @@ async function renderElementToPngBlob(element: HTMLElement, message: Message): P
     }
 }
 
-function downloadBlob(blob: Blob, filename: string) {
+function downloadBlob(blob: Blob, filename: string): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -420,11 +456,11 @@ function downloadBlob(blob: Blob, filename: string) {
     URL.revokeObjectURL(url);
 }
 
-async function copyBlobToClipboard(blob: Blob) {
+async function copyBlobToClipboard(blob: Blob): Promise<void> {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 }
 
-async function captureMessage(message: Message) {
+async function captureMessage(message: Message): Promise<void> {
     const element = findMessageElement(message.id);
     if (!element) {
         showToast("Message not found in view. Please scroll to it.", Toasts.Type.FAILURE);
@@ -433,7 +469,7 @@ async function captureMessage(message: Message) {
 
     try {
         showToast("Generating image...", Toasts.Type.MESSAGE);
-        const blob = await renderElementToPngBlob(element, message);
+        const blob = await renderMessageToBlob(element, message);
         const { outputMode } = settings.store;
 
         if (outputMode === "download" || outputMode === "both") {
@@ -445,7 +481,7 @@ async function captureMessage(message: Message) {
 
         showToast("Screenshot captured successfully!", Toasts.Type.SUCCESS);
     } catch (err) {
-        logger.error(err);
+        logger.error("Failed to capture screenshot:", err);
         showToast("Failed to capture screenshot. Check console for details.", Toasts.Type.FAILURE);
     }
 }
