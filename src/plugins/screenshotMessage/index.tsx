@@ -13,7 +13,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, Menu, MessageStore, showToast, Toasts } from "@webpack/common";
+import { ChannelStore, Menu, MessageStore, showToast, ThemeStore, Toasts } from "@webpack/common";
 import * as htmlToImage from "html-to-image";
 
 const logger = new Logger("ScreenshotMessage");
@@ -99,7 +99,7 @@ async function embedImages(element: HTMLElement): Promise<void> {
                 };
                 reader.readAsDataURL(blob);
             });
-        } catch {}
+        } catch { }
     }));
 }
 
@@ -107,7 +107,7 @@ function getAvatarUrl(author: Message["author"], guildId?: string): string {
     try {
         const url = (author as any).getAvatarURL?.(guildId, 128, false);
         if (url) return url;
-    } catch {}
+    } catch { }
 
     if (author.avatar) {
         const ext = author.avatar.startsWith("a_") ? "gif" : "webp";
@@ -194,13 +194,43 @@ function getThemeColors(): {
     muted: string;
     interactive: string;
 } {
-    const computed = getComputedStyle(document.body);
+    const isLightTheme = ThemeStore?.theme === "light";
+    const lightDefaults = {
+        background: "#ffffff",
+        text: "#313338",
+        header: "#060607",
+        muted: "#5c5e66",
+        interactive: "#4e5058"
+    };
+
+    const darkDefaults = {
+        background: "#313338",
+        text: "#dbdee1",
+        header: "#f2f3f5",
+        muted: "#949ba4",
+        interactive: "#b5bac1"
+    };
+
+    const defaults = isLightTheme ? lightDefaults : darkDefaults;
+
+    const themedElement =
+        document.querySelector(".theme-light, .theme-dark") ||
+        document.querySelector("#app-mount") ||
+        document.documentElement;
+
+    const computed = getComputedStyle(themedElement);
+
+    const readVar = (varName: string, fallback: string): string => {
+        const value = computed.getPropertyValue(varName).trim();
+        return value || fallback;
+    };
+
     return {
-        background: computed.getPropertyValue("--background-primary").trim() || "#313338",
-        text: computed.getPropertyValue("--text-normal").trim() || "#dbdee1",
-        header: computed.getPropertyValue("--header-primary").trim() || "#f2f3f5",
-        muted: computed.getPropertyValue("--text-muted").trim() || "#949ba4",
-        interactive: computed.getPropertyValue("--interactive-normal").trim() || "#b5bac1"
+        background: readVar("--background-primary", defaults.background),
+        text: readVar("--text-normal", defaults.text),
+        header: readVar("--header-primary", defaults.header),
+        muted: readVar("--text-muted", defaults.muted),
+        interactive: readVar("--interactive-normal", defaults.interactive)
     };
 }
 
