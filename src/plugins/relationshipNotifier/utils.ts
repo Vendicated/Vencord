@@ -21,7 +21,7 @@ import { popNotice, showNotice } from "@api/Notices";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { FluxStore } from "@vencord/discord-types";
-import { ChannelType, RelationshipType } from "@vencord/discord-types/enums";
+import { ChannelTypes, RelationshipType } from "@vencord/discord-types/enums";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
@@ -159,7 +159,7 @@ export async function syncGroups() {
     groups.clear();
 
     for (const { type, id, name, rawRecipients, icon } of ChannelStore.getSortedPrivateChannels()) {
-        if (type === ChannelType.GROUP_DM)
+        if (type === ChannelTypes.GROUP_DM)
             groups.set(id, {
                 id,
                 name: name || rawRecipients.map(r => r.username).join(", "),

@@ -1,4 +1,4 @@
-export const enum ChannelType {
+export const enum ChannelTypes {
     GUILD_TEXT = 0,
     DM = 1,
     GUILD_VOICE = 2,
