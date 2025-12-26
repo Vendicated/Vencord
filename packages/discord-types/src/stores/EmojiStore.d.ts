@@ -8,6 +8,7 @@ export interface EmojiUsageRecord {
 }
 
 export interface EmojiFrecency {
+    /** true when data modified and needs recomputation */
     dirty: boolean;
     _frequently: Emoji[];
     numFrequentlyItems: number;
@@ -17,6 +18,7 @@ export interface EmojiFrecency {
     computeFrecency: (totalUses: number, score: number, config: { numOfRecentUses?: number; maxTotalUse?: number; }) => number;
     calculateMaxTotalUse: boolean;
     lookupKey: (name: string) => Emoji | undefined;
+    /** keyed by emoji name or id */
     usageHistory: Record<string, EmojiUsageRecord>;
     afterCompute: () => void;
 }
@@ -59,6 +61,7 @@ export interface DisambiguatedEmojiContext {
 
 export class EmojiStore extends FluxStore {
     get categories(): string[];
+    /** skin tone modifier for emoji diversity (e.g. 🏻🏼🏽🏾🏿) */
     get diversitySurrogate(): string;
     get emojiFrecencyWithoutFetchingLatest(): EmojiFrecency;
     get emojiReactionFrecencyWithoutFetchingLatest(): EmojiFrecency;
