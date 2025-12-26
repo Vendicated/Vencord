@@ -42,7 +42,7 @@ export class MessageStore extends FluxStore {
     getLastEditableMessage(channelId: string): Message | undefined;
     getLastMessage(channelId: string): Message | undefined;
     getLastNonCurrentUserMessage(channelId: string): Message | undefined;
-    getMessage(channelId: string, messageId: string): Message | undefined;
+    getMessage(channelId: string, messageId: string): Message;
     /** @see {@link ChannelMessages} */
     getMessages(channelId: string): ChannelMessages;
     hasCurrentUserSentMessage(channelId: string): boolean;

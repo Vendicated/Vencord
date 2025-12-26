@@ -15,6 +15,11 @@ export interface ApplicationStream {
 export interface FriendsRow {
     key: string;
     userId: string;
+    /**
+     * 99 means contact based friend suggestions from FriendSuggestionStore,
+     * shown in SUGGESTIONS tab. different from RelationshipType.SUGGESTION
+     * which is for implicit suggestions in RelationshipStore
+     */
     type: RelationshipType | 99;
     status: StatusType;
     isMobile: boolean;
@@ -38,6 +43,7 @@ export interface RelationshipCounts {
     [RelationshipType.INCOMING_REQUEST]: number;
     [RelationshipType.OUTGOING_REQUEST]: number;
     [RelationshipType.BLOCKED]: number;
+    /** contact based friend suggestions from FriendSuggestionStore */
     99: number;
 }
 

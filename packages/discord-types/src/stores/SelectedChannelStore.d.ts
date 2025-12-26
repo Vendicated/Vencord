@@ -6,11 +6,11 @@ export interface ChannelFollowingDestination {
 }
 
 export class SelectedChannelStore extends FluxStore {
-    getChannelId(guildId?: string | null): string | undefined;
+    getChannelId(guildId?: string | null): string;
+    getVoiceChannelId(): string | undefined;
     getCurrentlySelectedChannelId(guildId?: string): string | undefined;
-    getLastChannelFollowingDestination(): ChannelFollowingDestination;
-    getLastSelectedChannelId(guildId?: string): string | undefined;
-    getLastSelectedChannels(guildId?: string): string | undefined;
-    getMostRecentSelectedTextChannelId(guildId: string): string | null;
-    getVoiceChannelId(): string | null;
+    getMostRecentSelectedTextChannelId(guildId: string): string | undefined;
+    getLastSelectedChannelId(guildId?: string): string;
+    getLastSelectedChannels(guildId?: string): string;
+    getLastChannelFollowingDestination(): ChannelFollowingDestination | undefined;
 }

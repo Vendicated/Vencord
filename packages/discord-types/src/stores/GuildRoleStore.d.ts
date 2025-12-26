@@ -7,7 +7,7 @@ export class GuildRoleStore extends FluxStore {
     getEveryoneRole(guild: Guild): Role;
     getManyRoles(guildId: string, roleIds: string[]): Role[];
     getNumRoles(guildId: string): number;
-    getRole(guildId: string, roleId: string): Role | undefined;
+    getRole(guildId: string, roleId: string): Role;
     getUnsafeMutableRoles(guildId: string): Record<string, Role>;
     serializeAllGuildRoles(): Array<{ partitionKey: string; values: Record<string, Role>; }>;
 }

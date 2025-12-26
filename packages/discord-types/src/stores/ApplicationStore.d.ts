@@ -11,7 +11,7 @@ export interface ApplicationUsage {
 
 export class ApplicationStore extends FluxStore {
     getState(): ApplicationStoreState;
-    getApplication(applicationId: string): Application | undefined;
+    getApplication(applicationId: string): Application;
     getApplicationByName(name: string): Application | undefined;
     getApplicationLastUpdated(applicationId: string): number | undefined;
     getGuildApplication(guildId: string, type: number): Application | undefined;

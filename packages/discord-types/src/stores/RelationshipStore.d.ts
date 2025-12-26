@@ -8,8 +8,8 @@ export class RelationshipStore extends FluxStore {
     getFriendIDs(): string[];
     getIgnoredIDs(): string[];
 
-    getMutableRelationships(): Record<string, RelationshipType>;
-    getNickname(userId: string): string | undefined;
+    getMutableRelationships(): Map<string, RelationshipType>;
+    getNickname(userId: string): string;
     getOriginApplicationId(userId: string): string | undefined;
     getOutgoingCount(): number;
     getPendingCount(): number;
@@ -18,7 +18,7 @@ export class RelationshipStore extends FluxStore {
 
     /** @returns Enum value from constants.RelationshipTypes */
     getRelationshipType(userId: string): RelationshipType;
-    getSince(userId: string): string | undefined;
+    getSince(userId: string): string;
     getSinces(): Record<string, string>;
     getSpamCount(): number;
     getVersion(): number;

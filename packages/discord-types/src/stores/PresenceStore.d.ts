@@ -23,11 +23,11 @@ export class PresenceStore extends FluxStore {
     getActivities(userId: string, guildId?: string): Activity[];
     getActivityMetadata(userId: string): unknown;
     getAllApplicationActivities(applicationId: string): UserAndActivity[];
-    getApplicationActivity(userId: string, applicationId: string, guildId?: string): Activity | undefined;
-    getClientStatus(userId: string): Partial<Record<DiscordPlatform, OnlineStatus>> | undefined;
+    getApplicationActivity(userId: string, applicationId: string, guildId?: string): Activity | null;
+    getClientStatus(userId: string): Record<DiscordPlatform, OnlineStatus>;
     getHiddenActivities(): Activity[];
     /** literally just getActivities(...)[0] */
-    getPrimaryActivity(userId: string, guildId?: string): Activity | undefined;
+    getPrimaryActivity(userId: string, guildId?: string): Activity | null;
     getState(): PresenceStoreState;
     getStatus(userId: string, guildId?: string | null, defaultStatus?: OnlineStatus): OnlineStatus;
     getUnfilteredActivities(userId: string, guildId?: string): Activity[];

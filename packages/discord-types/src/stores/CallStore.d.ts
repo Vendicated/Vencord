@@ -15,7 +15,7 @@ export interface CallStoreState {
 }
 
 export class CallStore extends FluxStore {
-    getCall(channelId: string): Call | undefined;
+    getCall(channelId: string): Call;
     getCalls(): Call[];
     getMessageId(channelId: string): string | null;
     isCallActive(channelId: string, messageId?: string): boolean;

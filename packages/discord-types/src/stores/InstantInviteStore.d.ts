@@ -10,7 +10,7 @@ export interface FriendInvite extends Invite {
 }
 
 export class InstantInviteStore extends FluxStore {
-    getInvite(channelId: string): Invite | undefined;
+    getInvite(channelId: string): Invite;
     getFriendInvite(): FriendInvite | null;
     getFriendInvitesFetching(): boolean;
     canRevokeFriendInvite(): boolean;
