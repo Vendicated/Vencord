@@ -52,7 +52,7 @@ export class RelationshipStore extends FluxStore {
     /** Returns an ISO timestamp string of when the relationship with the given user ID started */
     getSince(userId: string): string | undefined;
     /** Returns a map of user IDs to ISO timestamp strings of when each relationship started */
-    getSinces(): Map<string, string>;
+    getSinces(): Record<string, string>;
     /** Returns a list of the user IDs of all friends */
     getFriendIDs(): string[];
     /** Returns a list of the user IDs of all blocked */
