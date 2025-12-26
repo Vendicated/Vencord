@@ -1,16 +1,21 @@
 import { FluxStore, GuildSticker, PremiumStickerPack, Sticker } from "..";
 
 export type StickerGuildMap = Map<string, GuildSticker[]>;
+export type StickerPackMap = Map<string, Sticker[]>;
 
 export class StickersStore extends FluxStore {
+    hasLoadedStickerPacks: boolean;
+    isFetchingStickerPacks: boolean;
+    isLoaded: boolean;
+    loadState: number;
+
     getAllGuildStickers(): StickerGuildMap;
-    getRawStickersByGuild(): StickerGuildMap;
+    getAllPackStickers(): StickerPackMap;
     getPremiumPacks(): PremiumStickerPack[];
-    getAllStickersIterator(): IterableIterator<Sticker>;
-
+    getRawStickersByGuild(): StickerGuildMap;
     getStickerById(id: string): Sticker | undefined;
+    getStickerMetadataArrays(): unknown[];
     getStickerPack(id: string): PremiumStickerPack | undefined;
-    getStickersByGuildId(guildId: string): Sticker[] | undefined;
-
+    getStickersByGuildId(guildId: string): Sticker[];
     isPremiumPack(id: string): boolean;
 }

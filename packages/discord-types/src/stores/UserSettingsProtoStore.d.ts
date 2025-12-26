@@ -203,8 +203,8 @@ export class UserSettingsProtoStore extends FluxStore {
     getFullState(): Record<string, ProtoState>;
     hasLoaded(settingsType: number): boolean;
     getGuildFolders(): GuildFolder[];
-    getGuildRecentsDismissedAt(guildId: string): number | undefined;
-    getDismissedGuildContent(guildId: string): Record<string, number> | undefined;
+    getGuildRecentsDismissedAt(guildId: string): number;
+    getDismissedGuildContent(guildId: string): Record<string, number> | null;
     getGuildDismissedContentState(guildId: string): unknown;
     getGuildsProto(): Record<string, GuildProto>;
 }

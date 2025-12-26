@@ -9,6 +9,6 @@ export interface SelectedGuildState {
 export class SelectedGuildStore extends FluxStore {
     getGuildId(): string | null;
     getLastSelectedGuildId(): string | null;
-    getLastSelectedTimestamp(guildId: string): number | null;
-    getState(): SelectedGuildState | undefined;
+    getLastSelectedTimestamp(guildId: string): number | undefined;
+    getState(): SelectedGuildState;
 }

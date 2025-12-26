@@ -1,7 +1,16 @@
 import { FluxStore } from "..";
 
+export interface WindowSize {
+    width: number;
+    height: number;
+}
+
 export class WindowStore extends FluxStore {
+    getFocusedWindowId(): string | null;
+    getLastFocusedWindowId(): string;
+    isAppFocused(): boolean;
     isElementFullScreen(): boolean;
     isFocused(): boolean;
-    windowSize(): Record<"width" | "height", number>;
+    isVisible(): boolean;
+    windowSize(): WindowSize;
 }

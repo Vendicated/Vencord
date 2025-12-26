@@ -10,9 +10,9 @@ export interface ThemeState {
     preferences: Record<ThemePreference, Theme>;
 }
 export class ThemeStore extends FluxStore {
-    get theme(): Theme;
-    get darkSidebar(): boolean;
     get systemTheme(): SystemTheme;
-    themePreferenceForSystemTheme(preference: ThemePreference): Theme;
+    get theme(): Theme;
+
     getState(): ThemeState;
+    themePreferenceForSystemTheme(preference: ThemePreference): Theme;
 }

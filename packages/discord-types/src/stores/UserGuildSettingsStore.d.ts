@@ -40,6 +40,8 @@ export interface UserGuildSettingsState {
 
 export class UserGuildSettingsStore extends FluxStore {
     get accountNotificationSettings(): AccountNotificationSettings;
+    get mentionOnAllMessages(): boolean;
+    get useNewNotifications(): boolean;
 
     allowAllMessages(guildId: string): boolean;
     allowNoMessages(guildId: string): boolean;

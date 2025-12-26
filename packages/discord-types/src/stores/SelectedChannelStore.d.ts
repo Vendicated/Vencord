@@ -1,14 +1,16 @@
 import { FluxStore } from "..";
 
-export class SelectedChannelStore extends FluxStore {
-    getChannelId(guildId?: string | null): string;
-    getVoiceChannelId(): string | undefined;
-    getCurrentlySelectedChannelId(guildId?: string): string | undefined;
-    getMostRecentSelectedTextChannelId(guildId: string): string | undefined;
-    getLastSelectedChannelId(guildId?: string): string;
-    // yes this returns a string
-    getLastSelectedChannels(guildId?: string): string;
+export interface ChannelFollowingDestination {
+    guildId?: string;
+    channelId?: string;
+}
 
-    /** If you follow an announcement channel, this will return whichever channel you chose as destination */
-    getLastChannelFollowingDestination(): { guildId?: string; channelId?: string; } | undefined;
+export class SelectedChannelStore extends FluxStore {
+    getChannelId(guildId?: string | null): string | undefined;
+    getCurrentlySelectedChannelId(guildId?: string): string | undefined;
+    getLastChannelFollowingDestination(): ChannelFollowingDestination;
+    getLastSelectedChannelId(guildId?: string): string | undefined;
+    getLastSelectedChannels(guildId?: string): string | undefined;
+    getMostRecentSelectedTextChannelId(guildId: string): string | null;
+    getVoiceChannelId(): string | null;
 }

@@ -1,6 +1,24 @@
 import { Channel, CustomEmoji, Emoji, FluxStore } from "..";
 
+export interface EmojiCategory {
+    id: string;
+    name: string;
+    emojis: string[];
+}
+
+export interface EmojiFrecency {
+    totalUses: number;
+    frecencyByEmoji: Record<string, { totalUses: number; recentUses: number[]; score: number; }>;
+}
+
 export class EmojiStore extends FluxStore {
+    get categories(): Record<string, EmojiCategory>;
+    get diversitySurrogate(): string;
+    get emojiFrecencyWithoutFetchingLatest(): EmojiFrecency;
+    get emojiReactionFrecencyWithoutFetchingLatest(): EmojiFrecency;
+    get expandedSectionsByGuildIds(): Record<string, boolean>;
+    get loadState(): number;
+
     getCustomEmojiById(id?: string | null): CustomEmoji | undefined;
     getUsableCustomEmojiById(id?: string | null): CustomEmoji | undefined;
     getGuilds(): Record<string, {
@@ -8,23 +26,24 @@ export class EmojiStore extends FluxStore {
         get emojis(): CustomEmoji[];
         get rawEmojis(): CustomEmoji[];
         get usableEmojis(): CustomEmoji[];
-        get emoticons(): any[];
+        get emoticons(): unknown[];
         getEmoji(id: string): CustomEmoji | undefined;
         isUsable(emoji: CustomEmoji): boolean;
     }>;
     getGuildEmoji(guildId?: string | null): CustomEmoji[];
+    getUsableGuildEmoji(guildId?: string | null): CustomEmoji[];
     getNewlyAddedEmoji(guildId?: string | null): CustomEmoji[];
     getTopEmoji(guildId?: string | null): CustomEmoji[];
     getTopEmojisMetadata(guildId?: string | null): {
         emojiIds: string[];
         topEmojisTTL: number;
-    };
+    } | undefined;
+    hasFavoriteEmojis(guildId?: string | null): boolean;
     hasPendingUsage(): boolean;
     hasUsableEmojiInAnyGuild(): boolean;
-    searchWithoutFetchingLatest(data: any): any;
-    getSearchResultsOrder(...args: any[]): any;
+    getSearchResultsOrder(...args: unknown[]): unknown;
     getState(): {
-        pendingUsages: { key: string, timestamp: number; }[];
+        pendingUsages: { key: string; timestamp: number; }[];
     };
     searchWithoutFetchingLatest(data: {
         channel: Channel;
@@ -36,21 +55,21 @@ export class EmojiStore extends FluxStore {
     }): Record<"locked" | "unlocked", Emoji[]>;
 
     getDisambiguatedEmojiContext(): {
-        backfillTopEmojis: Record<any, any>;
+        backfillTopEmojis: Record<string, unknown>;
         customEmojis: Record<string, CustomEmoji>;
         emojisById: Record<string, CustomEmoji>;
         emojisByName: Record<string, CustomEmoji>;
         emoticonRegex: RegExp | null;
-        emoticonsByName: Record<string, any>;
+        emoticonsByName: Record<string, unknown>;
         escapedEmoticonNames: string;
-        favoriteNamesAndIds?: any;
-        favorites?: any;
-        frequentlyUsed?: any;
+        favoriteNamesAndIds?: unknown;
+        favorites?: unknown;
+        frequentlyUsed?: unknown;
         groupedCustomEmojis: Record<string, CustomEmoji[]>;
         guildId?: string;
         isFavoriteEmojiWithoutFetchingLatest(e: Emoji): boolean;
         newlyAddedEmoji: Record<string, CustomEmoji[]>;
-        topEmojis?: any;
+        topEmojis?: unknown;
         unicodeAliases: Record<string, string>;
         get favoriteEmojisWithoutFetchingLatest(): Emoji[];
     };
