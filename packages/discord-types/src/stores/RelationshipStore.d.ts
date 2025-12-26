@@ -8,7 +8,7 @@ export class RelationshipStore extends FluxStore {
     getFriendIDs(): string[];
     getIgnoredIDs(): string[];
 
-    getMutableRelationships(): Record<string, RelationshipType>;
+    getMutableRelationships(): Map<string, RelationshipType>;
     getNickname(userId: string): string;
     getOriginApplicationId(userId: string): string | undefined;
     getOutgoingCount(): number;
