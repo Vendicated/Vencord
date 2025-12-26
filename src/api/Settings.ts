@@ -261,9 +261,8 @@ export function migratePluginToSettings(newName: string, oldName: string, ...set
     if (oldPlugin?.enabled) {
         for (const settingName of settingNames) {
             logger.info(`Migrating plugin to setting from old name ${oldName} to ${newName} as ${settingName}`);
-            oldPlugin.enabled = false;
             newPlugin[settingName] = true;
-            if (!newPlugin?.enabled) newPlugin.enabled = true;
+            newPlugin.enabled = true;
             delete plugins[oldName];
             SettingsStore.markAsChanged();
         }
