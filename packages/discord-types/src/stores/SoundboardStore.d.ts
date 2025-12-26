@@ -26,8 +26,8 @@ export class SoundboardStore extends FluxStore {
     getOverlaySerializedState(): SoundboardOverlayState;
     getSounds(): Map<string, SoundboardSound[]>;
     getSoundsForGuild(guildId: string): SoundboardSound[] | null;
-    getSound(guildId: string, soundId: string): SoundboardSound | undefined;
-    getSoundById(soundId: string): SoundboardSound | undefined;
+    getSound(guildId: string, soundId: string): SoundboardSound;
+    getSoundById(soundId: string): SoundboardSound;
     isFetchingSounds(): boolean;
     isFetchingDefaultSounds(): boolean;
     isFetching(): boolean;

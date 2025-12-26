@@ -17,7 +17,7 @@ export interface Invite {
 }
 
 export class InviteStore extends FluxStore {
-    getInvite(code: string): Invite | undefined;
+    getInvite(code: string): Invite;
     getInviteError(code: string): unknown | undefined;
     getInvites(): Record<string, Invite>;
     getInviteKeyForGuildId(guildId: string): string | undefined;

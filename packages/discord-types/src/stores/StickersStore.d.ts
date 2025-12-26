@@ -16,6 +16,6 @@ export class StickersStore extends FluxStore {
     getStickerById(id: string): Sticker | undefined;
     getStickerMetadataArrays(): unknown[];
     getStickerPack(id: string): PremiumStickerPack | undefined;
-    getStickersByGuildId(guildId: string): Sticker[];
+    getStickersByGuildId(guildId: string): Sticker[] | undefined;
     isPremiumPack(id: string): boolean;
 }

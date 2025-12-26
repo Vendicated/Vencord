@@ -1,7 +1,7 @@
 import { Channel, FluxStore } from "..";
 
 export class ChannelStore extends FluxStore {
-    getChannel(channelId: string): Channel | undefined;
+    getChannel(channelId: string): Channel;
     getBasicChannel(channelId: string): Channel | undefined;
     hasChannel(channelId: string): boolean;
 
@@ -12,7 +12,7 @@ export class ChannelStore extends FluxStore {
     getAllThreadsForParent(channelId: string): Channel[];
     getSortedLinkedChannelsForGuild(guildId: string): Channel[];
 
-    getDMFromUserId(userId: string): string | undefined;
+    getDMFromUserId(userId: string): string;
     getDMChannelFromUserId(userId: string): Channel | undefined;
     getDMUserIds(): string[];
     getMutableDMsByUserIds(): Record<string, string>;

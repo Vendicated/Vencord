@@ -5,7 +5,7 @@ export class UserStore extends FluxStore {
     findByTag(username: string, discriminator: string): User | undefined;
     forEach(action: (user: User) => void): void;
     getCurrentUser(): User;
-    getUser(userId: string): User | undefined;
+    getUser(userId: string): User;
     getUsers(): Record<string, User>;
     getUserStoreVersion(): number;
     takeSnapshot(): Record<string, User>;

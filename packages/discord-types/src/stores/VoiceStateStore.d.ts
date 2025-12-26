@@ -6,16 +6,16 @@ export type VoiceStates = Record<string, UserVoiceStateRecords>;
 
 export interface VoiceState extends DiscordRecord {
     userId: string;
-    channelId: string | null;
-    sessionId: string | null;
+    channelId: string | null | undefined;
+    sessionId: string | null | undefined;
     mute: boolean;
     deaf: boolean;
     selfMute: boolean;
     selfDeaf: boolean;
     selfVideo: boolean;
-    selfStream: boolean;
+    selfStream: boolean | undefined;
     suppress: boolean;
-    requestToSpeakTimestamp: string | null;
+    requestToSpeakTimestamp: string | null | undefined;
     discoverable: boolean;
 
     isVoiceMuted(): boolean;
@@ -38,7 +38,7 @@ export class VoiceStateStore extends FluxStore {
     getVoiceStateForSession(userId: string, sessionId?: string | null): VoiceState | null | undefined;
 
     getUserVoiceChannelId(guildId: string | null, userId: string): string | undefined;
-    getCurrentClientVoiceChannelId(guildId: string | null): string | null;
+    getCurrentClientVoiceChannelId(guildId: string | null): string | undefined;
 
     getUsersWithVideo(channelId: string): Set<string>;
     getVoicePlatformForChannel(channelId: string, guildId: string): string | undefined;
