@@ -1,0 +1,8 @@
+.vc-screenshot-icon {
+    color: var(--interactive-normal);
+    transition: color 0.2s ease;
+}
+
+.vc-screenshot-icon:hover {
+    color: var(--interactive-hover);
+}
