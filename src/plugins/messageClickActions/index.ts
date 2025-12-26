@@ -91,7 +91,7 @@ async function react(channelId: string, messageId: string, emoji: string) {
 export default definePlugin({
     name: "MessageClickActions",
     description: "Hold Backspace and click to delete, double click to edit/reply, triple click to react",
-    authors: [Devs.Ven, EquicordDevs.keircn],
+    authors: [Devs.Ven, EquicordDevs.keyages],
 
     settings,
 

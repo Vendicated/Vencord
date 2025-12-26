@@ -51,6 +51,11 @@
     align-self: flex-start;
     opacity: 0.75;
     height: min-content;
+    cursor: pointer;
+}
+
+.vc-i-remember-you-user-id:hover {
+    opacity: 1;
 }
 
 .vc-i-remember-you-user {

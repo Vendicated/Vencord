@@ -10,8 +10,8 @@ import { HeadingPrimary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings";
 import { classNameFactory } from "@utils/css";
-import { openUserProfile } from "@utils/discord";
-import { Avatar, Clickable, React, TextInput, Tooltip, } from "@webpack/common";
+import { copyWithToast, openUserProfile } from "@utils/discord";
+import { Avatar, Clickable, ContextMenuApi, Menu, React, TextInput, Tooltip, UserStore } from "@webpack/common";
 
 import { Data, IStorageUser } from "./data";
 
@@ -66,10 +66,38 @@ function UserRow({ user, allowOwner = true }: { user: IStorageUser, allowOwner?:
                             </Paragraph>
                         }
                     </Tooltip>
-                    <span className={cl("user-id")}>
-                        <Paragraph>
-                            {user.id}
-                        </Paragraph>
+                    <span
+                        className={cl("user-id")}
+                        onContextMenu={e => {
+                            e.preventDefault();
+                            const userObj = UserStore.getUser(user.id);
+                            if (userObj) {
+                                ContextMenuApi.openContextMenu(e, () => (
+                                    <Menu.Menu
+                                        navId="user-context-menu"
+                                        onClose={ContextMenuApi.closeContextMenu}
+                                        aria-label="User Options"
+                                    >
+                                        <Menu.MenuItem
+                                            id="copy-user-id"
+                                            label="Copy User ID"
+                                            action={() => copyWithToast(user.id, "User ID copied to clipboard")}
+                                        />
+                                        <Menu.MenuItem
+                                            id="view-profile"
+                                            label="View Profile"
+                                            action={() => openUserProfile(user.id)}
+                                        />
+                                    </Menu.Menu>
+                                ));
+                            }
+                        }}
+                    >
+                        <Clickable onClick={() => copyWithToast(user.id, "User ID copied to clipboard")}>
+                            <Paragraph>
+                                {user.id}
+                            </Paragraph>
+                        </Clickable>
                     </span>
                 </div>
             </div>
