@@ -24,7 +24,7 @@ export const PluginInfo = {
     AUTHOR: {
         name: "pluckerpilple",
         id: 375402345971974147n,
-        github: "https://github.com/Mujhid1552"
+        github: "https://github.com/pluckerpilple"
     },
     CONTRIBUTORS: {}
 } as const satisfies types.PluginInfo;
