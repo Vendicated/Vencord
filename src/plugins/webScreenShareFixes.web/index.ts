@@ -29,8 +29,8 @@ export default definePlugin({
                     replace: '$&.concat($1?";stereo=1;sprop-stereo=1":"")'
                 },
                 {
-                    match: /:\[(\i\.ad\.H264),(\i\.ad\.VP8),(\i\.ad\.VP9)\]/,
-                    replace: ":[$3,$2,$1]"
+                    match: /\i\?\[(\i\.\i)\.H265,\i\.\i\.H264,\i\.\i\.VP8,\i\.\i\.VP9\]/,
+                    replace: "true?['AV1',$1.H265,$1.VP9,$1.H264,$1.VP8]"
                 }
             ]
         }
