@@ -5,9 +5,9 @@
  */
 
 import { isPluginEnabled } from "@api/PluginManager";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ShowHiddenChannelsPlugin from "@plugins/showHiddenChannels";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
