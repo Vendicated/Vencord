@@ -68,7 +68,7 @@ export function authorize(callback?: any) {
                     }
 
                     const { token } = await res.json();
-                    await updateAuth({token});
+                    await updateAuth({ token });
                     showToast("Successfully logged in!", Toasts.Type.SUCCESS);
                     callback?.();
                 } catch (e) {

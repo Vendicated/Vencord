@@ -159,7 +159,7 @@ async function patchBlock(action: "block" | "unblock", userId: string) {
             const newBlockedUsers = action === "block"
                 ? [...Auth.user.blockedUsers, userId]
                 : Auth.user.blockedUsers.filter(id => id !== userId);
-            await updateAuth({user: {...Auth.user, blockedUsers: newBlockedUsers}});
+            await updateAuth({ user: { ...Auth.user, blockedUsers: newBlockedUsers } });
         }
     }
 }

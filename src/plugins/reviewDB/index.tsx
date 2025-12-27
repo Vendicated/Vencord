@@ -96,7 +96,7 @@ export default definePlugin({
             if (!Auth.token) return;
 
             const user = await getCurrentUserInfo(Auth.token);
-            await updateAuth({user});
+            await updateAuth({ user });
 
             if (notifyReviews) {
                 if (lastReviewId && lastReviewId < user.lastReviewID) {

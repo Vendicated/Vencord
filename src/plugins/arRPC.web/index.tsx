@@ -60,7 +60,7 @@ export default definePlugin({
             activity.name ||= app.name;
         }
 
-        await FluxDispatcher.dispatch({type: "LOCAL_ACTIVITY_UPDATE", ...data});
+        await FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
     },
 
     async start() {
