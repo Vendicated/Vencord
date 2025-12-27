@@ -10,7 +10,6 @@ import { onceDefined } from "@shared/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
-import { initIpc } from "./ipcMain";
 import { RendererSettings } from "./settings";
 import { IS_VANILLA } from "./utils/constants";
 
@@ -61,7 +60,7 @@ if (!IS_VANILLA) {
         constructor(options: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
-                options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
+                options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
                 // work around discord unloading when in background
                 options.webPreferences.backgroundThrottling = false;
@@ -99,8 +98,6 @@ if (!IS_VANILLA) {
                     // Disable the Electron call entirely so that Discord can't dynamically change the size
                     this.setMinimumSize = (width: number, height: number) => { };
                 }
-
-                initIpc(this);
             } else super(options);
         }
     }
