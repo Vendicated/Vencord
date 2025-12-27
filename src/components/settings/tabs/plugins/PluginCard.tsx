@@ -5,9 +5,9 @@
  */
 
 import { showNotice } from "@api/Notices";
+import { isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
-import { proxyLazy } from "@utils/lazy";
 import { isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
 import { React, showToast, Toasts } from "@webpack/common";
@@ -15,9 +15,6 @@ import { Settings } from "Vencord";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
-
-// Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } = proxyLazy(() => require("plugins") as typeof import("plugins"));
 
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
@@ -52,8 +49,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             }
         }
 
-        // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches?.length) {
+        // if the plugin requires a restart, don't use stopPlugin/startPlugin. Wait for restart to apply changes.
+        if (pluginRequiresRestart(plugin)) {
             settings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name, "enabled");
             return;

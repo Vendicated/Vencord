@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import BadgeAPIPlugin from "plugins/_api/badges";
+import BadgeAPIPlugin from "@plugins/_api/badges";
 import { ComponentType, HTMLProps } from "react";
 
 export const enum BadgePosition {
@@ -31,7 +31,7 @@ export interface ProfileBadge {
     /** Custom component for the badge (tooltip not included) */
     component?: ComponentType<ProfileBadge & BadgeUserArgs>;
     /** The custom image to use */
-    image?: string;
+    iconSrc?: string;
     link?: string;
     /** Action to perform when you click the badge */
     onClick?(event: React.MouseEvent, props: ProfileBadge & BadgeUserArgs): void;
@@ -47,7 +47,8 @@ export interface ProfileBadge {
     key?: string;
 
     /**
-     * Allows dynamically returning multiple badges
+     * Allows dynamically returning multiple badges.
+     * May call hooks but then you must not use shouldShow
      */
     getBadges?(userInfo: BadgeUserArgs): ProfileBadge[];
 }
