@@ -19,9 +19,9 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
@@ -317,7 +317,7 @@ export default definePlugin({
             ]
         },
         {
-            find: '="interactive-normal",overflowCountClassName:',
+            find: '="interactive-text-default",overflowCountClassName:',
             replacement: [
                 {
                     // Create a variable for the channel prop
@@ -457,11 +457,11 @@ export default definePlugin({
                     // Filter hidden channels from GuildChannelStore.getChannels unless told otherwise
                     match: /(?<=getChannels\(\i)(\){.*?)return (.+?)}/,
                     replace: (_, rest, channels) => `,shouldIncludeHidden${rest}return $self.resolveGuildChannels(${channels},shouldIncludeHidden??arguments[0]==="@favorites");}`
-                }
+                },
             ]
         },
         {
-            find: "#{intl::FORM_LABEL_MUTED}",
+            find: ".invitesDisabledTooltip",
             replacement: {
                 // Make GuildChannelStore.getChannels return hidden channels
                 match: /(?<=getChannels\(\i)(?=\))/,

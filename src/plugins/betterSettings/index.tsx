@@ -5,16 +5,16 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory, disableStyle, enableStyle } from "@api/Styles";
+import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
-import PluginsSubmenu from "./PluginsSubmenu";
+import fullHeightStyle from "./fullHeightContext.css?managed";
 
 type SettingsEntry = { section: string, label: string; };
 
@@ -32,7 +32,8 @@ const settings = definePluginSettings({
     organizeMenu: {
         description: "Organizes the settings cog context menu into categories",
         type: OptionType.BOOLEAN,
-        default: true
+        default: true,
+        restartNeeded: true
     },
     eagerLoad: {
         description: "Removes the loading delay when opening the menu for the first time",
@@ -41,6 +42,11 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
+
+interface TransformedSettingsEntry {
+    section: string;
+    items: SettingsEntry[];
+}
 
 interface LayerProps extends HTMLAttributes<HTMLDivElement> {
     mode: "SHOWN" | "HIDDEN";
@@ -81,6 +87,15 @@ export default definePlugin({
     authors: [Devs.Kyuuhachi],
     settings,
 
+    start() {
+        if (settings.store.organizeMenu)
+            enableStyle(fullHeightStyle);
+    },
+
+    stop() {
+        disableStyle(fullHeightStyle);
+    },
+
     patches: [
         {
             find: "this.renderArtisanalHack()",
@@ -119,22 +134,25 @@ export default definePlugin({
             },
             predicate: () => settings.store.eagerLoad
         },
-        { // Settings cog context menu
+        {
+            // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                    replace: "$self.wrapMenu($1)"
+                    match: /=\[\];if\((\i)(?=\.forEach.{0,100}"logout"!==\i.{0,30}(\i)\.get\(\i\))/,
+                    replace: "=$self.wrapMap([]);if($self.transformSettingsEntries($1,$2)",
+                    predicate: () => settings.store.organizeMenu
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
-                    replace: "$&case 'VencordPlugins':return $self.PluginsSubmenu();"
+                    replace: "$&case 'VencordPlugins':return $self.buildPluginMenuEntries(true);$&case 'VencordThemes':return $self.buildThemeMenuEntries();"
                 }
             ]
         },
     ],
 
-    PluginsSubmenu,
+    buildPluginMenuEntries,
+    buildThemeMenuEntries,
 
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
@@ -151,49 +169,44 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    wrapMenu(list: SettingsEntry[]) {
-        if (!settings.store.organizeMenu) return list;
-
-        const items = [{ label: null as string | null, items: [] as SettingsEntry[] }];
+    transformSettingsEntries(list: SettingsEntry[], keyMap: Map<string, string>) {
+        const items = [] as TransformedSettingsEntry[];
 
         for (const item of list) {
             if (item.section === "HEADER") {
-                items.push({ label: item.label, items: [] });
-            } else if (item.section === "DIVIDER") {
-                items.push({ label: getIntlMessage("OTHER_OPTIONS"), items: [] });
-            } else {
-                items.at(-1)!.items.push(item);
+                keyMap.set(item.label, item.label);
+                items.push({ section: item.label, items: [] });
+            } else if (item.section !== "DIVIDER" && keyMap.has(item.section)) {
+                items.at(-1)?.items.push(item);
             }
         }
 
-        return {
-            filter(predicate: (item: SettingsEntry) => boolean) {
-                for (const category of items) {
-                    category.items = category.items.filter(predicate);
-                }
-                return this;
-            },
-            map(render: (item: SettingsEntry) => ReactElement<any>) {
-                return items
-                    .filter(a => a.items.length > 0)
-                    .map(({ label, items }) => {
-                        const children = items.map(render);
-                        if (label) {
-                            return (
-                                <Menu.MenuItem
-                                    key={label}
-                                    id={label.replace(/\W/, "_")}
-                                    label={label}
-                                    action={children[0].props.action}
-                                >
-                                    {children}
-                                </Menu.MenuItem>
-                            );
-                        } else {
-                            return children;
-                        }
-                    });
-            }
+        return items;
+    },
+
+    wrapMap(toWrap: TransformedSettingsEntry[]) {
+        // @ts-expect-error
+        toWrap.map = function (render: (item: SettingsEntry) => ReactElement<any>) {
+            return this
+                .filter(a => a.items.length > 0)
+                .map(({ section, items }) => {
+                    const children = items.map(render);
+                    if (section) {
+                        return (
+                            <Menu.MenuItem
+                                key={section}
+                                id={section.replace(/\W/, "_")}
+                                label={section}
+                            >
+                                {children}
+                            </Menu.MenuItem>
+                        );
+                    } else {
+                        return children;
+                    }
+                });
         };
+
+        return toWrap;
     }
 });
