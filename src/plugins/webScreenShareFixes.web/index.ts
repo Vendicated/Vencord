@@ -27,6 +27,10 @@ export default definePlugin({
                 {
                     match: /;usedtx=".concat\((\i)\?"0":"1"\)/,
                     replace: '$&.concat($1?";stereo=1;sprop-stereo=1":"")'
+                },
+                {
+                    match: /:\[(\i\.ad\.H264),(\i\.ad\.VP8),(\i\.ad\.VP9)\]/,
+                    replace: ":[$3,$2,$1]"
                 }
             ]
         }
