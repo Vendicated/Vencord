@@ -1,0 +1,17 @@
+.vc-iacorrector-icon {
+    transition: color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+}
+
+.vc-iacorrector-on {
+    color: var(--status-positive, var(--green-360, #3ba55c));
+    fill: var(--status-positive, var(--green-360, #3ba55c));
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 4px rgb(59 165 92 / 50%));
+}
+
+.vc-iacorrector-off {
+    color: var(--text-muted, var(--interactive-muted, #b5bac1));
+    fill: var(--text-muted, var(--interactive-muted, #b5bac1));
+    filter: drop-shadow(0 0 4px rgb(0 0 0 / 20%));
+    opacity: 0.85;
+}
