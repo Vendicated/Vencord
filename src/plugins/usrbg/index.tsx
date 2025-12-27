@@ -12,6 +12,10 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const API_URL = "https://usrbg.is-hardly.online/users";
+const EAGLECORD_INDEX_URL =
+    "https://github.com/prodbyeagle/dotfiles/raw/refs/heads/main/Vencord/eagleCord/usrbg.json";
+const EAGLECORD_IMAGE_BASE =
+    "https://raw.githubusercontent.com/prodbyeagle/dotfiles/refs/heads/main/Vencord/eagleCord/images/";
 
 interface UsrbgApiReturn {
     endpoint: string;
@@ -20,17 +24,19 @@ interface UsrbgApiReturn {
     users: Record<string, string>;
 }
 
+type EagleCordBannerIndex = Record<string, string>;
+
 const settings = definePluginSettings({
     nitroFirst: {
-        description: "Banner to use if both Nitro and USRBG banners are present",
+        description: "Banner to use if both Nitro and USRBG/EagleCord banners are present",
         type: OptionType.SELECT,
         options: [
             { label: "Nitro banner", value: true, default: true },
-            { label: "USRBG banner", value: false },
+            { label: "USRBG/EagleCord banner", value: false },
         ]
     },
     voiceBackground: {
-        description: "Use USRBG banners as voice chat backgrounds",
+        description: "Use USRBG/EagleCord banners as voice chat backgrounds",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
@@ -39,8 +45,8 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "USRBG",
-    description: "Displays user banners from USRBG, allowing anyone to get a banner without Nitro",
-    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad],
+    description: "Displays user banners from USRBG and EagleCord, allowing anyone to get a banner without Nitro",
+    authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad, Devs.Eagle],
     settings,
     patches: [
         {
@@ -48,7 +54,6 @@ export default definePlugin({
             replacement: {
                 match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
-
             }
         },
         {
@@ -64,49 +69,78 @@ export default definePlugin({
     ],
 
     data: null as UsrbgApiReturn | null,
+    eagleData: null as EagleCordBannerIndex | null,
 
-    settingsAboutComponent: () => {
-        return (
-            <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
-                Get your own USRBG banner
-            </LinkButton>
-        );
+    settingsAboutComponent: () => (
+        <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
+            Get your own USRBG banner
+        </LinkButton>
+    ),
+
+    /** Returns the banner URL for voice background or profile, unified */
+    getResolvedBanner(userId?: string): string | null {
+        if (!userId) return null;
+
+        const usrbg = this.userHasBackground(userId) ? this.getImageUrl(userId) : null;
+        const eagle = this.getEagleCordBannerUrl(userId);
+
+        return settings.store.nitroFirst ? usrbg ?? eagle : eagle ?? usrbg;
     },
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
-        if (className.includes("tile_")) {
-            if (this.userHasBackground(participantUserId)) {
-                return {
-                    backgroundImage: `url(${this.getImageUrl(participantUserId)})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat"
-                };
-            }
-        }
+        if (!settings.store.voiceBackground) return;
+        if (!className.includes("tile_")) return;
+
+        const url = this.getResolvedBanner(participantUserId);
+        if (!url) return;
+
+        return {
+            backgroundImage: `url(${url})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
+        };
     },
 
     patchBannerUrl({ displayProfile }: any) {
-        if (displayProfile?.banner && settings.store.nitroFirst) return;
-        if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
+        if (!displayProfile?.userId) return;
+
+        // Respect Nitro banner if nitroFirst is enabled
+        if (displayProfile.banner && settings.store.nitroFirst) return;
+
+        return this.getResolvedBanner(displayProfile.userId);
     },
 
     userHasBackground(userId: string) {
         return !!this.data?.users[userId];
     },
 
+    getEagleCordBannerUrl(userId: string): string | null {
+        const file = this.eagleData?.[userId];
+        if (!file) return null;
+
+        return `${EAGLECORD_IMAGE_BASE}${file}`;
+    },
+
     getImageUrl(userId: string): string | null {
         if (!this.userHasBackground(userId)) return null;
 
-        // We can assert that data exists because userHasBackground returned true
         const { endpoint, bucket, prefix, users: { [userId]: etag } } = this.data!;
         return `${endpoint}/${bucket}/${prefix}${userId}?${etag}`;
     },
 
     async start() {
-        const res = await fetch(API_URL);
-        if (res.ok) {
-            this.data = await res.json();
+        const [usrbgRes, eagleRes] = await Promise.all([
+            fetch(API_URL),
+            fetch(EAGLECORD_INDEX_URL)
+        ]);
+
+        if (usrbgRes.ok) {
+            this.data = await usrbgRes.json();
+        }
+
+        if (eagleRes.ok) {
+            this.eagleData = await eagleRes.json();
         }
     }
 });
