@@ -74,3 +74,30 @@ export const enum LoadState {
     LOADED = 2,
     ERROR = 3,
 }
+
+export const enum ConnectionStatsFlags {
+    TRANSPORT = 1,
+    OUTBOUND = 2,
+    INBOUND = 4,
+    ALL = 7,
+}
+
+export const enum SpeakingFlags {
+    NONE = 0,
+    VOICE = 1,
+    SOUNDSHARE = 2,
+    PRIORITY = 4,
+    HIDDEN = 8,
+}
+
+export const enum GoLiveQualityMode {
+    AUTO = 1,
+    FULL = 2,
+}
+
+export const enum VoiceProcessingStateReason {
+    CPU_OVERUSE = 1,
+    FAILED = 2,
+    VAD_CPU_OVERUSE = 3,
+    INITIALIZED = 4,
+}
