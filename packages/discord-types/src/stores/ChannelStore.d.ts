@@ -10,6 +10,7 @@ export class ChannelStore extends FluxStore {
     getMutableGuildChannelsForGuild(guildId: string): Record<string, Channel>;
     getAllThreadsForGuild(guildId: string): Channel[];
     getAllThreadsForParent(channelId: string): Channel[];
+    getSortedLinkedChannelsForGuild(guildId: string): Channel[];
 
     getDMFromUserId(userId: string): string;
     getDMChannelFromUserId(userId: string): Channel | undefined;
@@ -21,4 +22,10 @@ export class ChannelStore extends FluxStore {
     getGuildChannelsVersion(guildId: string): number;
     getPrivateChannelsVersion(): number;
     getInitialOverlayState(): Record<string, Channel>;
+
+    getDebugInfo(): {
+        loadedGuildIds: string[];
+        pendingGuildLoads: string[];
+        guildSizes: string[];
+    };
 }
