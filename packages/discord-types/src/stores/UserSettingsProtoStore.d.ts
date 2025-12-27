@@ -8,14 +8,16 @@ export interface GuildFolder {
 }
 
 export interface GuildProto {
-    channels: Record<string, unknown>;
+    // TODO: finish typing
+    channels: Record<string, any>;
     hubProgress: number;
     guildOnboardingProgress: number;
     dismissedGuildContent: Record<string, number>;
     disableRaidAlertPush: boolean;
     disableRaidAlertNag: boolean;
     leaderboardsDisabled: boolean;
-    guildDismissibleContentStates: Record<string, unknown>;
+    // TODO: finish typing
+    guildDismissibleContentStates: Record<string, any>;
 }
 
 export interface UserSettingsVersions {
@@ -36,13 +38,16 @@ export interface GuildsSettings {
 export interface UserContentSettings {
     dismissedContents: string;
     lastReceivedChangelogId: string;
-    recurringDismissibleContentStates: Record<string, unknown>;
-    lastDismissedOutboundPromotionStartDate: unknown;
-    premiumTier0ModalDismissedAt: unknown;
+    // TODO: finish typing
+    recurringDismissibleContentStates: Record<string, any>;
+    // TODO: type
+    lastDismissedOutboundPromotionStartDate: any;
+    premiumTier0ModalDismissedAt: any;
 }
 
 export interface VoiceAndVideoSettings {
-    videoBackgroundFilterDesktop: unknown;
+    // TODO: type
+    videoBackgroundFilterDesktop: any;
     alwaysPreviewVideo: boolean;
     afkTimeout: number;
     streamNotificationsEnabled: boolean;
@@ -71,8 +76,9 @@ export interface TextAndImagesSettings {
     convertEmoticons: boolean;
     viewNsfwCommands: boolean;
     includeStickersInAutocomplete: boolean;
-    explicitContentSettings: unknown;
-    goreContentSettings: unknown;
+    // TODO: type these
+    explicitContentSettings: any;
+    goreContentSettings: any;
     showMentionSuggestions: boolean;
 }
 
@@ -116,14 +122,14 @@ export interface GameLibrarySettings {
 
 export interface StatusSettings {
     statusExpiresAtMs: string;
-    status: { status: string } | null;
+    status: { status: string; } | null;
     showCurrentGame: boolean;
     statusCreatedAtMs: string;
 }
 
 export interface LocalizationSettings {
-    locale: { localeCode: string } | null;
-    timezoneOffset: { offset: number } | null;
+    locale: { localeCode: string; } | null;
+    timezoneOffset: { offset: number; } | null;
 }
 
 export interface AppearanceSettings {
@@ -134,7 +140,8 @@ export interface AppearanceSettings {
     launchPadMode: number;
     uiDensity: number;
     swipeRightToLeftMode: number;
-    clientThemeSettings: unknown;
+    // TODO: type
+    clientThemeSettings: any;
 }
 
 export interface GuildFoldersSettings {
@@ -143,8 +150,9 @@ export interface GuildFoldersSettings {
 }
 
 export interface AudioContextSettings {
-    user: Record<string, unknown>;
-    stream: Record<string, unknown>;
+    // TODO: finish these
+    user: Record<string, any>;
+    stream: Record<string, any>;
 }
 
 export interface ClipsSettings {
@@ -152,7 +160,8 @@ export interface ClipsSettings {
 }
 
 export interface InAppFeedbackSettings {
-    inAppFeedbackStates: Record<string, unknown>;
+    // TODO: finish typing
+    inAppFeedbackStates: Record<string, any>;
 }
 
 export interface UserSettings {
@@ -164,7 +173,8 @@ export interface UserSettings {
     textAndImages: TextAndImagesSettings;
     notifications: NotificationsSettings;
     privacy: PrivacySettings;
-    debug: Record<string, unknown>;
+    // TODO: finish typing
+    debug: Record<string, any>;
     gameLibrary: GameLibrarySettings;
     status: StatusSettings;
     localization: LocalizationSettings;
@@ -176,22 +186,24 @@ export interface UserSettings {
 }
 
 export interface FrecencySettings {
-    versions: unknown;
-    favoriteGifs: unknown;
-    favoriteStickers: unknown;
-    stickerFrecency: unknown;
-    favoriteEmojis: unknown;
-    emojiFrecency: unknown;
-    applicationCommandFrecency: unknown;
-    favoriteSoundboardSounds: unknown;
-    applicationFrecency: unknown;
-    playedSoundFrecency: unknown;
-    guildAndChannelFrecency: unknown;
-    emojiReactionFrecency: unknown;
+    // TODO: type all of these
+    versions: any;
+    favoriteGifs: any;
+    favoriteStickers: any;
+    stickerFrecency: any;
+    favoriteEmojis: any;
+    emojiFrecency: any;
+    applicationCommandFrecency: any;
+    favoriteSoundboardSounds: any;
+    applicationFrecency: any;
+    playedSoundFrecency: any;
+    guildAndChannelFrecency: any;
+    emojiReactionFrecency: any;
 }
 
 export interface ProtoState {
-    proto: unknown;
+    // TODO: type
+    proto: any;
 }
 
 export class UserSettingsProtoStore extends FluxStore {
@@ -205,6 +217,7 @@ export class UserSettingsProtoStore extends FluxStore {
     getGuildFolders(): GuildFolder[];
     getGuildRecentsDismissedAt(guildId: string): number;
     getDismissedGuildContent(guildId: string): Record<string, number> | null;
-    getGuildDismissedContentState(guildId: string): unknown;
+    // TODO: finish typing
+    getGuildDismissedContentState(guildId: string): any;
     getGuildsProto(): Record<string, GuildProto>;
 }

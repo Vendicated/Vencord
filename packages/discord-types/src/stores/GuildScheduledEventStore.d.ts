@@ -11,7 +11,7 @@ export interface GuildScheduledEventRecurrenceRule {
     frequency: number;
     interval: number;
     byWeekday: number[] | null;
-    byNWeekday: { n: number; day: number }[] | null;
+    byNWeekday: { n: number; day: number; }[] | null;
     byMonth: number[] | null;
     byMonthDay: number[] | null;
     byYearDay: number[] | null;
@@ -35,7 +35,8 @@ export interface GuildScheduledEvent {
     entity_metadata: GuildScheduledEventEntityMetadata | null;
     sku_ids: string[];
     recurrence_rule: GuildScheduledEventRecurrenceRule | null;
-    guild_scheduled_event_exceptions: unknown[];
+    // TODO: type
+    guild_scheduled_event_exceptions: any[];
     auto_start: boolean;
 }
 
@@ -46,7 +47,8 @@ export interface GuildScheduledEventRsvp {
 }
 
 export interface GuildScheduledEventUsers {
-    [userId: string]: unknown;
+    // TODO: finish typing
+    [userId: string]: any;
 }
 
 export class GuildScheduledEventStore extends FluxStore {

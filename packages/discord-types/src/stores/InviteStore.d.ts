@@ -11,14 +11,16 @@ export interface Invite {
     flags?: number;
     target_type?: number;
     target_user?: User;
-    target_application?: unknown;
-    stage_instance?: unknown;
-    guild_scheduled_event?: unknown;
+    // TODO: type these
+    target_application?: any;
+    stage_instance?: any;
+    guild_scheduled_event?: any;
 }
 
 export class InviteStore extends FluxStore {
     getInvite(code: string): Invite;
-    getInviteError(code: string): unknown | undefined;
+    // TODO: finish typing
+    getInviteError(code: string): any | undefined;
     getInvites(): Record<string, Invite>;
     getInviteKeyForGuildId(guildId: string): string | undefined;
     getFriendMemberIds(code: string): string[] | undefined;

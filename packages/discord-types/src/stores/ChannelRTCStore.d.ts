@@ -36,7 +36,8 @@ export interface UserParticipant extends BaseParticipant {
     soundsharing: boolean;
     ringing: boolean;
     userNick: string;
-    userAvatarDecoration: unknown | null;
+    // TODO: type
+    userAvatarDecoration: any | null;
     localVideoDisabled: boolean;
     userVideo?: boolean;
     streamId?: string;

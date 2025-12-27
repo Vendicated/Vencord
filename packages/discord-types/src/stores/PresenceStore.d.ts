@@ -14,14 +14,16 @@ export interface PresenceStoreState {
     activities: Record<string, Activity[]>;
     filteredActivities: Record<string, Activity[]>;
     hiddenActivities: Record<string, Activity[]>;
-    activityMetadata: Record<string, unknown>;
+    // TODO: finish typing
+    activityMetadata: Record<string, any>;
     clientStatuses: Record<string, Partial<Record<DiscordPlatform, OnlineStatus>>>;
 }
 
 export class PresenceStore extends FluxStore {
     findActivity(userId: string, predicate: (activity: Activity) => boolean, guildId?: string): Activity | undefined;
     getActivities(userId: string, guildId?: string): Activity[];
-    getActivityMetadata(userId: string): unknown;
+    // TODO: finish typing
+    getActivityMetadata(userId: string): any;
     getAllApplicationActivities(applicationId: string): UserAndActivity[];
     getApplicationActivity(userId: string, applicationId: string, guildId?: string): Activity | null;
     getClientStatus(userId: string): Record<DiscordPlatform, OnlineStatus>;

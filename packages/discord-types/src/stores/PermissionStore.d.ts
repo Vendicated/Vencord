@@ -32,15 +32,17 @@ type PartialChannel = Channel | { id: string; };
 type PartialGuild = Guild | { id: string; };
 
 export class PermissionStore extends FluxStore {
-    can(permission: bigint, channelOrGuild: PartialChannel | PartialGuild, guildId?: string, overwrites?: Record<string, unknown>, userId?: string): boolean;
-    canBasicChannel(permission: bigint, channel: PartialChannel, guildId?: string, overwrites?: Record<string, unknown>, userId?: string): boolean;
+    // TODO: finish typing these
+    can(permission: bigint, channelOrGuild: PartialChannel | PartialGuild, guildId?: string, overwrites?: Record<string, any>, userId?: string): boolean;
+    canBasicChannel(permission: bigint, channel: PartialChannel, guildId?: string, overwrites?: Record<string, any>, userId?: string): boolean;
     canWithPartialContext(permission: bigint, context: PartialContext): boolean;
     canManageUser(permission: bigint, userOrUserId: string, guild: PartialGuild): boolean;
     canAccessGuildSettings(guild: PartialGuild): boolean;
     canAccessMemberSafetyPage(guild: PartialGuild): boolean;
     canImpersonateRole(guild: PartialGuild, role: Role): boolean;
 
-    computePermissions(channel: PartialChannel, guildId?: string, overwrites?: Record<string, unknown>, userId?: string): bigint;
+    // TODO: finish typing
+    computePermissions(channel: PartialChannel, guildId?: string, overwrites?: Record<string, any>, userId?: string): bigint;
     computeBasicPermissions(channel: PartialChannel): number;
 
     getChannelPermissions(channel: PartialChannel): bigint;

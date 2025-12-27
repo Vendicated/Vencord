@@ -9,7 +9,8 @@ export interface AudioDevice {
     guid: string;
     hardwareId: string;
     containerId: string;
-    effects?: unknown;
+    // TODO: type
+    effects?: any;
 }
 
 export interface VideoDevice {
@@ -21,7 +22,8 @@ export interface VideoDevice {
     guid: string;
     hardwareId?: string;
     containerId?: string;
-    effects?: unknown;
+    // TODO: type
+    effects?: any;
 }
 
 export interface ClipsSource {
@@ -117,19 +119,23 @@ export interface MediaEngine {
     Camera: React.ComponentType<{ disabled?: boolean; deviceId?: string; width?: number; height?: number; }>;
     Video: React.ComponentType & { onContainerResized: () => void; };
 
-    on(event: MediaEngineEvent, listener: (...args: unknown[]) => void): this;
-    once(event: MediaEngineEvent, listener: (...args: unknown[]) => void): this;
-    off(event: MediaEngineEvent, listener: (...args: unknown[]) => void): this;
-    emit(event: MediaEngineEvent, ...args: unknown[]): boolean;
+    // TODO: finish typing these
+    on(event: MediaEngineEvent, listener: (...args: any[]) => void): this;
+    once(event: MediaEngineEvent, listener: (...args: any[]) => void): this;
+    off(event: MediaEngineEvent, listener: (...args: any[]) => void): this;
+    emit(event: MediaEngineEvent, ...args: any[]): boolean;
     removeAllListeners(event?: MediaEngineEvent): this;
     listenerCount(event: MediaEngineEvent): number;
 
-    applyMediaFilterSettings(settings: unknown): Promise<void>;
-    connect(userId: string, channelId: string, options: unknown): unknown;
+    // TODO: finish typing these
+    applyMediaFilterSettings(settings: any): Promise<void>;
+    connect(userId: string, channelId: string, options: any): any;
     connectionsEmpty(): boolean;
-    createReplayConnection(userId: string, options: unknown): unknown;
+    // TODO: finish typing
+    createReplayConnection(userId: string, options: any): any;
     destroy(): void;
-    eachConnection(callback: (connection: unknown) => void, context?: string): void;
+    // TODO: finish typing
+    eachConnection(callback: (connection: any) => void, context?: string): void;
     enable(): Promise<void>;
     exportClip(clipId: string, userId: string): Promise<Blob>;
     fetchAsyncResources(options: { fetchDave?: boolean; }): Promise<void>;
@@ -139,20 +145,24 @@ export interface MediaEngine {
     getAudioOutputDevices(): AudioDevice[];
     getAudioSubsystem(): string;
     getCodecCapabilities(callback: (capabilities: string) => void): void;
-    getCodecSurvey(): Promise<unknown>;
+    // TODO: finish typing
+    getCodecSurvey(): Promise<any>;
     getDebugLogging(): boolean;
-    getDesktopSource(): Promise<unknown>;
+    // TODO: finish typing
+    getDesktopSource(): Promise<any>;
     getLoopback(): boolean;
-    getMLSSigningKey(userId: string, guildId: string): Promise<{ key: unknown; signature: unknown; }>;
-    getNoiseCancellationStats(): Promise<unknown>;
-    getScreenPreviews(width: number, height: number): Promise<unknown[]>;
-    getSupportedBandwidthEstimationExperiments(callback: (experiments: unknown) => void): void;
+    // TODO: finish typing these
+    getMLSSigningKey(userId: string, guildId: string): Promise<{ key: any; signature: any; }>;
+    getNoiseCancellationStats(): Promise<any>;
+    getScreenPreviews(width: number, height: number): Promise<any[]>;
+    getSupportedBandwidthEstimationExperiments(callback: (experiments: any) => void): void;
     getSupportedSecureFramesProtocolVersion(): number;
     getSupportedVideoCodecs(callback: (codecs: string[]) => void): void;
     getSystemMicrophoneMode(): Promise<string>;
     getVideoInputDeviceId(): string;
     getVideoInputDevices(): VideoDevice[];
-    getWindowPreviews(width: number, height: number): Promise<unknown[]>;
+    // TODO: finish typing
+    getWindowPreviews(width: number, height: number): Promise<any[]>;
 
     interact(): void;
     presentNativeScreenSharePicker(options?: string): void;
@@ -160,9 +170,10 @@ export interface MediaEngine {
     rankRtcRegions(regions: string[]): Promise<string[]>;
     releaseNativeDesktopVideoSourcePickerStream(): void;
 
-    saveClip(clipId: string, userId: string): Promise<unknown>;
-    saveClipForUser(clipId: string, userId: string, options: unknown): Promise<unknown>;
-    saveScreenshot(channelId: string, userId: string, width: number | null, height: number | null, options: unknown): Promise<unknown>;
+    // TODO: finish typing these
+    saveClip(clipId: string, userId: string): Promise<any>;
+    saveClipForUser(clipId: string, userId: string, options: any): Promise<any>;
+    saveScreenshot(channelId: string, userId: string, width: number | null, height: number | null, options: any): Promise<any>;
 
     setAecDump(value: boolean): void;
     setAsyncClipsSourceDeinit(callback: () => void): void;
@@ -196,19 +207,23 @@ export interface MediaEngine {
     setSoundshareSource(soundshareId: number, enabled: boolean, context?: string): void;
     setVideoInputDevice(deviceId: string): Promise<void>;
 
-    shouldConnectionBroadcastVideo(connection: unknown): boolean;
-    showSystemCaptureConfigurationUI(options: unknown): void;
+    // TODO: finish typing these
+    shouldConnectionBroadcastVideo(connection: any): boolean;
+    showSystemCaptureConfigurationUI(options: any): void;
 
     startAecDump(): void;
-    startLocalAudioRecording(options: unknown): Promise<void>;
-    startRecordingRawSamples(options: unknown): void;
+    // TODO: finish typing these
+    startLocalAudioRecording(options: any): Promise<void>;
+    startRecordingRawSamples(options: any): void;
     stopAecDump(): void;
-    stopLocalAudioRecording(callback: (success: boolean, data: unknown) => void): void;
+    // TODO: finish typing
+    stopLocalAudioRecording(callback: (success: boolean, data: any) => void): void;
     stopRecordingRawSamples(): void;
 
     supported(): boolean;
     supports(feature: string): boolean;
-    updateClipMetadata(clipId: string, metadata: unknown): Promise<void>;
+    // TODO: finish typing
+    updateClipMetadata(clipId: string, metadata: any): Promise<void>;
     watchdogTick(): void;
     writeAudioDebugState(): Promise<void>;
 }
@@ -251,7 +266,8 @@ export class MediaEngineStore extends FluxStore {
     getLoopback(): boolean;
     getLoopbackReasons(): Set<string>;
     getMediaEngine(): MediaEngine;
-    getMLSSigningKey(userId: string, guildId: string): Promise<unknown>;
+    // TODO: finish typing
+    getMLSSigningKey(userId: string, guildId: string): Promise<any>;
     getMode(context?: string): string;
     getModeOptions(context?: string): ModeOptions;
     getMostRecentlyRequestedVoiceFilter(): string | null;
@@ -265,13 +281,15 @@ export class MediaEngineStore extends FluxStore {
     getPreviousVoiceFilter(): string | null;
     getPreviousVoiceFilterAppliedAt(): Date | null;
     getQoS(): boolean;
-    getSettings(context?: string): Record<string, unknown>;
-    getShortcuts(): Record<string, unknown>;
+    // TODO: finish typing these
+    getSettings(context?: string): Record<string, any>;
+    getShortcuts(): Record<string, any>;
     getSidechainCompression(): boolean;
     getSidechainCompressionStrength(): number;
     getSpeakingWhileMuted(): boolean;
     getState(): {
-        settingsByContext: Record<string, unknown>;
+        // TODO: finish typing
+        settingsByContext: Record<string, any>;
         inputDevices: Record<string, AudioDevice>;
         outputDevices: Record<string, AudioDevice>;
         appSupported: Record<string, boolean>;

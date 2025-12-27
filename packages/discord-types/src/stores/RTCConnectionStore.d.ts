@@ -20,7 +20,8 @@ export interface LastRTCConnectionState {
     rtcConnectionId: string | null;
     wasEverMultiParticipant: boolean;
     wasEverRtcConnected: boolean;
-    voiceStateAnalytics: unknown;
+    // TODO: type
+    voiceStateAnalytics: any;
     channelId: string;
 }
 
@@ -44,7 +45,8 @@ export interface SecureFramesRosterMapEntry {
 }
 
 export class RTCConnectionStore extends FluxStore {
-    getRTCConnection(): unknown | null;
+    // TODO: type
+    getRTCConnection(): any | null;
     getState(): RTCConnectionState;
     isConnected(): boolean;
     isDisconnected(): boolean;
@@ -66,7 +68,8 @@ export class RTCConnectionStore extends FluxStore {
     getVoiceFilterSpeakingDurationMs(): number | undefined;
     getPacketStats(): RTCConnectionPacketStats | undefined;
     getVoiceStateStats(): VoiceStateStats | undefined;
-    getUserVoiceSettingsStats(userId: string): unknown | undefined;
+    // TODO: finish typing
+    getUserVoiceSettingsStats(userId: string): any | undefined;
     getWasEverMultiParticipant(): boolean;
     getWasEverRtcConnected(): boolean;
     getUserIds(): string[] | undefined;

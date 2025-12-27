@@ -142,7 +142,8 @@ export class UserProfileStore extends FluxStore {
      */
     getMutualGuilds(userId: string): MutualGuild[] | undefined;
     getUserProfile(userId: string): UserProfile | undefined;
-    getWidgets(userId: string): unknown[] | undefined;
+    // TODO: finish typing
+    getWidgets(userId: string): any[] | undefined;
     getWishlistIds(userId: string): string[];
     getWishlistSettings(userId: string): WishlistSettings | null;
     /**

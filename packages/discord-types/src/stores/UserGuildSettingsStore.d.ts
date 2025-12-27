@@ -46,7 +46,8 @@ export class UserGuildSettingsStore extends FluxStore {
     allowAllMessages(guildId: string): boolean;
     allowNoMessages(guildId: string): boolean;
     getAddedToMessages(): string[];
-    getAllSettings(): { userGuildSettings: Record<string, GuildSettings> };
+    // TODO: finish typing
+    getAllSettings(): { userGuildSettings: Record<string, GuildSettings>; };
     getChannelFlags(channel: Channel): number;
     getChannelIdFlags(guildId: string, channelId: string): number;
     getChannelMessageNotifications(guildId: string, channelId: string): number | null;
@@ -63,8 +64,9 @@ export class UserGuildSettingsStore extends FluxStore {
     getNewForumThreadsCreated(guildId: string): boolean;
     getNotifyHighlights(guildId: string): number;
     getOptedInChannels(guildId: string): string[];
-    getOptedInChannelsWithPendingUpdates(guildId: string): Record<string, unknown>;
-    getPendingChannelUpdates(guildId: string): Record<string, unknown>;
+    // TODO: finish typing these
+    getOptedInChannelsWithPendingUpdates(guildId: string): Record<string, any>;
+    getPendingChannelUpdates(guildId: string): Record<string, any>;
     getState(): UserGuildSettingsState;
     isAddedToMessages(channelId: string): boolean;
     isCategoryMuted(guildId: string, channelId: string): boolean;
