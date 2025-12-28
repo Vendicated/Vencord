@@ -89,17 +89,11 @@ export default definePlugin({
         },
         {
             // Settings, sidebar
-            find: "#{intl::BILLING_SETTINGS}",
-            replacement: [
-                {
-                    match: /(?<=#{intl::BILLING_SETTINGS}[^,]*?,)(?=div)/,
-                    replace: "capitalism:true,"
-                },
-                {
-                    match: /\i\?\i:\i\.toSpliced\(3,0,\i\)/,
-                    replace: "($&).filter(e=>!e.capitalism)",
-                },
-            ],
+            find: ".BILLING_SECTION,",
+            replacement: {
+                match: /(?<=buildLayout:\(\)=>)\[.+?\]/,
+                replace: "[]",
+            },
             predicate: () => settings.store.billing,
         },
         {
