@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginToSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { getCustomColorString } from "@equicordplugins/customUserColors";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
@@ -45,6 +45,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Show a more useful message when several users are typing"
+    },
+    amITyping: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true,
+        description: "Shows you if other people can see you typing"
     }
 });
 
@@ -104,11 +110,13 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
     );
 }, { noop: true });
 
+migratePluginToSettings("TypingTweaks", "AmITyping", "amITyping");
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
-    authors: [Devs.zt, Devs.sadan],
+    authors: [Devs.zt, Devs.sadan, EquicordDevs.MrDiamond],
     settings,
+    isModified: true,
 
     managedStyle,
 
@@ -140,6 +148,14 @@ export default definePlugin({
                     predicate: () => settings.store.alternativeFormatting
                 }
             ]
+        },
+        {
+            find: "\"handleDismissInviteEducation\"",
+            predicate: () => settings.store.amITyping,
+            replacement: {
+                match: /\i\.default\.getCurrentUser\(\)/,
+                replace: "\"\""
+            }
         }
     ],
 
