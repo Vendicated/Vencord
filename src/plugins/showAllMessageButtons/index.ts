@@ -46,11 +46,10 @@ export default definePlugin({
                     replace: "isExpanded:$1,"
                 },
                 {
-                    predicate: () => settings.store.showFrequentlyUsedReactions,
-                    match: /function \i\(\i\){let{[^}]+}=function\(\i\).*?}(?=function \i\(\i\))/,
-                    replace: func => {
+                    match: /function \i\(\i\){let{(?:\i:\i,)*canReact:(\i)(?:,\i:\i)*}=function\(\i\).*?}(?=function \i\(\i\))/,
+                    replace: (func, canReactVar) => {
                         const reactionsElement = canonicalizeMatch(/(?<=\?null:)\(0,[^)]+\)\(\i\.Fragment,{children:\[[^\]]+\]}\)/).exec(func)![0];
-                        return func.replace(/children:\[/, children => children + reactionsElement + ",");
+                        return func.replace(/children:\[/, children => `${children}!${canReactVar}||!$self.settings.store.showFrequentlyUsedReactions?null:${reactionsElement},`);
                     }
                 }
             ]
