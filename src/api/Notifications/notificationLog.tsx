@@ -32,6 +32,7 @@ import type { DispatchWithoutAction } from "react";
 
 import NotificationComponent from "./NotificationComponent";
 import type { NotificationData } from "./Notifications";
+import { BaseText } from "@components/BaseText";
 
 interface PersistentNotificationData extends Pick<NotificationData, "title" | "body" | "image" | "icon" | "color"> {
     timestamp: number;
@@ -159,7 +160,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE} className={cl("modal")}>
             <ModalHeader>
-                <Heading style={{ flexGrow: 1 }}>Notification Log</Heading>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Notification Log</Heading>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 

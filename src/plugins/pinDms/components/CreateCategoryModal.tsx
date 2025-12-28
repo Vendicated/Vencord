@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
@@ -77,7 +78,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Heading style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</Heading>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</BaseText>
             </ModalHeader>
 
             {/* form is here so when you press enter while in the text input it submits */}

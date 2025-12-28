@@ -145,13 +145,15 @@ function ChangeDecorationModal(props: ModalProps) {
         className={DecorationModalStyles.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
-            <Heading
+            <BaseText
+                size="lg"
+                weight="semibold"
                 color="text-strong"
-                tag="h1"
+
                 style={{ flexGrow: 1 }}
             >
                 Change Decoration
-            </Heading>
+            </BaseText>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>
         <ModalContent

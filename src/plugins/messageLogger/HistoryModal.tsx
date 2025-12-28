@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Heading } from "@components/Heading";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
@@ -40,7 +40,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader className={cl("head")}>
-                <Heading style={{ flexGrow: 1 }}>Message Edit History</Heading>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Message Edit History</BaseText>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 

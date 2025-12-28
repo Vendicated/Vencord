@@ -5,13 +5,13 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { Button, TextButton } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { settings } from "@plugins/decor/settings";
 import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button } from "@webpack/common";
 
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
@@ -26,7 +26,6 @@ function GuidelinesModal(props: ModalProps) {
                 color="text-strong"
                 size="lg"
                 weight="semibold"
-                tag="h1"
                 style={{ flexGrow: 1 }}
             >
                 Hold on
@@ -55,13 +54,12 @@ function GuidelinesModal(props: ModalProps) {
                 >
                     Continue
                 </Button>
-                <Button
+                <TextButton
                     onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
+                    variant="primary"
                 >
                     Go Back
-                </Button>
+                </TextButton>
             </Flex>
         </ModalFooter>
     </ModalRoot>;

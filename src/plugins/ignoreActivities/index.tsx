@@ -6,6 +6,7 @@
 
 import { definePluginSettings, Settings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { HeadingSecondary } from "@components/Heading";
@@ -13,7 +14,7 @@ import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, RunningGameStore, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { RunningGameStore, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,

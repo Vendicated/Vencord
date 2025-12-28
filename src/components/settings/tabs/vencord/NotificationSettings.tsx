@@ -6,6 +6,7 @@
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
@@ -40,7 +41,7 @@ export function openNotificationSettingsModal() {
     openModal(props => (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader>
-                <Heading style={{ flexGrow: 1 }}>Notification Settings</Heading>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Notification Settings</BaseText>
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
 

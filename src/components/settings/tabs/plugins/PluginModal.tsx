@@ -20,9 +20,10 @@ import "./PluginModal.css";
 
 import { generateId } from "@api/Commands";
 import { useSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Heading, HeadingSecondary } from "@components/Heading";
+import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -176,7 +177,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             </div>
                         )}
                     </Flex>
-                    <Heading className={classes(Margins.top8, Margins.bottom8)}>Authors</Heading>
+                    <BaseText size="lg" weight="semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</BaseText>
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
@@ -215,7 +216,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 )}
 
                 <section>
-                    <Heading className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
+                    <BaseText size="lg" weight="semibold" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
                     {renderSettings()}
                 </section>
             </ModalContent>
