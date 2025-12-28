@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { Guild, User } from "@vencord/discord-types";
-import { ChannelStore, GuildMemberStore, GuildStore, InviteActions, MessageStore, PermissionStore, UserStore, } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, InviteActions, MessageStore, PermissionsBits, PermissionStore, UserStore, } from "@webpack/common";
 
 export interface IUserExtra {
     isOwner?: boolean;
@@ -147,7 +147,7 @@ export class Data {
                 target.add({ user, source: guild, extra: { updatedAt: now } });
             }
 
-this.processUsersToCollection([...target]);
+            this.processUsersToCollection([...target]);
 
             if (guild && this.hasInvitePermissions(guild.id)) {
                 this.collectInviteLink(guild.id);
@@ -188,7 +188,7 @@ this.processUsersToCollection([...target]);
         const member = GuildMemberStore.getMember(guildId, currentUser.id);
         if (!member) return false;
 
-        return PermissionStore.can(PermissionStore.CREATE_INSTANT_INVITE, guild.id);
+        return PermissionStore.can(PermissionsBits.CREATE_INSTANT_INVITE, guild);
     }
 
     async collectInviteLink(guildId: string) {
