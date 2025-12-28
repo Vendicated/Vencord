@@ -16,23 +16,50 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { canonicalizeMatch } from "@utils/patches";
+import definePlugin, { OptionType } from "@utils/types";
+
+export const settings = definePluginSettings({
+    showFrequentlyUsedReactions: {
+        description: "Show frequently used reactions",
+        type: OptionType.BOOLEAN,
+        default: true
+    }
+});
 
 export default definePlugin({
     name: "ShowAllMessageButtons",
     description: "Always show all message buttons no matter if you are holding the shift key or not.",
     tags: ["Chat", "Utility"],
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.LoganDark],
+
+    settings,
 
     patches: [
         {
             find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}),children",
-            replacement: {
-                // isExpanded: isShiftPressed && other conditions...
-                match: /isExpanded:\i&&(.+?),/,
-                replace: "isExpanded:$1,"
-            }
+            replacement: [
+                {
+                    // isExpanded: isShiftPressed && other conditions...
+                    match: /isExpanded:\i&&(.+?),/,
+                    replace: "isExpanded:$1,"
+                },
+                {
+                    match: /function \i\(\i\){let{(?:\i:\i,)*canReact:(\i)(?:,\i:\i)*}=function\(\i\).*?}(?=function \i\(\i\))/,
+                    replace: (func, canReactVar) => {
+                        const show = "$self.settings.store.showFrequentlyUsedReactions";
+                        // isExpanded?null:<frequently used reactions>
+                        const reactionsRe = canonicalizeMatch(/(?<=\i)\?null:(\(0,[^)]+\)\(\i\.Fragment,{children:\[[^\]]+\]}\))/);
+                        const reactionsElement = reactionsRe.exec(func)![1];
+
+                        return func
+                            .replace(reactionsRe, `||${show}$&`)
+                            .replace(/children:\[/, children => `${children}${canReactVar}&&${show}?${reactionsElement}:null,`);
+                    }
+                }
+            ]
         }
     ]
 });
