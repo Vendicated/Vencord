@@ -19,16 +19,15 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 
 import { MemberCount } from "./MemberCount";
 
-export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId?: string): number | null; };
 export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
     getProps(guildId?: string, channelId?: string): { groups: { count: number; id: string; }[]; };
 };
@@ -72,7 +71,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-                    replace: ":[$1?.startsWith('members')?$self.render():null,$2",
+                    replace: ":[$1?.includes('members')?$self.render():null,$2",
                 },
             ],
             predicate: () => settings.store.memberList

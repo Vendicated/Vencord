@@ -22,13 +22,11 @@ import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, Flux
 import { Except } from "type-fest";
 
 import { copyToClipboard } from "./clipboard";
-import { runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "./intlHash";
+import { runtimeHashMessageKey } from "./intlHash";
 import { Logger } from "./Logger";
 import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
 
 const IntlManagerLogger = new Logger("IntlManager");
-
-// TODO: remove legacy hashing function once Discord ships new one everywhere for a while
 
 /**
  * Get an internationalized message from a non hashed key
@@ -36,7 +34,7 @@ const IntlManagerLogger = new Logger("IntlManager");
  * @param values The values to interpolate, if it's a rich message
  */
 export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): any {
-    return getIntlMessageFromHash(runtimeHashMessageKey(key), values, key) || getIntlMessageFromHash(runtimeHashMessageKeyLegacy(key), values, key);
+    return getIntlMessageFromHash(runtimeHashMessageKey(key), values, key);
 }
 
 /**

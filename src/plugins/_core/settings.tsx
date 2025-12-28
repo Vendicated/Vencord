@@ -35,7 +35,7 @@ let LayoutTypes = {
     PANEL: 3,
     PANE: 4
 };
-waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL", "PANE"], v => LayoutTypes = v);
+waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL"], v => LayoutTypes = v);
 
 const FallbackSectionTypes = {
     HEADER: "HEADER",
@@ -56,11 +56,13 @@ interface SettingsLayoutNode {
     type: number;
     key?: string;
     legacySearchKey?: string;
+    getLegacySearchKey?(): string;
     useLabel?(): string;
     useTitle?(): string;
     buildLayout?(): SettingsLayoutNode[];
     icon?(): ReactNode;
     render?(): ReactNode;
+    StronglyDiscouragedCustomComponent?(): ReactNode;
 }
 
 interface EntryOptions {
@@ -149,35 +151,69 @@ export default definePlugin({
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
                 replace: "$self.buildLayout($1)"
             }
+        },
+        {
+            find: "getWebUserSettingFromSection",
+            replacement: {
+                match: /new Map\(\[(?=\[.{0,10}\.ACCOUNT,.{0,10}\.ACCOUNT_PANEL)/,
+                replace: "new Map([...$self.getSettingsSectionMappings(),"
+            }
         }
     ],
 
     buildEntry(options: EntryOptions): SettingsLayoutNode {
         const { key, title, panelTitle = title, Component, Icon } = options;
 
+        const panel: SettingsLayoutNode = {
+            key: key + "_panel",
+            type: LayoutTypes.PANEL,
+            useTitle: () => panelTitle,
+        };
+
+        const render = {
+            // FIXME
+            StronglyDiscouragedCustomComponent: () => <Component />,
+            render: () => <Component />,
+        };
+
+        // FIXME
+        if (LayoutTypes.PANE) {
+            panel.buildLayout = () => [
+                {
+                    key: key + "_pane",
+                    type: LayoutTypes.PANE,
+                    useTitle: () => panelTitle,
+                    buildLayout: () => [],
+                    ...render
+                }
+            ];
+        } else {
+            Object.assign(panel, render);
+            panel.buildLayout = () => [];
+        }
+
         return ({
             key,
             type: LayoutTypes.SIDEBAR_ITEM,
+            // FIXME
             legacySearchKey: title.toUpperCase(),
+            getLegacySearchKey: () => title.toUpperCase(),
             useTitle: () => title,
             icon: () => <Icon width={20} height={20} />,
-            buildLayout: () => [
-                {
-                    key: key + "_panel",
-                    type: LayoutTypes.PANEL,
-                    useTitle: () => panelTitle,
-                    buildLayout: () => [
-                        {
-                            key: key + "_pane",
-                            type: LayoutTypes.PANE,
-                            buildLayout: () => [],
-                            render: () => <Component />,
-                            useTitle: () => panelTitle
-                        }
-                    ]
-                }
-            ]
+            buildLayout: () => [panel]
         });
+    },
+
+    getSettingsSectionMappings() {
+        return [
+            ["VencordSettings", "vencord_main_panel"],
+            ["VencordPlugins", "vencord_plugins_panel"],
+            ["VencordThemes", "vencord_themes_panel"],
+            ["VencordUpdater", "vencord_updater_panel"],
+            ["VencordCloud", "vencord_cloud_panel"],
+            ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
+            ["VencordPatchHelper", "vencord_patch_helper_panel"]
+        ];
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
@@ -294,7 +330,7 @@ export default definePlugin({
                 className: "vc-settings-header"
             },
             {
-                section: "settings/tabs",
+                section: "VencordSettings",
                 label: "Vencord",
                 element: VencordTab,
                 className: "vc-settings"
@@ -324,7 +360,7 @@ export default definePlugin({
                 className: "vc-cloud"
             },
             {
-                section: "settings/tabsSync",
+                section: "VencordBackupAndRestore",
                 label: "Backup & Restore",
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"

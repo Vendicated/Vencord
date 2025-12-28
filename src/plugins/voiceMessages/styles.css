@@ -21,7 +21,7 @@
 }
 
 .vc-vmsg-preview-indicator {
-    background: var(--button-secondary-background);
+    background: var(--redesign-button-secondary-background);
     width: 16px;
     height: 16px;
     border-radius: 50%;
@@ -50,5 +50,5 @@
 }
 
 .vc-vmsg-error {
-    color: var(--text-danger);
+    color: var(--text-feedback-critical, #FF5C5C);
 }
