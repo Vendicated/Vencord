@@ -23,7 +23,7 @@ import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { CommandArgument, CommandContext } from "@vencord/discord-types";
 import { DraftType, UploadAttachmentStore, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
-import { applyPalette, GIFEncoder, quantize } from "gifenc";
+import { GIFEncoder, nearestColorIndex, quantize } from "gifenc";
 
 const DEFAULT_DELAY = 20;
 const DEFAULT_RESOLUTION = 128;
@@ -47,7 +47,7 @@ function loadImage(source: File | string) {
                 URL.revokeObjectURL(url);
             resolve(img);
         };
-        img.onerror = (event, _source, _lineno, _colno, err) => reject(err || event);
+        img.onerror = _event => reject(Error(`An error occurred while loading ${url}. Check the console for more info.`));
         img.crossOrigin = "Anonymous";
         img.src = url;
     });
@@ -83,11 +83,34 @@ async function resolveImage(options: CommandArgument[], ctx: CommandContext, noS
     return null;
 }
 
+function rgb888_to_rgb565(r: number, g: number, b: number): number {
+    return ((r << 8) & 0xf800) | ((g << 3) & 0x07e0) | (b >> 3);
+}
+
+function applyPaletteTransparent(data: Uint8Array | Uint8ClampedArray, palette: number[][], cache: number[], threshold: number): Uint8Array {
+    const index = new Uint8Array(Math.floor(data.length / 4));
+
+    for (let i = 0; i < index.length; i += 1) {
+        const r = data[4 * i];
+        const g = data[4 * i + 1];
+        const b = data[4 * i + 2];
+        const a = data[4 * i + 3];
+
+        if (a < threshold) {
+            index[i] = 255;
+        } else {
+            const key = rgb888_to_rgb565(r, g, b);
+            index[i] = key in cache ? cache[key] : (cache[key] = nearestColorIndex(palette, [r, g, b]));
+        }
+    }
+    return index;
+}
+
 migratePluginSettings("PetPet", "petpet");
 export default definePlugin({
     name: "PetPet",
     description: "Adds a /petpet slash command to create headpet gifs from any image",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.u32],
     commands: [
         {
             inputType: ApplicationCommandInputType.BUILT_IN,
@@ -96,7 +119,7 @@ export default definePlugin({
             options: [
                 {
                     name: "delay",
-                    description: "The delay between each frame. Defaults to 20.",
+                    description: "The delay between each frame in ms. Rounded to nearest 10ms. Defaults to the minimum value of 20.",
                     type: ApplicationCommandOptionType.INTEGER
                 },
                 {
@@ -143,15 +166,31 @@ export default definePlugin({
                 const avatar = await loadImage(url);
 
                 const delay = findOption(opts, "delay", DEFAULT_DELAY);
+                // Frame delays < 20ms don't function correctly on chromium and firefox
+                if (delay < 20) return sendBotMessage(cmdCtx.channel.id, { content: "Delay must be at least 20." });
+
                 const resolution = findOption(opts, "resolution", DEFAULT_RESOLUTION);
 
                 const gif = GIFEncoder();
 
+                const paletteImageSize = Math.min(120, resolution);
+
                 const canvas = document.createElement("canvas");
-                canvas.width = canvas.height = resolution;
-                const ctx = canvas.getContext("2d")!;
+                canvas.width = resolution;
+                // Ensure there is sufficient space for the palette generation image
+                canvas.height = Math.max(resolution, 2 * paletteImageSize);
+
+                const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
                 UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+
+                // Generate palette from an image where hand and avatar are fully visible
+                ctx.drawImage(avatar, 0, paletteImageSize, 0.8 * paletteImageSize, 0.8 * paletteImageSize);
+                ctx.drawImage(frames[0], 0, 0, paletteImageSize, paletteImageSize);
+                const { data } = ctx.getImageData(0, 0, paletteImageSize, 2 * paletteImageSize);
+                const palette = quantize(data, 255);
+
+                const cache = new Array(2 ** 16);
 
                 for (let i = 0; i < FRAMES; i++) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -166,13 +205,13 @@ export default definePlugin({
                     ctx.drawImage(frames[i], 0, 0, resolution, resolution);
 
                     const { data } = ctx.getImageData(0, 0, resolution, resolution);
-                    const palette = quantize(data, 256);
-                    const index = applyPalette(data, palette);
+                    const index = applyPaletteTransparent(data, palette, cache, 1);
 
                     gif.writeFrame(index, resolution, resolution, {
                         transparent: true,
-                        palette,
+                        transparentIndex: 255,
                         delay,
+                        palette: i === 0 ? palette : undefined,
                     });
                 }
 

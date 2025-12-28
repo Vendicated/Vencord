@@ -8,9 +8,9 @@ export class RelationshipStore extends FluxStore {
     getFriendIDs(): string[];
     getIgnoredIDs(): string[];
 
-    getMutableRelationships(): Map<string, number>;
+    getMutableRelationships(): Map<string, RelationshipType>;
     getNickname(userId: string): string;
-    getOriginApplicationId(applicationId: string): string;
+    getOriginApplicationId(userId: string): string | undefined;
     getOutgoingCount(): number;
     getPendingCount(): number;
     getPendingIgnoredCount(): number;
@@ -19,11 +19,9 @@ export class RelationshipStore extends FluxStore {
     /** @returns Enum value from constants.RelationshipTypes */
     getRelationshipType(userId: string): RelationshipType;
     getSince(userId: string): string;
-    getSinces(): Record<number, string>;
+    getSinces(): Record<string, string>;
     getSpamCount(): number;
     getVersion(): number;
-    getPendingCount(): number;
-    getRelationshipCount(): number;
 
     isBlocked(userId: string): boolean;
     isBlockedForMessage(userId: string): boolean;
@@ -38,7 +36,7 @@ export class RelationshipStore extends FluxStore {
     isFriend(userId: string): boolean;
     isIgnored(userId: string): boolean;
     isIgnoredForMessage(userId: string): boolean;
-    isStranger(userId: string): boolean;
     isSpam(userId: string): boolean;
+    isStranger(userId: string): boolean;
     isUnfilteredPendingIncoming(userId: string): boolean;
 }
