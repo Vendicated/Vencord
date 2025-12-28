@@ -21,26 +21,30 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
-    Max: {
-        description: "Max reactions (42 is the limit)",
+    reactionCount: {
+        description: "Number of reactions (0-42)",
         type: OptionType.NUMBER,
-        default: 5,
+        default: 5
     },
 });
 
 export default definePlugin({
-    name: "MoreReact",
-    description: "This plugin allows you to modify the max number of reactions for the frencency reaction menu",
-    tags: ["Frencency", "Reactions"],
+    name: "MoreQuickReactions",
+    description: "Increases the number of reactions available in the Quick React hover menu",
     authors: [Devs.iamme],
+    settings,
+
+    get reactionCount() {
+        return settings.store.reactionCount;
+    },
+
     patches: [
         {
-            find: "location:\"message_utilities\"",
+            find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
             replacement: {
-                match: /(?<=length>=3?.{0,40}\.slice\(0),3\)/,
-                replace: ",$self.settings.store.Max)"
+                match: /(?<=length>=3\?.{0,40}\.slice\(0),3\)/,
+                replace: ",$self.reactionCount)"
             }
         }
     ],
-    settings,
 });
