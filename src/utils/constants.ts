@@ -617,15 +617,12 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "VV",
         id: 254866377087778816n
     },
-<<<<<<< HEAD
     Eagle: {
         name: "eagle",
         id: 893759402832699392n,
-=======
     u32: {
         name: "u32",
         id: 1063237286818488351n,
->>>>>>> Vendicated/dev
     },
 } satisfies Record<string, Dev>);
 
