@@ -134,7 +134,7 @@ export default definePlugin({
         },
         // Reaction List
         {
-            find: ".reactorDefault",
+            find: ".reactionDefault",
             replacement: {
                 match: /tag:"strong"(?=.{0,50}\i\.name)(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
                 replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
@@ -145,7 +145,7 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /\.nickname,(?=children:)/,
+                match: /\.name,(?="aria-label)/,
                 replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults
@@ -197,7 +197,7 @@ export default definePlugin({
 
                 return {
                     color: value.replace("{DEFAULT}", "--text-default"),
-                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                    "--text-strong": value.replace("{DEFAULT}", "--text-strong"),
                     "--text-muted": value.replace("{DEFAULT}", "--text-muted")
                 };
             }
