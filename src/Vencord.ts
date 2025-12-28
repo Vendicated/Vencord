@@ -18,24 +18,24 @@ export * as Webpack from "./webpack";
 export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
+import { NotificationData, showNotification } from "@api/Notifications";
+import { initPluginManager, PMLogger, startAllPlugins } from "@api/PluginManager";
+import { PlainSettings, Settings, SettingsStore } from "@api/Settings";
+import { getCloudSettings, putCloudSettings, shouldCloudSync } from "@api/SettingsSync/cloudSync";
 import { coreStyleRootNode, initStyles } from "@api/Styles";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { IS_WINDOWS } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
+import { localStorage } from "@utils/localStorage";
+import { relaunch } from "@utils/native";
 import { StartAt } from "@utils/types";
+import { checkForUpdates, update, UpdateLogger } from "@utils/updater";
+import { onceReady } from "@webpack";
+import { SettingsRouter } from "@webpack/common";
+import { patches } from "@webpack/patcher";
 
 import { get as dsGet } from "./api/DataStore";
-import { NotificationData, showNotification } from "./api/Notifications";
-import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
-import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
-import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
-import { localStorage } from "./utils/localStorage";
-import { relaunch } from "./utils/native";
-import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
-import { onceReady } from "./webpack";
-import { SettingsRouter } from "./webpack/common";
-import { patches } from "./webpack/patchWebpack";
 
 if (IS_REPORTER) {
     require("./debug/runReporter");
