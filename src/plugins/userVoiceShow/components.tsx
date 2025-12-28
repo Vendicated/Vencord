@@ -7,7 +7,7 @@
  */
 
 import { isPluginEnabled } from "@api/PluginManager";
-import {BaseText} from "@components/BaseText";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ShowHiddenChannelsPlugin from "@plugins/showHiddenChannels";
 import { classNameFactory } from "@utils/css";

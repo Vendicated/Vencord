@@ -620,6 +620,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Eagle: {
         name: "eagle",
         id: 893759402832699392n,
+    },
     u32: {
         name: "u32",
         id: 1063237286818488351n,
