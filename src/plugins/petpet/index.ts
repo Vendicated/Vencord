@@ -21,7 +21,6 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { CommandArgument, CommandContext } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
 import { DraftType, UploadAttachmentStore, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
 import { GIFEncoder, nearestColorIndex, quantize } from "gifenc";
 
