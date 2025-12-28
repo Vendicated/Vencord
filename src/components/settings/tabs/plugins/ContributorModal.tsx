@@ -7,12 +7,12 @@
 import "./ContributorModal.css";
 
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { DevsById } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";

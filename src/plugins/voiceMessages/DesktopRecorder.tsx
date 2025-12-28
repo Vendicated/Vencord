@@ -18,11 +18,10 @@
 
 import { Button } from "@components/Button";
 import { PluginNative } from "@utils/types";
-import { showToast, Toasts, useState } from "@webpack/common";
+import { MediaEngineStore, showToast, Toasts, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
-import { MediaEngineStore } from "./utils";
 
 const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
 

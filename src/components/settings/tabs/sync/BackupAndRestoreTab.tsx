@@ -27,7 +27,7 @@ import { Margins } from "@utils/margins";
 
 function BackupAndRestoreTab() {
     return (
-        <SettingsTab title="Backup & Restore">
+        <SettingsTab>
             <Flex flexDirection="column" gap="0.5em">
                 <Card variant="warning">
                     <Heading tag="h4">Warning</Heading>

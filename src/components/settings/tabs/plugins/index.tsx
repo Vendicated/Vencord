@@ -21,7 +21,6 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
@@ -30,6 +29,7 @@ import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
+import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -259,7 +259,7 @@ function PluginSettings() {
     }
 
     return (
-        <SettingsTab title="Plugins">
+        <SettingsTab>
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <UIElementsButton />

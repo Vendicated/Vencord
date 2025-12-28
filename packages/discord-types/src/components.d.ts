@@ -35,17 +35,19 @@ export type Button = ComponentType<ButtonProps> & {
 
 // #endregion
 
-export type Tooltip = ComponentType<{
+export interface TooltipChildrenProps {
+    onClick(): void;
+    onMouseEnter(): void;
+    onMouseLeave(): void;
+    onContextMenu(): void;
+    onFocus(): void;
+    onBlur(): void;
+    "aria-label"?: string;
+}
+
+export interface TooltipProps {
     text: ReactNode | ComponentType;
-    children: FunctionComponent<{
-        onClick(): void;
-        onMouseEnter(): void;
-        onMouseLeave(): void;
-        onContextMenu(): void;
-        onFocus(): void;
-        onBlur(): void;
-        "aria-label"?: string;
-    }>;
+    children: FunctionComponent<TooltipChildrenProps>;
     "aria-label"?: string;
 
     allowOverflow?: boolean;
@@ -62,7 +64,9 @@ export type Tooltip = ComponentType<{
 
     tooltipClassName?: string;
     tooltipContentClassName?: string;
-}> & {
+}
+
+export type Tooltip = ComponentType<TooltipProps> & {
     Colors: Record<"BLACK" | "BRAND" | "CUSTOM" | "GREEN" | "GREY" | "PRIMARY" | "RED" | "YELLOW", string>;
 };
 
@@ -316,14 +320,6 @@ export type Slider = ComponentClass<PropsWithChildren<{
     "aria-labelledby"?: string;
     "aria-describedby"?: string;
 }>>;
-
-// TODO - type maybe idk probably not that useful other than the constants
-export type Flex = ComponentType<PropsWithChildren<any>> & {
-    Align: Record<"START" | "END" | "CENTER" | "STRETCH" | "BASELINE", string>;
-    Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
-    Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
-    Wrap: Record<"NO_WRAP" | "WRAP" | "WRAP_REVERSE", string>;
-};
 
 declare enum PopoutAnimation {
     NONE = "1",

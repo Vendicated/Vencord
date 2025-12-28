@@ -93,11 +93,11 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
             <HeadingPrimary>{title}</HeadingPrimary>
             <code>
                 {traceEnd && (
-                    <div style={{ color: "var(--header-primary)", marginBottom: 5, userSelect: "text" }}>
+                    <div style={{ color: "var(--text-strong)", marginBottom: 5, userSelect: "text" }}>
                         Trace ended at: {(new Date(traceEnd)).toTimeString()}
                     </div>
                 )}
-                <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
+                <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
                     <span>Start</span>
                     <span>Interval</span>
                     <span>Delta</span>
@@ -122,7 +122,7 @@ function ServerTrace({ trace }: ServerTraceProps) {
         <section>
             <HeadingSecondary>Server Trace</HeadingSecondary>
             <code>
-                <Flex flexDirection="column" gap="5px" style={{ color: "var(--header-primary)", userSelect: "text" }}>
+                <Flex flexDirection="column" gap="5px" style={{ color: "var(--text-strong)", userSelect: "text" }}>
                     {lines.map((line, idx) => (
                         <span key={idx}>{line}</span>
                     ))}

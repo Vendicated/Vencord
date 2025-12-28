@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import { Button } from "@components/Button";
 import { ErrorCard } from "@components/ErrorCard";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { relativeLuminance } from "@plugins/clientTheme/utils/colorUtils";
 import { createOrUpdateThemeColorVars } from "@plugins/clientTheme/utils/styleUtils";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ColorPicker, ThemeStore, useStateFromStores } from "@webpack/common";

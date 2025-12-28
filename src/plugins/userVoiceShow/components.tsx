@@ -5,23 +5,19 @@
  */
 
 import { isPluginEnabled } from "@api/PluginManager";
-import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ShowHiddenChannelsPlugin from "@plugins/showHiddenChannels";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-uvs-");
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
-const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
-    useChannelName: filters.byCode("()=>null==")
-});
-
 const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
 
 type IconProps = Omit<React.ComponentPropsWithoutRef<"div">, "children"> & {

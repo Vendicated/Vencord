@@ -17,11 +17,10 @@
 */
 
 import { Button } from "@components/Button";
-import { useState } from "@webpack/common";
+import { MediaEngineStore, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
-import { MediaEngineStore } from "./utils";
 
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);

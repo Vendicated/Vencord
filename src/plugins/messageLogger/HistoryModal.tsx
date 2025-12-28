@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
+import { TooltipContainer } from "@components/TooltipContainer";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { TabBar, Timestamp, TooltipContainer, useState } from "@webpack/common";
+import { TabBar, Timestamp, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 
