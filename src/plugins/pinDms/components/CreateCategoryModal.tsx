@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { Heading } from "@components/Heading";
 import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
@@ -13,8 +14,7 @@ import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { ColorPicker, Forms, TextInput, Toasts, useMemo, useState } from "@webpack/common";
-import {Button} from "@components/Button";
+import { ColorPicker, TextInput, Toasts, useMemo, useState } from "@webpack/common";
 
 interface ColorPickerWithSwatchesProps {
     defaultColor: number;
@@ -124,4 +124,3 @@ export const openCategoryModal = (categoryId: string | null, channelId: string |
         await requireSettingsMenu();
         return modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initialChannelId={channelId} />;
     });
-
