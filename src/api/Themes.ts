@@ -18,10 +18,10 @@
 
 import { Settings, SettingsStore } from "@api/Settings";
 import { createAndAppendStyle } from "@utils/css";
-import { findStoreLazy } from "@webpack";
 import { ThemeStore } from "@vencord/discord-types";
+import { findStoreLazy } from "@webpack";
 
-import { userStyleRootNode } from "./Styles";
+import { userStyleRootNode, vencordRootNode } from "./Styles";
 
 const PopoutWindowStore = findStoreLazy("PopoutWindowStore");
 
@@ -84,28 +84,13 @@ async function initThemes() {
 }
 
 function applyToPopout(popoutWindow: Window) {
-    if (!popoutWindow || !popoutWindow.document) return;
+    if (!popoutWindow?.document) return;
 
     const doc = popoutWindow.document;
 
-    const styles = [
-        { id: "vencord-custom-css", content: style?.textContent ?? "", disabled: !Settings.useQuickCss },
-        { id: "vencord-themes", content: themesStyle?.textContent ?? "" },
-        { id: "vencord-os-theme-values", content: document.getElementById("vencord-os-theme-values")?.textContent ?? "" }
-    ];
+    doc.getElementsByTagName("vencord-root")[0]?.remove();
 
-    styles.forEach(({ id, content, disabled }) => {
-        let popoutStyle = doc.getElementById(id) as HTMLStyleElement;
-        if (!popoutStyle) {
-            popoutStyle = doc.createElement("style");
-            popoutStyle.id = id;
-            doc.documentElement.appendChild(popoutStyle);
-        }
-        popoutStyle.textContent = content;
-        if (disabled) {
-            popoutStyle.disabled = disabled;
-        }
-    });
+    doc.documentElement.appendChild(vencordRootNode.cloneNode(true));
 }
 
 function updatePopoutWindows() {
@@ -127,20 +112,16 @@ document.addEventListener("DOMContentLoaded", () => {
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
 
+    window.addEventListener("message", event => {
+        const { discordPopoutEvent } = event.data || {};
+        if (discordPopoutEvent?.type !== "loaded") return;
+
+        const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
+        applyToPopout(popoutWindow);
+    });
+
     if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);
-
-        window.addEventListener("message", event => {
-            const { discordPopoutEvent } = event.data || {};
-            if (discordPopoutEvent?.type === "loaded") {
-                const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
-                applyToPopout(popoutWindow);
-                const style = popoutWindow.document.createElement("style");
-                style.id = "vencord-css-core";
-                style.textContent = document.getElementById("vencord-css-core")!.textContent;
-                popoutWindow.document.documentElement.appendChild(style);
-            }
-        });
     }
 }, { once: true });
 
