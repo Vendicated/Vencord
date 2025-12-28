@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Notices } from "@api/index";
+import { currentNotice, noticesQueue, popNotice, showNotice } from "@api/Notices";
 import { definePluginSettings } from "@api/Settings";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -41,7 +40,7 @@ export default definePlugin({
                     replace: "$self.getIdleTimeout()||"
                 },
                 {
-                    match: /Math\.min\((\i\.\i\.getSetting\(\)\*\i\.\i\.\i\.SECOND),\i\.\i\)/,
+                    match: /Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,
                     replace: "$1" // Decouple idle from afk (phone notifications will remain at user setting or 10 min maximum)
                 },
                 {
@@ -63,12 +62,12 @@ export default definePlugin({
 
         const backOnlineMessage = "Welcome back! Click the button to go online. Click the X to stay idle until reload.";
         if (
-            Notices.currentNotice?.[1] === backOnlineMessage ||
-            Notices.noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
+            currentNotice?.[1] === backOnlineMessage ||
+            noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
         ) return;
 
-        Notices.showNotice(backOnlineMessage, "Exit idle", () => {
-            Notices.popNotice();
+        showNotice(backOnlineMessage, "Exit idle", () => {
+            popNotice();
             FluxDispatcher.dispatch({
                 type: "IDLE",
                 idle: false

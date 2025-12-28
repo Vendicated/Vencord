@@ -67,15 +67,15 @@ export default definePlugin({
             find: '="SYSTEM_TAG"',
             replacement: {
                 // Override colorString with our custom color and disable gradients if applying the custom color.
-                match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i}=)(\i),/,
+                match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i.*?}=)(\i),/,
                 replace: "$self.wrapMessageColorProps($1, arguments[0]),"
             }
         },
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=roleName:\i,)color:/,
-                replace: "color:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
+                match: /(?<=roleName:\i,)colorString:/,
+                replace: "colorString:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }
@@ -127,7 +127,7 @@ export default definePlugin({
             const colorString = context?.colorString;
             const color = calculateNameColorForUser(id);
 
-            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
             }
 

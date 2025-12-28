@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Auth, authorize } from "@plugins/reviewDB/auth";
+import { Review, ReviewType } from "@plugins/reviewDB/entities";
+import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "@plugins/reviewDB/reviewDbApi";
+import { settings } from "@plugins/reviewDB/settings";
+import { cl, showToast } from "@plugins/reviewDB/utils";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
-import { Auth, authorize } from "../auth";
-import { Review, ReviewType } from "../entities";
-import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
-import { settings } from "../settings";
-import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
 const Transforms = findByPropsLazy("insertNodes", "textToText");
 const Editor = findByPropsLazy("start", "end", "toSlateRange");
-const ChatInputTypes = findByPropsLazy("FORM");
-const InputComponent = findComponentByCodeLazy("disableThemedBackground", "CHANNEL_TEXT_AREA");
+const ChatInputTypes = findByPropsLazy("FORM", "USER_PROFILE");
+const InputComponent = findComponentByCodeLazy("editorClassName", "CHANNEL_TEXT_AREA");
 const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
 
 interface UserProps {
@@ -127,7 +127,7 @@ export function ReviewsInputComponent(
 ) {
     const { token } = Auth;
     const editorRef = useRef<any>(null);
-    const inputType = ChatInputTypes.FORM;
+    const inputType = ChatInputTypes.USER_PROFILE_REPLY;
     inputType.disableAutoFocus = true;
 
     const channel = createChannelRecordFromServer({ id: "0", type: 1 });
