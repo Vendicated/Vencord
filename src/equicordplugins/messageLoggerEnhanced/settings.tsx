@@ -165,6 +165,18 @@ export const settings = definePluginSettings({
         description: "Maximum number of messages to store in the cache. Older messages are deleted when the limit is reached. This helps reduce memory usage and improve performance. 0 means there is no limit",
     },
 
+    timeBasedCleanupMinutes: {
+        default: 0,
+        type: OptionType.NUMBER,
+        description: "Automatically remove messages from servers that are older than this many minutes. Set to 0 to disable time-based cleanup.",
+    },
+
+    preserveCurrentChannel: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: "When enabled, messages in your currently selected channel are not affected by time-based cleanup.",
+    },
+
     whitelistedIds: {
         default: "",
         type: OptionType.STRING,

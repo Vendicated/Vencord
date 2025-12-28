@@ -41,13 +41,19 @@ const settings = definePluginSettings({
         description: "Discord hides your own activity buttons for some reason",
         restartNeeded: true,
         default: false,
+    },
+    noDefaultHangStatus: {
+        type: OptionType.BOOLEAN,
+        description: "Disable the default hang status when joining voice channels",
+        restartNeeded: true,
+        default: false,
     }
 });
 
 export default definePlugin({
     name: "EquicordHelper",
     description: "Used to provide support, fix discord caused crashes, and other misc features.",
-    authors: [Devs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu],
+    authors: [Devs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu, EquicordDevs.keyages],
     required: true,
     settings,
     patches: [
@@ -118,6 +124,15 @@ export default definePlugin({
             replacement: {
                 match: /.getId\(\)===\i.id/,
                 replace: "$& && false"
+            }
+        },
+        // No Default Hang Status
+        {
+            find: ".CHILLING)",
+            predicate: () => settings.store.noDefaultHangStatus,
+            replacement: {
+                match: /{enableHangStatus:(\i),/,
+                replace: "{_enableHangStatus:$1=false,"
             }
         },
         // Always show open legacy settings

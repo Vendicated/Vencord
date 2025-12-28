@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { ChannelStore } from "@webpack/common";
 import { DBSchema, IDBPDatabase, openDB } from "idb";
 
 import { LoggedMessageJSON } from "./types";
@@ -107,6 +108,36 @@ export async function getMessagesByStatusIDB(status: DBMessageStatus) {
 
 export async function getOldestMessagesIDB(limit: number) {
     return cacheRecords(await db.getAllFromIndex("messages", "by_timestamp", undefined, limit));
+}
+
+export async function getOlderThanTimestampIDB(timestamp: string) {
+    const tx = db.transaction("messages", "readonly");
+    const { store } = tx;
+    const index = store.index("by_timestamp");
+
+    const cursor = await index.openCursor(IDBKeyRange.upperBound(timestamp));
+
+    if (!cursor) {
+        return [];
+    }
+
+    const messages: DBMessageRecord[] = [];
+    for await (const c of cursor) {
+        messages.push(c.value);
+    }
+
+    return cacheRecords(messages);
+}
+
+export async function getOlderThanTimestampForGuildsIDB(timestamp: string, currentChannelId?: string, preserveCurrentChannel?: boolean) {
+    const allOldMessages = await getOlderThanTimestampIDB(timestamp);
+    return allOldMessages.filter(record => {
+        const { message } = record;
+        const channel = ChannelStore.getChannel(message.channel_id);
+        const isGuildMessage = channel?.guild_id != null;
+        const isCurrentChannel = preserveCurrentChannel && currentChannelId && message.channel_id === currentChannelId;
+        return isGuildMessage && !isCurrentChannel;
+    });
 }
 
 export async function getDateStortedMessagesByStatusIDB(newest: boolean, limit: number, status: DBMessageStatus) {
