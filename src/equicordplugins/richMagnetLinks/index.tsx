@@ -10,7 +10,7 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    authors: [EquicordDevs.cassie, EquicordDevs.mochienya],
+    authors: [EquicordDevs.cassie, EquicordDevs.mochienya, EquicordDevs.secp192k1],
     name: "RichMagnetLinks",
     description: "Renders magnet links like message links",
     patches: [
@@ -33,7 +33,7 @@ export default definePlugin({
         order,
         requiredFirstCharacters: ["magnet:?"],
         match(content: string) {
-            return /magnet:\?\S+/.exec(content);
+            return /^magnet:\?[\w\W]+?(?=\s|$)/.exec(content);
         },
         parse(matchedContent: RegExpExecArray, _, parseProps: Record<string, any>) {
             // Don't run when typing/editing message
@@ -43,7 +43,21 @@ export default definePlugin({
             };
 
             const magnetLink = matchedContent[0];
-            const filename = (new URL(magnetLink)).searchParams.get("dn") ?? "unknown filename";
+            let filename = "unknown filename";
+
+            try {
+                const searchPart = magnetLink.split("?")[1];
+                if (searchPart) {
+                    const params = new URLSearchParams(searchPart);
+                    const dn = params.get("dn");
+                    if (dn) {
+                        filename = decodeURIComponent(dn.replace(/\+/g, " "));
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to parse magnet link", err);
+            }
+
             return { type: "magnet", filename, magnetLink };
         },
         react({ magnetLink, filename }) {
