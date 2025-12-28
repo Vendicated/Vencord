@@ -9,19 +9,20 @@
 import "@plugins/_api/badges/fixDiscordBadgePadding.css";
 
 import { _getBadges, addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Heart } from "@components/Heart";
 import { Paragraph } from "@components/Paragraph";
 import DonateButton from "@components/settings/DonateButton";
-import { openContributorModal, openStaffModal } from "@components/settings/tabs";
+import { openContributorModal } from "@components/settings/tabs";
 import { Devs, EAGLECORD_ICON_IMAGE, OWNER_BADGE } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { ContextMenuApi, Menu, Toasts, UserStore } from "@webpack/common";
 
@@ -33,20 +34,7 @@ const ContributorBadge: ProfileBadge = {
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
-const FormerStaff: ProfileBadge = {
-    description: "Former Staff",
-    iconSrc: OWNER_BADGE,
-    position: BadgePosition.END,
-    onClick: () => openStaffModal(FormerStaff),
-    shouldShow: ({ userId }) => ["1093444260491165777", "773166395147157504"].includes(userId),
-    props: {
-        style: {
-            filter: "grayscale(100%)"
-        }
-    },
-};
-
-const OwnerBadge: ProfileBadge = {
+const EagleCordAdminBadge: ProfileBadge = {
     description: "Owner",
     iconSrc: OWNER_BADGE,
     position: BadgePosition.END,
@@ -55,7 +43,7 @@ const OwnerBadge: ProfileBadge = {
 };
 
 function openEaglePage() {
-    VencordNative.native.openExternal("https://prodbyeagle.dev").then(r => console.log(r));
+    VencordNative.native.openExternal("https://www.prodbyeagle.dev/").then(r => console.log(r));
 }
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
@@ -72,8 +60,7 @@ async function loadBadges(noCache = false) {
     EagleBadges = await fetch("https://raw.githubusercontent.com/prodbyeagle/dotfiles/refs/heads/main/Vencord/eagleCord/badges.json", init)
         .then(r => r.json());
 
-    addProfileBadge(OwnerBadge);
-    addProfileBadge(FormerStaff);
+    addProfileBadge(EagleCordAdminBadge);
 }
 
 let intervalId: any;
@@ -286,51 +273,49 @@ export default definePlugin({
                 ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
             },
             onClick() {
-                const modalKey = openModal(props => (
-                    <ErrorBoundary
-                        noop
-                        onError={() => {
-                            closeModal(modalKey);
-                        }}
-                    >
-                        <ModalRoot {...props}>
-                            <ModalHeader>
-                                <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <Heading
-                                        tag="h1"
-                                        style={{
-                                            width: "100%",
-                                            textAlign: "center",
-                                            margin: 0,
-                                        }}
-                                    >
-                                        🦅 EagleCord
-                                    </Heading>
-                                </Flex>
-                            </ModalHeader>
+                openModal(props => (
+                    <ModalRoot {...props} size={ModalSize.SMALL} aria-label="EagleCord Badge">
+                        <ModalHeader separator>
+                            <Flex justifyContent="center" alignItems="center" style={{ width: "100%" }}>
+                                <Heading tag="h2">
+                                    🦅 EagleCord Badge
+                                </Heading>
+                            </Flex>
+                        </ModalHeader>
 
-                            <ModalContent>
-                                <Flex style={{ justifyContent: "center", gap: "1rem" }}>
-                                    <img
-                                        src={badge.badge}
-                                        alt="EagleCord Badge"
-                                        style={{
-                                            width: 128,
-                                            height: 128,
-                                        }}
-                                    />
-                                </Flex>
-                                <div style={{ padding: "1em", textAlign: "center" }}>
-                                    <Paragraph>{badge.tooltip}</Paragraph>
-                                    <Paragraph className={Margins.top20}>
-                                        {badge.tooltip === "EagleCord User"
-                                            ? "This badge is given by 'prodbyeagle'. The Creator of EagleCord"
-                                            : "This is a custom badge from the EagleCord project, made by the user you are currently visiting."}
-                                    </Paragraph>
-                                </div>
-                            </ModalContent>
-                        </ModalRoot>
-                    </ErrorBoundary>
+                        <ModalContent>
+                            <Flex
+                                flexDirection="column"
+                                alignItems="center"
+                                gap="0.75em"
+                                style={{ textAlign: "center", padding: "0.5em 0" }}
+                            >
+                                <img
+                                    src={badge.badge}
+                                    alt={badge.tooltip}
+                                    style={{
+                                        width: 128,
+                                        height: 128,
+                                        borderRadius: "50%",
+                                    }}
+                                />
+
+                                <Heading tag="h3" style={{ wordBreak: "break-word" }}>
+                                    {badge.tooltip}
+                                </Heading>
+
+                                <BaseText style={{ opacity: 0.85, maxWidth: 420 }}>
+                                    This is a <strong>custom EagleCord badge</strong> assigned to this user.
+                                    Badge text and imagery are entirely user-defined and may be ironic,
+                                    humorous, or personal in nature.
+                                </BaseText>
+
+                                <BaseText style={{ fontSize: "0.85em", opacity: 0.6 }}>
+                                    Issued via EagleCord • Not an official Discord badge
+                                </BaseText>
+                            </Flex>
+                        </ModalContent>
+                    </ModalRoot>
                 ));
             },
         }) satisfies ProfileBadge);
