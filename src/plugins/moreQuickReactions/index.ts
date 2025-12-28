@@ -30,8 +30,8 @@ export default definePlugin({
         {
             find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
             replacement: {
-                match: /(?<=length>=3\?.{0,40}\.slice\(0),3\)/,
-                replace: ",$self.reactionCount)"
+                match: /(?<=length>=3\?.{0,40})\.slice\(0,3\)/,
+                replace: ".slice(0,$self.reactionCount)"
             }
         }
     ],
