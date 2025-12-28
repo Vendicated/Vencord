@@ -10,11 +10,11 @@ import "./ContributorModal.css";
 
 import { ProfileBadge } from "@api/Badges";
 import { useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes, pluralise } from "@utils/misc";

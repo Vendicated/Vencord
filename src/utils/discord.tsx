@@ -31,6 +31,7 @@ export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): 
  * Get an internationalized message from a hashed key
  * @param hashedKey The hashed message key
  * @param values The values to interpolate, if it's a rich message
+ * @param originalKey TODO: update me please. @prodbyeagle
  */
 export function getIntlMessageFromHash(hashedKey: string, values?: Record<PropertyKey, any>, originalKey?: string): any {
     try {
@@ -199,7 +200,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     const cached = UserProfileStore.getUserProfile(id);
     if (cached) return cached;
 
-    await FluxDispatcher.dispatch({type: "USER_PROFILE_FETCH_START", userId: id});
+    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId: id });
 
     const { body } = await RestAPI.get({
         url: Constants.Endpoints.USER_PROFILE(id),
@@ -211,7 +212,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
         oldFormErrors: true,
     });
 
-    await FluxDispatcher.dispatch({type: "USER_UPDATE", user: body.user});
+    await FluxDispatcher.dispatch({ type: "USER_UPDATE", user: body.user });
     await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", userProfile: body });
     if (options?.guild_id && body.guild_member)
         await FluxDispatcher.dispatch({

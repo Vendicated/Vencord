@@ -6,11 +6,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { settings } from "@plugins/imageZoom";
 import { ELEMENT_ID } from "@plugins/imageZoom/constants";
 import { waitFor } from "@plugins/imageZoom/utils/waitFor";
+import { classNameFactory } from "@utils/css";
 import { FluxDispatcher, useLayoutEffect, useMemo, useRef, useState } from "@webpack/common";
 
 interface Vec2 {

@@ -131,11 +131,11 @@ function CreateDecorationModal(props: ModalProps) {
                                 const inviteAccepted = await openInviteModal(INVITE_KEY);
                                 if (inviteAccepted) {
                                     closeAllModals();
-                                    await FluxDispatcher.dispatch({type: "LAYER_POP_ALL"});
+                                    await FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
                                 }
                             } else {
                                 closeAllModals();
-                                await FluxDispatcher.dispatch({type: "LAYER_POP_ALL"});
+                                await FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
                                 NavigationRouter.transitionToGuild(GUILD_ID);
                             }
                         }}

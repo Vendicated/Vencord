@@ -140,7 +140,7 @@ export default definePlugin({
 
     async startTyping(channelId: string) {
         if (settings.store.isEnabled) return;
-        await FluxDispatcher.dispatch({type: "TYPING_START_LOCAL", channelId});
+        await FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
     chatBarButton: {
