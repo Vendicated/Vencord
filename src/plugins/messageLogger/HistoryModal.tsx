@@ -6,12 +6,13 @@
 
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { TabBar, Timestamp, TooltipContainer, useState } from "@webpack/common";
+import { TabBar, Timestamp, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 

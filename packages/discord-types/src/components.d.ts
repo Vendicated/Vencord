@@ -36,17 +36,19 @@ export type Button = ComponentType<ButtonProps> & {
 
 // #endregion
 
-export type Tooltip = ComponentType<{
+export interface TooltipChildrenProps {
+    onClick(): void;
+    onMouseEnter(): void;
+    onMouseLeave(): void;
+    onContextMenu(): void;
+    onFocus(): void;
+    onBlur(): void;
+    "aria-label"?: string;
+}
+
+export interface TooltipProps {
     text: ReactNode | ComponentType;
-    children: FunctionComponent<{
-        onClick(): void;
-        onMouseEnter(): void;
-        onMouseLeave(): void;
-        onContextMenu(): void;
-        onFocus(): void;
-        onBlur(): void;
-        "aria-label"?: string;
-    }>;
+    children: FunctionComponent<TooltipChildrenProps>;
     "aria-label"?: string;
 
     allowOverflow?: boolean;
@@ -63,7 +65,9 @@ export type Tooltip = ComponentType<{
 
     tooltipClassName?: string;
     tooltipContentClassName?: string;
-}> & {
+}
+
+export type Tooltip = ComponentType<TooltipProps> & {
     Colors: Record<"BLACK" | "BRAND" | "CUSTOM" | "GREEN" | "GREY" | "PRIMARY" | "RED" | "YELLOW", string>;
 };
 
