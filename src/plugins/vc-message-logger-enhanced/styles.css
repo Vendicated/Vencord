@@ -1,0 +1,99 @@
+.msg-logger-modal-root {
+    max-height: 80vh;
+    min-height: 80vh;
+    min-width: 85vw;
+    max-width: 85vw;
+}
+
+.msg-logger-modal-empty-logs {
+    display: grid;
+    place-content: center;
+    height: 100%;
+}
+
+.msg-logger-modal-info-icon {
+    position: absolute;
+    top: -24px;
+    right: -24px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+}
+
+.msg-logger-modal-header {
+    flex-direction: column;
+
+    /* width: 100%; */
+}
+
+.msg-logger-modal-footer {
+    align-items: center;
+}
+
+.msg-logger-modal-content-container {
+    /* max-height: 80vh; */
+    overflow: hidden;
+    height: 100%;
+    transition: opacity 100ms ease-in;
+}
+
+.msg-logger-modal-content {
+    padding-bottom: 20px;
+    height: 100%;
+}
+
+.msg-logger-modal-content-inner {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    height: 100%;
+}
+
+.msg-logger-modal-header > div:has(input) {
+    width: 100%;
+}
+
+.msg-logger-modal-tab-bar-item {
+    padding-bottom: 16px;
+    margin-bottom: -2px;
+}
+
+.msg-logger-modal-tab-bar {
+    margin-top: 20px;
+    width: 100%;
+    justify-content: space-around;
+}
+
+.msg-logger-modal-danger-btn {
+    color: var(--white-500);
+    background-color: var(--button-danger-background);
+}
+
+.vc-log-toolbox-btn svg {
+    color: var(--interactive-normal);
+}
+
+:is(.vc-log-toolbox-btn:hover, .vc-log-toolbox-btn[class*="selected"]) svg {
+    color: var(--interactive-active);
+}
+
+.folder-upload-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    background-color: var(--input-background);
+}
+
+.folder-upload-input {
+    cursor: pointer;
+    padding: 10px 0 10px 10px;
+    color: var(--header-secondary);
+}
+
+.folder-upload-button {
+    margin: 6px;
+    padding: 4px 8px;
+}
+
+.vc-updater-modal-content {
+    padding: 1rem 2rem;
+}
