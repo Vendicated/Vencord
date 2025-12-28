@@ -627,7 +627,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     prism: {
         name: "dear.prism",
-        id: 1454940717465206987n,
+        id: 390884143749136386n,
     }
 } satisfies Record<string, Dev>);
 
