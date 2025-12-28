@@ -9,6 +9,7 @@ import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { copyWithToast, getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import {
@@ -29,7 +30,6 @@ import {
     FluxDispatcher,
     Menu,
     ReactDOM,
-    TooltipContainer,
     useCallback,
     useEffect,
     useMemo,

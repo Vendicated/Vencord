@@ -13,10 +13,11 @@ import { WarningIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings";
 import { ExcludedReasons, PluginDependencyList } from "@components/settings/tabs/plugins";
 import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { EQUIBOT_USER_ID } from "@utils/constants";
 import { isEquicordGuild, isEquicordSupport } from "@utils/misc";
 import { Message } from "@vencord/discord-types";
-import { showToast, Tooltip, TooltipContainer, useMemo } from "@webpack/common";
+import { showToast, Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import plugins, { ExcludedPlugins } from "~plugins";

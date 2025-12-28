@@ -9,12 +9,13 @@ import "../styles.css";
 import { Button } from "@components/Button";
 import { Heading } from "@components/Heading";
 import { SettingsTab, wrapTab } from "@components/settings";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { debounce } from "@shared/debounce";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useIntersection } from "@utils/react";
 import { Icon } from "@vencord/discord-types";
-import { Clickable, TextInput, TooltipContainer, useCallback, useEffect, useMemo, useState } from "@webpack/common";
+import { Clickable, TextInput, useCallback, useEffect, useMemo, useState } from "@webpack/common";
 
 import { getNameByIcon, IconsFinds } from "../names";
 import { IconsDef } from "../types";

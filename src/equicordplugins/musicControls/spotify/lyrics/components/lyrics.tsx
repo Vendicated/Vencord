@@ -5,11 +5,12 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { settings } from "@equicordplugins/musicControls/settings";
 import { SpotifyLrcStore } from "@equicordplugins/musicControls/spotify/lyrics/providers/store";
 import { SpotifyStore } from "@equicordplugins/musicControls/spotify/SpotifyStore";
 import { openModal } from "@utils/modal";
-import { ContextMenuApi, React, TooltipContainer, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { LyricsContextMenu } from "./ctxMenu";
 import { LyricsModal } from "./modal";

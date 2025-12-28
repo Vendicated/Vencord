@@ -8,6 +8,7 @@ import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { proxyLazy } from "@utils/lazy";
 import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findLazy, mapMangledModuleLazy } from "@webpack";
 import {
@@ -21,7 +22,6 @@ import {
     ScrollerThin,
     SearchableSelect,
     TabBar,
-    TooltipContainer,
     useEffect,
     useRef,
     UserStore,
