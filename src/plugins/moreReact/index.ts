@@ -37,8 +37,8 @@ export default definePlugin({
         {
             find: "location:\"message_utilities\"",
             replacement: {
-                match: /(length>=3?.{0,40}\.slice\(0),3\)/,
-                replace: "$1,$self.settings.store.Max)"
+                match: /(?<=length>=3?.{0,40}\.slice\(0),3\)/,
+                replace: ",$self.settings.store.Max)"
             }
         }
     ],
