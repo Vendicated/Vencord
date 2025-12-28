@@ -17,6 +17,8 @@
 */
 
 export const enum IpcEvents {
+    INIT_FILE_WATCHERS = "VencordInitFileWatchers",
+
     OPEN_QUICKCSS = "VencordOpenQuickCss",
     GET_QUICK_CSS = "VencordGetQuickCss",
     SET_QUICK_CSS = "VencordSetQuickCss",
@@ -28,8 +30,6 @@ export const enum IpcEvents {
     GET_THEMES_LIST = "VencordGetThemesList",
     GET_THEME_DATA = "VencordGetThemeData",
     GET_THEME_SYSTEM_VALUES = "VencordGetThemeSystemValues",
-    UPLOAD_THEME = "VencordUploadTheme",
-    DELETE_THEME = "VencordDeleteTheme",
     THEME_UPDATE = "VencordThemeUpdate",
 
     OPEN_EXTERNAL = "VencordOpenExternal",
@@ -42,13 +42,15 @@ export const enum IpcEvents {
     BUILD = "VencordBuild",
 
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
+    GET_MONACO_THEME = "VencordGetMonacoTheme",
 
     GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
-
-    OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
-    VOICE_MESSAGES_READ_RECORDING = "VencordVMReadRecording",
 
     CSP_IS_DOMAIN_ALLOWED = "VencordCspIsDomainAllowed",
     CSP_REMOVE_OVERRIDE = "VencordCspRemoveOverride",
     CSP_REQUEST_ADD_OVERRIDE = "VencordCspRequestAddOverride",
+
+    GET_RENDERER_CSS = "VencordGetRendererCss",
+    RENDERER_CSS_UPDATE = "VencordRendererCssUpdate",
+    PRELOAD_GET_RENDERER_JS = "VencordPreloadGetRendererJs",
 }
