@@ -127,7 +127,7 @@ export default definePlugin({
             const colorString = context?.colorString;
             const color = calculateNameColorForUser(id);
 
-            if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
             }
 

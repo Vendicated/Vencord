@@ -49,7 +49,7 @@ export function openNotificationSettingsModal() {
 }
 
 function NotificationSettings() {
-    const settings = useSettings().notifications;
+    const settings = useSettings(["notifications.*"]).notifications;
 
     return (
         <div style={{ padding: "1em 0" }}>
