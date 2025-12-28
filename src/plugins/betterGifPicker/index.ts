@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "BetterGifPicker",
-    description: "Makes the gif picker open the favourite category by default",
+    description: "Makes the gif picker open your favorites by default",
     authors: [Devs.Samwich],
     patches: [
         {
