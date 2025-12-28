@@ -160,7 +160,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE} className={cl("modal")}>
             <ModalHeader>
-                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Notification Log</Heading>
+                <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>Notification Log</BaseText>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
