@@ -20,11 +20,13 @@ import "./style.css";
 
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { findByPropsLazy, proxyLazyWebpack } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { useRef, UserSettingsActionCreators } from "@webpack/common";
 
-const { UserSettingsDelay } = findByPropsLazy("UserSettingsDelay", "MAX_FAVORITES");
-const { useDrag, useDrop } = findByPropsLazy("useDrag", "useDrop");
+const UserSettingsDelay = findByPropsLazy('INFREQUENT_USER_ACTION');
+const useDrag = findByCodeLazy("useDrag::spec.begin");
+const useDrop = findByCodeLazy("function l(t,n){var e=(0,o.w)(t,n),l=(0,i.V)(),");
+//                             !^ Should be replaced
 const { useLayoutEffect } = findByPropsLazy("useLayoutEffect", "useEffect");
 const imgCls = findByPropsLazy("image", "imageLoading");
 const dndCls = findByPropsLazy("wrapper", "target", "dragOver");
@@ -48,11 +50,12 @@ export default definePlugin({
     startAt: StartAt.WebpackReady,
     patches: [
         {
-            find: ".EMOJI_NAMES_WITH_FAVORITED",
+            find: 'allowAnimatedEmoji","selectedItemClassName',
+            //     ^ Probably should be replaced
             replacement: [
                 {
-                    match: /(\("li",{\.\.\.\i,key:\i,ref:\i)}/,
-                    replace: "$1,style:{position:'relative'}}",
+                    match: /(\("li",\i\(\i\({},\i\),{key:\i,ref:\i)(}\))/,
+                    replace: "$1,style:{position:'relative'}$2",
                 },
                 {
                     match: /(\(0,\i\.jsx\)\(\i,{ref:.*?inNitroLockedSection:\i}\))/,
@@ -67,11 +70,12 @@ export default definePlugin({
                     replace: "$1emoji.category==='FAVORITES'?drag:$2,collected:collected,",
                 },
                 {
-                    match: /(function\((?:\i,?)+\){let [{a-zA-Z,:_]*,)(\.\.\.\i})/,
-                    replace: "$1collected,$2",
+                    match: /(function\(\i,\i\){var{emoji:\i,)/,
+                    replace: "$1collected,",
                 },
                 {
-                    match: /(\(0,\i.jsx\)\(\i.default)/,
+                    match: /(\(0,\i.jsx\)\(\i.Z)/,
+                    //                       !^ Should be replaced
                     replace: "collected.isDragging?$self.dragItem():$1",
                 },
                 {
@@ -131,7 +135,7 @@ export default definePlugin({
     },
     wrapper(emoji: EmojiDescriptor) {
         const [collected, drop] = this.drop(emoji);
-        const ref: React.MutableRefObject<null | HTMLElement> = useRef(null);
+        const ref: React.RefObject<null | HTMLElement> = useRef(null);
         useLayoutEffect(() => {
             if (emoji.category !== "FAVORITES") { return; }
             const frame = requestAnimationFrame(() => {
