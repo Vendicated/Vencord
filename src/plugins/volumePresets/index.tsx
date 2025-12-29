@@ -83,8 +83,17 @@ function setPreset(key: string, preset: VolumePreset) {
     cachedPresets[key] = preset;
     savePresets();
 }
-function deletePreset(key: string) {
-    delete cachedPresets[key];
+function deletePreset(deleteKey: string, setSelectedQuickPreset?) {
+    delete cachedPresets[deleteKey];
+    Object.keys(settings.store.quickPresets).forEach(key => {
+        if (settings.store.quickPresets[key] === deleteKey) {
+            settings.store.quickPresets[key] = "none";
+            setSelectedQuickPreset(prev => ({
+                ...prev,
+                [key]: "none"
+            }));
+        }
+    });
     savePresets();
 }
 
@@ -329,7 +338,7 @@ function PresetManager() {
                                                         showToast("Cannot delete active preset!", Toasts.Type.FAILURE);
                                                         return;
                                                     }
-                                                    deletePreset(key);
+                                                    deletePreset(key, setSelectedQuickPreset);
                                                     forceUpdate();
                                                 }}
                                             >
