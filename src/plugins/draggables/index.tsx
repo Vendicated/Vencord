@@ -50,8 +50,7 @@ export default definePlugin({
     startAt: StartAt.WebpackReady,
     patches: [
         {
-            find: 'allowAnimatedEmoji","selectedItemClassName',
-            //     ^ Probably should be replaced
+            find: 'getDisambiguatedEmojiContext().isFavoriteEmojiWithoutFetchingLatest',
             replacement: [
                 {
                     match: /(\("li",\i\(\i\({},\i\),{key:\i,ref:\i)(}\))/,
