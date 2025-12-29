@@ -1,7 +1,7 @@
 {
     "name": "@equicord/types",
     "private": false,
-    "version": "1.13.8",
+    "version": "1.13.9",
     "description": "",
     "types": "index.d.ts",
     "scripts": {
@@ -9,7 +9,7 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
-    "author": "Vencord",
+    "author": "Equicord & Vencord Contributors",
     "license": "GPL-3.0",
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
