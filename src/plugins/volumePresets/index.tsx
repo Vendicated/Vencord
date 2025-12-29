@@ -372,7 +372,7 @@ function PresetManager() {
                     </Flex>
                 ) : (
                     <Paragraph>No presets yet. Create one above!</Paragraph>
-                )};
+                )}
 
             <Divider />
 
@@ -406,11 +406,11 @@ function PresetManager() {
                         ))}
                     </Grid>
                 );
-            })()};
+            })()}
 
             <Divider />
 
-            <HeadingSecondary>Active Preset</HeadingSecondary>;
+            <HeadingSecondary>Active Preset</HeadingSecondary>
             {
                 (() => {
                     const options = [
@@ -431,7 +431,7 @@ function PresetManager() {
                             }}
                         />
                     );
-                })()};
+                })()}
         </div >
     );
 }
