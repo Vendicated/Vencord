@@ -25,8 +25,7 @@ import { useRef, UserSettingsActionCreators } from "@webpack/common";
 
 const UserSettingsDelay = findByPropsLazy('INFREQUENT_USER_ACTION');
 const useDrag = findByCodeLazy("useDrag::spec.begin");
-const useDrop = findByCodeLazy("function l(t,n){var e=(0,o.w)(t,n),l=(0,i.V)(),");
-//                             !^ Should be replaced
+const useDrop = findByCodeLazy(".options);return", ".collect,");
 const { useLayoutEffect } = findByPropsLazy("useLayoutEffect", "useEffect");
 const imgCls = findByPropsLazy("image", "imageLoading");
 const dndCls = findByPropsLazy("wrapper", "target", "dragOver");
@@ -73,9 +72,8 @@ export default definePlugin({
                     replace: "$1collected,",
                 },
                 {
-                    match: /(\(0,\i.jsx\)\(\i.Z)/,
-                    //                       !^ Should be replaced
-                    replace: "collected.isDragging?$self.dragItem():$1",
+                    match: /(data-animated.*)(\(0,\i.jsx\)\(\i.\i)/,
+                    replace: "$1collected.isDragging?$self.dragItem():$2",
                 },
                 {
                     match: /\[(\i\.emojiItemSelected)\]/,
