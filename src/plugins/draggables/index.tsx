@@ -71,7 +71,7 @@ export default definePlugin({
                     replace: "$1collected,",
                 },
                 {
-                    match: /(data-animated.*)(\(0,\i.jsx\)\(\i.\i)/,
+                    match: /(data-animated.*?)(\(0,\i.jsx\)\(\i.\i)/,
                     replace: "$1collected.isDragging?$self.dragItem():$2",
                 },
                 {
