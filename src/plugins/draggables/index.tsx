@@ -21,12 +21,11 @@ import "./style.css";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { useRef, UserSettingsActionCreators } from "@webpack/common";
+import { useLayoutEffect, useRef, UserSettingsActionCreators } from "@webpack/common";
 
 const UserSettingsDelay = findByPropsLazy("INFREQUENT_USER_ACTION");
 const useDrag = findByCodeLazy("useDrag::spec.begin");
 const useDrop = findByCodeLazy(".options);return", ".collect,");
-const { useLayoutEffect } = findByPropsLazy("useLayoutEffect", "useEffect");
 const imgCls = findByPropsLazy("image", "imageLoading");
 const dndCls = findByPropsLazy("wrapper", "target", "dragOver");
 
