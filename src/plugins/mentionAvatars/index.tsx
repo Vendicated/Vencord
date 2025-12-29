@@ -6,8 +6,10 @@
 
 import "./styles.css";
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import showMeYourName from "@plugins/showMeYourName";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
@@ -68,7 +70,7 @@ export default definePlugin({
     renderUsername: ErrorBoundary.wrap(({ user, username, showMeYourNameMention }: { user: User, username: string, showMeYourNameMention: JSX.Element | null | undefined; }) => {
         const [isHovering, setIsHovering] = useState(false);
 
-        const nameContent = Vencord.Settings.plugins.ShowMeYourName.enabled && showMeYourNameMention
+        const nameContent = isPluginEnabled(showMeYourName.name) && showMeYourNameMention
             ? showMeYourNameMention : <>{getUsernameString(username)}</>;
 
         return (

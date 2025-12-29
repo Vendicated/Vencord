@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Logger } from "@utils/Logger";
 import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
@@ -213,7 +214,7 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
         public openExternal(path: string) {
             const videoId = path.match(/watch\?v=([\w-]+)/);
 
-            const url = Vencord.Plugins.isPluginEnabled("OpenInApp") && videoId
+            const url = isPluginEnabled("OpenInApp") && videoId
                 ? encodeURI("youtubemusic://openVideo " + videoId[1])
                 : "https://music.youtube.com" + path;
 

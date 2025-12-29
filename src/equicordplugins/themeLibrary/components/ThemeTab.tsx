@@ -59,7 +59,7 @@ const SearchTags = {
 function ThemeTab() {
     const [themes, setThemes] = useState<Theme[]>([]);
     const [filteredThemes, setFilteredThemes] = useState<Theme[]>([]);
-    const [themeLinks, setThemeLinks] = useState(Vencord.Settings.themeLinks);
+    const [themeLinks, setThemeLinks] = useState(Settings.themeLinks);
     const [likedThemes, setLikedThemes] = useState<ThemeLikeProps>();
     const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.ALL });
     const [hideWarningCard, setHideWarningCard] = useState(Settings.plugins.ThemeLibrary.hideWarningCard);
@@ -123,7 +123,7 @@ function ThemeTab() {
     }, []);
 
     useEffect(() => {
-        setThemeLinks(Vencord.Settings.themeLinks);
+        setThemeLinks(Settings.themeLinks);
     }, []);
 
     useEffect(() => {

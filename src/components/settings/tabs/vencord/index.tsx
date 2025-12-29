@@ -7,6 +7,7 @@
 import "./VencordTab.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
+import { plugins } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
@@ -228,7 +229,7 @@ function EquicordSettings() {
                 You can customize where this settings section appears in Discord's settings menu by configuring the{" "}
                 <a
                     role="button"
-                    onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}
+                    onClick={() => openPluginModal(plugins.Settings)}
                     style={{ cursor: "pointer", color: "var(--text-link)" }}
                 >
                     Settings Plugin

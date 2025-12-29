@@ -5,7 +5,7 @@
  */
 
 import { DataStore } from "@api/index";
-import { isPluginEnabled } from "@api/PluginManager";
+import { isPluginEnabled, plugins, startPlugin, stopPlugin } from "@api/PluginManager";
 import { SettingsStore } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { openPluginModal } from "@components/settings/tabs";
@@ -17,6 +17,8 @@ import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ChannelActionCreators, ChannelRouter, ChannelStore, ComponentDispatch, FluxDispatcher, GuildStore, MediaEngineStore, NavigationRouter, openUserSettingsPanel, React, ReadStateUtils, RelationshipStore, SelectedChannelStore, SelectedGuildStore, StreamerModeStore, Toasts, useEffect, UserStore, VoiceActions } from "@webpack/common";
 import type { FC, ReactElement, ReactNode } from "react";
 import { Settings } from "Vencord";
+
+import commandPalette from ".";
 
 type CommandHandler = () => void | Promise<void>;
 
@@ -1619,10 +1621,7 @@ function refreshPluginToggleCommand(plugin: Plugin) {
 }
 
 function registerPluginToggleCommands() {
-    const { plugins } = Vencord.Plugins;
-    const pluginMap = plugins as Record<string, Plugin>;
-
-    for (const plugin of Object.values(pluginMap)) {
+    for (const plugin of Object.values(plugins)) {
         refreshPluginToggleCommand(plugin);
     }
 
@@ -1631,8 +1630,7 @@ function registerPluginToggleCommands() {
             if (typeof path !== "string" || !path.startsWith("plugins.")) return;
             if (!path.endsWith(".enabled")) return;
             const pluginName = path.slice("plugins.".length, -".enabled".length);
-            const currentPlugins = Vencord.Plugins.plugins as Record<string, Plugin>;
-            const target = currentPlugins[pluginName];
+            const target = plugins[pluginName];
             if (!target) return;
             refreshPluginToggleCommand(target);
         };
@@ -1648,10 +1646,7 @@ function registerPluginToggleCommands() {
 }
 
 function registerPluginSettingsCommands() {
-    const { plugins } = Vencord.Plugins;
-    const pluginMap = plugins as Record<string, Plugin>;
-
-    for (const plugin of Object.values(pluginMap)) {
+    for (const plugin of Object.values(plugins)) {
         const keywords = createPluginKeywords(plugin);
         registerCommand({
             id: `settings-plugin-${plugin.name.toLowerCase()}`,
@@ -2307,15 +2302,6 @@ function registerFriendCommands() {
     });
 }
 
-function ensurePalettePlugin(): Plugin | null {
-    const plugin = Vencord.Plugins.plugins[COMMAND_PALETTE_PLUGIN_NAME] as Plugin | undefined;
-    if (!plugin) {
-        showToast("Command Palette plugin metadata unavailable.", Toasts.Type.FAILURE);
-        return null;
-    }
-    return plugin;
-}
-
 function setPresenceStatus(status: "online" | "idle" | "dnd" | "invisible") {
     if (!StatusSetting) {
         showToast("Unable to change status right now.", Toasts.Type.FAILURE);
@@ -2374,9 +2360,7 @@ function registerCommandPaletteUtilities() {
         categoryId: DEFAULT_CATEGORY_ID,
         tags: [TAG_NAVIGATION, TAG_DEVELOPER],
         handler: () => {
-            const plugin = ensurePalettePlugin();
-            if (!plugin) return;
-            openPluginModal(plugin);
+            openPluginModal(commandPalette);
         }
     });
 
@@ -2522,13 +2506,13 @@ function hotReloadPlugin(plugin: Plugin) {
         return false;
     }
 
-    const stopped = Vencord.Plugins.stopPlugin(plugin);
+    const stopped = stopPlugin(plugin);
     if (!stopped) {
         showToast(`Failed to stop ${plugin.name}.`, Toasts.Type.FAILURE);
         return false;
     }
 
-    const started = Vencord.Plugins.startPlugin(plugin);
+    const started = startPlugin(plugin);
     if (!started) {
         showToast(`Failed to restart ${plugin.name}.`, Toasts.Type.FAILURE);
         return false;
@@ -2539,7 +2523,7 @@ function hotReloadPlugin(plugin: Plugin) {
 }
 
 async function reloadAllPlugins() {
-    const entries = Object.values(Vencord.Plugins.plugins) as Plugin[];
+    const entries = Object.values(plugins);
     let count = 0;
     for (const plugin of entries) {
         if (!isPluginEnabled(plugin.name)) continue;
@@ -2554,7 +2538,6 @@ async function reloadAllPlugins() {
 }
 
 async function setAllPluginsEnabled(enabled: boolean) {
-    const { plugins } = Vencord.Plugins;
     let changed = 0;
     for (const plugin of Object.values(plugins) as Plugin[]) {
         const currentlyEnabled = isPluginEnabled(plugin.name);
@@ -2624,7 +2607,6 @@ function slugifyActionLabel(label: string) {
 }
 
 function createPluginToolboxCommands(): CommandEntry[] {
-    const { plugins } = Vencord.Plugins;
     const pluginMap = plugins as Record<string, Plugin>;
     const entries: CommandEntry[] = [];
     const usedIds = new Set<string>();

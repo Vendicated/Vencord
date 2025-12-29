@@ -11,6 +11,7 @@ import {
     NavContextMenuPatchCallback,
 } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -110,7 +111,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (
 
     let label;
 
-    if (!Vencord.Plugins.isPluginEnabled("MessageLoggerEnhanced")) {
+    if (!isPluginEnabled("MessageLoggerEnhanced")) {
         label = "Remove Message History";
     } else {
         label = "Remove Message (Temporary)";

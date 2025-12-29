@@ -5,6 +5,7 @@
  */
 
 import { showNotice } from "@api/Notices";
+import { plugins, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { canonicalizeMatch } from "@utils/patches";
 import { CodeFilter, stringMatches, wreq } from "@webpack";
@@ -126,7 +127,7 @@ export function toggleEnabled(name: string, beforeReload: (error?: string) => vo
             });
         }
     }
-    const plugin = Vencord.Plugins.plugins[name];
+    const plugin = plugins[name];
 
     const settings = Settings.plugins[plugin.name];
 
@@ -136,7 +137,7 @@ export function toggleEnabled(name: string, beforeReload: (error?: string) => vo
 
     // If we're enabling a plugin, make sure all deps are enabled recursively.
     if (!wasEnabled) {
-        const { restartNeeded, failures } = Vencord.Plugins.startDependenciesRecursive(plugin);
+        const { restartNeeded, failures } = startDependenciesRecursive(plugin);
         if (failures.length) {
             console.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
             showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
@@ -166,7 +167,7 @@ export function toggleEnabled(name: string, beforeReload: (error?: string) => vo
         return;
     }
 
-    const result = wasEnabled ? Vencord.Plugins.stopPlugin(plugin) : Vencord.Plugins.startPlugin(plugin);
+    const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
 
     if (!result) {
         settings.enabled = false;

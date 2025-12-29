@@ -5,6 +5,7 @@
  */
 
 import { showNotice } from "@api/Notices";
+import { plugins, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { Alerts, Toasts } from "@webpack/common";
 
@@ -58,13 +59,13 @@ export async function toggleEnabled(name: string) {
         return true;
     }
 
-    const plugin = Vencord.Plugins.plugins[name];
+    const plugin = plugins[name];
     const settings = Settings.plugins[plugin.name];
     const isEnabled = () => settings.enabled ?? false;
     const wasEnabled = isEnabled();
 
     if (!wasEnabled) {
-        const { restartNeeded, failures } = Vencord.Plugins.startDependenciesRecursive(plugin);
+        const { restartNeeded, failures } = startDependenciesRecursive(plugin);
         if (failures.length) {
             console.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
             showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
@@ -86,7 +87,7 @@ export async function toggleEnabled(name: string) {
         return await beforeReturn(settings, wasEnabled);
     }
 
-    const result = wasEnabled ? Vencord.Plugins.stopPlugin(plugin) : Vencord.Plugins.startPlugin(plugin);
+    const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
 
     if (!result) {
         settings.enabled = false;

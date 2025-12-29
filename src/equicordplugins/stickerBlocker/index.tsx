@@ -131,7 +131,7 @@ export default definePlugin({
             find: /\i\.\i\.STICKER_MESSAGE/,
             replacement: {
                 match: /}\),\(null!=\i\?\i:(\i)\)\.name]}\);/,
-                replace: "$& if(Vencord.Settings.plugins.StickerBlocker.blockedStickers.split(\", \").includes($1.id)) { return($self.blockedComponent($1)) }"
+                replace: "$& if($self.isBlocked($1.id)) return($self.blockedComponent($1));"
             }
         }
     ],
@@ -141,6 +141,13 @@ export default definePlugin({
     },
     start() {
         DataStore.createStore("StickerBlocker", "data");
+    },
+    isBlocked(stickerId) {
+        if (settings.store.blockedStickers.split(", ").includes(stickerId)) {
+            return true;
+        }
+
+        return false;
     },
     blockedComponent: ErrorBoundary.wrap(blockedComponentRender, { fallback: () => <p style={{ color: "red" }}>Failed to render :(</p> }),
     settings,

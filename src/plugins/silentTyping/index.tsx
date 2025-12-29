@@ -19,6 +19,7 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { plugins } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { openPluginModal } from "@components/index";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -162,7 +163,7 @@ const SilentTypingChatToggle: ChatBarButtonFactory = ({ channel, type }) => {
                 channel.guild_id ? toggleLocation(channel.guild_id, effectiveList, defaultHidden) : null;
                 break;
             case "settings":
-                openPluginModal(Vencord.Plugins.plugins.SilentTyping);
+                openPluginModal(plugins.SilentTyping);
                 break;
         }
     }

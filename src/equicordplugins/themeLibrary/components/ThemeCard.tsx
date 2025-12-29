@@ -57,7 +57,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({ theme, themeLinks, likedTh
             : [...themeLinks, `${apiUrl}/${theme.id}`];
 
         setThemeLinks(onlineThemeLinks);
-        Vencord.Settings.themeLinks = onlineThemeLinks;
+        Settings.themeLinks = onlineThemeLinks;
     };
 
     const handleThemeAttributesCheck = () => {

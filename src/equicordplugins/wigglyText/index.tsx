@@ -45,7 +45,7 @@ const classMap = [
 
 let styles: HTMLStyleElement;
 const updateStyles = () => {
-    const inten = Vencord.Settings.plugins.WigglyText.intensity + "px";
+    const inten = settings.store.intensity + "px";
     styles.textContent = `
 .wiggle-example {
     list-style-type: disc;

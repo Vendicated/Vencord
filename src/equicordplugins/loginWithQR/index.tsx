@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { plugins } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { Paragraph } from "@components/Paragraph";
 import { EquicordDevs } from "@utils/constants";
@@ -26,7 +27,7 @@ export default definePlugin({
             type: OptionType.COMPONENT,
             description: "Scan a QR code",
             component() {
-                if (!Vencord.Plugins.plugins.LoginWithQR.started)
+                if (!plugins.LoginWithQR.started)
                     return (
                         <Paragraph>
                             Enable the plugin and restart your client to scan a login QR code

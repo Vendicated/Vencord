@@ -5,6 +5,7 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import loginWithQR from "@equicordplugins/loginWithQR";
 import { images } from "@equicordplugins/loginWithQR/images";
 import { getIntlMessage } from "@utils/discord";
 import {
@@ -248,10 +249,8 @@ function QrModal(props: ModalProps) {
     });
 
     useEffect(() => {
-        const plugin = Vencord.Plugins.plugins.LoginWithQR as any;
-
-        plugin.qrModalOpen = true;
-        return () => void (plugin.qrModalOpen = false);
+        loginWithQR.qrModalOpen = true;
+        return () => void (loginWithQR.qrModalOpen = false);
     }, []);
 
     useEffect(() => {

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
+import betterUserArea from "@equicordplugins/betterUserArea";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -31,6 +33,6 @@ export default definePlugin({
     },
 
     shouldHideTooltips() {
-        return Vencord.Plugins.isPluginEnabled("BetterUserArea") && Vencord.Plugins.plugins.BetterUserArea.settings?.store?.removeButtonTooltips;
+        return isPluginEnabled(betterUserArea.name) && betterUserArea.settings.store.removeButtonTooltips;
     }
 });

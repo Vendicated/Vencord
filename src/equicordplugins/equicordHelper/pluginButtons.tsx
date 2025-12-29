@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { isPluginEnabled } from "@api/PluginManager";
+import { isPluginEnabled, plugins } from "@api/PluginManager";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { isEquicordGuild, isEquicordSupport } from "@utils/misc";
@@ -19,9 +19,9 @@ export const PluginButtons = ErrorBoundary.wrap(function PluginCards({ message }
     const msg = message.content?.toLowerCase() ?? "";
 
     const contentWords = (msg.match(/`\w+`/g) ?? []).map(e => e.slice(1, -1));
-    const matchedPlugins = Object.keys(Vencord.Plugins.plugins).filter(name => contentWords.includes(name.toLowerCase()));
+    const matchedPlugins = Object.keys(plugins).filter(name => contentWords.includes(name.toLowerCase()));
     const matchedPlugin = matchedPlugins.sort((a, b) => b.length - a.length)[0];
-    const pluginData = matchedPlugin ? Vencord.Plugins.plugins[matchedPlugin] : null;
+    const pluginData = matchedPlugin ? plugins[matchedPlugin] : null;
 
     const isEquicord = isEquicordGuild(message.channel_id) && isEquicordSupport(message.author.id);
     const startsWithEnabled = msg.startsWith("enable");
