@@ -295,7 +295,7 @@ export function migratePluginToSettings(newName: string, oldName: string, ...set
     }
 }
 
-export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, ...settings: string[]) {
+export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, migratePlugin: boolean, migrationName: string, ...settings: string[]) {
     const { plugins } = SettingsStore.plain;
 
     const oldSettings = plugins[oldPlugin];
@@ -310,8 +310,14 @@ export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, 
 
         newSettings[setting] = oldSettings[setting];
         delete oldSettings[setting];
-        SettingsStore.markAsChanged();
     }
+
+    if (migratePlugin) {
+        newSettings[migrationName] = oldSettings.enabled;
+        delete plugins[oldPlugin];
+    }
+
+    SettingsStore.markAsChanged();
 }
 
 export function definePluginSettings<
