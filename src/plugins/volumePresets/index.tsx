@@ -152,7 +152,7 @@ function PresetManager() {
                     try {
                         await fetchUserProfile(userId);
                     } catch (e) {
-                        console.log(`[VolumePresets] Failed to fetch user ${userId}:`, e);
+                        // console.log(`[VolumePresets] Failed to fetch user ${userId}:`, e);
                     }
                 }
             }
