@@ -140,5 +140,16 @@ export default definePlugin({
                 Reflect.deleteProperty(window, "DiscordSentry");
             }
         });
+        const originalReflectGet = Reflect.get;
+        Reflect.get = function (target, prop, receiver) {
+            if (target === window) {
+                const { stack } = new Error("");
+                // return undefined if requested by discord generateLaunchSignature function
+                if (stack?.includes?.("libdiscore")) {
+                    return undefined as any;
+                }
+            }
+            return originalReflectGet(target, prop, receiver);
+        };
     }
 });
