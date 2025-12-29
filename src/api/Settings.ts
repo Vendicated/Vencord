@@ -251,23 +251,6 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
     return SettingsStore.store;
 }
 
-export function migratePluginToSettings(newName: string, oldName: string, ...settingNames: string[]) {
-    const { plugins } = SettingsStore.plain;
-    const newPlugin = plugins[newName];
-    const oldPlugin = plugins[oldName];
-
-    if (newPlugin && oldPlugin?.enabled) {
-        for (const settingName of settingNames) {
-            logger.info(`Migrating plugin to setting from old name ${oldName} to ${newName} as ${settingName}`);
-            newPlugin[settingName] = true;
-        }
-
-        newPlugin.enabled = true;
-        delete plugins[oldName];
-        SettingsStore.markAsChanged();
-    }
-}
-
 export function migratePluginSettings(name: string, ...oldNames: string[]) {
     const { plugins } = SettingsStore.plain;
     if (name in plugins) return;
@@ -295,18 +278,40 @@ export function migratePluginSetting(pluginName: string, newSetting: string, old
     SettingsStore.markAsChanged();
 }
 
-export function migrateSettingFromPlugin(newPlugin: string, newSetting: string, oldPlugin: string, oldSetting: string) {
-    const newSettings = SettingsStore.plain.plugins[newPlugin];
-    const oldSettings = SettingsStore.plain.plugins[oldPlugin];
-    if (!oldSettings || !Object.hasOwn(oldSettings, oldSetting)) return;
-    if (!newSettings || (Object.hasOwn(newSettings, newSetting))) return;
+export function migratePluginToSettings(newName: string, oldName: string, ...settingNames: string[]) {
+    const { plugins } = SettingsStore.plain;
+    const newPlugin = plugins[newName];
+    const oldPlugin = plugins[oldName];
 
-    if (Object.hasOwn(newSettings, newSetting)) return;
+    if (newPlugin && oldPlugin?.enabled) {
+        for (const settingName of settingNames) {
+            logger.info(`Migrating plugin to setting from old name ${oldName} to ${newName} as ${settingName}`);
+            newPlugin[settingName] = true;
+        }
 
-    logger.info(`Migrating plugin setting from ${oldSetting} on ${oldPlugin} to ${newSetting} on ${newPlugin}`);
-    newSettings[newSetting] = oldSettings[oldSetting];
-    delete oldSettings[oldSetting];
-    SettingsStore.markAsChanged();
+        newPlugin.enabled = true;
+        delete plugins[oldName];
+        SettingsStore.markAsChanged();
+    }
+}
+
+export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, ...settings: string[]) {
+    const { plugins } = SettingsStore.plain;
+
+    const oldSettings = plugins[oldPlugin];
+    const newSettings = plugins[newPlugin];
+    if (!oldSettings || !newSettings) return;
+
+    for (const setting of settings) {
+        if (!Object.hasOwn(oldSettings, setting)) continue;
+        if (Object.hasOwn(newSettings, setting)) continue;
+
+        logger.info(`Migrating plugin setting "${setting}" from ${oldPlugin} to ${newPlugin}`);
+
+        newSettings[setting] = oldSettings[setting];
+        delete oldSettings[setting];
+        SettingsStore.markAsChanged();
+    }
 }
 
 export function definePluginSettings<
