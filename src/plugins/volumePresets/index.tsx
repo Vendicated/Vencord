@@ -164,6 +164,15 @@ function PresetManager() {
             settings.store.currentPreset = newPresetKey;
             setSelected(newPresetKey);
         }
+        Object.keys(settings.store.quickPresets).forEach(key => {
+            if (settings.store.quickPresets[key] === oldPresetKey) {
+                settings.store.quickPresets[key] = newPresetKey;
+                setSelectedQuickPreset(prev => ({
+                    ...prev,
+                    [key]: newPresetKey
+                }));
+            }
+        });
         forceUpdate();
     }
 
@@ -230,6 +239,26 @@ function PresetManager() {
                                                 inputRef={renameInputRef}
                                                 defaultValue={preset.name}
                                                 style={{ flex: 1 }}
+                                                onKeyDown={e => {
+                                                    if (e.key !== "Enter") return;
+                                                    if (renameInputRef.current) {
+                                                        const newName = renameInputRef.current.value;
+                                                        const newKey = createPresetKey(newName);
+
+                                                        if (newKey === "") {
+                                                            showToast("Invalid preset name", Toasts.Type.FAILURE);
+                                                            return;
+                                                        }
+
+                                                        if (newKey !== key && getPresets()[newKey]) {
+                                                            showToast("Preset name already in use", Toasts.Type.FAILURE);
+                                                            return;
+                                                        }
+
+                                                        renamePreset(key, newName);
+                                                        setRenamingPreset(null);
+                                                    }
+                                                }}
                                             />
                                         </Flex>
                                     ) : (
