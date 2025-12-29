@@ -23,7 +23,7 @@ import definePlugin, { StartAt } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { useRef, UserSettingsActionCreators } from "@webpack/common";
 
-const UserSettingsDelay = findByPropsLazy('INFREQUENT_USER_ACTION');
+const UserSettingsDelay = findByPropsLazy("INFREQUENT_USER_ACTION");
 const useDrag = findByCodeLazy("useDrag::spec.begin");
 const useDrop = findByCodeLazy(".options);return", ".collect,");
 const { useLayoutEffect } = findByPropsLazy("useLayoutEffect", "useEffect");
@@ -49,7 +49,7 @@ export default definePlugin({
     startAt: StartAt.WebpackReady,
     patches: [
         {
-            find: 'getDisambiguatedEmojiContext().isFavoriteEmojiWithoutFetchingLatest',
+            find: "getDisambiguatedEmojiContext().isFavoriteEmojiWithoutFetchingLatest",
             replacement: [
                 {
                     match: /(\("li",\i\(\i\({},\i\),{key:\i,ref:\i)(}\))/,
