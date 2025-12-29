@@ -110,7 +110,7 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
     );
 }, { noop: true });
 
-migratePluginToSettings("TypingTweaks", "AmITyping", "amITyping");
+migratePluginToSettings(true, "TypingTweaks", "AmITyping", "amITyping");
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",

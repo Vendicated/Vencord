@@ -1099,7 +1099,7 @@ function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boole
 }
 
 // Drop support for QuestCompleter and migrate to Questify settings.
-migratePluginToSettings("Questify", "QuestCompleter", "completeVideoQuestsInBackground", "completeGameQuestsInBackground", "completeAchievementQuestsInBackground");
+migratePluginToSettings(true, "Questify", "QuestCompleter", "completeVideoQuestsInBackground", "completeGameQuestsInBackground", "completeAchievementQuestsInBackground");
 
 export default definePlugin({
     name: "Questify",
