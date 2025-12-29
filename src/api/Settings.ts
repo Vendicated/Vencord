@@ -314,6 +314,7 @@ export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, 
 
     if (migratePlugin) {
         newSettings[migrationName] = oldSettings.enabled;
+        newSettings.enabled = true;
         delete plugins[oldPlugin];
     }
 
