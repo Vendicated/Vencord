@@ -70,7 +70,7 @@ const AllowLevelSettings = ErrorBoundary.wrap(() => {
 const settings = definePluginSettings({
     disableLoggers: {
         type: OptionType.BOOLEAN,
-        description: "Disables Discords loggers",
+        description: "Disables Discord's loggers",
         default: false,
         restartNeeded: true
     },
@@ -105,7 +105,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ConsoleJanitor",
-    description: "Disables annoying console messages/errors",
+    description: "Lets you disable annoying console messages, and filter out some others",
     authors: [Devs.Nuckyz, Devs.sadan],
     settings,
 
