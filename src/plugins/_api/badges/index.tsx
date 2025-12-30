@@ -149,7 +149,7 @@ export default definePlugin({
         try {
             return _getBadges(profile);
         } catch (e) {
-            new Logger("BadgeAPI#useBadges").error(e);
+            new Logger("BadgeAPI#getBadges").error(e);
             return [];
         }
     },
