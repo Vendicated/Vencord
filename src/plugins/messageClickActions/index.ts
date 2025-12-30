@@ -24,7 +24,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ApplicationIntegrationType, MessageFlags } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
-import { AuthenticationStore, Constants, FluxDispatcher, MessageTypeSets, PermissionsBits, PermissionStore, RestAPI, WindowStore } from "@webpack/common";
+import { AuthenticationStore, FluxDispatcher, MessageTypeSets, PermissionsBits, PermissionStore, RestAPI, WindowStore } from "@webpack/common";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
@@ -81,7 +81,7 @@ async function react(channelId: string, messageId: string, emoji: string) {
 
     try {
         await RestAPI.put({
-            url: Constants.Endpoints.REACTIONS(channelId, messageId, emojiParam)
+            url: `/channels/${channelId}/messages/${messageId}/reactions/${emojiParam}/@me`
         });
     } catch (e) {
         new Logger("MessageClickActions").error("Failed to add reaction:", e);
