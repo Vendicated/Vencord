@@ -43,12 +43,12 @@ const { ModalStack, DraftManager } = proxyLazyWebpack(() => {
 const settings = definePluginSettings({
     attemptToPreventCrashes: {
         type: OptionType.BOOLEAN,
-        description: "Whether to attempt to prevent Discord crashes.",
+        description: "Whether to attempt to prevent Discord crashes",
         default: true
     },
     attemptToNavigateToHome: {
         type: OptionType.BOOLEAN,
-        description: "Whether to attempt to navigate to the home when preventing Discord crashes.",
+        description: "Whether to attempt to navigate to the home when preventing Discord crashes",
         default: false
     }
 });
@@ -59,7 +59,7 @@ let shouldAttemptRecover = true;
 
 export default definePlugin({
     name: "CrashHandler",
-    description: "Utility plugin for handling and possibly recovering from crashes without a restart",
+    description: "Utility plugin for handling and attempting recovery from crashes without restarting",
     authors: [Devs.Nuckyz],
     enabledByDefault: true,
 
@@ -91,7 +91,7 @@ export default definePlugin({
                         showNotification({
                             color: "#eed202",
                             title: "Discord has crashed!",
-                            body: "Awn :( Discord has crashed two times rapidly, not attempting to recover.",
+                            body: "Awn :( Discord has crashed two times rapidly, not attempting to recover, restart the client instead.",
                             noPersist: true
                         });
                     } catch { }
@@ -107,7 +107,7 @@ export default definePlugin({
             try {
                 if (!hasCrashedOnce) {
                     hasCrashedOnce = true;
-                    maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
+                    maybePromptToUpdate("Uh oh, Discord has just crashed... but there is a Vencord update available that might fix this issue! Would you like to update now?", true);
                 }
             } catch { }
 
@@ -116,7 +116,7 @@ export default definePlugin({
                     this.handlePreventCrash(_this);
                 }
             } catch (err) {
-                CrashHandlerLogger.error("Failed to handle crash", err);
+                CrashHandlerLogger.error("Failed to handle crash.", err);
             }
         }, 1);
     },
@@ -186,7 +186,7 @@ export default definePlugin({
             try {
                 NavigationRouter.transitionToGuild("@me");
             } catch (err) {
-                CrashHandlerLogger.debug("Failed to navigate to home", err);
+                CrashHandlerLogger.debug("Failed to navigate to home.", err);
             }
         }
 
