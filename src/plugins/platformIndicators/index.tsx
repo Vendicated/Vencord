@@ -45,17 +45,18 @@ export interface Session {
 }
 
 function getStatusFillColor(status: OnlineStatus): string {
+    const style = window.getComputedStyle(document.body);
     switch (status) {
         case "online":
-            return "var(--green-new-38, #43a25a)";
+            return style.getPropertyValue("--green-new-38");
         case "idle":
-            return "var(--yellow-new-30, #ca9654)";
+            return style.getPropertyValue("--yellow-new-30");
         case "dnd":
-            return "var(--red-new-46, #d83a42)";
+            return style.getPropertyValue("--red-new-46");
         case "streaming":
-            return "var(--twitch, #9147ff)";
+            return style.getPropertyValue("--twitch");
         default:
-            return "var(--neutral-34, #82838b)";
+            return style.getPropertyValue("--neutral-34");
     }
 }
 
