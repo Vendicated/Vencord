@@ -19,11 +19,9 @@
 import { Settings, SettingsStore } from "@api/Settings";
 import { createAndAppendStyle } from "@utils/css";
 import { ThemeStore } from "@vencord/discord-types";
-import { findStoreLazy } from "@webpack";
+import { PopoutWindowStore } from "@webpack/common";
 
 import { userStyleRootNode, vencordRootNode } from "./Styles";
-
-const PopoutWindowStore = findStoreLazy("PopoutWindowStore");
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -83,12 +81,12 @@ async function initThemes() {
     updatePopoutWindows();
 }
 
-function applyToPopout(popoutWindow: Window) {
+function applyToPopout(popoutWindow: Window | undefined) {
     if (!popoutWindow?.document) return;
 
     const doc = popoutWindow.document;
 
-    doc.getElementsByTagName("vencord-root")[0]?.remove();
+    doc.querySelector("vencord-root")?.remove();
 
     doc.documentElement.appendChild(vencordRootNode.cloneNode(true));
 }
