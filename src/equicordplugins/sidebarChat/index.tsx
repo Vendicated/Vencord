@@ -221,7 +221,6 @@ export default definePlugin({
         useEffect(() => {
             if (!channel) return;
 
-            // @ts-expect-error
             if (channel.isForumLikeChannel()) {
                 requireForumView().then(() => {
                     setViewComponent(

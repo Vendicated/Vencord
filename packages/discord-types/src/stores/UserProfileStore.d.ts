@@ -1,5 +1,5 @@
 import { FluxStore, Guild, User, Application, ApplicationInstallParams } from "..";
-import { ApplicationIntegrationType } from "../../enums";
+import { ApplicationFlags, ApplicationIntegrationType } from "../../enums";
 
 export interface MutualFriend {
     /**
@@ -54,7 +54,7 @@ export interface ProfileApplication {
     id: string;
     customInstallUrl: string | undefined;
     installParams: ApplicationInstallParams | undefined;
-    flags: number;
+    flags: ApplicationFlags;
     popularApplicationCommandIds?: string[];
     integrationTypesConfig: Record<ApplicationIntegrationType, Partial<{
         oauth2_install_params: ApplicationInstallParams;

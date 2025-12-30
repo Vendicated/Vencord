@@ -1,3 +1,5 @@
+import { RoleFlags } from "../../enums";
+
 export interface Role {
     color: number;
     colorString: string | undefined;
@@ -11,23 +13,25 @@ export interface Role {
         secondary_color: number | undefined;
         tertiary_color: number | undefined;
     };
-    flags: number;
+    description: string | null;
+    flags: RoleFlags;
+    guildId: string;
     hoist: boolean;
-    icon: string | undefined;
+    icon: string | null;
     id: string;
     managed: boolean;
     mentionable: boolean;
     name: string;
-    originalPosition: number;
     permissions: bigint;
     position: number;
-    /**
-     * probably incomplete
-     */
     tags: {
-        bot_id: string;
-        integration_id: string;
-        premium_subscriber: unknown;
+        bot_id?: string;
+        integration_id?: string;
+        premium_subscriber?: null;
+        subscription_listing_id?: string;
+        available_for_purchase?: null;
+        guild_connections?: null;
     } | undefined;
-    unicodeEmoji: string | undefined;
+    unicodeEmoji: string | null;
+    version: number | undefined;
 }

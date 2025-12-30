@@ -11,42 +11,7 @@ export const enum DraftType {
     Poll = 4,
     SlashCommand = 5,
     ForwardContextMessage = 6,
-}
-
-export const enum GuildScheduledEventStatus {
-    SCHEDULED = 1,
-    ACTIVE = 2,
-    COMPLETED = 3,
-    CANCELED = 4,
-}
-
-export const enum GuildScheduledEventEntityType {
-    STAGE_INSTANCE = 1,
-    VOICE = 2,
-    EXTERNAL = 3,
-}
-
-export const enum GuildScheduledEventPrivacyLevel {
-    GUILD_ONLY = 2,
-}
-
-export const enum ParticipantType {
-    STREAM = 0,
-    HIDDEN_STREAM = 1,
-    USER = 2,
-    ACTIVITY = 3,
-}
-
-export const enum RTCPlatform {
-    DESKTOP = 0,
-    MOBILE = 1,
-    XBOX = 2,
-    PLAYSTATION = 3,
-}
-
-export const enum VideoSourceType {
-    VIDEO = 0,
-    CAMERA_PREVIEW = 1,
+    InteractionModal = 7,
 }
 
 export const enum EmojiIntention {
@@ -75,29 +40,15 @@ export const enum LoadState {
     ERROR = 3,
 }
 
-export const enum ConnectionStatsFlags {
-    TRANSPORT = 1,
-    OUTBOUND = 2,
-    INBOUND = 4,
-    ALL = 7,
+export const enum InviteTargetType {
+    STREAM = 1,
+    EMBEDDED_APPLICATION = 2,
+    ROLE_SUBSCRIPTIONS_PURCHASE = 3,
 }
 
-export const enum SpeakingFlags {
+export const enum PremiumType {
     NONE = 0,
-    VOICE = 1,
-    SOUNDSHARE = 2,
-    PRIORITY = 4,
-    HIDDEN = 8,
-}
-
-export const enum GoLiveQualityMode {
-    AUTO = 1,
-    FULL = 2,
-}
-
-export const enum VoiceProcessingStateReason {
-    CPU_OVERUSE = 1,
-    FAILED = 2,
-    VAD_CPU_OVERUSE = 3,
-    INITIALIZED = 4,
+    TIER_1 = 1,
+    TIER_2 = 2,
+    TIER_0 = 3,
 }

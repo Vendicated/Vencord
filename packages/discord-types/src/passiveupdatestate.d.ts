@@ -4,17 +4,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { GuildMemberFlags } from "../enums";
 import { VoiceState } from "./stores";
 
+export type PassiveUpdateType = "PASSIVE_UPDATE_V2";
+
 export interface PassiveUpdateState {
-    type: string;
+    type: PassiveUpdateType;
     guildId: string;
     members?: ({
         user: {
             avatar: null | string;
             communication_disabled_until: null | string;
             deaf: boolean;
-            flags: number;
+            flags: GuildMemberFlags;
             joined_at: string;
             mute: boolean;
             nick: string;
@@ -27,7 +30,7 @@ export interface PassiveUpdateState {
         nick: string | null;
         mute: boolean;
         joined_at: string;
-        flags: number;
+        flags: GuildMemberFlags;
         deaf: boolean;
         communication_disabled_until: null | string;
         avatar: null | string;

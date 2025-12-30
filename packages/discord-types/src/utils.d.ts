@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 import type { FluxEvents } from "./fluxEvents";
+import { ApplicationCommandOptionType, ChannelType, PremiumType } from "../enums";
 
 export { FluxEvents };
 
@@ -86,6 +87,8 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "VIEW_GUILD_ANALYTICS"
     | "VIEW_CREATOR_MONETIZATION_ANALYTICS"
     | "MODERATE_MEMBERS"
+    | "USE_EMBEDDED_ACTIVITIES"
+    | "USE_EXTERNAL_APPS"
     | "SEND_MESSAGES"
     | "SEND_TTS_MESSAGES"
     | "MANAGE_MESSAGES"
@@ -102,6 +105,9 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "USE_EXTERNAL_STICKERS"
     | "SEND_MESSAGES_IN_THREADS"
     | "SEND_VOICE_MESSAGES"
+    | "SEND_POLLS"
+    | "PIN_MESSAGES"
+    | "BYPASS_SLOWMODE"
     | "CONNECT"
     | "SPEAK"
     | "MUTE_MEMBERS"
@@ -110,9 +116,9 @@ export type Permissions = "CREATE_INSTANT_INVITE"
     | "USE_VAD"
     | "PRIORITY_SPEAKER"
     | "STREAM"
-    | "USE_EMBEDDED_ACTIVITIES"
     | "USE_SOUNDBOARD"
     | "USE_EXTERNAL_SOUNDS"
+    | "SET_VOICE_CHANNEL_STATUS"
     | "REQUEST_TO_SPEAK"
     | "MANAGE_EVENTS"
     | "CREATE_EVENTS";
@@ -292,7 +298,7 @@ export class DisplayProfile {
     canEditThemes: boolean;
     premiumGuildSince: Date | null;
     premiumSince: Date | null;
-    premiumType?: number;
+    premiumType?: PremiumType;
     primaryColor?: number;
 
     getBadges(): Array<{
@@ -324,7 +330,7 @@ export interface DateUtils {
 }
 
 export interface CommandOptions {
-    type: number;
+    type: ApplicationCommandOptionType;
     name: string;
     description: string;
     required?: boolean;
@@ -333,7 +339,7 @@ export interface CommandOptions {
         values: string | number;
     }[];
     options?: CommandOptions[];
-    channel_types?: number[];
+    channel_types?: ChannelType[];
     min_value?: number;
     max_value?: number;
     autocomplete?: boolean;

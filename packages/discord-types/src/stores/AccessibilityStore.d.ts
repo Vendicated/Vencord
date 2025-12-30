@@ -4,12 +4,13 @@ export type ReducedMotionPreference = "auto" | "reduce" | "no-preference";
 export type ForcedColorsPreference = "none" | "active";
 export type ContrastPreference = "no-preference" | "more" | "less" | "custom";
 export type RoleStyle = "username" | "dot" | "hidden";
+export type ContrastMode = "default" | "high";
 
 export interface AccessibilityState {
     fontSize: number;
     zoom: number;
     keyboardModeEnabled: boolean;
-    contrastMode: string;
+    contrastMode: ContrastMode;
     colorblindMode: boolean;
     lowContrastMode: boolean;
     saturation: number;

@@ -1,5 +1,5 @@
 import { FluxStore } from "..";
-import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, GuildScheduledEventStatus } from "../../enums";
+import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, GuildScheduledEventStatus, RecurrenceRuleFrequency } from "../../enums";
 
 export interface GuildScheduledEventEntityMetadata {
     location?: string;
@@ -8,7 +8,7 @@ export interface GuildScheduledEventEntityMetadata {
 export interface GuildScheduledEventRecurrenceRule {
     start: string;
     end: string | null;
-    frequency: number;
+    frequency: RecurrenceRuleFrequency;
     interval: number;
     byWeekday: number[] | null;
     byNWeekday: { n: number; day: number; }[] | null;

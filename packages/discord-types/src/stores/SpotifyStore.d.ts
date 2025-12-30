@@ -1,4 +1,9 @@
 import { FluxStore } from "..";
+import { ActivityFlags } from "../../enums";
+
+export type SpotifyDeviceType = "computer" | "smartphone" | "speaker" | "tv" | "game_console" | "automobile" | "unknown";
+export type SpotifyMediaType = "track" | "episode";
+export type SpotifyAlbumType = "album" | "single" | "compilation";
 
 export interface SpotifyDevice {
     id: string;
@@ -7,7 +12,7 @@ export interface SpotifyDevice {
     is_restricted: boolean;
     name: string;
     supports_volume: boolean;
-    type: string;
+    type: SpotifyDeviceType;
     volume_percent: number;
 }
 
@@ -38,7 +43,7 @@ export interface SpotifyImage {
 export interface SpotifyAlbum {
     id: string;
     name: string;
-    type: string;
+    type: SpotifyAlbumType;
     image: SpotifyImage | null;
 }
 
@@ -47,7 +52,7 @@ export interface SpotifyTrack {
     name: string;
     duration: number;
     isLocal: boolean;
-    type: string;
+    type: SpotifyMediaType;
     album: SpotifyAlbum;
     artists: SpotifyArtist[];
 }
@@ -74,12 +79,12 @@ export interface SpotifyActivity {
         id: string;
     };
     sync_id?: string;
-    flags?: number;
+    flags?: ActivityFlags;
     metadata?: {
         context_uri: string | undefined;
         album_id: string;
         artist_ids: string[];
-        type: string;
+        type: SpotifyMediaType;
         button_urls: string[];
     };
 }
