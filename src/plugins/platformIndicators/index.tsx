@@ -44,6 +44,21 @@ export interface Session {
     };
 }
 
+function getStatusFillColor(status: OnlineStatus): string {
+    switch (status) {
+        case "online":
+            return "var(--green-new-38, #43a25a)";
+        case "idle":
+            return "var(--yellow-new-30, #ca9654)";
+        case "dnd":
+            return "var(--red-new-46, #d83a42)";
+        case "streaming":
+            return "var(--twitch, #9147ff)";
+        default:
+            return "var(--neutral-34, #82838b)";
+    }
+}
+
 const SessionsStore = findStoreLazy("SessionsStore") as {
     getSessions(): Record<string, Session>;
 };
@@ -127,11 +142,11 @@ function ensureOwnStatus(user: User) {
 
 function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     const colorMap = {
-        online: useStatusFillColor("online"),
-        idle: useStatusFillColor("idle"),
-        dnd: useStatusFillColor("dnd"),
-        offline: useStatusFillColor("offline"),
-        streaming: useStatusFillColor("streaming"),
+        online: getStatusFillColor("online"),
+        idle: getStatusFillColor("idle"),
+        dnd: getStatusFillColor("dnd"),
+        offline: getStatusFillColor("offline"),
+        streaming: getStatusFillColor("streaming"),
     };
 
     const user = UserStore.getUser(userId);
