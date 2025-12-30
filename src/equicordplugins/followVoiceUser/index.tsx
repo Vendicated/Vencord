@@ -88,7 +88,7 @@ export default definePlugin({
 
             if (
                 settings.store.onlyWhenInVoice
-                && VoiceStateStore.getVoiceStateForUser(UserStore.getCurrentUser().id) === null
+                && !VoiceStateStore.getVoiceStateForUser(UserStore.getCurrentUser().id)
             ) return;
 
             voiceStates.forEach(voiceState => {
