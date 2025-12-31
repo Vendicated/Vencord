@@ -72,7 +72,7 @@ export default definePlugin({
     name: "10 WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settings,
