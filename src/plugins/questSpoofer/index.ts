@@ -22,9 +22,10 @@ import { showToast, Toasts } from "@webpack/common";
 export default definePlugin({
     name: "QuestSpoofer",
     description:
-        "Spoofs Discord Quests for video, desktop play, and streaming.",
+        "Spoofs Discord Quests for video, desktop play, and streaming. Originally based on a user plugin shared in the Vencord Discord.",
     authors: [Devs.Eagle],
     required: true,
+    isEagleCord: true,
 
     toolboxActions: {
         async "Fetch & Spoof Quests"() {

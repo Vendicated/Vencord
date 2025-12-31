@@ -88,11 +88,39 @@ export interface Plugin extends PluginDef {
 export type IconComponent = (props: IconProps & Record<string, any>) => ReactNode;
 export type IconProps = { height?: number | string; width?: number | string; className?: string; };
 export interface PluginDef {
+    /**
+     * Unique, human-readable name of the plugin.
+     * This is shown in the Plugins list and used for identification.
+     */
     name: string;
+
+    /**
+     * Short description of what the plugin does.
+     * Displayed in the Plugins settings UI.
+     */
     description: string;
+
+    /**
+     * List of authors who contributed to this plugin.
+     */
     authors: PluginAuthor[];
+
+    /**
+     * Called when the plugin is enabled.
+     * Use this to initialize state, register listeners, or perform setup logic.
+     */
     start?(): void;
+
+    /**
+     * Called when the plugin is disabled.
+     * Use this to clean up listeners, observers, or side effects created in `start`.
+     */
     stop?(): void;
+
+    /**
+     * A list of code patches applied by this plugin.
+     * Patches are applied automatically when the plugin is enabled.
+     */
     patches?: Omit<Patch, "plugin">[];
     /**
      * List of commands that your plugin wants to register
@@ -197,6 +225,12 @@ export interface PluginDef {
      * @deprecated Use {@link messagePopoverButton} instead
      */
     renderMessagePopoverButton?: never;
+    
+    /**
+     * Indicates that this plugin originates from EagleCord,
+     * a custom downstream distribution of Vencord.
+     */
+    isEagleCord?: boolean;
 }
 
 export const enum StartAt {

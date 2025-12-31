@@ -24,6 +24,7 @@ interface Props {
     setEnabled: (enabled: boolean) => void;
     disabled?: boolean;
     isNew?: boolean;
+    isEagle?: boolean;
     onMouseEnter?: MouseEventHandler<HTMLDivElement>;
     onMouseLeave?: MouseEventHandler<HTMLDivElement>;
 
@@ -32,7 +33,7 @@ interface Props {
     author?: ReactNode;
 }
 
-export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
+export function AddonCard({ disabled, isNew, isEagle, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContainerRef = useRef<HTMLDivElement>(null);
 
@@ -57,10 +58,11 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                                     title.style.setProperty("--duration", `${Math.max(0.5, (title.scrollWidth - titleContainer.clientWidth) / 7)}s`);
                                 }}
                             >
-                                {name}
+                                {name}  
                             </div>
                         </div>
                         {isNew && <AddonBadge text="NEW" color="#ED4245" />}
+                        {isEagle && <AddonBadge text="EAGLE" color="#5865F2" />}
                     </BaseText>
 
                     {!!author && (

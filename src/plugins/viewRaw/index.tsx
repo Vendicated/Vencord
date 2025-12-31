@@ -18,7 +18,9 @@ import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, ChannelStore, Forms, GuildRoleStore, Menu, Text } from "@webpack/common";
+import { ChannelStore, Forms, GuildRoleStore, Menu } from "@webpack/common"
+import { Heading } from "@components/Heading";
+import { Button } from "@components/Button";
 
 
 const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -65,20 +67,20 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
+                    <Heading tag="h3" style={{ flexGrow: 1 }}>View Raw</Heading>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
                         {!!msgContent && (
                             <>
-                                <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
+                                <Heading tag="h5">Content</Heading>
                                 <CodeBlock content={msgContent} lang="" />
                                 <Divider className={Margins.bottom20} />
                             </>
                         )}
 
-                        <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
+                        <Heading tag="h5">{type} Data</Heading>
                         <CodeBlock content={json} lang="json" />
                     </div>
                 </ModalContent >
