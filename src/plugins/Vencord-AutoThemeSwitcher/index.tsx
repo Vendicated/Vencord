@@ -47,7 +47,7 @@ export default definePlugin({
     name: "10 AutoThemeSwitcher",
     description: "Automatically switches between themes based on the time of day",
     authors:  [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settings,
