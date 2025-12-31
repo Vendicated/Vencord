@@ -276,7 +276,7 @@ export default definePlugin({
     name: "10 QuestComplete",
     description: "Complete Quests Using 'Spoof' Button Added in The Quests Tab",
     authors:[{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
 
