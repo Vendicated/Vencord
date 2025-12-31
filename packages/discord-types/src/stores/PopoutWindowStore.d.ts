@@ -216,25 +216,31 @@ export interface PopoutActions {
     setAlwaysOnTop(key: string, alwaysOnTop: boolean): void;
 
     /**
+     * Note: Not actually in the Webpack Common. You have to add it yourself if you want to use it
+     *
      * Injects a stylesheet into all open popout windows.
      * Validates origin matches current host or webpack public path.
      * @param url stylesheet URL to inject
      * @param integrity optional SRI integrity hash
      */
-    addStylesheet(url: string, integrity?: string): void;
+    addStylesheet?(url: string, integrity?: string): void;
 
     /**
+     * Note: Not actually in the Webpack Common. You have to add it yourself if you want to use it
+     *
      * Opens a channel call popout for voice/video calls.
      * Dispatches CHANNEL_CALL_POPOUT_WINDOW_OPEN action.
      * @param channel channel object to open call popout for
      */
-    openChannelCallPopout(channel: { id: string; }): void;
+    openChannelCallPopout?(channel: { id: string; }): void;
 
     /**
+     * Note: Not actually in the Webpack Common. You have to add it yourself if you want to use it
+     *
      * Opens a call tile popout for a specific participant.
      * Dispatches CALL_TILE_POPOUT_WINDOW_OPEN action.
      * @param channelId channel ID of the call
      * @param participantId user ID of the participant
      */
-    openCallTilePopout(channelId: string, participantId: string): void;
+    openCallTilePopout?(channelId: string, participantId: string): void;
 }
