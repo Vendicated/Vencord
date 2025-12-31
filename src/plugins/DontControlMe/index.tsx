@@ -203,7 +203,7 @@ export default definePlugin({
     name: "10 DontControlMe",
     description: "تضغط كلك يمين على الروم",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settings,
