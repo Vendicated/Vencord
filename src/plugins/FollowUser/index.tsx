@@ -285,11 +285,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }: UserContex
 export default definePlugin({
     name: "10 FollowUser",
     description: "الحق الي تبي",
-    authors: [{
-        name: "10",
-        id: 786315593963536415n
-    }],
-
+    authors:[Devs.rz30c],
     settings,
 
     patches: [
