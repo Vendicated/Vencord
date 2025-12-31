@@ -36,7 +36,7 @@ export function ensureSafePath(basePath: string, path: string) {
     return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
 }
 
-function readCss() {
+async function readCss() {
     return readFile(QUICK_CSS_PATH, "utf-8").catch(() => "");
 }
 
