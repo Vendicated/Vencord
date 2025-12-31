@@ -55,9 +55,10 @@ function Icon(svg: string, size = 20) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
         <Tooltip text={tooltip}>
             {tooltipProps => (
-                <svg {...tooltipProps}
-                        height={size - (small ? 3 : 0)}
-                        width={size - (small ? 3 : 0)}
+                <svg
+                    {...tooltipProps}
+                    height={size - (small ? 3 : 0)}
+                    width={size - (small ? 3 : 0)}
                 >
                     <rect
                         mask={"url(data:image/svg+xml;utf8," + encodeURIComponent(svg) + ") 0 0/contain"}
