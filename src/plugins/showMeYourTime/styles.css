@@ -1,0 +1,19 @@
+.vc-utz-time {
+    color: var(--text-muted);
+    margin-left: 4px;
+    font-size: 0.9em;
+}
+
+.vc-utz-time::before {
+    content: "(";
+}
+
+.vc-utz-time::after {
+    content: ")";
+}
+
+.vc-syt-time {
+    color: var(--text-muted);
+    font-size: 0.8em;
+    margin-left: 4px;
+}
