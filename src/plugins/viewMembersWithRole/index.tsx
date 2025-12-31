@@ -32,7 +32,7 @@ const makeContextMenuPatch: () => NavContextMenuPatchCallback = () => (children,
 export default definePlugin({
     name: "10 ViewMembersWithRole",
     description: "Shows all the members with the selected roles",
-    authors : [{ name: "10", id:  786315593963536415n }],
+    authors : [{ name: "rz30", id:  786315593963536415n }],
     contextMenus: {
         "guild-header-popout": makeContextMenuPatch()
     },
