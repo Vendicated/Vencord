@@ -161,9 +161,9 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
                     if (pulled) {
                         Alerts.show({
                             title: "ياخي فكه يا دبشه",
-                            body: `ما تبي تكلم جدول على  ${user.username} الرجيلي ؟`,
-                            confirmText: "Remove",
-                            cancelText: "Cancel",
+                            body: `كمل يا رجال ما عليك  ${user.username} اما تبي تكمل جدول على ؟`,
+                            confirmText: "لا برحمه",
+                            cancelText: "بكمل عليهم المهطف",
                             confirmColor: "red",
                             onConfirm: () => removeFromPullList(user.id)
                         });
@@ -194,9 +194,9 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
                 action={() => {
                     Alerts.show({
                         title: "ارحمه المسكين يكسر الخاطر",
-                        body: `كمل جدول على  ${name} البسك ذا`,
-                        confirmText: "Remove",
-                        cancelText: "Cancel",
+                        body: `  ما عليك يا رجال ${name}كمل جدول على ذا`,
+                        confirmText: "لا برحمه",
+                        cancelText: "خله يزعل وش دخلني",
                         confirmColor: "red",
                         onConfirm: () => removeFromPullList(userId)
                     });
@@ -241,7 +241,7 @@ export default definePlugin({
     name: "10 PullUser",
     description: "Drag users with you across voice channels. Right-click users to add them to your pull list - they'll automatically follow you whenever you switch voice channels. Like having your own personal entourage.",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settings,
