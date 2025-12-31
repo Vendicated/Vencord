@@ -24,6 +24,7 @@ export * from "./MessageStore";
 export * from "./NotificationSettingsStore";
 export * from "./OverridePremiumTypeStore";
 export * from "./PermissionStore";
+export * from "./PopoutWindowStore";
 export * from "./PresenceStore";
 export * from "./ReadStateStore";
 export * from "./RelationshipStore";

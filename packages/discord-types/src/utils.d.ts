@@ -224,34 +224,7 @@ export interface ExpressionPickerStore {
     useExpressionPickerStore<T>(selector: (state: ExpressionPickerStoreState) => T): T;
 }
 
-export interface BrowserWindowFeatures {
-    toolbar?: boolean;
-    menubar?: boolean;
-    location?: boolean;
-    directories?: boolean;
-    width?: number;
-    height?: number;
-    defaultWidth?: number;
-    defaultHeight?: number;
-    left?: number;
-    top?: number;
-    defaultAlwaysOnTop?: boolean;
-    movable?: boolean;
-    resizable?: boolean;
-    frame?: boolean;
-    alwaysOnTop?: boolean;
-    hasShadow?: boolean;
-    transparent?: boolean;
-    skipTaskbar?: boolean;
-    titleBarStyle?: string | null;
-    backgroundColor?: string;
-}
-
-export interface PopoutActions {
-    open(key: string, render: (windowKey: string) => ReactNode, features?: BrowserWindowFeatures);
-    close(key: string): void;
-    setAlwaysOnTop(key: string, alwaysOnTop: boolean): void;
-}
+export { BrowserWindowFeatures, PopoutActions } from "./stores/PopoutWindowStore";
 
 export type UserNameUtilsTagInclude = LiteralUnion<"auto" | "always" | "never", string>;
 export interface UserNameUtilsTagOptions {
