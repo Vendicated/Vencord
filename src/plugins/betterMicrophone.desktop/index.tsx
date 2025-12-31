@@ -29,7 +29,7 @@ export default definePlugin({
     name: "10 BetterMicrophone",
     description: "This plugin allows you to further customize your microphone.",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     dependencies: ["PhilsPluginLibrary"],
