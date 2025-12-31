@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "10 getMyToken",
     authors:  [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     description: "Get your token with a slash command.",
