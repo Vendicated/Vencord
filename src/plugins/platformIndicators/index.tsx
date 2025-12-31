@@ -44,22 +44,6 @@ export interface Session {
     };
 }
 
-function getStatusFillColor(status: OnlineStatus): string {
-    const style = window.getComputedStyle(document.body);
-    switch (status) {
-        case "online":
-            return style.getPropertyValue("--green-new-38");
-        case "idle":
-            return style.getPropertyValue("--yellow-new-30");
-        case "dnd":
-            return style.getPropertyValue("--red-new-46");
-        case "streaming":
-            return style.getPropertyValue("--twitch");
-        default:
-            return style.getPropertyValue("--neutral-34");
-    }
-}
-
 const SessionsStore = findStoreLazy("SessionsStore") as {
     getSessions(): Record<string, Session>;
 };
@@ -69,14 +53,19 @@ const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
 
 function Icon(svg: string, size = 20) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
-        <Tooltip text={tooltip} >
+        <Tooltip text={tooltip}>
             {tooltipProps => (
-                <img
-                    {...tooltipProps}
-                    src={"data:image/svg+xml;utf8," + encodeURIComponent(svg.replace("#123456", color))}
-                    height={size - (small ? 3 : 0)}
-                    width={size - (small ? 3 : 0)}
-                />
+                <svg {...tooltipProps}
+                        height={size - (small ? 3 : 0)}
+                        width={size - (small ? 3 : 0)}
+                >
+                    <rect
+                        mask={"url(data:image/svg+xml;utf8," + encodeURIComponent(svg) + ") 0 0/contain"}
+                        height={size - (small ? 3 : 0)}
+                        width={size - (small ? 3 : 0)}
+                        fill={color}
+                    />
+                </svg>
             )}
         </Tooltip>
     );
@@ -142,14 +131,6 @@ function ensureOwnStatus(user: User) {
 }
 
 function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
-    const colorMap = {
-        online: getStatusFillColor("online"),
-        idle: getStatusFillColor("idle"),
-        dnd: getStatusFillColor("dnd"),
-        offline: getStatusFillColor("offline"),
-        streaming: getStatusFillColor("streaming"),
-    };
-
     const user = UserStore.getUser(userId);
 
     if (!user || user.bot) return [];
@@ -159,20 +140,19 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     const status = PresenceStore.getClientStatus(user.id);
     if (!status) return [];
 
-    return Object.entries(status).map(([platform, status]) => {
-        const tooltip = getPlatformTooltip(platform as DiscordPlatform);
-
-        const icon = Icons[platform as DiscordPlatform] ?? Icons.desktop;
-
-        return {
-            description: tooltip,
-            iconSrc: "data:image/svg+xml;utf8," + encodeURIComponent(icon.svg.replace("#123456", colorMap[status] ?? colorMap.offline)),
-            props: {
-                style: { width: icon.size, height: icon.size },
-            },
-            key: `vc-platform-indicator-${platform}`,
-        } satisfies ProfileBadge;
-    });
+    return Object.entries(status).map(([platform, status]) => ({
+        key: `vc-platform-indicator-${platform}`,
+        component: () => (
+            <span className="vc-platform-indicator">
+                <PlatformIcon
+                    key={platform}
+                    platform={platform as DiscordPlatform}
+                    status={status}
+                    small={false}
+                />
+            </span>
+        ),
+    }));
 }
 
 const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolean; }) => {
