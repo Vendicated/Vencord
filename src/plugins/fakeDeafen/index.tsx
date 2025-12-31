@@ -48,7 +48,7 @@ export default definePlugin({
     description: "You're deafened but you're not",
     dependencies: ["PhilsPluginLibrary"],
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
 
