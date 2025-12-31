@@ -285,7 +285,7 @@ export default definePlugin({
     name: "10 NotifyUserChanges",
     description: "Adds a notify option in the user context menu to get notified when a user changes voice channels or online status",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
 
