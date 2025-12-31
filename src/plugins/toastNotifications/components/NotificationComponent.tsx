@@ -7,12 +7,11 @@
 import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { settings as PluginSettings } from "@plugins/toastNotifications/index";
 import { classes } from "@utils/misc";
 import { Channel, Message } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { React, useEffect, useMemo, useState } from "@webpack/common";
-
-import { settings as PluginSettings } from "../index";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const MessageComponent = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
