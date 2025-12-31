@@ -567,7 +567,7 @@ const _plugin: PluginDef & Record<string, any> = {
     name: "10 Stalker",
     description: "This plugin allows you to stalk users, made for delusional people like myself.",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     dependencies: ["MessageLoggerEnhanced"],
