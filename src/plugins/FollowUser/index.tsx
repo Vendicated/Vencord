@@ -286,7 +286,7 @@ export default definePlugin({
     name: "10 FollowUser",
     description: "الحق الي تبي",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settings,
