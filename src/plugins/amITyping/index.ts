@@ -11,7 +11,7 @@ export default definePlugin({
     name: "10 AmITyping",
     description: "Shows you if other people can see you typing.",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
 
