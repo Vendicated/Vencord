@@ -1,16 +1,9 @@
-import { Activity, FluxStore, Guild, User } from "..";
+import { Activity, ApplicationStream, FluxStore, Guild, User } from "..";
 import { GiftIntentType, RelationshipType } from "../../enums";
 
 export type FriendsSection = "ADD_FRIEND" | "ALL" | "ONLINE" | "PENDING" | "PENDING_IGNORED" | "SPAM" | "SUGGESTIONS";
 
 export type StatusType = "online" | "offline" | "idle" | "dnd" | "invisible" | "streaming" | "unknown";
-
-export interface ApplicationStream {
-    channelId: string;
-    guildId: string | null;
-    ownerId: string;
-    streamType: string;
-}
 
 export interface FriendsRow {
     key: string;

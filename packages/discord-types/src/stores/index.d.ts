@@ -1,11 +1,8 @@
 // please keep in alphabetical order
-<<<<<<< HEAD
-export * from "./ApplicationStreamingStore";
-=======
 export * from "./AccessibilityStore";
 export * from "./ActiveJoinedThreadsStore";
 export * from "./ApplicationStore";
->>>>>>> c123efd65923bb183850242affdb1d7b0d228e50
+export * from "./ApplicationStreamingStore";
 export * from "./AuthenticationStore";
 export * from "./CallStore";
 export * from "./ChannelRTCStore";
