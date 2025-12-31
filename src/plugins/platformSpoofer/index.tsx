@@ -41,7 +41,7 @@ export default definePlugin({
     name: "10 PlatformSpoofer",
     description: "Spoof what platform or device you're on",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settingsAboutComponent: () => <>
