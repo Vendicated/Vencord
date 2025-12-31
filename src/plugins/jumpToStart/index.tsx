@@ -32,7 +32,7 @@ export default definePlugin({
     name: "JumpToStart",
     description: "Adds a context menu option to jump to the start of a channel/DM",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     contextMenus:
