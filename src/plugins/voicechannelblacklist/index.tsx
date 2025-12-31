@@ -295,7 +295,7 @@ export default definePlugin({
     name: "10 VoiceChannelBlacklist",
     description: "Block users from voice channels with customizable actions",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settings,
