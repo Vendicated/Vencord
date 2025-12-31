@@ -33,7 +33,7 @@ export default definePlugin({
     name: "10 UnlimitedAccounts",
     description: "Increases the amount of accounts you can add.",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     settings,
