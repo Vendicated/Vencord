@@ -86,7 +86,7 @@ export default definePlugin({
     name: "10 ShowMeYourTime",
     description: "Display users' local times based on their timezone settings",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     patches: [
