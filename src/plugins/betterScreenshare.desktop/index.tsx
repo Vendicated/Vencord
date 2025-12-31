@@ -31,7 +31,7 @@ export default definePlugin({
     name: "10 BetterScreenshare",
     description: "This plugin allows you to further customize your screen sharing.",
     authors: [{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
     dependencies: ["PhilsPluginLibrary"],
