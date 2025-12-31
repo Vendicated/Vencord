@@ -139,7 +139,7 @@ export default definePlugin({
         }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = Array.from(reactions, ([id, _user]) => UserStore.getUser(id)).filter(Boolean);
+        const users = Array.from(reactions, ([id]) => UserStore.getUser(id)).filter(Boolean);
 
         return (
             <div
