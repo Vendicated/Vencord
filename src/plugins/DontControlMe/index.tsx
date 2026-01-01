@@ -200,7 +200,7 @@ function addPinChannelContextMenu(children: any, { channel }: { channel: any; })
 }
 
 export default definePlugin({
-    name: "10 DontControlMe",
+    name: "تثبيت ف الروم",
     description: "تضغط كلك يمين على الروم",
     authors: [{
         name: "rz30",
