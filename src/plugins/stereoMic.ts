@@ -23,7 +23,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "10 Stereo Mic",
+    name: "ستريو 2",
     description: "2 channels... scawwy",
     authors:[{
         name: "rz30",
