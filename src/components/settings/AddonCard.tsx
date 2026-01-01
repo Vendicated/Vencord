@@ -58,7 +58,7 @@ export function AddonCard({ disabled, isNew, isEagle, name, infoButton, footer, 
                                     title.style.setProperty("--duration", `${Math.max(0.5, (title.scrollWidth - titleContainer.clientWidth) / 7)}s`);
                                 }}
                             >
-                                {name}  
+                                {name}
                             </div>
                         </div>
                         {isNew && <AddonBadge text="NEW" color="#ED4245" />}

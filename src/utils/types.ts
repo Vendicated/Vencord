@@ -225,7 +225,7 @@ export interface PluginDef {
      * @deprecated Use {@link messagePopoverButton} instead
      */
     renderMessagePopoverButton?: never;
-    
+
     /**
      * Indicates that this plugin originates from EagleCord,
      * a custom downstream distribution of Vencord.
