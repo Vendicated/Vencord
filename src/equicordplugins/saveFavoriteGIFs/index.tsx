@@ -4,17 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { ApplicationCommandType } from "@api/Commands";
 import { showNotification } from "@api/Notifications";
+import { definePluginSettings } from "@api/Settings";
+import equicordToolbox from "@equicordplugins/equicordToolbox";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import { UserSettingsActionCreators } from "@webpack/common";
 
-async function saveGifs() {
-    const filename = `favorite-gifs-${new Date().toISOString().split("T")[0]}.txt`;
-    const gifUrls = Object.keys(UserSettingsActionCreators.FrecencyUserSettingsActionCreators.getCurrentValue().favoriteGifs.gifs);
-    const content = gifUrls.join("\n");
-
+async function saveContentToFile(content: string, filename: string) {
     try {
         if (IS_DISCORD_DESKTOP) {
             const data = new TextEncoder().encode(content);
@@ -27,23 +26,119 @@ async function saveGifs() {
         showNotification({
             title: "Save Favorite GIFs",
             body: `Saved GIFs successfully as ${filename}`,
+            color: "var(--text-positive)",
         });
     } catch (error) {
+        console.error(error);
         showNotification({
             title: "Save Favorite GIFs",
             body: "Failed to save GIFs",
+            color: "var(--text-danger)",
         });
     }
 }
 
+function getGifUrls(): string[] {
+    return Object.keys(UserSettingsActionCreators.FrecencyUserSettingsActionCreators.getCurrentValue().favoriteGifs.gifs);
+}
+
+async function saveAllGifs() {
+    const filename = `favorite-gifs-${new Date().toISOString().split("T")[0]}.txt`;
+    const gifUrls = getGifUrls();
+    
+    if (gifUrls.length === 0) {
+        showNotification({ title: "Save Favorite GIFs", body: "No favorite GIFs found..?" });
+        return;
+    }
+
+    const content = gifUrls.join("\n");
+    await saveContentToFile(content, filename);
+}
+
+async function saveWorkingGifs() {
+    const gifUrls = getGifUrls();
+    
+    if (gifUrls.length === 0) {
+        showNotification({ title: "Save Favorite GIFs", body: "No favorite GIFs found?" });
+        return;
+    }
+
+    showNotification({
+        title: "Save Favorite GIFs",
+        body: `Testing ${gifUrls.length} GIFs.. This may take a moment...`,
+        loading: true
+    });
+
+    const workingUrls: string[] = [];
+
+    await Promise.all(gifUrls.map(async (url) => {
+        try {
+            const response = await fetch(url, { method: "HEAD" });
+            if (response.ok) workingUrls.push(url);
+        } catch (e) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) workingUrls.push(url);
+            } catch (err) { }
+        }
+    }));
+
+    if (workingUrls.length === 0) {
+        showNotification({ title: "Save Favorite GIFs", body: "None of your saved GIFs appear to be working." });
+        return;
+    }
+
+    const filename = `working-gifs-${new Date().toISOString().split("T")[0]}.txt`;
+    const content = workingUrls.join("\n");
+    
+    await saveContentToFile(content, filename);
+    
+    showNotification({
+        title: "Save Favorite GIFs",
+        body: `Filtered ${gifUrls.length - workingUrls.length} possibly broken GIFs. Saved ${workingUrls.length} working GIFs.`,
+        color: "var(--text-positive)",
+    });
+}
+
+const settings = definePluginSettings({
+    showToolboxButton: {
+        description: "Show 'Save Favorite GIFs' button in Equicord Toolbox (Requires Reload)",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true,
+        get hidden() {
+            return !isPluginEnabled(equicordToolbox.name);
+        }
+    }
+});
+
 export default definePlugin({
     name: "SaveFavoriteGIFs",
-    description: "Save favorite GIF urls to a file",
+    description: "Export favorited GIF urls",
     authors: [Devs.thororen],
-    dependencies: ["EquicordToolbox"],
-    toolboxActions: {
-        "Save Favorite GIFs": () => {
-            saveGifs();
+    settings,
+    commands: [
+        {
+            name: "savegifs",
+            description: "Save all favorite GIF urls to a text file",
+            type: ApplicationCommandType.Chat,
+            action: saveAllGifs
+        },
+        {
+            name: "saveworkinggifs",
+            description: "Test all favorite GIFs and only save the ones that are still working",
+            type: ApplicationCommandType.Chat,
+            action: saveWorkingGifs
         }
+    ],
+    toolboxActions() {
+        const { showToolboxButton } = settings.use(["showToolboxButton"]);
+        if (!showToolboxButton) return null;
+
+        return {
+            "Save Favorite GIFs": () => {
+                saveAllGifs();
+            }
+        };
     }
 });
