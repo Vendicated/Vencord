@@ -45,7 +45,7 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: U
 };
 
 export default definePlugin({
-    name: "10 CopyUserMention",
+    name: "نسخ المنشن",
     authors: [{
         name: "rz30",
         id: 786315593963536415n
