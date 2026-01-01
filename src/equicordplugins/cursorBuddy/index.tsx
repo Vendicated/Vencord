@@ -23,7 +23,9 @@ import definePlugin, { OptionType } from "@utils/types";
 
 const ONEKO_IMAGE = "https://raw.githubusercontent.com/adryd325/oneko.js/c4ee66353b11a44e4a5b7e914a81f8d33111555e/oneko.gif";
 const ONEKO_SCRIPT = "https://raw.githubusercontent.com/adryd325/oneko.js/c4ee66353b11a44e4a5b7e914a81f8d33111555e/oneko.js";
-const FATASS_HORSE = "https://raw.githubusercontent.com/nexpid/fatass-horse/351f158bfd8fafd44d9c17faad61f2a80bcd33e3/horse.js";
+const FATASS_HORSE_SCRIPT = "https://raw.githubusercontent.com/nexpid/fatass-horse/351f158bfd8fafd44d9c17faad61f2a80bcd33e3/horse.js";
+const FATASS_HORSE_ORIGINAL_IMAGE = "https://raw.githubusercontent.com/nexpid/fatass-horse/refs/heads/main/sheet.png";
+const FATASS_HORSE_IMAGE = "https://raw.githubusercontent.com/nexpid/fatass-horse/351f158bfd8fafd44d9c17faad61f2a80bcd33e3/sheet.png";
 
 const settings = definePluginSettings({
     buddy: {
@@ -119,14 +121,17 @@ function load() {
             break;
         }
         case "fathorse": {
-            fetch(FATASS_HORSE).then(x => x.text()).then(s => (0, eval)(s)({
-                speed: settings.store.speed,
-                fps: settings.store.fps,
-                size: settings.store.size,
-                fade: settings.store.fade,
-                freeroam: settings.store.freeroam,
-                shake: settings.store.shake
-            }));
+            fetch(FATASS_HORSE_SCRIPT)
+                .then(x => x.text())
+                .then(s => s.replace(FATASS_HORSE_ORIGINAL_IMAGE, FATASS_HORSE_IMAGE))
+                .then(s => (0, eval)(s)({
+                    speed: settings.store.speed,
+                    fps: settings.store.fps,
+                    size: settings.store.size,
+                    fade: settings.store.fade,
+                    freeroam: settings.store.freeroam,
+                    shake: settings.store.shake
+                }));
         }
     }
 }
