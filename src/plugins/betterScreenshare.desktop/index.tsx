@@ -28,7 +28,7 @@ import { GoLivePanelWrapper, replacedSubmitFunction } from "./patches";
 import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 
 export default definePlugin({
-    name: "10 BetterScreenshare",
+    name: "تعديل الشير",
     description: "This plugin allows you to further customize your screen sharing.",
     authors: [{
         name: "rz30",
