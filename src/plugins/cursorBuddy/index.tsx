@@ -99,11 +99,13 @@ const settings = definePluginSettings({
 });
 
 function unload() {
-    if (settings.store.buddy === "oneko") document.getElementById("oneko")?.remove();
-    if (settings.store.buddy === "fathorse") document.getElementById("fathorse")?.remove();
+    document.getElementById("oneko")?.remove();
+    document.getElementById("fathorse")?.remove();
 }
 
 function load() {
+    unload();
+
     switch (settings.store.buddy) {
         case "oneko": {
             fetch(ONEKO_SCRIPT)
