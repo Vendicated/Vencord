@@ -208,7 +208,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="vc-blacklist"
-                label={blacklisted ? "ارحمه المسكين" : "عطه برجلك"}
+                label={blacklisted ? "ارحمه المسكين" : "عطه بلاك"}
                 color={blacklisted ? "danger" : undefined}
                 action={() => {
                     if (blacklisted) {
@@ -267,14 +267,14 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
         <Menu.MenuItem
             key="rm-all"
             id="rm-all"
-            label="Remove All"
+            label="ارحمه/م"
             color="danger"
             action={() => {
                 Alerts.show({
-                    title: "Remove All Users",
-                    body: `Are you sure you want to remove all ${list.length} users from the blacklist?`,
-                    confirmText: "Remove All",
-                    cancelText: "Cancel",
+                    title: "شله/م",
+                    body: `${list.length}ما ودك تفكهم شرك ؟`,
+                    confirmText: "خلاص طيب",
+                    cancelText: "خله/م يستاهل/ون",
                     confirmColor: "red",
                     onConfirm: () => list.forEach(e => removeBlacklist(e.userId, channel.id))
                 });
@@ -284,7 +284,7 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
 
     children.splice(-1, 0, (
         <Menu.MenuGroup>
-            <Menu.MenuItem id="vc-bl-list" label="Voice Blacklist">
+            <Menu.MenuItem id="vc-bl-list" label="وخر البلاك">
                 {items}
             </Menu.MenuItem>
         </Menu.MenuGroup>
@@ -292,8 +292,8 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
 };
 
 export default definePlugin({
-    name: "10 VoiceChannelBlacklist",
-    description: "Block users from voice channels with customizable actions",
+    name: "بلاك من الرومات",
+    description: "يطرده من الرم لين تشيل منه ",
     authors: [{
         name: "rz30",
         id: 786315593963536415n
