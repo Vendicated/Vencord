@@ -30,7 +30,7 @@ function toggleHoverControls(value: boolean) {
 }
 
 export default definePlugin({
-    name: "SpotifyControls",
+    name: "Spotify تحكم",
     description: "Adds a Spotify player above the account panel",
     authors: [{
         name: "rz30",
