@@ -127,6 +127,7 @@ export default definePlugin({
     },
 
     commands: [{
+
         name: "Signature",
         description: "Toggle your signature",
         inputType: ApplicationCommandInputType.BUILT_IN,
@@ -144,7 +145,8 @@ export default definePlugin({
                 content: settings.store.isEnabled ? "Signature enabled!" : "Signature disabled!",
             });
         },
-    }],
+    }
+    ],
 });
 
 // text processing injection processor

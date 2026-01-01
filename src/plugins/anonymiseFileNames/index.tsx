@@ -150,23 +150,25 @@ export default definePlugin({
         upload.filename = newFilename;
     },
 
-    commands: [{
-        name: "Spoiler",
-        description: "Toggle your spoiler",
-        inputType: ApplicationCommandInputType.BUILT_IN,
-        options: [
-            {
-                name: "value",
-                description: "Toggle your Spoiler (default is toggle)",
-                required: false,
-                type: ApplicationCommandOptionType.BOOLEAN,
+    commands: [
+        {
+            name: "Spoiler",
+            description: "Toggle your spoiler",
+            inputType: ApplicationCommandInputType.BUILT_IN,
+            options: [
+                {
+                    name: "value",
+                    description: "Toggle your Spoiler (default is toggle)",
+                    required: false,
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                },
+            ],
+            execute: async (args, ctx) => {
+                settings.store.spoilerMessages = !!findOption(args, "value", !settings.store.spoilerMessages);
+                sendBotMessage(ctx.channel.id, {
+                    content: settings.store.spoilerMessages ? "Spoiler enabled!" : "Spoiler disabled!",
+                });
             },
-        ],
-        execute: async (args, ctx) => {
-            settings.store.spoilerMessages = !!findOption(args, "value", !settings.store.spoilerMessages);
-            sendBotMessage(ctx.channel.id, {
-                content: settings.store.spoilerMessages ? "Spoiler enabled!" : "Spoiler disabled!",
-            });
-        },
-    }],
+        }
+    ],
 });

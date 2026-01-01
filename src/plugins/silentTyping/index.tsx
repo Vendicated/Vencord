@@ -342,96 +342,98 @@ export default definePlugin({
         },
     ],
 
-    commands: [{
-        name: "silent-typing",
-        description: "Hide your typing indicator from chat.",
-        inputType: ApplicationCommandInputType.BUILT_IN,
+    commands: [
+        {
+            name: "silent-typing",
+            description: "Hide your typing indicator from chat.",
+            inputType: ApplicationCommandInputType.BUILT_IN,
 
-        options: [
-            {
-                name: "toggle",
-                description: "Toggle functionality globally, for the channel, or for the guild.",
-                required: false,
-                type: ApplicationCommandOptionType.STRING,
-                choices: [
-                    { name: "Global", label: "Global", value: "global" },
-                    { name: "Channel", label: "Channel", value: "channel" },
-                    { name: "Guild", label: "Guild", value: "guild" },
-                ]
-            },
-            {
-                name: "chat-bar-indicators",
-                description: "Hide other users' typing indicators from above the chat bar.",
-                required: false,
-                type: ApplicationCommandOptionType.BOOLEAN,
-            },
-            {
-                name: "members-list-indicators",
-                description: "Hide other users' typing indicators from the members list.",
-                required: false,
-                type: ApplicationCommandOptionType.BOOLEAN,
-            },
-            {
-                name: "chat-icon",
-                description: "Show an icon in the chat bar for toggling the plugin on the go.",
-                required: false,
-                type: ApplicationCommandOptionType.BOOLEAN,
-            },
-            {
-                name: "chat-context-menu",
-                description: "Show a dropdown in the chat context menu to toggle plugin settings on the go.",
-                required: false,
-                type: ApplicationCommandOptionType.BOOLEAN,
-            },
-            {
-                name: "default-hidden",
-                description: "Whether to hide typing in DMs/channels/guilds by default or not.",
-                required: false,
-                type: ApplicationCommandOptionType.BOOLEAN,
-            }
-        ],
-
-        execute: async (args, ctx) => {
-            let updated = false;
-            const location = findOption(args, "toggle");
-
-            if (typeof location === "string") {
-                updated = true;
-
-                if (location === "global") {
-                    toggleGlobal();
-                } else {
-                    const locationId = location === "guild" ? ctx.channel.guild_id : ctx.channel.id;
-                    toggleLocation(locationId, getEffectiveList(), settings.store.defaultHidden);
+            options: [
+                {
+                    name: "toggle",
+                    description: "Toggle functionality globally, for the channel, or for the guild.",
+                    required: false,
+                    type: ApplicationCommandOptionType.STRING,
+                    choices: [
+                        { name: "Global", label: "Global", value: "global" },
+                        { name: "Channel", label: "Channel", value: "channel" },
+                        { name: "Guild", label: "Guild", value: "guild" },
+                    ]
+                },
+                {
+                    name: "chat-bar-indicators",
+                    description: "Hide other users' typing indicators from above the chat bar.",
+                    required: false,
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                },
+                {
+                    name: "members-list-indicators",
+                    description: "Hide other users' typing indicators from the members list.",
+                    required: false,
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                },
+                {
+                    name: "chat-icon",
+                    description: "Show an icon in the chat bar for toggling the plugin on the go.",
+                    required: false,
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                },
+                {
+                    name: "chat-context-menu",
+                    description: "Show a dropdown in the chat context menu to toggle plugin settings on the go.",
+                    required: false,
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                },
+                {
+                    name: "default-hidden",
+                    description: "Whether to hide typing in DMs/channels/guilds by default or not.",
+                    required: false,
+                    type: ApplicationCommandOptionType.BOOLEAN,
                 }
-            }
+            ],
 
-            const updateChatIcon = findOption(args, "chat-icon");
+            execute: async (args, ctx) => {
+                let updated = false;
+                const location = findOption(args, "toggle");
 
-            if (typeof updateChatIcon === "boolean") {
-                updated = true;
-                settings.store.chatIcon = !!updateChatIcon;
-            }
+                if (typeof location === "string") {
+                    updated = true;
 
-            const updateChatContextMenu = findOption(args, "chat-context-menu");
+                    if (location === "global") {
+                        toggleGlobal();
+                    } else {
+                        const locationId = location === "guild" ? ctx.channel.guild_id : ctx.channel.id;
+                        toggleLocation(locationId, getEffectiveList(), settings.store.defaultHidden);
+                    }
+                }
 
-            if (typeof updateChatContextMenu === "boolean") {
-                updated = true;
-                settings.store.chatContextMenu = !!updateChatContextMenu;
-            }
+                const updateChatIcon = findOption(args, "chat-icon");
 
-            const updateDefaultHidden = findOption(args, "default-hidden");
+                if (typeof updateChatIcon === "boolean") {
+                    updated = true;
+                    settings.store.chatIcon = !!updateChatIcon;
+                }
 
-            if (typeof updateDefaultHidden === "boolean") {
-                updated = true;
-                settings.store.defaultHidden = !!updateDefaultHidden;
-            }
+                const updateChatContextMenu = findOption(args, "chat-context-menu");
 
-            sendBotMessage(ctx.channel.id, {
-                content: updated ? "Silent typing settings updated." : "No changes made to silent typing settings.",
-            });
-        },
-    }],
+                if (typeof updateChatContextMenu === "boolean") {
+                    updated = true;
+                    settings.store.chatContextMenu = !!updateChatContextMenu;
+                }
+
+                const updateDefaultHidden = findOption(args, "default-hidden");
+
+                if (typeof updateDefaultHidden === "boolean") {
+                    updated = true;
+                    settings.store.defaultHidden = !!updateDefaultHidden;
+                }
+
+                sendBotMessage(ctx.channel.id, {
+                    content: updated ? "Silent typing settings updated." : "No changes made to silent typing settings.",
+                });
+            },
+        }
+    ],
 
     async startTyping(channelId: string) {
         if (checkEnabled(channelId)) return;
