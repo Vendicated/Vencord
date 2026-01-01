@@ -36,7 +36,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "كراك سبوتي فاي",
+    name: "كراك spotify",
     description: "Free listen along, no auto-pausing in voice chat, and allows activity to continue playing when idling",
     authors: [{
         name: "rz30",
