@@ -44,8 +44,8 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "10 FakeDeafen",
-    description: "You're deafened but you're not",
+    name: "فيك لهم",
+    description: "يطلع لناس انك دفن وانت مو دفن",
     dependencies: ["PhilsPluginLibrary"],
     authors: [{
         name: "rz30",
