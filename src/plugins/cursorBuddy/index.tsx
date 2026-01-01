@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -104,6 +105,7 @@ function unload() {
 }
 
 function load() {
+    if (!isPluginEnabled("CursorBuddy")) return;
     unload();
 
     switch (settings.store.buddy) {
