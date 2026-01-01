@@ -48,9 +48,12 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "UserVoiceShow",
-    description: "Shows an indicator when a user is in a Voice Channel",
-    authors: [Devs.Nuckyz, Devs.LordElias],
+    name: "تشوفه ف اي روم ؟",
+    description: "تشوف الناس ب اي روم داخلين",
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
 
