@@ -137,6 +137,7 @@ export default definePlugin({
     description: "only a slightly annoying plugin",
     authors: [Devs.Ven, Devs.adryd, EquicordDevs.nexpid],
     settings,
+    isModified: true,
 
     start: load,
     stop: unload,
