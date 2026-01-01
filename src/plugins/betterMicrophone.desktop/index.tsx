@@ -26,7 +26,7 @@ import { MicrophonePatcher } from "./patchers";
 import { initMicrophoneStore } from "./stores";
 
 export default definePlugin({
-    name: "10 BetterMicrophone",
+    name: "تعديل المايك",
     description: "This plugin allows you to further customize your microphone.",
     authors: [{
         name: "rz30",
