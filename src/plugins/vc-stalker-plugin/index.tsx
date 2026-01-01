@@ -564,8 +564,8 @@ let oldUsers: {
 let loggedMessages: Record<string, Message> = {};
 
 const _plugin: PluginDef & Record<string, any> = {
-    name: "10 Stalker",
-    description: "This plugin allows you to stalk users, made for delusional people like myself.",
+    name: "احبك",
+    description: "هذا البلوقن يعلمك ب كل شي عن الشخص الي تيبه مثلا تعرف رومه و ين يكتب و وش كتب و وين طلع و وين الروم الجديد و اذا تبي تضيف اكثر من واحد حط بعد كل ايدي , ",
     authors: [{
         name: "rz30",
         id: 786315593963536415n
