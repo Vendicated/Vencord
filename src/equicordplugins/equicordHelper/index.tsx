@@ -188,13 +188,12 @@ export default definePlugin({
     },
     commands: [
         {
-            name: "refresh_commands",
+            name: "refresh-commands",
             description: "Refresh Slash Commands",
             inputType: ApplicationCommandInputType.BUILT_IN,
             predicate: () => settings.store.refreshSlashCommands,
             execute: async (opts, ctx) => {
                 try {
-                    sendBotMessage(ctx.channel.id, { content: "Refreshing Slash Commands..." });
                     ApplicationCommandIndexStore.indices = {};
                     sendBotMessage(ctx.channel.id, { content: "Slash Commands refreshed successfully." });
                 }
