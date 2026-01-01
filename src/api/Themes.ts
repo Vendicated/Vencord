@@ -19,8 +19,9 @@
 import { Settings, SettingsStore } from "@api/Settings";
 import { createAndAppendStyle } from "@utils/css";
 import { ThemeStore } from "@vencord/discord-types";
+import { PopoutWindowStore } from "@webpack/common";
 
-import { userStyleRootNode } from "./Styles";
+import { userStyleRootNode, vencordRootNode } from "./Styles";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -33,6 +34,7 @@ async function toggle(isEnabled: boolean) {
                 style.textContent = css;
                 // At the time of writing this, changing textContent resets the disabled state
                 style.disabled = !Settings.useQuickCss;
+                updatePopoutWindows();
             });
             style.textContent = await VencordNative.quickCss.get();
         }
@@ -76,6 +78,25 @@ async function initThemes() {
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    updatePopoutWindows();
+}
+
+function applyToPopout(popoutWindow: Window | undefined) {
+    if (!popoutWindow?.document) return;
+
+    const doc = popoutWindow.document;
+
+    doc.querySelector("vencord-root")?.remove();
+
+    doc.documentElement.appendChild(vencordRootNode.cloneNode(true));
+}
+
+function updatePopoutWindows() {
+    const windowKeys = PopoutWindowStore.getWindowKeys();
+    for (const key of windowKeys) {
+        const popoutWindow = PopoutWindowStore.getWindow(key);
+        applyToPopout(popoutWindow);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -88,6 +109,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+
+    window.addEventListener("message", event => {
+        const { discordPopoutEvent } = event.data || {};
+        if (discordPopoutEvent?.type !== "loaded") return;
+
+        const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
+        applyToPopout(popoutWindow);
+    });
 
     if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);

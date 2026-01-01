@@ -78,6 +78,7 @@ export let InviteStore: t.InviteStore;
 export let LocaleStore: t.LocaleStore;
 export let RTCConnectionStore: t.RTCConnectionStore;
 export let SoundboardStore: t.SoundboardStore;
+export let PopoutWindowStore: t.PopoutWindowStore;
 export let ApplicationCommandIndexStore: GenericStore;
 
 /**
@@ -129,6 +130,7 @@ waitForStore("InviteStore", m => InviteStore = m);
 waitForStore("LocaleStore", m => LocaleStore = m);
 waitForStore("RTCConnectionStore", m => RTCConnectionStore = m);
 waitForStore("SoundboardStore", m => SoundboardStore = m);
+waitForStore("PopoutWindowStore", m => PopoutWindowStore = m);
 waitForStore("ApplicationCommandIndexStore", m => ApplicationCommandIndexStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
