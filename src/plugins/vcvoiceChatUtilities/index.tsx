@@ -156,8 +156,8 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "10 VoiceChatUtilities",
-    description: "This plugin allows you to perform multiple actions on an entire channel (move, mute, disconnect, etc.) (originally by dutake)",
+    name: "تحكم ب الروم كامل",
+    description: "مثلا تعطيهم كلهم ميوت ولا دسك ولا دفن و بنفس الثانيه !",
     authors: [{
         name: "rz30",
         id: 786315593963536415n
