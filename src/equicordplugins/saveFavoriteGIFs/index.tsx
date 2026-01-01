@@ -141,7 +141,6 @@ export default definePlugin({
                 label="Save Favorite GIFs"
                 action={saveAllGifs}
             />
-
         );
     }
 });
