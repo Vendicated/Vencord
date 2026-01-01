@@ -441,8 +441,8 @@ function addUserBadge(userId: string) {
 let originalGetUserProfile: any;
 
 export default definePlugin({
-    name: "10 BadgeSelector",
-    description: "شارات تنحط ف البروفايل",
+    name: "شارات الدس",
+    description: " شارات تنحط ف البروفايل ما يشوفها الا انت",
     authors: [{
         name: "rz30",
         id: 786315593963536415n
