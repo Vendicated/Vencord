@@ -73,7 +73,7 @@ function addContextMenu(children, { user }) {
 }
 
 export default definePlugin({
-    name: "10 AutoPullAnywhere",
+    name: "سحب اعضاء الروم",
     description: "يسحب الأشخاص المحددين لأي روم صوتي تدخله",
     authors: [{
         name: "10",
