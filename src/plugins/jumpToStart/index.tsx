@@ -20,7 +20,7 @@ const MenuPatch: NavContextMenuPatchCallback = (children, { channel }) => {
     children.push(
         <Menu.MenuItem
             id="vc-jump-to-first"
-            label="Jump To First Message"
+            label="اول رساله"
             action={() => {
                 jumpToFirstMessage(channel);
             }}
@@ -29,8 +29,8 @@ const MenuPatch: NavContextMenuPatchCallback = (children, { channel }) => {
 };
 
 export default definePlugin({
-    name: "JumpToStart",
-    description: "Adds a context menu option to jump to the start of a channel/DM",
+    name: "اول رساله",
+    description: "اول رساله في اي شات حتى لو كان شات روم",
     authors: [{
         name: "rz30",
         id: 786315593963536415n
