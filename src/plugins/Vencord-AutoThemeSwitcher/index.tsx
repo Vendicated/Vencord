@@ -44,7 +44,7 @@ function periodicThemeUpdateCheck() {
 }
 
 export default definePlugin({
-    name: "10 AutoThemeSwitcher",
+    name: "تغير ثيم الدسكورد",
     description: "Automatically switches between themes based on the time of day",
     authors:  [{
         name: "rz30",
