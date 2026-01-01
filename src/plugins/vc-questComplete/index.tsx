@@ -273,8 +273,8 @@ function executeQuestSpoofing() {
 }
 
 export default definePlugin({
-    name: "10 QuestComplete",
-    description: "Complete Quests Using 'Spoof' Button Added in The Quests Tab",
+    name: "اجمع لك اوربيز ؟",
+    description: "الاوربيز هذي تقدر تشتري فيها نيترو او افكت للافتار او حتى للبروفايل",
     authors:[{
         name: "rz30",
         id: 786315593963536415n
