@@ -20,12 +20,12 @@ import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "10 getMyToken",
+    name: "تبي توكنك ؟",
     authors:  [{
         name: "rz30",
         id: 786315593963536415n
     }],
-    description: "Get your token with a slash command.",
+    description: "اكتب ب اي شات / ويطلع لك gte Token",
 
     commands: [
         {
