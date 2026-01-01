@@ -38,7 +38,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "10 PlatformSpoofer",
+    name: "تحويل منصات",
     description: "Spoof what platform or device you're on",
     authors: [{
         name: "rz30",
