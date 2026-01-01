@@ -103,6 +103,17 @@ export default definePlugin({
     },
     onBeforeMessageEdit(_, __, message) {
         message.content = replaceTimestamp(message.content);
-    }
+    },
 
+    settingsAboutComponent() {
+        return (
+            <>
+                <p>
+                    sexy timestamps plugin
+                </p>
+                <p>
+                    ported from <a href="https://github.com/lisekilis/replugged-timestamps">Replugged-Timestamps</a> by the lisekilis
+                </p>
+            </>);
+    }
 });

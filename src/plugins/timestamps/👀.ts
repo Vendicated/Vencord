@@ -128,7 +128,6 @@ function findTime(content: string, index?: number): findTimeResult | null {
             shortTimeMatch.groups.hour = `${Number(shortTimeMatch.groups.hour) + 12}`;
         if (
             shortTimeMatch.groups?.hour === "12" &&
-            shortTimeMatch.groups.minute === "00" &&
             shortTimeMatch.groups.am_pm.toLowerCase() === "am"
         )
             shortTimeMatch.groups.hour = "0";
