@@ -7,8 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { MessageActions } from "@webpack/common";
+import { MessageActions, PinActions } from "@webpack/common";
 
 const settings = definePluginSettings({
     noShiftDelete: {
@@ -22,8 +21,6 @@ const settings = definePluginSettings({
         default: true,
     },
 });
-
-const PinActions = findByPropsLazy("pinMessage", "unpinMessage");
 
 export default definePlugin({
     name: "ShowAllMessageButtons",
@@ -57,8 +54,7 @@ export default definePlugin({
         MessageActions.deleteMessage(channel_id, id);
     },
     toggleMessagePin({ channel, message }) {
-        if (message.pinned)
-            return PinActions.unpinMessage(channel, message.id);
+        if (message.pinned) return PinActions.unpinMessage(channel, message.id);
 
         PinActions.pinMessage(channel, message.id);
     },
