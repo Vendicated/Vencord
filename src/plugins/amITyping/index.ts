@@ -8,7 +8,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "10 AmITyping",
+    name: "انت تكتب",
     description: "Shows you if other people can see you typing.",
     authors: [{
         name: "rz30",
