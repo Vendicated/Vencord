@@ -272,7 +272,7 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
             action={() => {
                 Alerts.show({
                     title: "شله/م",
-                    body: `${list.length}ما ودك تفكهم شرك ؟`,
+                    body: `${list.length}ما ودك تفكهم من شرك ؟`,
                     confirmText: "خلاص طيب",
                     cancelText: "خله/م يستاهل/ون",
                     confirmColor: "red",
