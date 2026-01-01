@@ -55,17 +55,21 @@ const settings = definePluginSettings({
     },
     defaultPrefix: {
         description: "default prefix for timestamps (used for formatting if none is specified)",
-        type: OptionType.SELECT,
+        type: OptionType.SELECT, // This uses runtime variables which typescript is not a fan of
         options: [
-            { get label() { return `${<>{Parser.parse(`<t:${timestamp}:t>`)}</>} (ｔ-) `; }, value: "t" },
-            { get label() { return `${<>{Parser.parse(`<t:${timestamp}:T>`)}</>} (Ｔ-) `; }, value: "T" },
-            { get label() { return `${<>{Parser.parse(`<t:${timestamp}:d>`)}</>} (ｄ-) `; }, value: "d" },
-            { get label() { return `${<>{Parser.parse(`<t:${timestamp}:D>`)}</>} (Ｄ-) `; }, value: "D" },
-            { get label() { return `${<>{Parser.parse(`<t:${timestamp}:f>`)}</>} (ｆ-) `; }, value: "f" },
-            { get label() { return `${<>{Parser.parse(`<t:${timestamp}:F>`)}</>} (Ｆ-) `; }, value: "F" },
-            { get label() { return `${<>{Parser.parse(`<t:${timestamp}:R>`)}</>} (Ｒ-) `; }, value: "R" },
+            { label: "", value: "t" },
+            { label: "", value: "T" },
+            { label: "", value: "d" },
+            { label: "", value: "D" },
+            { label: "", value: "f" },
+            { label: "", value: "F" },
+            { label: "", value: "R" },
         ],
         default: "t",
+        componentProps: {
+            renderOptionLabel: option => Parser.parse(`<t:${timestamp}:${option.value}> (${String.fromCharCode(option.value.charCodeAt(0) + 0xFEE0)})`),
+            renderOptionValue: option => Parser.parse(`<t:${timestamp}:${option[0].value}> (${String.fromCharCode(option[0].value.charCodeAt(0) + 0xFEE0)})`)
+        }
     },
     dateFormat: {
         description: "Date format to recognize",
