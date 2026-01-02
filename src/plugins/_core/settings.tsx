@@ -279,7 +279,7 @@ export default definePlugin({
         const vencordSection: SettingsLayoutNode = {
             key: "vencord_section",
             type: LayoutTypes.SECTION,
-            useLabel: () => "Vencord",
+            useTitle: () => "Vencord Settings",
             buildLayout: () => vencordEntries
         };
 
