@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Replacements } from "@plugins/betterNotifications.desktop/utils/Variables";
 import { Forms, React, Text, TextInput } from "@webpack/common";
 
 import { settings } from "..";
-import { Replacements } from "../utils/Variables";
 
 const OpeningVar = "{";
 const ClosingVar = "}";

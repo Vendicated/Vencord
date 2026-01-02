@@ -4,18 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { AdvancedNotification } from "@plugins/betterNotifications.desktop/types/advancedNotification";
+import { type BasicNotification } from "@plugins/betterNotifications.desktop/types/basicNotification";
 import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
 import { findByProps } from "@webpack";
 
 import { notificationShouldBeShown, settings } from "..";
-import { AdvancedNotification } from "../types/advancedNotification";
-import { BasicNotification } from "../types/basicNotification";
 import { AttachmentManipulation, blurImage, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio } from "./ImageManipulation";
 import { isLinux, replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
+const latestMessages: Map<string, Date[]> = new Map();
 
 export interface SuitableAttachment {
     isSpoiler: boolean,
@@ -52,7 +53,6 @@ export async function SendNativeNotification(avatarUrl: string,
     const { attachments } = advancedNotification.messageRecord;
     let contentType: string;
     let imageType: "png" | "jpeg";
-    const isAttachmentSpoiler: boolean = false;
     const suitableAttachments: SuitableAttachment[] = [];
 
     for (const attachment of attachments) {
@@ -94,6 +94,32 @@ export async function SendNativeNotification(avatarUrl: string,
 
     [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText, headerText]);
 
+    const notifierMessages = latestMessages.get(basicNotification.notif_user_id);
+    const now = new Date();
+
+    if (notifierMessages === undefined) {
+        logger.debug("User has not sent previous messages");
+        latestMessages.set(basicNotification.notif_user_id, [now]);
+    } else {
+        let lastDate = new Date(0);
+        let spamMessages = 0;
+
+        notifierMessages.forEach(date => {
+            if (now.getTime() - date.getTime() < 48000 && lastDate.getTime() - date.getTime() < 12000) {
+                spamMessages++;
+            }
+            lastDate = date;
+        });
+        logger.info(`User spam messages: ${spamMessages}`);
+        if (spamMessages > 5 && settings.store.autoMuteSpammers) {
+            logger.info("User has sent too many messages in a short timeframe. Not sending a notification");
+            return;
+        }
+
+        notifierMessages.push(now);
+        latestMessages.set(basicNotification.notif_user_id, notifierMessages);
+    }
+
     function notify(avatar, attachment = attachmentUrl) {
         Native.notify(
             (advancedNotification.messageRecord.call && settings.store.specialCallNotification) ? "call" : "notification",
@@ -123,7 +149,8 @@ export async function SendNativeNotification(avatarUrl: string,
                     ? SimpleMarkdown.defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(notificationBody))
                     : undefined,
                 quickReactions: JSON.stringify(settings.store.notificationQuickReactEnabled ? settings.store.notificationQuickReact : []),
-                inlineReply: settings.store.inlineReplyLinux
+                inlineReply: settings.store.inlineReplyLinux,
+                silent: true
             }
         );
     }

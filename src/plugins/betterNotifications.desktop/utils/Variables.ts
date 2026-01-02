@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { type AdvancedNotification } from "@plugins/betterNotifications.desktop/types/advancedNotification";
+import { type BasicNotification } from "@plugins/betterNotifications.desktop/types/basicNotification";
 import { Logger } from "@utils/Logger";
 import { GuildStore } from "@webpack/common";
 
 import { settings } from "..";
-import { AdvancedNotification } from "../types/advancedNotification";
-import { BasicNotification } from "../types/basicNotification";
 
 const logger = new Logger("BetterNotifications");
 

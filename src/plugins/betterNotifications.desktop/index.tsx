@@ -5,12 +5,17 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { Divider } from "@components/Divider";
+import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, ChannelRouter, Forms, React, showToast, Switch, Text, TextInput, Toasts } from "@webpack/common";
+import { ChannelRouter, React, showToast, Text, TextInput, Toasts } from "@webpack/common";
 
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
@@ -41,20 +46,18 @@ export const settings = definePluginSettings({
         component: props => {
             return (
                 <>
-                    <Forms.FormDivider />
-                    < Forms.FormSection title="Notification format settings" >
-                        <Forms.FormText>Available variables:</Forms.FormText>
-                        <ul>
-                            {Replacements.map((variable, index) => {
-                                // &#123; = { and &#125; = }
-                                return <li key={index}><Forms.FormText>&#123;{variable}&#125;</Forms.FormText></li>;
-                            })}
-                        </ul>
-                        <Forms.FormDivider />
+                    <Heading>Notification format settings</Heading>
+                    <Paragraph>Available variables:</Paragraph>
+                    <ul>
+                        {Replacements.map((variable, index) => {
+                            // &#123; = { and &#125; = }
+                            return <li key={index}><Paragraph>&#123;{variable}&#125;</Paragraph></li>;
+                        })}
+                    </ul>
+                    <Divider />
 
-                        <Forms.FormText>Notification title format</Forms.FormText>
-                        <VariableString setValue={props.setValue} defaultValue={settings.store.notificationTitleFormat} />
-                    </Forms.FormSection >
+                    <Paragraph>Notification title format</Paragraph>
+                    <VariableString setValue={props.setValue} defaultValue={settings.store.notificationTitleFormat} />
                 </>
             );
         },
@@ -65,10 +68,10 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: props => {
             return (
-                < Forms.FormSection>
-                    <Forms.FormText>Notification body format</Forms.FormText>
+                <>
+                    <Paragraph>Notification body format</Paragraph>
                     <VariableString setValue={props.setValue} defaultValue={settings.store.notificationBodyFormat} />
-                </Forms.FormSection >
+                </>
             );
         },
         default: "{body}",
@@ -78,11 +81,11 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: props => {
             return (
-                < Forms.FormSection>
-                    <Forms.FormText>Channel prefix</Forms.FormText>
-                    <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Prefix to use for server channel (not DMs) names in notifications (e.g. '#' -&gt; #general)</Forms.FormText>
+                <>
+                    <Paragraph>Channel prefix</Paragraph>
+                    <Paragraph>Prefix to use for server channel (not DMs) names in notifications (e.g. '#' -&gt; #general)</Paragraph>
                     <ExampleString setValue={props.setValue} defaultValue={settings.store.channelPrefix} staticValue="general"></ExampleString>
-                </Forms.FormSection >
+                </>
             );
         },
         default: "#"
@@ -92,13 +95,11 @@ export const settings = definePluginSettings({
         component: props => {
             return (
                 <>
-                    < Forms.FormSection>
-                        <Forms.FormText>Username prefix</Forms.FormText>
-                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Prefix to use for user names in notifications</Forms.FormText>
+                    <Paragraph>Username prefix</Paragraph>
+                    <Paragraph>Prefix to use for user names in notifications</Paragraph>
 
-                        <ExampleString setValue={props.setValue} defaultValue={settings.store.userPrefix} staticValue="username567"></ExampleString>
-                    </Forms.FormSection >
-                    <Forms.FormDivider />
+                    <ExampleString setValue={props.setValue} defaultValue={settings.store.userPrefix} staticValue="username567"></ExampleString>
+                    <Divider />
                 </>
             );
         },
@@ -121,24 +122,16 @@ export const settings = definePluginSettings({
 
             return (
                 <>
-                    <Forms.FormSection>
-                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
-                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification attribute text</Forms.FormTitle>
-                            <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={switchValue} onChange={setSwitchValue}></Switch>
+                    <FormSwitch title="Enable notification attribute text (Windows only)" className="mb-0 w-fit" hideBorder={true} value={switchValue} onChange={setSwitchValue}></FormSwitch>
+
+                    {switchValue &&
+                        <div style={{ marginTop: "12px" }}>
+
+                            <Paragraph>Attribute text format</Paragraph>
+                            <VariableString setValue={props.setValue} defaultValue={settings.store.notificationAttributeText} />
+
                         </div>
-                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Enables attribute text (Windows only)</Forms.FormText>
-
-
-                        {switchValue &&
-                            <div style={{ marginTop: "12px" }}>
-                                <Forms.FormSection>
-                                    <Forms.FormText>Attribute text format</Forms.FormText>
-                                    <VariableString setValue={props.setValue} defaultValue={settings.store.notificationAttributeText} />
-                                </Forms.FormSection>
-                            </div>
-                        }
-                    </Forms.FormSection >
-
+                    }
                 </>
             );
         },
@@ -164,24 +157,14 @@ export const settings = definePluginSettings({
 
             return (
                 <>
-                    <Forms.FormSection>
-                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
-                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification grouping</Forms.FormTitle>
-                            <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={switchValue} onChange={setSwitchValue}></Switch>
+                    <FormSwitch title="Enable notification grouping (Windows only)" hideBorder={true} value={switchValue} onChange={setSwitchValue}></FormSwitch>
+
+                    {switchValue &&
+                        <div style={{ marginTop: "12px" }}>
+                            <Paragraph>Grouping text format. This changes how notifications are grouped. This text is also visible in notifications below the application name.</Paragraph>
+                            <VariableString setValue={props.setValue} defaultValue={settings.store.notificationHeaderText} />
                         </div>
-                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Enables grouping for notifications. (Windows only)</Forms.FormText>
-
-
-                        {switchValue &&
-                            <div style={{ marginTop: "12px" }}>
-                                <Forms.FormSection>
-                                    <Forms.FormText>Grouping text format. This changes how notifications are grouped. This text is also visible in notifications below the application name.</Forms.FormText>
-                                    <VariableString setValue={props.setValue} defaultValue={settings.store.notificationHeaderText} />
-                                </Forms.FormSection>
-                            </div>
-                        }
-                    </Forms.FormSection >
-
+                    }
                 </>
             );
         },
@@ -227,43 +210,37 @@ export const settings = definePluginSettings({
 
             return (
                 <>
-                    <Forms.FormSection>
-                        <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
-                            <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable quick reactions</Forms.FormTitle>
-                            <Switch
-                                style={{ width: "fit-content", marginBottom: "0px" }}
-                                hideBorder={true}
-                                value={switchValue}
-                                onChange={setSwitchValue}
-                            />
-                        </div>
-                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
-                            Add reaction buttons to notifications
-                        </Forms.FormText>
+                    <FormSwitch
+                        title="Enable quick reactions"
+                        hideBorder={true}
+                        value={switchValue}
+                        onChange={setSwitchValue}
+                    />
 
-                        {switchValue && (
-                            <div style={{ marginTop: "12px" }}>
-                                <Forms.FormSection>
-                                    <Forms.FormText>Quick Reactions</Forms.FormText>
-                                    {reactions.map((emoji, index) => (
-                                        <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
-                                            <TextInput
-                                                value={emoji}
-                                                onChange={val => updateReaction(index, val)}
-                                                placeholder="e.g. "
-                                            />
-                                            <Button style={{ width: "3ch", marginLeft: "4px" }} onClick={() => removeReaction(index)}>
-                                                X
-                                            </Button>
-                                        </div>
-                                    ))}
-                                    <Button disabled={reactions.length >= 5} onClick={addReaction}>
-                                        Add Reaction
+                    <Paragraph>
+                        Add reaction buttons to notifications
+                    </Paragraph>
+
+                    {switchValue && (
+                        <div style={{ marginTop: "12px" }}>
+                            <Paragraph>Quick Reactions</Paragraph>
+                            {reactions.map((emoji, index) => (
+                                <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+                                    <TextInput
+                                        value={emoji}
+                                        onChange={val => updateReaction(index, val)}
+                                        placeholder="e.g. "
+                                    />
+                                    <Button style={{ width: "3ch", marginLeft: "4px" }} onClick={() => removeReaction(index)}>
+                                        X
                                     </Button>
-                                </Forms.FormSection>
-                            </div>
-                        )}
-                    </Forms.FormSection>
+                                </div>
+                            ))}
+                            <Button disabled={reactions.length >= 5} onClick={addReaction}>
+                                Add Reaction
+                            </Button>
+                        </div>
+                    )}
                 </>
             );
         },
@@ -298,13 +275,10 @@ export const settings = definePluginSettings({
             }, [value]);
 
             return <div style={{ marginBottom: "0.5em", height: "100%" }}>
-                <Forms.FormSection>
-                    <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
-                        <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable notification markup support for Linux</Forms.FormTitle>
-                        <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={value} onChange={setValue}></Switch>
-                    </div>
-                </Forms.FormSection>
-                <Forms.FormText style={{ marginBottom: "8px" }} type={Forms.FormText.Types.DESCRIPTION}><span style={{ color: "var(--status-danger)" }}>WARNING:</span> This feature may not support your system. If you see HTML tags (such as &lt;b&gt;) in notifications, turn this feature off.</Forms.FormText>
+
+                <FormSwitch title="Enable notification markup support for Linux" hideBorder={true} value={value} onChange={setValue}></FormSwitch>
+
+                <Paragraph style={{ marginBottom: "8px" }}><span style={{ color: "var(--status-danger)" }}>WARNING:</span> This feature may not support your system. If you see HTML tags (such as &lt;b&gt;) in notifications, turn this feature off.</Paragraph>
                 {value ?
                     <Text><b>Here's some bold text</b> and <i>heres's some italic text</i></Text>
                     :
@@ -324,6 +298,11 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Include blurred spoiler attachments",
         default: false
+    },
+    autoMuteSpammers: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically stops notifications for a few seconds in the event that someone is spam mentioning you",
+        default: true,
     },
 
     notificationImagePositionWin: {
@@ -355,14 +334,7 @@ export const settings = definePluginSettings({
                 if (settings.store.notificationQuickReactEnabled) settings.store.notificationQuickReactEnabled = false;
             }, [value]);
 
-            return <div style={{ marginBottom: "0.5em", height: "100%" }}>
-                <Forms.FormSection>
-                    <div style={{ display: "flex", justifyContent: "space-between", height: "fit-content" }}>
-                        <Forms.FormTitle style={{ marginBottom: "0px" }}>Enable support for inline replies from notifications</Forms.FormTitle>
-                        <Switch style={{ width: "fit-content", marginBottom: "0px" }} hideBorder={true} value={value} onChange={setValue}></Switch>
-                    </div>
-                </Forms.FormSection>
-            </div>;
+            return <FormSwitch title="Enable support for inline replies from notifications" hideBorder={true} value={value} onChange={setValue}></FormSwitch>;
         },
         default: true,
         hidden: !isLinux && Native.checkLinuxDE("KDE")
@@ -393,9 +365,9 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => (
             <>
-                <Forms.FormTitle>Cache options</Forms.FormTitle>
-                <Button look={Button.Looks.OUTLINED} onClick={_ => { Native.openTempFolder(); }}> Open cache folder</Button>
-                <Button style={{ backgroundColor: "var(--status-danger)" }} look={Button.Looks.FILLED} onClick={_ => {
+                <Heading>Cache options</Heading>
+                <Button variant={"secondary"} onClick={_ => { Native.openTempFolder(); }}>Open cache folder</Button>
+                <Button variant="dangerPrimary" onClick={_ => {
                     Native.deleteTempFolder().then(_ => {
                         showToast("Deleted cache folder", Toasts.Type.SUCCESS);
                     });
@@ -432,12 +404,11 @@ export default definePlugin({
                     if(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc()) {
                         Vencord.Plugins.plugins.BetterNotifications.SendNativeNotification($2, $3, $4, $5, $6);
                         console.log("Replaced notification function \`$1\` with own notification handler");
-                        return;
+                        //return;
                     } else {
                         [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.InterceptNotification($2, $3, $4, $5, $6);
                         console.log("Patched using variable replacement");
                     }
-
                 `
             }
         }

@@ -48,6 +48,7 @@ interface ExtraOptions {
     attachmentType?: string;
     quickReactions?: string; // A JSON string, parse before use
     inlineReply?: boolean;
+    silent?: boolean;
 }
 
 interface AssetOptions {
@@ -197,6 +198,7 @@ function generateXml(
                 `<action content="${emoji}" arguments="${notificationClickPath}?reaction=${emoji}&amp;messageId=${notificationData.messageId}&amp;channelId=${notificationData.channelId}" activationType="protocol" />`
             )}
              </actions>
+            <audio silent="true" />
          </toast>`;
     } else {
         xml = `
@@ -213,7 +215,7 @@ function generateXml(
                 :
                 ""
             }
-             <visual>
+            <visual>
                  <binding template="ToastGeneric">
                     <text hint-callScenarioCenterAlign="true">${safeStringForXML(titleString)}</text>
                     <text hint-callScenarioCenterAlign="true">${safeStringForXML(bodyString)}</text>
@@ -221,7 +223,8 @@ function generateXml(
 
                     ${extraOptions?.wAttributeText ? `<text placement="attribution">${safeStringForXML(extraOptions.wAttributeText)}</text>` : ""}
                  </binding>
-             </visual>
+            </visual>
+            <audio silent="true" />
          </toast>`;
     }
 
@@ -397,7 +400,6 @@ export function notify(event: IpcMainInvokeEvent,
     if (extraOptions?.attachmentUrl) {
         promises.push(saveAssetToDisk({ fileType: extraOptions.attachmentType, attachmentUrl: extraOptions.attachmentUrl }));
     }
-    // console.log("Creating promise...");
 
     Promise.all(promises).then(results => {
         // @ts-ignore
@@ -427,11 +429,12 @@ export function notify(event: IpcMainInvokeEvent,
             return;
         }
 
+
         const notification = new Notification({
             title: titleString,
             body: bodyString,
             timeoutType: "default",
-
+            silent: (extraOptions?.silent ?? false),
             // toastXml only works on Windows
             // https://learn.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/adaptive-interactive-toasts?tabs=xml
             ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment, quickReactions) })
