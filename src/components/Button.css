@@ -62,8 +62,9 @@
     line-height: 1.25;
 }
 
-.vc-btn-icon-only {
+.vc-btn-icon {
     min-width: auto;
+    min-height: 38px;
     aspect-ratio: 1;
     padding: 0;
     display: flex;
