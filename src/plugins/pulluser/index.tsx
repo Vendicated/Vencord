@@ -155,7 +155,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="pull-user"
-                label={pulled ? "خله ينقلع بس" : "ربط مع رجلينه"}
+                label={pulled ? "خله ينقلع بس" : "علشان 11   "}
                 color={pulled ? "danger" : undefined}
                 action={() => {
                     if (pulled) {
