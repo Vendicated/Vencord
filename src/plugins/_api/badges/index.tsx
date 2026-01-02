@@ -95,7 +95,7 @@ export default definePlugin({
                     replace: "...$1.props,$&"
                 },
                 {
-                    match: /(?<="aria-label":(\i)\.description,.*currentUserOwnsOrbBadge.{0,200})children:/,
+                    match: /(?<=forceOpen:.{0,40}?F\((e)\.id\).{0,100}?)children:/,
                     replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
                 // handle onClick and onContextMenu
@@ -108,7 +108,7 @@ export default definePlugin({
         {
             find: "getLegacyUsername(){",
             replacement: {
-                match: /getBadges\(\){[^}]{0,400}return\[/,
+                match: /getBadges\(\){[^}]{0,400}?return\[/,
                 replace: "$&...$self.getBadges(this),"
             }
         }
