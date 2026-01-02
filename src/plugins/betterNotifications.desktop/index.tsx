@@ -429,6 +429,7 @@ export default definePlugin({
 
     NotificationClickEvent(channelId: string, messageId: string) {
         logger.debug(`Recieved click to channel ${channelId}`);
+        window.focus();
         ChannelRouter.transitionToChannel(channelId);
         jumpToMessage.jumpToMessage({
             channelId,

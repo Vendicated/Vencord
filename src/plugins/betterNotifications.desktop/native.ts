@@ -5,7 +5,7 @@
  */
 
 import { execFile } from "child_process";
-import { app, IpcMainInvokeEvent, Notification, shell, WebContents } from "electron";
+import { app, BrowserWindow, IpcMainInvokeEvent, Notification, shell, WebContents } from "electron";
 import fs from "fs";
 import https from "https";
 import os from "os";
@@ -60,6 +60,7 @@ interface AssetOptions {
 }
 
 let webContents: WebContents | undefined;
+let window: BrowserWindow | undefined;
 
 function safeStringForXML(input: string): string {
     return input
@@ -476,9 +477,9 @@ export async function deleteTempFolder(_) {
 
 app.on("browser-window-created", (_, win) => {
     webContents = win.webContents;
+    window = win;
 });
 
-// TODO future: app.on("second-instance") with deeplinks on Windows notifications to allow button actions
 app.on("second-instance", (event, args) => {
     console.log("[BN] second instance activated");
     console.log(args);
@@ -486,6 +487,18 @@ app.on("second-instance", (event, args) => {
     if (!stringUrl || !stringUrl.startsWith("discord://")) {
         console.log(`[BN] url is ${stringUrl}. Skipping`);
         return;
+    }
+
+    if (window) {
+        console.log("Window is available");
+
+        // Praying to the Windows gods that one of these work
+        window.show();
+        window.focus();
+
+        // If the above two don't work, these sure will
+        window.setAlwaysOnTop(true);
+        window.setAlwaysOnTop(false);
     }
 
     const url = new URL(stringUrl);
