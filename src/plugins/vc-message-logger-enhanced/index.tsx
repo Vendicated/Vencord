@@ -242,7 +242,7 @@ export default definePlugin({
         name: "rz30",
         id: 786315593963536415n
     }],
-    description: "شغله علشان السوالكر",
+    description: "شغله علشان احبك",
     dependencies: ["MessageLogger"],
 
     patches: [
