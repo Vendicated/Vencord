@@ -24,6 +24,7 @@ export type ButtonSize = "min" | "xs" | "small" | "medium";
 export type ButtonProps = ComponentPropsWithRef<"button"> & {
     variant?: ButtonVariant;
     size?: ButtonSize;
+    iconOnly?: boolean;
 };
 
 export type LinkButtonProps = ComponentPropsWithRef<"a"> & {
@@ -31,9 +32,9 @@ export type LinkButtonProps = ComponentPropsWithRef<"a"> & {
     variant?: ButtonVariant;
 };
 
-export function Button({ variant = "primary", size = "medium", children, className, ...restProps }: ButtonProps) {
+export function Button({ variant = "primary", size = "medium", iconOnly, children, className, ...restProps }: ButtonProps) {
     return (
-        <button data-mana-component="button" className={classes(btnCls("base", variant, size), className)} {...restProps}>
+        <button data-mana-component="button" className={classes(btnCls("base", variant, size, iconOnly && "icon-only"), className)} {...restProps}>
             {children}
             {variant === "link" && <OpenExternalIcon className={btnCls("link-icon")} />}
         </button>

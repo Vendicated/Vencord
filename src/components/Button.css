@@ -62,6 +62,15 @@
     line-height: 1.25;
 }
 
+.vc-btn-icon-only {
+    min-width: auto;
+    aspect-ratio: 1;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .vc-btn-primary {
     background-color: var(--control-primary-background-default);
     border-color: var(--control-primary-border-default);
