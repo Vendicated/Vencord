@@ -20,6 +20,7 @@ let isMonitorRunning: boolean = false;
 
 const idMap: Map<number, NotificationData> = new Map();
 const replyMap: Map<Number, string> = new Map();
+let lastNotification: Notification | null = null;
 
 interface NotificationData {
     channelId: string;
@@ -438,7 +439,14 @@ export function notify(event: IpcMainInvokeEvent,
 
         // Listener for macOS
         notification.addListener("click", () => unixCallback());
+
+        if (lastNotification) {
+            console.log("Removing last notification");
+            lastNotification.close();
+        }
+
         notification.show();
+        lastNotification = notification;
     });
 }
 
