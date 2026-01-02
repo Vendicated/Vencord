@@ -37,7 +37,7 @@
 }
 
 .vc-notification-title {
-    color: var(--header-primary);
+    color: var(--text-strong);
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.25rem;
@@ -47,13 +47,13 @@
 .vc-notification-close-btn {
     all: unset;
     cursor: pointer;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     opacity: 0.5;
     transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 .vc-notification-close-btn:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
     opacity: 1;
 }
 
@@ -137,5 +137,5 @@
 
 .vc-notification-log-danger-btn {
     color: var(--white-500);
-    background-color: var(--button-danger-background);
+    background-color: var(--redesign-button-danger-background);
 }
