@@ -321,7 +321,7 @@ export const settings = definePluginSettings({
             { label: "Body", value: "x-kde-urls" },
             { label: "Inline", value: "image-path", default: true }
         ],
-        hidden: !isLinux && Native.checkLinuxDE("KDE")
+        hidden: !isLinux || !Native.checkLinuxDE("KDE")
     },
     inlineReplyLinux: {
         type: OptionType.COMPONENT,
@@ -336,8 +336,8 @@ export const settings = definePluginSettings({
 
             return <FormSwitch title="Enable support for inline replies from notifications" hideBorder={true} value={value} onChange={setValue}></FormSwitch>;
         },
-        default: true,
-        hidden: !isLinux && Native.checkLinuxDE("KDE")
+        default: false,
+        hidden: !isLinux || !Native.checkLinuxDE("KDE")
     },
     notificationAttachmentFit: {
         type: OptionType.SELECT,
@@ -404,7 +404,7 @@ export default definePlugin({
                     if(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc()) {
                         Vencord.Plugins.plugins.BetterNotifications.SendNativeNotification($2, $3, $4, $5, $6);
                         console.log("Replaced notification function \`$1\` with own notification handler");
-                        //return;
+                        // return;
                     } else {
                         [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.InterceptNotification($2, $3, $4, $5, $6);
                         console.log("Patched using variable replacement");

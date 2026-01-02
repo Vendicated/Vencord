@@ -410,7 +410,10 @@ export function notify(event: IpcMainInvokeEvent,
 
         // console.log(`[BN] notify notificationData: ${notificationData.channelId}`);
 
-        const unixCallback = () => event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
+        const unixCallback = () => {
+            forceFocus();
+            event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
+        };
 
         if (isLinux) {
             if (!isMonitorRunning && extraOptions?.inlineReply && checkLinuxDE("", "KDE")) {
@@ -475,6 +478,21 @@ export async function deleteTempFolder(_) {
     }
 }
 
+function forceFocus() {
+    if (window) {
+        console.log("Window is available");
+
+        // Praying to the Windows gods that one of these work
+        window.show();
+        window.focus();
+
+        // If the above two don't work, these sure will
+        window.setAlwaysOnTop(true);
+        window.setAlwaysOnTop(false);
+    }
+
+}
+
 app.on("browser-window-created", (_, win) => {
     webContents = win.webContents;
     window = win;
@@ -489,17 +507,7 @@ app.on("second-instance", (event, args) => {
         return;
     }
 
-    if (window) {
-        console.log("Window is available");
-
-        // Praying to the Windows gods that one of these work
-        window.show();
-        window.focus();
-
-        // If the above two don't work, these sure will
-        window.setAlwaysOnTop(true);
-        window.setAlwaysOnTop(false);
-    }
+    forceFocus();
 
     const url = new URL(stringUrl);
     if (!url.searchParams.get("reaction")) {
