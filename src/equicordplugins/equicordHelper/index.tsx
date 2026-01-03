@@ -53,13 +53,19 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Refreshes Slash Commands to show newly added commands without restarting your client.",
         default: false,
+    },
+    forceRoleIcon: {
+        type: OptionType.BOOLEAN,
+        description: "Forces role icons to display next to messages in compact mode",
+        restartNeeded: true,
+        default: false
     }
 });
 
 export default definePlugin({
     name: "EquicordHelper",
     description: "Used to provide support, fix discord caused crashes, and other misc features.",
-    authors: [Devs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu, EquicordDevs.keyages, EquicordDevs.SerStars],
+    authors: [Devs.thororen, EquicordDevs.nyx, EquicordDevs.Naibuu, EquicordDevs.keyages, EquicordDevs.SerStars, EquicordDevs.mart],
     required: true,
     settings,
     patches: [
@@ -154,6 +160,15 @@ export default definePlugin({
                 },
             ]
         })),
+        // Force Role Icon
+        {
+            find: "Message Username",
+            predicate: () => settings.store.forceRoleIcon,
+            replacement: {
+                match: /(?<=\.badgesContainer.{0,150}\?2:)0(?=\})/,
+                replace: "1"
+            }
+        },
     ],
     renderMessageAccessory(props) {
         return (
