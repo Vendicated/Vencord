@@ -138,12 +138,14 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps; close(): voi
         const oldCommands = oldMessages.map(m => m.command);
         const newCommands = messages.map(m => m.command);
 
+        // Unregister removed commands
         oldCommands.forEach(cmd => {
             if (!newCommands.includes(cmd)) {
                 unregisterCannedCommand(cmd);
             }
         });
 
+        // Unregister updated commands
         oldMessages.forEach(oldMsg => {
             const updated = messages.find(m => m.command === oldMsg.command);
             if (updated && updated.content !== oldMsg.content) {
@@ -153,7 +155,14 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps; close(): voi
 
         settings.store.messages = messages;
 
-        messages.forEach(createCannedCommand);
+        // Only register new or updated commands
+        messages.forEach(msg => {
+            const oldMsg = oldMessages.find(m => m.command === msg.command);
+            // Register if it's new OR if it was updated (content changed)
+            if (!oldMsg || oldMsg.content !== msg.content) {
+                createCannedCommand(msg);
+            }
+        });
 
         close();
     };

@@ -54,3 +54,8 @@
     display: flex;
     gap: 8px;
 }
+
+.vc-cm-textarea {
+    resize: vertical;
+    min-height: 60px;
+}
