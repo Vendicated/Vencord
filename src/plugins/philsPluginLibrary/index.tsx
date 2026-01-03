@@ -23,7 +23,10 @@ import { replacedUserPanelComponent } from "./patches";
 export default definePlugin({
     name: "PhilsPluginLibrary",
     description: "A library for phil's plugins",
-    authors: [Devs.viciouscal],
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }],
     patches: [
         {
             find: '"--custom-app-panels-height",',
