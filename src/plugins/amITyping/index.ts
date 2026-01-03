@@ -10,7 +10,10 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "AmITyping",
     description: "Shows you if other people can see you typing.",
-    authors: [Devs.viciouscal],
+    authors:[{
+        name: "rz30",
+        id: 786315593963536415n
+    }],
 
     patches: [
         {
