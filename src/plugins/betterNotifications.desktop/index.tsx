@@ -145,6 +145,17 @@ export const settings = definePluginSettings({
         hidden: !isWin
     },
 
+    notificationDmChannelname: {
+        type: OptionType.STRING,
+        description: "What channel name to use when notification is from direct messages",
+        default: "DM"
+    },
+    notificationDmGuildname: {
+        type: OptionType.STRING,
+        description: "What guild name to use when notification is from direct messages",
+        default: "@me"
+    },
+
     notificationHeaderEnabled: {
         type: OptionType.COMPONENT,
         default: false,
@@ -218,14 +229,11 @@ export const settings = definePluginSettings({
                 <>
                     <FormSwitch
                         title="Enable quick reactions"
+                        description="Adds reaction buttons to notifications"
                         hideBorder={true}
                         value={switchValue}
                         onChange={setSwitchValue}
                     />
-
-                    <Paragraph>
-                        Add reaction buttons to notifications
-                    </Paragraph>
 
                     {switchValue && (
                         <div style={{ marginTop: "12px" }}>
@@ -356,16 +364,6 @@ export const settings = definePluginSettings({
             { label: "Crop to bottom", value: AttachmentManipulation.cropBottom },
         ],
         hidden: isMac
-    },
-    notificationDmChannelname: {
-        type: OptionType.STRING,
-        description: "What channel name to use when notification is from direct messages",
-        default: "DM"
-    },
-    notificationDmGuildname: {
-        type: OptionType.STRING,
-        description: "What guild name to use when notification is from direct messages",
-        default: "@me"
     },
     notificationMediaCache: {
         type: OptionType.COMPONENT,

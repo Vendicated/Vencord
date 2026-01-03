@@ -201,9 +201,9 @@ export function InterceptNotification(avatarUrl: string,
     }
 
     let title = settings.store.notificationTitleFormat;
-    let body = settings.store.notificationBodyFormat;
+    let [body, bodyVars] = parseVariables(settings.store.notificationBodyFormat, advancedNotification);
 
-    [title, body] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body]);
+    [title, body] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body], bodyVars);
     logger.info("Succesfully patched notification");
 
     return [avatarUrl, title, body, basicNotification, advancedNotification];
