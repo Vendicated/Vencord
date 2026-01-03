@@ -50,8 +50,10 @@ interface ChannelInfo {
     groupName: string;
 }
 
+function getChannelInfoFromTitle(title: string): ChannelInfo {
+    // The notification title sometimes has weird whitespacef stuff which causes the split not to work
 
-function getChannelInfoFromTitle(title: string, basicNotification: BasicNotification, advancedNotification: AdvancedNotification): ChannelInfo {
+    title = title.replace(/[\u200E-\u200F\u202A-\u202E\u2066-\u2069]/g, "");
     let channelInfo: ChannelInfo;
     try {
         const parts = title.split(" (#");
@@ -176,7 +178,7 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
             description: ""
         };
     } else {
-        const channelData = getChannelInfoFromTitle(title, basicNotification, advancedNotification);
+        const channelData = getChannelInfoFromTitle(title);
         const guildData = GuildStore.getGuild(basicNotification.guild_id);
 
         channelInfo = {
