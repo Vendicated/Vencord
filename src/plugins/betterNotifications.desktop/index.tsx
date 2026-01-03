@@ -404,25 +404,14 @@ export default definePlugin({
                     if(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc()) {
                         Vencord.Plugins.plugins.BetterNotifications.SendNativeNotification($2, $3, $4, $5, $6);
                         console.log("Replaced notification function \`$1\` with own notification handler");
+                        Vencord.Webpack.findByCodeLazy("Unable to find sound for pack name:")("message1"); // Thanks @etorix on Discord
+
+                        return;
                     } else {
                         [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.InterceptNotification($2, $3, $4, $5, $6);
                         console.log("Patched using variable replacement");
                     }
                 `
-            }
-        },
-        {
-            find: "NOTIFICATIONS_SEND_NOTIFICATION",
-            replacement: {
-                match: /await ([a-zA-Z]).([a-zA-Z]{2}).invoke\("NOTIFICATIONS_SEND_NOTIFICATION",([a-zA-Z])\);/,
-                replace: "(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc() ? console.log('Replaced by BetterNotifications') : await $1.$2.invoke(\"NOTIFICATIONS_SEND_NOTIFICATION\",$3));",
-            }
-        },
-        {
-            find: "NOTIFICATIONS_REMOVE_NOTIFICATION",
-            replacement: {
-                match: /return\(([a-zA-z]{2})\(([a-zA-Z]),([a-zA-Z])\),/,
-                replace: "return null && ($1($2,$3),"
             }
         }
     ],
