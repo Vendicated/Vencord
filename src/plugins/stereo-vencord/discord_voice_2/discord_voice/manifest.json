@@ -1,0 +1,13 @@
+{
+  "files": [
+    "node_modules\\.yarn-integrity",
+    "discord_voice.node",
+    "gpu_encoder_helper.exe",
+    "openh264-2.2.0-win64.dll",
+    "selfie_segmentation.tflite",
+    "selfie_segmentation_landscape.tflite",
+    "mediapipe.dll",
+    "index.js",
+    "manifest.json"
+  ]
+}
