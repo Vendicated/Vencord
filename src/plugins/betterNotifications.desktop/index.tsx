@@ -417,6 +417,13 @@ export default definePlugin({
                 match: /await ([a-zA-Z]).([a-zA-Z]{2}).invoke\("NOTIFICATIONS_SEND_NOTIFICATION",([a-zA-Z])\);/,
                 replace: "(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc() ? console.log('Replaced by BetterNotifications') : await $1.$2.invoke(\"NOTIFICATIONS_SEND_NOTIFICATION\",$3));",
             }
+        },
+        {
+            find: "NOTIFICATIONS_REMOVE_NOTIFICATION",
+            replacement: {
+                match: /return\(([a-zA-z]{2})\(([a-zA-Z]),([a-zA-Z])\),/,
+                replace: "return null && ($1($2,$3),"
+            }
         }
     ],
 
