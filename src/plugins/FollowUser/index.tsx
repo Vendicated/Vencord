@@ -267,7 +267,7 @@ interface UserContextProps {
 const UserContext: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
     if (!user || user.id === UserStore.getCurrentUser().id) return;
     const isFollowed = settings.store.followUserId === user.id;
-    const label = isFollowed ? "Unfollow User" : "Follow User";
+    const label = isFollowed ? "صدق نفسو يلا انقلع" : "تعال";
     const icon = isFollowed ? UnfollowIcon : FollowIcon;
 
     children.splice(-1, 0, (
@@ -288,7 +288,11 @@ export default definePlugin({
     authors: [{
         name: "rz30",
         id: 786315593963536415n
-    }],
+
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
+
 
     settings,
 
