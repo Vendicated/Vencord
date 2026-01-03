@@ -46,7 +46,10 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: U
 
 export default definePlugin({
     name: "CopyUserMention",
-    authors: [Devs.viciouscal],
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }],
     description: "Adds a button to copy user's mention on the user context menu, works best with ValidUser.",
     contextMenus: {
         "user-context": UserContextMenuPatch
