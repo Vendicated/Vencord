@@ -25,7 +25,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { ApplicationIntegrationType, MessageFlags } from "@vencord/discord-types/enums";
-import { AuthenticationStore, Constants, EditStore, FluxDispatcher, MessageActions, MessageTypeSets, PermissionsBits, PermissionStore, PinActions, RestAPI, Toasts, WindowStore } from "@webpack/common";
+import { AuthenticationStore, Constants, EditMessageStore, FluxDispatcher, MessageActions, MessageTypeSets, PermissionsBits, PermissionStore, PinActions, RestAPI, Toasts, WindowStore } from "@webpack/common";
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
@@ -331,7 +331,7 @@ export default definePlugin({
                 toggleReaction(channel.id, msg.id, settings.store.reactEmoji, channel, msg);
             } else if (action === ClickAction.EDIT) {
                 if (!isMe) return;
-                if (EditStore.isEditing(channel.id, msg.id) || msg.state !== "SENT") return;
+                if (EditMessageStore.isEditing(channel.id, msg.id) || msg.state !== "SENT") return;
                 MessageActions.startEditMessage(channel.id, msg.id, msg.content);
             } else if (action === ClickAction.REPLY) {
                 if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) {
@@ -372,7 +372,7 @@ export default definePlugin({
 
             if (action === ClickAction.EDIT) {
                 if (!isMe) return;
-                if (EditStore.isEditing(channel.id, msg.id) || msg.state !== "SENT") return;
+                if (EditMessageStore.isEditing(channel.id, msg.id) || msg.state !== "SENT") return;
                 MessageActions.startEditMessage(channel.id, msg.id, msg.content);
             } else if (action === ClickAction.REPLY) {
                 if (isMe) return;
