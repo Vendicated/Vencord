@@ -41,10 +41,13 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
-    authors:[{
+    authors::[{
         name: "rz30",
         id: 786315593963536415n
-    }],
+
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settingsAboutComponent: () => <>
     <Forms.FormText className="plugin-warning">
     10 & 11. is not responsible for u violation of the laws :3
