@@ -404,7 +404,6 @@ export default definePlugin({
                     if(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc()) {
                         Vencord.Plugins.plugins.BetterNotifications.SendNativeNotification($2, $3, $4, $5, $6);
                         console.log("Replaced notification function \`$1\` with own notification handler");
-                        // return;
                     } else {
                         [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.InterceptNotification($2, $3, $4, $5, $6);
                         console.log("Patched using variable replacement");
@@ -427,7 +426,7 @@ export default definePlugin({
             setTimeout(() => {
                 showToast("Looks like you are using BetterNotifications on macOS. Switching over to Variable replacement patch strategy", Toasts.Type.MESSAGE, { duration: 8000 });
                 settings.store.notificationPatchType = "variable";
-            }, 4000);
+            }, 6000);
         }
     },
 
