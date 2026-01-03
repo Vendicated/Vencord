@@ -275,10 +275,13 @@ function executeQuestSpoofing() {
 export default definePlugin({
     name: "10 QuestComplete",
     description: "Complete Quests Using 'Spoof' Button Added in The Quests Tab",
-    authors:[{
-        name: "10",
+    authors::[{
+        name: "rz30",
         id: 786315593963536415n
-    }],
+
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
 
     start() {
         this.observer = new MutationObserver(() => {
