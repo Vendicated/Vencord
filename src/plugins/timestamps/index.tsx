@@ -7,10 +7,10 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Parser } from "@webpack/common";
+import { Parser, useState } from "@webpack/common";
+import { Components, Settings } from "Vencord";
 
 import { findFullDate } from "./👀";
-
 
 
 function getTimestamp(date: Date, prefix?: string | null): string {
@@ -31,7 +31,34 @@ function replaceTimestamp(content: string): string {
     return content;
 }
 
-
+// This is used for the description
+function formatDate(
+    day: number | string,
+    month: number | string,
+    year: number | string,
+    dateFormat: string,
+): string {
+    console.log("Date Format:", dateFormat);
+    const etad = (() => {
+        switch (dateFormat) {
+            case "dmy":
+                return `${day}/${month}/${year}`;
+            case "dym":
+                return `${day}/${year}/${month}`;
+            case "mdy":
+                return `${month}/${day}/${year}`;
+            case "myd":
+                return `${month}/${year}/${day}`;
+            case "ymd":
+                return `${year}/${month}/${day}`;
+            case "ydm":
+                return `${year}/${day}/${month}`;
+            default:
+                break;
+        }
+    })();
+    return `${etad}`;
+}
 // export async function start(): Promise<void> {
 //   inject.before(messages, "sendMessage", (_args) => {
 //     _args[1].content = replaceTimestamp(_args[1].content);
@@ -106,14 +133,47 @@ export default definePlugin({
     },
 
     settingsAboutComponent() {
+        const [collapsed, setCollapsed] = useState(true);
+
         return (
             <>
-                <p>
-                    sexy timestamps plugin
-                </p>
-                <p>
-                    ported from <a href="https://github.com/lisekilis/replugged-timestamps">Replugged-Timestamps</a> by the lisekilis
-                </p>
-            </>);
-    }
+                <Components.Paragraph>
+                    Timestamps plugin ported from <Components.Link href="https://github.com/lisekilis/replugged-timestamps">Replugged-Timestamps</Components.Link> by lisekilis
+                </Components.Paragraph>
+                <Components.TextButton variant="link" onClick={() => setCollapsed(!collapsed)} style={{ marginBottom: "10px", padding: 0 }}>
+                    {collapsed ? "▶ Show" : "▼ Hide"} Usage Guide
+                </Components.TextButton>
+                {!collapsed && (
+                    <>
+                        <Components.Heading>There are a two ways to use timestamps:</Components.Heading>
+                        <Components.HeadingSecondary>Absolute Timestamps</Components.HeadingSecondary>
+                        <Components.Paragraph>
+                            <code className="inline">{formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat)} 23:55</code>
+                            The time can be in 24-hour or 12-hour format. The date is optional and you can use any separator (/, ., -) between date parts.
+                        </Components.Paragraph>
+                        <Components.Paragraph>
+                            <small>
+                                <span>
+                                    <span>
+                                        Absolute timestamps do not require a prefix unless the "Require Prefix" setting is enabled.
+                                    </span>
+                                </span>
+                            </small>
+                        </Components.Paragraph>
+                        <Components.Divider />
+                        <Components.HeadingSecondary>Relative Timestamps</Components.HeadingSecondary>
+                        <Components.Paragraph>
+                            Relative: <Components.CodeBlock lang="md" content={"5d2h5h -3h now"} />. You can combine multiple time units in order of largest to smallest.
+                        </Components.Paragraph>
+                        <Components.HeadingTertiary>Relative timestamps always require a prefix regardless of the "Require Prefix" setting.</Components.HeadingTertiary>
+                        <Components.Divider />
+                        <Components.Paragraph>
+                            Supported prefixes are: <code>t</code>, <code>T</code>, <code>d</code>, <code>D</code>, <code>f</code>, <code>F</code>, and <code>R</code>.
+                            If no prefix is specified, the default prefix from the settings will be used.
+                        </Components.Paragraph>
+                    </>
+                )}
+            </>
+        );
+    },
 });
