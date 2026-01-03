@@ -35,7 +35,9 @@ type ReplacementMap = {
 };
 
 type Variables = {
-    [k in typeof Replacements[number]]: (notification: AdvancedNotification) => boolean
+    [k in typeof Replacements[number]]: (notification: AdvancedNotification) => boolean;
+} & {
+    [k in `"${string}"`]: (notification: AdvancedNotification) => boolean
 };
 
 interface GuildInfo {
@@ -86,9 +88,39 @@ export function parseVariables(format: string, notification: AdvancedNotificatio
     logger.info(`Variable matches: ${matches.length}`);
 
     for (const match of matches) {
-        const statements = match[0].split(" ", 5);
+        const statements: string[] = [];
+
+        let quotesOpen = false;
+        let tempString = "";
+
+        for (const char of match[0]) {
+            if (char === '"') {
+                if (quotesOpen) {
+                    statements.push(`"${tempString.replaceAll(" ", "(/space/)")}"`);
+                    tempString = "";
+                }
+
+                quotesOpen = !quotesOpen;
+                continue;
+            }
+
+            if (char === " " && !quotesOpen && tempString.length > 0) {
+                statements.push(tempString.trim());
+                tempString = "";
+                continue;
+            }
+
+            tempString += char;
+        }
+
+        if (tempString.length !== 0) {
+            statements.push(tempString.trim());
+        }
+
 
         const resultVariable = statements[0];
+
+        logger.info(statements);
 
         if (statements[1] !== "if") {
             logger.warn("Statement not in expected format! (variable if x y z)");
@@ -102,7 +134,7 @@ export function parseVariables(format: string, notification: AdvancedNotificatio
         const validVariables: string[] = Array.from([...Replacements]);
         const validComparisons = Object.keys(notification.messageRecord);
 
-        if (!validVariables.includes(resultVariable) || !validComparisons.includes(comparisonValue)) {
+        if ((!resultVariable.startsWith('"') && !validVariables.includes(resultVariable)) || !validComparisons.includes(comparisonValue)) {
             logger.warn(`Variable ${resultVariable} or ${comparisonValue} doesn't exist!`);
             logger.debug("Allowed resulting variables: ");
             logger.debug(validVariables);
@@ -181,9 +213,15 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
         logger.info("Checking function: ");
         console.log(variable);
 
-        if (variable(advancedNotification)) {
+        const conditionTrue = variable(advancedNotification);
+        if (conditionTrue) {
             logger.info("Matches!");
-            texts = texts.map(text => text.replaceAll(`[${index}?]`, replacementMap[index]));
+
+            if (index.startsWith('"')) {
+                texts = texts.map(text => text.replaceAll(`[${index}?]`, index.slice(1, index.length - 1).replaceAll("(/space/)", " ")));
+            } else {
+                texts = texts.map(text => text.replaceAll(`[${index}?]`, replacementMap[index]));
+            }
         } else {
             logger.info("Doesn't match");
             texts = texts.map(text => text.replaceAll(`[${index}?]`, ""));
