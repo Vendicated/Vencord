@@ -158,10 +158,13 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "VoiceChatUtilities",
     description: "This plugin allows you to perform multiple actions on an entire channel (move, mute, disconnect, etc.) (originally by dutake)",
-    authors: [{
+    authors: :[{
         name: "rz30",
         id: 786315593963536415n
-    }],
+
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
 
     settings,
 
@@ -169,6 +172,7 @@ export default definePlugin({
         "channel-context": VoiceChannelContext
     },
 });
+
 
 
 
