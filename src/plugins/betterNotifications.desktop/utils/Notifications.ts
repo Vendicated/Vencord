@@ -12,7 +12,7 @@ import { findByProps } from "@webpack";
 
 import { notificationShouldBeShown, settings } from "..";
 import { AttachmentManipulation, blurImage, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio } from "./ImageManipulation";
-import { isLinux, replaceVariables } from "./Variables";
+import { isLinux, parseVariables, replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
 const logger = new Logger("BetterNotifications");
@@ -88,11 +88,12 @@ export async function SendNativeNotification(avatarUrl: string,
     logger.debug(`Notification type ${basicNotification.channel_type}`);
 
     let title = settings.store.notificationTitleFormat;
-    let body = settings.store.notificationBodyFormat;
+    let [body, bodyVars] = parseVariables(settings.store.notificationBodyFormat, advancedNotification);
     let attributeText = settings.store.notificationAttributeText;
     let headerText = settings.store.notificationHeaderText;
 
-    [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText, headerText]);
+
+    [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText, headerText], bodyVars);
 
     const notifierMessages = latestMessages.get(basicNotification.notif_user_id);
     const now = new Date();

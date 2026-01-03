@@ -28,6 +28,57 @@ interface AttachmentRecord {
     spoiler: boolean;
 }
 
+export const MessageRecordFields = {
+    type: "number",
+    content: "string",
+    attachments: "AttachmentRecord[]",
+    embeds: "any[]",
+    timestamp: "string",
+    editedTimestamp: "any",
+    flags: "number",
+    components: "any[]",
+    codedLinks: "any[]",
+    stickers: "any[]",
+    stickerItems: "any[]",
+    id: "string",
+    channel_id: "string",
+    author: "Author",
+    bot: "boolean",
+    pinned: "boolean",
+    mentions: "string[]",
+    mentionRoles: "any[]",
+    mentionChannels: "any[]",
+    mentionEveryone: "boolean",
+    mentioned: "boolean",
+    tts: "boolean",
+    giftCodes: "any[]",
+    state: "string",
+    nonce: "any",
+    blocked: "boolean",
+    ignored: "boolean",
+    call: "Call | undefined",
+    webhookId: "any",
+    reactions: "any[]",
+    applicationId: "any",
+    application: "any",
+    activity: "any",
+    activityInstance: "any",
+    interaction: "any",
+    interactionData: "any",
+    interactionMetadata: "any",
+    interactionError: "any",
+    messageReference: "any",
+    isSearchHit: "boolean",
+    loggingName: "any",
+    referralTrialOfferId: "any",
+    giftingPrompt: "any",
+    messageSnapshots: "any[]",
+    isUnsupported: "boolean",
+    changelogId: "any",
+    chatWallpaperInfo: "any",
+} as const;
+
+
 export interface MessageRecord {
     type: number;
     content: string;

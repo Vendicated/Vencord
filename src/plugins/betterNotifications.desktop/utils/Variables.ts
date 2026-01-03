@@ -34,6 +34,10 @@ type ReplacementMap = {
     [k in typeof Replacements[number]]: string
 };
 
+type Variables = {
+    [k in typeof Replacements[number]]: (notification: AdvancedNotification) => boolean
+};
+
 interface GuildInfo {
     name: string;
     description: string;
@@ -72,7 +76,61 @@ function getChannelInfoFromTitle(title: string, basicNotification: BasicNotifica
     return channelInfo;
 }
 
-export function replaceVariables(advancedNotification: AdvancedNotification, basicNotification: BasicNotification, title: string, body: string, texts: string[]): string[] {
+export function parseVariables(format: string, notification: AdvancedNotification): [string, Partial<Variables>] {
+    logger.info("Parsing variables");
+    const variableRegex = /(?<=\[).+?(?=])/g;
+
+    const matches = [...format.matchAll(variableRegex)];
+    const variables: Partial<Variables> = {};
+
+    logger.info(`Variable matches: ${matches.length}`);
+
+    for (const match of matches) {
+        const statements = match[0].split(" ", 5);
+
+        const resultVariable = statements[0];
+
+        if (statements[1] !== "if") {
+            logger.warn("Statement not in expected format! (variable if x y z)");
+            continue;
+        }
+
+        const comparisonValue = statements[2];
+        const comparison = statements[3] || "is";
+        const comparedValue = statements[4] || "true";
+
+        const validVariables: string[] = Array.from([...Replacements]);
+        const validComparisons = Object.keys(notification.messageRecord);
+
+        if (!validVariables.includes(resultVariable) || !validComparisons.includes(comparisonValue)) {
+            logger.warn(`Variable ${resultVariable} or ${comparisonValue} doesn't exist!`);
+            logger.debug("Allowed resulting variables: ");
+            logger.debug(validVariables);
+            logger.debug("Allowed comparison variables: ");
+            logger.debug(validComparisons);
+            continue;
+        }
+
+        switch (comparison) {
+            case "==":
+            case "is":
+                variables[resultVariable] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]) === comparedValue; };
+                break;
+
+            case "!=":
+            case "isnot":
+                variables[resultVariable] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]) !== comparedValue; };
+                break;
+        }
+        logger.info(`Succesfully generated variable for statement ${match[0]}`);
+        format = format.replace(match[0], `${resultVariable}?`);
+    }
+
+    logger.info("Done parsing variables");
+    return [format, variables];
+}
+
+export function replaceVariables(advancedNotification: AdvancedNotification, basicNotification: BasicNotification, title: string, body: string, texts: string[], variables: Partial<Variables> = {}): string[] {
     let guildInfo: GuildInfo;
     let channelInfo: ChannelInfo;
 
@@ -114,6 +172,22 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
     new Map(Object.entries(replacementMap)).forEach((value, key) => {
         logger.debug(`Replacing ${key} - ${value}`);
         texts = texts.map(text => text.replaceAll(`{${key}}`, value));
+    });
+
+    Object.keys(variables).map(index => {
+        logger.info(`Checking statement for variable ${index}...`);
+        const variable: (notification: AdvancedNotification) => boolean = variables[index];
+
+        logger.info("Checking function: ");
+        console.log(variable);
+
+        if (variable(advancedNotification)) {
+            logger.info("Matches!");
+            texts = texts.map(text => text.replaceAll(`[${index}?]`, replacementMap[index]));
+        } else {
+            logger.info("Doesn't match");
+            texts = texts.map(text => text.replaceAll(`[${index}?]`, ""));
+        }
     });
 
     return texts;

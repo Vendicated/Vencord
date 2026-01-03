@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Paragraph } from "@components/Paragraph";
 import { Replacements } from "@plugins/betterNotifications.desktop/utils/Variables";
-import { Forms, React, Text, TextInput } from "@webpack/common";
+import { React, Text, TextInput } from "@webpack/common";
 
 import { settings } from "..";
 
@@ -212,7 +213,7 @@ export default function VariableString(props: { setValue: (value: string) => voi
                                 display: "inline-block",
                                 marginRight: "0.5em"
                             }} key={hintedVariable}>
-                                <Forms.FormText><b>{currentVar}</b>{hintedVariable.slice(currentVar.length)}</Forms.FormText>
+                                <Paragraph><b>{currentVar}</b>{hintedVariable.slice(currentVar.length)}</Paragraph>
                             </li>
                         </>
                     );

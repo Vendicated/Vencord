@@ -19,7 +19,7 @@ import { ChannelRouter, React, showToast, Text, TextInput, Toasts } from "@webpa
 
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
-import { AdvancedNotification } from "./types/advancedNotification";
+import { AdvancedNotification, MessageRecordFields } from "./types/advancedNotification";
 import { AttachmentManipulation } from "./utils/ImageManipulation";
 import { InterceptNotification, SendNativeNotification } from "./utils/Notifications";
 import { isLinux, isMac, isWin, Replacements } from "./utils/Variables";
@@ -52,6 +52,12 @@ export const settings = definePluginSettings({
                         {Replacements.map((variable, index) => {
                             // &#123; = { and &#125; = }
                             return <li key={index}><Paragraph>&#123;{variable}&#125;</Paragraph></li>;
+                        })}
+                    </ul>
+                    <Paragraph>Available conditional statements:</Paragraph>
+                    <ul>
+                        {Object.entries(MessageRecordFields).map(([variable, type], index) => {
+                            return <li key={index}><Paragraph>{variable} (<i>{type}</i>)</Paragraph></li>;
                         })}
                     </ul>
                     <Divider />
