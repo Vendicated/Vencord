@@ -47,7 +47,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
         <div className={cl("content")}>
             {userIds.length ?
                 (<>
-                    <Forms.FormTitle>{getIntlMessage("متاعبين", { numViewers: userIds.length })}</Forms.FormTitle>
+                    <Forms.FormTitle>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Forms.FormTitle>
                     <Flex flexDirection="column" style={{ gap: 6 }} >
                         {users.map(user => (
                             <Flex key={user.id} flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
@@ -122,7 +122,7 @@ export default definePlugin({
                 <div {...props}>{props.children}</div>
                 <div className={classes(cl("spectators_panel"), Margins.top8)}>
                     <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
-                        {getIntlMessage("متاعبين", { numViewers: userIds.length })}
+                        {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                     </Forms.FormTitle>
                     {users.length ?
                         <>
