@@ -6,12 +6,16 @@
 
 import "../styles.css";
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
 import { SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
-import { TabBar, useState } from "@webpack/common";
+import { TabBar, useMemo, useState } from "@webpack/common";
 
+import { SearchBar } from ".";
 import AccordionTab from "./tabs/AccordionTab";
+import AlertTab from "./tabs/AlertTab";
+import AnimationsTab from "./tabs/AnimationsTab";
 import AnchorTab from "./tabs/AnchorTab";
 import AvatarTab from "./tabs/AvatarTab";
 import BadgeTab from "./tabs/BadgeTab";
@@ -22,14 +26,17 @@ import CheckboxGroupTab from "./tabs/CheckboxGroupTab";
 import CheckboxTab from "./tabs/CheckboxTab";
 import ChipTab from "./tabs/ChipTab";
 import ClickableTab from "./tabs/ClickableTab";
+import CodeBlockTab from "./tabs/CodeBlockTab";
 import ColorPickerTab from "./tabs/ColorPickerTab";
 import ComboboxTab from "./tabs/ComboboxTab";
 import DividerTab from "./tabs/DividerTab";
+import ErrorBoundaryTab from "./tabs/ErrorBoundaryTab";
 import FocusLockTab from "./tabs/FocusLockTab";
 import GuildIconTab from "./tabs/GuildIconTab";
 import HeadingTab from "./tabs/HeadingTab";
 import LayerModalTab from "./tabs/LayerModalTab";
 import ListboxTab from "./tabs/ListboxTab";
+import MenuTab from "./tabs/MenuTab";
 import ModalTab from "./tabs/ModalTab";
 import NoticeTab from "./tabs/NoticeTab";
 import PaginatorTab from "./tabs/PaginatorTab";
@@ -57,6 +64,8 @@ import UserSummaryItemTab from "./tabs/UserSummaryItemTab";
 
 const TABS = [
     { id: "accordion", label: "Accordion" },
+    { id: "alert", label: "Alert" },
+    { id: "animations", label: "Animations" },
     { id: "anchor", label: "Anchor" },
     { id: "avatar", label: "Avatar" },
     { id: "badge", label: "Badge" },
@@ -67,14 +76,17 @@ const TABS = [
     { id: "checkbox", label: "Checkbox" },
     { id: "checkboxgroup", label: "CheckboxGroup" },
     { id: "clickable", label: "Clickable" },
+    { id: "codeblock", label: "CodeBlock" },
     { id: "colorpicker", label: "ColorPicker" },
     { id: "combobox", label: "Combobox" },
     { id: "divider", label: "Divider" },
+    { id: "errorboundary", label: "ErrorBoundary" },
     { id: "focuslock", label: "FocusLock" },
     { id: "guildicon", label: "GuildIcon" },
     { id: "heading", label: "Heading" },
     { id: "layermodal", label: "LayerModal" },
     { id: "listbox", label: "Listbox" },
+    { id: "menu", label: "Menu" },
     { id: "modal", label: "Modal" },
     { id: "notice", label: "Notice" },
     { id: "paginator", label: "Paginator" },
@@ -106,6 +118,8 @@ type TabId = typeof TABS[number]["id"];
 
 const TAB_COMPONENTS: Record<TabId, React.ComponentType> = {
     accordion: AccordionTab,
+    alert: AlertTab,
+    animations: AnimationsTab,
     anchor: AnchorTab,
     avatar: AvatarTab,
     badge: BadgeTab,
@@ -116,14 +130,17 @@ const TAB_COMPONENTS: Record<TabId, React.ComponentType> = {
     checkbox: CheckboxTab,
     checkboxgroup: CheckboxGroupTab,
     clickable: ClickableTab,
+    codeblock: CodeBlockTab,
     colorpicker: ColorPickerTab,
     combobox: ComboboxTab,
     divider: DividerTab,
+    errorboundary: ErrorBoundaryTab,
     focuslock: FocusLockTab,
     guildicon: GuildIconTab,
     heading: HeadingTab,
     layermodal: LayerModalTab,
     listbox: ListboxTab,
+    menu: MenuTab,
     modal: ModalTab,
     notice: NoticeTab,
     paginator: PaginatorTab,
@@ -152,11 +169,26 @@ const TAB_COMPONENTS: Record<TabId, React.ComponentType> = {
 
 function ComponentsTab() {
     const [currentTab, setCurrentTab] = useState<TabId>("avatar");
+    const [search, setSearch] = useState("");
     const TabComponent = TAB_COMPONENTS[currentTab];
+
+    const filteredTabs = useMemo(() => {
+        if (!search.trim()) return TABS;
+        const query = search.toLowerCase();
+        return TABS.filter(tab => tab.label.toLowerCase().includes(query));
+    }, [search]);
 
     return (
         <SettingsTab>
             <Heading className={Margins.bottom16}>Components</Heading>
+            <div className="vc-compfinder-search">
+                <SearchBar
+                    query={search}
+                    onChange={setSearch}
+                    onClear={() => setSearch("")}
+                    placeholder="Search components..."
+                />
+            </div>
             <TabBar
                 type="top"
                 look="brand"
@@ -164,14 +196,16 @@ function ComponentsTab() {
                 onItemSelect={setCurrentTab}
                 className="vc-compfinder-tabbar"
             >
-                {TABS.map(tab => (
+                {filteredTabs.map(tab => (
                     <TabBar.Item key={tab.id} id={tab.id} className="vc-compfinder-tab">
                         {tab.label}
                     </TabBar.Item>
                 ))}
             </TabBar>
             <div className="vc-compfinder-content">
-                <TabComponent />
+                <ErrorBoundary message={`Failed to render ${currentTab} tab`}>
+                    <TabComponent />
+                </ErrorBoundary>
             </div>
         </SettingsTab>
     );

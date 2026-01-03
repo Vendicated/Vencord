@@ -5,5 +5,6 @@
  */
 
 export interface SkeletonProps {
-    skipPulseAnimation?: boolean;
+    withHeader?: boolean;
+    size?: number;
 }

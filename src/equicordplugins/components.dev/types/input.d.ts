@@ -92,5 +92,6 @@ export interface SearchBarProps {
     onFocus?: () => void;
     autoComplete?: string;
     inputProps?: Record<string, any>;
+    className?: string;
     "aria-label"?: string;
 }
