@@ -94,6 +94,8 @@ function applyToPopout(popoutWindow: Window | undefined, key: string) {
 }
 
 function updatePopoutWindows() {
+    if (!PopoutWindowStore) return;
+
     for (const key of PopoutWindowStore.getWindowKeys()) {
         applyToPopout(PopoutWindowStore.getWindow(key), key);
     }
