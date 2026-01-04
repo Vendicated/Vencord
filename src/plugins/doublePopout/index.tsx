@@ -511,6 +511,67 @@ async function loadStreamPreviewFallback(content: Element, stream: Stream, usern
     }
 }
 
+// Get Discord's title bar height dynamically for a given document
+function getTitleBarHeight(doc: Document = document): number {
+    // 1. Try to find the specific title bar element (usually ends with -titleBar)
+    // We look for elements that are docked at the top (top: 0) and have a reasonable height
+    const selectors = ['[class*="-titleBar"]', '[class*="-bar"][class*="theme-"]'];
+
+    for (const selector of selectors) {
+        const elements = doc.querySelectorAll(selector);
+        for (const el of elements) {
+            const hEl = el as HTMLElement;
+            const rect = hEl.getBoundingClientRect();
+            // Title bar must be at the very top and have a small height (usually 22px or 32px)
+            if (rect.top === 0 && hEl.offsetHeight > 0 && hEl.offsetHeight < 60) {
+                return hEl.offsetHeight;
+            }
+        }
+    }
+
+    // 2. Generic fallback: find ANY bar at top with non-zero small height
+    const bars = doc.querySelectorAll('[class*="-bar"]');
+    for (const bar of bars) {
+        const el = bar as HTMLElement;
+        const rect = el.getBoundingClientRect();
+        if (rect.top === 0 && el.offsetHeight > 0 && el.offsetHeight < 50) {
+            return el.offsetHeight;
+        }
+    }
+
+    // Fallback to reasonable default
+    return 32;
+}
+
+// Get Discord's sidebar width dynamically for a given document
+function getSidebarWidth(doc: Document = document): number {
+    // 1. Primary selectors for sidebar and guilds
+    const sidebar = doc.querySelector('[class*="-sidebar"]') as HTMLElement;
+    const guilds = doc.querySelector('[class*="-guilds"]') as HTMLElement;
+
+    let maxWidth = 0;
+
+    // Check sidebar (includes channel list)
+    if (sidebar) {
+        const rect = sidebar.getBoundingClientRect();
+        // Sidebar usually docks at left: 0 or left: 72 (if guilds are separate)
+        // We want the total width from the left edge of the window
+        if (rect.left <= 80) { // Safety margin to ensure it's a left-docked sidebar
+            maxWidth = Math.max(maxWidth, rect.right);
+        }
+    }
+
+    // Check guilds list specifically (outermost left bar)
+    if (guilds) {
+        const rect = guilds.getBoundingClientRect();
+        if (rect.left <= 10) {
+            maxWidth = Math.max(maxWidth, rect.right);
+        }
+    }
+
+    return maxWidth;
+}
+
 // Make entire window draggable
 function makeDraggable(element: HTMLDivElement, stream: Stream) {
     let isDragging = false;
@@ -534,26 +595,6 @@ function makeDraggable(element: HTMLDivElement, stream: Stream) {
     });
 
     // Get Discord's title bar height dynamically
-    const getTitleBarHeight = (): number => {
-        // Find the title bar with any theme-* class (e.g. theme-dark, theme-light)
-        // We look for elements that have both "-bar" and "theme-" in their class string
-        const titleBar = document.querySelector('[class*="-bar"][class*="theme-"]') as HTMLElement;
-        if (titleBar && titleBar.offsetHeight > 0) {
-            return titleBar.offsetHeight;
-        }
-        // Alternative: find any bar at top with non-zero height
-        const bars = document.querySelectorAll('[class*="-bar"]');
-        for (const bar of bars) {
-            const el = bar as HTMLElement;
-            const rect = el.getBoundingClientRect();
-            if (rect.top === 0 && el.offsetHeight > 0 && el.offsetHeight < 50) {
-                return el.offsetHeight;
-            }
-        }
-        // Fallback to reasonable default
-        return 32;
-    };
-
     document.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         const titleBarHeight = getTitleBarHeight();
@@ -709,6 +750,8 @@ function toggleFakeFullscreen(doc: Document = document) {
     if (!targetContainer) targetContainer = mainVideo.parentElement;
 
     if (targetContainer) {
+        const btn = doc.querySelector('[class*="-participantsButton"]') as HTMLElement;
+
         if (targetContainer.classList.contains("vc-msp-native-fs")) {
             // Restore
             targetContainer.classList.remove("vc-msp-native-fs");
@@ -719,16 +762,40 @@ function toggleFakeFullscreen(doc: Document = document) {
             targetContainer.style.height = "";
             targetContainer.style.zIndex = "";
             targetContainer.style.backgroundColor = "";
+
+            if (btn) btn.style.display = "";
+
+            // Remove ESC handler
+            if ((targetContainer as any)._fsEscHandler) {
+                doc.removeEventListener("keydown", (targetContainer as any)._fsEscHandler);
+                delete (targetContainer as any)._fsEscHandler;
+            }
         } else {
             // Maximize
+            const titleBarHeight = getTitleBarHeight(doc);
+            const sidebarWidth = getSidebarWidth(doc);
+
             targetContainer.classList.add("vc-msp-native-fs");
             targetContainer.style.setProperty("position", "fixed", "important");
-            targetContainer.style.setProperty("top", "0", "important");
-            targetContainer.style.setProperty("left", "0", "important");
-            targetContainer.style.setProperty("width", "100%", "important");
-            targetContainer.style.setProperty("height", "100%", "important");
+            targetContainer.style.setProperty("top", `${titleBarHeight}px`, "important");
+            targetContainer.style.setProperty("left", `${sidebarWidth}px`, "important");
+            targetContainer.style.setProperty("width", `calc(100% - ${sidebarWidth}px)`, "important");
+            targetContainer.style.setProperty("height", `calc(100% - ${titleBarHeight}px)`, "important");
             targetContainer.style.setProperty("z-index", "2147483647", "important");
             targetContainer.style.setProperty("background-color", "#000", "important");
+
+            if (btn) btn.style.display = "none";
+
+            // ESC key handler to exit fake fullscreen
+            const escHandler = (e: KeyboardEvent) => {
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFakeFullscreen(doc);
+                }
+            };
+            doc.addEventListener("keydown", escHandler);
+            (targetContainer as any)._fsEscHandler = escHandler;
         }
     }
 }
