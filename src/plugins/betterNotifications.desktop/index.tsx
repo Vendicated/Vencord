@@ -21,6 +21,7 @@ import ConditionalHelper from "./components/ConditionalHelper";
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
 import { AdvancedNotification } from "./types/advancedNotification";
+import { BasicNotification } from "./types/basicNotification";
 import { AttachmentManipulation } from "./utils/ImageManipulation";
 import { InterceptNotification, SendNativeNotification } from "./utils/Notifications";
 import { isLinux, isMac, isWin, Replacements } from "./utils/Variables";
@@ -381,7 +382,12 @@ export const settings = definePluginSettings({
 
 
 export function notificationShouldBeShown(advancedData: AdvancedNotification): boolean {
-    // messageRecord.author may be undefined under specific notification types
+    // Even if we don't have enough data to create a custom notification, we should still show it incase it's imporatnt
+    // I don't think this can be unedfined with anything else other than reactions
+    if (!advancedData.messageRecord) {
+        return true;
+    }
+
     if ((advancedData.messageRecord.author?.discriminator || "0") !== "0" && !settings.store.allowBotNotifications) {
         logger.debug(`User discriminator: ${advancedData.messageRecord.author?.discriminator}`);
         return false;
@@ -403,15 +409,18 @@ export default definePlugin({
                 match: /async function (\i)\((\i),(\i),(\i),(\i),(\i)\){/,
                 replace: `
                 async function $1($2,$3,$4,$5,$6) {
-                    if(Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc()) {
+                    const useCustomFunc = Vencord.Plugins.plugins.BetterNotifications.ShouldUseCustomFunc($2, $3, $4, $5, $6);
+                    if(useCustomFunc === true) {
                         Vencord.Plugins.plugins.BetterNotifications.SendNativeNotification($2, $3, $4, $5, $6);
                         console.log("Replaced notification function \`$1\` with own notification handler");
                         Vencord.Webpack.findByCodeLazy("Unable to find sound for pack name:")("message1"); // Thanks @etorix on Discord
 
                         return;
-                    } else {
+                    } else if(useCustomFunc === false) {
                         [$2, $3, $4, $5] = Vencord.Plugins.plugins.BetterNotifications.InterceptNotification($2, $3, $4, $5, $6);
                         console.log("Patched using variable replacement");
+                    } else if(useCustomFunc === "ignore") {
+                        console.log("Could not process notification, letting Discord handle it...");
                     }
                 `
             }
@@ -474,7 +483,15 @@ export default definePlugin({
         });
     },
 
-    ShouldUseCustomFunc() {
-        return settings.store.notificationPatchType === "custom";
+    ShouldUseCustomFunc(
+        avatarUrl: string | undefined,
+        notificationTitle: string, notificationBody: string,
+        basicNotification: BasicNotification, advancedNotification: AdvancedNotification
+    ): boolean | string {
+        logger.info("Checking if custom notification function should be used");
+        if (settings.store.notificationPatchType === "variable") return false;
+        if (basicNotification.notif_type === "reaction_push_notification") return "ignore";
+
+        return true;
     },
 });
