@@ -38,7 +38,7 @@ export const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "How notifications are going to be patched. Custom enables features such as attachment previews",
         options: [
-            { label: "Custom", value: "custom", default: true },
+            { label: "Custom (recommended)", value: "custom", default: true },
             { label: "Variable replacement", value: "variable" }
         ],
         hidden: isMac
@@ -49,6 +49,12 @@ export const settings = definePluginSettings({
             return (
                 <>
                     <Heading>Notification format settings</Heading>
+                    <Divider />
+
+                    <Heading>Create conditional statements</Heading>
+                    <ConditionalHelper />
+                    <Divider />
+
                     <Paragraph>Available variables:</Paragraph>
                     <ul>
                         {Replacements.map((variable, index) => {
@@ -56,13 +62,11 @@ export const settings = definePluginSettings({
                             return <li key={index}><Paragraph>&#123;{variable}&#125;</Paragraph></li>;
                         })}
                     </ul>
-
-                    <Heading>Create conditional statements</Heading>
-                    <ConditionalHelper />
                     <Divider />
 
                     <Paragraph>Notification title format</Paragraph>
                     <VariableString setValue={props.setValue} defaultValue={settings.store.notificationTitleFormat} />
+
                 </>
             );
         },
@@ -127,7 +131,7 @@ export const settings = definePluginSettings({
 
             return (
                 <>
-                    <FormSwitch title="Enable notification attribute text (Windows only)" className="mb-0 w-fit" hideBorder={true} value={switchValue} onChange={setSwitchValue}></FormSwitch>
+                    <FormSwitch title="Enable notification attribute text (Windows only)" description="Allows for extra text to be put on notifications. Appears at the bottom of the notification" className="mb-0 w-fit" hideBorder={true} value={switchValue} onChange={setSwitchValue}></FormSwitch>
 
                     {switchValue &&
                         <div style={{ marginTop: "12px" }}>
@@ -173,7 +177,7 @@ export const settings = definePluginSettings({
 
             return (
                 <>
-                    <FormSwitch title="Enable notification grouping (Windows only)" hideBorder={true} value={switchValue} onChange={setSwitchValue}></FormSwitch>
+                    <FormSwitch title="Enable notification grouping (Windows only)" description="Groups notifications in the Action Center. The group is also visible at the top of the notification" hideBorder={true} value={switchValue} onChange={setSwitchValue}></FormSwitch>
 
                     {switchValue &&
                         <div style={{ marginTop: "12px" }}>
@@ -347,7 +351,7 @@ export const settings = definePluginSettings({
                 if (settings.store.notificationQuickReactEnabled) settings.store.notificationQuickReactEnabled = false;
             }, [value]);
 
-            return <FormSwitch title="Enable support for inline replies from notifications" hideBorder={true} value={value} onChange={setValue}></FormSwitch>;
+            return <FormSwitch title="Enable support for inline replies from notifications" description="Allows you to reply to messages directly from the notification without ever opening up discord" hideBorder={true} value={value} onChange={setValue}></FormSwitch>;
         },
         default: false,
         hidden: !isLinux || !Native.checkLinuxDE("KDE")
@@ -363,6 +367,11 @@ export const settings = definePluginSettings({
             { label: "Crop to bottom", value: AttachmentManipulation.cropBottom },
         ],
         hidden: isMac
+    },
+    notificationAttachmentMaxSize: {
+        type: OptionType.NUMBER,
+        description: "Maximum size of attachments in kilobites. A higher number may make notifications appear late, and too low may block notification attachments.",
+        default: 3000,
     },
     notificationMediaCache: {
         type: OptionType.COMPONENT,

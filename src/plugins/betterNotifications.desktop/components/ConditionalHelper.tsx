@@ -31,14 +31,14 @@ export default function ConditionalHelper() {
 
     return <>
         <FormSwitch hideBorder={true} onChange={setUsingCustomResult} value={usingCustomResult} title="Use custom text for result" description="Allows you to put custom text as the result of conditionals" />
-        <div className="conditional-wrapper" style={{ "display": "flex", "alignItems": "center", "columnGap": "8px" }}>
+        <div className="conditional-wrapper" style={{ "display": "flex", "flexDirection": "column", "alignItems": "center", "gap": "8px" }}>
             {usingCustomResult ? (
                 <TextInput placeholder="Something" value={conditionalResult} onChange={setConditionalResult} />
             ) :
                 <Select select={setConditionalResult} isSelected={val => val === conditionalResult} serialize={val => String(val)} options={Object.values(Replacements).map(replacement => ({ label: replacement, value: replacement })) as SelectOption[]} />
             }
             <Paragraph style={{ "fontSize": "20px" }}>if</Paragraph>
-            <Select select={setConditionalComparison} isSelected={val => val === conditionalComparison} serialize={val => String(val)} options={Object.keys(MessageRecordFields).map(value => ({ label: value, value: value })) as SelectOption[]} />
+            <Select popoutWidth={260} select={setConditionalComparison} isSelected={val => val === conditionalComparison} serialize={val => String(val)} options={Object.keys(MessageRecordFields).map(value => ({ label: value, value: value })) as SelectOption[]} />
             <Select select={setConditionalComparitor} isSelected={val => val === conditionalComparitor} serialize={val => String(val)} options={[{ label: "is", value: "is" }, { label: "is not", value: "isnot" }, { label: "contains", value: "contains" }, { label: "doesn't contain", value: "containsnot" }] as SelectOption[]} />
             {MessageRecordFields[conditionalComparison] === "boolean" ? (
                 <Select select={setComparisonValue} isSelected={val => val === comparisonValue} serialize={val => String(val)} options={[{ label: "true", value: "true" }, { label: "false", value: "false" }] as SelectOption[]} />

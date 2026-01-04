@@ -66,8 +66,8 @@ export async function SendNativeNotification(avatarUrl: string | undefined,
             logger.info("Attachment marked as a spoiler. Skipping...");
             continue;
         }
-        if (attachment.size > 3_000_000) {
-            logger.info("Attachment size exceeds 3mb. Skipping...");
+        if (attachment.size > settings.store.notificationAttachmentMaxSize * 1000) {
+            logger.info(`Attachment size exceeds ${settings.store.notificationAttachmentMaxSize}kb. Skipping...`);
             continue;
         }
 
