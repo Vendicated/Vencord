@@ -19,9 +19,12 @@
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Card } from "@components/Card";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
@@ -30,12 +33,11 @@ import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
 import { settings } from "./settings";
-import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
@@ -43,6 +45,7 @@ const CloudUpload: typeof TCloudUpload = findLazy(m => m.prototype?.trackUploadF
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
+export const cl = classNameFactory("vc-vmsg-");
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
     onRecordingChange?(recording: boolean): void;
@@ -144,7 +147,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
             URL.revokeObjectURL(blobUrl);
     }, [blobUrl]);
 
-    const [meta] = useAwaiter(async () => {
+    const [meta, metaError] = useAwaiter(async () => {
         if (!blob) return EMPTY_META;
 
         const audioContext = new AudioContext();
@@ -214,14 +217,18 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 </div>
 
                 <Forms.FormTitle>Preview</Forms.FormTitle>
-                <VoicePreview
-                    src={blobUrl}
-                    waveform={meta.waveform}
-                    recording={isRecording}
-                />
+                {metaError
+                    ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
+                    : (
+                        <VoicePreview
+                            src={blobUrl}
+                            waveform={meta.waveform}
+                            recording={isRecording}
+                        />
+                    )}
 
                 {isUnsupportedFormat && (
-                    <Card className={`vc-warning-card ${Margins.top16}`}>
+                    <Card variant="warning" className={Margins.top16} defaultPadding>
                         <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
 
                         <Forms.FormText className={Margins.top8}>
@@ -236,7 +243,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 <Button
                     disabled={!blob}
                     onClick={() => {
-                        sendAudio(blob!, meta);
+                        sendAudio(blob!, meta ?? EMPTY_META);
                         modalProps.onClose();
                         showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
                     }}

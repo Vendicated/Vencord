@@ -4,14 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import { Divider } from "@components/Divider";
+import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
+import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
+import { classNameFactory } from "@utils/css";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
-
-import { DEFAULT_COLOR, SWATCHES } from "../constants";
-import { categoryLen, createCategory, getCategory } from "../data";
 
 interface ColorPickerWithSwatchesProps {
     defaultColor: number;

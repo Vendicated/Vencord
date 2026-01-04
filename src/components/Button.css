@@ -10,7 +10,7 @@
     text-align: start;
     transition: 50ms ease-in;
     transition-property: background-color, color, border-color, opacity;
-    background: var(--control-background-secondary-default);
+    background: var(--control-secondary-background-default);
     color: var(--text-default);
     white-space: nowrap;
 
@@ -26,7 +26,7 @@
 
     &:focus-visible {
         /* stylelint-disable-next-line custom-property-pattern */
-        box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--focus-primary, #00b0f4));
+        box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--border-focus, #00b0f4));
     }
 }
 
@@ -63,85 +63,84 @@
 }
 
 .vc-btn-primary {
-    background-color: var(--control-background-primary-default);
-    border-color: var(--control-border-primary-default);
-    color: var(--control-text-primary-default);
+    background-color: var(--control-primary-background-default);
+    border-color: var(--control-primary-border-default);
+    color: var(--control-primary-text-default);
 
     &:hover {
-        background-color: var(--control-background-primary-hover);
-        border-color: var(--control-border-primary-hover);
-        color: var(--control-text-primary-hover);
+        background-color: var(--control-primary-background-hover);
+        border-color: var(--control-primary-border-hover);
+        color: var(--control-primary-text-hover);
     }
 }
 
 .vc-btn-secondary,
 .vc-btn-link {
-    background-color: var(--control-background-secondary-default);
-    border-color: var(--control-border-secondary-default);
-    color: var(--control-text-secondary-default);
+    background-color: var(--control-secondary-background-default);
+    border-color: var(--control-secondary-border-default);
+    color: var(--control-secondary-text-default);
 
     &:hover {
-        background-color: var(--control-background-secondary-hover);
-        border-color: var(--control-border-secondary-hover);
-        color: var(--control-text-secondary-hover);
+        background-color: var(--control-secondary-background-hover);
+        border-color: var(--control-secondary-border-hover);
+        color: var(--control-secondary-text-hover);
     }
 }
 
 .vc-btn-dangerPrimary {
-    background-color: var(--control-background-critical-primary-default);
-    border-color: var(--control-border-critical-primary-default);
-    color: var(--control-text-critical-primary-default);
+    background-color: var(--control-critical-primary-background-default);
+    border-color: var(--control-critical-primary-border-default);
+    color: var(--control-critical-primary-text-default);
 
     &:hover {
-        background-color: var(--control-background-critical-primary-hover);
-        border-color: var(--control-border-critical-primary-hover);
-        color: var(--control-text-critical-primary-hover);
+        background-color: var(--control-critical-primary-background-hover);
+        border-color: var(--control-critical-primary-border-hover);
+        color: var(--control-critical-primary-text-hover);
     }
 }
 
 .vc-btn-dangerSecondary {
-    background-color: var(--control-background-critical-secondary-default);
-    border-color: var(--control-border-critical-secondary-default);
-    color: var(--control-text-critical-secondary-default);
+    background-color: var(--control-critical-secondary-background-default);
+    border-color: var(--control-critical-secondary-border-default);
+    color: var(--control-critical-secondary-text-default);
 
     &:hover {
-        background-color: var(--control-background-critical-secondary-hover);
-        border-color: var(--control-border-critical-secondary-hover);
-        color: var(--control-text-critical-secondary-hover);
+        background-color: var(--control-critical-secondary-background-hover);
+        border-color: var(--control-critical-secondary-border-hover);
+        color: var(--control-critical-secondary-text-hover);
     }
 }
 
 .vc-btn-overlayPrimary {
-    background-color: var(--control-background-overlay-primary-default);
-    border-color: var(--control-border-overlay-primary-default);
-    color: var(--control-text-overlay-primary-default);
+    background-color: var(--control-overlay-primary-background-default);
+    border-color: var(--control-overlay-primary-border-default);
+    color: var(--control-overlay-primary-text-default);
 
     &:hover {
-        background-color: var(--control-background-overlay-primary-hover);
-        border-color: var(--control-border-overlay-primary-hover);
-        color: var(--control-text-overlay-primary-hover);
+        background-color: var(--control-overlay-primary-background-hover);
+        border-color: var(--control-overlay-primary-border-hover);
+        color: var(--control-overlay-primary-text-hover);
     }
 }
 
 .vc-btn-positive {
-    background-color: var(--button-positive-background);
-    border-color: var(--button-positive-border);
+    background-color: var(--redesign-button-positive-background, var(--green-430));
     color: var(--white);
 
     &:hover {
-        background-color: var(--button-positive-background-hover);
+        background-color: var(--redesign-button-positive-pressed-background, var(--green-460));
     }
 }
 
 .vc-btn-none {
     background-color: transparent;
     border-color: transparent;
-    color: var(--control-icon-icon-only-default);
+    color: var(--control-icon-only-icon-default);
 
     &:hover {
-        background-color: var(--control-background-icon-only-hover);
-        border-color: var(--control-border-icon-only-hover);
-        color: var(--control-icon-icon-only-hover);
+        background-color: var(--control-icon-only-background-hover);
+        border-color: var(--control-icon-only-border-hover);
+        color: var(--control-icon-only-icon-hover);
     }
 }
 
@@ -178,7 +177,7 @@
 
     &:focus-visible {
         /* stylelint-disable-next-line custom-property-pattern */
-        box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--focus-primary, #00b0f4));
+        box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--border-focus, #00b0f4));
     }
 }
 
@@ -187,11 +186,11 @@
 }
 
 .vc-text-btn-secondary {
-    color: var(--text-primary);
+    color: var(--text-strong, var(--text-default));
 }
 
 .vc-text-btn-danger {
-    color: var(--text-feedback-critical, var(--text-danger));
+    color: var(--text-feedback-critical);
 }
 
 .vc-text-btn-link {
