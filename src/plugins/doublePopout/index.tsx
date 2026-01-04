@@ -724,12 +724,23 @@ function closeAllWindows() {
 
 // Toggle Fake Fullscreen Mode
 function toggleFakeFullscreen(doc: Document = document) {
-    // Find the "Main" video (largest one)
+    // Find all videos in the document
     const videos = Array.from(doc.querySelectorAll("video")) as HTMLVideoElement[];
-    if (videos.length === 0) return;
 
-    videos.sort((a, b) => (b.videoWidth * b.videoHeight) - (a.videoWidth * a.videoHeight));
+    // Debug: Log all videos found
+    logger.info(`[FakeFullscreen] Found ${videos.length} video(s):`);
+    videos.forEach((video, i) => {
+        logger.info(`  [${i}] size=${video.videoWidth}x${video.videoHeight}, paused=${video.paused}, readyState=${video.readyState}`);
+    });
+
+    if (videos.length === 0) {
+        logger.warn("[FakeFullscreen] No videos found!");
+        return;
+    }
+
+    // Always use video #0 - Discord's natural ordering
     const mainVideo = videos[0];
+    logger.info(`[FakeFullscreen] Enlarging video #0: ${mainVideo.videoWidth}x${mainVideo.videoHeight}`);
 
     // Find the container to maximize
     let container = mainVideo.parentElement;
