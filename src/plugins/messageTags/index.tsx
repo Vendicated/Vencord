@@ -19,6 +19,7 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Heading, HeadingSecondary } from "@components/Heading";
+import { DeleteIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
