@@ -168,6 +168,7 @@ export default function VariableString(props: { setValue: (value: string) => voi
     const [hints, setHints] = React.useState<string[]>(getVariableHinting(""));
     const [currentVar, setCurrentVar] = React.useState<string>("");
 
+
     React.useEffect(() => {
         props.setValue(value);
         status = checkVariables(value);
@@ -219,7 +220,9 @@ export default function VariableString(props: { setValue: (value: string) => voi
                     );
                 })}
             </ul>
+
             <TextInput value={value} onChange={setValue}></TextInput>
+
             <TextInput style={{ marginTop: "6px", opacity: 0.5 }} value={exampleString} disabled={true}></TextInput>
             <Text style={{ marginTop: "4px", color: "red" }}>{errorMessage}</Text>
         </div>

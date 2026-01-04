@@ -17,9 +17,10 @@ import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelRouter, React, showToast, Text, TextInput, Toasts } from "@webpack/common";
 
+import ConditionalHelper from "./components/ConditionalHelper";
 import ExampleString from "./components/ExampleStrings";
 import VariableString from "./components/VariableString";
-import { AdvancedNotification, MessageRecordFields } from "./types/advancedNotification";
+import { AdvancedNotification } from "./types/advancedNotification";
 import { AttachmentManipulation } from "./utils/ImageManipulation";
 import { InterceptNotification, SendNativeNotification } from "./utils/Notifications";
 import { isLinux, isMac, isWin, Replacements } from "./utils/Variables";
@@ -54,12 +55,9 @@ export const settings = definePluginSettings({
                             return <li key={index}><Paragraph>&#123;{variable}&#125;</Paragraph></li>;
                         })}
                     </ul>
-                    <Paragraph>Available conditional statements:</Paragraph>
-                    <ul>
-                        {Object.entries(MessageRecordFields).map(([variable, type], index) => {
-                            return <li key={index}><Paragraph>{variable} (<i>{type}</i>)</Paragraph></li>;
-                        })}
-                    </ul>
+
+                    <Heading>Create conditional statements</Heading>
+                    <ConditionalHelper />
                     <Divider />
 
                     <Paragraph>Notification title format</Paragraph>

@@ -155,6 +155,16 @@ export function parseVariables(format: string, notification: AdvancedNotificatio
             case "isnot":
                 variables[resultVariable] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]) !== comparedValue; };
                 break;
+
+            case "contains":
+            case "has":
+                variables[resultVariable] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]).includes(comparedValue); };
+                break;
+
+            case "containsnot":
+            case "hasnot":
+                variables[resultVariable] = (notification: AdvancedNotification) => { return !String(notification.messageRecord[comparisonValue]).includes(comparedValue); };
+                break;
         }
         logger.info(`Succesfully generated variable for statement ${match[0]}`);
         format = format.replace(match[0], `${resultVariable}?`);
