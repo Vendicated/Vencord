@@ -309,7 +309,7 @@ export const settings = definePluginSettings({
     showSpoilerImages: {
         type: OptionType.BOOLEAN,
         description: "Include blurred spoiler attachments",
-        default: false
+        default: true
     },
     autoMuteSpammers: {
         type: OptionType.BOOLEAN,
