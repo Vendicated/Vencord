@@ -306,14 +306,54 @@ function createStreamWindow(stream: Stream, sourceDocument: Document = document)
     // Make window resizable from all edges
     makeResizable(container);
 
-    // Maximize/Restore Logic
+    // Track fullscreen state for this window
+    let isFullscreen = false;
+
+    // Maximize/Restore Logic - toggles both CSS fake fullscreen and OS fullscreen
     const toggleMaximize = () => {
+        isFullscreen = !isFullscreen;
         container.classList.toggle("vc-msp-maximized");
+
+        // Toggle OS-level fullscreen
+        try {
+            (DiscordNative as any).window.fullscreen();
+        } catch (err) {
+            logger.warn("Failed to toggle OS fullscreen:", err);
+        }
     };
+
+    // Exit fullscreen (called by ESC key)
+    const exitFullscreen = () => {
+        if (!isFullscreen) return;
+        isFullscreen = false;
+        container.classList.remove("vc-msp-maximized");
+
+        // Exit OS-level fullscreen
+        try {
+            (DiscordNative as any).window.fullscreen();
+        } catch (err) {
+            logger.warn("Failed to exit OS fullscreen:", err);
+        }
+    };
+
+    // ESC key handler to exit fullscreen
+    const escKeyHandler = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && isFullscreen) {
+            e.preventDefault();
+            e.stopPropagation();
+            exitFullscreen();
+        }
+    };
+
+    // Add ESC key listener
+    document.addEventListener("keydown", escKeyHandler);
+
+    // Store cleanup function for ESC handler
+    (container as any)._escKeyHandler = escKeyHandler;
 
     // Double click to maximize
     container.addEventListener("dblclick", (e) => {
-        // Ignroe double clicks on controls
+        // Ignore double clicks on controls
         if ((e.target as HTMLElement).closest(".vc-msp-controls")) return;
         toggleMaximize();
     });
@@ -476,10 +516,32 @@ function makeDraggable(element: HTMLDivElement, stream: Stream) {
         element.style.cursor = "grabbing";
     });
 
+    // Get Discord's title bar height dynamically
+    const getTitleBarHeight = (): number => {
+        // Find the title bar with any theme-* class (e.g. theme-dark, theme-light)
+        // We look for elements that have both "-bar" and "theme-" in their class string
+        const titleBar = document.querySelector('[class*="-bar"][class*="theme-"]') as HTMLElement;
+        if (titleBar && titleBar.offsetHeight > 0) {
+            return titleBar.offsetHeight;
+        }
+        // Alternative: find any bar at top with non-zero height
+        const bars = document.querySelectorAll('[class*="-bar"]');
+        for (const bar of bars) {
+            const el = bar as HTMLElement;
+            const rect = el.getBoundingClientRect();
+            if (rect.top === 0 && el.offsetHeight > 0 && el.offsetHeight < 50) {
+                return el.offsetHeight;
+            }
+        }
+        // Fallback to reasonable default
+        return 32;
+    };
+
     document.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
+        const titleBarHeight = getTitleBarHeight();
         element.style.left = `${Math.max(0, e.clientX - offsetX)}px`;
-        element.style.top = `${Math.max(0, e.clientY - offsetY)}px`;
+        element.style.top = `${Math.max(titleBarHeight, e.clientY - offsetY)}px`;
     });
 
     document.addEventListener("mouseup", () => {
@@ -570,6 +632,11 @@ function closeStreamWindow(stream: Stream) {
         (container as any)._stopCopying();
     }
 
+    // Remove ESC key handler
+    if ((container as any)._escKeyHandler) {
+        document.removeEventListener("keydown", (container as any)._escKeyHandler);
+    }
+
     // Clear video mapping for this user
     clearVideoMapping(stream.ownerId);
 
@@ -584,6 +651,10 @@ function closeAllWindows() {
         if ((container as any)._stopCopying) {
             (container as any)._stopCopying();
         }
+        // Remove ESC key handler
+        if ((container as any)._escKeyHandler) {
+            document.removeEventListener("keydown", (container as any)._escKeyHandler);
+        }
         container.remove();
     }
 
@@ -591,6 +662,81 @@ function closeAllWindows() {
     videoUserMap.clear();
     windowOffset = 0;
 }
+
+// Toggle Fake Fullscreen Mode
+function toggleFakeFullscreen(doc: Document = document) {
+    // Find the "Main" video (largest one)
+    const videos = Array.from(doc.querySelectorAll("video")) as HTMLVideoElement[];
+    if (videos.length === 0) return;
+
+    videos.sort((a, b) => (b.videoWidth * b.videoHeight) - (a.videoWidth * a.videoHeight));
+    const mainVideo = videos[0];
+
+    // Find the container to maximize
+    let container = mainVideo.parentElement;
+    let depth = 0;
+    let targetContainer = container;
+
+    while (container && depth < 10) {
+        if (container.classList.contains("vc-msp-native-fs")) {
+            targetContainer = container;
+            break;
+        }
+        if (container.className.includes("tile") || container.className.includes("wrapper")) {
+            targetContainer = container;
+        }
+        container = container.parentElement;
+        depth++;
+    }
+
+    if (!targetContainer) targetContainer = mainVideo.parentElement;
+
+    if (targetContainer) {
+        if (targetContainer.classList.contains("vc-msp-native-fs")) {
+            // Restore
+            targetContainer.classList.remove("vc-msp-native-fs");
+            targetContainer.style.position = "";
+            targetContainer.style.top = "";
+            targetContainer.style.left = "";
+            targetContainer.style.width = "";
+            targetContainer.style.height = "";
+            targetContainer.style.zIndex = "";
+            targetContainer.style.backgroundColor = "";
+        } else {
+            // Maximize
+            targetContainer.classList.add("vc-msp-native-fs");
+            targetContainer.style.position = "fixed";
+            targetContainer.style.top = "0";
+            targetContainer.style.left = "0";
+            targetContainer.style.width = "100%";
+            targetContainer.style.height = "100%";
+            targetContainer.style.zIndex = "10000";
+            targetContainer.style.backgroundColor = "#000";
+        }
+    }
+}
+
+// Global click handler to intercept "Hide Participants" button
+const handleGlobalClick = (e: MouseEvent) => {
+    // Check if the clicked element is the "Hide Participants" button
+    // We look for the specific class fragment provided by the user: "-participantsButton"
+    const target = e.target as HTMLElement;
+    const button = target.closest('[class*="-participantsButton"]');
+
+    if (button) {
+        logger.info(`Click detected on Participants Button. Active windows: ${openWindows.size}`);
+
+        // Only intercept if we have active popouts
+        if (openWindows.size > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            logger.info("Intercepted Hide Participants button click - toggling fake fullscreen");
+            toggleFakeFullscreen(document);
+        } else {
+            logger.info("No active popouts, allowing default behavior");
+        }
+    }
+};
 
 function openWindowsForChannel(channelId: string) {
     if (!ApplicationStreamingStore) {
@@ -650,56 +796,7 @@ const streamContextPatch: NavContextMenuPatchCallback = (children, { stream }: S
             icon={ScreenshareIcon} // Reusing icon for now or use another if available
             action={(e: any) => {
                 const doc = e?.view?.document || document;
-
-                // Logic duplicated from button for now (simplest for self-contained patch)
-                // Find the "Main" video (largest one)
-                const videos = Array.from(doc.querySelectorAll("video")) as HTMLVideoElement[];
-                if (videos.length === 0) return;
-
-                videos.sort((a, b) => (b.videoWidth * b.videoHeight) - (a.videoWidth * a.videoHeight));
-                const mainVideo = videos[0];
-
-                let container = mainVideo.parentElement;
-                let depth = 0;
-                let targetContainer = container;
-
-                while (container && depth < 10) {
-                    if (container.classList.contains("vc-msp-native-fs")) {
-                        targetContainer = container;
-                        break;
-                    }
-                    if (container.className.includes("tile") || container.className.includes("wrapper")) {
-                        targetContainer = container;
-                    }
-                    container = container.parentElement;
-                    depth++;
-                }
-
-                if (!targetContainer) targetContainer = mainVideo.parentElement;
-
-                if (targetContainer) {
-                    if (targetContainer.classList.contains("vc-msp-native-fs")) {
-                        // Restore
-                        targetContainer.classList.remove("vc-msp-native-fs");
-                        targetContainer.style.position = "";
-                        targetContainer.style.top = "";
-                        targetContainer.style.left = "";
-                        targetContainer.style.width = "";
-                        targetContainer.style.height = "";
-                        targetContainer.style.zIndex = "";
-                        targetContainer.style.backgroundColor = "";
-                    } else {
-                        // Maximize
-                        targetContainer.classList.add("vc-msp-native-fs");
-                        targetContainer.style.position = "fixed";
-                        targetContainer.style.top = "0";
-                        targetContainer.style.left = "0";
-                        targetContainer.style.width = "100%";
-                        targetContainer.style.height = "100%";
-                        targetContainer.style.zIndex = "10000";
-                        targetContainer.style.backgroundColor = "#000";
-                    }
-                }
+                toggleFakeFullscreen(doc);
             }}
         />
     );
@@ -787,13 +884,18 @@ export default definePlugin({
         if (voiceChannelId) {
             currentChannelId = voiceChannelId;
         }
-        // Context menu patch handles adding our options - no need for button injection
+
+        // Add global click listener for button interception
+        document.addEventListener("click", handleGlobalClick, true); // true for capturing phase to ensure we intercept first
     },
 
     stop() {
         logger.info("MultiStreamPopout stopping...");
         closeAllWindows();
         currentChannelId = null;
+
+        // Remove global click listener
+        document.removeEventListener("click", handleGlobalClick, true);
 
         // Remove all injected buttons (in case any remain)
         document.querySelectorAll(".vc-msp-inject-btn").forEach(el => el.remove());
