@@ -195,6 +195,10 @@ function getWindowKey(stream: Stream): string {
     return `msp_${stream.channelId}_${stream.ownerId}`;
 }
 
+function getWebcamWindowKey(userId: string, channelId: string): string {
+    return `msp_webcam_${channelId}_${userId}`;
+}
+
 // Cache to track which video element belongs to which user
 const videoUserMap = new Map<HTMLVideoElement, string>();
 
@@ -245,6 +249,20 @@ function findStreamVideoElement(ownerId: string, sourceDocument: Document = docu
 
     if (candidates.length === 0) {
         logger.warn(`No video candidates found for user ${ownerId} in ${sourceDocument === document ? "Main Window" : "Popout Window"}`);
+
+        // Try to auto-click participants button to show participants
+        const participantsBtn = sourceDocument.querySelector('[class*="-participantsButton"]') as HTMLElement;
+        if (participantsBtn) {
+            const svg = participantsBtn.querySelector("svg");
+            const svgClasses = svg?.className?.baseVal || svg?.getAttribute("class") || "";
+            const hasUpCaret = svgClasses.includes("upCaret");
+
+            if (hasUpCaret) {
+                logger.info("[AutoFix] Participants are hidden - clicking button to show them");
+                participantsBtn.click();
+            }
+        }
+
         return null;
     }
 
@@ -722,6 +740,252 @@ function closeAllWindows() {
     windowOffset = 0;
 }
 
+// Create a floating window for a webcam
+function createWebcamWindow(userId: string, channelId: string, sourceDocument: Document = document) {
+    const key = getWebcamWindowKey(userId, channelId);
+
+    if (openWindows.has(key)) {
+        logger.info(`Webcam window already exists for ${userId}`);
+        return;
+    }
+
+    const isMain = sourceDocument === document;
+    logger.info(`Creating floating window for webcam: ${userId} (Source: ${isMain ? "Main" : "Popout"})`);
+
+    const container = document.createElement("div");
+    container.id = key;
+    container.className = "vc-msp-window";
+    container.style.top = `${100 + windowOffset * 30}px`;
+    container.style.left = `${100 + windowOffset * 30}px`;
+    windowOffset = (windowOffset + 1) % 10;
+
+    const user = UserStore.getUser(userId);
+    const username = user?.globalName || user?.username || "Unknown User";
+
+    // Minimal layout - just the content area with resize handles
+    container.innerHTML = `
+        <div class="vc-msp-content">
+            <div class="vc-msp-loading">Finding webcam...</div>
+        </div>
+        <div class="vc-msp-resize-handle vc-msp-resize-n"></div>
+        <div class="vc-msp-resize-handle vc-msp-resize-e"></div>
+        <div class="vc-msp-resize-handle vc-msp-resize-s"></div>
+        <div class="vc-msp-resize-handle vc-msp-resize-w"></div>
+        <div class="vc-msp-resize-handle vc-msp-resize-ne"></div>
+        <div class="vc-msp-resize-handle vc-msp-resize-se"></div>
+        <div class="vc-msp-resize-handle vc-msp-resize-sw"></div>
+        <div class="vc-msp-resize-handle vc-msp-resize-nw"></div>
+        <div class="vc-msp-controls">
+            <button class="vc-msp-btn vc-msp-maximize-btn">□</button>
+            <button class="vc-msp-btn vc-msp-close-btn">✕</button>
+        </div>
+    `;
+
+    document.body.appendChild(container);
+    openWindows.set(key, container);
+
+    // Make entire window draggable (pass null stream, we handle differently)
+    makeDraggableWebcam(container, userId, channelId);
+
+    // Make window resizable from all edges
+    makeResizable(container);
+
+    // Track fullscreen state for this window
+    let isFullscreen = false;
+
+    const toggleMaximize = () => {
+        isFullscreen = !isFullscreen;
+        container.classList.toggle("vc-msp-maximized");
+        try {
+            (DiscordNative as any).window.fullscreen();
+        } catch (err) {
+            logger.warn("Failed to toggle OS fullscreen:", err);
+        }
+    };
+
+    const exitFullscreen = () => {
+        if (!isFullscreen) return;
+        isFullscreen = false;
+        container.classList.remove("vc-msp-maximized");
+        try {
+            (DiscordNative as any).window.fullscreen();
+        } catch (err) {
+            logger.warn("Failed to exit OS fullscreen:", err);
+        }
+    };
+
+    const escKeyHandler = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && isFullscreen) {
+            e.preventDefault();
+            e.stopPropagation();
+            exitFullscreen();
+        }
+    };
+
+    document.addEventListener("keydown", escKeyHandler);
+    (container as any)._escKeyHandler = escKeyHandler;
+
+    container.addEventListener("dblclick", (e) => {
+        if ((e.target as HTMLElement).closest(".vc-msp-controls")) return;
+        toggleMaximize();
+    });
+
+    const maxBtn = container.querySelector(".vc-msp-maximize-btn") as HTMLButtonElement;
+    maxBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleMaximize();
+    });
+
+    const closeBtn = container.querySelector(".vc-msp-close-btn") as HTMLButtonElement;
+    closeBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeWebcamWindow(userId, channelId);
+    });
+
+    // Start canvas-based frame copying for webcam
+    startWebcamCanvasCopy(container, userId, username, sourceDocument);
+}
+
+// Make webcam window draggable
+function makeDraggableWebcam(element: HTMLDivElement, userId: string, channelId: string) {
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    element.addEventListener("mousedown", (e) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains("vc-msp-close-btn") ||
+            target.classList.contains("vc-msp-resize-handle")) {
+            return;
+        }
+
+        isDragging = true;
+        offsetX = e.clientX - element.offsetLeft;
+        offsetY = e.clientY - element.offsetTop;
+        element.style.zIndex = "10001";
+        element.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const titleBarHeight = getTitleBarHeight();
+        element.style.left = `${Math.max(0, e.clientX - offsetX)}px`;
+        element.style.top = `${Math.max(titleBarHeight, e.clientY - offsetY)}px`;
+    });
+
+    document.addEventListener("mouseup", () => {
+        if (isDragging) {
+            isDragging = false;
+            element.style.zIndex = "10000";
+            element.style.cursor = "grab";
+        }
+    });
+}
+
+// Canvas copy for webcam
+function startWebcamCanvasCopy(container: HTMLDivElement, userId: string, username: string, sourceDocument: Document = document) {
+    const content = container.querySelector(".vc-msp-content") as HTMLDivElement;
+    if (!content) return;
+
+    let canvas: HTMLCanvasElement | null = null;
+    let ctx: CanvasRenderingContext2D | null = null;
+    let animationFrameId: number | null = null;
+    let retryCount = 0;
+    const maxRetries = 20;
+
+    function findWebcamVideo(): HTMLVideoElement | null {
+        // Use same logic as stream video finding
+        return findStreamVideoElement(userId, sourceDocument);
+    }
+
+    function setupCanvas() {
+        if (!canvas) {
+            canvas = document.createElement("canvas");
+            canvas.className = "vc-msp-canvas";
+            content.innerHTML = "";
+            content.appendChild(canvas);
+            ctx = canvas.getContext("2d");
+            logger.info(`Webcam canvas created for ${userId}`);
+        }
+    }
+
+    function copyFrame() {
+        const sourceVideo = findWebcamVideo();
+
+        if (!sourceVideo || sourceVideo.videoWidth === 0) {
+            retryCount++;
+            if (retryCount > maxRetries * 60) {
+                stopCopying();
+                content.innerHTML = `
+                    <div class="vc-msp-no-preview">
+                        <div class="vc-msp-no-preview-icon">📷</div>
+                        <div>Webcam video not found.</div>
+                    </div>
+                `;
+                return;
+            }
+            animationFrameId = requestAnimationFrame(copyFrame);
+            return;
+        }
+
+        retryCount = 0;
+
+        if (!canvas || !ctx) {
+            setupCanvas();
+        }
+
+        if (canvas && ctx) {
+            if (canvas.width !== sourceVideo.videoWidth || canvas.height !== sourceVideo.videoHeight) {
+                canvas.width = sourceVideo.videoWidth;
+                canvas.height = sourceVideo.videoHeight;
+                logger.info(`Webcam canvas resized to ${canvas.width}x${canvas.height}`);
+            }
+
+            try {
+                ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+            } catch (e) {
+                logger.warn("Webcam drawImage failed:", e);
+            }
+        }
+
+        animationFrameId = requestAnimationFrame(copyFrame);
+    }
+
+    function stopCopying() {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+    }
+
+    logger.info(`Starting webcam canvas copy for ${userId}`);
+    animationFrameId = requestAnimationFrame(copyFrame);
+
+    (container as any)._stopCopying = stopCopying;
+}
+
+function closeWebcamWindow(userId: string, channelId: string) {
+    const key = getWebcamWindowKey(userId, channelId);
+    const container = openWindows.get(key);
+
+    if (!container) return;
+
+    logger.info(`Closing webcam window for: ${userId}`);
+
+    if ((container as any)._stopCopying) {
+        (container as any)._stopCopying();
+    }
+
+    if ((container as any)._escKeyHandler) {
+        document.removeEventListener("keydown", (container as any)._escKeyHandler);
+    }
+
+    clearVideoMapping(userId);
+
+    container.remove();
+    openWindows.delete(key);
+}
+
 // Toggle Fake Fullscreen Mode
 function toggleFakeFullscreen(doc: Document = document) {
     // Find all videos in the document
@@ -1004,12 +1268,24 @@ const streamContextPatch: NavContextMenuPatchCallback = (children, { stream }: S
             label={isOpen ? "Close Stream Popout" : "Pop Out Stream"}
             icon={ScreenshareIcon}
             action={(e: any) => {
+                // Debug: Check participants button state using SVG caret direction
+                const doc = e?.view?.document || document;
+                const participantsBtn = doc.querySelector('[class*="-participantsButton"]') as HTMLElement;
+                const svg = participantsBtn?.querySelector("svg");
+                const svgClasses = svg?.className?.baseVal || svg?.getAttribute("class") || "";
+
+                const hasUpCaret = svgClasses.includes("upCaret");
+                const hasDownCaret = svgClasses.includes("downCaret");
+
+                logger.info(`[StreamClick] Button found: ${!!participantsBtn}, SVG classes: "${svgClasses}"`);
+                logger.info(`[StreamClick] upCaret: ${hasUpCaret}, downCaret: ${hasDownCaret}`);
+                logger.info(`[StreamClick] Participants are: ${hasUpCaret ? "HIDDEN" : hasDownCaret ? "SHOWN" : "UNKNOWN"}`);
+
                 if (isOpen) {
                     closeStreamWindow(stream);
                 } else {
                     // Try to get the document from the event view (Window)
                     // This handles context menus opened in the Popout Window
-                    const doc = e?.view?.document || document;
                     createStreamWindow(stream, doc);
                 }
             }}
@@ -1017,40 +1293,72 @@ const streamContextPatch: NavContextMenuPatchCallback = (children, { stream }: S
     );
 };
 
-// Also add to user context menu (when right-clicking on someone who's streaming)
+// Also add to user context menu (when right-clicking on someone who's streaming or has webcam)
 const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
-    if (!user || !ApplicationStreamingStore) return;
+    if (!user) return;
 
-    const stream = ApplicationStreamingStore.getAnyStreamForUser(user.id);
-    if (!stream) return;
+    const channelId = currentChannelId || SelectedChannelStore.getVoiceChannelId() || "";
 
-    const windowKey = getWindowKey(stream as Stream);
-    const isOpen = openWindows.has(windowKey);
+    // Check for stream first
+    if (ApplicationStreamingStore) {
+        const stream = ApplicationStreamingStore.getAnyStreamForUser(user.id);
+        if (stream) {
+            const windowKey = getWindowKey(stream as Stream);
+            const isOpen = openWindows.has(windowKey);
 
-    children.push(
-        <Menu.MenuSeparator />,
-        <Menu.MenuItem
-            id="pop-out-stream"
-            label={isOpen ? "Close Stream Popout" : "Pop Out Stream"}
-            icon={ScreenshareIcon}
-            action={() => {
-                if (isOpen) {
-                    closeStreamWindow(stream as Stream);
-                } else {
-                    createStreamWindow(stream as Stream);
-                }
-            }}
-        />
-    );
+            children.push(
+                <Menu.MenuSeparator />,
+                <Menu.MenuItem
+                    id="pop-out-stream"
+                    label={isOpen ? "Close Stream Popout" : "Pop Out Stream"}
+                    icon={ScreenshareIcon}
+                    action={(e: any) => {
+                        // Get source document from event (handles native popout windows)
+                        const doc = e?.view?.document || document;
+                        if (isOpen) {
+                            closeStreamWindow(stream as Stream);
+                        } else {
+                            createStreamWindow(stream as Stream, doc);
+                        }
+                    }}
+                />
+            );
+        }
+    }
+
+    // Always offer webcam popout option (for users in voice with camera)
+    if (channelId) {
+        const webcamKey = getWebcamWindowKey(user.id, channelId);
+        const isWebcamOpen = openWindows.has(webcamKey);
+
+        children.push(
+            <Menu.MenuSeparator />,
+            <Menu.MenuItem
+                id="pop-out-webcam"
+                label={isWebcamOpen ? "Close Webcam Popout" : "Pop Out Webcam"}
+                icon={ScreenshareIcon}
+                action={(e: any) => {
+                    // Get source document from event (handles native popout windows)
+                    const doc = e?.view?.document || document;
+                    if (isWebcamOpen) {
+                        closeWebcamWindow(user.id, channelId);
+                    } else {
+                        createWebcamWindow(user.id, channelId, doc);
+                    }
+                }}
+            />
+        );
+    }
 };
 
 export default definePlugin({
     name: "MultiStreamPopout",
-    description: "Right-click on a stream to pop it out to a floating window",
+    description: "Right-click on a stream or webcam tile to pop it out to a floating window",
     authors: [Devs.Ven],
 
     contextMenus: {
-        "stream-context": streamContextPatch
+        "stream-context": streamContextPatch,
+        "user-context": userContextPatch
     },
 
     flux: {
