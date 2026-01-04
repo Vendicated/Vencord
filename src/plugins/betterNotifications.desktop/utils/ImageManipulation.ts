@@ -20,7 +20,7 @@ interface Rect {
     width: number;
 }
 
-export async function cropImageToCircle(src, size) {
+export async function cropImageToCircle(src: string, size) {
     const { promise: imgLoaded, resolve } = Promise.withResolvers();
 
     src = src.startsWith("/assets")

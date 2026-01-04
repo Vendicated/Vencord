@@ -23,7 +23,7 @@ export interface SuitableAttachment {
     url: string;
 }
 
-export async function SendNativeNotification(avatarUrl: string,
+export async function SendNativeNotification(avatarUrl: string | undefined,
     notificationTitle: string, notificationBody: string,
     basicNotification: BasicNotification, advancedNotification: AdvancedNotification
 ) {
@@ -121,7 +121,7 @@ export async function SendNativeNotification(avatarUrl: string,
         latestMessages.set(basicNotification.notif_user_id, notifierMessages);
     }
 
-    function notify(avatar, attachment = attachmentUrl) {
+    function notify(avatar: string | undefined, attachment = attachmentUrl) {
         Native.notify(
             (advancedNotification.messageRecord.call && settings.store.specialCallNotification) ? "call" : "notification",
             title,
@@ -156,16 +156,28 @@ export async function SendNativeNotification(avatarUrl: string,
         );
     }
 
-    const url = new URL(avatarUrl);
-    url.searchParams.set("size", "256");
-    url.pathname = url.pathname.replace(".webp", ".png");
+    let bigAvatar: string | undefined = undefined;
 
-    const bigAvatar = url.toString();
+    if (avatarUrl) {
+        try {
+            const url = new URL(avatarUrl);
+            url.searchParams.set("size", "256");
+            url.pathname = url.pathname.replace(".webp", ".png");
 
-    let finalAvatarData;
+            bigAvatar = url.toString();
+        } catch (error) {
+            logger.warn(`Failed to get profile picture from ${avatarUrl}`);
+        }
+    } else {
+        logger.warn("avatarUrl is undefined!");
+    }
+
+
+
+    let finalAvatarData: string | undefined;
     if (settings.store.notificationPfpCircle && isLinux) {
         console.log("Cropping profile picture to circle...");
-        finalAvatarData = await cropImageToCircle(bigAvatar, 256);
+        finalAvatarData = bigAvatar ? await cropImageToCircle(bigAvatar, 256) : undefined;
     } else {
         finalAvatarData = avatarUrl;
     }

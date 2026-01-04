@@ -158,7 +158,7 @@ function saveAssetToDisk(options: AssetOptions) {
 function generateXml(
     type: "notification" | "call",
     titleString: string, bodyString: string,
-    avatarLoc: String,
+    avatarLoc: string | undefined,
     notificationData: NotificationData,
     extraOptions?: ExtraOptions,
     attachmentLoc?: string,
@@ -188,7 +188,7 @@ function generateXml(
                  <binding template="ToastGeneric">
                  <text>${safeStringForXML(titleString)}</text>
                  <text>${safeStringForXML(bodyString)}</text>
-                 <image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} placement="appLogoOverride"  />
+                 ${avatarLoc ? `<image src="${avatarLoc}" ${extraOptions?.wAvatarCrop ? "hint-crop='circle'" : ""} placement="appLogoOverride"  />` : ""}
 
                  ${extraOptions?.wAttributeText ? `<text placement="attribution">${safeStringForXML(extraOptions.wAttributeText)}</text>` : ""}
                  ${attachmentLoc ? `<image placement="${extraOptions?.messageOptions?.attachmentFormat}" src="${attachmentLoc}" />` : ""}
@@ -238,7 +238,7 @@ function generateXml(
 // libnotify has a limitation where actions cannot survive past the notification expiring. Meaning notifications in the DE history cannot be clicked. This can be sorta worked around with the replace-id but then that notify-send process will live forever untill clicked, then needs to be recreated.
 function notifySend(summary: string,
     body: string | null,
-    avatarLocation: string,
+    avatarLocation: string | undefined,
     defaultCallback: Function,
     notificationType: "notification" | "call",
     notificationData: NotificationData,
@@ -275,7 +275,8 @@ function notifySend(summary: string,
 
     // KDE has an `x-kde-urls` hint which can be used to display the attachment and avatar at the same time.
     if (attachmentLocation) args.push(`--hint=string:${attachmentFormat}:file://${attachmentLocation}`);
-    if (!attachmentLocation || attachmentFormat === "x-kde-urls") args.push(`--hint=string:image-path:file://${avatarLocation}`);
+
+    if (avatarLocation && (!attachmentLocation || attachmentFormat === "x-kde-urls")) args.push(`--hint=string:image-path:file://${avatarLocation}`);
 
     for (const reaction of reactions ?? []) {
         if (reaction === ",") continue;
@@ -390,7 +391,7 @@ async function startListeningToDbus() {
 export function notify(event: IpcMainInvokeEvent,
     type: "notification" | "call",
     titleString: string, bodyString: string,
-    avatarId: string, avatarUrl: string,
+    avatarId: string, avatarUrl: string | undefined,
     notificationData: NotificationData,
     extraOptions?: ExtraOptions
 ) {
@@ -403,9 +404,7 @@ export function notify(event: IpcMainInvokeEvent,
     }
 
     Promise.all(promises).then(results => {
-        // @ts-ignore
-        const avatar: string = results.at(0);
-        // @ts-ignore
+        const avatar: string | undefined = results.at(0);
         const attachment: string | undefined = results.at(1);
 
         // console.log(`[BN] notify notificationData: ${notificationData.channelId}`);
