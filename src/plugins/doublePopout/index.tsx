@@ -53,12 +53,30 @@ interface ApplicationStreamPreviewStore {
 const ApplicationStreamingStore: ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 const ApplicationStreamPreviewStore: ApplicationStreamPreviewStore = findStoreLazy("ApplicationStreamPreviewStore");
 
+// Fix WindowStore access - find by props to ensure we get the store with these methods
+interface ExtendedWindowStore {
+    addChangeListener: (handler: () => void) => void;
+    removeChangeListener: (handler: () => void) => void;
+    getWindowKeys: () => string[];
+    getWindow: (key: string) => Window | null;
+}
+
 // Module state
 const openWindows = new Map<string, HTMLDivElement>();
 let currentChannelId: string | null = null;
 let windowOffset = 0;
 
 const logger = new Logger("MultiStreamPopout");
+
+let WindowStore: ExtendedWindowStore;
+try {
+    // Try to find the store that manages popout windows by its specific methods
+    // We use findByPropsLazy because findStoreLazy("WindowStore") might return a different store wrapper
+    const { findByPropsLazy } = require("@webpack");
+    WindowStore = findByPropsLazy("getWindow", "getWindowKeys");
+} catch (e) {
+    logger.error("Failed to find WindowStore with getWindow/getWindowKeys:", e);
+}
 
 // Debug utilities - exposed to window.MSP for console testing
 const DEBUG = {
@@ -238,7 +256,6 @@ function findStreamVideoElement(ownerId: string, sourceDocument: Document = docu
         if (!existingMapping || existingMapping === ownerId) {
             // Map this video to this user
             videoUserMap.set(candidate.video, ownerId);
-            logger.info(`Matched video to user ${ownerId} at depth ${candidate.matchDepth}`);
             return candidate.video;
         }
     }
@@ -705,19 +722,23 @@ function toggleFakeFullscreen(doc: Document = document) {
         } else {
             // Maximize
             targetContainer.classList.add("vc-msp-native-fs");
-            targetContainer.style.position = "fixed";
-            targetContainer.style.top = "0";
-            targetContainer.style.left = "0";
-            targetContainer.style.width = "100%";
-            targetContainer.style.height = "100%";
-            targetContainer.style.zIndex = "10000";
-            targetContainer.style.backgroundColor = "#000";
+            targetContainer.style.setProperty("position", "fixed", "important");
+            targetContainer.style.setProperty("top", "0", "important");
+            targetContainer.style.setProperty("left", "0", "important");
+            targetContainer.style.setProperty("width", "100%", "important");
+            targetContainer.style.setProperty("height", "100%", "important");
+            targetContainer.style.setProperty("z-index", "2147483647", "important");
+            targetContainer.style.setProperty("background-color", "#000", "important");
         }
     }
 }
 
 // Global click handler to intercept "Hide Participants" button
 const handleGlobalClick = (e: MouseEvent) => {
+    // Debug: Log EVERY click to verify listener is working
+    // const t = e.target as HTMLElement;
+    // console.log("[MSP Debug] Global click:", t.tagName, t.className);
+
     // Check if the clicked element is the "Hide Participants" button
     // We look for the specific class fragment provided by the user: "-participantsButton"
     const target = e.target as HTMLElement;
@@ -730,13 +751,126 @@ const handleGlobalClick = (e: MouseEvent) => {
         if (openWindows.size > 0) {
             e.preventDefault();
             e.stopPropagation();
-            logger.info("Intercepted Hide Participants button click - toggling fake fullscreen");
-            toggleFakeFullscreen(document);
-        } else {
-            logger.info("No active popouts, allowing default behavior");
         }
     }
 };
+
+const windowObservers = new WeakMap<Window, MutationObserver>();
+
+function hookWindow(win: Window) {
+    if (!win) return;
+    if (windowObservers.has(win)) return;
+
+    let winName = "unknown";
+    try { winName = win.name || "Main Window"; } catch (e) { winName = "Access Error"; }
+
+    // Function to attach listener to button
+    const attachToButton = () => {
+        try {
+            const btn = win.document.querySelector('[class*="-participantsButton"]') as HTMLElement;
+
+            // Mirroring snippet logic: Check attribute directly
+            if (btn && !btn.getAttribute("data-msp-hooked")) {
+                btn.addEventListener("click", (e) => {
+                    if (openWindows.size > 0) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        // Use e.view.document to match context menu consistency
+                        const targetDoc = (e.view as Window)?.document || document;
+                        toggleFakeFullscreen(targetDoc);
+                    }
+                }, true); // Capture phase
+
+                btn.setAttribute("data-msp-hooked", "true");
+            }
+        } catch (err) {
+            logger.error(`Error attaching to button in ${winName}:`, err);
+        }
+    };
+
+    // Try observing the document body for changes to find the button when it renders
+    const observer = new MutationObserver((mutations) => {
+        attachToButton();
+    });
+
+    // Start Wait-Loop or Attach immediately
+    const startObserving = () => {
+        if (!win || win.closed) return;
+
+        const target = win.document.documentElement;
+        if (target) {
+            // Document is ready
+            try {
+                observer.observe(target, { childList: true, subtree: true });
+                windowObservers.set(win, observer);
+                attachToButton();
+            } catch (e) {
+                logger.error(`Failed to observe ${winName}:`, e);
+            }
+        } else {
+            // Document not ready, retry
+            setTimeout(startObserving, 100);
+        }
+    };
+
+    // Polling backup - ensuring we catch the button even if MO misses it or disconnects
+    const pollInterval = setInterval(() => {
+        if (!win || win.closed) {
+            clearInterval(pollInterval);
+            return;
+        }
+        attachToButton();
+    }, 1000);
+
+    // Store it on the window object itself safely
+    (win as any).__msp_poll = pollInterval;
+
+    startObserving();
+}
+
+function unhookWindow(win: Window) {
+    if (!win) return;
+
+    // Disconnect observer
+    const observer = windowObservers.get(win);
+    if (observer) {
+        observer.disconnect();
+        windowObservers.delete(win);
+    }
+
+    // Clear poll interval
+    if ((win as any).__msp_poll) {
+        clearInterval((win as any).__msp_poll);
+        delete (win as any).__msp_poll;
+    }
+}
+
+function handleWindowChange() {
+    logger.info("WindowStore changed (or initialization)");
+
+    // Hook main window
+    hookWindow(window);
+
+    if (!WindowStore) {
+        logger.warn("WindowStore is not available in handleWindowChange");
+        return;
+    }
+
+    try {
+        // Hook all other known windows
+        const windowKeys = WindowStore.getWindowKeys();
+
+        for (const key of windowKeys) {
+            const win = WindowStore.getWindow(key);
+            if (win) {
+                hookWindow(win);
+            }
+        }
+    } catch (e) {
+        logger.error("Error in handleWindowChange:", e);
+    }
+}
 
 function openWindowsForChannel(channelId: string) {
     if (!ApplicationStreamingStore) {
@@ -788,15 +922,6 @@ const streamContextPatch: NavContextMenuPatchCallback = (children, { stream }: S
                     const doc = e?.view?.document || document;
                     createStreamWindow(stream, doc);
                 }
-            }}
-        />,
-        <Menu.MenuItem
-            id="toggle-grid-fullscreen"
-            label="Fake Fullscreen"
-            icon={ScreenshareIcon} // Reusing icon for now or use another if available
-            action={(e: any) => {
-                const doc = e?.view?.document || document;
-                toggleFakeFullscreen(doc);
             }}
         />
     );
@@ -880,13 +1005,22 @@ export default definePlugin({
 
     start() {
         logger.info("MultiStreamPopout starting...");
+
         const voiceChannelId = SelectedChannelStore.getVoiceChannelId();
         if (voiceChannelId) {
             currentChannelId = voiceChannelId;
         }
 
-        // Add global click listener for button interception
-        document.addEventListener("click", handleGlobalClick, true); // true for capturing phase to ensure we intercept first
+        if (WindowStore) {
+            logger.info("WindowStore available, initializing window hooks");
+            // Add global click listener for button interception (Main Window)
+            handleWindowChange();
+
+            // Listen for new windows (Popouts)
+            WindowStore.addChangeListener(handleWindowChange);
+        } else {
+            logger.error("WindowStore NOT available at start");
+        }
     },
 
     stop() {
@@ -894,10 +1028,20 @@ export default definePlugin({
         closeAllWindows();
         currentChannelId = null;
 
-        // Remove global click listener
-        document.removeEventListener("click", handleGlobalClick, true);
+        // Cleanup main window
+        unhookWindow(window);
+
+        // Cleanup all other windows
+        const windowKeys = WindowStore.getWindowKeys();
+        for (const key of windowKeys) {
+            const win = WindowStore.getWindow(key);
+            if (win) unhookWindow(win);
+        }
+
+        // Stop listening for window changes
+        WindowStore.removeChangeListener(handleWindowChange);
 
         // Remove all injected buttons (in case any remain)
         document.querySelectorAll(".vc-msp-inject-btn").forEach(el => el.remove());
     }
-});
+});;;;;
