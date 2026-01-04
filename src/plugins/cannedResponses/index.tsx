@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import "./styles.css";
 
 import {
@@ -26,6 +25,7 @@ import {
 } from "@api/Commands";
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
@@ -40,7 +40,8 @@ import {
     openModal
 } from "@utils/modal";
 import definePlugin, { IconComponent } from "@utils/types";
-import { Button, Forms, TextInput, useState } from "@webpack/common";
+import { Message } from "@vencord/discord-types";
+import { Button, Forms, Menu, TextInput, TextArea, useState } from "@webpack/common";
 
 interface CannedMessage {
     id: string;
@@ -92,8 +93,23 @@ function unregisterCannedCommand(command: string) {
     unregisterCommand(command);
 }
 
-function PickerModal({ rootProps, close }: { rootProps: ModalProps; close(): void }) {
-    const [messages, setMessages] = useState<CannedMessage[]>(settings.store.messages || []);
+function PickerModal({ rootProps, close, prefilledContent }: { rootProps: ModalProps; close(): void; prefilledContent?: string }) {
+    const [messages, setMessages] = useState<CannedMessage[]>(() => {
+        const existingMessages = settings.store.messages || [];
+        
+        if (prefilledContent) {
+            return [
+                ...existingMessages,
+                {
+                    id: Date.now().toString(),
+                    command: "",
+                    content: prefilledContent
+                }
+            ];
+        }
+        
+        return existingMessages;
+    });
 
     const addMessage = () => {
         setMessages([
@@ -252,10 +268,12 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps; close(): voi
                                     Message Content
                                 </Forms.FormTitle>
 
-                                <TextInput
+                                <TextArea
                                     value={msg.content}
                                     onChange={v => updateMessage(msg.id, "content", v)}
                                     placeholder="Message text…"
+                                    rows={3}
+                                    className={cl("textarea")}
                                 />
 
                                 <Button
@@ -334,6 +352,37 @@ const CannedResponsesButton: ChatBarButtonFactory = ({ isAnyChat }) => {
     );
 };
 
+function getMessageContent(message: Message) {
+    return message.content
+        || message.messageSnapshots?.[0]?.message.content
+        || message.embeds?.find(embed => embed.type === "auto_moderation_message")?.rawDescription || "";
+}
+
+const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
+    const content = getMessageContent(message);
+    if (!content) return;
+
+    const group = findGroupChildrenByChildId("copy-text", children);
+    if (!group) return;
+
+    group.splice(group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, (
+        <Menu.MenuItem
+            id="vc-save-canned"
+            label="Save as Canned Message"
+            icon={CannedResponsesIcon}
+            action={() => {
+                const key = openModal(props => (
+                    <PickerModal
+                        rootProps={props}
+                        close={() => closeModal(key)}
+                        prefilledContent={content}
+                    />
+                ));
+            }}
+        />
+    ));
+};
+
 /* 
  * Ahem lets begin some attributions
  * This code was inspired in part by "sendTimestamps" for their Modal stuff.
@@ -352,6 +401,10 @@ export default definePlugin({
 
     stop() {
         getCannedResponses().forEach(m => unregisterCannedCommand(m.command));
+    },
+
+    contextMenus: {
+        "message": messageCtxPatch
     },
 
     chatBarButton: {
