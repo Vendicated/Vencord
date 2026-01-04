@@ -17,7 +17,9 @@ import {
 } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { DeleteIcon } from "@components/Icons";
+import { Button } from "@components/Button";
+import { Heading, HeadingSecondary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import {
@@ -32,7 +34,7 @@ import {
 } from "@utils/modal";
 import definePlugin, { IconComponent } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, Forms, Menu, TextArea, TextInput, useState } from "@webpack/common";
+import { Menu, TextArea, TextInput, useState } from "@webpack/common";
 
 interface Tag {
     id: string;
@@ -291,17 +293,17 @@ function PickerModal({ rootProps, close, prefilledContent }: { rootProps: ModalP
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
+                <Heading tag="h2" className={cl("modal-title")}>
                     Message Tags
-                </Forms.FormTitle>
+                </Heading>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
             <ModalContent>
                 {messages.length === 0 ? (
-                    <Forms.FormText>
+                    <Paragraph>
                         No tags yet.
-                    </Forms.FormText>
+                    </Paragraph>
                 ) : (
                     messages.map(msg => {
                         const unique = isCommandUnique(msg.command, msg.id);
@@ -321,9 +323,9 @@ function PickerModal({ rootProps, close, prefilledContent }: { rootProps: ModalP
                                 onDelete={() => deleteMessage(msg.id)}
                                 error={errorText}
                             >
-                                <Forms.FormTitle tag="h3" className={cl("section-title")}>
+                                <HeadingSecondary className={cl("section-title")}>
                                     Tag Name
-                                </Forms.FormTitle>
+                                </HeadingSecondary>
 
                                 <TextInput
                                     value={msg.command}
@@ -332,12 +334,9 @@ function PickerModal({ rootProps, close, prefilledContent }: { rootProps: ModalP
                                     error={!unique || !valid ? "Invalid tag name" : undefined}
                                 />
 
-                                <Forms.FormTitle
-                                    tag="h3"
-                                    className={cl("section-title", "section-title--spaced")}
-                                >
+                                <HeadingSecondary className={cl("section-title", "section-title--spaced")}>
                                     Message Content
-                                </Forms.FormTitle>
+                                </HeadingSecondary>
 
                                 <TextArea
                                     value={msg.content}
@@ -358,11 +357,12 @@ function PickerModal({ rootProps, close, prefilledContent }: { rootProps: ModalP
 
             <ModalFooter className={cl("footer")}>
                 <div className={cl("footer-group")}>
-                    <Button size={Button.Sizes.SMALL} onClick={importMessages}>
+                    <Button variant="secondary" size="small" onClick={importMessages}>
                         Import
                     </Button>
                     <Button
-                        size={Button.Sizes.SMALL}
+                        variant="secondary"
+                        size="small"
                         onClick={exportMessages}
                         disabled={messages.length === 0}
                     >
