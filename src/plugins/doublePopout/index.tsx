@@ -180,12 +180,12 @@ function getWindowKey(stream: Stream): string {
 const videoUserMap = new Map<HTMLVideoElement, string>();
 
 // Find Discord's video element for a specific user's stream
-function findStreamVideoElement(ownerId: string): HTMLVideoElement | null {
-    const videos = document.querySelectorAll("video");
+function findStreamVideoElement(ownerId: string, sourceDocument: Document = document): HTMLVideoElement | null {
+    const videos = sourceDocument.querySelectorAll("video");
     const candidates: Array<{ video: HTMLVideoElement; matchDepth: number; }> = [];
 
-    for (const video of videos) {
-        const videoEl = video as HTMLVideoElement;
+    for (let i = 0; i < videos.length; i++) {
+        const videoEl = videos[i] as HTMLVideoElement;
 
         // Skip our own popout videos
         if (videoEl.closest(".vc-msp-window")) continue;
@@ -202,20 +202,15 @@ function findStreamVideoElement(ownerId: string): HTMLVideoElement | null {
         let depth = 0;
         let foundAtDepth = -1;
 
-        while (parent && depth < 15) {
-            // Look for more specific patterns - data attributes, avatar images, etc.
+        while (parent && depth < 25) { // Increased depth just in case
             const html = parent.innerHTML;
 
-            // Check for user ID in the HTML
             if (html.includes(ownerId)) {
-                // Found it! Record the depth for priority matching
                 if (foundAtDepth === -1) {
                     foundAtDepth = depth;
-                    // Also check if this is a direct match (userId near the video)
                     const outerHtml = parent.outerHTML;
                     const idIndex = outerHtml.indexOf(ownerId);
                     if (idIndex !== -1 && idIndex < 500) {
-                        // User ID is close to the start - high confidence match
                         foundAtDepth = 0;
                     }
                 }
@@ -230,7 +225,7 @@ function findStreamVideoElement(ownerId: string): HTMLVideoElement | null {
     }
 
     if (candidates.length === 0) {
-        logger.warn(`No video candidates found for user ${ownerId}`);
+        logger.warn(`No video candidates found for user ${ownerId} in ${sourceDocument === document ? "Main Window" : "Popout Window"}`);
         return null;
     }
 
@@ -262,7 +257,7 @@ function clearVideoMapping(ownerId: string) {
 }
 
 // Create a floating window for a stream
-function createStreamWindow(stream: Stream) {
+function createStreamWindow(stream: Stream, sourceDocument: Document = document) {
     const key = getWindowKey(stream);
 
     if (openWindows.has(key)) {
@@ -270,7 +265,8 @@ function createStreamWindow(stream: Stream) {
         return;
     }
 
-    logger.info(`Creating floating window for stream: ${stream.ownerId}`);
+    const isMain = sourceDocument === document;
+    logger.info(`Creating floating window for stream: ${stream.ownerId} (Source: ${isMain ? "Main" : "Popout"})`);
 
     const container = document.createElement("div");
     container.id = key;
@@ -295,10 +291,13 @@ function createStreamWindow(stream: Stream) {
         <div class="vc-msp-resize-handle vc-msp-resize-se"></div>
         <div class="vc-msp-resize-handle vc-msp-resize-sw"></div>
         <div class="vc-msp-resize-handle vc-msp-resize-nw"></div>
-        <button class="vc-msp-close-btn">✕</button>
+        <div class="vc-msp-controls">
+            <button class="vc-msp-btn vc-msp-maximize-btn">□</button>
+            <button class="vc-msp-btn vc-msp-close-btn">✕</button>
+        </div>
     `;
 
-    document.body.appendChild(container);
+    document.body.appendChild(container); // Always append to Main Window body
     openWindows.set(key, container);
 
     // Make entire window draggable
@@ -306,6 +305,25 @@ function createStreamWindow(stream: Stream) {
 
     // Make window resizable from all edges
     makeResizable(container);
+
+    // Maximize/Restore Logic
+    const toggleMaximize = () => {
+        container.classList.toggle("vc-msp-maximized");
+    };
+
+    // Double click to maximize
+    container.addEventListener("dblclick", (e) => {
+        // Ignroe double clicks on controls
+        if ((e.target as HTMLElement).closest(".vc-msp-controls")) return;
+        toggleMaximize();
+    });
+
+    // Maximize button
+    const maxBtn = container.querySelector(".vc-msp-maximize-btn") as HTMLButtonElement;
+    maxBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleMaximize();
+    });
 
     // Close button
     const closeBtn = container.querySelector(".vc-msp-close-btn") as HTMLButtonElement;
@@ -315,11 +333,11 @@ function createStreamWindow(stream: Stream) {
     });
 
     // Start canvas-based frame copying
-    startCanvasCopy(container, stream, username);
+    startCanvasCopy(container, stream, username, sourceDocument);
 }
 
 // Canvas-based frame copying - copies frames from Discord's video to our canvas
-function startCanvasCopy(container: HTMLDivElement, stream: Stream, username: string) {
+function startCanvasCopy(container: HTMLDivElement, stream: Stream, username: string, sourceDocument: Document = document) {
     const content = container.querySelector(".vc-msp-content") as HTMLDivElement;
     if (!content) return;
 
@@ -330,7 +348,7 @@ function startCanvasCopy(container: HTMLDivElement, stream: Stream, username: st
     const maxRetries = 20;
 
     function findSourceVideo(): HTMLVideoElement | null {
-        return findStreamVideoElement(stream.ownerId);
+        return findStreamVideoElement(stream.ownerId, sourceDocument);
     }
 
     function setupCanvas() {
@@ -417,7 +435,10 @@ async function loadStreamPreviewFallback(content: Element, stream: Stream, usern
                 content.innerHTML = `
                     <div class="vc-msp-no-preview">
                         <div class="vc-msp-no-preview-icon">📺</div>
-                        <div>Stream not found</div>
+                        <div>Stream video not found.</div>
+                        <div style="font-size: 12px; opacity: 0.7; margin-top: 4px;">
+                            If you have the native Pop Out open,<br>please close it to view the stream here.
+                        </div>
                     </div>
                 `;
             }
@@ -609,11 +630,72 @@ const streamContextPatch: NavContextMenuPatchCallback = (children, { stream }: S
             id="pop-out-stream"
             label={isOpen ? "Close Stream Popout" : "Pop Out Stream"}
             icon={ScreenshareIcon}
-            action={() => {
+            action={(e: any) => {
                 if (isOpen) {
                     closeStreamWindow(stream);
                 } else {
-                    createStreamWindow(stream);
+                    // Try to get the document from the event view (Window)
+                    // This handles context menus opened in the Popout Window
+                    const doc = e?.view?.document || document;
+                    createStreamWindow(stream, doc);
+                }
+            }}
+        />,
+        <Menu.MenuItem
+            id="toggle-grid-fullscreen"
+            label="Fake Fullscreen"
+            icon={ScreenshareIcon} // Reusing icon for now or use another if available
+            action={(e: any) => {
+                const doc = e?.view?.document || document;
+
+                // Logic duplicated from button for now (simplest for self-contained patch)
+                // Find the "Main" video (largest one)
+                const videos = Array.from(doc.querySelectorAll("video")) as HTMLVideoElement[];
+                if (videos.length === 0) return;
+
+                videos.sort((a, b) => (b.videoWidth * b.videoHeight) - (a.videoWidth * a.videoHeight));
+                const mainVideo = videos[0];
+
+                let container = mainVideo.parentElement;
+                let depth = 0;
+                let targetContainer = container;
+
+                while (container && depth < 10) {
+                    if (container.classList.contains("vc-msp-native-fs")) {
+                        targetContainer = container;
+                        break;
+                    }
+                    if (container.className.includes("tile") || container.className.includes("wrapper")) {
+                        targetContainer = container;
+                    }
+                    container = container.parentElement;
+                    depth++;
+                }
+
+                if (!targetContainer) targetContainer = mainVideo.parentElement;
+
+                if (targetContainer) {
+                    if (targetContainer.classList.contains("vc-msp-native-fs")) {
+                        // Restore
+                        targetContainer.classList.remove("vc-msp-native-fs");
+                        targetContainer.style.position = "";
+                        targetContainer.style.top = "";
+                        targetContainer.style.left = "";
+                        targetContainer.style.width = "";
+                        targetContainer.style.height = "";
+                        targetContainer.style.zIndex = "";
+                        targetContainer.style.backgroundColor = "";
+                    } else {
+                        // Maximize
+                        targetContainer.classList.add("vc-msp-native-fs");
+                        targetContainer.style.position = "fixed";
+                        targetContainer.style.top = "0";
+                        targetContainer.style.left = "0";
+                        targetContainer.style.width = "100%";
+                        targetContainer.style.height = "100%";
+                        targetContainer.style.zIndex = "10000";
+                        targetContainer.style.backgroundColor = "#000";
+                    }
                 }
             }}
         />
@@ -731,6 +813,9 @@ export default definePlugin({
             this.streamObserver.disconnect();
             this.streamObserver = null;
         }
+
+        // Remove all injected buttons
+        document.querySelectorAll(".vc-msp-inject-btn").forEach(el => el.remove());
     },
 
     // Try to inject popout button into stream option panels
@@ -773,18 +858,118 @@ export default definePlugin({
             </div>
         `;
 
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
+            // Robust document detection
+            const candidates = new Set<Document>();
+
+            // 1. Physical location
+            const currentTarget = e.currentTarget as HTMLElement;
+            if (currentTarget?.ownerDocument) candidates.add(currentTarget.ownerDocument);
+
+            // 2. View location
+            if (e.view?.document) candidates.add(e.view.document);
+
+            // 3. Fallbacks
+            if (panel.ownerDocument) candidates.add(panel.ownerDocument);
+            candidates.add(document);
+
+            let clickDoc = document;
+
+            // Scan for videos
+            for (const doc of candidates) {
+                if (doc.querySelectorAll("video").length > 0) {
+                    clickDoc = doc;
+                    break;
+                }
+            }
+
             const key = getWindowKey(stream);
             if (openWindows.has(key)) {
                 closeStreamWindow(stream);
             } else {
-                createStreamWindow(stream);
+                createStreamWindow(stream, clickDoc);
+            }
+        });
+
+        // Add "Fake Fullscreen" button
+        const fsBtn = document.createElement("div");
+        fsBtn.className = "vc-msp-inject-btn";
+        fsBtn.innerHTML = `
+            <div class="vc-msp-panel-btn" role="menuitem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                </svg>
+                <span>Fake Fullscreen</span>
+            </div>
+        `;
+
+        fsBtn.addEventListener("click", (e) => {
+            const currentTarget = e.currentTarget as HTMLElement;
+            const doc = currentTarget.ownerDocument || document;
+
+            // Find the "Main" video (largest one)
+            const videos = Array.from(doc.querySelectorAll("video")) as HTMLVideoElement[];
+            if (videos.length === 0) return;
+
+            // Sort by size (area) descending
+            videos.sort((a, b) => (b.videoWidth * b.videoHeight) - (a.videoWidth * a.videoHeight));
+            const mainVideo = videos[0];
+
+            // Find the container to maximize (usually a few levels up, the 'tile')
+            // We look for a parent that has some specific class or just go up 3-4 levels
+            // The class usually contains "tile" or "wrapper"
+            let container = mainVideo.parentElement;
+            let depth = 0;
+            let targetContainer = container;
+
+            while (container && depth < 10) {
+                // If we found a previously maximized element, use it
+                if (container.classList.contains("vc-msp-native-fs")) {
+                    targetContainer = container;
+                    break;
+                }
+
+                // Heuristic: Look for the tile container
+                if (container.className.includes("tile") || container.className.includes("wrapper")) {
+                    targetContainer = container;
+                    // Keep looking up briefly in case there's a better one
+                }
+                container = container.parentElement;
+                depth++;
+            }
+
+            // If we didn't find a 'tile', just use the video's direct parent or close to it
+            if (!targetContainer) targetContainer = mainVideo.parentElement;
+
+            if (targetContainer) {
+                if (targetContainer.classList.contains("vc-msp-native-fs")) {
+                    // Restore
+                    targetContainer.classList.remove("vc-msp-native-fs");
+                    targetContainer.style.position = "";
+                    targetContainer.style.top = "";
+                    targetContainer.style.left = "";
+                    targetContainer.style.width = "";
+                    targetContainer.style.height = "";
+                    targetContainer.style.zIndex = "";
+                    targetContainer.style.backgroundColor = "";
+                } else {
+                    // Maximize
+                    targetContainer.classList.add("vc-msp-native-fs");
+                    targetContainer.style.position = "fixed";
+                    targetContainer.style.top = "0";
+                    targetContainer.style.left = "0";
+                    targetContainer.style.width = "100%";
+                    targetContainer.style.height = "100%";
+                    targetContainer.style.zIndex = "10000"; // Above header/footer
+                    targetContainer.style.backgroundColor = "#000"; // Black background
+                }
             }
         });
 
         // Insert at the end of the panel
         panel.appendChild(btn);
-        logger.info("Injected popout button into stream panel");
+        panel.appendChild(fsBtn);
+        logger.info("Injected popout buttons into stream panel");
     }
 });
 

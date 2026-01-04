@@ -56,10 +56,24 @@
 }
 
 /* Close button - floating in corner */
-.vc-msp-close-btn {
+/* Controls Container */
+.vc-msp-controls {
     position: absolute;
     top: 4px;
     right: 4px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.vc-msp-window:hover .vc-msp-controls {
+    opacity: 1;
+}
+
+/* Base button styles */
+.vc-msp-btn {
     background: rgba(0, 0, 0, 0.7);
     border: none;
     color: #fff;
@@ -67,14 +81,20 @@
     padding: 4px 8px;
     font-size: 14px;
     border-radius: 4px;
-    transition: all 0.15s ease;
     line-height: 1;
-    z-index: 10;
-    opacity: 0;
+    transition: background 0.15s ease;
 }
 
-.vc-msp-window:hover .vc-msp-close-btn {
-    opacity: 1;
+.vc-msp-btn:hover {
+    background: rgba(40, 40, 40, 0.9);
+}
+
+.vc-msp-close-btn {
+    background: rgba(200, 0, 0, 0.7);
+}
+
+.vc-msp-close-btn:hover {
+    background: rgba(255, 0, 0, 0.9);
 }
 
 .vc-msp-close-btn:hover {
@@ -169,6 +189,21 @@
     border-top-color: transparent;
     border-radius: 50%;
     animation: vc-msp-spin 1s linear infinite;
+}
+
+.vc-msp-window.vc-msp-maximized {
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0;
+    z-index: 10001;
+    /* Above everything */
+}
+
+.vc-msp-window.vc-msp-maximized .vc-msp-resize-handle {
+    display: none;
+    /* Disable resizing when maximized */
 }
 
 @keyframes vc-msp-spin {
