@@ -63,6 +63,7 @@ interface ExtendedWindowStore {
 
 // Module state
 const openWindows = new Map<string, HTMLDivElement>();
+let lastKnownWindowKeys: string[] = [];
 let currentChannelId: string | null = null;
 let windowOffset = 0;
 
@@ -916,18 +917,29 @@ function unhookWindow(win: Window) {
 function handleWindowChange() {
     logger.info("WindowStore changed (or initialization)");
 
-    // Hook main window
-    hookWindow(window);
-
     if (!WindowStore) {
         logger.warn("WindowStore is not available in handleWindowChange");
         return;
     }
 
     try {
-        // Hook all other known windows
         const windowKeys = WindowStore.getWindowKeys();
 
+        // Check if the set of native windows has actually changed
+        // This avoids closing all popouts when only OS fullscreen state changes
+        const hasChanged = windowKeys.length !== lastKnownWindowKeys.length ||
+            windowKeys.some(key => !lastKnownWindowKeys.includes(key));
+
+        if (hasChanged) {
+            logger.info("Native windows set changed, closing all custom popouts");
+            closeAllWindows();
+            lastKnownWindowKeys = [...windowKeys];
+        }
+
+        // Hook main window
+        hookWindow(window);
+
+        // Hook all other known windows
         for (const key of windowKeys) {
             const win = WindowStore.getWindow(key);
             if (win) {
