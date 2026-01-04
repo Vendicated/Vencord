@@ -87,13 +87,13 @@ export async function SendNativeNotification(avatarUrl: string,
 
     logger.debug(`Notification type ${basicNotification.channel_type}`);
 
-    let title = settings.store.notificationTitleFormat;
-    let [body, bodyVars] = parseVariables(settings.store.notificationBodyFormat, advancedNotification);
-    let attributeText = settings.store.notificationAttributeText;
-    let headerText = settings.store.notificationHeaderText;
+    const titleVars = parseVariables(settings.store.notificationTitleFormat, advancedNotification);
+    const bodyVars = parseVariables(settings.store.notificationBodyFormat, advancedNotification);
+    const attributeTextVars = parseVariables(settings.store.notificationAttributeText, advancedNotification);
+    const headerTextVars = parseVariables(settings.store.notificationHeaderText, advancedNotification);
 
 
-    [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body, attributeText, headerText], bodyVars);
+    const [title, body, attributeText, headerText] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [titleVars, bodyVars, attributeTextVars, headerTextVars]);
 
     const notifierMessages = latestMessages.get(basicNotification.notif_user_id);
     const now = new Date();
@@ -200,10 +200,10 @@ export function InterceptNotification(avatarUrl: string,
         return;
     }
 
-    let title = settings.store.notificationTitleFormat;
-    let [body, bodyVars] = parseVariables(settings.store.notificationBodyFormat, advancedNotification);
+    const titleVars = parseVariables(settings.store.notificationTitleFormat, advancedNotification);
+    const bodyVars = parseVariables(settings.store.notificationBodyFormat, advancedNotification);
 
-    [title, body] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [title, body], bodyVars);
+    const [title, body] = replaceVariables(advancedNotification, basicNotification, notificationTitle, notificationBody, [titleVars, bodyVars]);
     logger.info("Succesfully patched notification");
 
     return [avatarUrl, title, body, basicNotification, advancedNotification];

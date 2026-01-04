@@ -35,7 +35,7 @@ type ReplacementMap = {
 };
 
 type Variables = {
-    [k in typeof Replacements[number]]: (notification: AdvancedNotification) => boolean;
+    [k in `${typeof Replacements[number]}-${string}-${string}`]: (notification: AdvancedNotification) => boolean;
 } & {
     [k in `"${string}"`]: (notification: AdvancedNotification) => boolean
 };
@@ -145,36 +145,44 @@ export function parseVariables(format: string, notification: AdvancedNotificatio
             continue;
         }
 
+        const variableKey = `${resultVariable}-${comparison}-${comparedValue}`;
+
         switch (comparison) {
             case "==":
             case "is":
-                variables[resultVariable] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]) === comparedValue; };
+                variables[variableKey] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]) === comparedValue; };
                 break;
 
             case "!=":
             case "isnot":
-                variables[resultVariable] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]) !== comparedValue; };
+                variables[variableKey] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]) !== comparedValue; };
                 break;
 
             case "contains":
             case "has":
-                variables[resultVariable] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]).includes(comparedValue); };
+                variables[variableKey] = (notification: AdvancedNotification) => { return String(notification.messageRecord[comparisonValue]).includes(comparedValue); };
                 break;
 
             case "containsnot":
             case "hasnot":
-                variables[resultVariable] = (notification: AdvancedNotification) => { return !String(notification.messageRecord[comparisonValue]).includes(comparedValue); };
+                variables[variableKey] = (notification: AdvancedNotification) => { return !String(notification.messageRecord[comparisonValue]).includes(comparedValue); };
                 break;
         }
         logger.info(`Succesfully generated variable for statement ${match[0]}`);
-        format = format.replace(match[0], `${resultVariable}?`);
+        format = format.replace(match[0], `${variableKey}?`);
     }
 
     logger.info("Done parsing variables");
     return [format, variables];
 }
 
-export function replaceVariables(advancedNotification: AdvancedNotification, basicNotification: BasicNotification, title: string, body: string, texts: string[], variables: Partial<Variables> = {}): string[] {
+export function replaceVariables(
+    advancedNotification: AdvancedNotification,
+    basicNotification: BasicNotification,
+    title: string,
+    body: string,
+    texts: [string, Partial<Variables>][],
+): string[] {
     let guildInfo: GuildInfo;
     let channelInfo: ChannelInfo;
 
@@ -213,34 +221,51 @@ export function replaceVariables(advancedNotification: AdvancedNotification, bas
         guildTag: advancedNotification.messageRecord.author.primaryGuild?.tag ?? ""
     };
 
-    new Map(Object.entries(replacementMap)).forEach((value, key) => {
-        logger.debug(`Replacing ${key} - ${value}`);
-        texts = texts.map(text => text.replaceAll(`{${key}}`, value));
-    });
+    const processedTexts: string[] = [];
 
-    Object.keys(variables).map(index => {
-        logger.info(`Checking statement for variable ${index}...`);
-        const variable: (notification: AdvancedNotification) => boolean = variables[index];
+    for (let [text, variables] of texts) {
+        logger.info(`Processing text ${text}`);
+        logger.info("Known variables: ");
+        logger.info(variables);
 
-        logger.info("Checking function: ");
-        console.log(variable);
+        Object.entries(replacementMap).forEach(replacement => {
+            const prevText = text;
+            text = text.replaceAll(`{${replacement[0]}}`, replacement[1]);
 
-        const conditionTrue = variable(advancedNotification);
-        if (conditionTrue) {
-            logger.info("Matches!");
-
-            if (index.startsWith('"')) {
-                texts = texts.map(text => text.replaceAll(`[${index}?]`, index.slice(1, index.length - 1).replaceAll("(/space/)", " ")));
-            } else {
-                texts = texts.map(text => text.replaceAll(`[${index}?]`, replacementMap[index]));
+            if (text !== prevText) {
+                logger.debug(`Replaced ${replacement[0]} with ${replacement[1]}`);
             }
-        } else {
-            logger.info("Doesn't match");
-            texts = texts.map(text => text.replaceAll(`[${index}?]`, ""));
-        }
-    });
+        });
 
-    return texts;
+        for (const variableKey of Object.keys(variables)) {
+            logger.debug(`Processing variable for ${variableKey}`);
+
+            const check: (notification: AdvancedNotification) => boolean = variables[variableKey];
+            const checkResult = check(advancedNotification);
+
+
+            if (!checkResult) {
+                logger.info("Clause does not match");
+                text = text.replace(`[${variableKey}?]`, "");
+                continue;
+            }
+
+            logger.info("Clause did match, replacing...");
+            if (variableKey.startsWith('"')) {
+                text = text.replace(`[${variableKey}?]`, variableKey.slice(1, variableKey.length - 1).replaceAll("(/space/)", " "));
+            } else {
+                const variableName = variableKey.split("-")[0];
+                text = text.replace(`[${variableKey}?]`, replacementMap[variableName]);
+            }
+        }
+
+        logger.debug(`Processed text: ${text}`);
+
+        processedTexts.push(text);
+
+    }
+
+    return processedTexts;
 }
 
 /** @deprecated findByProps("htmlFor").defaultHtmlOutput(SimpleMarkdown.defaultInlineParse(input: string)); is a better alternative. (thanks @suffocate on discord)  */
