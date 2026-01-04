@@ -624,6 +624,9 @@ const streamContextPatch: NavContextMenuPatchCallback = (children, { stream }: S
     const windowKey = getWindowKey(stream);
     const isOpen = openWindows.has(windowKey);
 
+    // DEBUG: Log children state
+    logger.info(`streamContextPatch called, children.length before: ${children.length}`);
+
     children.push(
         <Menu.MenuSeparator />,
         <Menu.MenuItem
@@ -778,30 +781,13 @@ export default definePlugin({
         }
     },
 
-    streamObserver: null as MutationObserver | null,
-
     start() {
         logger.info("MultiStreamPopout starting...");
         const voiceChannelId = SelectedChannelStore.getVoiceChannelId();
         if (voiceChannelId) {
             currentChannelId = voiceChannelId;
         }
-
-        // Watch for stream option panels and inject our button
-        this.streamObserver = new MutationObserver(mutations => {
-            for (const mutation of mutations) {
-                for (const node of mutation.addedNodes) {
-                    if (node instanceof HTMLElement) {
-                        this.tryInjectButton(node);
-                    }
-                }
-            }
-        });
-
-        this.streamObserver.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        // Context menu patch handles adding our options - no need for button injection
     },
 
     stop() {
@@ -809,167 +795,7 @@ export default definePlugin({
         closeAllWindows();
         currentChannelId = null;
 
-        if (this.streamObserver) {
-            this.streamObserver.disconnect();
-            this.streamObserver = null;
-        }
-
-        // Remove all injected buttons
+        // Remove all injected buttons (in case any remain)
         document.querySelectorAll(".vc-msp-inject-btn").forEach(el => el.remove());
-    },
-
-    // Try to inject popout button into stream option panels
-    tryInjectButton(element: HTMLElement) {
-        // Look for buttons/menu items in popovers that contain stream-related text
-        const menuItems = element.querySelectorAll('[class*="menuItem"], [class*="button"], [role="menuitem"]');
-
-        for (const item of menuItems) {
-            const text = item.textContent?.toLowerCase() || "";
-
-            // Check if this looks like a stream options panel
-            // (contains volume, mute, or stream-related text)
-            if (text.includes("volume") || text.includes("mute") || text.includes("stream")) {
-                const parent = item.closest('[class*="menu"], [class*="popout"], [role="menu"]');
-                if (parent && !parent.querySelector(".vc-msp-inject-btn")) {
-                    this.injectPopoutButton(parent as HTMLElement);
-                    break;
-                }
-            }
-        }
-    },
-
-    injectPopoutButton(panel: HTMLElement) {
-        // Find a stream to open (the one currently being viewed/selected)
-        const streams = ApplicationStreamingStore?.getAllActiveStreamsForChannel(currentChannelId || "");
-        if (!streams || streams.length === 0) return;
-
-        // Try to find which stream this panel is for
-        // For now, we'll create buttons for all streams if we can't identify the specific one
-        const stream = streams[0]; // Default to first stream
-
-        const btn = document.createElement("div");
-        btn.className = "vc-msp-inject-btn";
-        btn.innerHTML = `
-            <div class="vc-msp-panel-btn" role="menuitem">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9 8h2v8H9zm4 0h2v8h-2z"/>
-                </svg>
-                <span>Pop Out Stream</span>
-            </div>
-        `;
-
-        btn.addEventListener("click", (e) => {
-            // Robust document detection
-            const candidates = new Set<Document>();
-
-            // 1. Physical location
-            const currentTarget = e.currentTarget as HTMLElement;
-            if (currentTarget?.ownerDocument) candidates.add(currentTarget.ownerDocument);
-
-            // 2. View location
-            if (e.view?.document) candidates.add(e.view.document);
-
-            // 3. Fallbacks
-            if (panel.ownerDocument) candidates.add(panel.ownerDocument);
-            candidates.add(document);
-
-            let clickDoc = document;
-
-            // Scan for videos
-            for (const doc of candidates) {
-                if (doc.querySelectorAll("video").length > 0) {
-                    clickDoc = doc;
-                    break;
-                }
-            }
-
-            const key = getWindowKey(stream);
-            if (openWindows.has(key)) {
-                closeStreamWindow(stream);
-            } else {
-                createStreamWindow(stream, clickDoc);
-            }
-        });
-
-        // Add "Fake Fullscreen" button
-        const fsBtn = document.createElement("div");
-        fsBtn.className = "vc-msp-inject-btn";
-        fsBtn.innerHTML = `
-            <div class="vc-msp-panel-btn" role="menuitem">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                </svg>
-                <span>Fake Fullscreen</span>
-            </div>
-        `;
-
-        fsBtn.addEventListener("click", (e) => {
-            const currentTarget = e.currentTarget as HTMLElement;
-            const doc = currentTarget.ownerDocument || document;
-
-            // Find the "Main" video (largest one)
-            const videos = Array.from(doc.querySelectorAll("video")) as HTMLVideoElement[];
-            if (videos.length === 0) return;
-
-            // Sort by size (area) descending
-            videos.sort((a, b) => (b.videoWidth * b.videoHeight) - (a.videoWidth * a.videoHeight));
-            const mainVideo = videos[0];
-
-            // Find the container to maximize (usually a few levels up, the 'tile')
-            // We look for a parent that has some specific class or just go up 3-4 levels
-            // The class usually contains "tile" or "wrapper"
-            let container = mainVideo.parentElement;
-            let depth = 0;
-            let targetContainer = container;
-
-            while (container && depth < 10) {
-                // If we found a previously maximized element, use it
-                if (container.classList.contains("vc-msp-native-fs")) {
-                    targetContainer = container;
-                    break;
-                }
-
-                // Heuristic: Look for the tile container
-                if (container.className.includes("tile") || container.className.includes("wrapper")) {
-                    targetContainer = container;
-                    // Keep looking up briefly in case there's a better one
-                }
-                container = container.parentElement;
-                depth++;
-            }
-
-            // If we didn't find a 'tile', just use the video's direct parent or close to it
-            if (!targetContainer) targetContainer = mainVideo.parentElement;
-
-            if (targetContainer) {
-                if (targetContainer.classList.contains("vc-msp-native-fs")) {
-                    // Restore
-                    targetContainer.classList.remove("vc-msp-native-fs");
-                    targetContainer.style.position = "";
-                    targetContainer.style.top = "";
-                    targetContainer.style.left = "";
-                    targetContainer.style.width = "";
-                    targetContainer.style.height = "";
-                    targetContainer.style.zIndex = "";
-                    targetContainer.style.backgroundColor = "";
-                } else {
-                    // Maximize
-                    targetContainer.classList.add("vc-msp-native-fs");
-                    targetContainer.style.position = "fixed";
-                    targetContainer.style.top = "0";
-                    targetContainer.style.left = "0";
-                    targetContainer.style.width = "100%";
-                    targetContainer.style.height = "100%";
-                    targetContainer.style.zIndex = "10000"; // Above header/footer
-                    targetContainer.style.backgroundColor = "#000"; // Black background
-                }
-            }
-        });
-
-        // Insert at the end of the panel
-        panel.appendChild(btn);
-        panel.appendChild(fsBtn);
-        logger.info("Injected popout buttons into stream panel");
     }
 });
-
