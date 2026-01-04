@@ -18,12 +18,11 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore } from "@webpack/common";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -84,14 +83,8 @@ export default definePlugin({
             find: ".USER_MENTION)",
             replacement: [
                 {
-                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
-                    match: /onContextMenu:\i,color:\i,\.\.\.\i(?=,children:)(?<=user:(\i),channel:(\i).{0,500}?)/,
-                    replace: "$&,color:$self.getColorInt($1?.id,$2?.id)",
-                    noWarn: true
-                },
-                {
-                    match: /(?<=onContextMenu:\i,color:)\i(?=\},\i\),\{children)(?<=user:(\i),channel:(\i).{0,500}?)/,
-                    replace: "$self.getColorInt($1?.id,$2?.id)",
+                    match: /(?<=user:(\i),guildId:([^,]+?),.{0,100}?children:\i=>\i)\((\i)\)/,
+                    replace: "({...$3,color:$self.getColorInt($1?.id,$2)})",
                 }
             ],
             predicate: () => settings.store.chatMentions
@@ -141,9 +134,9 @@ export default definePlugin({
         },
         // Reaction List
         {
-            find: ".reactorDefault",
+            find: ".reactionDefault",
             replacement: {
-                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
+                match: /tag:"strong"(?=.{0,50}\i\.name)(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
                 replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
             },
             predicate: () => settings.store.reactorsList,
@@ -152,14 +145,14 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /\.nickname,(?=children:)/,
+                match: /\.name,(?="aria-label)/,
                 replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults
         },
         // Messages
         {
-            find: "#{intl::MESSAGE_EDITED}",
+            find: ".SEND_FAILED,",
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
                 replace: "style:$self.useMessageColorsStyle($1),"
@@ -203,8 +196,8 @@ export default definePlugin({
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
-                    color: value.replace("{DEFAULT}", "--text-normal"),
-                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                    color: value.replace("{DEFAULT}", "--text-default"),
+                    "--text-strong": value.replace("{DEFAULT}", "--text-strong"),
                     "--text-muted": value.replace("{DEFAULT}", "--text-muted")
                 };
             }
@@ -216,7 +209,7 @@ export default definePlugin({
     },
 
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const role = GuildStore.getRole(guildId, id);
+        const role = GuildRoleStore.getRole(guildId, id);
 
         return (
             <span style={{

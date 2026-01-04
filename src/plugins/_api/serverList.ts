@@ -32,9 +32,9 @@ export default definePlugin({
             }
         },
         {
-            find: "#{intl::SERVERS}),children",
+            find: ".setGuildsTree(",
             replacement: {
-                match: /(?<=#{intl::SERVERS}\),children:)\i\.map\(\i\)/,
+                match: /(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,
                 replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
             }
         }

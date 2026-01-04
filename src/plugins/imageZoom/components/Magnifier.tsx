@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { FluxDispatcher, useLayoutEffect, useRef, useState } from "@webpack/common";
-
-import { ELEMENT_ID } from "../constants";
-import { settings } from "../index";
-import { waitFor } from "../utils/waitFor";
+import { settings } from "@plugins/imageZoom";
+import { ELEMENT_ID } from "@plugins/imageZoom/constants";
+import { waitFor } from "@plugins/imageZoom/utils/waitFor";
+import { classNameFactory } from "@utils/css";
+import { FluxDispatcher, useLayoutEffect, useMemo, useRef, useState } from "@webpack/common";
 
 interface Vec2 {
     x: number,
@@ -160,6 +159,19 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
         }
     });
 
+    const imageSrc = useMemo(() => {
+        try {
+            const imageUrl = new URL(instance.props.src);
+            if (imageUrl.pathname.startsWith("/attachments/"))
+                imageUrl.hostname = "cdn.discordapp.com";
+
+            imageUrl.searchParams.set("animated", "true");
+            return imageUrl.toString();
+        } catch {
+            return instance.props.src;
+        }
+    }, [instance.props.src]);
+
     if (!ready) return null;
 
     const box = element.current?.getBoundingClientRect();
@@ -203,7 +215,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                         }}
                         width={`${box.width * zoom.current}px`}
                         height={`${box.height * zoom.current}px`}
-                        src={instance.props.src}
+                        src={imageSrc}
                         alt=""
                     />
                 )}
