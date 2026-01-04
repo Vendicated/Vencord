@@ -163,7 +163,7 @@ const removeShortcutsPlugin = definePlugin({
             type: OptionType.STRING,
             name: "Custom Removed Shortcuts",
             description:
-                "A list of custom keyboard shortcuts to remove from Discord. Seperated by |, in the format CTRL + Slash or ALT + KeyB. Modifiers are optional.",
+                "A list of custom keyboard shortcuts to remove from Discord. Seperated by |, in the format `CTRL + Slash` or `ALT + KeyB`. Modifiers are optional. Example: `CTRL + SHIFT + KeyA | ALT + KeyC`",
             default: "",
             onChange(value) {
                 reloadCombos(value);
