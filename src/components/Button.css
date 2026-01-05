@@ -62,6 +62,26 @@
     line-height: 1.25;
 }
 
+.vc-btn-iconOnly {
+    width: 32px;
+    height: 32px;
+    min-width: unset;
+    min-height: unset;
+    padding: 0;
+    background-color: transparent;
+    border-color: transparent;
+
+    &:hover {
+        background-color: var(--control-icon-only-background-hover);
+        border-color: var(--control-icon-only-border-hover);
+    }
+
+    &:active {
+        background-color: var(--control-icon-only-background-active);
+        border-color: var(--control-icon-only-border-active);
+    }
+}
+
 .vc-btn-primary {
     background-color: var(--control-primary-background-default);
     border-color: var(--control-primary-border-default);
