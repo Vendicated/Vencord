@@ -1,22 +1,4 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import { CLASS_PREFIX, logger } from "../constants";
+import { CLASS_PREFIX } from "../constants";
 
 // Cache to track which video element belongs to which user
 const videoUserMap = new Map<HTMLVideoElement, string>();
@@ -70,8 +52,6 @@ export function findStreamVideoElement(ownerId: string, sourceDocument: Document
     }
 
     if (candidates.length === 0) {
-        logger.warn(`No video candidates found for user ${ownerId} in ${sourceDocument === document ? "Main Window" : "Popout Window"}`);
-
         // Try to auto-click participants button to show participants
         tryAutoShowParticipants(sourceDocument);
         return null;
@@ -89,8 +69,6 @@ export function findStreamVideoElement(ownerId: string, sourceDocument: Document
             return candidate.video;
         }
     }
-
-    logger.warn(`All candidates for ${ownerId} were already mapped to other users`);
     return null;
 }
 
@@ -105,7 +83,6 @@ function tryAutoShowParticipants(sourceDocument: Document): void {
         const hasUpCaret = svgClasses.includes("upCaret");
 
         if (hasUpCaret) {
-            logger.info("[AutoFix] Participants are hidden - clicking button to show them");
             participantsBtn.click();
         }
     }

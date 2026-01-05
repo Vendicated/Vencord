@@ -1,21 +1,3 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
-
 // Stream data from Discord
 export interface Stream {
     streamType: string;
@@ -58,4 +40,32 @@ export interface StreamContextProps {
 // Context menu props for user context
 export interface UserContextProps {
     user: { id: string; };
+}
+
+// Video pop-in configuration
+export interface VideoPopInConfig {
+    /** Unique key for the window */
+    key: string;
+    /** User/owner ID */
+    ownerId: string;
+    /** Loading text shown while finding video */
+    loadingText: string;
+    /** Document to search for video in */
+    sourceDocument: Document;
+    /** Icon to show if video not found */
+    fallbackIcon: string;
+    /** Message to show if video not found */
+    fallbackMessage: string;
+}
+
+// Video copy configuration (subset used by CanvasCopy)
+export interface VideoCopyConfig {
+    /** User/owner ID for finding the video */
+    ownerId: string;
+    /** Document to search for video in */
+    sourceDocument: Document;
+    /** Icon to show if video not found */
+    fallbackIcon: string;
+    /** Message to show if video not found */
+    fallbackMessage: string;
 }

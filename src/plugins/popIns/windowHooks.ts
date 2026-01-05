@@ -1,22 +1,3 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import { logger } from "./constants";
 import { closeAllWindows, openWindows } from "./components/FloatingWindow";
 import { toggleFakeFullscreen } from "./components/FakeFullscreen";
 import { WindowStore } from "./stores";
@@ -56,7 +37,7 @@ export function hookWindow(win: Window): void {
                 btn.setAttribute("data-pin-hooked", "true");
             }
         } catch (err) {
-            logger.error(`Error attaching to button in ${winName}:`, err);
+            // Error attaching to button
         }
     };
 
@@ -75,7 +56,7 @@ export function hookWindow(win: Window): void {
                 windowObservers.set(win, observer);
                 attachToButton();
             } catch (e) {
-                logger.error(`Failed to observe ${winName}:`, e);
+                // Failed to observe window
             }
         } else {
             // Document not ready, retry
@@ -122,10 +103,7 @@ export function unhookWindow(win: Window): void {
  * Handle WindowStore changes - hook new windows, close popouts when windows change.
  */
 export function handleWindowChange(): void {
-    logger.info("WindowStore changed (or initialization)");
-
     if (!WindowStore) {
-        logger.warn("WindowStore is not available in handleWindowChange");
         return;
     }
 
@@ -137,7 +115,6 @@ export function handleWindowChange(): void {
             windowKeys.some(key => !lastKnownWindowKeys.includes(key));
 
         if (hasChanged) {
-            logger.info("Native windows set changed, closing all custom popouts");
             closeAllWindows();
             lastKnownWindowKeys = [...windowKeys];
         }
@@ -153,7 +130,7 @@ export function handleWindowChange(): void {
             }
         }
     } catch (e) {
-        logger.error("Error in handleWindowChange:", e);
+        // Error in handleWindowChange
     }
 }
 

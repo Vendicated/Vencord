@@ -1,28 +1,10 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import { UserStore } from "@webpack/common";
 
-import { CLASS_PREFIX, getWebcamWindowKey, getWindowKey, logger } from "../constants";
-import { Stream } from "../types";
+import { CLASS_PREFIX } from "../constants";
+import { VideoPopInConfig } from "../types";
 import { getTitleBarHeight } from "../utils/discordUI";
 import { clearAllVideoMappings, clearVideoMapping } from "../utils/videoFinder";
-import { startCanvasCopy, startWebcamCanvasCopy } from "./CanvasCopy";
+import { startVideoCopy } from "./CanvasCopy";
 
 // Module state
 export const openWindows = new Map<string, HTMLDivElement>();
@@ -36,7 +18,6 @@ let topZIndex = 10000;
 function bringToFront(element: HTMLDivElement): void {
     topZIndex++;
     element.style.zIndex = String(topZIndex);
-    logger.info(`[bringToFront] Window z-index set to ${topZIndex}`);
 }
 
 /**
@@ -47,33 +28,14 @@ export function setCurrentChannelId(channelId: string | null): void {
 }
 
 /**
- * Configuration for creating a window.
+ * Create a video pop-in window.
  */
-interface WindowConfig {
-    key: string;
-    ownerId: string;
-    loadingText: string;
-    logPrefix: string;
-    sourceDocument: Document;
-    onClose: () => void;
-    startCopy: (container: HTMLDivElement, username: string) => void;
-}
-
-/**
- * Generic window creation function.
- */
-function createWindow(config: WindowConfig): void {
+export function createVideoPopIn(config: VideoPopInConfig): void {
     if (openWindows.has(config.key)) {
-        logger.info(`Window already exists for ${config.ownerId}`);
         return;
     }
 
-    const isMain = config.sourceDocument === document;
-    logger.info(`Creating floating window for ${config.logPrefix}: ${config.ownerId} (Source: ${isMain ? "Main" : "Popout"})`);
-
     const container = createWindowElement(config.key);
-    const user = UserStore.getUser(config.ownerId);
-    const username = user?.globalName || user?.username || "Unknown User";
 
     container.innerHTML = createWindowHTML(config.loadingText);
 
@@ -82,19 +44,22 @@ function createWindow(config: WindowConfig): void {
 
     makeDraggable(container);
     makeResizable(container);
-    setupWindowControls(container, config.onClose);
+    setupWindowControls(container, () => closeVideoPopIn(config.key, config.ownerId));
 
-    config.startCopy(container, username);
+    startVideoCopy(container, {
+        ownerId: config.ownerId,
+        sourceDocument: config.sourceDocument,
+        fallbackIcon: config.fallbackIcon,
+        fallbackMessage: config.fallbackMessage
+    });
 }
 
 /**
- * Generic window close function.
+ * Close a video pop-in window by key.
  */
-function closeWindow(key: string, ownerId: string, logPrefix: string): void {
+export function closeVideoPopIn(key: string, ownerId: string): void {
     const container = openWindows.get(key);
     if (!container) return;
-
-    logger.info(`Closing ${logPrefix} window for: ${ownerId}`);
 
     if ((container as any)._stopCopying) {
         (container as any)._stopCopying();
@@ -110,55 +75,9 @@ function closeWindow(key: string, ownerId: string, logPrefix: string): void {
 }
 
 /**
- * Create a floating window for a stream.
- */
-export function createStreamWindow(stream: Stream, sourceDocument: Document = document): void {
-    createWindow({
-        key: getWindowKey(stream),
-        ownerId: stream.ownerId,
-        loadingText: "Finding stream...",
-        logPrefix: "stream",
-        sourceDocument,
-        onClose: () => closeStreamWindow(stream),
-        startCopy: (container, username) => startCanvasCopy(container, stream, username, sourceDocument)
-    });
-}
-
-/**
- * Create a floating window for a webcam.
- */
-export function createWebcamWindow(userId: string, channelId: string, sourceDocument: Document = document): void {
-    createWindow({
-        key: getWebcamWindowKey(userId, channelId),
-        ownerId: userId,
-        loadingText: "Finding webcam...",
-        logPrefix: "webcam",
-        sourceDocument,
-        onClose: () => closeWebcamWindow(userId, channelId),
-        startCopy: (container, username) => startWebcamCanvasCopy(container, userId, username, sourceDocument)
-    });
-}
-
-/**
- * Close a stream window.
- */
-export function closeStreamWindow(stream: Stream): void {
-    closeWindow(getWindowKey(stream), stream.ownerId, "stream");
-}
-
-/**
- * Close a webcam window.
- */
-export function closeWebcamWindow(userId: string, channelId: string): void {
-    closeWindow(getWebcamWindowKey(userId, channelId), userId, "webcam");
-}
-
-/**
  * Close all open windows.
  */
 export function closeAllWindows(): void {
-    logger.info(`Closing all ${openWindows.size} windows`);
-
     for (const [, container] of openWindows) {
         if ((container as any)._stopCopying) {
             (container as any)._stopCopying();
@@ -224,7 +143,7 @@ function setupWindowControls(container: HTMLDivElement, onClose: () => void): vo
         try {
             (DiscordNative as any).window.fullscreen();
         } catch (err) {
-            logger.warn("Failed to toggle OS fullscreen:", err);
+            // Failed to toggle OS fullscreen
         }
     };
 
@@ -236,7 +155,7 @@ function setupWindowControls(container: HTMLDivElement, onClose: () => void): vo
         try {
             (DiscordNative as any).window.fullscreen();
         } catch (err) {
-            logger.warn("Failed to exit OS fullscreen:", err);
+            // Failed to exit OS fullscreen
         }
     };
 
