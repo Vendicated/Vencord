@@ -68,6 +68,8 @@ export default definePlugin({
             if (!contentType?.startsWith("image/") || src.startsWith("data:")) return;
 
             const url = new URL(src);
+            if (!url.pathname.startsWith("/attachments/")) return;
+
             url.searchParams.set("animated", String(!freeze));
 
             if (!settings.store.originalImagesInChat && mediaLayoutType === "MOSAIC") {
