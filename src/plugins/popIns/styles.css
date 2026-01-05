@@ -1,0 +1,253 @@
+/* PopIn's - Floating Window Styles */
+
+.vc-pin-window {
+    position: fixed;
+    width: 400px;
+    height: 300px;
+    background-color: #000;
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    cursor: grab;
+    min-width: 200px;
+    min-height: 150px;
+}
+
+.vc-pin-window:active {
+    cursor: grabbing;
+}
+
+.vc-pin-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #000;
+    border-radius: 4px;
+}
+
+.vc-pin-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #000;
+    pointer-events: none;
+}
+
+.vc-pin-preview {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.vc-pin-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #000;
+    pointer-events: none;
+}
+
+/* Controls Container */
+.vc-pin-controls {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.vc-pin-window:hover .vc-pin-controls {
+    opacity: 1;
+}
+
+/* Base button styles */
+.vc-pin-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: background 0.15s ease;
+}
+
+.vc-pin-btn:hover {
+    background: rgba(40, 40, 40, 0.9);
+}
+
+.vc-pin-close-btn {
+    background: rgba(200, 0, 0, 0.7);
+}
+
+.vc-pin-close-btn:hover {
+    background-color: var(--button-danger-background, #ed4245);
+}
+
+/* Resize handles */
+.vc-pin-resize-handle {
+    position: absolute;
+    background: transparent;
+}
+
+/* Edge handles */
+.vc-pin-resize-n {
+    top: -4px;
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: n-resize;
+}
+
+.vc-pin-resize-s {
+    bottom: -4px;
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: s-resize;
+}
+
+.vc-pin-resize-e {
+    right: -4px;
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: e-resize;
+}
+
+.vc-pin-resize-w {
+    left: -4px;
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: w-resize;
+}
+
+/* Corner handles */
+.vc-pin-resize-ne {
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: ne-resize;
+}
+
+.vc-pin-resize-se {
+    bottom: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: se-resize;
+}
+
+.vc-pin-resize-sw {
+    bottom: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: sw-resize;
+}
+
+.vc-pin-resize-nw {
+    top: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: nw-resize;
+}
+
+/* Loading state */
+.vc-pin-loading {
+    color: var(--text-muted, #72767d);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-pin-loading::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text-muted, #72767d);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: vc-pin-spin 1s linear infinite;
+}
+
+/* Maximized state */
+.vc-pin-window.vc-pin-maximized {
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0;
+    z-index: 10001;
+}
+
+.vc-pin-window.vc-pin-maximized .vc-pin-resize-handle {
+    display: none;
+}
+
+@keyframes vc-pin-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* No preview fallback */
+.vc-pin-no-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted, #72767d);
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+
+.vc-pin-no-preview-icon {
+    font-size: 48px;
+    opacity: 0.6;
+}
+
+/* Injected button in stream options panel */
+.vc-pin-inject-btn {
+    margin-top: 8px;
+    border-top: 1px solid var(--background-modifier-accent, #40444b);
+    padding-top: 8px;
+}
+
+.vc-pin-panel-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--interactive-normal, #b9bbbe);
+    font-size: 14px;
+    transition: all 0.15s ease;
+}
+
+.vc-pin-panel-btn:hover {
+    background-color: var(--background-modifier-hover, rgba(79, 84, 92, 0.4));
+    color: var(--interactive-hover, #dcddde);
+}
+
+.vc-pin-panel-btn svg {
+    flex-shrink: 0;
+}
