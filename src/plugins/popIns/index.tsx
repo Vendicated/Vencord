@@ -12,8 +12,8 @@ import { handleWindowChange, unhookWindow, getWindowStore } from "./windowHooks"
 
 export default definePlugin({
     name: "PopIn's",
-    description: "Right-click on a stream or webcam tile to pop it out to a floating window",
-    authors: [Devs.Ven],
+    description: "Right-click on a stream or webcam tile to pop it out to a floating window inside the discord",
+    authors: [Devs.fantik],
 
     contextMenus: {
         "stream-context": streamContextPatch,
