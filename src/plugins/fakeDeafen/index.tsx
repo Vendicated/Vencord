@@ -56,7 +56,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "PurifyFakeDeafen",
+    name: "فيك لهم",
     description: "Fake being muted, deafened, or both while still being able to hear and speak.",
     dependencies: ["PhilsPluginLibrary"],
     authors: [{
