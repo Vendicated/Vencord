@@ -1,7 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
- * Modified by pluckerpilple (2025)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,12 +28,7 @@ import { initMicrophoneStore } from "./stores";
 export default definePlugin({
     name: "BetterMicrophone",
     description: "This plugin allows you to further customize your microphone.",
-    authors: [
-        {
-            name: "pluckerpilple",
-            id: 375402345971974147n
-        }
-    ],
+    authors: [Devs.pluckerpilple],
     dependencies: ["PhilsPluginLibrary"],
     start(): void {
         initMicrophoneStore();

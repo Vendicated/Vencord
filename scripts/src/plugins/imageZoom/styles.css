@@ -1,0 +1,25 @@
+.vc-imgzoom-lens {
+    position: absolute;
+    inset: 0;
+    z-index: 9999;
+    border: 2px solid grey;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: none;
+    box-shadow: inset 0 0 10px 2px grey;
+    filter: drop-shadow(0 0 2px grey);
+    pointer-events: none;
+
+    /* negate the border offsetting the lens */
+    margin: -2px;
+}
+
+.vc-imgzoom-square {
+    border-radius: 0;
+}
+
+.vc-imgzoom-nearest-neighbor > .vc-imgzoom-image {
+    image-rendering: pixelated;
+
+    /* https://googlechrome.github.io/samples/image-rendering-pixelated/index.html */
+}

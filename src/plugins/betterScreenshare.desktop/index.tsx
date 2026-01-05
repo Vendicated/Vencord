@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2025 pluckerpilple
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,7 @@ import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 export default definePlugin({
     name: "BetterScreenshare",
     description: "This plugin allows you to further customize your screen sharing.",
-    authors: [
-        {
-            name: "pluckerpilple",
-            id: 375402345971974147n
-        }
-    ],
+    authors: [Devs.pluckerpilple],
     dependencies: ["PhilsPluginLibrary"],
     patches: [
         {

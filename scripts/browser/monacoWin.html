@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Vencord QuickCSS Editor</title>
+        <style>
+            html,
+            body,
+            #container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="container"></div>
+
+        <script>
+            const script = document.createElement("script");
+            script.src = new URL("/vendor/monaco/index.js", baseUrl);
+
+            const style = document.createElement("link");
+            style.type = "text/css";
+            style.rel = "stylesheet";
+            style.href = new URL("/vendor/monaco/index.css", baseUrl);
+
+            document.body.append(style, script);
+        </script>
+    </body>
+</html>

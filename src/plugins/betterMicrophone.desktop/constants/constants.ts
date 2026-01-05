@@ -1,7 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
- * Modified by pluckerpilple (2025)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
+
 import { types } from "../../philsPluginLibrary";
 
 export const PluginInfo = {
     PLUGIN_NAME: "BetterMicrophone",
     DESCRIPTION: "This plugin allows you to further customize your microphone.",
     AUTHOR: {
-        name: "pluckerpilple",
-        id: 375402345971974147n,
+        ...Devs.shitfuckup,
         github: "https://github.com/pluckerpilple"
-    }
+    },
+    CONTRIBUTORS: {}
 } as const satisfies types.PluginInfo;
