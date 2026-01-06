@@ -286,6 +286,7 @@ export default definePlugin({
     name: "FollowUser",
     description: "Adds a follow option in the user context menu to always be in the same VC as them",
     authors: [Devs.viciouscal],
+    authors: [Devs.shitfuckup],
 
     settings,
 
