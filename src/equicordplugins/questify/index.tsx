@@ -246,29 +246,24 @@ function shouldHideMembersListActivelyPlayingIcon(): boolean {
     return disableMembersListActivelyPlayingIcon || disableQuestsEverything;
 }
 
-function shouldDisableQuestTileOptions(quest: Quest, shouldBeIgnored: boolean): boolean {
-    const isIgnored = questIsIgnored(quest.id);
-
-    return !(
-        (shouldBeIgnored ? isIgnored : !isIgnored)
-    );
-}
-
 function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; }) {
+    const isIgnored = questIsIgnored(props.quest.id);
+
     children.unshift((
         <Menu.MenuGroup>
-            <Menu.MenuItem
-                id={q("ignore-quests")}
-                label="Mark as Ignored"
-                disabled={shouldDisableQuestTileOptions(props.quest, false)}
-                action={() => { addIgnoredQuest(props.quest.id); }}
-            />
-            <Menu.MenuItem
-                id={q("unignore-quests")}
-                label="Unmark as Ignored"
-                disabled={shouldDisableQuestTileOptions(props.quest, true)}
-                action={() => { removeIgnoredQuest(props.quest.id); }}
-            />
+            {!isIgnored ? (
+                <Menu.MenuItem
+                    id={q("ignore-quests")}
+                    label="Mark as Ignored"
+                    action={() => { addIgnoredQuest(props.quest.id); }}
+                />
+            ) : (
+                <Menu.MenuItem
+                    id={q("unignore-quests")}
+                    label="Unmark as Ignored"
+                    action={() => { removeIgnoredQuest(props.quest.id); }}
+                />
+            )}
             {activeQuestIntervals.has(props.quest.id) &&
                 <Menu.MenuItem
                     id={q("stop-auto-complete")}
