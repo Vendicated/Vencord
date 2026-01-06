@@ -62,14 +62,20 @@ export const ensurePopoutRoot = (win: Window, callback: (root: HTMLElement) => v
     }
 };
 
-export const dispatchContextMenuEvent = (
+export const dispatchContextMenuThroughOverlay = (
     win: Window,
+    overlayElement: HTMLElement,
     x: number,
     y: number,
     screenX: number,
     screenY: number
 ) => {
+    // Temporarily hide overlay to find element below
+    const prevPointerEvents = overlayElement.style.pointerEvents;
+    overlayElement.style.pointerEvents = "none";
+
     const elementBelow = win.document.elementFromPoint(x, y) as HTMLElement;
+
     if (elementBelow) {
         const newEvent = new MouseEvent("contextmenu", {
             bubbles: true,
@@ -83,24 +89,10 @@ export const dispatchContextMenuEvent = (
         });
         elementBelow.dispatchEvent(newEvent);
     }
+
+    // Restore immediately
+    overlayElement.style.pointerEvents = prevPointerEvents || "auto";
 };
-
-export const dispatchContextMenuThroughOverlay = (
-    win: Window,
-    overlayElement: HTMLElement,
-    x: number,
-    y: number,
-    screenX: number,
-    screenY: number
-) => {
-    overlayElement.style.pointerEvents = "none";
-    dispatchContextMenuEvent(win, x, y, screenX, screenY);
-    setTimeout(() => {
-        overlayElement.style.pointerEvents = "auto";
-    }, 100);
-};
-
-
 
 export const autoFitPopout = (win: Window) => {
     const doc = win.document;

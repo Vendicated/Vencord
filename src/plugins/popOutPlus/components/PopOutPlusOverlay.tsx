@@ -105,7 +105,7 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
                 style={{
                     opacity: isVisible ? 1 : 0,
                     pointerEvents: isVisible ? "auto" : "none",
-                    transition: "opacity 0.3s ease",
+                    transition: "opacity 0.1s ease",
                 }}
             >
                 <PopOutControls
