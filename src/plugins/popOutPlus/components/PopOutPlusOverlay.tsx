@@ -5,8 +5,10 @@
  */
 
 import { usePopoutWindow } from "@plugins/popOutPlus/hooks/usePopoutWindow";
-import { dispatchContextMenuThroughOverlay, observeWindowInteractions, startWindowDrag } from "@plugins/popOutPlus/utils/windowInteractions";
-import { PopoutWindowStore, React, useEffect, useRef, useState } from "@webpack/common";
+import { useWindowDragging } from "@plugins/popOutPlus/hooks/useWindowDragging";
+import { useWindowEvents } from "@plugins/popOutPlus/hooks/useWindowEvents";
+import { dispatchContextMenuThroughOverlay } from "@plugins/popOutPlus/utils/windowInteractions";
+import { PopoutWindowStore, React, useCallback, useRef, useState } from "@webpack/common";
 
 import { PopOutControls } from "./PopOutControls";
 
@@ -25,69 +27,51 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
         autoFitToVideo
     } = usePopoutWindow(popoutKey);
 
+    const { onMouseDown: handleDragStart, isDragging } = useWindowDragging(popoutKey);
+
     const [isVisible, setIsVisible] = useState(false);
     const hideTimeoutRef = useRef<number | null>(null);
     const dragLayerRef = useRef<HTMLDivElement>(null);
 
-    const showControls = () => {
+    const showControls = useCallback(() => {
         setIsVisible(true);
         if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
         hideTimeoutRef.current = window.setTimeout(() => setIsVisible(false), 2000);
-    };
+    }, []);
 
-    useEffect(() => {
-        const win = PopoutWindowStore?.getWindow(popoutKey);
-        if (!win) return;
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        showControls();
+        if ((e.target as HTMLElement)?.tagName === "INPUT" || (e.target as HTMLElement)?.tagName === "TEXTAREA") {
+            return;
+        }
 
-        const cleanup = observeWindowInteractions(win, {
-            onActivity: showControls,
-            onKeyDown: e => {
-                showControls();
-                if ((e.target as HTMLElement)?.tagName === "INPUT" || (e.target as HTMLElement)?.tagName === "TEXTAREA") {
-                    return;
-                }
+        if (e.key === "f" || e.key === "F11") {
+            e.preventDefault();
+            toggleFullscreen();
+        } else if (e.key === "p") {
+            e.preventDefault();
+            togglePin();
+        } else if (e.key === "c") {
+            e.preventDefault();
+            toggleClearView();
+        } else if (e.key === "a") {
+            e.preventDefault();
+            autoFitToVideo();
+        }
+    }, [showControls, toggleFullscreen, togglePin, toggleClearView, autoFitToVideo]);
 
-                if (e.key === "f" || e.key === "F11") {
-                    e.preventDefault();
-                    toggleFullscreen();
-                } else if (e.key === "p") {
-                    e.preventDefault();
-                    togglePin();
-                } else if (e.key === "c") {
-                    e.preventDefault();
-                    toggleClearView();
-                } else if (e.key === "a") {
-                    e.preventDefault();
-                    autoFitToVideo();
-                }
-            },
-            onDblClick: e => {
-                const target = e.target as HTMLElement;
-                if (target.closest("#vc-popout-controls") || target.tagName === "BUTTON") return;
-                toggleFullscreen();
-            }
-        });
+    const handleDblClick = useCallback((e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.closest("#vc-popout-controls") || target.tagName === "BUTTON") return;
+        toggleFullscreen();
+    }, [toggleFullscreen]);
 
-        return () => {
-            cleanup();
-            if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-        };
-    }, [popoutKey, toggleFullscreen, togglePin, toggleClearView, autoFitToVideo]);
-
-    // Dragging Logic
-    const handleMouseDown = (e: React.MouseEvent) => {
-        if (e.button !== 0) return;
-        const win = PopoutWindowStore?.getWindow(popoutKey);
-        if (!win || !dragLayerRef.current) return;
-
-        startWindowDrag(
-            win,
-            { screenX: e.screenX, screenY: e.screenY },
-            undefined,
-            undefined,
-            dragLayerRef.current
-        );
-    };
+    // Use the hook for window event listeners
+    useWindowEvents(popoutKey, {
+        onActivity: showControls,
+        onKeyDown: handleKeyDown,
+        onDblClick: handleDblClick
+    });
 
     const handleContextMenu = (e: React.MouseEvent) => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
@@ -103,7 +87,7 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
             <div
                 ref={dragLayerRef}
                 id="vc-popout-drag-layer"
-                onMouseDown={handleMouseDown}
+                onMouseDown={handleDragStart}
                 onContextMenu={handleContextMenu}
                 style={{
                     position: "fixed",
@@ -112,7 +96,7 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
                     right: 0,
                     bottom: 0,
                     zIndex: 99998,
-                    cursor: "grab",
+                    cursor: isDragging ? "grabbing" : "grab",
                     background: "transparent",
                     pointerEvents: "auto"
                 }}

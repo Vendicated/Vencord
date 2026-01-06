@@ -28,7 +28,7 @@ export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
     }
 };
 
-// I did not found how to dynamically change class list for separate popups windows except this method
+// I've not found how to dynamically change class list for separate popups windows except this method
 export const setPopoutClearView = (win: Window, enabled: boolean) => {
     if (enabled) {
         win.document.body.classList.add("vc-popout-clear-view");
@@ -37,6 +37,7 @@ export const setPopoutClearView = (win: Window, enabled: boolean) => {
     }
 };
 
+// I've not found the better way to add react component into popout page. PopoutWindowStore.getWindow returns window object
 export const ensurePopoutRoot = (win: Window, callback: (root: HTMLElement) => void) => {
     const doc = win.document;
     if (doc.getElementById(POPOUT_ROOT_ID)) return;
@@ -59,72 +60,6 @@ export const ensurePopoutRoot = (win: Window, callback: (root: HTMLElement) => v
         }, 100);
         setTimeout(() => clearInterval(interval), 5000);
     }
-};
-
-export const observeWindowInteractions = (
-    win: Window,
-    callbacks: {
-        onActivity?: () => void;
-        onKeyDown?: (e: KeyboardEvent) => void;
-        onDblClick?: (e: MouseEvent) => void;
-    }
-) => {
-    const doc = win.document;
-    const { onActivity, onKeyDown, onDblClick } = callbacks;
-    const cleanups: (() => void)[] = [];
-
-    if (onActivity) {
-        doc.addEventListener("mousemove", onActivity);
-        doc.addEventListener("mouseenter", onActivity);
-        cleanups.push(() => {
-            doc.removeEventListener("mousemove", onActivity);
-            doc.removeEventListener("mouseenter", onActivity);
-        });
-    }
-
-    if (onKeyDown) {
-        doc.addEventListener("keydown", onKeyDown);
-        cleanups.push(() => doc.removeEventListener("keydown", onKeyDown));
-    }
-
-    if (onDblClick) {
-        doc.addEventListener("dblclick", onDblClick);
-        cleanups.push(() => doc.removeEventListener("dblclick", onDblClick));
-    }
-
-    return () => cleanups.forEach(c => c());
-};
-
-export const startWindowDrag = (
-    win: Window,
-    initialEvent: { screenX: number, screenY: number; },
-    onDragStart?: () => void,
-    onDragEnd?: () => void,
-    dragElement?: HTMLElement
-) => {
-    const startX = initialEvent.screenX;
-    const startY = initialEvent.screenY;
-    const startWinX = win.screenX;
-    const startWinY = win.screenY;
-
-    if (dragElement) dragElement.style.cursor = "grabbing";
-    if (onDragStart) onDragStart();
-
-    const handleMouseMove = (e: MouseEvent) => {
-        const deltaX = e.screenX - startX;
-        const deltaY = e.screenY - startY;
-        win.moveTo(startWinX + deltaX, startWinY + deltaY);
-    };
-
-    const handleMouseUp = () => {
-        win.removeEventListener("mousemove", handleMouseMove);
-        win.removeEventListener("mouseup", handleMouseUp);
-        if (dragElement) dragElement.style.cursor = "grab";
-        if (onDragEnd) onDragEnd();
-    };
-
-    win.addEventListener("mousemove", handleMouseMove);
-    win.addEventListener("mouseup", handleMouseUp);
 };
 
 export const dispatchContextMenuEvent = (
@@ -165,9 +100,7 @@ export const dispatchContextMenuThroughOverlay = (
     }, 100);
 };
 
-export const movePopout = (win: Window, x: number, y: number) => {
-    win.moveTo(x, y);
-};
+
 
 export const autoFitPopout = (win: Window) => {
     const doc = win.document;
