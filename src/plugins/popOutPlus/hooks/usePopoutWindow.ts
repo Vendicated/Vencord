@@ -4,46 +4,42 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addFullscreenListener, autoFitPopout, isWindowClearView, setPopoutAlwaysOnTop, setPopoutClearView, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
-import { PopoutWindowStore, useCallback, useEffect, useState } from "@webpack/common";
+import { autoFitPopout, isWindowClearView, setPopoutAlwaysOnTop, setPopoutClearView, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
+import { PopoutWindowStore, useCallback, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 export const usePopoutWindow = (popoutKey: string) => {
-    const [isPinned, setIsPinned] = useState(false);
-    const [isFullscreen, setIsFullscreen] = useState(false);
     const [isClearView, setIsClearView] = useState(false);
 
-    const updateStates = useCallback(() => {
-        setIsPinned(PopoutWindowStore?.getIsAlwaysOnTop(popoutKey) ?? false);
-        const win = PopoutWindowStore?.getWindow(popoutKey);
-        // @ts-ignore
-        if (PopoutWindowStore?.isWindowFullScreen) {
-            // @ts-ignore
-            setIsFullscreen(PopoutWindowStore.isWindowFullScreen(popoutKey));
-        }
+    // Use store subscriptions for reactive state
+    const isPinned = useStateFromStores(
+        [PopoutWindowStore],
+        () => PopoutWindowStore?.getIsAlwaysOnTop(popoutKey) ?? false,
+        [popoutKey]
+    );
 
+    const isFullscreen = useStateFromStores(
+        [PopoutWindowStore],
+        () => PopoutWindowStore?.isWindowFullScreen?.(popoutKey) ?? false,
+        [popoutKey]
+    );
+
+    // ClearView still needs local state since it's not tracked by a store
+    useEffect(() => {
+        const win = PopoutWindowStore?.getWindow(popoutKey);
         if (win) {
             setIsClearView(isWindowClearView(win));
         }
     }, [popoutKey]);
 
-    useEffect(() => {
-        updateStates();
-        const win = PopoutWindowStore?.getWindow(popoutKey);
-        if (!win) return;
-
-        return addFullscreenListener(win, setIsFullscreen);
-    }, [popoutKey, updateStates]);
-
     const togglePin = useCallback(() => {
-        const next = !isPinned;
-        setPopoutAlwaysOnTop(popoutKey, next);
-        setIsPinned(next);
+        setPopoutAlwaysOnTop(popoutKey, !isPinned);
+        // State update happens automatically via store subscription
     }, [isPinned, popoutKey]);
 
     const toggleFullscreen = useCallback(() => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
-        togglePopoutFullscreen(win);
+        togglePopoutFullscreen(win, popoutKey);
         // State update happens via event listener, but we can optimistically flip if we trust it
     }, [popoutKey]);
 

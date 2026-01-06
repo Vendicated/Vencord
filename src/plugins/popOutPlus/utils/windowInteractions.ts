@@ -5,6 +5,7 @@
  */
 
 import { findByProps } from "@webpack";
+import { PopoutWindowStore } from "@webpack/common";
 
 export const POPOUT_ROOT_ID = "vc-popout-plus-root";
 
@@ -15,16 +16,19 @@ export const setPopoutAlwaysOnTop = (popoutKey: string, enabled: boolean) => {
     getPopoutModule()?.setAlwaysOnTop(popoutKey, enabled);
 };
 
-export const togglePopoutFullscreen = (win: Window) => {
+export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
     const doc = win.document;
-    const appMount = doc.getElementById("app-mount");
 
-    if (doc.fullscreenElement) {
+    // Use store to check fullscreen state instead of DOM query
+    if (PopoutWindowStore?.isWindowFullScreen?.(popoutKey)) {
         doc.exitFullscreen().catch(() => { });
-    } else if (appMount?.requestFullscreen) {
-        appMount.requestFullscreen().catch(() => {
-            doc.documentElement.requestFullscreen().catch(() => { });
-        });
+    } else {
+        const appMount = doc.getElementById("app-mount");
+        if (appMount?.requestFullscreen) {
+            appMount.requestFullscreen().catch(() => {
+                doc.documentElement.requestFullscreen().catch(() => { });
+            });
+        }
     }
 };
 
@@ -41,18 +45,8 @@ export const setPopoutClearView = (win: Window, enabled: boolean) => {
     }
 };
 
-export const isWindowFullscreen = (win: Window): boolean => {
-    return !!win.document.fullscreenElement;
-};
-
 export const isWindowClearView = (win: Window): boolean => {
     return win.document.body.classList.contains("vc-popout-clear-view");
-};
-
-export const addFullscreenListener = (win: Window, callback: (isFullscreen: boolean) => void): () => void => {
-    const handler = () => callback(!!win.document.fullscreenElement);
-    win.document.addEventListener("fullscreenchange", handler);
-    return () => win.document.removeEventListener("fullscreenchange", handler);
 };
 
 export const ensurePopoutRoot = (win: Window, callback: (root: HTMLElement) => void) => {
