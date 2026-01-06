@@ -1,7 +1,0 @@
-*
-!.*ignore
-!package.json
-!*.md
-!prepare.ts
-!index.d.ts
-!globals.d.ts

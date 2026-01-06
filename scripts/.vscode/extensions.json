@@ -1,9 +1,0 @@
-{
-    "recommendations": [
-        "dbaeumer.vscode-eslint",
-        "EditorConfig.EditorConfig",
-        "GregorBiswanger.json2ts",
-        "stylelint.vscode-stylelint",
-        "Vendicated.vencord-companion"
-    ]
-}
