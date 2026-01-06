@@ -20,6 +20,7 @@ import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
@@ -348,7 +349,7 @@ export default definePlugin({
             }
 
             try {
-                return child?.props?.renderTreeNode !== null;
+                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
             } catch (e) {
                 console.error(e);
                 return true;

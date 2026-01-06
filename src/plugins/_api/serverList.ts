@@ -39,8 +39,8 @@ export default definePlugin({
                     replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
                 },
                 {
-                    match: /lastTargetNode.{0,50}\{\}\)\]/,
-                    replace: "$&.concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below))"
+                    match: /lastTargetNode.{0,25}\?null:\i,/,
+                    replace: "$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"
                 }
             ]
         }
