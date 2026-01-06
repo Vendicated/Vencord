@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { autoFitPopout, isWindowClearView, setPopoutAlwaysOnTop, setPopoutClearView, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
-import { PopoutWindowStore, useCallback, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { autoFitPopout, setPopoutAlwaysOnTop, setPopoutClearView, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
+import { PopoutWindowStore, useCallback, useState, useStateFromStores } from "@webpack/common";
 
 export const usePopoutWindow = (popoutKey: string) => {
+    // ClearView uses local state - React state is the source of truth
     const [isClearView, setIsClearView] = useState(false);
 
     // Use store subscriptions for reactive state
@@ -22,14 +23,6 @@ export const usePopoutWindow = (popoutKey: string) => {
         () => PopoutWindowStore?.isWindowFullScreen?.(popoutKey) ?? false,
         [popoutKey]
     );
-
-    // ClearView still needs local state since it's not tracked by a store
-    useEffect(() => {
-        const win = PopoutWindowStore?.getWindow(popoutKey);
-        if (win) {
-            setIsClearView(isWindowClearView(win));
-        }
-    }, [popoutKey]);
 
     const togglePin = useCallback(() => {
         setPopoutAlwaysOnTop(popoutKey, !isPinned);

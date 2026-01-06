@@ -28,16 +28,13 @@ export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
     }
 };
 
+// I did not found how to dynamically change class list for separate popups windows except this method
 export const setPopoutClearView = (win: Window, enabled: boolean) => {
     if (enabled) {
         win.document.body.classList.add("vc-popout-clear-view");
     } else {
         win.document.body.classList.remove("vc-popout-clear-view");
     }
-};
-
-export const isWindowClearView = (win: Window): boolean => {
-    return win.document.body.classList.contains("vc-popout-clear-view");
 };
 
 export const ensurePopoutRoot = (win: Window, callback: (root: HTMLElement) => void) => {
