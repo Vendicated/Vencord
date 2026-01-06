@@ -4,22 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByProps } from "@webpack";
-import { PopoutWindowStore } from "@webpack/common";
+import { PopoutActions, PopoutWindowStore } from "@webpack/common";
 
 export const POPOUT_ROOT_ID = "vc-popout-plus-root";
 
-let popoutModule: any;
-const getPopoutModule = () => popoutModule ??= findByProps("openCallTilePopout");
-
 export const setPopoutAlwaysOnTop = (popoutKey: string, enabled: boolean) => {
-    getPopoutModule()?.setAlwaysOnTop(popoutKey, enabled);
+    PopoutActions.setAlwaysOnTop(popoutKey, enabled);
 };
 
+// There is no native/react method to enforce fullscreen
 export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
     const doc = win.document;
 
-    // Use store to check fullscreen state instead of DOM query
     if (PopoutWindowStore?.isWindowFullScreen?.(popoutKey)) {
         doc.exitFullscreen().catch(() => { });
     } else {
