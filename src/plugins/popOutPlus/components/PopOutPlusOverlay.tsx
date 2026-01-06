@@ -100,6 +100,29 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
                     pointerEvents: "auto"
                 }}
             />
+
+            <div
+                style={{
+                    position: "fixed",
+                    top: "20%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    background: "rgba(0, 0, 0, 0.8)",
+                    color: "white",
+                    padding: "8px 12px",
+                    borderRadius: "4px",
+                    pointerEvents: "none",
+                    zIndex: 200,
+                    opacity: isDragging ? 1 : 0,
+                    transition: "opacity 0.2s ease",
+                    fontSize: "14px",
+                    whiteSpace: "nowrap",
+                    textAlign: "center"
+                }}
+            >
+                To move to another monitor, drag by the title bar (disable Clear View to see title bar).
+            </div>
+
             <div
                 style={{
                     opacity: isVisible ? 1 : 0,
