@@ -78,7 +78,7 @@ const onPopoutWindowOpen = (event: any) => {
 export default definePlugin({
     name: "PopOut Plus",
     description: "Pop out streams and cameras with fullscreen support",
-    authors: [Devs.Ven, Devs.fantik],
+    authors: [Devs.prism, Devs.fantik],
 
     start() {
         FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", onPopoutWindowOpen);
