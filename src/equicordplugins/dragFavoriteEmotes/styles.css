@@ -1,0 +1,25 @@
+.vc-drag-favorite-emotes-indicator::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 4px;
+    right: 0;
+    left: 2px;
+    height: calc(100% - (var(--custom-emoji-picker-constants-emoji-container-padding-vertical) * 2));
+    width: 4px;
+    transform: translateX(-4px);
+    background-color: var(--green-360);
+    border-radius: 2px;
+}
+
+.vc-drag-favorite-emotes-wrapper {
+    inset: 0;
+    flex-direction: row;
+}
+
+.vc-drag-favorite-emotes-item {
+    background-size: 40px;
+    height: 40px;
+    width: 40px;
+    display: block;
+}

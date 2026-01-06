@@ -1233,6 +1233,14 @@ export const EquicordDevs = Object.freeze({
         name: "Key",
         id: 1230319937155760131n
     },
+    PWall: {
+        name: "PWall",
+        id: 0n
+    },
+    busyboxkitty: {
+        name: "busyboxkitty",
+        id: 1312185484159483948n
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
