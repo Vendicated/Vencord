@@ -53,30 +53,6 @@ function parseCombo(line: string): KeyCombo | null {
     return combo.code ? combo : null;
 }
 
-let keydownHandler: ((e: KeyboardEvent) => void) | null = null;
-let combos: KeyCombo[] = [];
-
-function reloadCombos(value: string) {
-    combos = combos.filter(c => !c.userDefined);
-
-    if (value.trim().length === 0) {
-        return;
-    }
-
-    const lines = value
-        .split("|")
-        .map(l => l.trim())
-        .filter(l => l.length > 0);
-
-    for (const line of lines) {
-        const combo = parseCombo(line);
-
-        if (!combo) continue;
-        combo.userDefined = true;
-        combos.push(combo);
-    }
-}
-
 const callShortcuts: KeyCombo[] = [
     {
         ctrl: true,
@@ -104,26 +80,17 @@ function matchesCombo(a: KeyCombo, b: KeyCombo): boolean {
     );
 }
 
-function reloadRemoveCallShortcut(value: boolean) {
-    if (value) {
-        combos.push(...callShortcuts);
-    }
-    else {
-        combos = combos.filter(c => !callShortcuts.some(cc => matchesCombo(c, cc)));
-    }
-}
-
 const removeShortcutsPlugin = definePlugin({
     name: "RemoveShortcuts",
     description:
         "Remove keyboard shortcuts from discord. By default `CTRL + '` and `CTRL + SHIFT + '` to call is disabled. This plugin blocks input from reaching Discord's keyboard shortcut handler.",
     authors: [Devs.Kim],
     start() {
-        if (keydownHandler) return;
-        reloadCombos(this.settings.store.userRemovedShortcuts);
-        reloadRemoveCallShortcut(this.settings.store.removeCallShortcut);
-        keydownHandler = (e: KeyboardEvent) => {
-            for (const combo of combos) {
+        if (this.keydownHandler) return;
+        this.reloadCombos(this.settings.store.userRemovedShortcuts);
+        this.reloadRemoveCallShortcut(this.settings.store.removeCallShortcut);
+        this.keydownHandler = (e: KeyboardEvent) => {
+            for (const combo of this.keyCombos) {
                 if (matchesCombo(combo, {
                     code: e.code,
                     ctrl: e.ctrlKey,
@@ -137,12 +104,12 @@ const removeShortcutsPlugin = definePlugin({
                 }
             }
         };
-        document.addEventListener("keydown", keydownHandler, true);
+        document.addEventListener("keydown", this.keydownHandler, true);
     },
     stop() {
-        document.removeEventListener("keydown", keydownHandler!, true);
-        keydownHandler = null;
-        combos = [];
+        document.removeEventListener("keydown", this.keydownHandler!, true);
+        this.keydownHandler = null;
+        this.keyCombos = [];
     },
     settings: definePluginSettings({
         removeCallShortcut: {
@@ -151,7 +118,7 @@ const removeShortcutsPlugin = definePlugin({
             description: "Removes the `CTRL + '` and `CTRL + SHIFT + '` keyboard shortcut to start a call.",
             default: true,
             onChange(value) {
-                reloadRemoveCallShortcut(value);
+                removeShortcutsPlugin.reloadRemoveCallShortcut(value);
             },
         },
         userRemovedShortcuts: {
@@ -161,10 +128,39 @@ const removeShortcutsPlugin = definePlugin({
                 "A list of custom keyboard shortcuts to remove from Discord. Separated by |, in the format `CTRL + Slash` or `ALT + KeyB`. Modifiers are optional. Example: `CTRL + SHIFT + KeyA | ALT + KeyC`",
             default: "",
             onChange(value) {
-                reloadCombos(value);
+                removeShortcutsPlugin.reloadCombos(value);
             },
         },
     }),
+    keydownHandler: null as ((e: KeyboardEvent) => void) | null,
+    keyCombos: [] as KeyCombo[],
+    reloadCombos(value: string) {
+        this.keyCombos = this.keyCombos.filter(c => !c.userDefined);
+
+        if (value.trim().length === 0) {
+            return;
+        }
+
+        const lines = value
+            .split("|")
+            .map(l => l.trim())
+            .filter(l => l.length > 0);
+
+        for (const line of lines) {
+            const combo = parseCombo(line);
+
+            if (!combo) continue;
+            combo.userDefined = true;
+            this.keyCombos.push(combo);
+        }
+    },
+    reloadRemoveCallShortcut(value: boolean) {
+        this.keyCombos = this.keyCombos.filter(c => !callShortcuts.some(cc => matchesCombo(c, cc)));
+
+        if (value) {
+            this.keyCombos.push(...callShortcuts);
+        }
+    },
 });
 
 export default removeShortcutsPlugin;
