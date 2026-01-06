@@ -414,6 +414,10 @@ export function notify(event: IpcMainInvokeEvent,
             event.sender.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationClickEvent("${notificationData.channelId}", "${notificationData.messageId}")`);
         };
 
+        if (window) {
+            window.flashFrame(true);
+        }
+
         if (isLinux) {
             if (!isMonitorRunning && extraOptions?.inlineReply && checkLinuxDE("", "KDE")) {
                 startListeningToDbus();
@@ -478,17 +482,27 @@ export async function deleteTempFolder(_) {
 }
 
 function forceFocus() {
-    if (window) {
-        console.log("Window is available");
+    setTimeout(() => {
+        if (window) {
+            console.log("Window is available");
 
-        // Praying to the Windows gods that one of these work
-        window.show();
-        window.focus();
+            window.show();
+            window.focus();
 
-        // If the above two don't work, these sure will
-        window.setAlwaysOnTop(true);
-        window.setAlwaysOnTop(false);
-    }
+            if (window.isMinimized()) {
+                window.restore();
+            }
+
+            // The "screen-saver" seems to be important because I couldnt get focusing working with anything else
+            window.setAlwaysOnTop(true, "screen-saver");
+
+            setTimeout(() => {
+                window!.setAlwaysOnTop(false);
+            }, 1500);
+        } else {
+            console.warn("Window is not available");
+        }
+    }, 300);
 
 }
 
@@ -506,11 +520,11 @@ app.on("second-instance", (event, args) => {
         return;
     }
 
-    forceFocus();
 
     const url = new URL(stringUrl);
     if (!url.searchParams.get("reaction")) {
         console.log("[BN] Link does not contain a reaction");
+        forceFocus();
     }
     webContents?.executeJavaScript(`Vencord.Plugins.plugins.BetterNotifications.NotificationReactEvent("${url.searchParams.get("channelId")}", "${url.searchParams.get("messageId")}", "${url.searchParams.get("reaction")}")`);
 });
