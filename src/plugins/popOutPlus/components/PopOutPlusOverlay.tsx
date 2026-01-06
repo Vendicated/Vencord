@@ -66,7 +66,6 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
         toggleFullscreen();
     }, [toggleFullscreen]);
 
-    // Use the hook for window event listeners
     useWindowEvents(popoutKey, {
         onActivity: showControls,
         onKeyDown: handleKeyDown,

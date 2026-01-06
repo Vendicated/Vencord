@@ -71,7 +71,6 @@ export const dispatchContextMenuThroughOverlay = (
     screenX: number,
     screenY: number
 ) => {
-    // Temporarily hide overlay to find element below
     const prevPointerEvents = overlayElement.style.pointerEvents;
     overlayElement.style.pointerEvents = "none";
 
@@ -91,7 +90,6 @@ export const dispatchContextMenuThroughOverlay = (
         elementBelow.dispatchEvent(newEvent);
     }
 
-    // Restore immediately
     overlayElement.style.pointerEvents = prevPointerEvents || "auto";
 };
 

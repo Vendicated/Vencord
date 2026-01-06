@@ -8,10 +8,8 @@ import { autoFitPopout, setPopoutAlwaysOnTop, setPopoutClearView, togglePopoutFu
 import { PopoutWindowStore, useCallback, useState, useStateFromStores } from "@webpack/common";
 
 export const usePopoutWindow = (popoutKey: string) => {
-    // ClearView uses local state - React state is the source of truth
     const [isClearView, setIsClearView] = useState(false);
 
-    // Use store subscriptions for reactive state
     const isPinned = useStateFromStores(
         [PopoutWindowStore],
         () => PopoutWindowStore?.getIsAlwaysOnTop(popoutKey) ?? false,
@@ -26,14 +24,12 @@ export const usePopoutWindow = (popoutKey: string) => {
 
     const togglePin = useCallback(() => {
         setPopoutAlwaysOnTop(popoutKey, !isPinned);
-        // State update happens automatically via store subscription
     }, [isPinned, popoutKey]);
 
     const toggleFullscreen = useCallback(() => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
         togglePopoutFullscreen(win, popoutKey);
-        // State update happens via event listener, but we can optimistically flip if we trust it
     }, [popoutKey]);
 
     const toggleClearView = useCallback(() => {

@@ -55,7 +55,7 @@ const patch = (children: any[], userId: string, isStream: boolean) => {
 };
 
 const attemptPopoutInjection = (key: string, attempt = 0) => {
-    if (attempt > 20) return; // Give up after 2 seconds approx
+    if (attempt > 20) return;
 
     if (PopoutWindowStore.isWindowFullyInitialized(key)) {
         const popoutWindow = PopoutWindowStore.getWindow(key);
@@ -77,22 +77,18 @@ const onPopoutWindowOpen = (event: any) => {
 
 export default definePlugin({
     name: "PopOut Plus",
-    description: "Pop out streams and cameras with fullscreen support (press F or F11 in popout)",
+    description: "Pop out streams and cameras with fullscreen support",
     authors: [Devs.Ven, Devs.fantik],
 
     start() {
         FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", onPopoutWindowOpen);
 
-        // Inject into any already-open popouts
         const keys = getCallTilePopoutKeys();
         keys.forEach(key => attemptPopoutInjection(key));
     },
 
     stop() {
         FluxDispatcher.unsubscribe("POPOUT_WINDOW_OPEN", onPopoutWindowOpen);
-
-        // Cleanup: Removing roots from windows is optional as they will be closed eventually,
-        // but for a clean "stop" we could iterate open popouts if needed.
     },
 
     contextMenus: {
