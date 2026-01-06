@@ -4,11 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByProps } from "@webpack";
+import { addFullscreenListener, autoFitPopout, isWindowClearView, setPopoutAlwaysOnTop, setPopoutClearView, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
 import { PopoutWindowStore, useCallback, useEffect, useState } from "@webpack/common";
-
-let popoutModule: any;
-const getPopoutModule = () => popoutModule ??= findByProps("openCallTilePopout");
 
 export const usePopoutWindow = (popoutKey: string) => {
     const [isPinned, setIsPinned] = useState(false);
@@ -18,7 +15,15 @@ export const usePopoutWindow = (popoutKey: string) => {
     const updateStates = useCallback(() => {
         setIsPinned(PopoutWindowStore?.getIsAlwaysOnTop(popoutKey) ?? false);
         const win = PopoutWindowStore?.getWindow(popoutKey);
-        setIsFullscreen(!!win?.document.fullscreenElement);
+        // @ts-ignore
+        if (PopoutWindowStore?.isWindowFullScreen) {
+            // @ts-ignore
+            setIsFullscreen(PopoutWindowStore.isWindowFullScreen(popoutKey));
+        }
+
+        if (win) {
+            setIsClearView(isWindowClearView(win));
+        }
     }, [popoutKey]);
 
     useEffect(() => {
@@ -26,91 +31,35 @@ export const usePopoutWindow = (popoutKey: string) => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
 
-        const handleFsChange = () => setIsFullscreen(!!win.document.fullscreenElement);
-        win.document.addEventListener("fullscreenchange", handleFsChange);
-
-        return () => {
-            win.document.removeEventListener("fullscreenchange", handleFsChange);
-        };
+        return addFullscreenListener(win, setIsFullscreen);
     }, [popoutKey, updateStates]);
 
     const togglePin = useCallback(() => {
         const next = !isPinned;
-        getPopoutModule()?.setAlwaysOnTop(popoutKey, next);
+        setPopoutAlwaysOnTop(popoutKey, next);
         setIsPinned(next);
     }, [isPinned, popoutKey]);
 
     const toggleFullscreen = useCallback(() => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
-
-        const doc = win.document;
-        const appMount = doc.getElementById("app-mount");
-
-        if (doc.fullscreenElement) {
-            doc.exitFullscreen().catch(() => { });
-        } else if (appMount?.requestFullscreen) {
-            appMount.requestFullscreen().catch(() => {
-                doc.documentElement.requestFullscreen().catch(() => { });
-            });
-        }
+        togglePopoutFullscreen(win);
+        // State update happens via event listener, but we can optimistically flip if we trust it
     }, [popoutKey]);
 
     const toggleClearView = useCallback(() => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
 
-        const titleBar = win.document.querySelector('[class*="titleBar"]') as HTMLElement;
-        if (!titleBar) return;
-
         const next = !isClearView;
         setIsClearView(next);
-        titleBar.style.display = next ? "none" : "";
+        setPopoutClearView(win, next);
     }, [isClearView, popoutKey]);
 
     const autoFitToVideo = useCallback(() => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
-
-        const doc = win.document;
-        const video = doc.querySelector("video") as HTMLVideoElement;
-        if (!video) return;
-
-        const { videoWidth, videoHeight } = video;
-        if (!videoWidth || !videoHeight) return;
-
-        const containerRect = video.getBoundingClientRect();
-        if (!containerRect.width || !containerRect.height) return;
-
-        const videoAspect = videoWidth / videoHeight;
-        const containerAspect = containerRect.width / containerRect.height;
-
-        let actualWidth: number;
-        let actualHeight: number;
-
-        if (videoAspect > containerAspect) {
-            actualWidth = containerRect.width;
-            actualHeight = containerRect.width / videoAspect;
-        } else {
-            actualHeight = containerRect.height;
-            actualWidth = containerRect.height * videoAspect;
-        }
-
-        const videoSize = {
-            width: Math.round(actualWidth),
-            height: Math.round(actualHeight)
-        };
-
-        const containerPaddingX = win.innerWidth - containerRect.width;
-        const containerPaddingY = win.innerHeight - containerRect.height;
-
-        const chromeWidth = win.outerWidth - win.innerWidth;
-        const chromeHeight = win.outerHeight - win.innerHeight;
-
-        const newWidth = videoSize.width + containerPaddingX + chromeWidth;
-        const newHeight = videoSize.height + containerPaddingY + chromeHeight;
-
-        win.resizeTo(newWidth, newHeight);
+        autoFitPopout(win);
     }, [popoutKey]);
 
     return {

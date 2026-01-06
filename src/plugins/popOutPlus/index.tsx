@@ -19,29 +19,13 @@ const getCallTilePopoutKeys = (): string[] => {
     return keys.filter(k => k.startsWith(POPOUT_KEY_PREFIX));
 };
 
+import { ensurePopoutRoot } from "@plugins/popOutPlus/utils/windowInteractions";
+
 const injectReactToPopout = (popoutWindow: Window, popoutKey: string) => {
-    const doc = popoutWindow.document;
-
-    if (doc.getElementById("vc-popout-plus-root")) {
-        return;
-    }
-
-    // Wait for app-mount to be available
-    const waitForAppMount = setInterval(() => {
-        const appMount = doc.getElementById("app-mount");
-        if (appMount) {
-            clearInterval(waitForAppMount);
-
-            const rootDiv = doc.createElement("div");
-            rootDiv.id = "vc-popout-plus-root";
-            appMount.appendChild(rootDiv);
-
-            const root = createRoot(rootDiv);
-            root.render(<PopOutPlusOverlay popoutKey={popoutKey} />);
-        }
-    }, 100);
-
-    setTimeout(() => clearInterval(waitForAppMount), 5000);
+    ensurePopoutRoot(popoutWindow, rootDiv => {
+        const root = createRoot(rootDiv);
+        root.render(<PopOutPlusOverlay popoutKey={popoutKey} />);
+    });
 };
 
 const patch = (children: any[], userId: string, isStream: boolean) => {
@@ -68,17 +52,25 @@ const patch = (children: any[], userId: string, isStream: boolean) => {
     }
 };
 
+const attemptPopoutInjection = (key: string, attempt = 0) => {
+    if (attempt > 20) return; // Give up after 2 seconds approx
+
+    if (PopoutWindowStore.isWindowFullyInitialized(key)) {
+        const popoutWindow = PopoutWindowStore.getWindow(key);
+        if (popoutWindow) {
+            injectReactToPopout(popoutWindow, key);
+        }
+    } else {
+        setTimeout(() => attemptPopoutInjection(key, attempt + 1), 100);
+    }
+};
+
 const onPopoutWindowOpen = (event: any) => {
     if (!event.key?.startsWith(POPOUT_KEY_PREFIX)) {
         return;
     }
 
-    setTimeout(() => {
-        const popoutWindow = PopoutWindowStore?.getWindow(event.key);
-        if (popoutWindow) {
-            injectReactToPopout(popoutWindow, event.key);
-        }
-    }, 500);
+    attemptPopoutInjection(event.key);
 };
 
 export default definePlugin({
@@ -90,15 +82,8 @@ export default definePlugin({
         FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", onPopoutWindowOpen);
 
         // Inject into any already-open popouts
-        setTimeout(() => {
-            const keys = getCallTilePopoutKeys();
-            keys.forEach(key => {
-                const popoutWindow = PopoutWindowStore?.getWindow(key);
-                if (popoutWindow) {
-                    injectReactToPopout(popoutWindow, key);
-                }
-            });
-        }, 100);
+        const keys = getCallTilePopoutKeys();
+        keys.forEach(key => attemptPopoutInjection(key));
     },
 
     stop() {
