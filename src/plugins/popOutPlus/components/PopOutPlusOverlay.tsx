@@ -94,7 +94,7 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    zIndex: 99998,
+                    zIndex: 10,
                     cursor: isDragging ? "grabbing" : "grab",
                     background: "transparent",
                     pointerEvents: "auto"
@@ -105,6 +105,8 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
                     opacity: isVisible ? 1 : 0,
                     pointerEvents: isVisible ? "auto" : "none",
                     transition: "opacity 0.1s ease",
+                    position: "relative",
+                    zIndex: 100,
                 }}
             >
                 <PopOutControls
