@@ -45,16 +45,16 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
             return;
         }
 
-        if (e.key === "f" || e.key === "F11") {
+        if (e.code === "KeyF" || e.code === "F11") {
             e.preventDefault();
             toggleFullscreen();
-        } else if (e.key === "p") {
+        } else if (e.code === "KeyP") {
             e.preventDefault();
             togglePin();
-        } else if (e.key === "c") {
+        } else if (e.code === "KeyC") {
             e.preventDefault();
             toggleClearView();
-        } else if (e.key === "a") {
+        } else if (e.code === "KeyA") {
             e.preventDefault();
             autoFitToVideo();
         }
