@@ -33,11 +33,6 @@ export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
 };
 
 export const setPopoutClearView = (win: Window, enabled: boolean) => {
-    const titleBar = win.document.querySelector('[class*="titleBar"]') as HTMLElement;
-    if (titleBar) {
-        titleBar.style.display = enabled ? "none" : "";
-    }
-    // Also toggle a class on the body for potential CSS usage
     if (enabled) {
         win.document.body.classList.add("vc-popout-clear-view");
     } else {
