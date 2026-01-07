@@ -79,8 +79,8 @@ export let LocaleStore: t.LocaleStore;
 export let RTCConnectionStore: t.RTCConnectionStore;
 export let SoundboardStore: t.SoundboardStore;
 export let PopoutWindowStore: t.PopoutWindowStore;
-export let ApplicationCommandIndexStore: GenericStore;
-export let EditMessageStore: GenericStore;
+export let ApplicationCommandIndexStore: t.ApplicationCommandIndexStore;
+export let EditMessageStore: t.EditMessageStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}

@@ -1,12 +1,14 @@
 // please keep in alphabetical order
 export * from "./AccessibilityStore";
 export * from "./ActiveJoinedThreadsStore";
+export * from "./ApplicationCommandIndexStore";
 export * from "./ApplicationStore";
 export * from "./AuthenticationStore";
 export * from "./CallStore";
 export * from "./ChannelRTCStore";
 export * from "./ChannelStore";
 export * from "./DraftStore";
+export * from "./EditMessageStore";
 export * from "./EmojiStore";
 export * from "./FluxStore";
 export * from "./FriendsStore";
