@@ -38,7 +38,7 @@ function formatDate(
     year: number | string,
     dateFormat: string,
 ): string {
-    console.log("Date Format:", dateFormat);
+
     const etad = (() => {
         switch (dateFormat) {
             case "dmy":
