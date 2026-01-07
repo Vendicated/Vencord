@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Parser, useState } from "@webpack/common";
+import { Parser, Select, useState } from "@webpack/common";
 import { Components, Settings } from "Vencord";
 
 import { findFullDate } from "./👀";
@@ -133,44 +133,88 @@ export default definePlugin({
     },
 
     settingsAboutComponent() {
-        const [collapsed, setCollapsed] = useState(true);
+        const [guideCollapsed, setGuideCollapsed] = useState(true);
+        const [previewCollapsed, setPreviewCollapsed] = useState(true);
+        const [previewPrefix, setPreviewPrefix] = useState("t");
+        const [previewValue, setPreviewValue] = useState("now");
 
         return (
             <>
                 <Components.Paragraph>
-                    Timestamps plugin ported from <Components.Link href="https://github.com/lisekilis/replugged-timestamps">Replugged-Timestamps</Components.Link> by lisekilis
+                    Timestamps plugin ported from <Components.Link href="https://github.com/lisekilis/replugged-timestamps">Replugged-Timestamps</Components.Link>
                 </Components.Paragraph>
-                <Components.TextButton variant="link" onClick={() => setCollapsed(!collapsed)} style={{ marginBottom: "10px", padding: 0 }}>
-                    {collapsed ? "▶ Show" : "▼ Hide"} Usage Guide
+                <Components.TextButton variant="link" onClick={() => setGuideCollapsed(!guideCollapsed)} style={{ marginBottom: "10px", padding: 0 }}>
+                    {guideCollapsed ? "▶ Show" : "▼ Hide"} Usage Guide
                 </Components.TextButton>
-                {!collapsed && (
+                {!guideCollapsed && (
                     <>
                         <Components.Heading>There are a two ways to use timestamps:</Components.Heading>
                         <Components.HeadingSecondary>Absolute Timestamps</Components.HeadingSecondary>
                         <Components.Paragraph>
-                            <code className="inline">{formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat)} 23:55</code>
-                            The time can be in 24-hour or 12-hour format. The date is optional and you can use any separator (/, ., -) between date parts.
-                        </Components.Paragraph>
-                        <Components.Paragraph>
-                            <small>
-                                <span>
-                                    <span>
-                                        Absolute timestamps do not require a prefix unless the "Require Prefix" setting is enabled.
-                                    </span>
-                                </span>
-                            </small>
+                            Absolute example: <Components.InlineCode>{formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat)} 23:55</Components.InlineCode><br />
+                            The time can be in 24-hour or 12-hour format. The date is optional and you can use any separator (/, ., -) between date parts.<br />
+                            Absolute timestamps do not require a prefix unless the "Require Prefix" setting is enabled.
                         </Components.Paragraph>
                         <Components.Divider />
                         <Components.HeadingSecondary>Relative Timestamps</Components.HeadingSecondary>
                         <Components.Paragraph>
-                            Relative: <Components.CodeBlock lang="md" content={"5d2h5h -3h now"} />. You can combine multiple time units in order of largest to smallest.
+                            Relative: <Components.InlineCode>5d2h5m</Components.InlineCode> <Components.InlineCode>-3h</Components.InlineCode> <Components.InlineCode>now</Components.InlineCode>. You can combine multiple time units in order of largest to smallest.<br />
+                            Supported time units are: <Components.InlineCode>y (years) m (months) w (weeks) d (days) h (hours) m (minutes) s (seconds)</Components.InlineCode>.<br />
+                            Both positive and negative values are supported.<br />
+                            You can also use <Components.InlineCode>now</Components.InlineCode> to represent the current time.<br />
+                            <b>Relative timestamps always require a prefix regardless of the "Require Prefix" setting.</b>
                         </Components.Paragraph>
-                        <Components.HeadingTertiary>Relative timestamps always require a prefix regardless of the "Require Prefix" setting.</Components.HeadingTertiary>
                         <Components.Divider />
+                        <Components.Heading>Prefixes</Components.Heading>
                         <Components.Paragraph>
-                            Supported prefixes are: <code>t</code>, <code>T</code>, <code>d</code>, <code>D</code>, <code>f</code>, <code>F</code>, and <code>R</code>.
+                            Prefixes determine how Discord will format the timestamp.<br />
+                            They consist of a single letter followed by a hyphen (<Components.InlineCode>-</Components.InlineCode>).<br />
+                            Supported prefix letters are: <Components.InlineCode>t T d D f F R</Components.InlineCode>.<br />
                             If no prefix is specified, the default prefix from the settings will be used.
                         </Components.Paragraph>
+                    </>
+                )}
+                <Components.Divider />
+                <Components.TextButton variant="link" onClick={() => setPreviewCollapsed(!previewCollapsed)} style={{ marginBottom: "10px", padding: 0 }}>
+                    {previewCollapsed ? "▶ Show" : "▼ Hide"} preview
+                </Components.TextButton>
+                {!previewCollapsed && (
+                    <>
+                        <Components.Heading>Preview</Components.Heading>
+                        <Components.Paragraph>Prefix</Components.Paragraph>
+                        <Select
+                            isSelected={v => v === previewPrefix}
+                            select={setPreviewPrefix}
+                            serialize={v => String(v)}
+                            options={[
+                                { label: "t-", value: "t" },
+                                { label: "T-", value: "T" },
+                                { label: "d-", value: "d" },
+                                { label: "D-", value: "D" },
+                                { label: "f-", value: "f" },
+                                { label: "F-", value: "F" },
+                                { label: "R-", value: "R" },
+                            ]}
+                        />
+                        <Components.Paragraph>Value</Components.Paragraph>
+                        <Select
+                            isSelected={v => v === previewValue}
+                            select={setPreviewValue}
+                            serialize={v => String(v)}
+                            options={[
+                                { label: formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat) + " 23:55", value: formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat) + " 23:55" },
+                                { label: formatDate("31", "12", "2023", Settings.plugins.timestamps.dateFormat) + " 11:59 PM", value: formatDate("31", "12", "2023", Settings.plugins.timestamps.dateFormat) + " 11:59 PM" },
+                                { label: "20:11", value: "20:11" },
+                                { label: "6:20 AM", value: "6:20 AM" },
+                                { label: "5d2h5m", value: "5d2h5m" },
+                                { label: "1h-10m", value: "1h-10m" },
+                                { label: "1y", value: "1y" },
+                                { label: "-1d", value: "-1d" },
+                                { label: "-3h", value: "-3h" },
+                                { label: "now", value: "now" },
+                            ]}
+                        />
+                        <Components.Paragraph>Result: {Parser.parse(replaceTimestamp(previewPrefix + "-" + previewValue))}</Components.Paragraph>
                     </>
                 )}
             </>
