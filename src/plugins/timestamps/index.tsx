@@ -135,7 +135,7 @@ export default definePlugin({
     settingsAboutComponent() {
         const [guideCollapsed, setGuideCollapsed] = useState(true);
         const [previewCollapsed, setPreviewCollapsed] = useState(true);
-        const [previewPrefix, setPreviewPrefix] = useState("t");
+        const [previewPrefix, setPreviewPrefix] = useState("t-");
         const [previewValue, setPreviewValue] = useState("now");
 
         return (
@@ -148,7 +148,7 @@ export default definePlugin({
                 </Components.TextButton>
                 {!guideCollapsed && (
                     <>
-                        <Components.Heading>There are a two ways to use timestamps:</Components.Heading>
+                        <Components.HeadingPrimary>There are a two ways to use timestamps:</Components.HeadingPrimary>
                         <Components.HeadingSecondary>Absolute Timestamps</Components.HeadingSecondary>
                         <Components.Paragraph>
                             Absolute example: <Components.InlineCode>{formatDate("20", "08", "2023", Settings.plugins.Timestamps.dateFormat)} 23:55</Components.InlineCode><br />
@@ -170,7 +170,8 @@ export default definePlugin({
                             Prefixes determine how Discord will format the timestamp.<br />
                             They consist of a single letter followed by a hyphen (<Components.InlineCode>-</Components.InlineCode>).<br />
                             Supported prefix letters are: <Components.InlineCode>t T d D f F R</Components.InlineCode>.<br />
-                            If no prefix is specified, the default prefix from the settings will be used.
+                            If no prefix is specified, the default prefix from the settings will be used.<br />
+                            The usage of a backslash (<Components.InlineCode>\</Components.InlineCode>) before a prefix or time will escape it, preventing it from being converted into a timestamp.
                         </Components.Paragraph>
                     </>
                 )}
@@ -187,13 +188,16 @@ export default definePlugin({
                             select={setPreviewPrefix}
                             serialize={v => String(v)}
                             options={[
-                                { label: "t-", value: "t" },
-                                { label: "T-", value: "T" },
-                                { label: "d-", value: "d" },
-                                { label: "D-", value: "D" },
-                                { label: "f-", value: "f" },
-                                { label: "F-", value: "F" },
-                                { label: "R-", value: "R" },
+                                { label: "t-", value: "t-" },
+                                { label: "T-", value: "T-" },
+                                { label: "d-", value: "d-" },
+                                { label: "D-", value: "D-" },
+                                { label: "f-", value: "f-" },
+                                { label: "F-", value: "F-" },
+                                { label: "R-", value: "R-" },
+                                { label: "No Prefix", value: "" },
+                                { label: "\\", value: "\\" },
+                                { label: "\\t-", value: "\\t-" }
                             ]}
                         />
                         <Components.Paragraph>Value</Components.Paragraph>
@@ -214,7 +218,7 @@ export default definePlugin({
                             ]}
                         />
                         <Components.Divider />
-                        <Components.Heading>Result: {Parser.parse(replaceTimestamp(previewPrefix + "-" + (previewValue === "arasaka" ? formatDate("20", "08", "2023", Settings.plugins.Timestamps.dateFormat) + " 23:55" : previewValue)))}</Components.Heading>
+                        <Components.Heading>Result: {Parser.parse(replaceTimestamp(previewPrefix + (previewValue === "arasaka" ? formatDate("20", "08", "2023", Settings.plugins.Timestamps.dateFormat) + " 23:55" : previewValue)))}</Components.Heading>
                     </>
                 )}
             </>
