@@ -120,7 +120,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "timestamps",
+    name: "Timestamps",
     description: "Timestamps in your messages. With extensive formatting options (ported from replugged)",
     authors: [Devs.lisekilis],
     settings,
