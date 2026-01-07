@@ -37,15 +37,14 @@ export default function AlertTab() {
         });
     };
 
-    const showSecondaryConfirmAlert = () => {
+    const showExpressiveAlert = () => {
         Alerts.show({
-            title: "Multiple Actions",
-            body: "This alert has a secondary confirm action.",
-            confirmText: "Primary Action",
-            secondaryConfirmText: "Secondary Action",
-            cancelText: "Cancel",
-            onConfirm: () => showToast("Primary action!", ToastType.SUCCESS),
-            onConfirmSecondary: () => showToast("Secondary action!", ToastType.MESSAGE),
+            title: "Premium Feature",
+            body: "This feature requires a premium subscription.",
+            confirmText: "Upgrade Now",
+            confirmVariant: "expressive",
+            cancelText: "Maybe Later",
+            onConfirm: () => showToast("Upgrading!", ToastType.SUCCESS),
         });
     };
 
@@ -78,12 +77,12 @@ export default function AlertTab() {
                 </Button>
             </SectionWrapper>
 
-            <SectionWrapper title="Secondary Confirm">
+            <SectionWrapper title="Expressive Alert">
                 <Paragraph color="text-muted" style={{ marginBottom: 8 }}>
-                    Alert with multiple confirm actions.
+                    Alert with premium/expressive styled button.
                 </Paragraph>
-                <Button variant="secondary" onClick={showSecondaryConfirmAlert}>
-                    Show Multi-Action Alert
+                <Button onClick={showExpressiveAlert}>
+                    Show Expressive Alert
                 </Button>
             </SectionWrapper>
 
@@ -116,13 +115,7 @@ export default function AlertTab() {
                     <strong>confirmVariant</strong> - "primary", "critical-primary", or "expressive"
                 </Paragraph>
                 <Paragraph color="text-muted">
-                    <strong>secondaryConfirmText</strong> - Text for secondary action button
-                </Paragraph>
-                <Paragraph color="text-muted">
                     <strong>onConfirm</strong> - Callback when confirm clicked
-                </Paragraph>
-                <Paragraph color="text-muted">
-                    <strong>onConfirmSecondary</strong> - Callback for secondary action
                 </Paragraph>
                 <Paragraph color="text-muted">
                     <strong>onCancel</strong> - Callback when cancel clicked

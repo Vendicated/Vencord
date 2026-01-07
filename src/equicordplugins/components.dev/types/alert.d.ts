@@ -9,12 +9,11 @@ export interface AlertOptions {
     body: React.ReactNode;
     confirmText?: string;
     cancelText?: string;
-    secondaryConfirmText?: string;
     confirmVariant?: "primary" | "critical-primary" | "expressive";
     onConfirm?: () => void;
     onCancel?: () => void;
-    onConfirmSecondary?: () => void;
     onCloseCallback?: () => void;
+    contextKey?: string;
 }
 
 export interface AlertsType {
