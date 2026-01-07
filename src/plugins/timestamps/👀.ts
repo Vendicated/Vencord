@@ -170,7 +170,7 @@ function findCrap(content: string): string | null {
 }
 export function findFullDate(content: string): findResult | null {
     const prefix = findPrefix(content);
-    if (!prefix && Settings.plugins.timestamps.requirePrefix /* cfg.get("prefix", false)*/) return null;
+    if (!prefix && Settings.plugins.Timestamps.requirePrefix /* cfg.get("prefix", false)*/) return null;
     const now = new Date();
     const text = prefix ? findText(content, prefix.nextIndex) : null;
     // logger.log("Text:", text);
@@ -184,8 +184,8 @@ export function findFullDate(content: string): findResult | null {
         };
     const date = findDate(
         content,
-        Settings.plugins.timestamps.dateFormat /* cfg.get("dateFormat", "mdy")*/,
-        Settings.plugins.timestamps.useShortYear /* cfg.get("shortYear", true)*/,
+        Settings.plugins.Timestamps.dateFormat /* cfg.get("dateFormat", "mdy")*/,
+        Settings.plugins.Timestamps.useShortYear /* cfg.get("shortYear", true)*/,
         prefix ? prefix.nextIndex : 0,
     );
     const time = findTime(content, date ? date.nextIndex : prefix ? prefix.nextIndex : 0);

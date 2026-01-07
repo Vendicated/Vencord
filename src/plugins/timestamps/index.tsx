@@ -151,7 +151,7 @@ export default definePlugin({
                         <Components.Heading>There are a two ways to use timestamps:</Components.Heading>
                         <Components.HeadingSecondary>Absolute Timestamps</Components.HeadingSecondary>
                         <Components.Paragraph>
-                            Absolute example: <Components.InlineCode>{formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat)} 23:55</Components.InlineCode><br />
+                            Absolute example: <Components.InlineCode>{formatDate("20", "08", "2023", Settings.plugins.Timestamps.dateFormat)} 23:55</Components.InlineCode><br />
                             The time can be in 24-hour or 12-hour format. The date is optional and you can use any separator (/, ., -) between date parts.<br />
                             Absolute timestamps do not require a prefix unless the "Require Prefix" setting is enabled.
                         </Components.Paragraph>
@@ -159,7 +159,7 @@ export default definePlugin({
                         <Components.HeadingSecondary>Relative Timestamps</Components.HeadingSecondary>
                         <Components.Paragraph>
                             Relative: <Components.InlineCode>5d2h5m</Components.InlineCode> <Components.InlineCode>-3h</Components.InlineCode> <Components.InlineCode>now</Components.InlineCode>. You can combine multiple time units in order of largest to smallest.<br />
-                            Supported time units are: <Components.InlineCode>y (years) m (months) w (weeks) d (days) h (hours) m (minutes) s (seconds)</Components.InlineCode>.<br />
+                            Supported time units are: <Components.InlineCode>y (years) m (months) w (weeks) d (days) h (hours) m (minutes) s (seconds)</Components.InlineCode><br />
                             Both positive and negative values are supported.<br />
                             You can also use <Components.InlineCode>now</Components.InlineCode> to represent the current time.<br />
                             <b>Relative timestamps always require a prefix regardless of the "Require Prefix" setting.</b>
@@ -202,8 +202,7 @@ export default definePlugin({
                             select={setPreviewValue}
                             serialize={v => String(v)}
                             options={[
-                                { label: formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat) + " 23:55", value: formatDate("20", "08", "2023", Settings.plugins.timestamps.dateFormat) + " 23:55" },
-                                { label: formatDate("31", "12", "2023", Settings.plugins.timestamps.dateFormat) + " 11:59 PM", value: formatDate("31", "12", "2023", Settings.plugins.timestamps.dateFormat) + " 11:59 PM" },
+                                { label: formatDate("20", "08", "2023", Settings.plugins.Timestamps.dateFormat) + " 23:55", value: "arasaka" },
                                 { label: "20:11", value: "20:11" },
                                 { label: "6:20 AM", value: "6:20 AM" },
                                 { label: "5d2h5m", value: "5d2h5m" },
@@ -214,7 +213,8 @@ export default definePlugin({
                                 { label: "now", value: "now" },
                             ]}
                         />
-                        <Components.Paragraph>Result: {Parser.parse(replaceTimestamp(previewPrefix + "-" + previewValue))}</Components.Paragraph>
+                        <Components.Divider />
+                        <Components.Heading>Result: {Parser.parse(replaceTimestamp(previewPrefix + "-" + (previewValue === "arasaka" ? formatDate("20", "08", "2023", Settings.plugins.Timestamps.dateFormat) + " 23:55" : previewValue)))}</Components.Heading>
                     </>
                 )}
             </>
