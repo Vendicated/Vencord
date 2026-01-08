@@ -20,11 +20,11 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { FluxStore } from "@webpack/types";
+import type { FluxStore } from "@vencord/discord-types";
+import type { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunction } from "../debug/Tracer";
-import { Flux } from "./common";
-import { AnyModuleFactory, AnyWebpackRequire, ModuleExports, WebpackRequire } from "./wreq";
+import type { AnyModuleFactory, AnyWebpackRequire } from "./types";
 
 const logger = new Logger("Webpack");
 
@@ -38,7 +38,7 @@ export const onceReady = new Promise<void>(r => _resolveReady = r);
 export let wreq: WebpackRequire;
 export let cache: WebpackRequire["c"];
 
-export const fluxStores: Record<string, FluxStore> = {};
+export const fluxStores = new Map<string, FluxStore>();
 
 export type FilterFn = (mod: any) => boolean;
 
@@ -74,7 +74,7 @@ export const filters = {
 
     componentByCode: (...code: CodeFilter): FilterFn => {
         const byCodeFilter = filters.byCode(...code);
-        const filter = m => {
+        const filter = (m: any) => {
             let inner = m;
 
             while (inner != null) {
@@ -210,6 +210,8 @@ export function handleModuleNotFound(method: string, ...filter: unknown[]) {
  * Find the first module that matches the filter
  */
 export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
+    if (IS_ANTI_CRASH_TEST) return null;
+
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -269,6 +271,8 @@ export function findAll(filter: FilterFn) {
  * @returns Array of results in the same order as the passed filters
  */
 export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+    if (IS_ANTI_CRASH_TEST) return [];
+
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
@@ -450,55 +454,50 @@ export function findByCodeLazy(...code: CodeFilter) {
     return proxyLazy(() => findByCode(...code));
 }
 
+function populateFluxStoreMap() {
+    const { Flux } = require("./common") as typeof import("./common");
+
+    Flux.Store.getAll?.().forEach(store =>
+        fluxStores.set(store.getName(), store)
+    );
+
+    try {
+        const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
+        const libdiscoreExports = getLibdiscore();
+
+        for (const libdiscoreExportName in libdiscoreExports) {
+            if (!libdiscoreExportName.endsWith("Store")) {
+                continue;
+            }
+
+            const storeName = libdiscoreExportName;
+            const store = libdiscoreExports[storeName];
+
+            fluxStores.set(storeName, store);
+        }
+    } catch { }
+}
+
 /**
  * Find a store by its displayName
  */
 export function findStore(name: StoreNameFilter) {
-    let res = fluxStores[name] as any;
-    if (res == null) {
-        for (const store of Flux.Store.getAll?.() ?? []) {
-            const storeName = store.getName();
-
-            if (storeName === name) {
-                res = store;
-            }
-
-            if (fluxStores[storeName] == null) {
-                fluxStores[storeName] = store;
-            }
-        }
-
-        try {
-            const getLibdiscore = findByCode("libdiscoreWasm is not initialized");
-            const libdiscoreExports = getLibdiscore();
-
-            for (const libdiscoreExportName in libdiscoreExports) {
-                if (!libdiscoreExportName.endsWith("Store")) {
-                    continue;
-                }
-
-                const storeName = libdiscoreExportName;
-                const store = libdiscoreExports[storeName];
-
-                if (storeName === name) {
-                    res = store;
-                }
-
-                if (fluxStores[storeName] == null) {
-                    fluxStores[storeName] = store;
-                }
-            }
-
-        } catch { }
-
-        if (res == null) {
-            res = find(filters.byStoreName(name), { isIndirect: true });
-        }
+    if (!fluxStores.has(name)) {
+        populateFluxStoreMap();
     }
 
-    if (!res)
-        handleModuleNotFound("findStore", name);
-    return res;
+    if (fluxStores.has(name)) {
+        return fluxStores.get(name);
+    }
+
+    const res = find(filters.byStoreName(name), { isIndirect: true });
+    if (res) {
+        fluxStores.set(name, res);
+        return res;
+    }
+
+    handleModuleNotFound("findStore", name);
+    return null;
 }
 
 /**
@@ -594,6 +593,9 @@ function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumera
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     const exports = {} as Record<S, any>;
 
+    // whitelist Modal API to be able to test modals
+    if (IS_ANTI_CRASH_TEST && code !== ':"thin")' && code !== ".modalKey?") return exports;
+
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
     if (id === null)
         return exports;
@@ -634,6 +636,8 @@ export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
  * @returns A promise that resolves with a boolean whether the chunks were loaded
  */
 export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultExtractAndLoadChunksRegex) {
+    if (IS_ANTI_CRASH_TEST) return false;
+
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");
@@ -717,6 +721,9 @@ export function extractAndLoadChunksLazy(code: CodeFilter, matcher = DefaultExtr
  * then call the callback with the module as the first argument
  */
 export function waitFor(filter: string | PropsFilter | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    // if react find fails then we are fully cooked
+    if (IS_ANTI_CRASH_TEST && filter !== "useState") return;
+
     if (IS_REPORTER && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
 
     if (typeof filter === "string")

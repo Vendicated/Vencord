@@ -6,9 +6,10 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Flex, Menu } from "@webpack/common";
+import { Menu } from "@webpack/common";
 
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
@@ -23,6 +24,11 @@ const DefaultEngines = {
     Startpage: "https://www.startpage.com/sp/search?query="
 } as const;
 
+const enum ReplacementEngineValue {
+    OFF = "off",
+    CUSTOM = "custom",
+}
+
 const settings = definePluginSettings({
     customEngineName: {
         description: "Name of the custom search engine",
@@ -33,6 +39,15 @@ const settings = definePluginSettings({
         description: "The URL of your Engine",
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="
+    },
+    replacementEngine: {
+        description: "Replace with a specific search engine instead of adding a menu",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Off", value: ReplacementEngineValue.OFF, default: true },
+            { label: "Custom Engine", value: ReplacementEngineValue.CUSTOM },
+            ...Object.keys(DefaultEngines).map(engine => ({ label: engine, value: engine }))
+        ]
     }
 });
 
@@ -41,13 +56,31 @@ function search(src: string, engine: string) {
 }
 
 function makeSearchItem(src: string) {
-    let Engines = {};
+    const { customEngineName, customEngineURL, replacementEngine } = settings.store;
 
-    if (settings.store.customEngineName && settings.store.customEngineURL) {
-        Engines[settings.store.customEngineName] = settings.store.customEngineURL;
+    const hasCustomEngine = Boolean(customEngineName && customEngineURL);
+    const hasValidReplacementEngine = replacementEngine !== ReplacementEngineValue.OFF && !(replacementEngine === ReplacementEngineValue.CUSTOM && !hasCustomEngine);
+
+    const Engines = { ...DefaultEngines };
+
+    if (hasCustomEngine) {
+        Engines[customEngineName!] = customEngineURL;
     }
 
-    Engines = { ...Engines, ...DefaultEngines };
+    if (hasValidReplacementEngine) {
+        const name = replacementEngine === ReplacementEngineValue.CUSTOM && hasCustomEngine
+            ? customEngineName
+            : replacementEngine;
+
+        return (
+            <Menu.MenuItem
+                label={`Search with ${name}`}
+                key="search-custom-engine"
+                id="vc-search-custom-engine"
+                action={() => search(src, Engines[name!])}
+            />
+        );
+    }
 
     return (
         <Menu.MenuItem
@@ -62,7 +95,7 @@ function makeSearchItem(src: string) {
                         key={key}
                         id={key}
                         label={
-                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                            <Flex gap="0.5em" alignItems="center">
                                 <img
                                     style={{
                                         borderRadius: "50%"
@@ -70,7 +103,7 @@ function makeSearchItem(src: string) {
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={`https://www.google.com/s2/favicons?domain=${Engines[engine]}&sz=64`}
+                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
                                 />
                                 {engine}
                             </Flex>
@@ -96,7 +129,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) 
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
-    description: "Replaces the Google search with different Engines",
+    description: "Replaces the Google search with different Engine(s)",
     authors: [Devs.Moxxie, Devs.Ethan],
 
     settings,

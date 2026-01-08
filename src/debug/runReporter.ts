@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { addPatch } from "@api/PluginManager";
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { getBuildNumber, patchTimings } from "@webpack/patcher";
+import { getBuildNumber, patches, patchTimings } from "@webpack/patcher";
 
-import { addPatch, patches } from "../plugins";
 import { loadLazyChunks } from "./loadLazyChunks";
 
 async function runReporter() {
@@ -28,7 +28,7 @@ async function runReporter() {
             }
         }, "Vencord Reporter");
 
-        // @ts-ignore
+        // @ts-expect-error
         Vencord.Webpack._initReporter = function () {
             // initReporter is called in the patched entry point of Discord
             // setImmediate to only start searching for lazy chunks after Discord initialized the app
@@ -83,7 +83,6 @@ async function runReporter() {
                     result = Webpack.mapMangledModule(code, mapper, includeBlacklistedExports);
                     if (Object.keys(result).length !== Object.keys(mapper).length) throw new Error("Webpack Find Fail");
                 } else {
-                    // @ts-ignore
                     result = Webpack[method](...args);
                 }
 

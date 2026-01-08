@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
+import NoReplyMentionPlugin from "@plugins/noReplyMention";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { ApplicationIntegrationType, MessageFlags } from "@vencord/discord-types/enums";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
+import { AuthenticationStore, FluxDispatcher, MessageTypeSets, PermissionsBits, PermissionStore, WindowStore } from "@webpack/common";
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
@@ -28,6 +31,7 @@ const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
 const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
+const focusChanged = () => !WindowStore.isFocused() && (isDeletePressed = false);
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
@@ -62,15 +66,19 @@ export default definePlugin({
     start() {
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
+        WindowStore.addChangeListener(focusChanged);
     },
 
     stop() {
         document.removeEventListener("keydown", keydown);
         document.removeEventListener("keyup", keyup);
+        WindowStore.removeChangeListener(focusChanged);
     },
 
-    onMessageClick(msg: any, channel, event) {
-        const isMe = msg.author.id === UserStore.getCurrentUser().id;
+    onMessageClick(msg, channel, event) {
+        const myId = AuthenticationStore.getId();
+        const isMe = msg.author.id === myId;
+        const isSelfInvokedUserApp = msg.interactionMetadata?.authorizing_integration_owners[ApplicationIntegrationType.USER_INSTALL] === myId;
         if (!isDeletePressed) {
             if (event.detail < 2) return;
             if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
@@ -85,13 +93,11 @@ export default definePlugin({
             } else {
                 if (!settings.store.enableDoubleClickToReply) return;
 
-                const EPHEMERAL = 64;
-                if (msg.hasFlag(EPHEMERAL)) return;
+                if (!MessageTypeSets.REPLYABLE.has(msg.type) || msg.hasFlag(MessageFlags.EPHEMERAL)) return;
 
                 const isShiftPress = event.shiftKey && !settings.store.requireModifier;
-                const NoReplyMention = Vencord.Plugins.plugins.NoReplyMention as any as typeof import("../noReplyMention").default;
-                const shouldMention = Vencord.Plugins.isPluginEnabled("NoReplyMention")
-                    ? NoReplyMention.shouldMention(msg, isShiftPress)
+                const shouldMention = isPluginEnabled(NoReplyMentionPlugin.name)
+                    ? NoReplyMentionPlugin.shouldMention(msg, isShiftPress)
                     : !isShiftPress;
 
                 FluxDispatcher.dispatch({
@@ -102,7 +108,7 @@ export default definePlugin({
                     showMentionToggle: channel.guild_id !== null
                 });
             }
-        } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel))) {
+        } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel) || isSelfInvokedUserApp)) {
             if (msg.deleted) {
                 FluxDispatcher.dispatch({
                     type: "MESSAGE_DELETE",

@@ -122,10 +122,16 @@ export default definePlugin({
 
         {
             find: "Copy image not supported",
-            replacement: {
-                match: /(?<=(?:canSaveImage|canCopyImage)\(\i?\)\{.{0,50})!\i\.isPlatformEmbedded/g,
-                replace: "false"
-            }
+            replacement: [
+                {
+                    match: /(?<=(?:canSaveImage|canCopyImage)\(.{0,120}?)!\i\.isPlatformEmbedded/g,
+                    replace: "false"
+                },
+                {
+                    match: /(?<=canCopyImage\(.+?)typeof \i\.clipboard\.copyImage/,
+                    replace: '"function"'
+                }
+            ]
         },
         // Add back Copy & Save Image
         {
@@ -135,10 +141,6 @@ export default definePlugin({
                     // if (!IS_WEB || null ==
                     match: /!\i\.isPlatformEmbedded/,
                     replace: "false"
-                },
-                {
-                    match: /return\s*?\[.{0,50}?(?=\?.{0,100}?id:"copy-image")/,
-                    replace: "return [true"
                 },
                 {
                     match: /(?<=#{intl::COPY_IMAGE_MENU_ITEM}\),)action:/,

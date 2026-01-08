@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ComponentDispatch, FluxDispatcher, NavigationRouter, SelectedGuildStore, SettingsRouter } from "@webpack/common";
@@ -30,7 +30,7 @@ export default definePlugin({
     enabledByDefault: true,
 
     onKey(e: KeyboardEvent) {
-        const hasCtrl = e.ctrlKey || (e.metaKey && navigator.platform.includes("Mac"));
+        const hasCtrl = e.ctrlKey || (e.metaKey && IS_MAC);
 
         if (hasCtrl) switch (e.key) {
             case "t":

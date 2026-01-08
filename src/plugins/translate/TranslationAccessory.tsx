@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Message } from "@vencord/discord-types";
 import { Parser, useEffect, useState } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import { TranslateIcon } from "./TranslateIcon";
 import { cl, TranslationValue } from "./utils";
@@ -57,7 +57,7 @@ export function TranslationAccessory({ message }: { message: Message; }) {
         <span className={cl("accessory")}>
             <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />
             {Parser.parse(translation.text)}
-            {" "}
+            <br />
             (translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
         </span>
     );

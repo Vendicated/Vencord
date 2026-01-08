@@ -52,7 +52,7 @@ const UrlReplacementRules: Record<string, URLReplacementRule> = {
         description: "Open Epic Games links in the Epic Games Launcher",
     },
     tidal: {
-        match: /^https:\/\/tidal\.com\/browse\/(track|album|artist|playlist|user|video|mix)\/(.+)(?:\?.+?)?$/,
+        match: /^https:\/\/(?:listen\.)?tidal\.com\/(?:browse\/)?(track|album|artist|playlist|user|video|mix)\/([a-f0-9-]+).*/,
         replace: (_, type, id) => `tidal://${type}/${id}`,
         description: "Open Tidal links in the Tidal app",
     },
@@ -100,9 +100,8 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
-                    match: /(!)?\(0,\i\.isDesktop\)\(\)/,
-                    replace: (_, not) => not ? "false" : "true"
+                    match: /\(0,\i\.isDesktop\)\(\)/,
+                    replace: "true"
                 }
             ]
         },
