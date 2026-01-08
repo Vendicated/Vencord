@@ -60,12 +60,15 @@ export default definePlugin({
         );
     },
 
-    getSrc(props: { src: string; mediaLayoutType: string; width: number; height: number; contentType: string; }, freeze?: boolean) {
+    getSrc(props: { src: string; mediaLayoutType: string; width: number; height: number; contentType: string; mosaicStyleAlt?: boolean; }, freeze?: boolean) {
         if (!props?.src) return;
 
         try {
-            const { contentType, height, mediaLayoutType, src, width } = props;
-            if (!contentType?.startsWith("image/") || src.startsWith("data:")) return;
+            const { contentType, height, mediaLayoutType, src, width, mosaicStyleAlt } = props;
+            // Embed images do not have a content type set.
+            // It's difficult to differentiate between images and videos. but mosaicStyleAlt seems exclusive to images
+            const isImage = contentType?.startsWith("image/") ?? (typeof mosaicStyleAlt === "boolean");
+            if (!isImage || src.startsWith("data:")) return;
 
             const url = new URL(src);
             if (!url.pathname.startsWith("/attachments/")) return;
