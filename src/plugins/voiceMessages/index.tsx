@@ -62,7 +62,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
             label={
                 <div className={OptionClasses.optionLabel}>
                     <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
-                    <div className={OptionClasses.optionName}>Send voice message</div>
+                    <div className={OptionClasses.optionName}>Send Voice Message</div>
                 </div>
             }
             action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
