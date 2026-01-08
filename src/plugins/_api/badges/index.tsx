@@ -91,15 +91,11 @@ export default definePlugin({
             find: "#{intl::PROFILE_USER_BADGES}",
             replacement: [
                 {
-                    match: /(?<=\{[^}]*?)badges:\i(?=[^}]*?}=(\i))/,
-                    replace: "_$&=$self.useBadges($1.displayProfile).concat($1.badges)"
-                },
-                {
                     match: /alt:" ","aria-hidden":!0,src:.{0,50}(\i).iconSrc/,
                     replace: "...$1.props,$&"
                 },
                 {
-                    match: /(?<="aria-label":(\i)\.description,.{0,200}?)children:/g,
+                    match: /(?<=forceOpen:.{0,40}?\i\((\i)\.id\).{0,100}?)children:/,
                     replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
                 // handle onClick and onContextMenu
@@ -108,6 +104,13 @@ export default definePlugin({
                     replace: "...$self.getBadgeMouseEventHandlers($1),$&"
                 }
             ]
+        },
+        {
+            find: "getLegacyUsername(){",
+            replacement: {
+                match: /getBadges\(\)\{.{0,100}?return\[/,
+                replace: "$&...$self.getBadges(this),"
+            }
         }
     ],
 
@@ -140,14 +143,13 @@ export default definePlugin({
         clearInterval(intervalId);
     },
 
-    // doesn't use hooks itself, but some plugins might do so in their getBadges function
-    useBadges(profile: { userId: string; guildId: string; }) {
+    getBadges(profile: { userId: string; guildId: string; }) {
         if (!profile) return [];
 
         try {
             return _getBadges(profile);
         } catch (e) {
-            new Logger("BadgeAPI#useBadges").error(e);
+            new Logger("BadgeAPI#getBadges").error(e);
             return [];
         }
     },
