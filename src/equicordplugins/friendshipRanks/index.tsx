@@ -43,43 +43,43 @@ const ranks: rankInfo[] =
             title: "Sprout",
             description: "Your friendship is just starting",
             requirement: 0,
-            iconSrc: "https://images.equicord.org/api/files/raw/019b494c-e995-7005-8964-c21f69c5af1f"
+            iconSrc: "https://cdn.nest.rip/uploads/82a1b1b8-4ef1-4f2e-b206-1a73f03ce54f.png"
         },
         {
             title: "Blooming",
             description: "Your friendship is getting there! (1 Month)",
             requirement: 30,
-            iconSrc: "https://images.equicord.org/api/files/raw/019b494c-e995-7001-a9ea-9c24268bf34e"
+            iconSrc: "https://cdn.nest.rip/uploads/6402fbb7-1124-4d3e-bf7f-dd96a7a60457.png"
         },
         {
             title: "Burning",
             description: "Your friendship has reached terminal velocity (3 Months)",
             requirement: 90,
-            iconSrc: "https://images.equicord.org/api/files/raw/019b494c-e995-7002-96d6-70c91b2e2979"
+            iconSrc: "https://cdn.nest.rip/uploads/aa4ad55c-0f2c-460e-8b09-7332ef1764e2.png"
         },
         {
             title: "Fighter",
             description: "Your friendship is strong (6 Months)",
             requirement: 182.5,
-            iconSrc: "https://images.equicord.org/api/files/raw/019b494c-e995-7003-a48c-4208802fa00d"
+            iconSrc: "https://cdn.nest.rip/uploads/04b0b774-6157-40ad-a57d-908dca804f6d.png"
         },
         {
             title: "Star",
             description: "Your friendship has been going on for a WHILE (1 Year)",
             requirement: 365,
-            iconSrc: "https://images.equicord.org/api/files/raw/019b494c-e995-7006-81d6-8cec81991bad"
+            iconSrc: "https://cdn.nest.rip/uploads/63c7e792-4ff1-44c9-9c61-d8dd7ebea040.png"
         },
         {
             title: "Royal",
             description: "Your friendship has gone through thick and thin- a whole 2 years!",
             requirement: 730,
-            iconSrc: "https://images.equicord.org/api/files/raw/019b494c-e995-7004-9f94-a81b66b5db30"
+            iconSrc: "https://cdn.nest.rip/uploads/4b05772b-419a-41a4-bf43-fccda1a35e20.png"
         },
         {
             title: "Besties",
             description: "How do you even manage this??? (5 Years)",
             requirement: 1826.25,
-            iconSrc: "https://images.equicord.org/api/files/raw/019b494c-e995-7000-84e2-2c310a8fc730"
+            iconSrc: "https://cdn.nest.rip/uploads/9418629c-04c7-40fe-a5b8-039de27a94d1.png"
         }
     ];
 

@@ -114,7 +114,7 @@ const settings = definePluginSettings({
     imageLink: {
         description: "URL for the image (button and modal)",
         type: OptionType.STRING,
-        default: "https://images.equicord.org/api/files/raw/0199e730-70d5-7000-a44f-d1acb42064cc",
+        default: "https://cdn.nest.rip/uploads/ecf0ef5b-55d1-4da7-9e5c-e469569a9731.png",
     },
     songLink: {
         description: "URL for the song to play",
