@@ -15,7 +15,7 @@ export default definePlugin({
         {
             find: "._areActivitiesExperimentallyHidden=(",
             replacement: {
-                match: /NumberFormat\(.{0,50}\]\);(?=.{0,100}\.membersGroup)/,
+                match: /NumberFormat\(.{0,50}\]\);(?=.{0,100}\.memberGroupsPlaceholder)/,
                 replace: "$&return null;"
             }
         }

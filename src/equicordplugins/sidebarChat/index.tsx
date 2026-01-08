@@ -10,6 +10,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { HeaderBarButton } from "@api/HeaderBar";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Channel, Guild, User } from "@vencord/discord-types";
@@ -19,7 +20,6 @@ import {
     filters,
     findByPropsLazy,
     findComponentByCodeLazy,
-    findLazy,
     findStoreLazy,
     mapMangledModuleLazy
 } from "@webpack";
@@ -46,6 +46,8 @@ import {
 } from "@webpack/common";
 
 import { settings, SidebarStore } from "./store";
+
+const cl = classNameFactory("vc-sidebar-chat-");
 
 const { HeaderBar } = mapMangledModuleLazy(".themedMobile]:", {
     HeaderBar: filters.byCode(".themedMobile]:"),
@@ -77,9 +79,6 @@ const ChannelHeader = findComponentByCodeLazy(".forumPostTitle]:", '"channel-".c
 const PopoutWindow = findComponentByCodeLazy("Missing guestWindow reference");
 const FullChannelView = findComponentByCodeLazy("showFollowButton:(null");
 const WanderingCubesLoading = findComponentByCodeLazy('="wanderingCubes"');
-
-// love
-const ppStyle = findLazy(m => m?.popoutContent && Object.keys(m).length === 1);
 
 const ChatInputTypes = findByPropsLazy("FORM", "NORMAL");
 const Sidebars = findByPropsLazy("ThreadSidebar", "MessageRequestSidebar");
@@ -332,9 +331,9 @@ const RenderPopout = ErrorBoundary.wrap(({ channel, name }: { channel: Channel; 
         <PopoutWindow
             withTitleBar
             windowKey={`DISCORD_VC_SC-${channel.id}`}
-            title={name || "Vencord"}
+            title={name || "Equicord"}
             channelId={channel.id}
-            contentClassName={ppStyle.popoutContent}
+            contentClassName={cl("popout")}
         >
             <FullChannelView providedChannel={channel} />
         </PopoutWindow>
