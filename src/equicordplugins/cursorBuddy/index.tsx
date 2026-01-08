@@ -117,7 +117,8 @@ function load() {
                     .replace("./oneko.gif", ONEKO_IMAGE)
                     .replace("nekoSpeed = 10;", `nekoSpeed = ${settings.store.speed};`)
                     .replace(" > 100", ` > ${1000 / settings.store.fps}`)
-                );
+                )
+                .then(s => Function(s)());
             break;
         }
         case "fathorse": {

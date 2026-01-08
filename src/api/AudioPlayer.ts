@@ -235,7 +235,7 @@ export function identifyAudioType(audio: string): AudioType {
 /**
  * Adds a function to process an audio before it is played.
  * @param key A unique identifier for this audio processor. Plugin name is recommended.
- * @param processor A function that takes an audio, volume (0-100), and type (AudioType), and returns the replacement audio and volume.
+ * @param processor A function that takes a data object with audio, volume (0-100), and type (AudioType) attributes, and modifies the audio and volume in place.
  */
 export function addAudioProcessor(key: string, processor: AudioProcessor): void {
     audioProcessorFunctions[key] = processor;
