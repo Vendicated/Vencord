@@ -19,7 +19,7 @@ const textBtnCls = classNameFactory("vc-text-btn-");
 
 export type ButtonVariant =
     "primary" | "secondary" | "dangerPrimary" | "dangerSecondary" | "overlayPrimary" | "positive" | "link" | "none";
-export type ButtonSize = "min" | "xs" | "small" | "medium";
+export type ButtonSize = "min" | "xs" | "small" | "medium" | "iconOnly";
 
 export type ButtonProps = ComponentPropsWithRef<"button"> & {
     variant?: ButtonVariant;
