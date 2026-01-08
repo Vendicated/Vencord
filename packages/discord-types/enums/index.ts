@@ -5,6 +5,7 @@ export * from "./commands";
 export * from "./guild";
 export * from "./messages";
 export * from "./misc";
+export * from "./quests";
 export * from "./settings";
 export * from "./user";
 export * from "./voice";
