@@ -11,6 +11,24 @@ import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
 import { AnyModuleFactory } from "webpack";
 
+function getWebpackChunkMap() {
+    const sym = Symbol();
+    let v: Record<PropertyKey, string> | null = null;
+
+    Object.defineProperty(Object.prototype, sym, {
+        get() {
+            v = this;
+            return "";
+        },
+        configurable: true
+    });
+
+    wreq.u(sym);
+    delete Object.prototype[sym];
+
+    return v;
+}
+
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
 
@@ -26,10 +44,9 @@ export async function loadLazyChunks() {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
-        /* This regex loads all language packs which makes webpack finds testing extremely slow, so for now, lets use one which doesnt include those
-        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
-        */
-        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
+        // This regex loads all language packs which makes webpack finds testing extremely slow, so for now, we prioritize using the one which doesnt include those
+        const CompleteLazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
+        const PartialLazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
 
         let foundCssDebuggingLoad = false;
 
@@ -37,7 +54,7 @@ export async function loadLazyChunks() {
             // Workaround to avoid loading the CSS debugging chunk which turns the app pink
             const hasCssDebuggingLoad = foundCssDebuggingLoad ? false : (foundCssDebuggingLoad = factoryCode.includes(".cssDebuggingEnabled&&"));
 
-            const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
+            const lazyChunks = factoryCode.matchAll(hasCssDebuggingLoad ? CompleteLazyChunkRegex : PartialLazyChunkRegex);
             const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
 
             const shouldForceDefer = false;
@@ -153,17 +170,10 @@ export async function loadLazyChunks() {
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
-        const allChunks = [] as PropertyKey[];
+        const chunkMap = getWebpackChunkMap();
+        if (!chunkMap) throw new Error("Failed to get chunk map");
 
-        // Matches "id" or id:
-        for (const currentMatch of String(wreq.u).matchAll(/(?:"([\deE]+?)"(?![,}]))|(?:([\deE]+?):)/g)) {
-            const id = currentMatch[1] ?? currentMatch[2];
-            if (id == null) continue;
-
-            const numId = Number(id);
-            allChunks.push(Number.isNaN(numId) ? id : numId);
-        }
-
+        const allChunks = Object.keys(chunkMap).map(id => Number.isNaN(Number(id)) ? id : Number(id));
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
         // Chunks which our regex could not catch to load

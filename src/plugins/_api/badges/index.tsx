@@ -25,19 +25,19 @@ import { Heart } from "@components/Heart";
 import DonateButton from "@components/settings/DonateButton";
 import { openContributorModal } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
+import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { User } from "@vencord/discord-types";
-import { Forms, Toasts, UserStore } from "@webpack/common";
+import { ContextMenuApi, Forms, Menu, Toasts, UserStore } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
 const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
-    image: CONTRIBUTOR_BADGE,
+    iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => shouldShowContributorBadge(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
@@ -56,36 +56,61 @@ async function loadBadges(noCache = false) {
 
 let intervalId: any;
 
+function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
+    return (
+        <Menu.Menu
+            navId="vc-badge-context"
+            onClose={ContextMenuApi.closeContextMenu}
+            aria-label="Badge Options"
+        >
+            {badge.description && (
+                <Menu.MenuItem
+                    id="vc-badge-copy-name"
+                    label="Copy Badge Name"
+                    action={() => copyWithToast(badge.description!)}
+                />
+            )}
+            {badge.iconSrc && (
+                <Menu.MenuItem
+                    id="vc-badge-copy-link"
+                    label="Copy Badge Image Link"
+                    action={() => copyWithToast(badge.iconSrc!)}
+                />
+            )}
+        </Menu.Menu>
+    );
+}
+
 export default definePlugin({
     name: "BadgeAPI",
-    description: "API to add badges to users.",
+    description: "API to add badges to users",
     authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
     required: true,
     patches: [
         {
-            find: ".MODAL]:26",
-            replacement: {
-                match: /(?=;return 0===(\i)\.length\?)(?<=(\i)\.useMemo.+?)/,
-                replace: ";$1=$2.useMemo(()=>[...$self.getBadges(arguments[0].displayProfile),...$1],[$1])"
-            }
-        },
-        {
             find: "#{intl::PROFILE_USER_BADGES}",
             replacement: [
                 {
-                    match: /(alt:" ","aria-hidden":!0,src:)(.+?)(?=,)(?<=href:(\i)\.link.+?)/,
-                    replace: (_, rest, originalSrc, badge) => `...${badge}.props,${rest}${badge}.image??(${originalSrc})`
+                    match: /alt:" ","aria-hidden":!0,src:.{0,50}(\i).iconSrc/,
+                    replace: "...$1.props,$&"
                 },
                 {
-                    match: /(?<="aria-label":(\i)\.description,.{0,200})children:/,
+                    match: /(?<=forceOpen:.{0,40}?\i\((\i)\.id\).{0,100}?)children:/,
                     replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
-                // conditionally override their onClick with badge.onClick if it exists
+                // handle onClick and onContextMenu
                 {
                     match: /href:(\i)\.link/,
-                    replace: "...($1.onClick&&{onClick:vcE=>$1.onClick(vcE,$1)}),$&"
+                    replace: "...$self.getBadgeMouseEventHandlers($1),$&"
                 }
             ]
+        },
+        {
+            find: "getLegacyUsername(){",
+            replacement: {
+                match: /getBadges\(\)\{.{0,100}?return\[/,
+                replace: "$&...$self.getBadges(this),"
+            }
         }
     ],
 
@@ -118,15 +143,13 @@ export default definePlugin({
         clearInterval(intervalId);
     },
 
-    getBadges(props: { userId: string; user?: User; guildId: string; }) {
-        if (!props) return [];
+    getBadges(profile: { userId: string; guildId: string; }) {
+        if (!profile) return [];
 
         try {
-            props.userId ??= props.user?.id!;
-
-            return _getBadges(props);
+            return _getBadges(profile);
         } catch (e) {
-            new Logger("BadgeAPI#hasBadges").error(e);
+            new Logger("BadgeAPI#getBadges").error(e);
             return [];
         }
     },
@@ -137,9 +160,22 @@ export default definePlugin({
     }, { noop: true }),
 
 
+    getBadgeMouseEventHandlers(badge: ProfileBadge & BadgeUserArgs) {
+        const handlers = {} as Record<string, (e: React.MouseEvent) => void>;
+
+        if (!badge) return handlers; // sanity check
+
+        const { onClick, onContextMenu } = badge;
+
+        if (onClick) handlers.onClick = e => onClick(e, badge);
+        if (onContextMenu) handlers.onContextMenu = e => onContextMenu(e, badge);
+
+        return handlers;
+    },
+
     getDonorBadges(userId: string) {
         return DonorBadges[userId]?.map(badge => ({
-            image: badge.badge,
+            iconSrc: badge.badge,
             description: badge.tooltip,
             position: BadgePosition.START,
             props: {
@@ -147,6 +183,9 @@ export default definePlugin({
                     borderRadius: "50%",
                     transform: "scale(0.9)" // The image is a bit too big compared to default badges
                 }
+            },
+            onContextMenu(event, badge) {
+                ContextMenuApi.openContextMenu(event, () => <BadgeContextMenu badge={badge} />);
             },
             onClick() {
                 const modalKey = openModal(props => (
@@ -156,19 +195,19 @@ export default definePlugin({
                     }}>
                         <ModalRoot {...props}>
                             <ModalHeader>
-                                <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <Forms.FormTitle
-                                        tag="h2"
-                                        style={{
-                                            width: "100%",
-                                            textAlign: "center",
-                                            margin: 0
-                                        }}
-                                    >
+                                <Forms.FormTitle
+                                    tag="h2"
+                                    style={{
+                                        width: "100%",
+                                        textAlign: "center",
+                                        margin: 0
+                                    }}
+                                >
+                                    <Flex justifyContent="center" alignItems="center" gap="0.5em">
                                         <Heart />
                                         Vencord Donor
-                                    </Forms.FormTitle>
-                                </Flex>
+                                    </Flex>
+                                </Forms.FormTitle>
                             </ModalHeader>
                             <ModalContent>
                                 <Flex>
@@ -195,7 +234,7 @@ export default definePlugin({
                                 </div>
                             </ModalContent>
                             <ModalFooter>
-                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                <Flex justifyContent="center" style={{ width: "100%" }}>
                                     <DonateButton />
                                 </Flex>
                             </ModalFooter>
@@ -203,6 +242,6 @@ export default definePlugin({
                     </ErrorBoundary>
                 ));
             },
-        }));
+        } satisfies ProfileBadge));
     }
 });
