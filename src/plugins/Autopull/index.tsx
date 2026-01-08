@@ -75,8 +75,8 @@ function addContextMenu(children, { user }) {
 export default definePlugin({
     name: "سحب اعضاء الروم",
     description: "يسحب الأشخاص المحددين لأي روم صوتي تدخله",
-    authors: [{
-        name: "10",
+    authors:[{
+        name: "rz30",
         id: 786315593963536415n
     }],
     contextMenus: {
