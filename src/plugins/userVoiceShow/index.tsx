@@ -57,10 +57,10 @@ export default definePlugin({
     patches: [
         // User Popout, User Profile Modal, Direct Messages Side Profile
         {
-            find: "#{intl::USER_PROFILE_LOAD_ERROR}",
+            find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
-                match: /(\.fetchError.+?\?)null/,
-                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId,isProfile:true})`
+                match: /(\i).isVerifiedBot\(\)}\),/,
+                replace: "$&$self.VoiceChannelIndicator({userId:$1.id,isProfile:true}),"
             },
             predicate: () => settings.store.showInUserProfileModal
         },
