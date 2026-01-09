@@ -19,12 +19,6 @@ import { PluginCards } from "./pluginCards";
 let clicked = false;
 
 const settings = definePluginSettings({
-    disableDMContextMenu: {
-        type: OptionType.BOOLEAN,
-        description: "Disables the DM list context menu in favor of the x button",
-        restartNeeded: true,
-        default: false
-    },
     noMirroredCamera: {
         type: OptionType.BOOLEAN,
         description: "Prevents the camera from being mirrored on your screen",
@@ -82,16 +76,6 @@ export default definePlugin({
                     replace: "return $1;"
                 }
             ]
-        },
-        // Remove DM Context Menu
-        {
-            find: "#{intl::DM_OPTIONS}",
-            predicate: () => settings.store.disableDMContextMenu,
-
-            replacement: {
-                match: /\{dotsInsteadOfCloseButton:(\i),rearrangeContextMenu:(\i).*?autoTrackExposure:!0\}\)/,
-                replace: "$1=false,$2=false"
-            },
         },
         // When focused on voice channel or group chat voice call
         {

@@ -48,7 +48,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "GuildTagCoachmark",
+            find: "GuildTagAvailableCoachmark",
             replacement: {
                 match: /return.{0,100}shouldShow/g,
                 replace: "return null;$&"
