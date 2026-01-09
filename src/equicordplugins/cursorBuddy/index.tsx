@@ -1,29 +1,19 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { Divider } from "@components/Divider";
+import { Heading } from "@components/Heading";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import fathorse from "./fathorse";
+import oneko from "./oneko";
 
-const ONEKO_SCRIPT = "https://raw.githubusercontent.com/adryd325/oneko.js/5281d057c4ea9bd4f6f997ee96ba30491aed16c0/oneko.js";
 const ONEKO_IMAGE = "https://raw.githubusercontent.com/adryd325/oneko.js/5281d057c4ea9bd4f6f997ee96ba30491aed16c0/oneko.gif";
 const FATASS_HORSE_IMAGE = "https://raw.githubusercontent.com/nexpid/fatass-horse/08bc4042750d5f995c55327f7b6c6710158f5263/sheet.png";
 
@@ -58,6 +48,38 @@ const settings = definePluginSettings({
         isValid: (value: number) => value > 0 || "Framerate must be bigger than 0",
         onChange: load
     },
+    // Oneko Specific
+    onekoSection: {
+        type: OptionType.COMPONENT,
+        component: () => (
+            <div>
+                <Heading style={{ fontSize: "1.6em", marginTop: "10px" }}>Oneko</Heading>
+                <Divider style={{ marginBottom: "-10px" }}></Divider>
+            </div>
+        ),
+    },
+    furColor: {
+        description: "Fur hex color for Oneko",
+        type: OptionType.STRING,
+        default: "#FFFFFF",
+        onChange: load,
+    },
+    outlineColor: {
+        description: "Outline hex color for Oneko",
+        type: OptionType.STRING,
+        default: "#000000",
+        onChange: load,
+    },
+    // Fatass Horse Specific
+    fathorseSection: {
+        type: OptionType.COMPONENT,
+        component: () => (
+            <div>
+                <Heading style={{ fontSize: "1.6em", marginTop: "10px" }}>Fatass Horse</Heading>
+                <Divider style={{ marginBottom: "-10px" }}></Divider>
+            </div>
+        ),
+    },
     size: {
         description: "Size of the fatass horse",
         type: OptionType.NUMBER,
@@ -81,9 +103,17 @@ const settings = definePluginSettings({
         description: "If the horse should shake the window when it's walking",
         type: OptionType.BOOLEAN,
         default: false,
-        onChange: load
+        onChange: load,
     },
 }, {
+    // Oneko Specific
+    furColor: {
+        disabled() { return this.store.buddy !== "oneko"; }
+    },
+    outlineColor: {
+        disabled() { return this.store.buddy !== "oneko"; }
+    },
+    // Fatass Horse Specific
     size: {
         disabled() { return this.store.buddy !== "fathorse"; },
     },
@@ -109,16 +139,14 @@ function load() {
 
     switch (settings.store.buddy) {
         case "oneko": {
-            fetch(ONEKO_SCRIPT)
-                .then(x => x.text())
-                .then(s => s
-                    .replace("(isReducedMotion)", "(false)")
-                    .replace("persistPosition = true;", "persistPosition = false;")
-                    .replace("./oneko.gif", ONEKO_IMAGE)
-                    .replace("nekoSpeed = 10;", `nekoSpeed = ${settings.store.speed};`)
-                    .replace(" > 100", ` > ${1000 / settings.store.fps}`)
-                )
-                .then(s => Function(s)());
+            oneko({
+                speed: settings.store.speed,
+                fps: settings.store.fps,
+                image: ONEKO_IMAGE,
+                persistPosition: false,
+                furColor: settings.store.furColor,
+                outlineColor: settings.store.outlineColor
+            });
             break;
         }
         case "fathorse": {
@@ -139,7 +167,7 @@ migratePluginSettings("CursorBuddy", "Oneko", "oneko");
 export default definePlugin({
     name: "CursorBuddy",
     description: "only a slightly annoying plugin",
-    authors: [Devs.Ven, Devs.adryd, EquicordDevs.nexpid],
+    authors: [Devs.Ven, Devs.adryd, EquicordDevs.nexpid, EquicordDevs.ZcraftElite],
     settings,
     isModified: true,
 
