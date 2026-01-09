@@ -37,8 +37,8 @@ interface DragItem {
 
 const cl = classNameFactory("vc-plugin-ui-elements-");
 
-const useDrag = findByCodeLazy("useDrag", ".collect")
-const useDrop = findByCodeLazy("options)", ".collect")
+const useDrag = findByCodeLazy("useDrag", ".collect");
+const useDrop = findByCodeLazy("options)", ".collect");
 
 const UI_ELEMENT_TYPE = "ui-element";
 
