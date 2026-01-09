@@ -13,11 +13,6 @@
     color: var(--interactive-icon-hover);
 }
 
-.vc-uvs-profile-speaker {
-    align-self: flex-start;
-    padding-block-start: 4px;
-}
-
 .vc-uvs-profile-speaker svg {
     width: var(--custom-nickname-icon-size);
     height: var(--custom-nickname-icon-size);
