@@ -38,7 +38,7 @@ const altKey = IS_MAC ? "opt" : "alt";
 const settings = definePluginSettings({
     toolbarDevMenu: {
         type: OptionType.BOOLEAN,
-        description: "Change the Help (?) toolbar button (top right in chat) to Discord's developer menu",
+        description: "Change the Help (?) toolbar button (top right in window) to Discord's developer menu",
         default: false,
         restartNeeded: true
     }

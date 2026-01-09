@@ -37,7 +37,7 @@ const DESKTOP_ONLY = (f: string) => () => {
 
 const makeVesktopSwitcher = (branch: string) => () => {
     if (Vesktop.Settings.store.discordBranch === branch)
-        throw new Error(`Already on ${branch}`);
+        throw new Error(`Already on the ${branch}`);
 
     Vesktop.Settings.store.discordBranch = branch;
     VesktopNative.app.relaunch();

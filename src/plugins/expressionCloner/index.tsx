@@ -196,7 +196,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             id: Toasts.genId()
         });
     } catch (e: any) {
-        let message = "Something went wrong (check console!)";
+        let message = "Something went wrong, check the console!";
         try {
             message = JSON.parse(e.text).message;
         } catch { }
