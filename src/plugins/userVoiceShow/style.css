@@ -13,7 +13,7 @@
     color: var(--interactive-icon-hover);
 }
 
-.vc-uvs-profile-speaker svg {
+.vc-uvs-profile-speaker {
     width: var(--custom-nickname-icon-size);
     height: var(--custom-nickname-icon-size);
 }
