@@ -105,8 +105,8 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /null,\i," — ",\i\]/,
-                    replace: "null,$self.RoleGroupColor(arguments[0])]"
+                    match: /(?<=\.roleIcon.{0,15}:null,).{0,150}— ",\i\]\}\)\]/,
+                    replace: "$self.RoleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList
