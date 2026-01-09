@@ -168,6 +168,7 @@ export default definePlugin({
     name: "CursorBuddy",
     description: "only a slightly annoying plugin",
     authors: [Devs.Ven, Devs.adryd, EquicordDevs.nexpid, EquicordDevs.ZcraftElite],
+    tags: ["Oneko", "FatassHorse", "Pet"],
     settings,
     isModified: true,
 

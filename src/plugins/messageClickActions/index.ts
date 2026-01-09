@@ -1,20 +1,8 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
@@ -27,10 +15,20 @@ import { Channel, Message } from "@vencord/discord-types";
 import { ApplicationIntegrationType, MessageFlags } from "@vencord/discord-types/enums";
 import { AuthenticationStore, Constants, EditMessageStore, FluxDispatcher, MessageActions, MessageTypeSets, PermissionsBits, PermissionStore, PinActions, RestAPI, Toasts, WindowStore } from "@webpack/common";
 
-let isDeletePressed = false;
-const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
-const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
-const focusChanged = () => !WindowStore.isFocused() && (isDeletePressed = false);
+let isKeyPressed = false;
+const keydown = (e: KeyboardEvent) => {
+    const key = settings.store.keySelection === "backspace" ? "Backspace" : "Delete";
+    if (e.key === key) {
+        isKeyPressed = true;
+    }
+};
+const keyup = (e: KeyboardEvent) => {
+    const key = settings.store.keySelection === "backspace" ? "Backspace" : "Delete";
+    if (e.key === key) {
+        isKeyPressed = false;
+    }
+};
+const focusChanged = () => !WindowStore.isFocused() && (isKeyPressed = false);
 
 let doubleClickTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingDoubleClickAction: (() => void) | null = null;
@@ -60,6 +58,14 @@ const settings = definePluginSettings({
             { label: "Copy Message ID", value: ClickAction.COPY_MESSAGE_ID },
             { label: "Copy User ID", value: ClickAction.COPY_USER_ID },
             { label: "None (Disabled)", value: ClickAction.NONE }
+        ]
+    },
+    keySelection: {
+        type: OptionType.SELECT,
+        description: "Key to use for click actions (Backspace or Delete)",
+        options: [
+            { label: "Backspace", value: "backspace", default: true },
+            { label: "Delete", value: "delete" }
         ]
     },
     doubleClickAction: {
@@ -260,7 +266,8 @@ function quoteMessage(channel: Channel, msg: Message) {
 export default definePlugin({
     name: "MessageClickActions",
     description: "Customize message click actions - choose what happens when you click, double-click, or hold backspace",
-    authors: [Devs.Ven, EquicordDevs.keyages],
+    authors: [Devs.Ven, EquicordDevs.keyages, EquicordDevs.ZcraftElite],
+    isModified: true,
 
     settings,
 
@@ -291,7 +298,7 @@ export default definePlugin({
 
         if ((settings.store.disableInDms && isDM) || (settings.store.disableInSystemDms && isSystemDM)) return;
 
-        if (isDeletePressed) {
+        if (isKeyPressed) {
             const action = settings.store.backspaceClickAction;
             if (action === ClickAction.NONE) return;
 
