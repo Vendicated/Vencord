@@ -193,7 +193,7 @@ export default definePlugin({
             const author = useMessageAuthor(message);
 
             // Do not apply role color if the send fails, otherwise it becomes indistinguishable if the message is sent
-            if (message.state === "SEND_FAILED") return;
+            if (message.state !== "SENT") return;
 
             if (author.colorString != null && messageSaturation !== 0) {
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
