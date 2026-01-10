@@ -71,8 +71,10 @@ async function initThemes() {
     updatePopoutWindows();
 }
 
-function applyToPopout(popoutWindow: Window | undefined) {
+function applyToPopout(popoutWindow: Window | undefined, key: string) {
     if (!popoutWindow?.document) return;
+    // skip game overlay cuz it needs to stay transparent, themes broke it
+    if (key === "DISCORD_OutOfProcessOverlay") return;
 
     const doc = popoutWindow.document;
 
@@ -82,10 +84,10 @@ function applyToPopout(popoutWindow: Window | undefined) {
 }
 
 function updatePopoutWindows() {
-    const windowKeys = PopoutWindowStore.getWindowKeys();
-    for (const key of windowKeys) {
-        const popoutWindow = PopoutWindowStore.getWindow(key);
-        applyToPopout(popoutWindow);
+    if (!PopoutWindowStore) return;
+
+    for (const key of PopoutWindowStore.getWindowKeys()) {
+        applyToPopout(PopoutWindowStore.getWindow(key), key);
     }
 }
 
@@ -104,8 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const { discordPopoutEvent } = event.data || {};
         if (discordPopoutEvent?.type !== "loaded") return;
 
-        const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
-        applyToPopout(popoutWindow);
+        applyToPopout(PopoutWindowStore.getWindow(discordPopoutEvent.key), discordPopoutEvent.key);
     });
 
     if (!IS_WEB) {
