@@ -28,7 +28,7 @@ import { initMicrophoneStore } from "./stores";
 export default definePlugin({
     name: "BetterMicrophone",
     description: "This plugin allows you to further customize your microphone.",
-    authors: [Devs.shitfuckup],
+    authors: [Devs.pluckerpilple],
     dependencies: ["PhilsPluginLibrary"],
     start(): void {
         initMicrophoneStore();
