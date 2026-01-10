@@ -163,7 +163,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
                             title: "ياخي فكه يا دبشه",
                             body: `كمل يا رجال ما عليك  ${user.username} اما تبي تكمل جدول عليه ؟`,
                             confirmText: "لا برحمه",
-                            cancelText: "بكمل عليه المهطف",
+                            cancelText: "بكمل عليه الهطف",
                             confirmColor: "red",
                             onConfirm: () => removeFromPullList(user.id)
                         });
