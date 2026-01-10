@@ -63,7 +63,7 @@ export default definePlugin({
                 },
                 {
                     match: /(onFocus".{0,50}\(\i,{ref:)(\i),/,
-                    replace: '$1arguments[0]?.descriptor?.emoji?.category==="FAVORITES"?drag:$2,collected:collected,',
+                    replace: '$1arguments[0]?.descriptor?.category==="FAVORITES"?drag:$2,collected:collected,',
                 },
                 {
                     match: /(,\{key:\i,ref:\i)(?=\}\),)/,
@@ -71,11 +71,11 @@ export default definePlugin({
                 },
                 {
                     match: /(delay:200,children:)(\i)/,
-                    replace: "$1[$2,$self.wrapper(arguments[0]?.descriptor?.emoji)]",
+                    replace: "$1[$2,$self.wrapper(arguments[0]?.descriptor)]",
                 },
                 {
                     match: /(delay:200,children:.{0,100}\}\):)(\i)\)/,
-                    replace: "$1[$2,$self.wrapper(arguments[0]?.descriptor?.emoji)])",
+                    replace: "$1[$2,$self.wrapper(arguments[0]?.descriptor)])",
                 },
             ],
         },
