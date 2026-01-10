@@ -10,7 +10,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 import { Forms } from "@webpack/common";
 import { addSettingsPanelButton, DeafenIcon, MuteIcon, removeSettingsPanelButton } from "../philsPluginLibrary";
+import { CamIcon } from "./CamIcon";
 
+export let fakecam = false;
 export let fakeD = false;
 export let fakeM = false;
 export let fakeBoth = false;
@@ -30,6 +32,14 @@ const BothIcon = () => (
         <path fill="currentColor" d="M18 15C17.9454 15 17.8914 15.0022 17.8379 15.0065L7.94413 4.10778C9.13603 3.40203 10.5232 3 12 3C16.4183 3 20 6.58172 20 11V15H18Z" />
         <rect fill="currentColor" x="3" y="2" width="2" height="20" transform="rotate(45 3 2)" />
     </svg>
+);
+
+const CamIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M17 10.5V7C17 5.9 16.1 5 15 5H5C3.9 5 3 5.9 3 7V15C3 16.1 3.9 17 5 17H15C16.1 17 17 16.1 17 15V11.5L21 15.5V6.5L17 10.5Z" />
+        <rect fill="currentColor" x="2" y="2" width="2" height="20" transform="rotate(45 2 2)" />
+    </svg>
+
 );
 
 const settings = definePluginSettings({
@@ -76,7 +86,7 @@ export default definePlugin({
 
     settings,
     toggle: (au: any, what: string) => {
-        if (fakeM === false && fakeD === false && fakeBoth === false)
+        if (fakeM === false && fakeD === false && fakeBoth === false && fakecam === false)
             return au;
         else {
             switch (what) {
@@ -158,6 +168,27 @@ export default definePlugin({
                 setTimeout(mute, 250);
             }
         });
+
+         addSettingsPanelButton({
+            name: "fakecam", icon: CamIcon, tooltipText: "Fake Camera", onClick: () => {
+
+                if (fakeM) {
+                    fakeM = false;
+                    mute();
+                    setTimeout(mute, 250);
+                }
+                if (fakeD) {
+                    fakeD = false;
+                    deafen();
+                    setTimeout(deafen, 250);
+                }
+
+
+                fakecam = !fakecam;
+                deafen();
+                setTimeout(mute, 250);
+            }
+        });
     },
 
     stop() {
@@ -165,6 +196,7 @@ export default definePlugin({
         removeSettingsPanelButton("fakemute");
         removeSettingsPanelButton("faked");
         removeSettingsPanelButton("fakeboth");
+        removeSettingsPanelButton("fakecam");
     },
 
     getSettingsPanel() {
