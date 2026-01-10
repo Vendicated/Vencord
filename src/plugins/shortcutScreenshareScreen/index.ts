@@ -8,7 +8,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import { settings } from "./settings";
-import { startStreaming, stopStreaming, toggleAudio, toggleGameOrScreen, toggleStream } from "./streamManager";
+import { startStream, stopStream, toggleAudio, toggleGameOrScreen, toggleStream } from "./streamManager";
 
 export default definePlugin({
     name: "ShortcutScreenShare",
@@ -17,8 +17,8 @@ export default definePlugin({
     settings,
     keybinds: [
         { event: "testKeybind", global: false, function: () => console.log("Test keybind pressed!"), options: { keydown: true, keyup: false } },
-        { event: "startStreaming", global: true, function: startStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
-        { event: "stopStreaming", global: true, function: stopStreaming, options: { blurred: false, focused: false, keydown: true, keyup: false } },
+        { event: "startStreaming", global: true, function: startStream, options: { blurred: false, focused: false, keydown: true, keyup: false } },
+        { event: "stopStreaming", global: true, function: stopStream, options: { blurred: false, focused: false, keydown: true, keyup: false } },
         { event: "toggleAudio", global: true, function: toggleAudio, options: { blurred: false, focused: false, keydown: true, keyup: false } },
         { event: "toggleStream", global: true, function: toggleStream, options: { blurred: false, focused: false, keydown: true, keyup: false } },
         { event: "toggleGameOrScreen", global: true, function: toggleGameOrScreen, options: { blurred: false, focused: true, keydown: true, keyup: false } }

@@ -20,20 +20,18 @@ import "./KeybindSetting.css";
 
 import keybindsManager from "@api/Keybinds/keybindsManager";
 import { KeybindShortcut } from "@api/Keybinds/types";
-import { classNameFactory } from "@api/Styles";
+import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
+import { Flex } from "@components/Flex";
 import { ScreenshareIcon, WebsiteIcon } from "@components/Icons";
 import { Switch } from "@components/settings";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/index";
 import { OptionType, PluginOptionKeybind } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { React, Text, Tooltip, useEffect, useRef, useState } from "@webpack/common";
+import { Tooltip, useEffect, useRef, useState } from "@webpack/common";
+import { MouseEventHandler } from "react";
 
 import { SettingProps, SettingsSection } from "./Common";
-
-const ButtonClasses = findByPropsLazy("button", "sm", "secondary", "hasText", "buttonChildrenWrapper");
-const FlexClasses = findByPropsLazy("flex", "horizontalReverse");
-const ContainersClasses = findByPropsLazy("buttonContainer", "recorderContainer");
-const RecorderClasses = findByPropsLazy("recorderContainer", "keybindInput");
 
 export const cl = classNameFactory("vc-plugins-setting-keybind");
 
@@ -81,28 +79,28 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
 
     return (
         <SettingsSection name={id} description={option.description} error={error} inlineSetting={true}>
-            <div className={cl("-layout")}>
+            <Flex flexDirection="row" alignItems="center" justifyContent="space-between" gap=".5em">
                 <Tooltip text={global ? "Global Keybind" : "Window Keybind"}>
                     {({ onMouseEnter, onMouseLeave }) => (
-                        <div className={cl("-icon")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                        <div className={cl(enabled ? "-icon" : "-icon-disabled")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                             {global
-                                ? <WebsiteIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="var(--header-primary)" className={!enabled ? "disabled" : ""} />
-                                : <ScreenshareIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="var(--header-primary)" className={!enabled ? "disabled" : ""} />
+                                ? <WebsiteIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="#FFFFFF" />
+                                : <ScreenshareIcon onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} color="#FFFFFF" />
                             }
                         </div>
                     )}
                 </Tooltip>
                 <Tooltip text={keybindsManager.keysToString(state, global) || "No Keybind Set"}>
                     {({ onMouseEnter, onMouseLeave }) => (
-                        <div className={cl("-discord")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} >
-                            <KeybindInput
-                                id={inputId}
-                                defaultKeys={state}
-                                global={global}
-                                onChange={handleChange}
-                                disabled={!enabled}
-                            />
-                        </div>
+                        <KeybindInput
+                            id={inputId}
+                            defaultKeys={state}
+                            global={global}
+                            onChange={handleChange}
+                            disabled={!enabled}
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                        />
                     )}
                 </Tooltip>
                 <Tooltip text={enabled ? "Disable/Clear Keybind" : "Enable Keybind"}>
@@ -112,17 +110,19 @@ export function KeybindSetting({ option, pluginSettings, definedSettings, id, on
                         </div>
                     )}
                 </Tooltip>
-            </div>
+            </Flex>
         </SettingsSection>
     );
 }
 
-function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
+function KeybindInput({ id, defaultKeys, global, onChange, disabled, onMouseEnter, onMouseLeave }: {
     id: string;
     defaultKeys: KeybindShortcut;
     global: boolean;
     onChange: (value: KeybindShortcut) => void;
     disabled: boolean;
+    onMouseEnter?: MouseEventHandler<HTMLDivElement>;
+    onMouseLeave?: MouseEventHandler<HTMLDivElement>;
 }) {
     const [recording, setRecording] = useState(false);
     const stopCapture = useRef<() => void | undefined>(undefined);
@@ -136,9 +136,7 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
         };
     }, []);
 
-    function updateRecording(e: React.MouseEvent<HTMLButtonElement>) {
-        e.preventDefault();
-        e.stopPropagation();
+    function updateRecording() {
         if (!recording) {
             startRecording();
         } else {
@@ -165,22 +163,16 @@ function KeybindInput({ id, defaultKeys, global, onChange, disabled }: {
     }
 
     return (
-        <div className={classes(recording ? RecorderClasses.recording : "", RecorderClasses.recorderContainer, disabled ? RecorderClasses.containerDisabled : "")}>
-            <div className={classes(RecorderClasses.recorderLayout, FlexClasses.flex, FlexClasses.horizontal)}>
+        <div className={classes(cl("-recorder-container"), recording ? "recording" : "", disabled ? "disabled" : "")}>
+            <Flex flexDirection="row" className={cl("-recorder-layout")} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} alignItems="center" gap="4px">
                 <FocusedInput id={id} onBlur={stopRecording} recording={recording} disabled={disabled} value={keybindsManager.keysToString(defaultKeys, global)} />
-                <div className={classes(ContainersClasses.buttonContainer)}>
-                    <button onClick={updateRecording} className={classes(ButtonClasses.button, ButtonClasses.sm, recording ? ButtonClasses["critical-secondary"] : ButtonClasses.secondary, ButtonClasses.hasText)} >
-                        <div className={classes(ButtonClasses.buttonChildrenWrapper)}>
-                            <div className={classes(ButtonClasses.buttonChildren)}>
-                                <Text variant="text-sm/medium" color="inherit">
-                                    {!recording ? defaultKeys.length ? "Record Keybind" : "Edit Keybind" : "Stop Recording"}
-                                </Text>
-                            </div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
+                <Button className={cl("-recorder-button")} onClick={updateRecording} size="small" variant={recording ? "dangerSecondary" : "secondary"} onMouseDown={e => e.preventDefault()}>
+                    <BaseText size="sm" weight="medium" style={{ color: "inherit" }}>
+                        {!recording ? defaultKeys.length ? "Record Keybind" : "Edit Keybind" : "Stop Recording"}
+                    </BaseText>
+                </Button>
+            </Flex>
+        </div >
     );
 }
 
@@ -195,6 +187,6 @@ function FocusedInput({ id, onBlur, recording, disabled, value }) {
     }, [recording]);
 
     return (
-        <input id={id} onBlur={onBlur} type="text" readOnly disabled={disabled} value={value} placeholder="No Keybind Set" className={classes(RecorderClasses.keybindInput)} ref={inputRef} />
+        <input id={id} onBlur={onBlur} type="text" readOnly disabled={disabled} value={value} placeholder="No Keybind Set" className={cl("-recorder-input")} ref={inputRef} />
     );
 }

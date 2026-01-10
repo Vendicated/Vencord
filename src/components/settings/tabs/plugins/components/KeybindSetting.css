@@ -1,20 +1,61 @@
-.vc-plugins-setting-keybind-layout {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: .5em;
-}
-
-.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-icon > svg.disabled {
+.vc-plugins-setting-keybind-icon-disabled > svg {
     opacity: .3;
 }
 
-.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord > div > div {
-    position: unset;
+.vc-plugins-setting-keybind-recorder-layout {
+    cursor: pointer;
 }
 
-.vc-plugins-setting-keybind-layout .vc-plugins-setting-keybind-discord > div > div > input:focus {
-    border-radius: var(--radius-sm);
-    background-color: rgb(255 255 255 / 5%) !important;
+.vc-plugins-setting-keybind-recorder-container {
+    transition: border .15s ease;
+    background-color: var(--input-background-default, #0000001f);
+    border: 1px solid;
+    border-color: var(--input-border-default, #97979f33);
+    border-radius: var(--radius-sm, 8px);
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.vc-plugins-setting-keybind-recorder-container.recording {
+    animation: vc-plugins-setting-keybind-recorder-shadowpulse 1s ease-in infinite;
+    border-color: hsl(var(--red-400-hsl, #da3e4499) / 60%);
+    box-shadow: 0 0 6px hsl(var(--red-400-hsl, #da3e4499) / 30%);
+    color: var(--status-danger, #da3e44);
+}
+
+.vc-plugins-setting-keybind-recorder-container.disabled {
+    cursor: not-allowed;
+    opacity: .3;
+}
+
+@keyframes vc-plugins-setting-keybind-recorder-shadowpulse {
+    0% {
+        box-shadow: 0 0 6px hsl(var(--red-400-hsl)/30%)
+    }
+
+    50% {
+        box-shadow: 0 0 10px hsl(var(--red-400-hsl)/60%)
+    }
+
+    100% {
+        box-shadow: 0 0 6px hsl(var(--red-400-hsl)/30%)
+    }
+}
+
+.vc-plugins-setting-keybind-recorder-button {
+    margin: 4px;
+    min-width: 120px;
+}
+
+input.vc-plugins-setting-keybind-recorder-input {
+    font-size: 14px;
+    font-weight: var(--font-weight-semibold, 600);
+    user-select: none;
+    border: none;
+    padding-block: 10px;
+    padding-inline: 10px 0;
+    white-space: nowrap;
+    background-color: transparent;
+    color: var(--text-normal, #fff);
+    width: 100px;
 }

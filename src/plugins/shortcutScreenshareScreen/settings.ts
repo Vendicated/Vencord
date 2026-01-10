@@ -9,8 +9,6 @@ import { OptionType } from "@utils/types";
 
 import { updateStream } from "./streamManager";
 
-
-export type ShikiSettings = typeof settings.store;
 export const settings = definePluginSettings({
     testKeybind: {
         type: OptionType.KEYBIND,
@@ -23,21 +21,14 @@ export const settings = definePluginSettings({
     displayNumber: {
         type: OptionType.NUMBER,
         description: "Default themes",
-        default: 1
+        default: 1,
+        componentProps: {
+            min: 1
+        }
     },
     toggleStream: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to toggle the stream.",
-        global: true
-    },
-    toggleGameOrScreen: {
-        type: OptionType.KEYBIND,
-        description: "Set the shortcut to toggle the game or screen.",
-        global: true
-    },
-    toggleAudio: {
-        type: OptionType.KEYBIND,
-        description: "Set the shortcut to toggle the audio.",
         global: true
     },
     startStreaming: {
@@ -48,6 +39,16 @@ export const settings = definePluginSettings({
     stopStreaming: {
         type: OptionType.KEYBIND,
         description: "Set the shortcut to stop the stream.",
+        global: true
+    },
+    toggleGameOrScreen: {
+        type: OptionType.KEYBIND,
+        description: "Set the shortcut to toggle the game or screen.",
+        global: true
+    },
+    toggleAudio: {
+        type: OptionType.KEYBIND,
+        description: "Set the shortcut to toggle the audio.",
         global: true
     },
     disablePreview: {
