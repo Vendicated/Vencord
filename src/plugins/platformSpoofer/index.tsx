@@ -41,7 +41,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
-    authors: [Devs.shitfuckup],
+    authors: [Devs.pluckerpilple],
     settingsAboutComponent: () => <>
     <Forms.FormText className="plugin-warning">
     Mujhid. is not responsible for u violation of the laws :3

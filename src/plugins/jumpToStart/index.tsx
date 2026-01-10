@@ -31,7 +31,7 @@ const MenuPatch: NavContextMenuPatchCallback = (children, { channel }) => {
 export default definePlugin({
     name: "JumpToStart",
     description: "Adds a context menu option to jump to the start of a channel/DM",
-    authors: [Devs.shitfuckup],
+    authors: [Devs.pluckerpilple],
     contextMenus:
     {
         "channel-context": MenuPatch,
