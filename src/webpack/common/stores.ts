@@ -79,6 +79,7 @@ export let LocaleStore: t.LocaleStore;
 export let RTCConnectionStore: t.RTCConnectionStore;
 export let SoundboardStore: t.SoundboardStore;
 export let PopoutWindowStore: t.PopoutWindowStore;
+export let SessionsStore: t.SessionsStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -136,3 +137,4 @@ waitForStore("ThemeStore", m => {
     // For this reason, use a non import access here.
     Vencord.Api.Themes.initQuickCssThemeStore(m);
 });
+waitForStore("SessionsStore", m => SessionsStore = m);
