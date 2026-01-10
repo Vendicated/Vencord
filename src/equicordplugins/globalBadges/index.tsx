@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { BadgePosition, ProfileBadge } from "@api/Badges";
+import { migratePluginSetting } from "@api/Settings";
 import { Button } from "@components/Button";
 import { BadgeContextMenu } from "@plugins/_api/badges";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -20,6 +21,7 @@ import { cl, GlobalBadges, INVITE_LINK, loadBadges } from "./utils";
 
 let intervalId: any;
 
+migratePluginSetting("GlobalBadges", "showRaincord", "showRa1ncord");
 export default definePlugin({
     name: "GlobalBadges",
     description: "Adds global badges from other client mods",

@@ -14,17 +14,18 @@ export let GlobalBadges = {};
 export const INVITE_LINK = "kwHCJPxp8t";
 export const cl = classNameFactory("vc-global-badges-");
 export const serviceMap: Record<string, string> = {
+    badgevault: "BadgeVault",
     nekocord: "Nekocord",
     reviewdb: "ReviewDB",
     aero: "Aero",
     aliucord: "Aliucord",
-    ra1ncord: "Ra1ncord",
+    raincord: "Raincord",
     velocity: "Velocity",
     enmity: "Enmity",
-    badgevault: "BadgeVault",
-    vencord: "Vencord",
-    equicord: "Equicord",
+    paicord: "Paicord",
 };
+
+const blockedMods = ["vencord", "equicord"];
 
 export async function loadBadges() {
     const url = settings.store.apiUrl.endsWith("/") ? settings.store.apiUrl + "users" : settings.store.apiUrl + "/users";
@@ -34,10 +35,7 @@ export async function loadBadges() {
     for (const key in globalBadges.users) {
         filteredUsers[key] = globalBadges.users[key].filter(b => {
             const { mod } = b;
-            if (!mod) return false;
-
-            const blockedMods = ["vencord", "equicord"];
-            if (blockedMods.includes(mod)) return false;
+            if (!mod || blockedMods.includes(mod)) return false;
 
             const conditionalMods = {
                 aero: settings.store.showAero,
@@ -46,7 +44,7 @@ export async function loadBadges() {
                 nekocord: settings.store.showNekocord,
                 reviewdb: settings.store.showReviewDB,
                 aliucord: settings.store.showAliucord,
-                ra1ncord: settings.store.showRa1ncord,
+                raincord: settings.store.showRaincord,
                 enmity: settings.store.showEnmity
             };
 

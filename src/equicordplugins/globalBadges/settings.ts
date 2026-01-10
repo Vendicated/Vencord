@@ -60,9 +60,9 @@ export const settings = definePluginSettings({
         default: true,
         restartNeeded: false
     },
-    showRa1ncord: {
+    showRaincord: {
         type: OptionType.BOOLEAN,
-        description: "Show Ra1ncord Badges",
+        description: "Show Raincord Badges",
         default: true,
         restartNeeded: false
     },
@@ -75,6 +75,12 @@ export const settings = definePluginSettings({
     showEnmity: {
         type: OptionType.BOOLEAN,
         description: "Show Enmity Badges",
+        default: true,
+        restartNeeded: false
+    },
+    showPaicord: {
+        type: OptionType.BOOLEAN,
+        description: "Show Paicord Badges",
         default: true,
         restartNeeded: false
     },
