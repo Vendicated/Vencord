@@ -32,6 +32,7 @@ export * from "./RTCConnectionStore";
 export * from "./RunningGameStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
+export * from "./SessionsStore";
 export * from "./SoundboardStore";
 export * from "./SpellCheckStore";
 export * from "./SpotifyStore";
