@@ -161,9 +161,9 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
                     if (pulled) {
                         Alerts.show({
                             title: "ياخي فكه يا دبشه",
-                            body: `كمل يا رجال ما عليك  ${user.username} اما تبي تكمل جدول على ؟`,
+                            body: `كمل يا رجال ما عليك  ${user.username} اما تبي تكمل جدول عليه ؟`,
                             confirmText: "لا برحمه",
-                            cancelText: "بكمل عليهم المهطف",
+                            cancelText: "بكمل عليه المهطف",
                             confirmColor: "red",
                             onConfirm: () => removeFromPullList(user.id)
                         });
@@ -230,7 +230,7 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
 
     children.splice(-1, 0, (
         <Menu.MenuGroup>
-            <Menu.MenuItem id="pull-list" label="علشاني">
+            <Menu.MenuItem id="pull-list" label="فكهوم">
                 {items}
             </Menu.MenuItem>
         </Menu.MenuGroup>
