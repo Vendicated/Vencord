@@ -117,7 +117,7 @@ async function fetchQuote() {
     return currentQuote;
 }
 
-function QuoteComponent(): string {
+function QuoteComponent(): JSX.Element | null {
     const [quote, setQuote] = useState(currentQuote);
     useEffect(() => {
         (async () => {
@@ -125,7 +125,7 @@ function QuoteComponent(): string {
             setQuote(quote);
         })();
     }, []);
-    return quote;
+    return <ErrorBoundary noop>{quote}</ErrorBoundary>;
 }
 
 export default definePlugin({
@@ -163,7 +163,7 @@ export default definePlugin({
                 quotes.push(...presetQuotes);
 
             if (enableRandomFactQuotes)
-                quotes.push(<ErrorBoundary noop><QuoteComponent /></ErrorBoundary>);
+                quotes.push(<QuoteComponent />);
 
             quotes.push(...additionalQuotes.split(additionalQuotesDelimiter).filter(Boolean));
 
