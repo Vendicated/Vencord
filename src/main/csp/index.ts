@@ -63,7 +63,7 @@ export const CspPolicies: PolicyMap = {
     "dearrow-thumb.ajay.app": ImageSrc, // Dearrow Thumbnail CDN
     "usrbg.is-hardly.online": ImageSrc, // USRBG API
     "icons.duckduckgo.com": ImageSrc, // DuckDuckGo Favicon API (Reverse Image Search)
-    "*.wikipedia.org": ConnectSrc, // Wikipedia
+    "en.wikipedia.org": ConnectSrc, // Wikipedia
     "uselessfacts.jsph.pl": ConnectSrc, // Useless Facts API
 };
 
