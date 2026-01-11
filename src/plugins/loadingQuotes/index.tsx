@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { sleep } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { useEffect, useState } from "@webpack/common";
 import presetQuotesText from "file://quotes.txt";
@@ -27,6 +28,8 @@ import { JSX } from "react";
 
 const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(Boolean) as string[];
 const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon you are...";
+
+const logger = new Logger("LoadingQuotes");
 
 let currentQuote = "Loading random fact...";
 
@@ -99,7 +102,7 @@ async function fetchQuote() {
         else { currentQuote = json?.text || ""; }
     }
     catch (error) {
-        new Logger("LoadingQuotes").error("Failed to fetch quote", error);
+        logger.error("Failed to fetch quote", error);
         currentQuote = "";
     }
     for (let retryIndex = 0; retryIndex < 5; retryIndex++) {
@@ -109,7 +112,7 @@ async function fetchQuote() {
                 currentQuote = data?.query?.pages?.[0]?.extract || "";
             }
             catch (error) {
-                new Logger("LoadingQuotes").error("Failed to fetch quote", error);
+                logger.error("Failed to fetch quote", error);
                 currentQuote = "";
             }
         }
@@ -170,7 +173,7 @@ export default definePlugin({
             if (!quotes.length)
                 quotes.push(noQuotesQuote);
         } catch (e) {
-            new Logger("LoadingQuotes").error("Failed to mutate quotes", e);
+            logger.error("Failed to mutate quotes", e);
         }
     }
 });
