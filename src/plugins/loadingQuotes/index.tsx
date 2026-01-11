@@ -31,8 +31,6 @@ const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon
 
 const logger = new Logger("LoadingQuotes");
 
-let currentQuote = "Loading random fact...";
-
 const settings = definePluginSettings({
     replaceEvents: {
         description: "Should this plugin also apply during events with special event themed quotes? (e.g. Halloween)",
@@ -94,6 +92,7 @@ const settings = definePluginSettings({
 
 async function fetchQuote() {
     const url = settings.store.apiUrl;
+    let currentQuote = "";
     try {
         const json = await fetch(url).then(res => res.json());
         if (url.includes("wiki")) {
@@ -123,7 +122,7 @@ async function fetchQuote() {
 }
 
 function QuoteComponent(): JSX.Element | null {
-    const [quote, setQuote] = useState(currentQuote);
+    const [quote, setQuote] = useState("Loading random fact...");
     useEffect(() => {
         (async () => {
             const quote = await fetchQuote();
