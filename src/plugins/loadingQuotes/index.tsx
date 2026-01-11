@@ -17,14 +17,13 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { JSX } from "react";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { useEffect, useState } from "@webpack/common";
-
 import definePlugin, { OptionType } from "@utils/types";
+import { useEffect, useState } from "@webpack/common";
 import presetQuotesText from "file://quotes.txt";
+import { JSX } from "react";
 
 const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(Boolean) as string[];
 const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon you are...";
@@ -104,7 +103,7 @@ async function fetchQuote() {
         currentQuote = "";
     }
     for (let retryIndex = 0; retryIndex < 5; retryIndex++) {
-        if (currentQuote === "" || (url.indexOf("wiki") > -1 && currentQuote.endsWith(':'))) {
+        if (currentQuote === "" || (url.indexOf("wiki") > -1 && currentQuote.endsWith(":"))) {
             try {
                 const data = await fetch(url).then(response => response.json());
                 currentQuote = data?.query?.pages?.[0]?.extract || "";
