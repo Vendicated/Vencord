@@ -96,7 +96,7 @@ async function fetchQuote() {
     const url = settings.store.apiUrl;
     try {
         const json = await fetch(url).then(res => res.json());
-        if (url.indexOf("wiki") > -1) {
+        if (url.includes("wiki")) {
             currentQuote = json?.query?.pages?.[0]?.extract || "";
         }
         else { currentQuote = json?.text || ""; }
