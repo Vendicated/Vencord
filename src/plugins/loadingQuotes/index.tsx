@@ -110,7 +110,7 @@ async function fetchQuote() {
             await sleep(1000 * (retryIndex + 1));
             try {
                 const data = await fetch(url).then(response => response.json());
-                if (url.includes("wiki") && currentQuote.endsWith(":")) {
+                if (url.includes("wiki")) {
                     currentQuote = data?.query?.pages?.[0]?.extract || "";
                 } else {
                     currentQuote = data?.text || "";
