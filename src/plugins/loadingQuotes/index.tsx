@@ -107,8 +107,8 @@ async function fetchQuote() {
     }
     for (let retryIndex = 0; retryIndex < 5; retryIndex++) {
         // check if the fact is just empty or a disambiguation page
-        if (currentQuote === "" || (url.indexOf("wiki") > -1 && currentQuote.endsWith(":"))) {
-            sleep(500);
+        if (currentQuote === "" || (url.includes("wiki") && currentQuote.endsWith(":"))) {
+            await sleep(1000 * (retryIndex + 1));
             try {
                 const data = await fetch(url).then(response => response.json());
                 currentQuote = data?.query?.pages?.[0]?.extract || "";
