@@ -99,7 +99,7 @@ async function fetchQuote() {
         else { currentQuote = json?.text || ""; }
     }
     catch (error) {
-        console.log(error);
+        new Logger("LoadingQuotes").error("Failed to fetch quote", error);
         currentQuote = "";
     }
     for (let retryIndex = 0; retryIndex < 5; retryIndex++) {
@@ -109,7 +109,7 @@ async function fetchQuote() {
                 currentQuote = data?.query?.pages?.[0]?.extract || "";
             }
             catch (error) {
-                console.log(error);
+                new Logger("LoadingQuotes").error("Failed to fetch quote", error);
                 currentQuote = "";
             }
         }
