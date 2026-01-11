@@ -105,12 +105,16 @@ async function fetchQuote() {
         currentQuote = "";
     }
     for (let retryIndex = 0; retryIndex < 5; retryIndex++) {
-        // check if the fact is just empty or a disambiguation page
+        // check if the fact is just empty or a disambiguation page when using Wikipedia
         if (currentQuote === "" || (url.includes("wiki") && currentQuote.endsWith(":"))) {
             await sleep(1000 * (retryIndex + 1));
             try {
                 const data = await fetch(url).then(response => response.json());
-                currentQuote = data?.query?.pages?.[0]?.extract || "";
+                if (url.includes("wiki") && currentQuote.endsWith(":")) {
+                    currentQuote = data?.query?.pages?.[0]?.extract || "";
+                } else {
+                    currentQuote = data?.text || "";
+                }
             }
             catch (error) {
                 logger.error("Failed to fetch quote", error);
