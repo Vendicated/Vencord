@@ -106,6 +106,7 @@ async function fetchQuote() {
         currentQuote = "";
     }
     for (let retryIndex = 0; retryIndex < 5; retryIndex++) {
+        sleep(500);
         if (currentQuote === "" || (url.indexOf("wiki") > -1 && currentQuote.endsWith(":"))) {
             try {
                 const data = await fetch(url).then(response => response.json());
