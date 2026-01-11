@@ -81,6 +81,21 @@ function drawImageRect(ctx: CanvasRenderingContext2D, img: HTMLImageElement, rec
     ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
 }
 
+export async function webpToJpg(src: string): Promise<string> {
+    const image = await imgInit(src);
+    const canvas = document.createElement("canvas");
+
+    canvas.width = image.width;
+    canvas.height = image.height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("canvas context not defined");
+
+    ctx.drawImage(image, 0, 0);
+
+    return canvas.toDataURL();
+}
+
 export async function fitAttachmentIntoCorrectAspectRatio(images: string[], type: AttachmentManipulation) {
     const { promise: imgLoaded, resolve } = Promise.withResolvers();
 

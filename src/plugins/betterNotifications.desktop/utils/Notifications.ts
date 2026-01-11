@@ -11,7 +11,7 @@ import { PluginNative } from "@utils/types";
 import { findByProps } from "@webpack";
 
 import { notificationShouldBeShown, settings } from "..";
-import { AttachmentManipulation, blurImage, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio } from "./ImageManipulation";
+import { AttachmentManipulation, blurImage, cropImageToCircle, fitAttachmentIntoCorrectAspectRatio, webpToJpg } from "./ImageManipulation";
 import { isLinux, parseVariables, replaceVariables } from "./Variables";
 
 const Native = VencordNative.pluginHelpers.BetterNotifications as PluginNative<typeof import("../native")>;
@@ -58,7 +58,7 @@ export async function SendNativeNotification(avatarUrl: string | undefined,
     for (const attachment of attachments) {
         contentType = attachment.content_type;
 
-        if (contentType !== "image/jpeg" && contentType !== "image/png") {
+        if (contentType !== "image/jpeg" && contentType !== "image/png" && contentType !== "image/webp") {
             logger.info(`Invalid content type ${contentType}. Skipping...`);
             continue;
         }
@@ -72,6 +72,10 @@ export async function SendNativeNotification(avatarUrl: string | undefined,
         }
 
         attachmentUrl = attachment.proxy_url;
+
+        if (contentType === "image/webp") {
+            attachmentUrl = await webpToJpg(attachment.proxy_url);
+        }
 
         // @ts-ignore
         imageType = contentType.split("/")[1];

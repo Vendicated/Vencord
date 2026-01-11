@@ -447,8 +447,6 @@ export function notify(event: IpcMainInvokeEvent,
             ...(isWin && { toastXml: generateXml(type, titleString, bodyString, avatar, notificationData, extraOptions, attachment, quickReactions) })
         });
 
-        // Listener for macOS
-        notification.addListener("click", () => unixCallback());
 
         if (lastNotification) {
             console.log("Removing last notification");
