@@ -19,11 +19,17 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { JSX } from "react";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { useEffect, useState } from "@webpack/common";
+
 import definePlugin, { OptionType } from "@utils/types";
 import presetQuotesText from "file://quotes.txt";
 
 const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(Boolean) as string[];
 const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon you are...";
+
+let currentQuote = "Loading random fact...";
 
 const settings = definePluginSettings({
     replaceEvents: {
@@ -51,12 +57,82 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "|",
     },
+    enableRandomFactQuotes: {
+        description: "Enable random fact quotes from an online API",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    apiUrl: {
+            description: "API endpoint to use (if enabled) for random facts.",
+            type: OptionType.SELECT,
+            options: [
+                {
+                    label: "Useless facts API. Gives you random useless but short facts.",
+                    value: "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en",
+                    default: true
+                },
+                {
+                    label: "Wikipedia API. Gives you random facts from all topics but potentially long.",
+                    value: "https://en.wikipedia.org/w/api.php?" + new URLSearchParams({
+                        action: "query",
+                        prop: "extracts",
+                        format: "json",
+                        formatversion: "2",
+                        exsentences: "2",
+                        exsectionformat: "plain",
+                        generator: "random",
+                        grnnamespace: "0",
+                        explaintext: "1",
+                        origin: "*",
+                    })
+                }
+            ]
+        },
 });
+
+async function fetchQuote() {
+    const url = settings.store.apiUrl;
+    try {
+        const json = await fetch(url).then(res => res.json());
+        if (url.indexOf("wiki") > -1) {
+            currentQuote = json?.query?.pages?.[0]?.extract || "";
+        }
+        else { currentQuote = json?.text || ""; }
+    }
+    catch (error) {
+        console.log(error);
+        currentQuote = "";
+    }
+    for (let retryIndex = 0; retryIndex < 5; retryIndex++) {
+        if (currentQuote === "" || (url.indexOf("wiki") > -1 && currentQuote.endsWith(':'))) {
+            try {
+                const data = await fetch(url).then(response => response.json());
+                currentQuote = data?.query?.pages?.[0]?.extract || "";
+            }
+            catch (error) {
+                console.log(error);
+                currentQuote = "";
+            }
+        }
+    }
+    return currentQuote;
+}
+
+function QuoteComponent(): string {
+    const [quote, setQuote] = useState(currentQuote);
+    useEffect(() => {
+        (async () => {
+            const quote = await fetchQuote();
+            setQuote(quote);
+        })();
+    }, []);
+    return quote;
+}
 
 export default definePlugin({
     name: "LoadingQuotes",
     description: "Replace Discords loading quotes",
-    authors: [Devs.Ven, Devs.KraXen72, Devs.UlyssesZhan],
+    authors: [Devs.Ven, Devs.KraXen72, Devs.UlyssesZhan, Devs.DarkRedTitan],
 
     settings,
 
@@ -77,16 +153,18 @@ export default definePlugin({
         },
     ],
 
-    mutateQuotes(quotes: string[]) {
+    mutateQuotes(quotes: (string | JSX.Element)[]): void {
         try {
-            const { enableDiscordPresetQuotes, additionalQuotes, additionalQuotesDelimiter, enablePluginPresetQuotes } = settings.store;
+            const { enableDiscordPresetQuotes, additionalQuotes, additionalQuotesDelimiter, enablePluginPresetQuotes, enableRandomFactQuotes } = settings.store;
 
             if (!enableDiscordPresetQuotes)
                 quotes.length = 0;
 
-
             if (enablePluginPresetQuotes)
                 quotes.push(...presetQuotes);
+
+            if (enableRandomFactQuotes)
+                quotes.push(<ErrorBoundary noop><QuoteComponent /></ErrorBoundary>);
 
             quotes.push(...additionalQuotes.split(additionalQuotesDelimiter).filter(Boolean));
 
