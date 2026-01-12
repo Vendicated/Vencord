@@ -23,7 +23,7 @@ export const ControlButton: React.FC<ControlButtonProps> = ({ id, icon, title, o
                 e.stopPropagation();
                 onClick();
             }}
-            className={`vc-popout-control-btn${active ? " vc-popout-active" : ""}`}
+            className={`vc-popoutplus-control-btn${active ? " vc-popoutplus-active" : ""}`}
         >
             {icon}
         </button>

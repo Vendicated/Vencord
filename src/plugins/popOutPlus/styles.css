@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-.vc-popout-clear-view [class*="titleBar"] {
+
+.vc-popoutplus-clear-view [class*="titleBar"] {
     display: none !important;
 }
 
-.vc-popout-control-btn {
+.vc-popoutplus-control-btn {
     -webkit-app-region: no-drag;
     background: rgb(0 0 0 / 60%);
     color: white;
@@ -26,12 +27,12 @@
     pointer-events: auto;
 }
 
-.vc-popout-control-btn.vc-popout-active {
+.vc-popoutplus-control-btn.vc-popoutplus-active {
     background: rgb(88 101 242 / 90%);
     opacity: 1;
 }
 
-#vc-popout-controls {
+#vc-popoutplus-controls {
     position: fixed;
     bottom: 10px;
     right: 10px;
@@ -41,7 +42,7 @@
     pointer-events: auto;
 }
 
-#vc-popout-drag-layer {
+#vc-popoutplus-drag-layer {
     position: fixed;
     left: 0;
     right: 0;
@@ -51,15 +52,15 @@
     pointer-events: auto;
 }
 
-#vc-popout-drag-layer.vc-popout-dragging {
+#vc-popoutplus-drag-layer.vc-popoutplus-dragging {
     cursor: grabbing;
 }
 
-#vc-popout-drag-layer:not(.vc-popout-dragging) {
+#vc-popoutplus-drag-layer:not(.vc-popoutplus-dragging) {
     cursor: grab;
 }
 
-.vc-popout-drag-hint {
+.vc-popoutplus-drag-hint {
     position: fixed;
     top: 20%;
     left: 50%;
@@ -77,11 +78,11 @@
     text-align: center;
 }
 
-.vc-popout-drag-hint.vc-popout-visible {
+.vc-popoutplus-drag-hint.vc-popoutplus-visible {
     opacity: 1;
 }
 
-.vc-popout-controls-wrapper {
+.vc-popoutplus-controls-wrapper {
     -webkit-app-region: no-drag;
     position: relative;
     z-index: 100;
@@ -90,11 +91,11 @@
     transition: opacity 0.1s ease;
 }
 
-.vc-popout-controls-wrapper.vc-popout-visible {
+.vc-popoutplus-controls-wrapper.vc-popoutplus-visible {
     opacity: 1;
     pointer-events: auto;
 }
 
-.vc-popout-dragging {
+.vc-popoutplus-dragging {
     -webkit-app-region: drag;
 }

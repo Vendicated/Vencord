@@ -95,15 +95,15 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
 
     return (
         <>
-            <div className={`vc-popout-drag-hint${isDragging ? " vc-popout-visible" : ""}`}>
+            <div className={`vc-popoutplus-drag-hint${isDragging ? " vc-popoutplus-visible" : ""}`}>
                 Dragging window...
             </div>
 
-            <div className={`vc-popout-drag-hint${isClearViewHintVisible && !isDragging ? " vc-popout-visible" : ""}`}>
+            <div className={`vc-popoutplus-drag-hint${isClearViewHintVisible && !isDragging ? " vc-popoutplus-visible" : ""}`}>
                 Hold Ctrl button to drag window
             </div>
 
-            <div className={`vc-popout-controls-wrapper${isVisible ? " vc-popout-visible" : ""}`}>
+            <div className={`vc-popoutplus-controls-wrapper${isVisible ? " vc-popoutplus-visible" : ""}`}>
                 <PopOutControls
                     isPinned={isPinned}
                     togglePin={togglePin}

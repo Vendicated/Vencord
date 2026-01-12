@@ -4,16 +4,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { PopoutActions, PopoutWindowStore } from "@webpack/common";
+import { PopoutActions } from "@webpack/common";
 
 
 export const setPopoutAlwaysOnTop = (popoutKey: string, enabled: boolean) => {
     PopoutActions.setAlwaysOnTop(popoutKey, enabled);
 };
 
-// There is no native/react method to enforce fullscreen
+/**
+ * PopoutWindowStore?.isWindowFullScreen is only checking if app-mount is fullscreen element
+ * And patching out whole app-mount is seems like overkill, especcially if we still enforced
+ * to use win.document.exitFullscreen to exit fullscreen
+ *
+ */
 export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
-    const isFullscreen = PopoutWindowStore?.isWindowFullScreen?.(popoutKey) || win.document.fullscreenElement;
+    const isFullscreen = win.document.fullscreenElement;
 
     if (isFullscreen) {
         win.document.exitFullscreen().catch(() => { });
@@ -21,8 +26,6 @@ export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
         win.document.documentElement.requestFullscreen().catch(() => { });
     }
 };
-
-
 
 // For this feature we need to get actual video width and heights. Stores can return to us only original resolution
 export const autoFitPopout = (win: Window & { __vc_popout_video?: HTMLVideoElement; }) => {

@@ -28,29 +28,29 @@ export const PopOutControls: React.FC<PopOutControlsProps> = ({
     autoFitToVideo
 }) => {
     return (
-        <div id="vc-popout-controls">
+        <div id="vc-popoutplus-controls">
             <ControlButton
-                id="vc-popout-pin-btn"
+                id="vc-popoutplus-pin-btn"
                 icon="📌"
                 title={isPinned ? "Unpin Window (P)" : "Pin on Top (P)"}
                 onClick={togglePin}
                 active={isPinned}
             />
             <ControlButton
-                id="vc-popout-clearview-btn"
+                id="vc-popoutplus-clearview-btn"
                 icon="👁"
                 title={isClearView ? "Show Title Bar (C)" : "Clear View (C)"}
                 onClick={toggleClearView}
                 active={isClearView}
             />
             <ControlButton
-                id="vc-popout-fit-btn"
+                id="vc-popoutplus-fit-btn"
                 icon="🗖"
                 title="Auto Fit (A)"
                 onClick={autoFitToVideo}
             />
             <ControlButton
-                id="vc-popout-fullscreen-btn"
+                id="vc-popoutplus-fullscreen-btn"
                 icon="⛶"
                 title={isFullscreen ? "Exit Fullscreen (F)" : "Fullscreen (F)"}
                 onClick={toggleFullscreen}
