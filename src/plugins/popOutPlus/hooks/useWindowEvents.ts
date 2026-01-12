@@ -19,29 +19,27 @@ export const useWindowEvents = (popoutKey: string, callbacks: WindowEventCallbac
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
 
-        const doc = win.document;
-
         if (onActivity) {
-            doc.addEventListener("mousemove", onActivity);
-            doc.addEventListener("mouseenter", onActivity);
+            win.addEventListener("mousemove", onActivity);
+            win.addEventListener("mouseenter", onActivity);
         }
         if (onKeyDown) {
-            doc.addEventListener("keydown", onKeyDown);
+            win.addEventListener("keydown", onKeyDown);
         }
         if (onDblClick) {
-            doc.addEventListener("dblclick", onDblClick);
+            win.addEventListener("dblclick", onDblClick);
         }
 
         return () => {
             if (onActivity) {
-                doc.removeEventListener("mousemove", onActivity);
-                doc.removeEventListener("mouseenter", onActivity);
+                win.removeEventListener("mousemove", onActivity);
+                win.removeEventListener("mouseenter", onActivity);
             }
             if (onKeyDown) {
-                doc.removeEventListener("keydown", onKeyDown);
+                win.removeEventListener("keydown", onKeyDown);
             }
             if (onDblClick) {
-                doc.removeEventListener("dblclick", onDblClick);
+                win.removeEventListener("dblclick", onDblClick);
             }
         };
     }, [popoutKey, onActivity, onKeyDown, onDblClick]);

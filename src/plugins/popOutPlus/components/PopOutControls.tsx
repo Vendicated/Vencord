@@ -28,18 +28,7 @@ export const PopOutControls: React.FC<PopOutControlsProps> = ({
     autoFitToVideo
 }) => {
     return (
-        <div
-            id="vc-popout-controls"
-            style={{
-                position: "fixed",
-                bottom: "10px",
-                right: "10px",
-                zIndex: 99999,
-                display: "flex",
-                gap: "6px",
-                pointerEvents: "auto",
-            }}
-        >
+        <div id="vc-popout-controls">
             <ControlButton
                 id="vc-popout-pin-btn"
                 icon="📌"

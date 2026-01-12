@@ -19,12 +19,8 @@ export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
     if (PopoutWindowStore?.isWindowFullScreen?.(popoutKey)) {
         doc.exitFullscreen().catch(() => { });
     } else {
-        const appMount = doc.getElementById("app-mount");
-        if (appMount?.requestFullscreen) {
-            appMount.requestFullscreen().catch(() => {
-                doc.documentElement.requestFullscreen().catch(() => { });
-            });
-        }
+        const target = doc.getElementById("app-mount") ?? doc.documentElement;
+        target.requestFullscreen().catch(() => { });
     }
 };
 
@@ -95,43 +91,24 @@ export const dispatchContextMenuThroughOverlay = (
 
 // For this feature we need to get actual video width and heights. Stores can return to us only original resolution
 export const autoFitPopout = (win: Window) => {
-    const doc = win.document;
-    const video = doc.querySelector("video") as HTMLVideoElement;
-    if (!video) return;
+    const video = win.document.querySelector("video") as HTMLVideoElement;
+    if (!video?.videoWidth || !video?.videoHeight) return;
 
     const { videoWidth, videoHeight } = video;
-    if (!videoWidth || !videoHeight) return;
+    const rect = video.getBoundingClientRect();
+    const aspect = videoWidth / videoHeight;
 
-    const containerRect = video.getBoundingClientRect();
-    if (!containerRect.width || !containerRect.height) return;
+    const [width, height] = aspect > rect.width / rect.height
+        ? [rect.width, rect.width / aspect]
+        : [rect.height * aspect, rect.height];
 
-    const videoAspect = videoWidth / videoHeight;
-    const containerAspect = containerRect.width / containerRect.height;
+    const paddingX = win.innerWidth - rect.width;
+    const paddingY = win.innerHeight - rect.height;
+    const chromeX = win.outerWidth - win.innerWidth;
+    const chromeY = win.outerHeight - win.innerHeight;
 
-    let actualWidth: number;
-    let actualHeight: number;
-
-    if (videoAspect > containerAspect) {
-        actualWidth = containerRect.width;
-        actualHeight = containerRect.width / videoAspect;
-    } else {
-        actualHeight = containerRect.height;
-        actualWidth = containerRect.height * videoAspect;
-    }
-
-    const videoSize = {
-        width: Math.round(actualWidth),
-        height: Math.round(actualHeight)
-    };
-
-    const containerPaddingX = win.innerWidth - containerRect.width;
-    const containerPaddingY = win.innerHeight - containerRect.height;
-
-    const chromeWidth = win.outerWidth - win.innerWidth;
-    const chromeHeight = win.outerHeight - win.innerHeight;
-
-    const newWidth = videoSize.width + containerPaddingX + chromeWidth;
-    const newHeight = videoSize.height + containerPaddingY + chromeHeight;
-
-    win.resizeTo(newWidth, newHeight);
+    win.resizeTo(
+        Math.round(width) + paddingX + chromeX,
+        Math.round(height) + paddingY + chromeY
+    );
 };

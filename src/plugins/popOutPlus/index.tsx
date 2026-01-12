@@ -6,13 +6,16 @@
 
 import "./styles.css";
 
+import { ensurePopoutRoot } from "@plugins/popOutPlus/utils/windowInteractions";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { ParticipantType } from "@vencord/discord-types/enums/misc";
 import { findByProps } from "@webpack";
 import { ChannelRTCStore, FluxDispatcher, Menu, PopoutWindowStore, React, SelectedChannelStore } from "@webpack/common";
 import { createRoot } from "@webpack/common/react";
 
 import { PopOutPlusOverlay } from "./components/PopOutPlusOverlay";
+
 
 const POPOUT_KEY_PREFIX = "DISCORD_CALL_TILE_POPOUT";
 
@@ -20,8 +23,6 @@ const getCallTilePopoutKeys = (): string[] => {
     const keys = PopoutWindowStore?.getWindowKeys() ?? [];
     return keys.filter(k => k.startsWith(POPOUT_KEY_PREFIX));
 };
-
-import { ensurePopoutRoot } from "@plugins/popOutPlus/utils/windowInteractions";
 
 const injectReactToPopout = (popoutWindow: Window, popoutKey: string) => {
     ensurePopoutRoot(popoutWindow, rootDiv => {
@@ -35,7 +36,7 @@ const patch = (children: any[], userId: string, isStream: boolean) => {
     if (!channelId) return;
 
     const p = ChannelRTCStore.getParticipants(channelId)?.find((p: any) =>
-        p.user?.id === userId && (isStream ? p.type === 0 : (p.type === 2 && (p.streamId || p.videoStreamId)))
+        p.user?.id === userId && (isStream ? p.type === ParticipantType.STREAM : (p.type === ParticipantType.USER && (p.streamId || p.videoStreamId)))
     );
 
     if (p) {
