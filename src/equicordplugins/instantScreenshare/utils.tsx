@@ -53,12 +53,17 @@ export const settings = definePluginSettings({
         restartNeeded: true,
         default: false,
     },
+    focusDiscord: {
+        type: OptionType.BOOLEAN,
+        description: "Only start screenshare with keybind when Discord is focused",
+        default: true,
+    },
     toolboxManagement: {
         type: OptionType.BOOLEAN,
         description: "Enable/Disable Instant Screenshare",
         default: true,
         hidden: true,
-    }
+    },
 });
 
 export async function getCurrentMedia() {
