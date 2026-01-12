@@ -7,8 +7,7 @@
 import { usePopoutWindow } from "@plugins/popOutPlus/hooks/usePopoutWindow";
 import { useWindowDragging } from "@plugins/popOutPlus/hooks/useWindowDragging";
 import { useWindowEvents } from "@plugins/popOutPlus/hooks/useWindowEvents";
-import { dispatchContextMenuThroughOverlay } from "@plugins/popOutPlus/utils/windowInteractions";
-import { PopoutWindowStore, React, useCallback, useRef, useState } from "@webpack/common";
+import { React, useCallback, useEffect, useRef, useState } from "@webpack/common";
 
 import { PopOutControls } from "./PopOutControls";
 
@@ -27,11 +26,24 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
         autoFitToVideo
     } = usePopoutWindow(popoutKey);
 
-    const { onMouseDown: handleDragStart, isDragging } = useWindowDragging(popoutKey);
+    const { isDragging } = useWindowDragging(popoutKey);
 
     const [isVisible, setIsVisible] = useState(false);
+    const [isClearViewHintVisible, setIsClearViewHintVisible] = useState(false);
     const hideTimeoutRef = useRef<number | null>(null);
-    const dragLayerRef = useRef<HTMLDivElement>(null);
+    const clearViewHintTimeoutRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (isClearView) {
+            setIsClearViewHintVisible(true);
+            if (clearViewHintTimeoutRef.current) {
+                clearTimeout(clearViewHintTimeoutRef.current);
+            }
+            clearViewHintTimeoutRef.current = window.setTimeout(() => setIsClearViewHintVisible(false), 3000);
+        } else {
+            setIsClearViewHintVisible(false);
+        }
+    }, [isClearView]);
 
     const showControls = useCallback(() => {
         setIsVisible(true);
@@ -75,29 +87,14 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
         onDblClick: handleDblClick
     });
 
-    const handleContextMenu = (e: React.MouseEvent) => {
-        const win = PopoutWindowStore?.getWindow(popoutKey);
-        if (!win || !dragLayerRef.current) {
-            return;
-        }
-        e.preventDefault();
-
-        dispatchContextMenuThroughOverlay(win, dragLayerRef.current, e.clientX, e.clientY, e.screenX, e.screenY);
-    };
-
     return (
         <>
-            <div
-                ref={dragLayerRef}
-                id="vc-popout-drag-layer"
-                className={isDragging ? "vc-popout-dragging" : ""}
-                onMouseDown={handleDragStart}
-                onContextMenu={handleContextMenu}
-                style={{ top: isClearView ? "0" : "22px" }}
-            />
-
             <div className={`vc-popout-drag-hint${isDragging ? " vc-popout-visible" : ""}`}>
-                To move to another monitor, drag by the title bar (disable Clear View to see title bar).
+                Dragging window...
+            </div>
+
+            <div className={`vc-popout-drag-hint${isClearViewHintVisible && !isDragging ? " vc-popout-visible" : ""}`}>
+                Hold Ctrl button to drag window
             </div>
 
             <div className={`vc-popout-controls-wrapper${isVisible ? " vc-popout-visible" : ""}`}>

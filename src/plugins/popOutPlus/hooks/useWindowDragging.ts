@@ -4,49 +4,41 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { PopoutWindowStore, useCallback, useRef, useState } from "@webpack/common";
+import { PopoutWindowStore, useEffect, useState } from "@webpack/common";
 
 export const useWindowDragging = (popoutKey: string) => {
     const [isDragging, setIsDragging] = useState(false);
-    const dragDataRef = useRef<{ startX: number, startY: number, startWinX: number, startWinY: number; } | null>(null);
 
-    const onMouseDown = useCallback((e: React.MouseEvent) => {
-        if (e.button !== 0) return; // Only left click
-
+    useEffect(() => {
         const win = PopoutWindowStore?.getWindow(popoutKey);
         if (!win) return;
 
-        dragDataRef.current = {
-            startX: e.screenX,
-            startY: e.screenY,
-            startWinX: win.screenX,
-            startWinY: win.screenY
+        const handleKeyChange = (e: KeyboardEvent) => {
+            const active = e.ctrlKey;
+            setIsDragging(active);
+            if (active) {
+                win.document.body.classList.add("vc-popout-dragging");
+            } else {
+                win.document.body.classList.remove("vc-popout-dragging");
+            }
         };
 
-        setIsDragging(true);
-
-        const handleMouseMove = (evt: MouseEvent) => {
-            const data = dragDataRef.current;
-            if (!data) return;
-
-            const deltaX = evt.screenX - data.startX;
-            const deltaY = evt.screenY - data.startY;
-            win.moveTo(data.startWinX + deltaX, data.startWinY + deltaY);
-        };
-
-        const handleMouseUp = () => {
-            win.removeEventListener("mousemove", handleMouseMove);
-            win.removeEventListener("mouseup", handleMouseUp);
+        const handleBlur = () => {
             setIsDragging(false);
-            dragDataRef.current = null;
+            win.document.body.classList.remove("vc-popout-dragging");
         };
 
-        win.addEventListener("mousemove", handleMouseMove);
-        win.addEventListener("mouseup", handleMouseUp);
+        win.addEventListener("keydown", handleKeyChange);
+        win.addEventListener("keyup", handleKeyChange);
+        win.addEventListener("blur", handleBlur);
+
+        return () => {
+            win.removeEventListener("keydown", handleKeyChange);
+            win.removeEventListener("keyup", handleKeyChange);
+            win.removeEventListener("blur", handleBlur);
+            win.document.body.classList.remove("vc-popout-dragging");
+        };
     }, [popoutKey]);
 
-    return {
-        onMouseDown,
-        isDragging
-    };
+    return { isDragging };
 };

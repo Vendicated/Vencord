@@ -58,37 +58,6 @@ export const ensurePopoutRoot = (win: Window, callback: (root: HTMLElement) => v
     }
 };
 
-// I use overlay for enabling drag-n-drop functionality for whole window. This will allow us to open context menu
-export const dispatchContextMenuThroughOverlay = (
-    win: Window,
-    overlayElement: HTMLElement,
-    x: number,
-    y: number,
-    screenX: number,
-    screenY: number
-) => {
-    const prevPointerEvents = overlayElement.style.pointerEvents;
-    overlayElement.style.pointerEvents = "none";
-
-    const elementBelow = win.document.elementFromPoint(x, y) as HTMLElement;
-
-    if (elementBelow) {
-        const newEvent = new MouseEvent("contextmenu", {
-            bubbles: true,
-            cancelable: true,
-            view: win,
-            clientX: x,
-            clientY: y,
-            screenX: screenX,
-            screenY: screenY,
-            button: 2
-        });
-        elementBelow.dispatchEvent(newEvent);
-    }
-
-    overlayElement.style.pointerEvents = prevPointerEvents || "auto";
-};
-
 // For this feature we need to get actual video width and heights. Stores can return to us only original resolution
 export const autoFitPopout = (win: Window) => {
     const video = win.document.querySelector("video") as HTMLVideoElement;

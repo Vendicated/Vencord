@@ -92,3 +92,7 @@ body.vc-popout-clear-view [class*="titleBar"] {
     opacity: 1;
     pointer-events: auto;
 }
+
+.vc-popout-dragging {
+    -webkit-app-region: drag;
+}
