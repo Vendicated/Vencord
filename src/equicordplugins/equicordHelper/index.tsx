@@ -134,7 +134,7 @@ export default definePlugin({
         // Always show open legacy settings
         ...[
             ".DEVELOPER_SECTION,",
-            '"LegacySettingsSidebarItem"'
+            ".LEGACY_SETTINGS_SIDEBAR_ITEM,"
         ].map(find => ({
             find,
             replacement: [
