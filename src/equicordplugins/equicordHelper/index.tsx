@@ -132,18 +132,15 @@ export default definePlugin({
             }
         },
         // Always show open legacy settings
-        ...[
-            ".DEVELOPER_SECTION,",
-            ".LEGACY_SETTINGS_SIDEBAR_ITEM,"
-        ].map(find => ({
-            find,
+        {
+            find: ".DEVELOPER_SECTION,",
             replacement: [
                 {
                     match: /\i\.\i\.isDeveloper/,
                     replace: "true"
                 },
             ]
-        })),
+        },
         // Force Role Icon
         {
             find: "Message Username",
