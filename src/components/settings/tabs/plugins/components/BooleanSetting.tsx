@@ -41,7 +41,11 @@ export function BooleanSetting({ option, pluginSettings, definedSettings, id, on
 
     return (
         <SettingsSection tag="label" name={id} description={option.description} error={error} inlineSetting>
-            <Switch checked={state} onChange={handleChange} />
+            <Switch
+                checked={state}
+                onChange={handleChange}
+                disabled={option.disabled?.call(definedSettings) ?? false}
+            />
         </SettingsSection>
     );
 }

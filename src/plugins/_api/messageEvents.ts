@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "#{intl::EDIT_TEXTAREA_HELP}",
             replacement: {
-                match: /(?<=,channel:\i\}\)\.then\().+?\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\}(?=return)/,
+                match: /(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,
                 replace: (match, args) => "" +
                     `async ${match}` +
                     `if(await Vencord.Api.MessageEvents._handlePreEdit(${args}))` +
