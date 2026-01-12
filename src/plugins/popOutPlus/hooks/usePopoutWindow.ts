@@ -38,9 +38,9 @@ export const usePopoutWindow = (popoutKey: string) => {
     }, [popoutKey]);
 
     const toggleClearView = useCallback(() => {
-        const next = !isClearView;
-        PopoutStore.setClearView(popoutKey, next);
-    }, [isClearView, popoutKey]);
+        const current = PopoutStore.isClearView(popoutKey);
+        PopoutStore.setClearView(popoutKey, !current);
+    }, [popoutKey]);
 
     const autoFitToVideo = useCallback(() => {
         const win = PopoutWindowStore?.getWindow(popoutKey);

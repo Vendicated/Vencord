@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { FluxDispatcher } from "@webpack/common";
-
 const states = new Map<string, boolean>();
 const draggingStates = new Map<string, boolean>();
 const listeners = new Set<() => void>();
@@ -20,13 +18,6 @@ export const PopoutStore = {
         states.set(key, enabled);
 
         listeners.forEach(l => l());
-
-        // Dispatch an event
-        FluxDispatcher.dispatch({
-            type: "VC_POPOUT_PLUS_CLEAR_VIEW_UPDATE",
-            key,
-            enabled
-        });
     },
 
     isDragging(key: string) {

@@ -29,15 +29,11 @@ export const useWindowDragging = (popoutKey: string) => {
         win.addEventListener("keydown", handleKeyChange);
         win.addEventListener("keyup", handleKeyChange);
         win.addEventListener("blur", handleReset);
-        win.addEventListener("mouseup", handleReset);
-        win.addEventListener("mouseleave", handleReset);
 
         return () => {
             win.removeEventListener("keydown", handleKeyChange);
             win.removeEventListener("keyup", handleKeyChange);
             win.removeEventListener("blur", handleReset);
-            win.removeEventListener("mouseup", handleReset);
-            win.removeEventListener("mouseleave", handleReset);
             PopoutStore.setDragging(popoutKey, false);
         };
     }, [popoutKey]);
