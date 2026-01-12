@@ -116,7 +116,7 @@ export default definePlugin({
         },
         {
             // Emoji list
-            find: "#{intl::EMOJI_PICKER_CREATE_EMOJI_TITLE}),size:",
+            find: "#{intl::EMOJI_PICKER_EXPAND_EMOJI_SECTION}),size:",
             replacement: {
                 match: /(\i)=\i\|\|!\i&&\i.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
                 replace: "$&$1||"
