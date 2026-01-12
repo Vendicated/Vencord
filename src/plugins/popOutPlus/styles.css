@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-body.vc-popout-clear-view [class*="titleBar"] {
+.vc-popout-clear-view [class*="titleBar"] {
     display: none !important;
 }
 

@@ -6,94 +6,95 @@
 
 import "./styles.css";
 
-import { ensurePopoutRoot } from "@plugins/popOutPlus/utils/windowInteractions";
+import { ClearViewStore } from "@plugins/popOutPlus/store";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ParticipantType } from "@vencord/discord-types/enums/misc";
 import { findByProps } from "@webpack";
-import { ChannelRTCStore, FluxDispatcher, Menu, PopoutWindowStore, React, SelectedChannelStore } from "@webpack/common";
-import { createRoot } from "@webpack/common/react";
+import { ChannelRTCStore, Menu, React, SelectedChannelStore } from "@webpack/common";
 
 import { PopOutPlusOverlay } from "./components/PopOutPlusOverlay";
-
-
-const POPOUT_KEY_PREFIX = "DISCORD_CALL_TILE_POPOUT";
-
-const getCallTilePopoutKeys = (): string[] => {
-    const keys = PopoutWindowStore?.getWindowKeys() ?? [];
-    return keys.filter(k => k.startsWith(POPOUT_KEY_PREFIX));
-};
-
-const injectReactToPopout = (popoutWindow: Window, popoutKey: string) => {
-    ensurePopoutRoot(popoutWindow, rootDiv => {
-        const root = createRoot(rootDiv);
-        root.render(<PopOutPlusOverlay popoutKey={popoutKey} />);
-    });
-};
-
-const patch = (children: any[], userId: string, isStream: boolean) => {
-    const channelId = SelectedChannelStore.getVoiceChannelId();
-    if (!channelId) return;
-
-    const p = ChannelRTCStore.getParticipants(channelId)?.find((p: any) =>
-        p.user?.id === userId && (isStream ? p.type === ParticipantType.STREAM : (p.type === ParticipantType.USER && (p.streamId || p.videoStreamId)))
-    );
-
-    if (p) {
-        children.push(
-            <Menu.MenuGroup>
-                <Menu.MenuItem
-                    id={isStream ? "popout-stream" : "popout-camera"}
-                    label={isStream ? "Pop Out Stream" : "Pop Out Camera"}
-                    action={() => {
-                        const popoutModule = findByProps("openCallTilePopout");
-                        popoutModule?.openCallTilePopout(channelId, p.id);
-                    }}
-                />
-            </Menu.MenuGroup>
-        );
-    }
-};
-
-const attemptPopoutInjection = (key: string, attempt = 0) => {
-    if (attempt > 20) return;
-
-    if (PopoutWindowStore.isWindowFullyInitialized(key)) {
-        const popoutWindow = PopoutWindowStore.getWindow(key);
-        if (popoutWindow) {
-            injectReactToPopout(popoutWindow, key);
-        }
-    } else {
-        setTimeout(() => attemptPopoutInjection(key, attempt + 1), 100);
-    }
-};
-
-const onPopoutWindowOpen = (event: any) => {
-    if (!event.key?.startsWith(POPOUT_KEY_PREFIX)) {
-        return;
-    }
-
-    attemptPopoutInjection(event.key);
-};
 
 export default definePlugin({
     name: "PopOut Plus",
     description: "Pop out streams and cameras with fullscreen support",
     authors: [Devs.prism, Devs.fantik],
 
-    start() {
-        FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", onPopoutWindowOpen);
+    PopOutPlusOverlay,
+    React,
+    ClearViewStore,
+    classes,
 
-        const keys = getCallTilePopoutKeys();
-        keys.forEach(key => attemptPopoutInjection(key));
-    },
-
-    stop() {
-        FluxDispatcher.unsubscribe("POPOUT_WINDOW_OPEN", onPopoutWindowOpen);
-    },
+    start() { },
+    stop() { },
 
     contextMenus: {
-        "stream-context": (children, { stream }) => stream && patch(children, stream.ownerId, true),
-        "user-context": (children, { user }) => user && patch(children, user.id, false)
-    }
+        "stream-context": (children, { stream }) => {
+            const userId = stream?.ownerId;
+            if (!userId) return;
+            const channelId = SelectedChannelStore.getVoiceChannelId();
+            if (!channelId) return;
+
+            const p = ChannelRTCStore.getParticipants(channelId)?.find((p: any) =>
+                p.user?.id === userId && p.type === ParticipantType.STREAM
+            );
+
+            if (p) {
+                children.push(
+                    <Menu.MenuGroup>
+                        <Menu.MenuItem
+                            id="popout-stream"
+                            label="Pop Out Stream"
+                            action={() => {
+                                const popoutModule = findByProps("openCallTilePopout");
+                                popoutModule?.openCallTilePopout(channelId, p.id);
+                            }}
+                        />
+                    </Menu.MenuGroup>
+                );
+            }
+        },
+        "user-context": (children, { user }) => {
+            const userId = user?.id;
+            if (!userId) return;
+            const channelId = SelectedChannelStore.getVoiceChannelId();
+            if (!channelId) return;
+
+            const p = ChannelRTCStore.getParticipants(channelId)?.find((p: any) =>
+                p.user?.id === userId && p.type === ParticipantType.USER && (p.streamId || p.videoStreamId)
+            );
+
+            if (p) {
+                children.push(
+                    <Menu.MenuGroup>
+                        <Menu.MenuItem
+                            id="popout-camera"
+                            label="Pop Out Camera"
+                            action={() => {
+                                const popoutModule = findByProps("openCallTilePopout");
+                                popoutModule?.openCallTilePopout(channelId, p.id);
+                            }}
+                        />
+                    </Menu.MenuGroup>
+                );
+            }
+        }
+    },
+
+    patches: [
+        {
+            find: "data-popout-root",
+            replacement: [
+                {
+                    match: /constructor\(\.\.\.(\i)\)\{super\(\.\.\.\1\),/,
+                    replace: "$& $self.ClearViewStore.subscribe(() => this.forceUpdate()),"
+                },
+                {
+                    match: /\(0,(\i)\.jsxs\)\("div",\{className:(\i)\.(\i),children:\[/,
+                    replace: '(0,$1.jsxs)("div",{className:$self.classes($2.$3, $self.ClearViewStore.isClearView(this.props.windowKey) && "vc-popout-clear-view"),children:[(0,$1.jsx)($self.PopOutPlusOverlay, { popoutKey: this.props.windowKey }),'
+                }
+            ]
+        }
+    ]
 });

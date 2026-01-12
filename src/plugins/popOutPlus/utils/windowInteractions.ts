@@ -6,7 +6,6 @@
 
 import { PopoutActions, PopoutWindowStore } from "@webpack/common";
 
-export const POPOUT_ROOT_ID = "vc-popout-plus-root";
 
 export const setPopoutAlwaysOnTop = (popoutKey: string, enabled: boolean) => {
     PopoutActions.setAlwaysOnTop(popoutKey, enabled);
@@ -24,39 +23,7 @@ export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
     }
 };
 
-// I've not found how to dynamically change class list for separate popups windows except this method
-export const setPopoutClearView = (win: Window, enabled: boolean) => {
-    if (enabled) {
-        win.document.body.classList.add("vc-popout-clear-view");
-    } else {
-        win.document.body.classList.remove("vc-popout-clear-view");
-    }
-};
 
-// I've not found the better way to add react component into popout page. PopoutWindowStore.getWindow returns window object
-export const ensurePopoutRoot = (win: Window, callback: (root: HTMLElement) => void) => {
-    const doc = win.document;
-    if (doc.getElementById(POPOUT_ROOT_ID)) return;
-
-    const check = () => {
-        const appMount = doc.getElementById("app-mount");
-        if (appMount) {
-            const rootDiv = doc.createElement("div");
-            rootDiv.id = POPOUT_ROOT_ID;
-            appMount.appendChild(rootDiv);
-            callback(rootDiv);
-            return true;
-        }
-        return false;
-    };
-
-    if (!check()) {
-        const interval = setInterval(() => {
-            if (check()) clearInterval(interval);
-        }, 100);
-        setTimeout(() => clearInterval(interval), 5000);
-    }
-};
 
 // For this feature we need to get actual video width and heights. Stores can return to us only original resolution
 export const autoFitPopout = (win: Window) => {

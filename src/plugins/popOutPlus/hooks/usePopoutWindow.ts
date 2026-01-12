@@ -4,11 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { autoFitPopout, setPopoutAlwaysOnTop, setPopoutClearView, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
-import { PopoutWindowStore, useCallback, useState, useStateFromStores } from "@webpack/common";
+import { ClearViewStore } from "@plugins/popOutPlus/store";
+import { autoFitPopout, setPopoutAlwaysOnTop, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
+import { PopoutWindowStore, useCallback, useStateFromStores } from "@webpack/common";
 
 export const usePopoutWindow = (popoutKey: string) => {
-    const [isClearView, setIsClearView] = useState(false);
+    const isClearView = useStateFromStores(
+        [ClearViewStore as any],
+        () => ClearViewStore.isClearView(popoutKey),
+        [popoutKey]
+    );
 
     const isPinned = useStateFromStores(
         [PopoutWindowStore],
@@ -33,12 +38,8 @@ export const usePopoutWindow = (popoutKey: string) => {
     }, [popoutKey]);
 
     const toggleClearView = useCallback(() => {
-        const win = PopoutWindowStore?.getWindow(popoutKey);
-        if (!win) return;
-
         const next = !isClearView;
-        setIsClearView(next);
-        setPopoutClearView(win, next);
+        ClearViewStore.setClearView(popoutKey, next);
     }, [isClearView, popoutKey]);
 
     const autoFitToVideo = useCallback(() => {
