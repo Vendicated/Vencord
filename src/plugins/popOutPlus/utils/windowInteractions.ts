@@ -13,13 +13,12 @@ export const setPopoutAlwaysOnTop = (popoutKey: string, enabled: boolean) => {
 
 // There is no native/react method to enforce fullscreen
 export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
-    const doc = win.document;
+    const isFullscreen = PopoutWindowStore?.isWindowFullScreen?.(popoutKey) || win.document.fullscreenElement;
 
-    if (PopoutWindowStore?.isWindowFullScreen?.(popoutKey)) {
-        doc.exitFullscreen().catch(() => { });
+    if (isFullscreen) {
+        win.document.exitFullscreen().catch(() => { });
     } else {
-        const target = doc.getElementById("app-mount") ?? doc.documentElement;
-        target.requestFullscreen().catch(() => { });
+        win.document.documentElement.requestFullscreen().catch(() => { });
     }
 };
 
