@@ -1,124 +1,94 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
-import definePlugin, { makeRange, OptionType } from "@utils/types";
+import { EquicordDevs } from "@utils/index";
+import definePlugin, { OptionType } from "@utils/types";
+
+const MIDDLE_CLICK = 1;
+
+let lastMiddleClickUp = 0;
 
 const settings = definePluginSettings({
-    limitTo: {
+    scope: {
         type: OptionType.SELECT,
-        description: "Allow middle click pastes:",
+        description: "Situations in which to prevent middle click from pasting.",
         options: [
             {
-                label: "Whenever a text box is active",
-                value: "active",
+                label: "Always Prevent Middle Click Pasting",
+                value: "always",
                 default: true
             },
             {
-                label: "Only when clicking on a text box",
-                value: "direct"
+                label: "Only Prevent When Text Area Not Focused",
+                value: "focus"
             },
-            {
-                label: "Never",
-                value: "never"
-            }
         ]
     },
-    reenableDelay: {
-        type: OptionType.SLIDER,
-        description: "Milliseconds until re-enabling global paste events after middle click.",
-        markers: makeRange(0, 1000, 500),
-        default: 500,
+    threshold: {
+        type: OptionType.NUMBER,
+        description: "Milliseconds until pasting is enabled again after a middle click.",
+        default: 100,
+        onChange(newValue) { if (newValue < 1) { settings.store.threshold = 1; } },
     },
 });
-
-let containerEl;
 
 export default definePlugin({
     name: "LimitMiddleClickPaste",
-    description: "For middle-click autoscroll users, prevents middle-click from making unwanted pastes.",
-    authors: [EquicordDevs.nobody],
+    description: "Prevent middle click pasting either always or just when a text area is not focused.",
+    authors: [EquicordDevs.Etorix],
+    settings,
 
-    settings: settings,
+    isPastingDisabled(isInput: boolean) {
+        const pasteBlocked = Date.now() - lastMiddleClickUp < Math.max(settings.store.threshold, 1);
+        const { scope } = settings.store;
+
+        if (!pasteBlocked) return false;
+        if (scope === "always") return true;
+        if (scope === "focus" && !isInput) return true;
+
+        return false;
+    },
+
+    onMouseUp: (e: MouseEvent) => {
+        if (e.button === MIDDLE_CLICK) lastMiddleClickUp = Date.now();
+    },
 
     start() {
-        // Discord adds it's paste listeners to #app-mount. We can intercept them
-        // by attaching listeners a child element.
-        containerEl = document.querySelector("[class*=appAsidePanelWrapper]")!;
-        containerEl?.addEventListener("paste", blockPastePropogation);
-
-        // Also add them to body to intercept the event listeners on document
-        document?.body?.addEventListener("paste", blockPastePropogation);
-
-        document?.body?.addEventListener("mousedown", disablePasteOnMousedown);
+        document.addEventListener("mouseup", this.onMouseUp);
     },
 
     stop() {
-        containerEl?.removeEventListener("paste", blockPastePropogation);
-
-        document?.body?.removeEventListener("paste", blockPastePropogation);
-
-        document?.body?.removeEventListener("mousedown", disablePasteOnMousedown);
-        pasteDisabled = false;
+        document.removeEventListener("mouseup", this.onMouseUp);
     },
+
+    patches: [
+        {
+            // Detects paste events triggered by the "browser" outside of input fields.
+            find: "document.addEventListener(\"paste\",",
+            replacement: {
+                match: /(?<=paste",(\i)=>{)/,
+                replace: "if($1.target.tagName===\"BUTTON\"||$self.isPastingDisabled(false)){$1.preventDefault?.();$1.stopPropagation?.();return;};"
+            }
+        },
+        {
+            // Detects paste events triggered inside of Discord's text input.
+            find: ",origin:\"clipboard\"});",
+            replacement: {
+                match: /(?<="handlePaste",(\i)=>{)(?=var)/,
+                replace: "if($self.isPastingDisabled(true)){$1.preventDefault?.();$1.stopPropagation?.();return;}"
+            }
+        },
+        {
+            // Detects paste events triggered inside of Discord's search box.
+            find: "props.handlePastedText&&",
+            replacement: {
+                match: /(?<=clipboardData\);)/,
+                replace: "if($self.isPastingDisabled(true)){arguments[1].preventDefault?.();arguments[1].stopPropagation?.();return;};"
+            }
+        },
+    ],
 });
-
-let pasteDisabled: boolean = false;
-let timeoutID: number | undefined;
-
-function blockPastePropogation(e: ClipboardEvent) {
-    if (pasteDisabled) {
-        e.stopImmediatePropagation();
-    }
-}
-
-function disablePasteOnMousedown(e: MouseEvent) {
-    if (e.button !== 1) return;
-    let testEl: HTMLElement | null = null;
-
-    switch (settings.store.limitTo) {
-        case "active":
-            testEl = document.activeElement as HTMLElement;
-            break;
-        case "direct":
-            testEl = e.target as HTMLElement;
-            break;
-        case "never":
-            testEl = null;
-            break;
-    }
-
-    if (settings.store.limitTo !== "never" && maybeEditable(testEl)) return;
-
-    window.clearTimeout(timeoutID);
-    pasteDisabled = true;
-    timeoutID = window.setTimeout(() => {
-        pasteDisabled = false;
-    }, settings.store.reenableDelay);
-}
-
-function maybeEditable(el: HTMLElement | null): boolean {
-    if (!el) return false;
-    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") return true;
-    let parent: HTMLElement | null;
-    for (parent = el; parent; parent = parent.parentElement) {
-        if (parent.isContentEditable) return true;
-    }
-    return false;
-}
