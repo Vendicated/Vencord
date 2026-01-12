@@ -9,6 +9,7 @@
 }
 
 .vc-popout-control-btn {
+    -webkit-app-region: no-drag;
     background: rgb(0 0 0 / 60%);
     color: white;
     border: none;
@@ -81,6 +82,7 @@
 }
 
 .vc-popout-controls-wrapper {
+    -webkit-app-region: no-drag;
     position: relative;
     z-index: 100;
     opacity: 0;

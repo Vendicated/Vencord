@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ClearViewStore } from "@plugins/popOutPlus/store";
+import { PopoutStore } from "@plugins/popOutPlus/store";
 import { autoFitPopout, setPopoutAlwaysOnTop, togglePopoutFullscreen } from "@plugins/popOutPlus/utils/windowInteractions";
 import { PopoutWindowStore, useCallback, useStateFromStores } from "@webpack/common";
 
 export const usePopoutWindow = (popoutKey: string) => {
     const isClearView = useStateFromStores(
-        [ClearViewStore as any],
-        () => ClearViewStore.isClearView(popoutKey),
+        [PopoutStore as any],
+        () => PopoutStore.isClearView(popoutKey),
         [popoutKey]
     );
 
@@ -39,7 +39,7 @@ export const usePopoutWindow = (popoutKey: string) => {
 
     const toggleClearView = useCallback(() => {
         const next = !isClearView;
-        ClearViewStore.setClearView(popoutKey, next);
+        PopoutStore.setClearView(popoutKey, next);
     }, [isClearView, popoutKey]);
 
     const autoFitToVideo = useCallback(() => {

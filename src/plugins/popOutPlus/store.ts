@@ -7,9 +7,10 @@
 import { FluxDispatcher } from "@webpack/common";
 
 const states = new Map<string, boolean>();
+const draggingStates = new Map<string, boolean>();
 const listeners = new Set<() => void>();
 
-export const ClearViewStore = {
+export const PopoutStore = {
     isClearView(key: string) {
         return states.get(key) ?? false;
     },
@@ -26,6 +27,17 @@ export const ClearViewStore = {
             key,
             enabled
         });
+    },
+
+    isDragging(key: string) {
+        return draggingStates.get(key) ?? false;
+    },
+
+    setDragging(key: string, enabled: boolean) {
+        if (draggingStates.get(key) === enabled) return;
+        draggingStates.set(key, enabled);
+
+        listeners.forEach(l => l());
     },
 
     // Vencord hooks like useStateFromStores use these

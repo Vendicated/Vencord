@@ -30,8 +30,8 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
 
     const [isVisible, setIsVisible] = useState(false);
     const [isClearViewHintVisible, setIsClearViewHintVisible] = useState(false);
-    const hideTimeoutRef = useRef<number | null>(null);
-    const clearViewHintTimeoutRef = useRef<number | null>(null);
+    const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const clearViewHintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (isClearView) {
@@ -39,18 +39,24 @@ export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey 
             if (clearViewHintTimeoutRef.current) {
                 clearTimeout(clearViewHintTimeoutRef.current);
             }
-            clearViewHintTimeoutRef.current = window.setTimeout(() => setIsClearViewHintVisible(false), 3000);
+            clearViewHintTimeoutRef.current = setTimeout(() => setIsClearViewHintVisible(false), 3000);
         } else {
             setIsClearViewHintVisible(false);
         }
     }, [isClearView]);
+
+    useEffect(() => {
+        if (isDragging) {
+            setIsClearViewHintVisible(false);
+        }
+    }, [isDragging]);
 
     const showControls = useCallback(() => {
         setIsVisible(true);
         if (hideTimeoutRef.current) {
             clearTimeout(hideTimeoutRef.current);
         }
-        hideTimeoutRef.current = window.setTimeout(() => setIsVisible(false), 2000);
+        hideTimeoutRef.current = setTimeout(() => setIsVisible(false), 2000);
     }, []);
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {

@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { ClearViewStore } from "@plugins/popOutPlus/store";
+import { PopoutStore } from "@plugins/popOutPlus/store";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
@@ -23,7 +23,7 @@ export default definePlugin({
 
     PopOutPlusOverlay,
     React,
-    ClearViewStore,
+    PopoutStore,
     classes,
 
     start() { },
@@ -88,11 +88,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /constructor\(\.\.\.(\i)\)\{super\(\.\.\.\1\),/,
-                    replace: "$& $self.ClearViewStore.subscribe(() => this.forceUpdate()),"
+                    replace: "$& $self.PopoutStore.subscribe(() => this.forceUpdate()),"
                 },
                 {
                     match: /\(0,(\i)\.jsxs\)\("div",\{className:(\i)\.(\i),children:\[/,
-                    replace: '(0,$1.jsxs)("div",{className:$self.classes($2.$3, $self.ClearViewStore.isClearView(this.props.windowKey) && "vc-popout-clear-view"),children:[(0,$1.jsx)($self.PopOutPlusOverlay, { popoutKey: this.props.windowKey }),'
+                    replace: '(0,$1.jsxs)("div",{className:$self.classes($2.$3, $self.PopoutStore.isClearView(this.props.windowKey) && "vc-popout-clear-view", $self.PopoutStore.isDragging(this.props.windowKey) && "vc-popout-dragging"),children:[(0,$1.jsx)($self.PopOutPlusOverlay, { popoutKey: this.props.windowKey }),'
                 }
             ]
         }
