@@ -39,7 +39,7 @@ import { Alerts, SearchableSelect, Select, useState } from "@webpack/common";
 const ICON_STYLE: React.CSSProperties = { width: 20, height: 20, borderRadius: 4, verticalAlign: "middle" };
 
 function EquicordIcon() {
-    return <img src="https://equicord.org/assets/icons/equicord/icon.png" alt="Equicord" style={ICON_STYLE} />;
+    return <img src="https://equicord.org/assets/favicon.png" alt="Equicord" style={ICON_STYLE} />;
 }
 
 function VencordIcon() {
