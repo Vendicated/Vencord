@@ -95,6 +95,16 @@ export default definePlugin({
                     replace: '(0,$1.jsxs)("div",{className:$self.classes($2.$3, $self.PopoutStore.isClearView(this.props.windowKey) && "vc-popout-clear-view", $self.PopoutStore.isDragging(this.props.windowKey) && "vc-popout-dragging"),children:[(0,$1.jsx)($self.PopOutPlusOverlay, { popoutKey: this.props.windowKey }),'
                 }
             ]
+        },
+        // Patch DirectVideo to expose video element for auto-fit functionality
+        {
+            find: '"DirectVideo"',
+            replacement: {
+                // Match: container.appendChild(videoElement)
+                match: /\.appendChild\((\i)\),/,
+                // Store video on its own window (popout) via ownerDocument.defaultView
+                replace: ".appendChild($1),($1.ownerDocument.defaultView.__vc_popout_video=$1),"
+            }
         }
     ]
 });

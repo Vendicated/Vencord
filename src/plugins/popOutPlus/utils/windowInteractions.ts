@@ -26,8 +26,9 @@ export const togglePopoutFullscreen = (win: Window, popoutKey: string) => {
 
 
 // For this feature we need to get actual video width and heights. Stores can return to us only original resolution
-export const autoFitPopout = (win: Window) => {
-    const video = win.document.querySelector("video") as HTMLVideoElement;
+export const autoFitPopout = (win: Window & { __vc_popout_video?: HTMLVideoElement; }) => {
+    // Video element is set by DirectVideo patch on the popout window
+    const video = win.__vc_popout_video;
     if (!video?.videoWidth || !video?.videoHeight) return;
 
     const { videoWidth, videoHeight } = video;
