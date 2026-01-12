@@ -43,7 +43,7 @@ const enum ShowMode {
 const CONNECT = 1n << 20n;
 
 export const settings = definePluginSettings({
-    enabled: {
+    showHiddenChannels: {
         description: "Show hidden channels",
         type: OptionType.BOOLEAN,
         default: true,
@@ -92,9 +92,9 @@ const GuildContextMenuPatch: NavContextMenuPatchCallback = (children, { guild }:
         <Menu.MenuCheckboxItem
             id="vc-shc-toggle"
             label="Show Hidden Channels"
-            checked={settings.store.enabled}
+            checked={settings.store.showHiddenChannels}
             action={() => {
-                settings.store.enabled = !settings.store.enabled;
+                settings.store.showHiddenChannels = !settings.store.showHiddenChannels;
                 forceUpdateChannelList();
             }}
         />
@@ -108,7 +108,7 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn ,Devs.EhDaYaghaly],
     settings,
 
     contextMenus: {
@@ -124,7 +124,7 @@ export default definePlugin({
                 // Remove the special logic for channels we don't have access to (only when enabled)
                 {
                     match: /if\(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL.+?{if\(this\.id===\i\).+?threadIds:\[\]}}/,
-                    replace: m => `if(!$self.settings.store.enabled){${m}}`
+                    replace: m => `if(!$self.settings.store.showHiddenChannels){${m}}`
                 },
                 // Do not check for unreads when selecting the render level if the channel is hidden
                 {
@@ -134,12 +134,12 @@ export default definePlugin({
                 // Make channels we dont have access to be the same level as normal ones (only when enabled)
                 {
                     match: /(this\.record\)\?{renderLevel:(.+?),threadIds.+?renderLevel:)(.+?)(?=,threadIds)/g,
-                    replace: (_, rest, defaultRenderLevel, originalLevel) => `${rest}!$self.settings.store.enabled?${originalLevel}:${defaultRenderLevel}`
+                    replace: (_, rest, defaultRenderLevel, originalLevel) => `${rest}!$self.settings.store.showHiddenChannels?${originalLevel}:${defaultRenderLevel}`
                 },
                 // Remove permission checking for getRenderLevel function (only when enabled)
                 {
                     match: /(getRenderLevel\(\i\){.+?return)(!\i\.\i\.can\(\i\.\i\.VIEW_CHANNEL,this\.record\))\|\|/,
-                    replace: (_, rest, permCheck) => `${rest}(!$self.settings.store.enabled&&${permCheck})||`
+                    replace: (_, rest, permCheck) => `${rest}(!$self.settings.store.showHiddenChannels&&${permCheck})||`
                 }
             ]
         },
@@ -493,7 +493,7 @@ export default definePlugin({
                 {
                     // Make GuildChannelStore contain hidden channels (controlled by settings)
                     match: /isChannelGated\(.+?\)(?=&&)/,
-                    replace: m => `${m}&&!$self.settings.store.enabled`
+                    replace: m => `${m}&&!$self.settings.store.showHiddenChannels`
                 },
                 {
                     // Filter hidden channels from GuildChannelStore.getChannels unless told otherwise
@@ -533,7 +533,7 @@ export default definePlugin({
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
         try {
             // If the toggle is disabled, don't treat any channel as hidden
-            if (!settings.store.enabled) return false;
+            if (!settings.store.showHiddenChannels) return false;
 
             if (channel == null || Object.hasOwn(channel, "channelId") && channel.channelId == null) return false;
 
@@ -549,7 +549,7 @@ export default definePlugin({
     },
 
     resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
-        if (shouldIncludeHidden && settings.store.enabled) return channels;
+        if (shouldIncludeHidden && settings.store.showHiddenChannels) return channels;
 
         const res = {};
         for (const [key, maybeObjChannels] of Object.entries(channels)) {
