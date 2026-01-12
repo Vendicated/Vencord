@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { PopoutStore } from "@plugins/popOutPlus/store";
+import { PopoutStore, PopoutStoreType } from "@plugins/popOutPlus/store";
 import { PopoutWindowStore, useEffect, useStateFromStores } from "@webpack/common";
 
 export const useWindowDragging = (popoutKey: string) => {
     const isDragging = useStateFromStores(
-        [PopoutStore as any],
+        [PopoutStore as PopoutStoreType],
         () => PopoutStore.isDragging(popoutKey),
         [popoutKey]
     );

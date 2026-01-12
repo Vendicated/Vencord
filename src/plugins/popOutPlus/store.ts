@@ -8,7 +8,19 @@ const states = new Map<string, boolean>();
 const draggingStates = new Map<string, boolean>();
 const listeners = new Set<() => void>();
 
-export const PopoutStore = {
+export interface PopoutStoreType {
+    isClearView(key: string): boolean;
+    setClearView(key: string, enabled: boolean): void;
+    isDragging(key: string): boolean;
+    setDragging(key: string, enabled: boolean): void;
+    addChangeListener(l: () => void): void;
+    removeChangeListener(l: () => void): void;
+    addReactChangeListener(l: () => void): void;
+    removeReactChangeListener(l: () => void): void;
+    subscribe(l: () => void): () => boolean;
+}
+
+export const PopoutStore: PopoutStoreType = {
     isClearView(key: string) {
         return states.get(key) ?? false;
     },
