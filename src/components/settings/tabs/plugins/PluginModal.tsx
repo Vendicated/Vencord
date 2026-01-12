@@ -76,7 +76,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     useEffect(() => {
         (async () => {
-            for (const user of plugin.authors.slice(0, 6)) {
+            for (const user of plugin.authors.slice()) {
                 try {
                     const author = user.id
                         ? await UserUtils.getUser(String(user.id))
