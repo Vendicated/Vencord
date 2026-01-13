@@ -16,6 +16,8 @@ interface PopOutPlusOverlayProps {
 }
 
 export const PopOutPlusOverlay: React.FC<PopOutPlusOverlayProps> = ({ popoutKey }) => {
+    if (!popoutKey.startsWith("DISCORD_CALL_TILE_POPOUT_")) return null;
+
     const {
         isPinned,
         isFullscreen,
