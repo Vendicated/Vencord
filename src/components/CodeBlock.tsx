@@ -19,3 +19,14 @@ export function CodeBlock(props: { content?: string, lang: string; }) {
         </div>
     );
 }
+
+/**
+ * Renders inline code like `this`
+ */
+export function InlineCode({ children }: { children: React.ReactNode; }) {
+    return (
+        <span className={CodeContainerClasses.markup}>
+            <code className="inline">{children}</code>
+        </span>
+    );
+}
