@@ -5,7 +5,8 @@
  */
 
 
-.vc-popoutplus-clear-view [class*="titleBar"] {
+.vc-popoutplus-clear-view [class*="titleBar"],
+:fullscreen [class*="titleBar"] {
     display: none !important;
 }
 
