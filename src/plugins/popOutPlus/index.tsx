@@ -52,7 +52,7 @@ function addPopoutMenuItem(
 export default definePlugin({
     name: "PopOut Plus",
     description: "Pop out streams and cameras with fullscreen support",
-    authors: [Devs.prism, Devs.fantik],
+    authors: [Devs.fantik],
 
     PopOutPlusOverlay,
     React,

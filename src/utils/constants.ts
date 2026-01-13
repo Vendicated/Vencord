@@ -628,10 +628,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     fantik: {
         name: "FunTeaQueue",
         id: 245513429190705152n,
-    },
-    prism: {
-        name: "dear.prism",
-        id: 390884143749136386n,
     }
 } satisfies Record<string, Dev>);
 
