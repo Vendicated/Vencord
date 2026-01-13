@@ -6,7 +6,7 @@
 
 import "./styles.css";
 
-import { BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import { BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import { Badges } from "@api/index";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -125,8 +125,15 @@ function getBadgesToApply() {
         return ({
             description: rank.title,
             iconSrc: rank.iconSrc,
+            position: BadgePosition.END,
             onClick: () => openRankModal(rank),
             shouldShow: (info: BadgeUserArgs) => shouldShowBadge(info.userId, rank.requirement, index),
+            props: {
+                style: {
+                    borderRadius: "50%",
+                    transform: "scale(0.9)"
+                }
+            },
         });
     });
 
