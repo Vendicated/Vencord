@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -138,7 +140,7 @@ export default definePlugin({
                             overflow: "hidden",
 
                             borderRadius: "50%",
-                            backgroundColor: "var(--interactive-normal)",
+                            backgroundColor: "var(--interactive-icon-default)",
                             color: "var(--background-base-lower)",
                         }}
                     >

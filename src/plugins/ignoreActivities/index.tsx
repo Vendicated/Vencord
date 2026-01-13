@@ -11,8 +11,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Forms, RunningGameStore, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -29,8 +28,6 @@ const enum FilterMode {
     Whitelist,
     Blacklist
 }
-
-const RunningGameStore = findStoreLazy("RunningGameStore");
 
 const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
 
@@ -64,7 +61,7 @@ function ToggleActivityComponent(activity: IgnoredActivity, isPlaying = false) {
     const { ignoredActivities } = s;
 
     if (ignoredActivities.some(act => act.id === activity.id)) return ToggleIconOff(activity, "var(--status-danger)");
-    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--interactive-normal)");
+    return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--interactive-icon-default)");
 }
 
 function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, activity: IgnoredActivity) {
@@ -131,7 +128,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
     }
 
     return (
-        <Forms.FormSection>
+        <section>
             <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
             <TextInput
@@ -140,7 +137,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
                 onChange={handleChange}
                 placeholder="235834946571337729, 343383572805058560"
             />
-        </Forms.FormSection>
+        </section>
     );
 }
 

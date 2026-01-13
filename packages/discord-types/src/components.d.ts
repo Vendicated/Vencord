@@ -1,61 +1,53 @@
 import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
 
-// copy(find(m => Array.isArray(m) && m.includes("heading-sm/normal")).map(JSON.stringify).join("|"))
-export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-sm/extrabold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-md/extrabold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-lg/extrabold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/semibold" | "heading-xl/bold" | "heading-xl/extrabold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/semibold" | "heading-xxl/bold" | "heading-xxl/extrabold" | "eyebrow" | "heading-deprecated-12/normal" | "heading-deprecated-12/medium" | "heading-deprecated-12/semibold" | "heading-deprecated-12/bold" | "heading-deprecated-12/extrabold" | "redesign/heading-18/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "redesign/message-preview/normal" | "redesign/message-preview/medium" | "redesign/message-preview/semibold" | "redesign/message-preview/bold" | "redesign/channel-title/normal" | "redesign/channel-title/medium" | "redesign/channel-title/semibold" | "redesign/channel-title/bold" | "display-sm" | "display-md" | "display-lg" | "code";
-export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTION" | "LABEL_BOLD" | "LABEL_SELECTED" | "LABEL_DESCRIPTOR" | "ERROR" | "SUCCESS", string>;
-export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
 
+// #region Old compability
+
+export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
 export type Margins = Record<"marginTop16" | "marginTop8" | "marginBottom8" | "marginTop20" | "marginBottom20", string>;
+
+// copy(find(m => Array.isArray(m) && m.includes("heading-sm/normal")).map(JSON.stringify).join("|"))
+export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-sm/extrabold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-md/extrabold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-lg/extrabold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/semibold" | "heading-xl/bold" | "heading-xl/extrabold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/semibold" | "heading-xxl/bold" | "heading-xxl/extrabold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold";
 
 export type TextProps = PropsWithChildren<HtmlHTMLAttributes<HTMLDivElement> & {
     variant?: TextVariant;
     tag?: "div" | "span" | "p" | "strong" | HeadingTag;
-    selectable?: boolean;
-    lineClamp?: number;
 }>;
 
 export type Text = ComponentType<TextProps>;
-export type Heading = ComponentType<TextProps>;
 
-export type FormTitle = ComponentType<HTMLProps<HTMLTitleElement> & PropsWithChildren<{
-    /** default is h5 */
-    tag?: HeadingTag;
-    faded?: boolean;
-    disabled?: boolean;
-    required?: boolean;
-    error?: ReactNode;
-}>>;
+export interface ButtonProps extends PropsWithChildren<Omit<HTMLProps<HTMLButtonElement>, "size">> {
+    /** Button.Looks.FILLED */
+    look?: string;
+    /** Button.Colors.BRAND */
+    color?: string;
+    /** Button.Sizes.MEDIUM */
+    size?: string;
 
-export type FormSection = ComponentType<PropsWithChildren<{
-    /** default is h5 */
-    tag?: HeadingTag;
     className?: string;
-    titleClassName?: string;
-    titleId?: string;
-    title?: ReactNode;
-    disabled?: boolean;
-    htmlFor?: unknown;
-}>>;
+}
 
-export type FormDivider = ComponentType<{
-    className?: string;
-    style?: CSSProperties;
-}>;
+export type Button = ComponentType<ButtonProps> & {
+    Colors: Record<"BRAND" | "RED" | "GREEN" | "PRIMARY" | "LINK" | "WHITE" | "TRANSPARENT" | "CUSTOM", string>;
+    Looks: Record<"FILLED" | "LINK", string>;
+    Sizes: Record<"NONE" | "SMALL" | "MEDIUM" | "LARGE" | "XLARGE" | "MIN", string>;
+};
 
+// #endregion
 
-export type FormText = ComponentType<TextProps>;
+export interface TooltipChildrenProps {
+    onClick(): void;
+    onMouseEnter(): void;
+    onMouseLeave(): void;
+    onContextMenu(): void;
+    onFocus(): void;
+    onBlur(): void;
+    "aria-label"?: string;
+}
 
-export type Tooltip = ComponentType<{
+export interface TooltipProps {
     text: ReactNode | ComponentType;
-    children: FunctionComponent<{
-        onClick(): void;
-        onMouseEnter(): void;
-        onMouseLeave(): void;
-        onContextMenu(): void;
-        onFocus(): void;
-        onBlur(): void;
-        "aria-label"?: string;
-    }>;
+    children: FunctionComponent<TooltipChildrenProps>;
     "aria-label"?: string;
 
     allowOverflow?: boolean;
@@ -72,7 +64,9 @@ export type Tooltip = ComponentType<{
 
     tooltipClassName?: string;
     tooltipContentClassName?: string;
-}> & {
+}
+
+export type Tooltip = ComponentType<TooltipProps> & {
     Colors: Record<"BLACK" | "BRAND" | "CUSTOM" | "GREEN" | "GREY" | "PRIMARY" | "RED" | "YELLOW", string>;
 };
 
@@ -121,45 +115,12 @@ export type ComboboxPopout = ComponentType<PropsWithChildren<{
     className?: string;
     listClassName?: string;
 
-
     autoFocus?: boolean;
     multiSelect?: boolean;
     maxVisibleItems?: number;
     showScrollbar?: boolean;
 
 }>>;
-
-export interface ButtonProps extends PropsWithChildren<Omit<HTMLProps<HTMLButtonElement>, "size">> {
-    /** Button.Looks.FILLED */
-    look?: string;
-    /** Button.Colors.BRAND */
-    color?: string;
-    /** Button.Sizes.MEDIUM */
-    size?: string;
-    /** Button.BorderColors.BLACK */
-    borderColor?: string;
-
-    wrapperClassName?: string;
-    className?: string;
-    innerClassName?: string;
-
-    buttonRef?: Ref<HTMLButtonElement>;
-    focusProps?: any;
-    submitting?: boolean;
-
-    submittingStartedLabel?: string;
-    submittingFinishedLabel?: string;
-}
-
-export type Button = ComponentType<ButtonProps> & {
-    BorderColors: Record<"BLACK" | "BRAND" | "BRAND_NEW" | "GREEN" | "LINK" | "PRIMARY" | "RED" | "TRANSPARENT" | "WHITE" | "YELLOW", string>;
-    Colors: Record<"BRAND" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "BLACK" | "TRANSPARENT" | "BRAND_NEW" | "CUSTOM", string>;
-    Hovers: Record<"DEFAULT" | "BRAND" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "BLACK" | "TRANSPARENT", string>;
-    Looks: Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
-    Sizes: Record<"NONE" | "TINY" | "SMALL" | "MEDIUM" | "LARGE" | "XLARGE" | "MIN" | "MAX" | "ICON", string>;
-
-    Link: any;
-};
 
 export type CheckboxAligns = {
     CENTER: "center";
@@ -359,14 +320,6 @@ export type Slider = ComponentClass<PropsWithChildren<{
     "aria-labelledby"?: string;
     "aria-describedby"?: string;
 }>>;
-
-// TODO - type maybe idk probably not that useful other than the constants
-export type Flex = ComponentType<PropsWithChildren<any>> & {
-    Align: Record<"START" | "END" | "CENTER" | "STRETCH" | "BASELINE", string>;
-    Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
-    Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
-    Wrap: Record<"NO_WRAP" | "WRAP" | "WRAP_REVERSE", string>;
-};
 
 declare enum PopoutAnimation {
     NONE = "1",

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Style } from "@api/Styles";
+
 declare global {
     /**
      * This exists only at build time, so references to it in patches should insert it
@@ -37,6 +39,7 @@ declare global {
     export var IS_UPDATER_DISABLED: boolean;
     export var IS_DEV: boolean;
     export var IS_REPORTER: boolean;
+    export var IS_ANTI_CRASH_TEST: boolean;
     export var IS_DISCORD_DESKTOP: boolean;
     export var IS_VESKTOP: boolean;
     export var VERSION: string;
@@ -44,12 +47,7 @@ declare global {
 
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
-    export var VencordStyles: Map<string, {
-        name: string;
-        source: string;
-        classNames: Record<string, string>;
-        dom: HTMLStyleElement | null;
-    }>;
+    export var VencordStyles: Map<string, Style>;
     export var appSettings: {
         set(setting: string, v: any): void;
     };

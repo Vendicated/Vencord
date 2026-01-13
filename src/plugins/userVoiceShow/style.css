@@ -1,5 +1,5 @@
 .vc-uvs-speaker {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10,7 +10,7 @@
 }
 
 .vc-uvs-clickable:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
 }
 
 .vc-uvs-profile-speaker {

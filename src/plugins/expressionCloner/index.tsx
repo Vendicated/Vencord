@@ -26,6 +26,7 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
+import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
@@ -47,13 +48,35 @@ interface Emoji {
 
 type Data = Emoji | Sticker;
 
-const StickerExt = [, "png", "png", "json", "gif"] as const;
+const StickerExtMap = {
+    [StickerFormatType.PNG]: "png",
+    [StickerFormatType.APNG]: "png",
+    [StickerFormatType.LOTTIE]: "json",
+    [StickerFormatType.GIF]: "gif"
+} as const;
 
-function getUrl(data: Data) {
+const PremiumTierStickerLimitMap = {
+    0: 5,
+    1: 15,
+    2: 30,
+    3: 60
+} as const;
+
+const MAX_EMOJI_SIZE_BYTES = 256 * 1024;
+const MAX_STICKER_SIZE_BYTES = 512 * 1024;
+
+function getGuildMaxStickerSlots(guild: Guild) {
+    if (guild.features.has("MORE_STICKERS") && guild.premiumTier === 3)
+        return 120;
+
+    return PremiumTierStickerLimitMap[guild.premiumTier] ?? PremiumTierStickerLimitMap[0];
+}
+
+function getUrl(data: Data, size: number) {
     if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.webp?size=${size}&lossless=true`;
 
-    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExtMap[data.format_type]}?size=${size}&lossless=true`;
 }
 
 async function fetchSticker(id: string) {
@@ -77,7 +100,7 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
     data.append("name", sticker.name);
     data.append("tags", sticker.tags);
     data.append("description", sticker.description);
-    data.append("file", await fetchBlob(getUrl(sticker)));
+    data.append("file", await fetchBlob(sticker));
 
     const { body } = await RestAPI.post({
         url: Constants.Endpoints.GUILD_STICKER_PACKS(guildId),
@@ -95,7 +118,7 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
 }
 
 async function cloneEmoji(guildId: string, emoji: Emoji) {
-    const data = await fetchBlob(getUrl(emoji));
+    const data = await fetchBlob(emoji);
 
     const dataUrl = await new Promise<string>(resolve => {
         const reader = new FileReader();
@@ -118,27 +141,46 @@ function getGuildCandidates(data: Data) {
             (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
         if (!canCreate) return false;
 
-        if (data.t === "Sticker") return true;
+        if (data.t === "Sticker") {
+            const stickerSlots = getGuildMaxStickerSlots(g);
+            const stickers = StickersStore.getStickersByGuildId(g.id);
+
+            return !stickers || stickers.length < stickerSlots;
+        }
 
         const { isAnimated } = data as Emoji;
 
         const emojiSlots = getGuildMaxEmojiSlots(g);
-        const { emojis } = EmojiStore.getGuilds()[g.id];
+        const emojis = EmojiStore.getGuildEmoji(g.id);
 
         let count = 0;
-        for (const emoji of emojis)
-            if (emoji.animated === isAnimated && !emoji.managed)
+        for (const emoji of emojis) {
+            if (emoji.animated === isAnimated && !emoji.managed) {
                 count++;
+            }
+        }
+
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function fetchBlob(url: string) {
-    const res = await fetch(url);
-    if (!res.ok)
-        throw new Error(`Failed to fetch ${url} - ${res.status}`);
+async function fetchBlob(data: Data) {
+    const MAX_SIZE = data.t === "Sticker"
+        ? MAX_STICKER_SIZE_BYTES
+        : MAX_EMOJI_SIZE_BYTES;
 
-    return res.blob();
+    for (let size = 4096; size >= 16; size /= 2) {
+        const url = getUrl(data, size);
+        const res = await fetch(url);
+        if (!res.ok)
+            throw new Error(`Failed to fetch ${url} - ${res.status}`);
+
+        const blob = await res.blob();
+        if (blob.size <= MAX_SIZE)
+            return blob;
+    }
+
+    throw new Error(`Failed to fetch ${data.t} within size limit of ${MAX_SIZE / 1000}kB`);
 }
 
 async function doClone(guildId: string, data: Sticker | Emoji) {
@@ -284,7 +326,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                 openModalLazy(async () => {
                     const res = await fetchData();
                     const data = { t: type, ...res } as Sticker | Emoji;
-                    const url = getUrl(data);
+                    const url = getUrl(data, 128);
 
                     return modalProps => (
                         <ModalRoot {...modalProps}>

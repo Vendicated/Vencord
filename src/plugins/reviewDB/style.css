@@ -1,20 +1,17 @@
-[class|="section"]:not([class|="lastSection"]) + .vc-rdb-view {
-    margin-top: 12px;
-}
-
 .vc-rdb-badge {
     vertical-align: middle;
     margin-left: 4px;
 }
 
 .vc-rdb-input {
-    padding-left: 12px;
+    padding-inline: 12px;
     margin-top: 6px;
     margin-bottom: 12px;
     resize: none;
     overflow: hidden;
     background: transparent;
-    border: 1px solid var(--profile-message-input-border-color);
+    border: 1px solid var(--input-border-default, var(--border-muted));
+    box-sizing: border-box;
 }
 
 .vc-rdb-modal-footer-wrapper {
@@ -39,10 +36,10 @@
 
 .vc-rdb-modal-footer .vc-rdb-input {
     margin-bottom: 0;
-    background: var(--input-background);
+    background: var(--input-background-default);
 }
 
-.vc-rdb-modal-footer [class|="pageControlContainer"] {
+.vc-rdb-modal-footer [class*="pageControlContainer"] {
     margin-top: 0;
 }
 
@@ -61,7 +58,7 @@
 }
 
 .vc-rdb-review:hover {
-    background: var(--background-message-hover) !important;
+    background: var(--message-background-hover) !important;
     border-radius: 8px;
 }
 
