@@ -86,7 +86,7 @@ export default definePlugin({
         },
         // MenuGroup doesn't accept styles or anything special by default :/
         {
-            find: ".groupLabel,",
+            find: /\.groupLabel,\i\.hideInteraction,/,
             replacement: {
                 match: /role:"group",/,
                 replace: "$&style:arguments[0].style,onWheel:arguments[0].onWheel,"
