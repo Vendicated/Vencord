@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { EyeIcon } from "@components/Icons";
-import SettingsPlugin from "@plugins/_core/settings";
+import SettingsPlugin, { settingsSectionMap } from "@plugins/_core/settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -39,6 +39,8 @@ export default definePlugin({
             element: () => <DataUI plugin={this} usersCollection={data.usersCollection} />,
             id: "IRememberYou"
         }));
+
+        settingsSectionMap.push(["EquicordIRememberYou", "equicord_i_remember_you"]);
 
         const data = (this.dataManager = await new Data().withStart());
 

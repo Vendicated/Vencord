@@ -5,7 +5,7 @@
  */
 
 import { ColorPaletteIcon } from "@components/Icons";
-import SettingsPlugin from "@plugins/_core/settings";
+import SettingsPlugin, { settingsSectionMap } from "@plugins/_core/settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { openUserSettingsPanel } from "@webpack/common";
@@ -40,6 +40,8 @@ export default definePlugin({
             element: require("./components/ThemeTab").default,
             id: "ThemeLibrary",
         }));
+
+        settingsSectionMap.push(["EquicordThemeLibrary", "equicord_theme_library"]);
     },
 
     stop() {

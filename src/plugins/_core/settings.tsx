@@ -104,6 +104,18 @@ const settings = definePluginSettings({
     }
 });
 
+export const settingsSectionMap: [string, string][] = [
+    ["EquicordSettings", "equicord_main_panel"],
+    ["EquicordPlugins", "equicord_plugins_panel"],
+    ["EquicordThemes", "equicord_themes_panel"],
+    ["EquicordUpdater", "equicord_updater_panel"],
+    ["EquicordChangelog", "equicord_changelog_panel"],
+    ["EquicordCloud", "equicord_cloud_panel"],
+    ["EquicordBackupAndRestore", "equicord_backup_restore_panel"],
+    ["EquicordPatchHelper", "equicord_patch_helper_panel"],
+    ["EquibopSettings", "equicord_equibop_settings_panel"],
+];
+
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
@@ -202,20 +214,7 @@ export default definePlugin({
     },
 
     getSettingsSectionMappings() {
-        return [
-            ["EquicordSettings", "equicord_main_panel"],
-            ["EquicordPlugins", "equicord_plugins_panel"],
-            ["EquicordThemes", "equicord_themes_panel"],
-            ["EquicordUpdater", "equicord_updater_panel"],
-            ["EquicordChangelog", "equicord_changelog_panel"],
-            ["EquicordCloud", "equicord_cloud_panel"],
-            ["EquicordBackupAndRestore", "equicord_backup_restore_panel"],
-            ["EquicordPatchHelper", "equicord_patch_helper_panel"],
-            ["EquibopSettings", "equicord_equibop_settings_panel"],
-            ["EquicordDiscordIcons", "equicord_icon_viewer"],
-            ["EquicordThemeLibrary", "equicord_theme_library"],
-            ["EquicordIRememberYou", "equicord_i_remember_you"],
-        ];
+        return settingsSectionMap;
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
