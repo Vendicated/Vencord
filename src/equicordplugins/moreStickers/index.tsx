@@ -50,7 +50,7 @@ export default definePlugin({
             find: ".gifts)",
             replacement: [
                 {
-                    match: /(?<=(,!\i&&\(null==\(\i=\i\.stickers\)\?void 0.*?\i\.push\(\{).{0,15}node:(.{0,45})},"sticker"\)\}\))/,
+                    match: /(?<=(\(null==\(\i=\i\.stickers\)\?void 0.*?\i\.push\(\{).{0,15}node:(.{0,50})},"sticker"\)\}\))/,
                     replace: "$1key:\"stickers+\",node:$2,stickersType:\"stickers+\"},\"stickers+\")})"
                 },
                 {
