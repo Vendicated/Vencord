@@ -995,7 +995,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Replace names in reaction popouts.
-                    match: /(?<=className:\i.reactorInfo,children:)(\[.{0,400}?\])/,
+                    match: /(?<=className:\i.reactorInfo,children:)(\[.{0,400}?}\)\])/,
                     replace: "($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId,type:\"reactionsPopout\"}))??($1)"
                 },
                 {
