@@ -44,7 +44,7 @@ export default definePlugin({
     authors: [Devs.pluckerpilple],
     settingsAboutComponent: () => <>
     <Forms.FormText className="plugin-warning">
-    Mujhid. is not responsible for u violation of the laws :3
+    **Mujhid. is not responsible for u violation of the laws :3**
     </Forms.FormText>
 </>,
     settings: settings,
