@@ -995,8 +995,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Replace names in reaction popouts.
-                    match: /children:(null!=(?:.{0,300}?)children:\i}\))/,
-                    replace: "style:{\"overflow\":\"visible\"},children:($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId,type:\"reactionsPopout\"}))??($1)"
+                    match: /(?<=className:\i.reactorInfo,children:)(\[.{0,350}?\])/,
+                    replace: "($self.getMemberListProfilesReactionsVoiceNameElement({user:arguments[0].user,guildId:arguments[0].guildId,type:\"reactionsPopout\"}))??($1)"
                 },
                 {
                     // Track hovering over reaction popouts.
