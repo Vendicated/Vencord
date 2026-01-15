@@ -1,4 +1,5 @@
 import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
+import { GlobalShortcut } from "./utils";
 
 
 // #region Old compability
@@ -508,4 +509,10 @@ export type ColorPicker = ComponentType<{
     suggestedColors?: string[];
     label?: ReactNode;
     onChange(value: number | null): void;
+}>;
+
+export type GlobalKeybind = ComponentType<{
+    defaultValue: GlobalShortcut;
+    disabled: boolean;
+    onChange(value: GlobalShortcut): void;
 }>;

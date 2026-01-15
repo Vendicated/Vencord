@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type * as t from "@vencord/discord-types";
+import * as t from "@vencord/discord-types";
 import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
 import type * as TSPattern from "ts-pattern";
 
@@ -68,7 +68,7 @@ waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
-const ToastType = {
+export const ToastType = {
     MESSAGE: "message",
     SUCCESS: "success",
     FAILURE: "failure",
@@ -79,7 +79,7 @@ const ToastType = {
     BOOKMARK: "bookmark",
     CLOCK: "clock"
 };
-const ToastPosition = {
+export const ToastPosition = {
     TOP: 0,
     BOTTOM: 1
 };
