@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-
+import "plugins/_misc/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -44,7 +44,7 @@ export default definePlugin({
     authors: [Devs.pluckerpilple],
     settingsAboutComponent: () => <>
     <Forms.FormText className="plugin-warning">
-    **Mujhid. is not responsible for u violation of the laws :3**
+    Mujhid is not responsible for u violation of the laws :3
     </Forms.FormText>
 </>,
     settings: settings,
