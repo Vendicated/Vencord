@@ -883,9 +883,10 @@ export default definePlugin({
                     if (this.canUseEmote(emoji, channelId)) continue;
 
                     hasBypass = true;
-
+                    
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
+                    const emojiSize = s.emojiSize ?? 48;
                     const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
