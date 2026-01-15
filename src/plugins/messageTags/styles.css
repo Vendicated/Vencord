@@ -1,0 +1,160 @@
+.vc-cm-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-cm-modal-title {
+    margin: 0;
+}
+
+.vc-cm-modal-close-button {
+    padding: 0;
+}
+
+/* Accordion Styles */
+.vc-cm-accordion {
+    margin-bottom: 1em;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.vc-cm-accordion-error {
+    border-color: var(--status-danger);
+}
+
+.vc-cm-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--background-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+    min-height: 30px;
+}
+
+.vc-cm-accordion-header:hover {
+    background: var(--background-secondary-alt);
+}
+
+.vc-cm-accordion-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.vc-cm-accordion-chevron {
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    color: var(--text-default);
+}
+
+.vc-cm-accordion-chevron-expanded {
+    transform: rotate(90deg);
+}
+
+.vc-cm-accordion-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-default);
+}
+
+.vc-cm-accordion-delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    background: var(--background-modifier-accent);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: var(--text-default);
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+}
+
+.vc-cm-accordion-delete-button:hover {
+    background: var(--status-danger);
+    color: var(--white-500);
+}
+
+.vc-cm-accordion-content {
+    padding: 16px;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Legacy card styles - removed */
+.vc-cm-message-card {
+    /* Keeping this for backward compatibility but not used */
+}
+
+.vc-cm-section-title {
+    font-size: 14px;
+    margin-bottom: 0.5em;
+}
+
+.vc-cm-section-title--spaced {
+    margin-top: 0.5em;
+}
+
+.vc-cm-error {
+    color: var(--status-danger);
+    margin-left: 0.25em;
+}
+
+.vc-cm-delete-button {
+    margin-top: 0.5em;
+}
+
+.vc-cm-add-button {
+    margin-top: 1em;
+    width: 100%;
+}
+
+.vc-cm-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-cm-footer-group {
+    display: flex;
+    gap: 8px;
+}
+
+/* Rich text editor styles */
+.vc-cm-rich-editor-wrapper {
+    margin-top: 0.5em;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.vc-cm-rich-editor {
+    min-height: 100px;
+}
+
+/* Make the editor look more integrated */
+.vc-cm-rich-editor-wrapper > div {
+    background: transparent !important;
+}
