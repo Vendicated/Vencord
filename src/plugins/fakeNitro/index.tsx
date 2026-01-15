@@ -722,8 +722,8 @@ export default definePlugin({
         const resolution = settings.store.stickerSize;
 
         const canvas = document.createElement("canvas");
-        canvas.width = resolution;
-        canvas.height = resolution;
+        canvas.width = resolution ?? 160;
+        canvas.height = resolution ?? 160;
 
         const ctx = canvas.getContext("2d", {
             willReadFrequently: true
