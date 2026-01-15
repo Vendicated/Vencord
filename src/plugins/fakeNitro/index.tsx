@@ -884,7 +884,7 @@ export default definePlugin({
 
                     hasBypass = true;
 
-                    const emojiSize = s.emojisize ?? 48;
+                    const emojiSize = s.emojiSize ?? 48;
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
                     const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: emojiSize }));
