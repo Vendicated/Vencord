@@ -25,23 +25,9 @@ import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { DiscordPlatform, OnlineStatus, User } from "@vencord/discord-types";
-import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
-import { AuthenticationStore, PresenceStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { filters, mapMangledModuleLazy } from "@webpack";
+import { AuthenticationStore, PresenceStore, SessionsStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
-export interface Session {
-    sessionId: string;
-    status: string;
-    active: boolean;
-    clientInfo: {
-        version: number;
-        os: string;
-        client: string;
-    };
-}
-
-const SessionsStore = findStoreLazy("SessionsStore") as {
-    getSessions(): Record<string, Session>;
-};
 const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
     useStatusFillColor: filters.byCode(".hex")
 });
