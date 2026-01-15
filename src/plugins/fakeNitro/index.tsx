@@ -719,11 +719,11 @@ export default definePlugin({
             .then(parseAPNG);
 
         const gif = GIFEncoder();
-        const resolution = settings.store.stickerSize;
+        const resolution = settings.store.stickerSize ?? 160;
 
         const canvas = document.createElement("canvas");
-        canvas.width = resolution ?? 160;
-        canvas.height = resolution ?? 160;
+        canvas.width = resolution;
+        canvas.height = resolution;
 
         const ctx = canvas.getContext("2d", {
             willReadFrequently: true
