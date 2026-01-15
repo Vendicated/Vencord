@@ -11,11 +11,11 @@ import definePlugin, { ReporterTestable } from "@utils/types";
 import { CloudUpload } from "@vencord/discord-types";
 
 const extensionMap = {
-    "ogg": [".ogv", ".oga", ".ogx", ".ogm", ".spx", ".opus", ".flac", ".aac", ".wma"],
-    "jpg": [".jpeg", ".jfif", ".jpe", ".jif", ".jfi", ".pjpeg", ".pjp", ".bmp", ".tiff", ".tif", ".webp"],
+    "ogg": [".ogv", ".oga", ".ogx", ".ogm", ".spx", ".aac", ".wma"],
+    "jpg": [".jpe", ".jif", ".jfi", ".pjpeg", ".pjp", ".bmp", ".tiff", ".tif"],
     "svg": [".svgz", ".ai", ".eps"],
-    "mp4": [".m4v", ".m4r", ".m4p", ".avi", ".mkv", ".wmv", ".flv", ".3gp", ".webm"],
-    "m4a": [".m4b", ".aiff", ".wav"],
+    "mp4": [".m4v", ".m4r", ".m4p", ".avi", ".mkv", ".wmv", ".flv", ".3gp"],
+    "m4a": [".m4b", ".aiff"],
     "mov": [".movie", ".qt", ".asf", ".rm", ".rmvb"],
     "png": [".ico", ".cur"],
 };
