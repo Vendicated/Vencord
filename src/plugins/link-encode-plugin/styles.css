@@ -1,0 +1,56 @@
+.vc-link-encode-modal-content {
+    padding: 1em;
+}
+
+.vc-link-encode-modal-header {
+    place-content: center space-between;
+}
+
+.vc-link-encode-modal-title {
+    margin: 0;
+}
+
+.vc-link-encode-accessory {
+    color: var(--text-muted);
+    margin-top: 0.5em;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2rem;
+    white-space: break-spaces;
+}
+
+.vc-link-encode-accessory-icon {
+    margin-right: 0.25em;
+}
+
+.vc-link-encode-accessory-label {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.vc-link-encode-dismiss {
+    all: unset;
+    cursor: pointer;
+    color: var(--text-link);
+}
+
+.vc-link-encode-dismiss:is(:hover, :focus) {
+    text-decoration: underline;
+}
+
+.vc-link-encode-auto-encode {
+    color: var(--green-360);
+}
+
+.vc-link-encode-chat-button {
+    scale: 1.085;
+}
+
+.vc-link-encode-decoded-link {
+    color: var(--text-link);
+    text-decoration: none;
+}
+
+.vc-link-encode-decoded-link:hover {
+    text-decoration: underline;
+}
