@@ -52,7 +52,7 @@ const fakeVoiceState = {
 
 const StateKeys = ["selfDeaf", "selfMute", "selfVideo"];
 export default definePlugin({
-    name: "sFakeMuteAndDeafen",
+    name: "FakeMuteAndDeafen",
     description: "Kendinizi sahte olarak susturabilir ve sağırlaştırabilirsiniz. Bu sırada konuşmaya devam edebilir ve duyulabilirsiniz.",
     authors: [{
         name: "kramo",
