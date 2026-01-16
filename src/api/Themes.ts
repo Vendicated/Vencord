@@ -19,28 +19,22 @@
 import { Settings, SettingsStore } from "@api/Settings";
 import { createAndAppendStyle } from "@utils/css";
 import { ThemeStore } from "@vencord/discord-types";
+import { PopoutWindowStore } from "@webpack/common";
+
+import { userStyleRootNode, vencordRootNode } from "./Styles";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
 
-async function initSystemValues() {
-    const values = await VencordNative.themes.getSystemValues();
-    const variables = Object.entries(values)
-        .filter(([, v]) => v !== "#")
-        .map(([k, v]) => `--${k}: ${v};`)
-        .join("");
-
-    createAndAppendStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
-}
-
 async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
-            style = createAndAppendStyle("vencord-custom-css");
+            style = createAndAppendStyle("vencord-custom-css", userStyleRootNode);
             VencordNative.quickCss.addChangeListener(css => {
                 style.textContent = css;
                 // At the time of writing this, changing textContent resets the disabled state
                 style.disabled = !Settings.useQuickCss;
+                updatePopoutWindows();
             });
             style.textContent = await VencordNative.quickCss.get();
         }
@@ -49,7 +43,7 @@ async function toggle(isEnabled: boolean) {
 }
 
 async function initThemes() {
-    themesStyle ??= createAndAppendStyle("vencord-themes");
+    themesStyle ??= createAndAppendStyle("vencord-themes", userStyleRootNode);
 
     const { themeLinks, enabledThemes } = Settings;
 
@@ -84,12 +78,32 @@ async function initThemes() {
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    updatePopoutWindows();
+}
+
+function applyToPopout(popoutWindow: Window | undefined, key: string) {
+    if (!popoutWindow?.document) return;
+    // skip game overlay cuz it needs to stay transparent, themes broke it
+    if (key === "DISCORD_OutOfProcessOverlay") return;
+
+    const doc = popoutWindow.document;
+
+    doc.querySelector("vencord-root")?.remove();
+
+    doc.documentElement.appendChild(vencordRootNode.cloneNode(true));
+}
+
+function updatePopoutWindows() {
+    if (!PopoutWindowStore) return;
+
+    for (const key of PopoutWindowStore.getWindowKeys()) {
+        applyToPopout(PopoutWindowStore.getWindow(key), key);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     if (IS_USERSCRIPT) return;
 
-    initSystemValues();
     initThemes();
 
     toggle(Settings.useQuickCss);
@@ -97,6 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+
+    window.addEventListener("message", event => {
+        const { discordPopoutEvent } = event.data || {};
+        if (discordPopoutEvent?.type !== "loaded") return;
+
+        applyToPopout(PopoutWindowStore.getWindow(discordPopoutEvent.key), discordPopoutEvent.key);
+    });
 
     if (!IS_WEB) {
         VencordNative.quickCss.addThemeChangeListener(initThemes);

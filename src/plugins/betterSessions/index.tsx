@@ -75,7 +75,7 @@ export default definePlugin({
                 },
                 // Replace the icon
                 {
-                    match: /\.currentSession:null\),children:\[(?<=,icon:(\i)\}.+?)/,
+                    match: /\.legacySession\),children:\[(?<=,icon:(\i)\}.+?)/,
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
@@ -140,7 +140,7 @@ export default definePlugin({
                             overflow: "hidden",
 
                             borderRadius: "50%",
-                            backgroundColor: "var(--interactive-normal)",
+                            backgroundColor: "var(--interactive-icon-default)",
                             color: "var(--background-base-lower)",
                         }}
                     >

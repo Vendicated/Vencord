@@ -18,17 +18,15 @@
 
 import type { MessageObject } from "@api/MessageEvents";
 import type { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
-import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
 import { copyToClipboard } from "./clipboard";
-import { runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "./intlHash";
+import { runtimeHashMessageKey } from "./intlHash";
 import { Logger } from "./Logger";
 import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
 
 const IntlManagerLogger = new Logger("IntlManager");
-
-// TODO: remove legacy hashing function once Discord ships new one everywhere for a while
 
 /**
  * Get an internationalized message from a non hashed key
@@ -36,7 +34,7 @@ const IntlManagerLogger = new Logger("IntlManager");
  * @param values The values to interpolate, if it's a rich message
  */
 export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): any {
-    return getIntlMessageFromHash(runtimeHashMessageKey(key), values, key) || getIntlMessageFromHash(runtimeHashMessageKeyLegacy(key), values, key);
+    return getIntlMessageFromHash(runtimeHashMessageKey(key), values, key);
 }
 
 /**
@@ -236,17 +234,6 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
  */
 export function getUniqueUsername(user: User) {
     return user.discriminator === "0" ? user.username : user.tag;
-}
-
-/**
- *  Get the URL for an emoji. This function always returns a gif URL for animated emojis, instead of webp
- * @param id The emoji id
- * @param animated Whether the emoji is animated
- * @param size The size for the emoji
- */
-export function getEmojiURL(id: string, animated: boolean, size: number) {
-    const url = IconUtils.getEmojiURL({ id, animated, size });
-    return animated ? url.replace(".webp", ".gif") : url;
 }
 
 // Discord has a similar function in their code
