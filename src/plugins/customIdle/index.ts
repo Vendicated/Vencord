@@ -28,7 +28,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "CustomIdle",
-    description: "Allows you to set the time before Discord goes idle (or disable auto-idle)",
+    description: "Allows you to change the time Discord waits before changing your status to idle (or disable auto-idle)",
     authors: [Devs.newwares],
     settings,
     patches: [
