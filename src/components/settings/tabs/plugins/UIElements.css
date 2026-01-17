@@ -40,3 +40,57 @@
         margin-left: auto;
     }
 }
+
+.vc-plugin-ui-elements-switches-row {
+    -webkit-user-drag: element;
+    cursor: grab;
+}
+
+.vc-plugin-ui-elements-switches-row:active {
+    cursor: grabbing;
+}
+
+.vc-plugin-ui-elements-switches-row-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 12px;
+    border-radius: 6px;
+
+    transition:
+        background-color 120ms ease,
+        opacity 120ms ease;
+}
+
+.vc-plugin-ui-elements-switches-row-wrapper:hover {
+    background-color: var(--background-mod-subtle);
+}
+
+.vc-plugin-ui-elements-switches-row-wrapper[data-dragging="true"] {
+    opacity: 0.4;
+}
+
+.vc-plugin-ui-elements-drag-handle {
+    width: 20px;
+    text-align: center;
+    color: var(--interactive-icon-default);
+    cursor: grab;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 120ms ease;
+}
+
+.vc-plugin-ui-elements-switches-row-wrapper:hover
+.vc-plugin-ui-elements-drag-handle {
+    opacity: 1;
+}
+
+.vc-plugin-ui-elements-drag-handle:hover {
+    color: var(--interactive-icon-hover);
+}
+
+.vc-plugin-ui-elements-drag-handle:active {
+    cursor: grabbing;
+    color: var(--interactive-icon-hover);
+}
