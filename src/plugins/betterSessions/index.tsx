@@ -75,7 +75,7 @@ export default definePlugin({
                 },
                 // Replace the icon
                 {
-                    match: /\.currentSession:null\),children:\[(?<=,icon:(\i)\}.+?)/,
+                    match: /\.legacySession\),children:\[(?<=,icon:(\i)\}.+?)/,
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
