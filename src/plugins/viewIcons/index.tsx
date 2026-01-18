@@ -24,6 +24,7 @@ import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Guild, User } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
+import type { MouseEvent } from "react";
 
 
 interface UserContextProps {
@@ -67,10 +68,18 @@ const settings = definePluginSettings({
     }
 });
 
-const openAvatar = (url: string) => openImage(url, 512, 512);
-const openBanner = (url: string) => openImage(url, 1024);
+const openAvatar = (url: string, event?: MouseEvent) => openImage({ url, width: 512, height: 512, event });
+const openBanner = (url: string, event?: MouseEvent) => openImage({ url, width: 1024, event });
 
-function openImage(url: string, width: number, height?: number) {
+interface OpenImageProps {
+    url: string;
+    width: number;
+    height?: number;
+    event?: MouseEvent;
+}
+
+function openImage({ url, width, height, event }: OpenImageProps) {
+    event?.stopPropagation();
     const u = new URL(url, window.location.href);
 
     const format = url.startsWith("/")
@@ -201,7 +210,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
-                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
+                    replace: '$&style:{cursor:"pointer"},onClick:e=>{$self.openAvatar($1,e)},',
                 }
             ],
             all: true
@@ -211,7 +220,7 @@ export default definePlugin({
             find: 'backgroundColor:"COMPLETE"',
             replacement: {
                 match: /(\.banner,.+?),style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\2,)/,
-                replace: (_, rest, bannerSrc) => `${rest},onClick:()=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
+                replace: (_, rest, bannerSrc) => `${rest},onClick:e=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc},e),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
@@ -220,7 +229,7 @@ export default definePlugin({
             replacement: {
                 match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
                 // We have to check that icon is not an unread GDM in the server bar
-                replace: (m, iconUrl) => `${m},onClick:()=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl})`
+                replace: (m, iconUrl) => `${m},onClick:e=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl},e)`
             }
         },
         // User DMs top small icon
@@ -228,7 +237,7 @@ export default definePlugin({
             find: ".cursorPointer:null,children",
             replacement: {
                 match: /(?=,src:(\i.getAvatarURL\(.+?[)]))/,
-                replace: (_, avatarUrl) => `,onClick:()=>$self.openAvatar(${avatarUrl})`
+                replace: (_, avatarUrl) => `,onClick:e=>$self.openAvatar(${avatarUrl},e)`
             }
         },
         // User Dms top large icon
@@ -236,7 +245,7 @@ export default definePlugin({
             find: ".EMPTY_GROUP_DM)",
             replacement: {
                 match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
-                replace: (_, avatarUrl) => `onClick:()=>$self.openAvatar(${avatarUrl}),`
+                replace: (_, avatarUrl) => `onClick:e=>$self.openAvatar(${avatarUrl},e),`
             }
         }
     ]
