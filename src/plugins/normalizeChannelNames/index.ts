@@ -7,15 +7,6 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-function normalizeText(text: string): string {
-    if (!text) return "";
-    return text
-        .normalize("NFKD")
-        .toLowerCase()
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\w\s-]/g, "");
-}
-
 export default definePlugin({
     name: "NormalizeChannelNames",
     description:
@@ -23,19 +14,24 @@ export default definePlugin({
     authors: [Devs.MVDW_Java],
     patches: [
         {
-            find: "queryChannels(e){",
+            find: ",queryChannels(",
+            group: true,
             replacement: [
                 {
-                    match: /m=e5\((\i),(\i)\)/,
-                    replace: "m=e5($self.normalizeText($1),$2)",
+                    match: /(\i)\.toLocaleLowerCase\(\);return{queryLower/,
+                    replace: "$self.normalize($1);return{queryLower",
                 },
                 {
-                    match: /i=e\.name\.toLocaleLowerCase\(\)/,
-                    replace: "i=$self.normalizeText(e.name)",
+                    match: /(\i)=(\i)\.name\.toLocaleLowerCase\(\),/,
+                    replace: "$1=$self.normalize($2.name),",
                 },
             ],
         },
     ],
 
-    normalizeText,
+    normalize: (text: string) =>
+        text
+            .normalize("NFKD")
+            .toLowerCase()
+            .replace(/[\u0300-\u036f]/g, ""),
 });
