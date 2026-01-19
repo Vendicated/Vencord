@@ -258,7 +258,7 @@ function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingLi
                                     onClose();
                                 }}
                             >
-                                <JumpIcon className="vc-readinglist-icon" />
+                                <JumpIcon />
                             </button>
                         )}
                     </Tooltip>
@@ -270,7 +270,7 @@ function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingLi
                                 onMouseLeave={onMouseLeave}
                                 onClick={onRemove}
                             >
-                                <TrashIcon className="vc-readinglist-icon" />
+                                <TrashIcon/>
                             </button>
                         )}
                     </Tooltip>

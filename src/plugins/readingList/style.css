@@ -2,11 +2,11 @@
 .vc-reading-list-header-icon {
     vertical-align: middle;
     margin-right: 8px;
-    color: var(--header-primary);
+    color: var(--interactive-icon-default);
 }
 
 .vc-readinglist-icon {
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
 }
 
 .vc-readinglist-btn[class*="selected"] .vc-readinglist-icon {
@@ -23,7 +23,9 @@
     max-height: 80vh;
     display: flex;
     flex-direction: column;
+    padding: 0px;
     border-radius: 8px;
+    background-color: var(--background-surface-high);
     box-shadow: var(--elevation-high);
     overflow: hidden;
 }
@@ -34,13 +36,12 @@
     align-items: center;
     padding: 16px;
     gap: 8px;
-    border-bottom: 1px solid var(--background-modifier-accent);
+    border-bottom: 1px solid var(--border-subtle);
     flex-shrink: 0;
 }
 
 .vc-reading-list-count-badge {
     margin-left: auto;
-    background: var(--background-secondary);
     color: var(--text-muted);
     padding: 2px 8px;
     border-radius: 10px;
@@ -50,8 +51,7 @@
 /* Popout Content (scrollable) */
 .vc-reading-list-popout-content {
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden scroll;
     min-height: 100px;
     max-height: 500px;
 }
@@ -95,6 +95,9 @@
 .vc-reading-list-popover-item {
     padding: 12px;
     border-radius: 4px;
+    border: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-8);
+    background-color: var(--background-surface-higher);
     transition: background 0.1s ease;
 }
 
@@ -145,7 +148,7 @@
 .vc-reading-list-action-btn {
     padding: 4px;
     border-radius: 4px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -156,7 +159,7 @@
 }
 
 .vc-reading-list-action-btn:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
     background: var(--background-modifier-hover);
 }
 
