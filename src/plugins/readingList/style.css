@@ -17,7 +17,26 @@
     color: var(--interactive-hover);
 }
 
-/* Popout Container - Discord pinned messages style */
+/* Icon wrapper for badge positioning */
+.vc-readinglist-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Unread badge - red dot */
+.vc-readinglist-unread-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--status-danger);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
 .vc-reading-list-popout {
     width: 420px;
     max-height: 80vh;
@@ -243,7 +262,6 @@
     white-space: nowrap;
 }
 
-/* Note styles (if still needed) */
 .vc-reading-list-note {
     margin-top: 8px;
     padding: 8px;
@@ -265,7 +283,7 @@
     font-size: 11px;
 }
 
-/* Legacy/unused styles cleanup */
+
 .vc-reading-list-count {
     margin-left: auto;
     align-self: center;

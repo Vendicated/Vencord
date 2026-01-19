@@ -26,10 +26,11 @@ import { Devs } from "@utils/constants";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Message, MessageAttachment } from "@vencord/discord-types";
-import { Button, ChannelStore, Menu, NavigationRouter, Popout, React, Text, Timestamp, Tooltip, useEffect, useRef, useState, UserStore } from "@webpack/common";
+import { Button, ChannelStore, Menu, NavigationRouter, Popout, React, ScrollerThin, Text, Timestamp, Tooltip, useEffect, useRef, useState, UserStore } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
 const DATA_KEY = "ReadingList_ITEMS";
+const UNREAD_KEY = "ReadingList_UNREAD";
 
 // Get Discord's popout container classes for consistent styling
 const PopoutClasses = findByPropsLazy("container", "scroller", "list");
@@ -120,6 +121,28 @@ const AttachmentIcon: IconComponent = ({ height = 16, width = 16, className }) =
 );
 
 let readingList: ReadingListItem[] = [];
+let hasUnread = false;
+let unreadListeners: Set<() => void> = new Set();
+
+function notifyUnreadChange() {
+    unreadListeners.forEach(listener => listener());
+}
+
+function useUnreadState() {
+    const [, forceUpdate] = useState({});
+    useEffect(() => {
+        const listener = () => forceUpdate({});
+        unreadListeners.add(listener);
+        return () => { unreadListeners.delete(listener); };
+    }, []);
+    return hasUnread;
+}
+
+async function setUnread(value: boolean) {
+    hasUnread = value;
+    await DataStore.set(UNREAD_KEY, value);
+    notifyUnreadChange();
+}
 
 async function loadReadingList(): Promise<ReadingListItem[]> {
     readingList = await DataStore.get(DATA_KEY) ?? [];
@@ -168,6 +191,7 @@ async function addToReadingList(msg: Message, note?: string): Promise<void> {
 
     items.unshift(newItem);
     await saveReadingList(items);
+    await setUnread(true);
 }
 
 async function removeFromReadingList(id: string): Promise<void> {
@@ -270,7 +294,7 @@ function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingLi
                                 onMouseLeave={onMouseLeave}
                                 onClick={onRemove}
                             >
-                                <TrashIcon/>
+                                <TrashIcon />
                             </button>
                         )}
                     </Tooltip>
@@ -346,7 +370,7 @@ function ReadingListPopout({ onClose }: { onClose: () => void; }) {
                     {items.length}
                 </Text>
             </div>
-            <div className={`vc-reading-list-popout-content ${PopoutClasses?.scroller ?? ""}`}>
+            <ScrollerThin className="vc-reading-list-popout-content">
                 <ErrorBoundary>
                     {loading ? (
                         <div className="vc-reading-list-loading">
@@ -373,7 +397,7 @@ function ReadingListPopout({ onClose }: { onClose: () => void; }) {
                         </div>
                     )}
                 </ErrorBoundary>
-            </div>
+            </ScrollerThin>
             {items.length > 0 && (
                 <div className="vc-reading-list-popout-footer">
                     <Button
@@ -393,6 +417,14 @@ function ReadingListPopout({ onClose }: { onClose: () => void; }) {
 function ReadingListPopoutButton({ buttonClass }: { buttonClass: string; }) {
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
+    const unread = useUnreadState();
+
+    const handleOpen = async () => {
+        setShow(v => !v);
+        if (!show) {
+            await setUnread(false);
+        }
+    };
 
     return (
         <Popout
@@ -408,9 +440,14 @@ function ReadingListPopoutButton({ buttonClass }: { buttonClass: string; }) {
                 <HeaderBarIcon
                     ref={buttonRef}
                     className={`vc-readinglist-btn ${buttonClass}`}
-                    onClick={() => setShow(v => !v)}
+                    onClick={handleOpen}
                     tooltip={isShown ? null : "Reading List"}
-                    icon={() => <BookmarkFilledIcon height={24} width={24} className="vc-readinglist-icon" />}
+                    icon={() => (
+                        <div className="vc-readinglist-icon-wrapper">
+                            <BookmarkFilledIcon height={24} width={24} className="vc-readinglist-icon" />
+                            {unread && !isShown && <div className="vc-readinglist-unread-badge" />}
+                        </div>
+                    )}
                     selected={isShown}
                 />
             )}
@@ -490,5 +527,7 @@ export default definePlugin({
 
     async start() {
         await loadReadingList();
+        hasUnread = await DataStore.get(UNREAD_KEY) ?? false;
+        notifyUnreadChange();
     }
 });
