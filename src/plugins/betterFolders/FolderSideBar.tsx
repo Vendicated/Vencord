@@ -17,13 +17,12 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Animations, useStateFromStores } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { Animations, ChannelRTCStore, useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
 import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
 
-const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
 function getExpandedFolderIds() {

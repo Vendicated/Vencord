@@ -19,12 +19,13 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 import { User } from "@vencord/discord-types";
-import { DateUtils, RelationshipStore, Text, TooltipContainer } from "@webpack/common";
+import { DateUtils, RelationshipStore, Text } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const formatter = new Intl.DateTimeFormat(undefined, {

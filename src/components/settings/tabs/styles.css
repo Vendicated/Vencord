@@ -43,11 +43,22 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1em;
+    margin-top: 16px;
 }
 
 .vc-cloud-erase-data-danger-btn {
     color: var(--white-500);
     background-color: var(--redesign-button-danger-background);
+}
+
+.vc-cloud-icon-with-button {
+    display: flex;
+    gap: 0.5em;
+    padding-inline: 0.5em 1em;
+}
+
+.vc-cloud-button-icon {
+    height: 1.25em;
 }
 
 .vc-settings-modal {

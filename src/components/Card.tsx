@@ -6,7 +6,7 @@
 
 import "./Card.css";
 
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { ComponentPropsWithRef } from "react";
 

@@ -5,9 +5,9 @@
  */
 
 import { isPluginEnabled } from "@api/PluginManager";
-import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import ShowHiddenChannelsPlugin from "@plugins/showHiddenChannels";
+import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
@@ -25,14 +25,12 @@ const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
 
 type IconProps = Omit<React.ComponentPropsWithoutRef<"div">, "children"> & {
     size?: number;
-    iconClassName?: string;
 };
 
 function Icon(props: PropsWithChildren<IconProps>) {
     const {
         size = 16,
         className,
-        iconClassName,
         ...restProps
     } = props;
 
@@ -42,7 +40,6 @@ function Icon(props: PropsWithChildren<IconProps>) {
             className={classes(cl("speaker"), className)}
         >
             <svg
-                className={iconClassName}
                 width={size}
                 height={size}
                 viewBox="0 0 24 24"
@@ -192,8 +189,12 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
                     {...props}
                     role="button"
                     onClick={onClick}
-                    className={classes(cl("clickable"), isActionButton && ActionButtonClasses.actionButton, isActionButton && shouldHighlight && ActionButtonClasses.highlight)}
-                    iconClassName={classes(cl(isProfile && "profile-speaker"))}
+                    className={classes(
+                        cl("clickable"),
+                        isActionButton && ActionButtonClasses.actionButton,
+                        isActionButton && shouldHighlight && ActionButtonClasses.highlight,
+                        cl(isProfile && "profile-speaker")
+                    )}
                     size={isActionButton ? 20 : 16}
                 />
             )}

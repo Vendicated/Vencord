@@ -84,9 +84,9 @@ export default definePlugin({
 
         // Add support for the nonce parameter to Discord's shitcode
         {
-            find: ".REQUEST_GUILD_MEMBERS",
+            find: ".REQUEST_GUILD_MEMBERS,",
             replacement: {
-                match: /\.send\(8,{/,
+                match: /\.send\(\i\.\i\.REQUEST_GUILD_MEMBERS,{/,
                 replace: "$&nonce:arguments[1].nonce,"
             }
         },

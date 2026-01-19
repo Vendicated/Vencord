@@ -4,10 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { hexToHSL } from "./colorUtils";
+import { managedStyleRootNode } from "@api/Styles";
+import { createAndAppendStyle } from "@utils/css";
 
+import { hexToHSL } from "./colorUtils";
 const VARS_STYLE_ID = "vc-clientTheme-vars";
 const OVERRIDES_STYLE_ID = "vc-clientTheme-overrides";
+type StyleId = typeof VARS_STYLE_ID | typeof OVERRIDES_STYLE_ID;
+
+const styleCache = {} as Record<StyleId, HTMLStyleElement | null>;
 
 export function createOrUpdateThemeColorVars(color: string) {
     const { hue, saturation, lightness } = hexToHSL(color);
@@ -25,23 +30,20 @@ export async function startClientTheme(color: string) {
 }
 
 export function disableClientTheme() {
-    document.getElementById(VARS_STYLE_ID)?.remove();
-    document.getElementById(OVERRIDES_STYLE_ID)?.remove();
+    styleCache[VARS_STYLE_ID]?.remove();
+    styleCache[OVERRIDES_STYLE_ID]?.remove();
+    styleCache[VARS_STYLE_ID] = null;
+    styleCache[OVERRIDES_STYLE_ID] = null;
 }
 
-function getOrCreateStyle(styleId: string) {
-    const existingStyle = document.getElementById(styleId);
-    if (existingStyle) {
-        return existingStyle as HTMLStyleElement;
+function getOrCreateStyle(styleId: StyleId) {
+    if (!styleCache[styleId]) {
+        styleCache[styleId] = createAndAppendStyle(styleId, managedStyleRootNode);
     }
-
-    const newStyle = document.createElement("style");
-    newStyle.id = styleId;
-
-    return document.head.appendChild(newStyle);
+    return styleCache[styleId];
 }
 
-function createOrUpdateStyle(styleId: string, css: string) {
+function createOrUpdateStyle(styleId: StyleId, css: string) {
     const style = getOrCreateStyle(styleId);
     style.textContent = css;
 }

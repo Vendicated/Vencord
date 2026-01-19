@@ -101,28 +101,21 @@ export interface UserProfile extends UserProfileBase, Pick<User, "premiumType"> 
     premiumSince: Date | null;
 }
 
-export class UserProfileStore extends FluxStore {
-    /**
-     * @param userId the user ID of the profile being fetched.
-     * @param guildId the guild ID to of the profile being fetched.
-     * defaults to the internal symbol `NO GUILD ID` if nullish
-     *
-     * @returns true if the profile is being fetched, false otherwise.
-     */
-    isFetchingProfile(userId: string, guildId?: string): boolean;
-    /**
-     * Check if mutual friends for {@link userId} are currently being fetched.
-     *
-     * @param userId the user ID of the mutual friends being fetched.
-     *
-     * @returns true if mutual friends are being fetched, false otherwise.
-     */
-    isFetchingFriends(userId: string): boolean;
+export interface ApplicationWidgetConfig {
+    applicationId: string;
+    widgetType: number;
+}
 
+export interface WishlistSettings {
+    privacy: number;
+}
+
+export class UserProfileStore extends FluxStore {
+    get applicationWidgetApplicationConfigs(): Record<string, ApplicationWidgetConfig>;
     get isSubmitting(): boolean;
 
-    getUserProfile(userId: string): UserProfile | undefined;
-
+    getApplicationWidgetApplicationConfig(applicationId: string): ApplicationWidgetConfig | undefined;
+    getFirstWishlistId(userId: string): string | null;
     getGuildMemberProfile(userId: string, guildId: string | undefined): UserProfileBase | null;
     /**
      * Get the mutual friends of a user.
@@ -148,4 +141,26 @@ export class UserProfileStore extends FluxStore {
      * @returns an array of mutual guilds, or undefined if the user has no mutual guilds
      */
     getMutualGuilds(userId: string): MutualGuild[] | undefined;
+    getUserProfile(userId: string): UserProfile | undefined;
+    // TODO: finish typing
+    getWidgets(userId: string): any[] | undefined;
+    getWishlistIds(userId: string): string[];
+    getWishlistSettings(userId: string): WishlistSettings | null;
+    /**
+     * Check if mutual friends for {@link userId} are currently being fetched.
+     *
+     * @param userId the user ID of the mutual friends being fetched.
+     *
+     * @returns true if mutual friends are being fetched, false otherwise.
+     */
+    isFetchingFriends(userId: string): boolean;
+    /**
+     * @param userId the user ID of the profile being fetched.
+     * @param guildId the guild ID to of the profile being fetched.
+     * defaults to the internal symbol `NO GUILD ID` if nullish
+     *
+     * @returns true if the profile is being fetched, false otherwise.
+     */
+    isFetchingProfile(userId: string, guildId?: string): boolean;
+    takeSnapshot(): Record<string, UserProfile>;
 }
