@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 import "./style.css";
 
@@ -23,12 +23,25 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
-import { Message } from "@vencord/discord-types";
-import { Button, ChannelStore, Menu, NavigationRouter, React, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Message, MessageAttachment } from "@vencord/discord-types";
+import { Button, ChannelStore, Menu, NavigationRouter, Popout, React, Text, Timestamp, Tooltip, useEffect, useRef, useState, UserStore } from "@webpack/common";
+import type { PropsWithChildren } from "react";
 
 const DATA_KEY = "ReadingList_ITEMS";
+
+// Get Discord's popout container classes for consistent styling
+const PopoutClasses = findByPropsLazy("container", "scroller", "list");
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
+
+interface StoredAttachment {
+    id: string;
+    filename: string;
+    url: string;
+    content_type?: string;
+    size?: number;
+}
 
 interface ReadingListItem {
     id: string;
@@ -41,6 +54,7 @@ interface ReadingListItem {
     timestamp: string;
     addedAt: number;
     note?: string;
+    attachments?: StoredAttachment[];
 }
 
 const BookmarkIcon: IconComponent = ({ height = 24, width = 24, className }) => (
@@ -58,7 +72,7 @@ const BookmarkIcon: IconComponent = ({ height = 24, width = 24, className }) => 
 const BookmarkFilledIcon: IconComponent = ({ height = 24, width = 24, className }) => (
     <svg
         viewBox="0 0 24 24"
-        fill="white"
+        fill="currentColor"
         height={height}
         width={width}
         className={className}
@@ -93,6 +107,18 @@ const JumpIcon: IconComponent = ({ height = 20, width = 20, className }) => (
     </svg>
 );
 
+const AttachmentIcon: IconComponent = ({ height = 16, width = 16, className }) => (
+    <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        height={height}
+        width={width}
+        className={className}
+    >
+        <path d="M6 2a4 4 0 0 0-4 4v12a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4H6zm10 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-4.6 6.8l-3.6 4.8a1 1 0 0 0 .8 1.6h10.8a1 1 0 0 0 .8-1.6l-2.4-3.2a1 1 0 0 0-1.6 0L14 17l-1.8-2.4a1 1 0 0 0-.8-.8z" />
+    </svg>
+);
+
 let readingList: ReadingListItem[] = [];
 
 async function loadReadingList(): Promise<ReadingListItem[]> {
@@ -115,19 +141,29 @@ async function addToReadingList(msg: Message, note?: string): Promise<void> {
 
     const channel = ChannelStore.getChannel(msg.channel_id);
 
+    // Store attachment info
+    const attachments: StoredAttachment[] = (msg.attachments || []).map((a: MessageAttachment) => ({
+        id: a.id,
+        filename: a.filename,
+        url: a.url,
+        content_type: a.content_type,
+        size: a.size
+    }));
+
     const newItem: ReadingListItem = {
         id: `${msg.id}-${Date.now()}`,
         messageId: msg.id,
         channelId: msg.channel_id,
         guildId: channel?.guild_id,
-        content: msg.content || "[No text content]",
+        content: msg.content || "",
         authorName: msg.author.username,
         authorAvatar: msg.author.avatar
             ? `https://cdn.discordapp.com/avatars/${msg.author.id}/${msg.author.avatar}.png`
             : `https://cdn.discordapp.com/embed/avatars/${Number(msg.author.id) % 5}.png`,
         timestamp: msg.timestamp.toString(),
         addedAt: Date.now(),
-        note
+        note,
+        attachments: attachments.length > 0 ? attachments : undefined
     };
 
     items.unshift(newItem);
@@ -151,13 +187,53 @@ function jumpToMessage(channelId: string, messageId: string, guildId?: string) {
     NavigationRouter.transitionTo(path);
 }
 
-function ReadingListItem({ item, onRemove }: { item: ReadingListItem; onRemove: () => void; }) {
-    const truncatedContent = item.content.length > 200
-        ? item.content.slice(0, 200) + "..."
+// Parse mentions and convert <@123456> to @username
+function renderContent(content: string): React.ReactNode {
+    if (!content) return null;
+
+    // Pattern for user mentions: <@123456> or <@!123456>
+    const mentionRegex = /<@!?(\d+)>/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = mentionRegex.exec(content)) !== null) {
+        // Add text before the mention
+        if (match.index > lastIndex) {
+            parts.push(content.slice(lastIndex, match.index));
+        }
+
+        const userId = match[1];
+        const user = UserStore.getUser(userId);
+        const username = user ? `@${user.username}` : `@Unknown User`;
+
+        parts.push(
+            <span key={match.index} className="vc-reading-list-mention">
+                {username}
+            </span>
+        );
+
+        lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < content.length) {
+        parts.push(content.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : content;
+}
+
+function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingListItem; onRemove: () => void; onClose: () => void; }) {
+    const truncatedContent = item.content.length > 150
+        ? item.content.slice(0, 150) + "..."
         : item.content;
 
+    const hasContent = item.content.length > 0;
+    const hasAttachments = item.attachments && item.attachments.length > 0;
+
     return (
-        <div className="vc-reading-list-item">
+        <div className="vc-reading-list-popover-item">
             <div className="vc-reading-list-item-header">
                 <img
                     className="vc-reading-list-avatar"
@@ -165,7 +241,7 @@ function ReadingListItem({ item, onRemove }: { item: ReadingListItem; onRemove: 
                     alt={item.authorName}
                 />
                 <div className="vc-reading-list-meta">
-                    <Text variant="text-md/semibold">{item.authorName}</Text>
+                    <Text variant="text-sm/semibold">{item.authorName}</Text>
                     <Text variant="text-xs/normal" className="vc-reading-list-timestamp">
                         <Timestamp timestamp={new Date(item.timestamp)} />
                     </Text>
@@ -177,7 +253,10 @@ function ReadingListItem({ item, onRemove }: { item: ReadingListItem; onRemove: 
                                 className="vc-reading-list-action-btn"
                                 onMouseEnter={onMouseEnter}
                                 onMouseLeave={onMouseLeave}
-                                onClick={() => jumpToMessage(item.channelId, item.messageId, item.guildId)}
+                                onClick={() => {
+                                    jumpToMessage(item.channelId, item.messageId, item.guildId);
+                                    onClose();
+                                }}
                             >
                                 <JumpIcon className="vc-readinglist-icon" />
                             </button>
@@ -197,23 +276,47 @@ function ReadingListItem({ item, onRemove }: { item: ReadingListItem; onRemove: 
                     </Tooltip>
                 </div>
             </div>
-            <div className="vc-reading-list-content">
-                <Text variant="text-sm/normal">{truncatedContent}</Text>
-            </div>
-            {item.note && (
-                <div className="vc-reading-list-note">
-                    <Text variant="text-xs/medium" className="vc-reading-list-note-label">Note:</Text>
-                    <Text variant="text-xs/normal">{item.note}</Text>
+            {hasContent && (
+                <div className="vc-reading-list-content">
+                    <Text variant="text-sm/normal">{renderContent(truncatedContent)}</Text>
                 </div>
             )}
-            <Text variant="text-xs/normal" className="vc-reading-list-added">
-                Added {new Date(item.addedAt).toLocaleDateString()}
-            </Text>
+            {hasAttachments && (
+                <div className="vc-reading-list-attachments">
+                    {item.attachments!.map(att => (
+                        <a
+                            key={att.id}
+                            href={att.url}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            className="vc-reading-list-attachment"
+                        >
+                            {att.content_type?.startsWith("image/") ? (
+                                <img
+                                    src={att.url}
+                                    alt={att.filename}
+                                    className="vc-reading-list-attachment-image"
+                                />
+                            ) : (
+                                <div className="vc-reading-list-attachment-file">
+                                    <AttachmentIcon />
+                                    <span className="vc-reading-list-attachment-name">{att.filename}</span>
+                                </div>
+                            )}
+                        </a>
+                    ))}
+                </div>
+            )}
+            {!hasContent && !hasAttachments && (
+                <Text variant="text-sm/normal" className="vc-reading-list-no-content">
+                    [No content]
+                </Text>
+            )}
         </div>
     );
 }
 
-function ReadingListModal({ rootProps }: { rootProps: any; }) {
+function ReadingListPopout({ onClose }: { onClose: () => void; }) {
     const [items, setItems] = useState<ReadingListItem[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -235,15 +338,15 @@ function ReadingListModal({ rootProps }: { rootProps: any; }) {
     };
 
     return (
-        <ModalRoot {...rootProps} size={ModalSize.MEDIUM}>
-            <ModalHeader separator={false}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>
-                    <BookmarkFilledIcon height={20} width={20} className="vc-reading-list-header-icon" />
-                    Reading List
+        <div className={`vc-reading-list-popout ${PopoutClasses?.container ?? ""}`}>
+            <div className="vc-reading-list-popout-header">
+                <BookmarkFilledIcon height={18} width={18} className="vc-reading-list-header-icon" />
+                <Text variant="heading-md/semibold">Reading List</Text>
+                <Text variant="text-xs/normal" className="vc-reading-list-count-badge">
+                    {items.length}
                 </Text>
-                <ModalCloseButton onClick={rootProps.onClose} />
-            </ModalHeader>
-            <ModalContent>
+            </div>
+            <div className={`vc-reading-list-popout-content ${PopoutClasses?.scroller ?? ""}`}>
                 <ErrorBoundary>
                     {loading ? (
                         <div className="vc-reading-list-loading">
@@ -251,41 +354,68 @@ function ReadingListModal({ rootProps }: { rootProps: any; }) {
                         </div>
                     ) : items.length === 0 ? (
                         <div className="vc-reading-list-empty">
-                            <BookmarkIcon height={48} width={48} />
+                            <BookmarkIcon height={40} width={40} />
                             <Text variant="text-md/normal">Your reading list is empty</Text>
-                            <Text variant="text-sm/normal" className="vc-reading-list-empty-hint">
-                                Right-click on any message and select "Add to Reading List" to save it for later!
+                            <Text variant="text-xs/normal" className="vc-reading-list-empty-hint">
+                                Right-click a message to save it for later
                             </Text>
                         </div>
                     ) : (
                         <div className="vc-reading-list-items">
                             {items.map(item => (
-                                <ReadingListItem
+                                <ReadingListItemComponent
                                     key={item.id}
                                     item={item}
                                     onRemove={() => handleRemove(item.id)}
+                                    onClose={onClose}
                                 />
                             ))}
                         </div>
                     )}
                 </ErrorBoundary>
-            </ModalContent>
+            </div>
             {items.length > 0 && (
-                <ModalFooter>
-                    <Button color={Button.Colors.RED} onClick={handleClearAll}>
+                <div className="vc-reading-list-popout-footer">
+                    <Button
+                        size={Button.Sizes.SMALL}
+                        color={Button.Colors.RED}
+                        look={Button.Looks.LINK}
+                        onClick={handleClearAll}
+                    >
                         Clear All
                     </Button>
-                    <Text variant="text-sm/normal" className="vc-reading-list-count">
-                        {items.length} item{items.length !== 1 ? "s" : ""} saved
-                    </Text>
-                </ModalFooter>
+                </div>
             )}
-        </ModalRoot>
+        </div>
     );
 }
 
-function openReadingListModal() {
-    openModal(props => <ReadingListModal rootProps={props} />);
+function ReadingListPopoutButton({ buttonClass }: { buttonClass: string; }) {
+    const buttonRef = useRef(null);
+    const [show, setShow] = useState(false);
+
+    return (
+        <Popout
+            position="bottom"
+            align="right"
+            animation={Popout.Animation.NONE}
+            shouldShow={show}
+            onRequestClose={() => setShow(false)}
+            targetElementRef={buttonRef}
+            renderPopout={() => <ReadingListPopout onClose={() => setShow(false)} />}
+        >
+            {(_, { isShown }) => (
+                <HeaderBarIcon
+                    ref={buttonRef}
+                    className={`vc-readinglist-btn ${buttonClass}`}
+                    onClick={() => setShow(v => !v)}
+                    tooltip={isShown ? null : "Reading List"}
+                    icon={() => <BookmarkFilledIcon height={24} width={24} className="vc-readinglist-icon" />}
+                    selected={isShown}
+                />
+            )}
+        </Popout>
+    );
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }) => {
@@ -314,7 +444,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ReadingList",
-    description: "Save messages to read later. Access via right-click menu or the toolbar button.",
+    description: "Save messages to read later. Access via right-click menu or the top bar button.",
     authors: [Devs.EhDaYaGhaly],
 
     settings,
@@ -323,8 +453,25 @@ export default definePlugin({
         "message": messageContextMenuPatch
     },
 
-    toolboxActions: {
-        "Open Reading List": openReadingListModal
+    patches: [
+        {
+            find: '?"BACK_FORWARD_NAVIGATION":',
+            replacement: {
+                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i))/,
+                replace: "$self.TrailingWrapper,{className:$1,"
+            }
+        }
+    ],
+
+    TrailingWrapper({ children, className }: PropsWithChildren<{ className: string; }>) {
+        return (
+            <>
+                {children}
+                <ErrorBoundary noop>
+                    <ReadingListPopoutButton buttonClass={className} />
+                </ErrorBoundary>
+            </>
+        );
     },
 
     messagePopoverButton: {

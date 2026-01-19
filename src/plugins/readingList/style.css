@@ -1,8 +1,71 @@
+/* Reading List Icon Styles */
 .vc-reading-list-header-icon {
     vertical-align: middle;
     margin-right: 8px;
+    color: var(--header-primary);
 }
 
+.vc-readinglist-icon {
+    color: var(--interactive-normal);
+}
+
+.vc-readinglist-btn[class*="selected"] .vc-readinglist-icon {
+    color: var(--interactive-active);
+}
+
+.vc-readinglist-btn:hover .vc-readinglist-icon {
+    color: var(--interactive-hover);
+}
+
+/* Popout Container - Discord pinned messages style */
+.vc-reading-list-popout {
+    width: 420px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    box-shadow: var(--elevation-high);
+    overflow: hidden;
+}
+
+/* Popout Header */
+.vc-reading-list-popout-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 8px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    flex-shrink: 0;
+}
+
+.vc-reading-list-count-badge {
+    margin-left: auto;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+/* Popout Content (scrollable) */
+.vc-reading-list-popout-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 100px;
+    max-height: 500px;
+}
+
+/* Popout Footer */
+.vc-reading-list-popout-footer {
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+    border-top: 1px solid var(--background-modifier-accent);
+    flex-shrink: 0;
+}
+
+/* Loading and Empty States */
 .vc-reading-list-loading,
 .vc-reading-list-empty {
     display: flex;
@@ -17,58 +80,70 @@
 .vc-reading-list-empty-hint {
     color: var(--text-muted);
     text-align: center;
-    max-width: 300px;
+    max-width: 280px;
 }
 
+/* Items Container */
 .vc-reading-list-items {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 8px 0;
+    padding: 8px;
+    gap: 2px;
 }
 
-.vc-reading-list-item {
-    background: var(--background-secondary);
-    border-radius: 8px;
+/* Individual Item - Discord pinned message style */
+.vc-reading-list-popover-item {
     padding: 12px;
-    transition: background 0.2s ease;
+    border-radius: 4px;
+    transition: background 0.1s ease;
 }
 
-.vc-reading-list-item:hover {
-    background: var(--background-secondary-alt);
+.vc-reading-list-popover-item:hover {
+    background: var(--background-modifier-hover);
 }
 
+/* Item Header */
 .vc-reading-list-item-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .vc-reading-list-avatar {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .vc-reading-list-meta {
     flex-grow: 1;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
 }
 
 .vc-reading-list-timestamp {
     color: var(--text-muted);
+    font-size: 12px;
 }
 
+/* Action Buttons */
 .vc-reading-list-actions {
     display: flex;
-    gap: 4px;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+.vc-reading-list-popover-item:hover .vc-reading-list-actions {
+    opacity: 1;
 }
 
 .vc-reading-list-action-btn {
-    padding: 6px;
+    padding: 4px;
     border-radius: 4px;
     color: var(--interactive-normal);
     background: transparent;
@@ -77,7 +152,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s ease, background 0.2s ease;
+    transition: color 0.1s ease, background 0.1s ease;
 }
 
 .vc-reading-list-action-btn:hover {
@@ -89,18 +164,90 @@
     color: var(--status-danger);
 }
 
+/* Content */
 .vc-reading-list-content {
     color: var(--text-normal);
     word-break: break-word;
-    line-height: 1.4;
+    line-height: 1.375;
+    padding-left: 32px;
 }
 
+.vc-reading-list-no-content {
+    color: var(--text-muted);
+    font-style: italic;
+    padding-left: 32px;
+}
+
+/* Mentions */
+.vc-reading-list-mention {
+    background: var(--mention-background);
+    color: var(--text-link);
+    padding: 0 2px;
+    border-radius: 3px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.vc-reading-list-mention:hover {
+    background: var(--mention-foreground);
+    color: var(--white-500);
+}
+
+/* Attachments */
+.vc-reading-list-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    padding-left: 32px;
+}
+
+.vc-reading-list-attachment {
+    display: block;
+    text-decoration: none;
+    border-radius: 4px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.vc-reading-list-attachment-image {
+    max-width: 200px;
+    max-height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+}
+
+.vc-reading-list-attachment-file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    color: var(--text-link);
+    font-size: 13px;
+    max-width: 200px;
+}
+
+.vc-reading-list-attachment-file:hover {
+    background: var(--background-secondary-alt);
+}
+
+.vc-reading-list-attachment-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Note styles (if still needed) */
 .vc-reading-list-note {
     margin-top: 8px;
     padding: 8px;
     background: var(--background-tertiary);
     border-radius: 4px;
     border-left: 3px solid var(--brand-experiment);
+    margin-left: 32px;
 }
 
 .vc-reading-list-note-label {
@@ -109,25 +256,16 @@
 }
 
 .vc-reading-list-added {
-    margin-top: 8px;
+    margin-top: 4px;
+    padding-left: 32px;
     color: var(--text-muted);
-    font-style: italic;
+    font-size: 11px;
 }
 
+/* Legacy/unused styles cleanup */
 .vc-reading-list-count {
     margin-left: auto;
     align-self: center;
     margin-right: 8px;
     color: var(--text-muted);
-}
-.vc-readinglist-icon {
-    color: var(--interactive-icon-default);
-}
-
-.vc-readinglist-btn[class*="selected"] .vc-readinglist-icon {
-    color: var(--interactive-icon-active);
-}
-
-.vc-readinglist-btn:hover .vc-readinglist-icon {
-    color: var(--interactive-icon-hover);
 }
