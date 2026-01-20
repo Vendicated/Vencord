@@ -5,165 +5,139 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, IS_MAC } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ComponentDispatch } from "@webpack/common";
 
-import { getSupportedLanguages } from "./utils/detector";
-import { detectLanguage, isAlreadyCodeBlock, wrapWithCodeBlock } from "./utils/detector";
+import { isAlreadyCodeBlock, wrapWithCodeBlock } from "./utils/detector";
 
 export const settings = definePluginSettings({
-    autoDetect: {
-        description: "코드 자동 감지 및 래핑 활성화",
-        type: OptionType.BOOLEAN,
-        default: true
-    },
-    fallbackLanguage: {
-        description: "언어 감지 실패 시 기본 언어 (예: txt, cs, js)",
+    language: {
+        description: "제일 자주 보내는 코드 언어를 선택하세요 (예: py, js, cpp)",
         type: OptionType.STRING,
-        default: "txt"
+        default: "py"
     },
     shortcutKey: {
         description: "코드 블록 래핑 단축키",
         type: OptionType.STRING,
         default: "ctrl+shift+c"
-    },
-    minLines: {
-        description: "자동 감지 최소 줄 수",
-        type: OptionType.NUMBER,
-        default: 3
-    },
-    showNotification: {
-        description: "코드 감지 시 알림 표시",
-        type: OptionType.BOOLEAN,
-        default: false
     }
 });
 
-// 현재 메시지 입력창의 텍스트 가져오기
 function getSlateEditor(): Element | null {
-    return document.querySelector("[data-slate-editor='true']");
+    const editor = document.querySelector("[data-slate-editor='true']");
+    if (editor) return editor;
+
+    const active = document.activeElement;
+    if (active && (active.getAttribute("contenteditable") === "true" || active.getAttribute("role") === "textbox")) {
+        return active;
+    }
+
+    return null;
+}
+
+// 에디터 내용 추출 (줄바꿈 보존 및 이모지 개행 문제 해결)
+function getEditorContent(editor: Element): string {
+    // 에디터 내부의 각 줄(보통 div 또는 p)을 순회합니다.
+    const lines = Array.from(editor.children);
+
+    if (lines.length > 0) {
+        return lines.map(line => {
+            // textContent는 이모지나 태그 때문에 발생하는 불필요한 레이아웃 줄바꿈을 무시합니다.
+            // Slate 에디터에서 사용하는 제로 너비 공백(\u200b) 등을 제거합니다.
+            return (line.textContent || "").replace(/[\u200b\ufeff]/g, "");
+        }).join("\n");
+    }
+
+    // fallback: 자식이 없는 경우
+    return (editor as HTMLElement).innerText.replace(/\r/g, "");
 }
 
 export default definePlugin({
     name: "CodeWrapper",
-    description: "코드를 자동으로 감지하여 코드블록으로 감싸거나, 단축키로 코드블록 래핑. 20+ 프로그래밍 언어 지원!",
-    authors: [Devs.Ven], // 실제 사용 시 자신의 정보로 변경
+    description: "단축키로 코드를 안전하게 코드블록으로 감쌉니다.",
+    authors: [Devs.cbite],
     settings,
 
-    // 지원되는 언어 목록 표시
-    getSupportedLanguagesList(): string {
-        return getSupportedLanguages()
-            .map(lang => `${lang.name} (${lang.identifier})`)
-            .join(", ");
-    },
-
-    // 메시지 전송 전 처리
-    onBeforeMessageSend(_, msg) {
-        if (!settings.store.autoDetect) return;
-
-        const { content } = msg;
-        const lineCount = content.split("\n").length;
-
-        // 최소 줄 수 체크
-        if (lineCount < settings.store.minLines) return;
-
-        // 이미 코드블록이면 무시
-        if (isAlreadyCodeBlock(content)) return;
-
-        // 언어 감지
-        const result = detectLanguage(content);
-
-        if (result.isCode && result.language) {
-            msg.content = wrapWithCodeBlock(content, result.language.identifier);
-
-            if (settings.store.showNotification) {
-                console.log(`[CodeWrapper] Detected ${result.language.name} code (score: ${result.score})`);
-            }
-        }
-    },
-
-    onBeforeMessageEdit(_cid, _mid, msg) {
-        if (!settings.store.autoDetect) return;
-
-        const { content } = msg;
-        const lineCount = content.split("\n").length;
-
-        if (lineCount < settings.store.minLines) return;
-        if (isAlreadyCodeBlock(content)) return;
-
-        const result = detectLanguage(content);
-
-        if (result.isCode && result.language) {
-            msg.content = wrapWithCodeBlock(content, result.language.identifier);
-        }
-    },
-
-    // 단축키 핸들러
     handleKeyDown(e: KeyboardEvent) {
         const shortcut = settings.store.shortcutKey.toLowerCase();
         const parts = shortcut.split("+");
 
-        const needsCtrl = parts.includes("ctrl");
         const needsShift = parts.includes("shift");
         const needsAlt = parts.includes("alt");
-        const key = parts.find(p => !["ctrl", "shift", "alt"].includes(p))?.toUpperCase();
+        const needsCtrl = parts.includes("ctrl") || parts.includes("control");
+        const needsCmd = parts.includes("cmd") || parts.includes("command") || parts.includes("meta");
 
-        if (
-            needsCtrl === e.ctrlKey &&
-            needsShift === e.shiftKey &&
-            needsAlt === e.altKey &&
-            e.key.toUpperCase() === key
-        ) {
+        // OS별 모디파이어 키 매칭
+        // Mac: 'ctrl' 설정이나 'cmd' 설정 모두 Command(Meta) 키로 감지
+        // Windows/Linux: 'ctrl' 설정은 Control 키로 감지
+        const modifierMatch = IS_MAC
+            ? ((needsCtrl || needsCmd) ? e.metaKey : !e.metaKey)
+            : (needsCtrl ? e.ctrlKey : !e.ctrlKey);
+
+        const shiftMatch = (needsShift === e.shiftKey);
+        const altMatch = (needsAlt === e.altKey);
+
+        const key = parts.find(p => !["ctrl", "control", "shift", "alt", "cmd", "command", "meta"].includes(p))?.toUpperCase();
+        const keyMatch = (e.key.toUpperCase() === key);
+
+        if (modifierMatch && shiftMatch && altMatch && keyMatch) {
             e.preventDefault();
             this.wrapCurrentText();
         }
     },
 
-    // 현재 입력창 텍스트를 코드블록으로 감싸기
     wrapCurrentText() {
         const slateNode = getSlateEditor();
         if (!slateNode) return;
 
-        const currentText = slateNode.textContent || "";
-        if (!currentText.trim()) return;
+        const rawText = getEditorContent(slateNode);
+        if (!rawText.trim()) return;
 
-        // 이미 코드블록이면 무시
-        if (isAlreadyCodeBlock(currentText)) return;
+        // 이미 완료된 코드블록이면 실행 안 함
+        if (isAlreadyCodeBlock(rawText)) return;
 
-        // 언어 감지 시도
-        const result = detectLanguage(currentText);
-        const language = result.language?.identifier || settings.store.fallbackLanguage;
+        let { language } = settings.store;
+        let codeContent = rawText;
 
-        const wrappedText = wrapWithCodeBlock(currentText.trim(), language);
+        // 수동 언어 감지
+        const lines = rawText.split("\n");
+        if (lines.length > 1) {
+            const firstLine = lines[0].trim();
+            if (firstLine.length > 0 && firstLine.length < 15 && /^[a-zA-Z0-9+\-#]+$/.test(firstLine)) {
+                language = firstLine;
+                codeContent = lines.slice(1).join("\n").trim();
+            }
+        }
 
-        // 입력창 비우기
-        ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
-            rawText: "",
-            plainText: ""
-        });
+        const wrappedText = wrapWithCodeBlock(codeContent, language);
 
-        // 새 텍스트 삽입 (약간의 딜레이 후)
+        // --- 가장 안전한 교체 로직 ---
+        const editor = slateNode as HTMLElement;
+        editor.focus();
+
+        // 1. 전체 선택 (브라우저 명령어 중 Slate가 가장 잘 인식하는 것 하나만 사용)
+        document.execCommand("selectAll", false, undefined);
+
+        // 2. 디스코드가 선택 영역을 인식할 시간을 짧게 줍니다 (중요)
         setTimeout(() => {
+            // 3. 내부 Dispatch를 사용하여 텍스트 삽입 (높이 자동 조절 및 마크다운 처리)
+            // 선택된 영역이 있는 상태에서 실행하면 '덮어쓰기'가 확실하게 일어납니다.
             ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
                 rawText: wrappedText,
                 plainText: wrappedText
             });
-        }, 10);
+        }, 100);
     },
 
     start() {
-        // 키보드 이벤트 리스너 등록
         this.keyHandler = this.handleKeyDown.bind(this);
-        document.addEventListener("keydown", this.keyHandler);
-
-        console.log("[CodeWrapper] Started! Supported languages:", this.getSupportedLanguagesList());
+        document.addEventListener("keydown", this.keyHandler, true);
     },
 
     stop() {
-        // 키보드 이벤트 리스너 해제
         if (this.keyHandler) {
-            document.removeEventListener("keydown", this.keyHandler);
+            document.removeEventListener("keydown", this.keyHandler, true);
         }
     },
 

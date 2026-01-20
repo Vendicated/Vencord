@@ -4,67 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import languagePatterns from "../languages/patterns";
-import type { DetectionResult, LanguagePattern } from "../languages/types";
-
-/**
- * 코드 내용에서 언어를 감지합니다.
- * @param content 분석할 코드 내용
- * @returns 감지 결과 (언어, 점수, 코드 여부)
- */
-export function detectLanguage(content: string): DetectionResult {
-    // 빈 내용은 무시
-    if (!content.trim()) {
-        return { language: null, score: 0, isCode: false };
-    }
-
-    // 이미 코드블록으로 감싸져 있으면 무시
-    if (isAlreadyCodeBlock(content)) {
-        return { language: null, score: 0, isCode: false };
-    }
-
-    let bestMatch: LanguagePattern | null = null;
-    let bestScore = 0;
-
-    // 각 언어 패턴을 검사
-    for (const lang of languagePatterns) {
-        const score = calculateScore(content, lang);
-        const threshold = lang.threshold ?? 3;
-
-        if (score >= threshold && score > bestScore) {
-            bestScore = score;
-            bestMatch = lang;
-        }
-    }
-
-    return {
-        language: bestMatch,
-        score: bestScore,
-        isCode: bestMatch !== null
-    };
-}
-
-/**
- * 주어진 언어 패턴에 대한 점수를 계산합니다.
- */
-function calculateScore(content: string, lang: LanguagePattern): number {
-    let score = 0;
-
-    for (const { pattern, weight = 1 } of lang.patterns) {
-        if (pattern.test(content)) {
-            score += weight;
-        }
-    }
-
-    return score;
-}
-
 /**
  * 이미 코드블록으로 감싸져 있는지 확인합니다.
+ * 마크다운 백틱(```)만 감지하고, Python 삼중 따옴표(""")는 무시합니다.
  */
 export function isAlreadyCodeBlock(content: string): boolean {
     const trimmed = content.trim();
-    return /^```[\s\S]*```$/m.test(trimmed);
+    // 백틱(`)으로 시작하고 끝나는지 확인
+    return /^`{3}[\s\S]*`{3}$/m.test(trimmed);
 }
 
 /**
@@ -73,29 +20,17 @@ export function isAlreadyCodeBlock(content: string): boolean {
  * @param language 언어 식별자 (예: cs, js, py)
  */
 export function wrapWithCodeBlock(content: string, language: string): string {
-    // 이미 코드블록이면 그대로 반환
-    if (isAlreadyCodeBlock(content)) return content;
+    // 내용물에 포함된 백틱 중 가장 긴 길이를 찾습니다.
+    const backticks = content.match(/`+/g);
+    let maxLength = 0;
 
-    return `\`\`\`${language}\n${content.trim()}\n\`\`\``;
-}
+    if (backticks) {
+        maxLength = Math.max(...backticks.map(t => t.length));
+    }
 
-/**
- * 특정 언어 식별자가 지원되는지 확인합니다.
- */
-export function isLanguageSupported(identifier: string): boolean {
-    return languagePatterns.some(lang => lang.identifier === identifier);
-}
+    // 기본은 3개, 내부에 백틱이 포함되어 있으면 그보다 1개 더 많게 설정하여 끊김 방지
+    const fenceLength = Math.max(3, maxLength + 1);
+    const fence = "`".repeat(fenceLength);
 
-/**
- * 지원되는 모든 언어 목록을 반환합니다.
- */
-export function getSupportedLanguages(): LanguagePattern[] {
-    return [...languagePatterns];
-}
-
-/**
- * 언어 식별자로 언어 패턴을 가져옵니다.
- */
-export function getLanguageByIdentifier(identifier: string): LanguagePattern | undefined {
-    return languagePatterns.find(lang => lang.identifier === identifier);
+    return `${fence}${language}\n${content.trim()}\n${fence}`;
 }
