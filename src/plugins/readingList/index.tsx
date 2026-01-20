@@ -1,19 +1,7 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./style.css";
@@ -24,9 +12,9 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Message, MessageAttachment } from "@vencord/discord-types";
-import { Button, ChannelStore, Menu, NavigationRouter, Popout, React, ScrollerThin, Text, Timestamp, Tooltip, useEffect, useRef, useState, UserStore } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, ChannelStore, Menu, NavigationRouter, Popout, React, ScrollerThin, Text, Timestamp, Tooltip, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 const DATA_KEY = "ReadingList_ITEMS";
 const UNREAD_KEY = "ReadingList_UNREAD";
@@ -121,7 +109,7 @@ const AttachmentIcon: IconComponent = ({ height = 16, width = 16, className }) =
 
 let readingList: ReadingListItem[] = [];
 let hasUnread = false;
-let unreadListeners: Set<() => void> = new Set();
+const unreadListeners: Set<() => void> = new Set();
 
 function notifyUnreadChange() {
     unreadListeners.forEach(listener => listener());
@@ -228,7 +216,7 @@ function renderContent(content: string): React.ReactNode {
 
         const userId = match[1];
         const user = UserStore.getUser(userId);
-        const username = user ? `@${user.username}` : `@Unknown User`;
+        const username = user ? `@${user.username}` : "@Unknown User";
 
         parts.push(
             <span key={match.index} className="vc-reading-list-mention">
