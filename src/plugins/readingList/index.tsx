@@ -244,7 +244,7 @@ function renderContent(content: string): React.ReactNode {
 }
 
 function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingListItem; onRemove: () => void; onClose: () => void; }) {
-  
+
     let message = MessageStore.getMessage(item.channelId, item.messageId);
 
     if (!message && item.serializedMessage && MessageConstructor) {
@@ -255,7 +255,7 @@ function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingLi
         }
     }
 
- //BUG HERE
+ // BUG HERE
     //  Get channel or Create a fake one if missing (so ChannelMessage doesn't crash)
     const channel = ChannelStore.getChannel(item.channelId) ?? {
         id: item.channelId,
@@ -263,7 +263,7 @@ function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingLi
         isPrivate: () => !item.guildId,
         isSystemDM: () => false,
         getGuildId: () => item.guildId,
-        
+
     };
 
     const renderLegacy = () => {
