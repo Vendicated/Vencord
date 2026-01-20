@@ -120,12 +120,54 @@
     transition: background 0.1s ease;
     display: flex;
     gap: 12px;
-    align-items: center;
+    align-items: flex-start;
+    position: relative;
+    /* For absolute positioning of actions */
 }
 
 .vc-reading-list-popover-item:hover {
     background: var(--background-modifier-hover);
 }
+
+/* Native Rendering Overrides */
+.vc-reading-list-native {
+    display: block;
+    /* ChannelMessage is usually a block (li) */
+    padding: 0;
+    /* Let ChannelMessage handle padding */
+    border: none;
+    background: transparent;
+    overflow: hidden;
+    /* Contain floats */
+}
+
+.vc-reading-list-native .message-2CShn3 {
+    /* Discord message class might vary, but usually they have margin */
+    margin: 0;
+    padding: 8px 12px;
+}
+
+.vc-reading-list-native:hover {
+    background: var(--background-modifier-hover);
+}
+
+.vc-reading-list-native-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--background-surface-higher);
+    border-radius: 4px;
+    padding: 2px;
+    box-shadow: var(--elevation-stroke), var(--elevation-medium);
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    z-index: 10;
+}
+
+.vc-reading-list-native:hover .vc-reading-list-native-actions {
+    opacity: 1;
+}
+
 
 /* Item Header */
 .vc-reading-list-item-header {
@@ -164,13 +206,20 @@
 .vc-reading-list-actions {
     display: flex;
     gap: 2px;
+    /* Legacy opacity handling */
     opacity: 0;
     transition: opacity 0.1s ease;
 }
 
-.vc-reading-list-popover-item:hover .vc-reading-list-actions {
+.vc-reading-list-popover-item:not(.vc-reading-list-native):hover .vc-reading-list-actions {
     opacity: 1;
 }
+
+/* For native actions, we handle opacity on the container */
+.vc-reading-list-native-actions .vc-reading-list-actions {
+    opacity: 1;
+}
+
 
 .vc-reading-list-action-btn {
     padding: 4px;

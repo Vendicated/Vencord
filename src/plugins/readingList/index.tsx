@@ -14,7 +14,11 @@ import { Devs } from "@utils/constants";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message, MessageAttachment } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, ChannelStore, Menu, NavigationRouter, Popout, React, ScrollerThin, Text, Timestamp, Tooltip, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { Button, ChannelStore, Menu, MessageStore, NavigationRouter, Popout, React, ScrollerThin, Text, Timestamp, Tooltip, useEffect, useRef, UserStore, useState } from "@webpack/common";
+
+const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
+// The Discord Message class constructor
+const MessageConstructor = findByPropsLazy("Message").Message;
 
 const DATA_KEY = "ReadingList_ITEMS";
 const UNREAD_KEY = "ReadingList_UNREAD";
@@ -43,6 +47,8 @@ interface ReadingListItem {
     addedAt: number;
     note?: string;
     attachments?: StoredAttachment[];
+    // Stores the raw message data to reconstruct the Message object
+    serializedMessage?: any;
 }
 
 const BookmarkIcon: IconComponent = ({ height = 24, width = 24, className }) => (
@@ -173,7 +179,9 @@ async function addToReadingList(msg: Message, note?: string): Promise<void> {
         timestamp: msg.timestamp.toString(),
         addedAt: Date.now(),
         note,
-        attachments: attachments.length > 0 ? attachments : undefined
+        attachments: attachments.length > 0 ? attachments : undefined,
+
+        serializedMessage: JSON.parse(JSON.stringify(msg))
     };
 
     items.unshift(newItem);
@@ -198,7 +206,7 @@ function jumpToMessage(channelId: string, messageId: string, guildId?: string) {
     NavigationRouter.transitionTo(path);
 }
 
-// Parse mentions and convert <@123456> to @username
+
 function renderContent(content: string): React.ReactNode {
     if (!content) return null;
 
@@ -236,97 +244,145 @@ function renderContent(content: string): React.ReactNode {
 }
 
 function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingListItem; onRemove: () => void; onClose: () => void; }) {
-    const truncatedContent = item.content.length > 150
-        ? item.content.slice(0, 150) + "..."
-        : item.content;
+  
+    let message = MessageStore.getMessage(item.channelId, item.messageId);
 
-    const hasContent = item.content.length > 0;
-    const hasAttachments = item.attachments && item.attachments.length > 0;
+    if (!message && item.serializedMessage && MessageConstructor) {
+        try {
+            message = new MessageConstructor(item.serializedMessage);
+        } catch (e) {
+            console.error("[ReadingList] Failed to hydrate message:", e);
+        }
+    }
 
-    return (
-        <div className="vc-reading-list-popover-item">
-            <img
-                className="vc-reading-list-avatar"
-                src={item.authorAvatar}
-                alt={item.authorName}
-            />
-            <div className="vc-reading-list-right">
-                <div className="vc-reading-list-item-header">
-                    <div className="vc-reading-list-meta">
-                        <Text variant="text-sm/semibold">{item.authorName}</Text>
-                        <Text variant="text-xs/normal" className="vc-reading-list-timestamp">
-                            <Timestamp timestamp={new Date(item.timestamp)} />
+ //BUG HERE
+    //  Get channel or Create a fake one if missing (so ChannelMessage doesn't crash)
+    const channel = ChannelStore.getChannel(item.channelId) ?? {
+        id: item.channelId,
+        guild_id: item.guildId,
+        isPrivate: () => !item.guildId,
+        isSystemDM: () => false,
+        getGuildId: () => item.guildId,
+        
+    };
+
+    const renderLegacy = () => {
+        const truncatedContent = item.content.length > 150
+            ? item.content.slice(0, 150) + "..."
+            : item.content;
+
+        const hasContent = item.content.length > 0;
+        const hasAttachments = item.attachments && item.attachments.length > 0;
+
+        return (
+            <div className="vc-reading-list-popover-item">
+                <img
+                    className="vc-reading-list-avatar"
+                    src={item.authorAvatar}
+                    alt={item.authorName}
+                />
+                <div className="vc-reading-list-right">
+                    <div className="vc-reading-list-item-header">
+                        <div className="vc-reading-list-meta">
+                            <Text variant="text-sm/semibold">{item.authorName}</Text>
+                            <Text variant="text-xs/normal" className="vc-reading-list-timestamp">
+                                <Timestamp timestamp={new Date(item.timestamp)} />
+                            </Text>
+                        </div>
+                        {renderActions()}
+                    </div>
+                    {hasContent && (
+                        <div className="vc-reading-list-content">
+                            <Text variant="text-sm/normal">{renderContent(truncatedContent)}</Text>
+                        </div>
+                    )}
+                    {hasAttachments && (
+                        <div className="vc-reading-list-attachments">
+                            {item.attachments!.map(att => (
+                                <a
+                                    key={att.id}
+                                    href={att.url}
+                                    target="_blank"
+                                    rel="noreferrer noopener"
+                                    className="vc-reading-list-attachment"
+                                >
+                                    {att.content_type?.startsWith("image/") ? (
+                                        <img
+                                            src={att.url}
+                                            alt={att.filename}
+                                            className="vc-reading-list-attachment-image"
+                                        />
+                                    ) : (
+                                        <div className="vc-reading-list-attachment-file">
+                                            <AttachmentIcon />
+                                            <span className="vc-reading-list-attachment-name">{att.filename}</span>
+                                        </div>
+                                    )}
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                    {!hasContent && !hasAttachments && (
+                        <Text variant="text-sm/normal" className="vc-reading-list-no-content">
+                            [No content]
                         </Text>
-                    </div>
-                    <div className="vc-reading-list-actions">
-                        <Tooltip text="Jump to message">
-                            {({ onMouseEnter, onMouseLeave }) => (
-                                <button
-                                    className="vc-reading-list-action-btn"
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    onClick={() => {
-                                        jumpToMessage(item.channelId, item.messageId, item.guildId);
-                                        onClose();
-                                    }}
-                                >
-                                    <JumpIcon />
-                                </button>
-                            )}
-                        </Tooltip>
-                        <Tooltip text="Remove from list">
-                            {({ onMouseEnter, onMouseLeave }) => (
-                                <button
-                                    className="vc-reading-list-action-btn vc-reading-list-action-btn-danger"
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    onClick={onRemove}
-                                >
-                                    <TrashIcon />
-                                </button>
-                            )}
-                        </Tooltip>
-                    </div>
+                    )}
                 </div>
-                {hasContent && (
-                    <div className="vc-reading-list-content">
-                        <Text variant="text-sm/normal">{renderContent(truncatedContent)}</Text>
-                    </div>
-                )}
-                {hasAttachments && (
-                    <div className="vc-reading-list-attachments">
-                        {item.attachments!.map(att => (
-                            <a
-                                key={att.id}
-                                href={att.url}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                className="vc-reading-list-attachment"
-                            >
-                                {att.content_type?.startsWith("image/") ? (
-                                    <img
-                                        src={att.url}
-                                        alt={att.filename}
-                                        className="vc-reading-list-attachment-image"
-                                    />
-                                ) : (
-                                    <div className="vc-reading-list-attachment-file">
-                                        <AttachmentIcon />
-                                        <span className="vc-reading-list-attachment-name">{att.filename}</span>
-                                    </div>
-                                )}
-                            </a>
-                        ))}
-                    </div>
-                )}
-                {!hasContent && !hasAttachments && (
-                    <Text variant="text-sm/normal" className="vc-reading-list-no-content">
-                        [No content]
-                    </Text>
-                )}
             </div>
+        );
+    };
+
+    const renderActions = () => (
+        <div className="vc-reading-list-actions">
+            <Tooltip text="Jump to message">
+                {({ onMouseEnter, onMouseLeave }) => (
+                    <button
+                        className="vc-reading-list-action-btn"
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                        onClick={() => {
+                            jumpToMessage(item.channelId, item.messageId, item.guildId);
+                            onClose();
+                        }}
+                    >
+                        <JumpIcon />
+                    </button>
+                )}
+            </Tooltip>
+            <Tooltip text="Remove from list">
+                {({ onMouseEnter, onMouseLeave }) => (
+                    <button
+                        className="vc-reading-list-action-btn vc-reading-list-action-btn-danger"
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                        onClick={onRemove}
+                    >
+                        <TrashIcon />
+                    </button>
+                )}
+            </Tooltip>
         </div>
     );
+
+    // Prefer Native Rendering
+    if (message && channel && ChannelMessage) {
+        return (
+            <div className="vc-reading-list-popover-item vc-reading-list-native">
+                <ChannelMessage
+                    id={`reading-list-${item.id}`}
+                    message={message}
+                    channel={channel}
+                    compact={false}
+                    subscribeToComponentDispatch={false}
+                />
+                <div className="vc-reading-list-native-actions">
+                    {renderActions()}
+                </div>
+            </div>
+        );
+    }
+
+    return renderLegacy();
 }
 
 function ReadingListPopout({ onClose }: { onClose: () => void; }) {
