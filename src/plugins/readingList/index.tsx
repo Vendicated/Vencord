@@ -27,7 +27,6 @@ import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Message, MessageAttachment } from "@vencord/discord-types";
 import { Button, ChannelStore, Menu, NavigationRouter, Popout, React, ScrollerThin, Text, Timestamp, Tooltip, useEffect, useRef, useState, UserStore } from "@webpack/common";
-import type { PropsWithChildren } from "react";
 
 const DATA_KEY = "ReadingList_ITEMS";
 const UNREAD_KEY = "ReadingList_UNREAD";
@@ -494,20 +493,17 @@ export default definePlugin({
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i))/,
-                replace: "$self.TrailingWrapper,{className:$1,"
+                match: /(?<=trailing:.{0,50}children:\[)(?=.+?className:(\i))/,
+                replace: "$self.ReadingListButton({className:$1}),"
             }
         }
     ],
 
-    TrailingWrapper({ children, className }: PropsWithChildren<{ className: string; }>) {
+    ReadingListButton({ className }: { className: string; }) {
         return (
-            <>
-                {children}
-                <ErrorBoundary noop>
-                    <ReadingListPopoutButton buttonClass={className} />
-                </ErrorBoundary>
-            </>
+            <ErrorBoundary noop>
+                <ReadingListPopoutButton buttonClass={className} />
+            </ErrorBoundary>
         );
     },
 
