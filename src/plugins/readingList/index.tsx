@@ -245,84 +245,86 @@ function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingLi
 
     return (
         <div className="vc-reading-list-popover-item">
-            <div className="vc-reading-list-item-header">
-                <img
-                    className="vc-reading-list-avatar"
-                    src={item.authorAvatar}
-                    alt={item.authorName}
-                />
-                <div className="vc-reading-list-meta">
-                    <Text variant="text-sm/semibold">{item.authorName}</Text>
-                    <Text variant="text-xs/normal" className="vc-reading-list-timestamp">
-                        <Timestamp timestamp={new Date(item.timestamp)} />
-                    </Text>
-                </div>
-                <div className="vc-reading-list-actions">
-                    <Tooltip text="Jump to message">
-                        {({ onMouseEnter, onMouseLeave }) => (
-                            <button
-                                className="vc-reading-list-action-btn"
-                                onMouseEnter={onMouseEnter}
-                                onMouseLeave={onMouseLeave}
-                                onClick={() => {
-                                    jumpToMessage(item.channelId, item.messageId, item.guildId);
-                                    onClose();
-                                }}
-                            >
-                                <JumpIcon />
-                            </button>
-                        )}
-                    </Tooltip>
-                    <Tooltip text="Remove from list">
-                        {({ onMouseEnter, onMouseLeave }) => (
-                            <button
-                                className="vc-reading-list-action-btn vc-reading-list-action-btn-danger"
-                                onMouseEnter={onMouseEnter}
-                                onMouseLeave={onMouseLeave}
-                                onClick={onRemove}
-                            >
-                                <TrashIcon />
-                            </button>
-                        )}
-                    </Tooltip>
-                </div>
-            </div>
-            {hasContent && (
-                <div className="vc-reading-list-content">
-                    <Text variant="text-sm/normal">{renderContent(truncatedContent)}</Text>
-                </div>
-            )}
-            {hasAttachments && (
-                <div className="vc-reading-list-attachments">
-                    {item.attachments!.map(att => (
-                        <a
-                            key={att.id}
-                            href={att.url}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="vc-reading-list-attachment"
-                        >
-                            {att.content_type?.startsWith("image/") ? (
-                                <img
-                                    src={att.url}
-                                    alt={att.filename}
-                                    className="vc-reading-list-attachment-image"
-                                />
-                            ) : (
-                                <div className="vc-reading-list-attachment-file">
-                                    <AttachmentIcon />
-                                    <span className="vc-reading-list-attachment-name">{att.filename}</span>
-                                </div>
+            <img
+                className="vc-reading-list-avatar"
+                src={item.authorAvatar}
+                alt={item.authorName}
+            />
+            <div className="vc-reading-list-right">
+                <div className="vc-reading-list-item-header">
+                    <div className="vc-reading-list-meta">
+                        <Text variant="text-sm/semibold">{item.authorName}</Text>
+                        <Text variant="text-xs/normal" className="vc-reading-list-timestamp">
+                            <Timestamp timestamp={new Date(item.timestamp)} />
+                        </Text>
+                    </div>
+                    <div className="vc-reading-list-actions">
+                        <Tooltip text="Jump to message">
+                            {({ onMouseEnter, onMouseLeave }) => (
+                                <button
+                                    className="vc-reading-list-action-btn"
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    onClick={() => {
+                                        jumpToMessage(item.channelId, item.messageId, item.guildId);
+                                        onClose();
+                                    }}
+                                >
+                                    <JumpIcon />
+                                </button>
                             )}
-                        </a>
-                    ))}
+                        </Tooltip>
+                        <Tooltip text="Remove from list">
+                            {({ onMouseEnter, onMouseLeave }) => (
+                                <button
+                                    className="vc-reading-list-action-btn vc-reading-list-action-btn-danger"
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    onClick={onRemove}
+                                >
+                                    <TrashIcon />
+                                </button>
+                            )}
+                        </Tooltip>
+                    </div>
                 </div>
-            )}
-            {!hasContent && !hasAttachments && (
-                <Text variant="text-sm/normal" className="vc-reading-list-no-content">
-                    [No content]
-                </Text>
-            )}
+                {hasContent && (
+                    <div className="vc-reading-list-content">
+                        <Text variant="text-sm/normal">{renderContent(truncatedContent)}</Text>
+                    </div>
+                )}
+                {hasAttachments && (
+                    <div className="vc-reading-list-attachments">
+                        {item.attachments!.map(att => (
+                            <a
+                                key={att.id}
+                                href={att.url}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                className="vc-reading-list-attachment"
+                            >
+                                {att.content_type?.startsWith("image/") ? (
+                                    <img
+                                        src={att.url}
+                                        alt={att.filename}
+                                        className="vc-reading-list-attachment-image"
+                                    />
+                                ) : (
+                                    <div className="vc-reading-list-attachment-file">
+                                        <AttachmentIcon />
+                                        <span className="vc-reading-list-attachment-name">{att.filename}</span>
+                                    </div>
+                                )}
+                            </a>
+                        ))}
+                    </div>
+                )}
+                {!hasContent && !hasAttachments && (
+                    <Text variant="text-sm/normal" className="vc-reading-list-no-content">
+                        [No content]
+                    </Text>
+                )}
+            </div>
         </div>
     );
 }

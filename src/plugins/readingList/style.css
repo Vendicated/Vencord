@@ -80,7 +80,7 @@
     display: flex;
     justify-content: center;
     padding: 12px;
-    border-top: 1px solid var(--background-modifier-accent);
+    border-top: 1px solid var(--border-subtle);
     flex-shrink: 0;
 }
 
@@ -118,6 +118,9 @@
     margin-bottom: var(--space-8);
     background-color: var(--background-surface-higher);
     transition: background 0.1s ease;
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }
 
 .vc-reading-list-popover-item:hover {
@@ -133,10 +136,15 @@
 }
 
 .vc-reading-list-avatar {
-    width: 24px;
-    height: 24px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     flex-shrink: 0;
+}
+
+.vc-reading-list-right {
+    flex: 1;
+    min-width: 0;
 }
 
 .vc-reading-list-meta {
@@ -191,13 +199,11 @@
     color: var(--text-normal);
     word-break: break-word;
     line-height: 1.375;
-    padding-left: 32px;
 }
 
 .vc-reading-list-no-content {
     color: var(--text-muted);
     font-style: italic;
-    padding-left: 32px;
 }
 
 /* Mentions */
@@ -221,7 +227,6 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 8px;
-    padding-left: 32px;
 }
 
 .vc-reading-list-attachment {
@@ -268,7 +273,6 @@
     background: var(--background-tertiary);
     border-radius: 4px;
     border-left: 3px solid var(--brand-experiment);
-    margin-left: 32px;
 }
 
 .vc-reading-list-note-label {
@@ -278,7 +282,6 @@
 
 .vc-reading-list-added {
     margin-top: 4px;
-    padding-left: 32px;
     color: var(--text-muted);
     font-size: 11px;
 }
