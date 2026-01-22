@@ -21,7 +21,7 @@ import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import type { FluxStore } from "@vencord/discord-types";
-import type { ModuleExports, WebpackRequire } from "@vencord/discord-types/webpack";
+import type { ModuleExports, ModuleFactory, WebpackRequire } from "@vencord/discord-types/webpack";
 
 import { traceFunction } from "../debug/Tracer";
 import type { AnyModuleFactory, AnyWebpackRequire } from "./types";
@@ -769,20 +769,24 @@ export function search(...code: CodeFilter) {
  * to view a massive file. extract then returns the extracted module so you can jump to it.
  * As mentioned above, note that this extracted module is not actually used,
  * so putting breakpoints or similar will have no effect.
- * @param id The id of the module to extract
+ * @param moduleId The id of the module to extract
  */
-export function extract(id: string | number) {
-    const mod = wreq.m[id] as Function;
-    if (!mod) return null;
+export function extract(moduleId: PropertyKey) {
+    const originalFactory = wreq.m[moduleId];
+    if (!originalFactory) return null;
 
+    const originalFactoryCode = String(originalFactory);
+    const isArrowFunction = originalFactoryCode.startsWith("(");
+
+    const wrappedCode = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
     const code = `
-// [EXTRACTED] WebpackModule${id}
+// [EXTRACTED] WebpackModule${String(moduleId)}
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
-0,${mod.toString()}
-//# sourceURL=file:///ExtractedWebpackModule${id}
+0,${wrappedCode}
+//# sourceURL=file:///ExtractedWebpackModule${String(moduleId)}
 `;
-    const extracted = (0, eval)(code);
-    return extracted as Function;
+
+    return (0, eval)(code) as ModuleFactory;
 }
