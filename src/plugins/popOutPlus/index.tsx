@@ -89,9 +89,7 @@ export default definePlugin({
         {
             find: '"DirectVideo"',
             replacement: {
-                // Match: container.appendChild(videoElement)
                 match: /\.appendChild\((\i)\),/,
-                // Store video on its own window (popout) via ownerDocument.defaultView
                 replace: ".appendChild($1),($1.ownerDocument.defaultView.__vc_popout_video=$1),"
             }
         }

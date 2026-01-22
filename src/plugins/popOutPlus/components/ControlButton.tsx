@@ -8,7 +8,7 @@ import { React } from "@webpack/common";
 
 interface ControlButtonProps {
     id: string;
-    icon: string;
+    icon: React.ReactNode;
     title: string;
     onClick: () => void;
     active?: boolean;

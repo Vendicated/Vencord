@@ -7,6 +7,7 @@
 import { React } from "@webpack/common";
 
 import { ControlButton } from "./ControlButton";
+import { EyeIcon, EyeOffIcon, FitIcon, FullscreenIcon, PinIcon } from "./Icons";
 
 interface PopOutControlsProps {
     isPinned: boolean;
@@ -31,27 +32,27 @@ export const PopOutControls: React.FC<PopOutControlsProps> = ({
         <div id="vc-popoutplus-controls">
             <ControlButton
                 id="vc-popoutplus-pin-btn"
-                icon="📌"
+                icon={<PinIcon />}
                 title={isPinned ? "Unpin Window (P)" : "Pin on Top (P)"}
                 onClick={togglePin}
                 active={isPinned}
             />
             <ControlButton
                 id="vc-popoutplus-clearview-btn"
-                icon="👁"
+                icon={isClearView ? <EyeOffIcon /> : <EyeIcon />}
                 title={isClearView ? "Show Title Bar (C)" : "Clear View (C)"}
                 onClick={toggleClearView}
                 active={isClearView}
             />
             <ControlButton
                 id="vc-popoutplus-fit-btn"
-                icon="🗖"
+                icon={<FitIcon />}
                 title="Auto Fit (A)"
                 onClick={autoFitToVideo}
             />
             <ControlButton
                 id="vc-popoutplus-fullscreen-btn"
-                icon="⛶"
+                icon={<FullscreenIcon />}
                 title={isFullscreen ? "Exit Fullscreen (F)" : "Fullscreen (F)"}
                 onClick={toggleFullscreen}
                 active={isFullscreen}
@@ -59,3 +60,4 @@ export const PopOutControls: React.FC<PopOutControlsProps> = ({
         </div>
     );
 };
+
