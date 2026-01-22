@@ -25,12 +25,9 @@ import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Role } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
 import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
-
-const ChannelListClasses = findByPropsLazy("modeMuted", "modeSelected", "unread", "icon");
 
 export const cl = classNameFactory("vc-shc-");
 
@@ -541,7 +538,7 @@ export default definePlugin({
 
     LockIcon: ErrorBoundary.wrap(() => (
         <svg
-            className={ChannelListClasses.icon}
+            className={cl("channel-list-icon")}
             height="18"
             width="20"
             viewBox="0 0 24 24"
@@ -558,7 +555,7 @@ export default definePlugin({
                 <svg
                     onMouseLeave={onMouseLeave}
                     onMouseEnter={onMouseEnter}
-                    className={classes(ChannelListClasses.icon, cl("hidden-channel-icon"))}
+                    className={classes(cl("channel-list-icon"), cl("hidden-channel-icon"))}
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
