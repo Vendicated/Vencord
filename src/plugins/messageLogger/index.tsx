@@ -480,7 +480,7 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 // Make edit marker clickable
-                match: /(isInline:!1,children:.+?)"span",\{(?=className:)/,
+                match: /(isInline:!1,children:.{0,50}?)"span",\{(?=className:)/,
                 replace: "$1$self.EditMarker,{message:arguments[0].message,"
             }
         },

@@ -30,7 +30,7 @@ export default definePlugin({
         {
             find: '["VIDEO","CLIP","AUDIO"]',
             replacement: {
-                match: /(\[\i>0&&\i\.length>0.+?children:)(\i.slice\(\i\))(?<=showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
+                match: /(\[\i>0&&\i\.length>0.{0,150}?children:)(\i.slice\(\i\))(?<=showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
                 replace: (_, rest, origChildren, showDownload, isVisualMediaType) => `${rest}[${showDownload}&&${isVisualMediaType}&&$self.PictureInPictureButton(),...${origChildren}]`
             }
         }
