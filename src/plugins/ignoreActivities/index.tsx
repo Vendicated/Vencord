@@ -268,7 +268,7 @@ export default definePlugin({
                 // let { ... nowPlaying: a = !1 ...
                 // let { overlay: b ... } = Props ...
                 // ToggleOverLayButton(), nowPlaying && ... RemoveGameButton()
-                match: /\.gameNameLastPlayed.+?,\i\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)(?=\1&&)/,
+                match: /\.Fragment,\{children:.+?,\i\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)(?=\1&&)/,
                 replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`,
             }
         },
