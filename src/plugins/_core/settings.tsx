@@ -102,7 +102,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::9Al4Qd::raw}",
+            find: "#{intl::COPY_VERSION}",
             replacement: [
                 {
                     match: /,\i\.\i\),.+?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
