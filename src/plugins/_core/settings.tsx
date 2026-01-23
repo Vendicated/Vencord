@@ -112,7 +112,7 @@ export default definePlugin({
                     }
                 },
                 {
-                    match: /\.\i,"data-mtctest.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.\i,.{0,50}\})\)," "/,
+                    match: /"data-mtctest.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.\i,.{0,50}\})\)," "/,
                     replace: (m, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component},${props})`;
