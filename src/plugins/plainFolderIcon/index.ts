@@ -37,8 +37,8 @@ export default definePlugin({
                     // ...
                     // className: cn({[_1]: hasFolderButtonContent, [_2]: !hasFolderButtonContent}),
                     // children: [!hasFolderButtonContent && ...]
-                    match: /className:\i\(\)\(\{\[\i\.\i\]:(\i),\[\i\.\i\]:!\1(?=.{0,30}children:\[!\i&&)/,
-                    replace: (m, hasFolderButtonContent) => `${m},"vc-plainFolderIcon-plain":${hasFolderButtonContent}`
+                    match: /\.slice\(0,4\).+?\]:(\i),\[\i\.\i\]:!\1/,
+                    replace: (m, hasFolderButtonContent) => `${m},"vc-plainFolderIcon-plain":!${hasFolderButtonContent}`
                 }
 
             ]
