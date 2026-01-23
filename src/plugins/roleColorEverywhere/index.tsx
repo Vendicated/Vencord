@@ -91,7 +91,7 @@ export default definePlugin({
         },
         // Slate
         {
-            // same find as FullUserInChatbox
+            // Same find as FullUserInChatbox
             find: ':"text":',
             replacement: [
                 {

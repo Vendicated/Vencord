@@ -49,7 +49,7 @@ export default definePlugin({
         },
         {
             // Guild Banner
-            find: '"data-banner-visible":',
+            find: "#{intl::DISCOVERABLE_GUILD_HEADER_PUBLIC_INFO}",
             replacement: {
                 match: /(guildBanner:\i,animate:)\i(?=}\):null)/,
                 replace: "$1!0"

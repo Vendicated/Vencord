@@ -161,7 +161,7 @@ export default definePlugin({
         {
             find: "#{intl::WELCOME_CTA_LABEL}",
             replacement: {
-                match: /(?<={channel:\i,message:\i}=(\i).+?)className:\i\.\i,(?=.{0,40}"sticker")/,
+                match: /className:\i\.\i,(?=.{0,40}?"sticker")(?<={channel:\i,message:\i}=(\i).+?)/,
                 replace: "$&onContextMenu:(vcEvent)=>$self.pickSticker(vcEvent, $1),"
             }
         }
