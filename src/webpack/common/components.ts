@@ -26,7 +26,7 @@ import { TooltipContainer as TooltipContainerComponent } from "@components/Toolt
 import { TooltipFallback } from "@components/TooltipFallback";
 import { LazyComponent } from "@utils/lazyReact";
 import * as t from "@vencord/discord-types";
-import { filters, mapMangledCssClasses, mapMangledModuleLazy, waitFor } from "@webpack";
+import { filters, find, findCssClassesLazy, mapMangledCssClasses, mapMangledModuleLazy, proxyLazyWebpack, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
 
@@ -76,26 +76,18 @@ export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.compo
 export let createScroller: (scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin;
 export let createListScroller: (scrollBarClassName: string, fadeClassName: string, someOtherClassIdkMan: string, resizeObserverClass: typeof ResizeObserver) => t.ListScrollerThin;
 
-const scrollerClassnames = ["thin", "auto", "fade", "customTheme", "none"] as const;
 const listScrollerClassnames = ["thin", "auto", "fade"] as const;
-export let scrollerClasses: Record<typeof scrollerClassnames[number], string>;
-export let listScrollerClasses: Record<typeof listScrollerClassnames[number], string>;
+export const scrollerClasses = findCssClassesLazy("thin", "auto", "fade", "customTheme", "none");
+
+const isListScroller = filters.byClassNames(...listScrollerClassnames);
+const isNotNormalScroller = filters.byClassNames("customTheme");
+export const listScrollerClasses = proxyLazyWebpack(() => {
+    const mod = find(m => isListScroller(m) && !isNotNormalScroller(m));
+    return mapMangledCssClasses(mod, listScrollerClassnames);
+});
 
 waitFor(filters.byCode('="ltr",orientation:', "customTheme:", "forwardRef"), m => createScroller = m);
 waitFor(filters.byCode("getScrollerNode:", "resizeObserver:", "sectionHeight:"), m => createListScroller = m);
-
-waitFor(
-    filters.byClassNames(...scrollerClassnames),
-    m => scrollerClasses = mapMangledCssClasses(m, scrollerClassnames)
-);
-{
-    const isListScroller = filters.byClassNames(...listScrollerClassnames);
-    const isNotNormalScroller = filters.byClassNames("customTheme");
-    waitFor(
-        m => isListScroller(m) && !isNotNormalScroller(m),
-        m => listScrollerClasses = mapMangledCssClasses(m, listScrollerClassnames)
-    );
-}
 
 export const ScrollerNone = LazyComponent(() => createScroller(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme));
 export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme));
