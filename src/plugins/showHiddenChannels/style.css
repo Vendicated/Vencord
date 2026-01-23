@@ -105,13 +105,3 @@
     margin-left: 6px;
     z-index: 0;
 }
-
-/* rough copy of _3675bedf89a045e5
- FIXME: this does not account for the variety of different colors discord applies based on other classes */
-.vc-shc-channel-list-icon {
-    color: var(--channel-icon);
-    display: block;
-    flex: 0 0 auto;
-    width: 20px;
-    height: 20px;
-}
