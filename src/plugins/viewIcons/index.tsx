@@ -210,8 +210,8 @@ export default definePlugin({
         {
             find: 'backgroundColor:"COMPLETE"',
             replacement: {
-                match: /(\.banner,.+?),style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\2,)/,
-                replace: (_, rest, bannerSrc) => `${rest},onClick:()=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
+                match: /(?<=!1\),)style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\1,)/,
+                replace: (_, bannerSrc) => `onClick:()=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
