@@ -445,11 +445,11 @@ export default definePlugin({
 
         {
             // Attachment renderer
-            find: ".removeMosaicItemHoverButton",
+            find: ".Types.ATTACHMENT,inline:",
             replacement: [
                 {
-                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
-                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
+                    match: /obscured:\i,(?=containerStyles:)/,
+                    replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
                 }
             ]
         },
@@ -471,7 +471,7 @@ export default definePlugin({
             find: ".SEND_FAILED,",
             replacement: {
                 // Render editHistory behind the message content
-                match: /\.isFailed]:.+?children:\[/,
+                match: /children:\[(?=.{0,120}?location:\i.\i.WITH_CONTENT)/,
                 replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
@@ -480,7 +480,7 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 // Make edit marker clickable
-                match: /"span",\{(?=className:\i\.edited,)/,
+                match: /"span",\{(?=className:\i\.\i,)/,
                 replace: "$self.EditMarker,{message:arguments[0].message,"
             }
         },
