@@ -66,16 +66,16 @@ export default definePlugin({
             replacement: [
                 // Replace children with a single label with state
                 {
-                    match: /({variant:"eyebrow",className:\i\.sessionInfoRow,children:).{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
+                    match: /({variant:"eyebrow",className:\i\.\i,children:).{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:\i\[\d+\]}\)\]}\)\]/,
                     replace: "$1$self.renderName(arguments[0])"
                 },
                 {
-                    match: /({variant:"text-sm\/medium",className:\i\.sessionInfoRow,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
+                    match: /({variant:"text-sm\/medium",className:\i\.\i,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
                     replace: "$1$self.renderTimestamp({ ...arguments[0], timeLabel: $2 })}"
                 },
                 // Replace the icon
                 {
-                    match: /\.legacySession\),children:\[(?<=,icon:(\i)\}.+?)/,
+                    match: /,\i\.\i\),children:\[(?<=,icon:(\i)\}.+?)/,
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
