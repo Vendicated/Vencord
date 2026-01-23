@@ -105,7 +105,7 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /(?<=\.roleIcon.{0,15}:null,).{0,150}— ",\i\]\}\)\]/,
+                    match: /(?<=\}\):null,).{0,100}— ",\i\]\}\)\]/,
                     replace: "$self.RoleGroupColor(arguments[0])]"
                 },
             ],
