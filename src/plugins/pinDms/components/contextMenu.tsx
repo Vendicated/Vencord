@@ -52,6 +52,34 @@ function createPinMenuItem(channelId: string) {
                         action={() => removeChannelFromCategory(channelId)}
                     />
 
+                    <Menu.MenuItem
+                        id="move-to-category"
+                        label="Move to Category"
+                    >
+                        {
+                            currentUserCategories
+                                .filter(category => category.channels.includes(channelId) === false)
+                                .map(category => (
+                                    <Menu.MenuItem
+                                        key={category.id}
+                                        id={`move-to-category-${category.id}`}
+                                        label={category.name}
+                                        action={() => {
+                                            removeChannelFromCategory(channelId);
+                                            addChannelToCategory(channelId, category.id);
+                                        }}
+                                    />
+                                ))
+                        }
+                        <Menu.MenuSeparator />
+                        <Menu.MenuItem
+                            id="vc-add-category-move"
+                            label="Add Category"
+                            color="brand"
+                            action={() => openCategoryModal(null, channelId)}
+                        />
+                    </Menu.MenuItem>
+
                     {
                         settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, -1) && (
                             <Menu.MenuItem
