@@ -25,7 +25,6 @@ import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { filters, findAll, search } from "@webpack";
 
 const PORT = 8485;
-const NAV_ID = "dev-companion-reconnect";
 
 const logger = new Logger("DevCompanion");
 
@@ -204,6 +203,9 @@ function initWs(isManual = false) {
                     switch (type.replace("find", "").replace("Lazy", "")) {
                         case "":
                             results = findAll(parsedArgs[0]);
+                            break;
+                        case "CssClasses":
+                            results = findAll(filters.byClassNames(...parsedArgs), { topLevelOnly: true });
                             break;
                         case "ByProps":
                             results = findAll(filters.byProps(...parsedArgs));
