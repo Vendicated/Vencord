@@ -10,11 +10,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { RelationshipStore, Text } from "@webpack/common";
 
-const containerWrapper = findByPropsLazy("memberSinceWrapper");
-const container = findByPropsLazy("memberSince");
+const WrapperClasses = findCssClassesLazy("memberSinceWrapper");
+const ContainerClasses = findCssClassesLazy("memberSince");
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
 const Section = findComponentByCodeLazy("headingVariant:", '"section"', "headingIcon:");
@@ -77,8 +77,8 @@ export default definePlugin({
                 headingColor="text-default"
                 className="vc-friendsSince-profile-section"
             >
-                <div className={containerWrapper.memberSinceWrapper}>
-                    <div className={container.memberSince}>
+                <div className={WrapperClasses.memberSinceWrapper}>
+                    <div className={ContainerClasses.memberSince}>
                         {!!getCurrentChannel()?.guild_id && (
                             <svg
                                 aria-hidden="true"

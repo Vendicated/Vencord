@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
 import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
 import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -60,7 +60,7 @@ function CreateDecorationModal(props: ModalProps) {
     return <ModalRoot
         {...props}
         size={ModalSize.MEDIUM}
-        className={DecorationModalStyles.modal}
+        className={DecorationModalClasses.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
             <Text
