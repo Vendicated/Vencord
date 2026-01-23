@@ -11,4 +11,4 @@ export const cl = classNameFactory("vc-decor-");
 export const DecorationModalClasses = findCssClassesLazy("modalPreview", "modalCloseButton", "spinner", "modal");
 
 export const requireAvatarDecorationModal = extractAndLoadChunksLazy(["initialSelectedDecoration:", /initialSelectedDecoration:\i,.{0,300}\i\.e\(/]);
-export const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
+export const requireCreateStickerModal = extractAndLoadChunksLazy([".CREATE_STICKER_MODAL,", "isDisplayingIndividualStickers"]);
