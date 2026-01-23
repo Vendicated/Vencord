@@ -106,8 +106,8 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /(?<=\}\):null,).{0,100}— ",\i\]\}\)\]/,
-                    replace: "$self.RoleGroupColor(arguments[0])]"
+                    match: /(#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.+}\):null,).{0,100}?— ",\i\]\}\)\]/,
+                    replace: (_, rest) => `${rest}$self.RoleGroupColor(arguments[0])]`
                 },
             ],
             predicate: () => settings.store.memberList
@@ -127,7 +127,7 @@ export default definePlugin({
             find: "#{intl::GUEST_NAME_SUFFIX})]",
             replacement: [
                 {
-                    match: /#{intl::GUEST_NAME_SUFFIX}\)\].+?\](?<=guildId:(\i),.+?user:(\i).+?)/,
+                    match: /#{intl::GUEST_NAME_SUFFIX}.+?""\](?<=guildId:(\i),.+?user:(\i).+?)/,
                     replace: "$&,style:$self.getColorStyle($2.id,$1),"
                 }
             ],
@@ -146,7 +146,7 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /className:\i\.\i,(?="aria-label".{0,200}usernameClass)/,
+                match: /\.SIZE_32.+?variant:"text-md\/normal",className:\i\.\i,(?="aria-label":)/,
                 replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults

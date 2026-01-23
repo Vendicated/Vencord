@@ -15,7 +15,7 @@ export default definePlugin({
     authors: [Devs.puv],
     patches: [
         {
-            find: "VOICE_MESSAGE_PLAYBACK_STARTED,{src:",
+            find: "#{intl::LgCPMt::raw}",
             replacement: {
                 match: /(?<=onVolumeHide:\i\}\))/,
                 replace: ",$self.renderDownload(arguments[0].src)"

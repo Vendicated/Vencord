@@ -166,7 +166,7 @@ export default definePlugin({
             replacement: [
                 // Make the channel appear as muted if it's hidden
                 {
-                    match: /Children\.count.+?;(?=return\(0,\i\.jsxs?\))(?<={channel:(\i),name:\i,muted:(\i).+?;)/,
+                    match: /Children\.count.+?;(?=return\(0,\i\.jsxs?\)\(\i\.\i,{focusTarget:)(?<={channel:(\i),name:\i,muted:(\i).+?;)/,
                     replace: (m, channel, muted) => `${m}${muted}=$self.isHiddenChannel(${channel})?true:${muted};`
                 },
                 // Add the hidden eye icon if the channel is hidden
@@ -176,7 +176,7 @@ export default definePlugin({
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    match: /(?<=\?\i\.\i:\i\.\i,)(.+?)if\((\i)(?:\)return |\?)(\i\.MUTED)/,
+                    match: /(?<=\?\i\.\i:\i\.\i,)(.{0,150}?)if\((\i)(?:\)return |\?)(\i\.MUTED)/,
                     replace: (_, otherClasses, isMuted, mutedClassExpression) => `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
                 }
             ]
@@ -193,7 +193,7 @@ export default definePlugin({
                 {
                     // Hide unreads
                     predicate: () => settings.store.hideUnreads === true,
-                    match: /Children\.count.+?;(?=return\(0,\i\.jsxs?\))(?<={channel:(\i),name:\i,.+?unread:(\i).+?)/,
+                    match: /Children\.count.+?;(?=return\(0,\i\.jsxs?\)\(\i\.\i,{focusTarget:)(?<={channel:(\i),name:\i,.+?unread:(\i).+?)/,
                     replace: (m, channel, unread) => `${m}${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
                 }
             ]
@@ -301,7 +301,7 @@ export default definePlugin({
                 },
                 {
                     // Patch the header to only return allowed users and roles if it's a hidden channel or locked channel (Like when it's used on the HiddenChannelLockScreen)
-                    match: /return\(0,\i\.jsxs?\)\(\i\.\i,{channelId:(\i)\.id(?=.+?(\(0,\i\.jsxs?\)\("div",{className:\i\.\i,children:\[function.+?\]}\)),)/,
+                    match: /return\(0,\i\.jsxs?\)\(\i\.\i,{channelId:(\i)\.id(?=.+?(\(0,\i\.jsxs?\)\("div",{className:\i\.\i,children:\[.{0,100}\i\.length.>0.+?\]}\)),)/,
                     replace: (m, channel, allowedUsersAndRolesComponent) => `if($self.isHiddenChannel(${channel},true)){return${allowedUsersAndRolesComponent};}${m}`
                 },
                 {
@@ -368,7 +368,7 @@ export default definePlugin({
                 },
                 {
                     // Disable bad CSS class which mess up hidden voice channels styling
-                    match: /(?=\i\|\|\i!==\i\.\i\.FULL_SCREEN)/,
+                    match: /(?=\i\|\|\i!==\i\.\i\.FULL_SCREEN.{0,100}?this\._callContainerRef)/,
                     replace: '$&!this.props.inCall&&$self.isHiddenChannel(this.props.channel,true)?"":'
                 }
             ]
@@ -408,7 +408,7 @@ export default definePlugin({
                 },
                 {
                     // Remove the open chat button for the HiddenChannelLockScreen
-                    match: /(?<=onClick:.{0,70}?toggleParticipantsList.{0,150}?\),!\i&&)\(0,\i\.jsxs?\).{0,280}iconClassName/,
+                    match: /(?<="participants-list-button"\),!\i&&)\(0,\i\.jsxs?\).{0,280}?iconClassName:/,
                     replace: "!$self.isHiddenChannel(arguments[0]?.channel,true)&&$&"
                 }
             ]
@@ -438,7 +438,7 @@ export default definePlugin({
             },
         },
         {
-            find: 'className:"channelMention",children',
+            find: 'className:"channelMention",children:',
             replacement: {
                 // Show inside voice channel instead of trying to join them when clicking on a channel mention
                 match: /(?<=getChannel\(\i\);null!=(\i))(?=.{0,100}?selectVoiceChannel)/,
