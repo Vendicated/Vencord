@@ -65,7 +65,7 @@ export default definePlugin({
         find: "#{intl::FRIEND_REQUEST_CANCEL}",
         replacement: {
             predicate: () => settings.store.showDates,
-            match: /(?<=\.listItemContents,children:\[)\(0,.+?(?=,\(0)(?<=user:(\i).+?)/,
+            match: /(?<=\.\i,children:\[)\(0,.+?(?=,\(0)(?<=user:(\i).+?)/,
             replace: (children, user) => `$self.WrapperDateComponent({user:${user},children:${children}})`
         }
     }],

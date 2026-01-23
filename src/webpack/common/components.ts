@@ -52,7 +52,7 @@ export const Switch = FormSwitchCompat as never;
 
 /** @deprecated Use Card from Vencord */
 export const Card = waitForComponent<never>("Card", filters.componentByCode(".editable),", ".outline:"));
-export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
+export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode('"data-toggleable-component":"checkbox'));
 
 export const Tooltip = waitForComponent<t.Tooltip>("Tooltip", m => m.prototype?.shouldShowTooltip && m.prototype.render, TooltipFallback);
 /** @deprecated import from @vencord/components */
