@@ -29,7 +29,8 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".dotBorderBase",
+            // class used in this module is dotBorderBase
+            find: "0H16C18.2091",
             replacement: {
                 match: /,viewBox:"0 0 20 20"/,
                 replace: "$&,onClick:()=>$self.copyToClipBoard(arguments[0].color),style:{cursor:'pointer'}",
