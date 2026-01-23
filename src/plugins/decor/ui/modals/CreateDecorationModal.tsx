@@ -20,7 +20,7 @@ const FileUpload = findComponentByCodeLazy(".currentTarget.files)", "lineClamp:1
 
 const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
-    HelpMessage: filters.byCode(".iconDiv")
+    HelpMessage: filters.byCode("messageType:")
 });
 
 function useObjectURL(object: Blob | MediaSource | null) {
