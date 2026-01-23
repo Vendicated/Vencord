@@ -27,7 +27,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"calc(100% + 1px)":"100%"',
+            find: ".RESPONSIVE?",
             replacement: {
                 match: /(?="data-role":"img","data-safe-src":)(?<=href:(\i).{0,30})/,
                 replace: "title:$self.getTitle($1),"
