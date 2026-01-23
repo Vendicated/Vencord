@@ -71,7 +71,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /children:\[(\i\.useMemo[^}]+"aria-multiselectable")(?<=className:(\i),.+?)/,
-                    replace: "children:[$1?.includes('members')?$self.render():null,$2",
+                    replace: "children:[$2?.includes('members')?$self.render():null,$1",
                 },
             ],
             predicate: () => settings.store.memberList

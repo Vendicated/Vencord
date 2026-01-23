@@ -72,7 +72,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"no-private-channels"',
+            find: '"private-channels-".concat(',
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
@@ -95,8 +95,8 @@ export default definePlugin({
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
-                    match: /(?<=span",{)className:\i\.\i,(?=children:\i.)/,
-                    replace: "...$self.makeSpanProps(),$&"
+                    match: /"renderSection".+?"span",{/,
+                    replace: "$&...$self.makeSpanProps(),"
                 },
 
                 // Fix Row Height

@@ -119,7 +119,7 @@ export default definePlugin({
                     replace: "$&$self.pushSection($1,arguments[0].user);"
                 },
                 {
-                    match: /className:\i\.\i,children:(?=.{0,100}?component:.*?section:(\i))/,
+                    match: /children:(?=.{0,100}?component:.+?section:(\i))/,
                     replace: "$&$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):"
                 },
                 // Make the gap between each item smaller so our tab can fit.
@@ -137,7 +137,7 @@ export default definePlugin({
                     replace: "$&||$self.getMutualGroupDms(arguments[0].user.id).length>0"
                 },
                 {
-                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.\i\}\)).{0,50}"MUTUAL_FRIENDS".+?)/,
+                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.\i}\)).{0,50}?"MUTUAL_FRIENDS".+?)/,
                     replace: (m, hasMutualGuilds, hasMutualFriends, Divider, classes) => "" +
                         `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
                 }
