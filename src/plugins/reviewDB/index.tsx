@@ -23,10 +23,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { NotesIcon, OpenExternalIcon } from "@components/Icons";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
-import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { Guild, User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
 import { Alerts, Clickable, Menu, Parser } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
@@ -34,9 +32,7 @@ import { openReviewsModal } from "./components/ReviewModal";
 import { NotificationType, ReviewType } from "./entities";
 import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
-import { showToast } from "./utils";
-
-const BannerButtonClasses = findByPropsLazy("bannerButton");
+import { cl, showToast } from "./utils";
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
@@ -152,7 +148,7 @@ export default definePlugin({
             <TooltipContainer text="View Reviews">
                 <Clickable
                     onClick={() => openReviewsModal(user.id, user.username, ReviewType.User)}
-                    className={classes(BannerButtonClasses.bannerButton)}
+                    className={cl("banner-button")}
                 >
                     <NotesIcon height={16} width={16} />
                 </Clickable>
