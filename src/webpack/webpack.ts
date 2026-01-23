@@ -578,6 +578,21 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
     });
 }
 
+export function mapMangledCssClasses<S extends string>(mappedModule: object, classes: S[] | ReadonlyArray<S>): Record<S, string> {
+    const values = Object.values(mappedModule);
+    const mapped = {} as Record<S, string>;
+
+    for (const cls of classes) {
+        const re = makeClassNameRegex(cls);
+        mapped[cls] = values.find(v => typeof v === "string" && re.test(v)) as string;
+
+        if (!mapped[cls]) // this should never happen unless this is used manually with invalid input
+            throw new Error(`mapMangledCssClasses: Invalid input. ${cls} not found in module`);
+    }
+
+    return mapped;
+}
+
 export function findCssClasses<S extends string>(...classes: S[]): Record<S, string> {
     const res = find(filters.byClassNames(...classes), { isIndirect: true, topLevelOnly: true });
 
@@ -586,15 +601,7 @@ export function findCssClasses<S extends string>(...classes: S[]): Record<S, str
         return {} as Record<S, string>;
     }
 
-    const values = Object.values(res);
-    const mapped = {} as Record<S, string>;
-
-    for (const cls of classes) {
-        const re = makeClassNameRegex(cls);
-        mapped[cls] = values.find(v => typeof v === "string" && re.test(v)) as string;
-    }
-
-    return mapped;
+    return mapMangledCssClasses(res, classes);
 }
 
 export function findCssClassesLazy<S extends string>(...classes: S[]) {
