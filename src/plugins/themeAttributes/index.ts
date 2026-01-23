@@ -29,9 +29,9 @@ export default definePlugin({
 
         // Add data-author-id and data-is-self to all messages
         {
-            find: ".messageListItem",
+            find: ".referencedUsernameProfile,referencedAvatarProfile:",
             replacement: {
-                match: /\.messageListItem(?=,"aria)/,
+                match: /\.\i(?=,"aria-setsize":-1,children:.+?#{intl::MESSAGE_A11Y_ROLE_DESCRIPTION})/,
                 replace: "$&,...$self.getMessageProps(arguments[0])"
             }
         },
