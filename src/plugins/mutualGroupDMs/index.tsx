@@ -18,22 +18,25 @@
 
 import "./style.css";
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, Text, useMemo, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
 
-const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
-const MutualsListClasses = findByPropsLazy("row", "icon", "name", "nick");
-const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"', ".header");
+const ProfileListClasses = findCssClassesLazy("empty", "textContainer", "connectionIcon");
+const TabBarClasses = findCssClassesLazy("tabPanelScroller", "tabBarPanel");
+const MutualsListClasses = findCssClassesLazy("row", "icon", "name", "details");
+// FIXME
+const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"');
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||
@@ -116,7 +119,7 @@ export default definePlugin({
                     replace: "$&$self.pushSection($1,arguments[0].user);"
                 },
                 {
-                    match: /\.tabBarPanel,.*?children:(?=.+?section:(\i))/,
+                    match: /className:\i\.\i,children:(?=.{0,100}?component:.*?section:(\i))/,
                     replace: "$&$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):"
                 },
                 // Make the gap between each item smaller so our tab can fit.
@@ -172,7 +175,7 @@ export default definePlugin({
 
         return (
             <ScrollerThin
-                className={ProfileListClasses.listScroller}
+                className={TabBarClasses.tabPanelScroller}
                 fade={true}
                 onClose={onClose}
             >
@@ -180,8 +183,9 @@ export default definePlugin({
                     ? entries
                     : (
                         <div className={ProfileListClasses.empty}>
-                            <div className={ProfileListClasses.emptyIconFriends}></div>
-                            <div className={ProfileListClasses.emptyText}>No group dms in common</div>
+                            <div className={ProfileListClasses.textContainer}>
+                                <BaseText tag="h3" size="md" weight="medium" style={{ color: "var(--text-strong)" }}>You don't have any group chats in common</BaseText>
+                            </div>
                         </div>
                     )
                 }

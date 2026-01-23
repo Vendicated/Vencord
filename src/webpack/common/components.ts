@@ -26,7 +26,7 @@ import { TooltipContainer as TooltipContainerComponent } from "@components/Toolt
 import { TooltipFallback } from "@components/TooltipFallback";
 import { LazyComponent } from "@utils/lazyReact";
 import * as t from "@vencord/discord-types";
-import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
+import { filters, findCssClassesLazy, mapMangledModuleLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
 
@@ -77,12 +77,11 @@ export const UserSummaryItem = waitForComponent("UserSummaryItem", filters.compo
 
 export let createScroller: (scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin;
 export let createListScroller: (scrollBarClassName: string, fadeClassName: string, someOtherClassIdkMan: string, resizeObserverClass: typeof ResizeObserver) => t.ListScrollerThin;
-export let scrollerClasses: Record<string, string>;
+export const scrollerClasses = findCssClassesLazy("thin", "auto", "fade", "customTheme", "none");
 export let listScrollerClasses: Record<string, string>;
 
 waitFor(filters.byCode('="ltr",orientation:', "customTheme:", "forwardRef"), m => createScroller = m);
 waitFor(filters.byCode("getScrollerNode:", "resizeObserver:", "sectionHeight:"), m => createListScroller = m);
-waitFor(["thin", "auto", "customTheme"], m => scrollerClasses = m);
 waitFor(m => m.thin && m.auto && !m.customTheme, m => listScrollerClasses = m);
 
 export const ScrollerNone = LazyComponent(() => createScroller(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme));
