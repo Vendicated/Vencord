@@ -275,9 +275,9 @@ export default definePlugin({
 
         // Activities from the apps launcher in the bottom right of the chat bar
         {
-            find: ".promotedLabelWrapperNonBanner,children",
+            find: "#{intl::EMBEDDED_ACTIVITIES_DEVELOPER_ACTIVITY}",
             replacement: {
-                match: /\.appDetailsHeaderContainer.+?children:\i.*?}\),(?<=application:(\i).+?)/,
+                match: /,rendersPlaceholder:.+?children:\i.*?}\),(?<=application:(\i).+?)/,
                 replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
             }
         }
