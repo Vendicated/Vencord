@@ -581,8 +581,10 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
 export function findCssClasses<S extends string>(...classes: S[]): Record<S, string> {
     const res = find(filters.byClassNames(...classes), { isIndirect: true, topLevelOnly: true });
 
-    if (!res)
+    if (!res) {
         handleModuleNotFound("findCssClasses", ...classes);
+        return {} as Record<S, string>;
+    }
 
     const values = Object.values(res);
     const mapped = {} as Record<S, string>;
