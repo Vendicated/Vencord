@@ -35,8 +35,7 @@ const UserUtils = findByPropsLazy("getGlobalName");
 const ProfileListClasses = findCssClassesLazy("empty", "textContainer", "connectionIcon");
 const TabBarClasses = findCssClassesLazy("tabPanelScroller", "tabBarPanel");
 const MutualsListClasses = findCssClassesLazy("row", "icon", "name", "details");
-// FIXME
-const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"');
+const ExpandableList = findComponentByCodeLazy('action:"PRESS_SECTION"', "section");
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||
