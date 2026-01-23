@@ -28,7 +28,7 @@ import { Menu } from "@webpack/common";
 
 import managedStyle from "./style.css?managed";
 
-const Button = findComponentByCodeLazy(".greenTooltip,", ".greenTooltipContent");
+const Button = findComponentByCodeLazy(".GREEN,positionKeyStemOverride");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
