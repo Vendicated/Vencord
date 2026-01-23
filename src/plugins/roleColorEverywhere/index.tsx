@@ -91,7 +91,8 @@ export default definePlugin({
         },
         // Slate
         {
-            find: ".userTooltip,children",
+            // same find as FullUserInChatbox
+            find: ':"text":',
             replacement: [
                 {
                     match: /let\{id:(\i),guildId:\i,channelId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
@@ -123,20 +124,20 @@ export default definePlugin({
         },
         // Voice Users
         {
-            find: ".usernameSpeaking]:",
+            find: "#{intl::GUEST_NAME_SUFFIX})]",
             replacement: [
                 {
-                    match: /\.usernameSpeaking\]:.+?,(?=children)(?<=guildId:(\i),.+?user:(\i).+?)/,
-                    replace: "$&style:$self.getColorStyle($2.id,$1),"
+                    match: /#{intl::GUEST_NAME_SUFFIX}\)\].+?\](?<=guildId:(\i),.+?user:(\i).+?)/,
+                    replace: "$&,style:$self.getColorStyle($2.id,$1),"
                 }
             ],
             predicate: () => settings.store.voiceUsers
         },
         // Reaction List
         {
-            find: ".reactionDefault",
+            find: "MessageReactions.render:",
             replacement: {
-                match: /tag:"strong"(?=.{0,50}\i\.name)(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
+                match: /tag:"strong",variant:"text-md\/\w+"(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
                 replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
             },
             predicate: () => settings.store.reactorsList,
