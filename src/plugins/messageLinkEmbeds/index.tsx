@@ -25,7 +25,7 @@ import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
-import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
+import { findComponentByCodeLazy, findComponentLazy, findCssClassesLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -47,8 +47,8 @@ const messageCache = new Map<string, {
     fetched: boolean;
 }>();
 
-const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
-const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
+const Embed = findComponentLazy(m => m.prototype?.renderSuppressButton);
+const AutoModEmbed = findComponentByCodeLazy("withFooter", "childrenMessageContent:");
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 
 const SearchResultClasses = findCssClassesLazy("message", "searchResult");
