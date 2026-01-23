@@ -20,13 +20,13 @@ import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreE
 import { definePluginSettings } from "@api/Settings";
 import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
-import { getCurrentGuild, getEmojiURL } from "@utils/discord";
+import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
 import type { Emoji, Message, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
@@ -84,7 +84,7 @@ const settings = definePluginSettings({
         description: "Size of the emojis when sending",
         type: OptionType.SLIDER,
         default: 48,
-        markers: [32, 48, 64, 96, 128, 160, 256, 512]
+        markers: [32, 48, 56, 64, 96, 128, 160, 256, 512]
     },
     transformEmojis: {
         description: "Whether to transform fake emojis into real ones",
@@ -862,6 +862,7 @@ export default definePlugin({
 
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
+                    url.searchParams.set("lossless", "true");
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
@@ -878,9 +879,10 @@ export default definePlugin({
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
-                    const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
+                    const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
+                    url.searchParams.set("lossless", "true");
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
@@ -911,9 +913,10 @@ export default definePlugin({
 
                 hasBypass = true;
 
-                const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
+                const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
+                url.searchParams.set("lossless", "true");
 
                 const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
