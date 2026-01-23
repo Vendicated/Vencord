@@ -47,7 +47,7 @@ export default definePlugin({
         {
             find: "}renderEmbeds(",
             replacement: [{
-                match: /\.container/,
+                match: /\(\)\(\i,\i\.\i/,
                 replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
             }]
         }
