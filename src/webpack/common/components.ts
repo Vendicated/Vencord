@@ -82,7 +82,9 @@ export const scrollerClasses = findCssClassesLazy("thin", "auto", "fade", "custo
 const isListScroller = filters.byClassNames(...listScrollerClassnames);
 const isNotNormalScroller = filters.byClassNames("customTheme");
 export const listScrollerClasses = proxyLazyWebpack(() => {
-    const mod = find(m => isListScroller(m) && !isNotNormalScroller(m));
+    const mod = find(m => isListScroller(m) && !isNotNormalScroller(m), { topLevelOnly: true });
+    if (!mod) return {} as Record<typeof listScrollerClassnames[number], string>;
+
     return mapMangledCssClasses(mod, listScrollerClassnames);
 });
 
