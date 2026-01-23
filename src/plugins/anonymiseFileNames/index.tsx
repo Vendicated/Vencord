@@ -24,7 +24,7 @@ import { CloudUpload } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
 
-const ActionBarIcon = findByCodeLazy(".actionBarIcon");
+const ActionBarIcon = findByCodeLazy(".actionBarIconaaaaaaaaaaa");
 
 const enum Methods {
     Random,
