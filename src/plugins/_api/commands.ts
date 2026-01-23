@@ -50,7 +50,7 @@ export default definePlugin({
         },
         // Show plugin name instead of "Built-In"
         {
-            find: "onOptionClick:",
+            find: "#{intl::COMMANDS_OPTIONAL_COUNT}",
             replacement: {
                 // ...children: p?.name
                 match: /(?<=:(\i)\.displayDescription\}.{0,200}children:).{0,50}\.name(?=\}\))/,
