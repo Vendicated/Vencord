@@ -256,7 +256,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
     return isWaitFor ? [null, null] : null;
 });
 
-export function findAll(filter: FilterFn) {
+export function findAll(filter: FilterFn, { topLevelOnly = false }: { topLevelOnly?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -268,7 +268,7 @@ export function findAll(filter: FilterFn) {
         if (filter(mod.exports))
             ret.push(mod.exports);
 
-        if (typeof mod.exports !== "object")
+        if (typeof mod.exports !== "object" || topLevelOnly)
             continue;
 
         for (const nestedMod in mod.exports) {
