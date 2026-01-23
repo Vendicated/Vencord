@@ -70,14 +70,14 @@ export default definePlugin({
             find: "{isSidebarVisible:",
             replacement: [
                 {
-                    match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                    match: /(?<=\{className:(\i),[^}]+?=\i.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                     replace: ":[$1?.includes('members')?$self.render():null,$2",
                 },
             ],
             predicate: () => settings.store.memberList
         },
         {
-            find: ".invitesDisabledTooltip",
+            find: "GuildTooltip - ",
             replacement: {
                 match: /#{intl::VIEW_AS_ROLES_MENTIONS_WARNING}.{0,100}(?=])/,
                 replace: "$&,$self.renderTooltip(arguments[0].guild)"
