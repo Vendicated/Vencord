@@ -6,13 +6,13 @@
 
 import { cl } from "@plugins/decor/ui";
 import { classes } from "@utils/misc";
-import { findCssClasses } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { React } from "@webpack/common";
 import { JSX } from "react";
 
 import Grid, { GridProps } from "./Grid";
 
-const ScrollerClasses = findCssClasses("managedReactiveScroller", "thin");
+const ScrollerClasses = findCssClassesLazy("managedReactiveScroller", "thin");
 
 type Section<SectionT, ItemT> = SectionT & {
     items: Array<ItemT>;
