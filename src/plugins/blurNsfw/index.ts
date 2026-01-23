@@ -49,7 +49,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\.renderReactions\(\i\).+?className:)/,
-                    replace: '$&(this.props.channel.nsfw?" vc-nsfw-img":"")+'
+                    replace: '$&(this.props.channel.nsfw?"vc-nsfw-img ":"")+'
                 }
             ]
         }
