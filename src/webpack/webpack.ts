@@ -626,7 +626,7 @@ export function mapMangledModuleLazy<S extends string>(code: string | RegExp | C
     return proxyLazy(() => mapMangledModule(code, mappers, includeBlacklistedExports));
 }
 
-export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
+export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?((?:\i\.e\("?[^)]+?"?\),?)+?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
 export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
 
 /**
