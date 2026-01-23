@@ -2,3 +2,29 @@
     display: flex;
     align-items: center;
 }
+
+/* FIXME: bad name
+_7f7a2c5f23327d73 */
+.vc-chatbar-discord-button {
+    opacity: .7;
+    align-items: center;
+    align-self: center;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+
+    &:hover {
+        background: hsl(0deg 0% 100% / 10%);
+        opacity: 1
+    }
+}
+
+/* _3f4f204c3133fb93 */
+.vc-chatbar-button-wrapper {
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
