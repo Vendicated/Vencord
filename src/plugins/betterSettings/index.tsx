@@ -5,9 +5,10 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory, disableStyle, enableStyle } from "@api/Styles";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
