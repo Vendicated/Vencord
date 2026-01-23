@@ -20,6 +20,7 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
+import { escapeRegExp } from "@utils/text";
 import type { FluxStore } from "@vencord/discord-types";
 import type { ModuleExports, ModuleFactory, WebpackRequire } from "@vencord/discord-types/webpack";
 
@@ -52,6 +53,10 @@ export const stringMatches = (s: string, filter: CodeFilter) =>
             ? s.includes(f)
             : (f.global && (f.lastIndex = 0), f.test(s))
     );
+
+export function makeClassNameRegex(className: string) {
+    return new RegExp(`(?:\\b|_)${escapeRegExp(className)}(?:\\b|_)`);
+}
 
 export const filters = {
     byProps: (...props: PropsFilter): FilterFn =>
@@ -90,6 +95,17 @@ export const filters = {
 
         filter.$$vencordProps = [...code];
         return filter;
+    },
+
+    byClassNames: (...classes: string[]): FilterFn => {
+        const regexes = classes.map(makeClassNameRegex);
+
+        return (m: any) => {
+            if (typeof m !== "object") return false;
+
+            const values = Object.values(m);
+            return regexes.every(cls => values.some(v => typeof v === "string" && cls.test(v)));
+        };
     }
 };
 
@@ -209,7 +225,7 @@ export function handleModuleNotFound(method: string, ...filter: unknown[]) {
 /**
  * Find the first module that matches the filter
  */
-export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
+export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false, topLevelOnly = false }: { isIndirect?: boolean; isWaitFor?: boolean; topLevelOnly?: boolean; } = {}) {
     if (IS_ANTI_CRASH_TEST) return null;
 
     if (typeof filter !== "function")
@@ -223,7 +239,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
             return isWaitFor ? [mod.exports, key] : mod.exports;
         }
 
-        if (typeof mod.exports !== "object") continue;
+        if (typeof mod.exports !== "object" || topLevelOnly) continue;
 
         for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
@@ -560,6 +576,29 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
             handleModuleNotFound("findExportedComponent", ...props);
         return res[props[0]];
     });
+}
+
+export function findCssClasses<S extends string>(...classes: S[]): Record<S, string> {
+    const res = find(filters.byClassNames(...classes), { isIndirect: true, topLevelOnly: true });
+
+    if (!res)
+        handleModuleNotFound("findCssClasses", ...classes);
+
+    const values = Object.values(res);
+    const mapped = {} as Record<S, string>;
+
+    for (const cls of classes) {
+        const re = makeClassNameRegex(cls);
+        mapped[cls] = values.find(v => typeof v === "string" && re.test(v)) as string;
+    }
+
+    return mapped;
+}
+
+export function findCssClassesLazy<S extends string>(...classes: S[]) {
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["findCssClasses", classes]);
+
+    return proxyLazy(() => findCssClasses(...classes));
 }
 
 function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumerable: boolean) {
