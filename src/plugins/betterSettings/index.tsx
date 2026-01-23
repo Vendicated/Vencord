@@ -160,13 +160,7 @@ export default definePlugin({
     // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
         try {
-            // findCssClassesLazy returns an empty object if the classes aren't found
-            // so we have to explicitly test for the presence of classes
-            if (!Classes.layer?.length) {
-                new Logger("BetterSettings").error("Failed to find classes");
-                return props.children;
-            }
-            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch].forEach(e => e.test);
+            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch, Classes.layer].forEach(e => e.test);
         } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;

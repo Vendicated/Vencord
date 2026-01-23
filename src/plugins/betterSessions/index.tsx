@@ -71,12 +71,12 @@ export default definePlugin({
                 },
                 {
                     match: /({variant:"text-sm\/medium",className:\i\.\i,children:.{70,110}{children:"\\xb7"}\),\(0,\i\.\i\)\("span",{children:)(\i\[\d+\])}/,
-                    replace: "$1$self.renderTimestamp({ ...arguments[0], timeLabel: $2 })}"
+                    replace: "$1$self.renderTimestamp({...arguments[0],timeLabel:$2})}"
                 },
                 // Replace the icon
                 {
-                    match: /,\i\.\i\),children:\[(?<=,icon:(\i)\}.+?)/,
-                    replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
+                    match: /children:\[(?=.{0,125}?width:"32")(?<=,icon:(\i)\}.+?)/,
+                    replace: "children:[$self.renderIcon({...arguments[0],DeviceIcon:$1}),false&&"
                 }
             ]
         }

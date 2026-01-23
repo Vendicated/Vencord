@@ -178,10 +178,7 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the Guild List from the Sidebar children
                 {
-                    // match the bottom (NEW) footer
-                    // both the top and bottom one use barClassName
-                    // so we match the call to classNames that's only in the bottom one
-                    match: /\}\),barClassName:.+?\}\)\]/,
+                    match: /reverse:!0,.+?barClassName:.+?\}\)\]/,
                     replace: "$&.filter($self.makeGuildsBarSidebarFilter(!!arguments[0]?.isBetterFolders))"
                 }
             ]
@@ -227,20 +224,20 @@ export default definePlugin({
                 // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
                 {
                     predicate: () => !settings.store.keepIcons,
-                    match: /(?=\i\(\(\i,\i,\i\)=>{let{key:.{0,70}"ul")(?<=selected:\i,expanded:(\i),.+?)/,
-                    replace: (_, isExpanded) => `$self.shouldRenderContents(arguments[0],${isExpanded})?null:`
+                    match: /"--custom-folder-color".+?(?=\i\(\(\i,\i,\i\)=>{let{key:.{0,70}"ul")(?<=selected:\i,expanded:(\i),.+?)/,
+                    replace: (m, isExpanded) => `${m}$self.shouldRenderContents(arguments[0],${isExpanded})?null:`
                 },
                 // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                 {
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
-                    match: /--custom-folder-color.{0,110}?children:\[/,
+                    match: /"--custom-folder-color".{0,110}?children:\[/,
                     replace: "$&$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)&&"
                 },
                 // Decide if we should render the expanded folder icon if we are rendering the Better Folders sidebar
                 {
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
-                    match: /(?<="span",[^,]{0,50}?,)(?=\i,)/,
-                    replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
+                    match: /"--custom-folder-color".+?className:\i\.\i}\),(?=\i,)/,
+                    replace: "$&!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
                 }
             ]
         },

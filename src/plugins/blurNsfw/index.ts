@@ -48,8 +48,8 @@ export default definePlugin({
             find: "}renderEmbeds(",
             replacement: [
                 {
-                    match: /\(\)\(\i,\i\.\i(?<=this.renderShareClientTheme\(.{0,250})/,
-                    replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
+                    match: /(\.renderReactions\(\i\).+?className:)/,
+                    replace: '$&(this.props.channel.nsfw?" vc-nsfw-img":"")+'
                 }
             ]
         }

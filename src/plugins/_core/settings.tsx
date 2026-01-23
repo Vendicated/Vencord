@@ -105,14 +105,14 @@ export default definePlugin({
             find: "#{intl::COPY_VERSION}",
             replacement: [
                 {
-                    match: /,\i\.\i\),.+?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
+                    match: /"text-xxs\/normal".+?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
                     replace: (m, _buildOverride, makeRow, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;
                     }
                 },
                 {
-                    match: /"data-mtctest.+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}.\i,.{0,50}\})\)," "/,
+                    match: /"text-xs\/normal".+?\[\(0,\i\.jsxs?\)\((.{1,10}),(\{[^{}}]+\{.{0,20}className:\i.\i,.+?\})\)," "/,
                     replace: (m, component, props) => {
                         props = props.replace(/children:\[.+\]/, "");
                         return `${m},$self.makeInfoElements(${component},${props})`;
@@ -141,8 +141,8 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: {
                 // Skip the check Discord performs to make sure the section being selected in the user settings context menu is valid
-                match: /void\(null!=\(\i=Object.values\(\i\.\i\).+?&&(?=\(0,\i\.openUserSettings\)\(\i,\{section:\i)/,
-                replace: "("
+                match: /null!=\(\i=Object.values\(\i\.\i\).{0,50}?&&(?=\(0,\i\.openUserSettings\)\(\i,\{section:\i)/,
+                replace: ""
             }
         },
         {
