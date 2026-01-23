@@ -166,7 +166,7 @@ export default definePlugin({
             find: "useFullWidth:!0,shouldLink:",
             replacement: [
                 {
-                    match: /className:\i\.\$_,/,
+                    match: /useFullWidth:!0,shouldLink:/,
                     replace: `id:"${ELEMENT_ID}",$&`
                 },
                 {

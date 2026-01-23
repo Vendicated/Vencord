@@ -448,7 +448,7 @@ export default definePlugin({
             find: ".Types.ATTACHMENT,inline:",
             replacement: [
                 {
-                    match: /obscured:\i,(?=containerStyles:)/,
+                    match: /\.SPOILER,(?=\[\i\.\i\]:)/,
                     replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
                 }
             ]
@@ -471,7 +471,7 @@ export default definePlugin({
             find: ".SEND_FAILED,",
             replacement: {
                 // Render editHistory behind the message content
-                match: /(?<=\]:\i.isUnsupported}\),)children:\[/,
+                match: /\]:\i.isUnsupported.+?,children:\[/,
                 replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
@@ -480,8 +480,8 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 // Make edit marker clickable
-                match: /(?<=isInline:!1,children:.+?)"span",\{(?=className:)/,
-                replace: "$self.EditMarker,{message:arguments[0].message,"
+                match: /(isInline:!1,children:.+?)"span",\{(?=className:)/,
+                replace: "$1$self.EditMarker,{message:arguments[0].message,"
             }
         },
 

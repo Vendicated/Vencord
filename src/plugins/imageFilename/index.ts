@@ -29,7 +29,7 @@ export default definePlugin({
         {
             find: ".RESPONSIVE?",
             replacement: {
-                match: /(?="data-role":"img","data-safe-src":)(?<=href:(\i).{0,30})/,
+                match: /(?="data-role":"img","data-safe-src":)(?<=href:(\i).+?)/,
                 replace: "title:$self.getTitle($1),"
             }
         },

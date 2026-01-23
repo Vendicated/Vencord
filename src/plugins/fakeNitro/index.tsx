@@ -186,7 +186,7 @@ export default definePlugin({
             find: '.getByName("fork_and_knife")',
             predicate: () => settings.store.enableEmojiBypass,
             replacement: {
-                match: /\.CHAT/,
+                match: ".CHAT",
                 replace: ".STATUS"
             }
         },
