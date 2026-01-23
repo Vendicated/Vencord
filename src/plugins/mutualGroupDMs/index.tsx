@@ -105,7 +105,7 @@ export default definePlugin({
                 // Discord adds spacing between each item which pushes our tab off screen.
                 // set the gap to zero to ensure ours stays on screen
                 {
-                    match: /className:\i\.tabBar/,
+                    match: /className:\i\.\i(?=,type:"top")/,
                     replace: '$& + " vc-mutual-gdms-modal-tab-bar"'
                 }
             ]
@@ -137,7 +137,7 @@ export default definePlugin({
                     replace: "$&||$self.getMutualGroupDms(arguments[0].user.id).length>0"
                 },
                 {
-                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
+                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.\i\}\)).{0,50}"MUTUAL_FRIENDS".+?)/,
                     replace: (m, hasMutualGuilds, hasMutualFriends, Divider, classes) => "" +
                         `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
                 }
