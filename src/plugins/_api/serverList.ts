@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "#{intl::DISCODO_DISABLED}",
             replacement: {
-                match: /(?<=#{intl::DISCODO_DISABLED}.+?)(\(0,\i\.jsxs?\)\(\i,\{selected:.+?\}\))(?=\}\}$)/,
+                match: /(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:.+?}\))(?=}function)/,
                 replace: "[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
             }
         },
