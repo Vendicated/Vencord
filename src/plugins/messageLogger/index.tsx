@@ -471,7 +471,7 @@ export default definePlugin({
             find: ".SEND_FAILED,",
             replacement: {
                 // Render editHistory behind the message content
-                match: /children:\[(?=.{0,120}?location:\i.\i.WITH_CONTENT)/,
+                match: /(?<=\]:\i.isUnsupported}\),)children:\[/,
                 replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
@@ -480,7 +480,7 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 // Make edit marker clickable
-                match: /"span",\{(?=className:\i\.\i,)/,
+                match: /(?<=isInline:!1,children:.+?)"span",\{(?=className:)/,
                 replace: "$self.EditMarker,{message:arguments[0].message,"
             }
         },
