@@ -72,7 +72,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".privateChannelsHeaderContainer,",
+            find: '"no-private-channels"',
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
@@ -95,7 +95,7 @@ export default definePlugin({
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
-                    match: /(?<=span",{)className:\i\.headerText,/,
+                    match: /(?<=span",{)className:\i\.\i,(?=children:\i.)/,
                     replace: "...$self.makeSpanProps(),$&"
                 },
 
