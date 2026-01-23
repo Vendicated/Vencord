@@ -49,7 +49,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\(\)\(\i,\i\.\i(?<=this.renderShareClientTheme\(.{0,250})/,
-                    replace: "$&+(this.props.channel.nsfw || $self.settings.store.blurAllChannels ? ' vc-nsfw-img': '')"
+                    replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
                 }
             ]
         }
