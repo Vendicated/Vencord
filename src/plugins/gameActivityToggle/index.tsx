@@ -114,7 +114,7 @@ export default definePlugin({
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
-                match: /className:\i\.buttons,.{0,50}children:\[/,
+                match: /className:\i\.\i,.{0,50}children:\[(?=.{0,25}accountContainerRef)/,
                 replace: "$&$self.GameActivityToggleButton(arguments[0]),"
             }
         }
