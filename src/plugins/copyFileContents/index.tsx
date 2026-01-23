@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "#{intl::PREVIEW_BYTES_LEFT}",
             replacement: {
-                match: /\.footerGap.+?url:\i,fileName:\i,fileSize:\i}\),(?<=fileContents:(\i),bytesLeft:(\i).+?)/g,
+                match: /(?<=fileContents:(\i),bytesLeft:(\i).+?)url:\i,fileName:\i,fileSize:\i}\),(?=.{0,25}setLanguage:)/g,
                 replace: "$&$self.addCopyButton({fileContents:$1,bytesLeft:$2}),"
             }
         }
