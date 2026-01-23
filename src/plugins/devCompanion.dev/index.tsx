@@ -164,6 +164,8 @@ function initWs(isManual = false) {
 
                 if (src.startsWith("function(")) {
                     src = "0," + src;
+                } else if (src.charCodeAt(0) >= 49 /* 1*/ && src.charCodeAt(0) <= 57 /* 9*/) {
+                    src = "0,function" + src.substring(src.indexOf("("));
                 }
 
                 let i = 0;
