@@ -98,7 +98,7 @@ export default definePlugin({
         },
         ...[
             '"Message Username"', // Messages
-            "#{intl::YJig7C::raw}", // Nameplate preview
+            "#{intl::COLLECTIBLES_NAMEPLATE_PREVIEW_A11Y}", // Nameplate preview
             "#{intl::ayozFl::raw}", // Avatar preview
         ].map(find => ({
             find,
