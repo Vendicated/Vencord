@@ -131,24 +131,3 @@
 .vc-rdb-block-modal-unblock {
     cursor: pointer;
 }
-
-.vc-rdb-banner-button {
-    align-items: center;
-    background: var(--redesign-button-overlay-alpha-background);
-    border: 1px solid var(--opacity-white-8);
-    border-radius: 50%;
-    box-sizing: border-box;
-    color: var(--white);
-    cursor: pointer;
-    display: flex;
-    height: var(--custom-button-button-sm-height);
-    justify-content: center;
-    transition: background 50ms ease-in;
-    width: var(--custom-button-button-sm-height);
-
-    &:active,
-    &:hover {
-        background: var(--redesign-button-overlay-alpha-pressed-background);
-        transition: background .15s ease-out
-    }
-}
