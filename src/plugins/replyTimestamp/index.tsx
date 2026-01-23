@@ -10,11 +10,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Message } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { DateUtils, Timestamp } from "@webpack/common";
 import type { HTMLAttributes } from "react";
 
-const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
+const MessageClasses = findCssClassesLazy("separator", "latin24CompactTimeStamp");
 
 function Sep(props: HTMLAttributes<HTMLElement>) {
     return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
