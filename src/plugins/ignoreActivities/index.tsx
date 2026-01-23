@@ -250,18 +250,6 @@ export default definePlugin({
                 replace: (m, runningGames) => `${m}${runningGames}=${runningGames}.filter(({id,name})=>$self.isActivityNotIgnored({type:0,application_id:id,name}));`
             }
         },
-
-        // FIXME(Bundler minifier change related): Remove the non used compability once enough time has passed
-        {
-            find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
-            replacement: {
-                // let { ... nowPlaying: a = !1 ...
-                // let { overlay: b ... } = Props
-                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)/,
-                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`,
-                noWarn: true,
-            }
-        },
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
