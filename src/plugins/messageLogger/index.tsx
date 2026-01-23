@@ -471,7 +471,7 @@ export default definePlugin({
             find: ".SEND_FAILED,",
             replacement: {
                 // Render editHistory behind the message content
-                match: /\]:\i.isUnsupported.+?,children:\[/,
+                match: /\]:\i.isUnsupported.{0,20}?,children:\[/,
                 replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
