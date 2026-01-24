@@ -148,7 +148,7 @@ export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size m
     getAssets: filters.byCode(".assets")
 });
 
-export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transitioning to ", {
+export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("transitionTo - Transitioning to", {
     transitionTo: filters.byCode("transitionTo -"),
     transitionToGuild: filters.byCode("transitionToGuild -"),
     back: filters.byCode("goBack()"),
