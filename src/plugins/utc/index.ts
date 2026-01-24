@@ -27,10 +27,9 @@ const ClassMap = new Map<string, string>();
 
 const utcRegex = new RegExp(`${UTC_CLASS_PREFIX}\\S+\\s*`, "g");
 
-const classNameRegex = /([\w\d_$]+?)-(\w+)/g;
+const classNameRegex = /(\w+?)_([\w\d_$]+)/g;
 
-const classPrefixHashRegex = /[_\d$]/;
-
+const classSuffixHashRegex = /[_\d$]/;
 
 export default definePlugin({
     name: "UTC",
@@ -61,11 +60,12 @@ export default definePlugin({
             ? input.replaceAll(utcRegex, "").trim()
             : input;
 
+
         const utcSuffixes = [...baseClasses.matchAll(classNameRegex)].reduce(
-            (suffix, [_, prefix, name]) =>
-                classPrefixHashRegex.test(prefix) && !suffix.includes(name)
-                    ? `${suffix} utc_${name}`
-                    : suffix,
+            (prefix, [_, name, suffix]) =>
+                classSuffixHashRegex.test(suffix) && !prefix.includes(name)
+                    ? `${prefix} utc_${name}`
+                    : prefix,
             "",
         );
 
