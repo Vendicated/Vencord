@@ -109,6 +109,14 @@ export default definePlugin({
                 }
             ]
         })),
+        // Patch avatar decoration preview to display Decor avatar decorations as if they are purchased
+        {
+            find: "#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}",
+            replacement: {
+                match: /(#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}.+?return null!=(\i)&&\()(null==\i)/,
+                replace: (_, rest, avatarDecoration, hasPurchase) => `${rest}(${avatarDecoration}.skuId!==$self.SKU_ID&&${hasPurchase})`
+            }
+        }
     ],
     settings,
 
