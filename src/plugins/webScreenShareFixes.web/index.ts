@@ -4,24 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-
-const settings = definePluginSettings({
-    experimentalAV1Support: {
-        type: OptionType.BOOLEAN,
-        description: "Enable AV1 codec support. May cause issues like infinitely loading streams",
-        default: false
-    }
-});
+import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "WebScreenShareFixes",
     authors: [Devs.Kaitlyn],
     description: "Removes 2500kbps bitrate cap on chromium and vesktop clients.",
     enabledByDefault: true,
-    settings,
 
     patches: [
         {
@@ -38,22 +28,8 @@ export default definePlugin({
                 {
                     match: /;usedtx=".concat\((\i)\?"0":"1"\)/,
                     replace: '$&.concat($1?";stereo=1;sprop-stereo=1":"")'
-                },
-                {
-                    match: /\i\?\[(\i\.\i)\.H265,\i\.\i\.H264,\i\.\i\.VP8,\i\.\i\.VP9\]/,
-                    replace: "true?$self.getCodecs($1)"
                 }
             ]
         }
-    ],
-
-    getCodecs(Codecs: Record<string, string>) {
-        const codecs = [Codecs.H265, Codecs.VP9, Codecs.H264, Codecs.VP8];
-
-        if (settings.store.experimentalAV1Support) {
-            codecs.unshift("AV1");
-        }
-
-        return codecs;
-    }
+    ]
 });
