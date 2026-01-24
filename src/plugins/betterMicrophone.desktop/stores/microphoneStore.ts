@@ -225,8 +225,8 @@ export const defaultMicrophoneProfiles = {
         forceStereo: true,
         preferredSampleRate: 48000
     },
-    purify: {
-        name: "Purify",
+    rz : {
+        name: "rz",
         freq: 384000,
         freqEnabled: true,
         rate: 384000,
@@ -237,7 +237,7 @@ export const defaultMicrophoneProfiles = {
         channelsEnabled: true,
         voiceBitrate: 24576,
         voiceBitrateEnabled: true,
-        // Purify Studio - Legendary Settings
+        // rz Studio - Legendary Settings
         enableEffects: true,
         masterGain: 1.15, // Slightly boosted for studio quality
         eqEnabled: true,
