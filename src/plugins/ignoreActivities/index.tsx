@@ -253,11 +253,8 @@ export default definePlugin({
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                // let { ... nowPlaying: a = !1 ...
-                // let { overlay: b ... } = Props ...
-                // ToggleOverLayButton(), nowPlaying && ... RemoveGameButton()
-                match: /\.Fragment,\{children:.+?,\i\(\),(?<=nowPlaying:(\i)=!1,.+?overlay:\i,[^}]+?\}=(\i).+?)(?=\1&&)/,
-                replace: (m, nowPlaying, props) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`,
+                match: /(\i)&&!\i\|\|\i\?null(?<=return (\i)\.verified.+?)/,
+                replace: "$self.renderToggleGameActivityButton($2,$1),$&"
             }
         },
 
@@ -265,8 +262,8 @@ export default definePlugin({
         {
             find: "#{intl::EMBEDDED_ACTIVITIES_DEVELOPER_ACTIVITY}",
             replacement: {
-                match: /,rendersPlaceholder:.+?children:\i.*?}\),(?<=application:(\i).+?)/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
+                match: /,rendersPlaceholder:.{0,150}?children:\i.*?}\),(?<=application:(\i).+?)/,
+                replace: "$&$self.renderToggleActivityButton($1),"
             }
         }
     ],
