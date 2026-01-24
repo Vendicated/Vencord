@@ -127,7 +127,7 @@ export default definePlugin({
             find: "#{intl::GUEST_NAME_SUFFIX})]",
             replacement: [
                 {
-                    match: /#{intl::GUEST_NAME_SUFFIX}.{0,50}?""\](?<=guildId:(\i),.{0,50}?user:(\i).+?)/,
+                    match: /#{intl::GUEST_NAME_SUFFIX}.{0,50}?""\](?<=guildId:(\i),.+?user:(\i).+?)/,
                     replace: "$&,style:$self.getColorStyle($2.id,$1),"
                 }
             ],
@@ -195,7 +195,7 @@ export default definePlugin({
             const author = useMessageAuthor(message);
 
             // Do not apply role color if the send fails, otherwise it becomes indistinguishable
-            if (message.state !== "SEND_FAILED") return;
+            if (message.state === "SEND_FAILED") return;
 
             if (author.colorString != null && messageSaturation !== 0) {
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
