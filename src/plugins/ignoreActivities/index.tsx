@@ -262,7 +262,7 @@ export default definePlugin({
         {
             find: "#{intl::EMBEDDED_ACTIVITIES_DEVELOPER_ACTIVITY}",
             replacement: {
-                match: /,rendersPlaceholder:.{0,150}?children:\i.*?}\),(?<=application:(\i).+?)/,
+                match: /lineClamp:1.{0,50}?(?=!\i&&\i\?.+?application:(\i))/,
                 replace: "$&$self.renderToggleActivityButton($1),"
             }
         }
