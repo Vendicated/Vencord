@@ -625,6 +625,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "u32",
         id: 1063237286818488351n,
     },
+    prism: {
+        name: "prism",
+        id: 390884143749136386n,
+    },
     fantik: {
         name: "FunTeaQueue",
         id: 245513429190705152n,
