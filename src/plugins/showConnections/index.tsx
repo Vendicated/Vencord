@@ -160,10 +160,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "UserProfilePopoutBody",
+            find: ".hasAvatarForGuild(null==",
             replacement: {
-                match: /userId:\i\.id,guild:\i\}\)(?=])/,
-                replace: "$&,$self.profilePopoutComponent(arguments[0])"
+                match: /currentUser:\i,guild:\i[^}]*?\}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2 })"
             }
         }
     ],
