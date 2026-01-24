@@ -23,175 +23,162 @@ import { settings } from "@plugins/reviewDB/settings";
 import { canBlockReviewAuthor, canDeleteReview, canReportReview, cl, showToast } from "@plugins/reviewDB/utils";
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { LazyComponent } from "@utils/react";
-import { filters, findBulk } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { Alerts, Parser, Timestamp, useState } from "@webpack/common";
 
 import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
-export default LazyComponent(() => {
-    // this is terrible, blame mantika
-    const p = filters.byProps;
-    const [
-        { cozyMessage, buttons, message, buttonsInner, groupStart },
-        { container, isHeader },
-        { avatar, clickable, username, wrapper, cozy },
-        buttonClasses,
-        botTag
-    ] = findBulk(
-        p("cozyMessage"),
-        p("container", "isHeader"),
-        p("avatar", "zalgo"),
-        p("button", "wrapper", "selected"),
-        p("botTagRegular")
-    );
+const MessageClasses = findCssClassesLazy("cozyMessage", "message", "groupStart", "buttons", "buttonsInner");
+const ContainerClasses = findCssClassesLazy("container", "isHeader");
+const AvatarClasses = findCssClassesLazy("avatar", "wrapper", "cozy", "clickable", "username");
+const ButtonClasses = findCssClassesLazy("button", "wrapper", "selected");
+const BotTagClasses = findCssClassesLazy("botTagVerified", "botTagRegular", "botText", "px", "rem");
 
-    const dateFormat = new Intl.DateTimeFormat();
+const dateFormat = new Intl.DateTimeFormat();
 
-    return function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
-        const [showAll, setShowAll] = useState(false);
+export default function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
+    const [showAll, setShowAll] = useState(false);
 
-        function openModal() {
-            openUserProfile(review.sender.discordID);
-        }
+    function openModal() {
+        openUserProfile(review.sender.discordID);
+    }
 
-        function delReview() {
-            Alerts.show({
-                title: "Are you sure?",
-                body: "Do you really want to delete this review?",
-                confirmText: "Delete",
-                cancelText: "Nevermind",
-                onConfirm: async () => {
-                    if (!(await getToken())) {
-                        return showToast("You must be logged in to delete reviews.");
-                    } else {
-                        deleteReview(review.id).then(res => {
-                            if (res) {
-                                refetch();
-                            }
-                        });
-                    }
+    function delReview() {
+        Alerts.show({
+            title: "Are you sure?",
+            body: "Do you really want to delete this review?",
+            confirmText: "Delete",
+            cancelText: "Nevermind",
+            onConfirm: async () => {
+                if (!(await getToken())) {
+                    return showToast("You must be logged in to delete reviews.");
+                } else {
+                    deleteReview(review.id).then(res => {
+                        if (res) {
+                            refetch();
+                        }
+                    });
                 }
-            });
-        }
+            }
+        });
+    }
 
-        function reportRev() {
-            Alerts.show({
-                title: "Are you sure?",
-                body: "Do you really you want to report this review?",
-                confirmText: "Report",
-                cancelText: "Nevermind",
-                // confirmColor: "red", this just adds a class name and breaks the submit button guh
-                onConfirm: async () => {
-                    if (!(await getToken())) {
-                        return showToast("You must be logged in to report reviews.");
-                    } else {
-                        reportReview(review.id);
-                    }
+    function reportRev() {
+        Alerts.show({
+            title: "Are you sure?",
+            body: "Do you really you want to report this review?",
+            confirmText: "Report",
+            cancelText: "Nevermind",
+            // confirmColor: "red", this just adds a class name and breaks the submit button guh
+            onConfirm: async () => {
+                if (!(await getToken())) {
+                    return showToast("You must be logged in to report reviews.");
+                } else {
+                    reportReview(review.id);
                 }
-            });
-        }
+            }
+        });
+    }
 
-        const isAuthorBlocked = Auth?.user?.blockedUsers?.includes(review.sender.discordID) ?? false;
+    const isAuthorBlocked = Auth?.user?.blockedUsers?.includes(review.sender.discordID) ?? false;
 
-        function blockReviewSender() {
-            if (isAuthorBlocked)
-                return unblockUser(review.sender.discordID);
+    function blockReviewSender() {
+        if (isAuthorBlocked)
+            return unblockUser(review.sender.discordID);
 
-            Alerts.show({
-                title: "Are you sure?",
-                body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
-                confirmText: "Block",
-                cancelText: "Nevermind",
-                // confirmColor: "red", this just adds a class name and breaks the submit button guh
-                onConfirm: async () => {
-                    if (!(await getToken())) {
-                        return showToast("You must be logged in to block users.");
-                    } else {
-                        blockUser(review.sender.discordID);
-                    }
+        Alerts.show({
+            title: "Are you sure?",
+            body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
+            confirmText: "Block",
+            cancelText: "Nevermind",
+            // confirmColor: "red", this just adds a class name and breaks the submit button guh
+            onConfirm: async () => {
+                if (!(await getToken())) {
+                    return showToast("You must be logged in to block users.");
+                } else {
+                    blockUser(review.sender.discordID);
                 }
-            });
-        }
+            }
+        });
+    }
 
-        return (
-            <div className={classes(cl("review"), cozyMessage, wrapper, message, groupStart, cozy)} style={
-                {
-                    marginLeft: "0px",
-                    paddingLeft: "52px", // wth is this
-                    // nobody knows anymore
-                }
-            }>
+    return (
+        <div className={classes(cl("review"), MessageClasses.cozyMessage, AvatarClasses.wrapper, MessageClasses.message, MessageClasses.groupStart, AvatarClasses.cozy)} style={
+            {
+                marginLeft: "0px",
+                paddingLeft: "52px", // wth is this
+                // nobody knows anymore
+            }
+        }>
 
-                <img
-                    className={classes(avatar, clickable)}
-                    onClick={openModal}
-                    src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                    style={{ left: "0px", zIndex: 0 }}
-                />
-                <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
+            <img
+                className={classes(AvatarClasses.avatar, AvatarClasses.clickable)}
+                onClick={openModal}
+                src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
+                style={{ left: "0px", zIndex: 0 }}
+            />
+            <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
+                <span
+                    className={classes(AvatarClasses.clickable, AvatarClasses.username)}
+                    style={{ color: "var(--channels-default)", fontSize: "14px" }}
+                    onClick={() => openModal()}
+                >
+                    {review.sender.username}
+                </span>
+
+                {review.type === ReviewType.System && (
                     <span
-                        className={classes(clickable, username)}
-                        style={{ color: "var(--channels-default)", fontSize: "14px" }}
-                        onClick={() => openModal()}
-                    >
-                        {review.sender.username}
-                    </span>
-
-                    {review.type === ReviewType.System && (
-                        <span
-                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.px, botTag.rem)}
-                            style={{ marginLeft: "4px" }}>
-                            <span className={botTag.botText}>
-                                System
-                            </span>
+                        className={classes(BotTagClasses.botTagVerified, BotTagClasses.botTagRegular, BotTagClasses.px, BotTagClasses.rem)}
+                        style={{ marginLeft: "4px" }}>
+                        <span className={BotTagClasses.botText}>
+                            System
                         </span>
-                    )}
-                </div>
-                {isAuthorBlocked && (
-                    <ReviewBadge
-                        name="You have blocked this user"
-                        description="You have blocked this user"
-                        icon="/assets/aaee57e0090991557b66.svg"
-                        type={0}
-                        onClick={() => openBlockModal()}
-                    />
-                )}
-                {review.sender.badges.map((badge, idx) => <ReviewBadge key={idx} {...badge} />)}
-
-                {
-                    !settings.store.hideTimestamps && review.type !== ReviewType.System && (
-                        <Timestamp timestamp={new Date(review.timestamp * 1000)} >
-                            {dateFormat.format(review.timestamp * 1000)}
-                        </Timestamp>)
-                }
-
-                <div className={cl("review-comment")}>
-                    {(review.comment.length > 200 && !showAll)
-                        ? (
-                            <>
-                                {Parser.parseGuildEventDescription(review.comment.substring(0, 200))}...
-                                <br />
-                                <a onClick={() => setShowAll(true)}>Read more</a>]
-                            </>
-                        )
-                        : Parser.parseGuildEventDescription(review.comment)}
-                </div>
-
-                {review.id !== 0 && (
-                    <div className={classes(container, isHeader, buttons)} style={{
-                        padding: "0px",
-                    }}>
-                        <div className={classes(buttonClasses.wrapper, buttonsInner)} >
-                            {canReportReview(review) && <ReportButton onClick={reportRev} />}
-                            {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
-                            {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
-                        </div>
-                    </div>
+                    </span>
                 )}
             </div>
-        );
-    };
-});
+            {isAuthorBlocked && (
+                <ReviewBadge
+                    name="You have blocked this user"
+                    description="You have blocked this user"
+                    icon="/assets/aaee57e0090991557b66.svg"
+                    type={0}
+                    onClick={() => openBlockModal()}
+                />
+            )}
+            {review.sender.badges.map((badge, idx) => <ReviewBadge key={idx} {...badge} />)}
+
+            {
+                !settings.store.hideTimestamps && review.type !== ReviewType.System && (
+                    <Timestamp timestamp={new Date(review.timestamp * 1000)} >
+                        {dateFormat.format(review.timestamp * 1000)}
+                    </Timestamp>)
+            }
+
+            <div className={cl("review-comment")}>
+                {(review.comment.length > 200 && !showAll)
+                    ? (
+                        <>
+                            {Parser.parseGuildEventDescription(review.comment.substring(0, 200))}...
+                            <br />
+                            <a onClick={() => setShowAll(true)}>Read more</a>]
+                        </>
+                    )
+                    : Parser.parseGuildEventDescription(review.comment)}
+            </div>
+
+            {review.id !== 0 && (
+                <div className={classes(ContainerClasses.container, ContainerClasses.isHeader, MessageClasses.buttons)} style={{
+                    padding: "0px",
+                }}>
+                    <div className={classes(ButtonClasses.wrapper, MessageClasses.buttonsInner)} >
+                        {canReportReview(review) && <ReportButton onClick={reportRev} />}
+                        {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
+                        {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
