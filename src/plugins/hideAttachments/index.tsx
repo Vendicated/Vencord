@@ -41,7 +41,7 @@ const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
 
 migratePluginSettings("HideMedia", "HideAttachments");
 
-const hasMedia = (msg: Message) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0;
+const hasMedia = (msg: Message) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0 || msg.components.length > 0;
 
 async function toggleHide(channelId: string, messageId: string) {
     const ids = await getHiddenMessages();
@@ -55,13 +55,13 @@ async function toggleHide(channelId: string, messageId: string) {
 export default definePlugin({
     name: "HideMedia",
     description: "Hide attachments and embeds for individual messages via hover button",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.MrCRACK],
     dependencies: ["MessageUpdaterAPI"],
 
     patches: [{
         find: "this.renderAttachments(",
         replacement: {
-            match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories)\((\i)\)/g,
+            match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories|ComponentAccessories)\((\i)\)/g,
             replace: "$self.shouldHide($1?.id)?null:$&"
         }
     }],
