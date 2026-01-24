@@ -445,7 +445,7 @@ export default definePlugin({
 
         {
             // Attachment renderer
-            find: ".Types.ATTACHMENT,inline:",
+            find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
             replacement: [
                 {
                     match: /\.SPOILER,(?=\[\i\.\i\]:)/,
