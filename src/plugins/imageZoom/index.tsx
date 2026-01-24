@@ -163,7 +163,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "useFullWidth:!0,shouldLink:",
+            find: ".renderLinkComponent)?",
             replacement: [
                 {
                     match: /useFullWidth:!0,shouldLink:/,

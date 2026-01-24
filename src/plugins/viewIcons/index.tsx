@@ -199,16 +199,16 @@ export default definePlugin({
         {
             find: "imageClassName:null!=",
             replacement: {
-                match: /(?<=\("div",\i\(\i\(\{\},\i\),)(\{className:)/,
-                replace: '{style:{cursor:"pointer"},onClick:()=>$self.openAvatar($self.getAvatarUrl(arguments[0].user)),className:'
+                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
+                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
             }
         },
         // Banners
         {
             find: 'backgroundColor:"COMPLETE"',
             replacement: {
-                match: /(?<=!1\),)style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\1,)/,
-                replace: (_, bannerSrc) => `onClick:()=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
+                match: /(overflow:"visible",.{0,125}?!1\),)style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\2,)/,
+                replace: (_, rest, bannerSrc) => `${rest}onClick:()=>${bannerSrc}!=null&&$self.openBanner(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
@@ -236,9 +236,5 @@ export default definePlugin({
                 replace: (_, avatarUrl) => `onClick:()=>$self.openAvatar(${avatarUrl}),`
             }
         }
-    ],
-
-    getAvatarUrl(user: User) {
-        return IconUtils.getUserAvatarURL(user, true);
-    },
+    ]
 });
