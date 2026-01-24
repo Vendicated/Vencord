@@ -16,6 +16,11 @@
     transition: background-color 200ms ease, border-color 200ms ease;
 }
 
+.vc-switch-checked .vc-switch-indicator {
+    background: var(--switch-background-selected-default);
+    border-color: var(--switch-border-selected-default);
+}
+
 .vc-switch-disabled {
     cursor: not-allowed;
     opacity: 0.5;
@@ -29,17 +34,12 @@
     box-shadow: 0 0 0 2px var(--border-focus, #00a8fc);
 }
 
-.vc-switch-indicator:hover {
+.vc-switch-container:hover .vc-switch-indicator {
     background: var(--switch-background-hover);
     border-color: var(--switch-border-hover);
 }
 
-.vc-switch-checked .vc-switch-indicator {
-    background: var(--switch-background-selected-default);
-    border-color: var(--switch-border-selected-default);
-}
-
-.vc-switch-checked .vc-switch-indicator:hover {
+.vc-switch-checked:hover .vc-switch-indicator {
     background: var(--switch-background-selected-hover);
     border-color: var(--switch-border-selected-hover);
 }
