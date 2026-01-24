@@ -72,7 +72,7 @@ export default definePlugin({
             find: "#{intl::GUILD_MEMBER_MOD_VIEW_HIGHEST_ROLE}),children:",
             predicate: () => settings.store.showModView,
             replacement: {
-                match: /(#{intl::GUILD_MEMBER_MOD_VIEW_HIGHEST_ROLE}.{0,80})role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+)/,
+                match: /(#{intl::GUILD_MEMBER_MOD_VIEW_HIGHEST_ROLE}.{0,80})role:\i(?<=\[\i\.roles,\i\.highestRoleId,(\i)\].+?)/,
                 replace: (_, rest, roles) => `${rest}role:$self.getHighestRole(arguments[0],${roles})`,
             }
         },
