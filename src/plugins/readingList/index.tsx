@@ -17,8 +17,8 @@ import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ChannelStore, Menu, MessageStore, NavigationRouter, Popout, React, ScrollerThin, Text, Timestamp, Tooltip, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
-// The Discord Message class constructor
-const MessageConstructor = findByPropsLazy("Message").Message;
+// The Discord Message class constructor (keep lazy, access .Message when needed)
+const MessageModule = findByPropsLazy("Message");
 
 const DATA_KEY = "ReadingList_ITEMS";
 const UNREAD_KEY = "ReadingList_UNREAD";
@@ -247,9 +247,9 @@ function ReadingListItemComponent({ item, onRemove, onClose }: { item: ReadingLi
 
     let message = MessageStore.getMessage(item.channelId, item.messageId);
 
-    if (!message && item.serializedMessage && MessageConstructor) {
+    if (!message && item.serializedMessage && MessageModule.Message) {
         try {
-            message = new MessageConstructor(item.serializedMessage);
+            message = new MessageModule.Message(item.serializedMessage);
         } catch (e) {
             console.error("[ReadingList] Failed to hydrate message:", e);
         }
