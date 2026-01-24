@@ -16,7 +16,7 @@ import { useAuthorizationStore } from "@plugins/decor/lib/stores/AuthorizationSt
 import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
 import { decorationToAvatarDecoration } from "@plugins/decor/lib/utils/decoration";
 import { settings } from "@plugins/decor/settings";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "@plugins/decor/ui";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal } from "@plugins/decor/ui";
 import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import DecorationGridCreate from "@plugins/decor/ui/components/DecorationGridCreate";
 import DecorationGridNone from "@plugins/decor/ui/components/DecorationGridNone";
@@ -142,7 +142,7 @@ function ChangeDecorationModal(props: ModalProps) {
     return <ModalRoot
         {...props}
         size={ModalSize.DYNAMIC}
-        className={DecorationModalStyles.modal}
+        className={DecorationModalClasses.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
             <BaseText

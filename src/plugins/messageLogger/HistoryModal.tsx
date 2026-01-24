@@ -11,13 +11,13 @@ import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { TabBar, Timestamp, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 
-const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
-const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
+const CodeContainerClasses = findCssClassesLazy("markup", "codeContainer");
+const MiscClasses = findCssClassesLazy("messageContent", "markupRtl");
 
 const cl = classNameFactory("vc-ml-modal-");
 

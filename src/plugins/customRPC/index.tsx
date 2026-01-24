@@ -39,7 +39,7 @@ import { ApplicationAssetUtils, FluxDispatcher, React, UserStore } from "@webpac
 import { RPCSettings } from "./RpcSettings";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
-const ActivityView = findComponentByCodeLazy(".party?(0", ".card");
+const ActivityView = findComponentByCodeLazy(".party?(0", "USER_PROFILE_ACTIVITY");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
