@@ -183,11 +183,11 @@ export default definePlugin({
         makeBypassPatches(),
         // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
-            find: "emojiItemDisabled]",
+            find: '.getByName("fork_and_knife")',
             predicate: () => settings.store.enableEmojiBypass,
             replacement: {
-                match: /CHAT/,
-                replace: "STATUS"
+                match: ".CHAT",
+                replace: ".STATUS"
             }
         },
         {
