@@ -1,42 +1,64 @@
 .vc-switch-container {
-    background: var(--primary-400);
-    border: 1px solid transparent;
-    border-radius: 16px;
-    box-sizing: border-box;
-    cursor: pointer;
-    height: 28px;
+    display: flex;
+    align-items: center;
     position: relative;
-    width: 44px;
-
-    .high-contrast-mode & {
-        border-color: var(--border-strong);
-    }
 }
 
-.vc-switch-checked {
-    background: var(--brand-500);
-    border-color: var(--control-primary-border-default);
+.vc-switch-indicator {
+    background: var(--switch-background-default);
+    border: 1px solid var(--switch-border-default);
+    border-radius: var(--radius-lg);
+    box-sizing: border-box;
+    cursor: pointer;
+    height: 24px;
+    position: relative;
+    width: 48px;
+    transition: background-color 200ms ease, border-color 200ms ease;
 }
 
 .vc-switch-disabled {
     cursor: not-allowed;
-    opacity: 0.3;
+    opacity: 0.5;
 }
 
-.vc-switch-focusVisible {
-    /* stylelint-disable-next-line custom-property-pattern */
-    box-shadow: 0 0 0 4px var(--__adaptive-focus-ring-color, var(--border-focus, #00b0f4));
+.vc-switch-disabled .vc-switch-indicator {
+    cursor: not-allowed;
 }
 
-.vc-switch-slider {
-    display: block;
-    height: 20px;
-    left: 0;
-    margin: 3px;
+.vc-switch-focusVisible .vc-switch-indicator {
+    box-shadow: 0 0 0 2px var(--border-focus, #00a8fc);
+}
+
+.vc-switch-indicator:hover {
+    background: var(--switch-background-hover);
+    border-color: var(--switch-border-hover);
+}
+
+.vc-switch-checked .vc-switch-indicator {
+    background: var(--switch-background-selected-default);
+    border-color: var(--switch-border-selected-default);
+}
+
+.vc-switch-checked .vc-switch-indicator:hover {
+    background: var(--switch-background-selected-hover);
+    border-color: var(--switch-border-selected-hover);
+}
+
+.vc-switch-thumb {
+    align-items: center;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    left: 1px;
+    margin-left: -1px;
+    margin-top: -1px;
     position: absolute;
-    width: 28px;
-    transition: 100ms transform ease-in-out;
-    overflow: visible;
+    width: 24px;
+    transition: left 150ms ease-in-out;
+}
+
+.vc-switch-checked .vc-switch-thumb {
+    left: 24px;
 }
 
 .vc-switch-input {
