@@ -49,9 +49,9 @@ export default definePlugin({
         },
         {
             // Guild Banner
-            find: ".animatedBannerHoverLayer,onMouseEnter:",
+            find: "#{intl::DISCOVERABLE_GUILD_HEADER_PUBLIC_INFO}",
             replacement: {
-                match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
+                match: /(guildBanner:\i,animate:)\i(?=}\):null)/,
                 replace: "$1!0"
             }
         },

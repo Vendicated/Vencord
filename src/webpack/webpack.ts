@@ -256,7 +256,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
     return isWaitFor ? [null, null] : null;
 });
 
-export function findAll(filter: FilterFn) {
+export function findAll(filter: FilterFn, { topLevelOnly = false }: { topLevelOnly?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -268,7 +268,7 @@ export function findAll(filter: FilterFn) {
         if (filter(mod.exports))
             ret.push(mod.exports);
 
-        if (typeof mod.exports !== "object")
+        if (typeof mod.exports !== "object" || topLevelOnly)
             continue;
 
         for (const nestedMod in mod.exports) {
@@ -389,7 +389,7 @@ export function findModuleFactory(...code: CodeFilter) {
     return wreq.m[id];
 }
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findCssClasses" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
 
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
@@ -578,21 +578,30 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
     });
 }
 
-export function findCssClasses<S extends string>(...classes: S[]): Record<S, string> {
-    const res = find(filters.byClassNames(...classes), { isIndirect: true, topLevelOnly: true });
-
-    if (!res)
-        handleModuleNotFound("findCssClasses", ...classes);
-
-    const values = Object.values(res);
+export function mapMangledCssClasses<S extends string>(mappedModule: object, classes: S[] | ReadonlyArray<S>): Record<S, string> {
+    const values = Object.values(mappedModule);
     const mapped = {} as Record<S, string>;
 
     for (const cls of classes) {
         const re = makeClassNameRegex(cls);
         mapped[cls] = values.find(v => typeof v === "string" && re.test(v)) as string;
+
+        if (!mapped[cls]) // this should never happen unless this is used manually with invalid input
+            throw new Error(`mapMangledCssClasses: Invalid input. ${cls} not found in module`);
     }
 
     return mapped;
+}
+
+export function findCssClasses<S extends string>(...classes: S[]): Record<S, string> {
+    const res = find(filters.byClassNames(...classes), { isIndirect: true, topLevelOnly: true });
+
+    if (!res) {
+        handleModuleNotFound("findCssClasses", ...classes);
+        return {} as Record<S, string>;
+    }
+
+    return mapMangledCssClasses(res, classes);
 }
 
 export function findCssClassesLazy<S extends string>(...classes: S[]) {

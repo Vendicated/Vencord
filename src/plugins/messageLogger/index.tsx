@@ -29,7 +29,7 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findCssClassesLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -42,7 +42,7 @@ interface MLMessage extends Message {
     firstEditTimestamp?: Date;
 }
 
-const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -177,7 +177,7 @@ export default definePlugin({
                             isEdited={true}
                             isInline={false}
                         >
-                            <span className={styles.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
+                            <span className={MessageClasses.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
                         </Timestamp>
                     </div>
                 ))}
@@ -445,11 +445,11 @@ export default definePlugin({
 
         {
             // Attachment renderer
-            find: ".removeMosaicItemHoverButton",
+            find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
             replacement: [
                 {
-                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
-                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
+                    match: /\.SPOILER,(?=\[\i\.\i\]:)/,
+                    replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
                 }
             ]
         },
@@ -471,7 +471,7 @@ export default definePlugin({
             find: ".SEND_FAILED,",
             replacement: {
                 // Render editHistory behind the message content
-                match: /\.isFailed]:.+?children:\[/,
+                match: /\]:\i.isUnsupported.{0,20}?,children:\[/,
                 replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
             }
         },
@@ -480,8 +480,8 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 // Make edit marker clickable
-                match: /"span",\{(?=className:\i\.edited,)/,
-                replace: "$self.EditMarker,{message:arguments[0].message,"
+                match: /(isInline:!1,children:.{0,50}?)"span",\{(?=className:)/,
+                replace: "$1$self.EditMarker,{message:arguments[0].message,"
             }
         },
 

@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findCssClassesLazy, findStoreLazy } from "@webpack";
 import { Clickable, ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
 
 import { contextMenus } from "./components/contextMenu";
@@ -26,7 +26,7 @@ interface ChannelComponentProps {
     selected: boolean;
 }
 
-const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
+const headerClasses = findCssClassesLazy("privateChannelsHeaderContainer", "headerText");
 
 export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
@@ -72,7 +72,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".privateChannelsHeaderContainer,",
+            find: '"private-channels-".concat(',
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
@@ -95,8 +95,8 @@ export default definePlugin({
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
-                    match: /(?<=span",{)className:\i\.headerText,/,
-                    replace: "...$self.makeSpanProps(),$&"
+                    match: /"renderSection".{0,300}?"span",{/,
+                    replace: "$&...$self.makeSpanProps(),"
                 },
 
                 // Fix Row Height

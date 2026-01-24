@@ -27,7 +27,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserGuildSettingsStore, UserStore, UserSummaryItem, useStateFromStores } from "@webpack/common";
 
-const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
+const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
 
 const enum IndicatorMode {
     Dots = 1 << 0,

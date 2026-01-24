@@ -29,10 +29,10 @@ export default definePlugin({
 
         // Add data-author-id and data-is-self to all messages
         {
-            find: ".messageListItem",
+            find: "Message must not be a thread starter message",
             replacement: {
-                match: /\.messageListItem(?=,"aria)/,
-                replace: "$&,...$self.getMessageProps(arguments[0])"
+                match: /"aria-setsize":-1,(?=.{0,150}?#{intl::MESSAGE_A11Y_ROLE_DESCRIPTION})/,
+                replace: "...$self.getMessageProps(arguments[0]),$&"
             }
         },
 

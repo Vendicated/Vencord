@@ -2,7 +2,6 @@
     width: 24px;
     height: 24px;
     color: var(--interactive-icon-default);
-    margin-left: 12px;
     cursor: pointer;
     position: relative;
 }

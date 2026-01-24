@@ -41,7 +41,7 @@ waitFor(m => m.name === "MenuCheckboxItem", (_, id) => {
 });
 
 waitFor(filters.componentByCode('path:["empty"]'), m => Menu.Menu = m);
-waitFor(filters.componentByCode("sliderContainer", "slider", "handleSize:16", "=100"), m => Menu.MenuSliderControl = m);
+waitFor(filters.componentByCode("SLIDER)", "handleSize:16"), m => Menu.MenuSliderControl = m);
 waitFor(filters.componentByCode(".SEARCH)", ".focus()", "query:"), m => Menu.MenuSearchControl = m);
 
 export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN', {
