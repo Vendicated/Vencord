@@ -95,7 +95,7 @@ export default definePlugin({
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
-                    match: /"renderSection".+?"span",{/,
+                    match: /"renderSection".{0,300}?"span",{/,
                     replace: "$&...$self.makeSpanProps(),"
                 },
 
