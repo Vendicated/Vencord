@@ -27,6 +27,7 @@ export default definePlugin({
 
     patches: [
         {
+            // Same find as RoleColorEverywhere chatbox mentions
             find: ':"text":',
             replacement: {
                 match: /(hidePersonalInformation\).+?)(if\(null!=\i\){.+?return \i)(?=})/,
