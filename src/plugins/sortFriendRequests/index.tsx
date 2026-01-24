@@ -62,10 +62,10 @@ export default definePlugin({
             replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
         }
     }, {
-        find: "#{intl::FRIEND_REQUEST_CANCEL}",
+        find: " ",
         replacement: {
             predicate: () => settings.store.showDates,
-            match: /(?<=\.\i,children:\[)\(0,.{0,150}user:\i,hovered:\i+?(?=,\(0)(?<=user:(\i).+?)/,
+            match: /(?<=\.\i,children:\[)\(0,.{0,100}user:\i,hovered:\i.+?(?=,\(0)(?<=user:(\i).+?)/,
             replace: (children, user) => `$self.WrapperDateComponent({user:${user},children:${children}})`
         }
     }],
