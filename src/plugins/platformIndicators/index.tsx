@@ -24,7 +24,7 @@ import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecor
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { DiscordPlatform, User } from "@vencord/discord-types";
+import { DiscordPlatform, OnlineStatus, User } from "@vencord/discord-types";
 import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import { AuthenticationStore, PresenceStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
@@ -42,11 +42,14 @@ export interface Session {
 const SessionsStore = findStoreLazy("SessionsStore") as {
     getSessions(): Record<string, Session>;
 };
+const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
+    useStatusFillColor: filters.byCode(".hex")
+});
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
-        <Tooltip text={tooltip} >
-            {(tooltipProps: any) => (
+        <Tooltip text={tooltip}>
+            {tooltipProps => (
                 <svg
                     {...tooltipProps}
                     height={(opts?.height ?? 20) - (small ? 3 : 0)}
@@ -68,14 +71,14 @@ const Icons = {
     embedded: Icon("M14.8 2.7 9 3.1V47h3.3c1.7 0 6.2.3 10 .7l6.7.6V2l-4.2.2c-2.4.1-6.9.3-10 .5zm1.8 6.4c1 1.7-1.3 3.6-2.7 2.2C12.7 10.1 13.5 8 15 8c.5 0 1.2.5 1.6 1.1zM16 33c0 6-.4 10-1 10s-1-4-1-10 .4-10 1-10 1 4 1 10zm15-8v23.3l3.8-.7c2-.3 4.7-.6 6-.6H43V3h-2.2c-1.3 0-4-.3-6-.6L31 1.7V25z", { viewBox: "0 0 50 50" }),
 } satisfies Record<DiscordPlatform, any>;
 
-const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
-    useStatusFillColor: filters.byCode(".hex")
-});
-
-const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: string; small: boolean; }) => {
-    const tooltip = platform === "embedded"
+function getPlatformTooltip(platform: DiscordPlatform): string {
+    return platform === "embedded"
         ? "Console"
         : platform[0].toUpperCase() + platform.slice(1);
+}
+
+const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: OnlineStatus; small: boolean; }) => {
+    const tooltip = getPlatformTooltip(platform as DiscordPlatform);
 
     const Icon = Icons[platform] ?? Icons.desktop;
 
@@ -117,6 +120,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     if (!status) return [];
 
     return Object.entries(status).map(([platform, status]) => ({
+        key: `vc-platform-indicator-${platform}`,
         component: () => (
             <span className="vc-platform-indicator">
                 <PlatformIcon
@@ -127,7 +131,6 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
                 />
             </span>
         ),
-        key: `vc-platform-indicator-${platform}`
     }));
 }
 
