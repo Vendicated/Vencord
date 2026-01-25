@@ -214,10 +214,10 @@ export interface ExpressionPickerStoreState extends Record<PropertyKey, any> {
 }
 
 export interface ExpressionPickerStore {
-    openExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
-    closeExpressionPicker(activeViewType?: any): void;
-    toggleMultiExpressionPicker(activeViewType?: any): void;
-    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
+    openExpressionPicker(activeView: ActiveView, activeViewType?: any, channelId?: string): void;
+    closeExpressionPicker(activeViewType?: any, channelId?: string): void;
+    toggleMultiExpressionPicker(activeViewType?: any, channelId?: string): void;
+    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any, channelId?: string): void;
     setExpressionPickerView(activeView: ActiveView): void;
     setSearchQuery(searchQuery: string, isSearchSuggestion?: boolean): void;
     useExpressionPickerStore(): ExpressionPickerStoreState;
