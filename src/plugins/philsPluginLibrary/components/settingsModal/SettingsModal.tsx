@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
+import { ContributorAuthorSummary } from "@plugins/philsPluginLibrary/components/ContributorAuthorSummary";
+import { Author, Contributor } from "@plugins/philsPluginLibrary/types";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@utils/modal";
-import { Button, Text } from "@webpack/common";
 import React, { JSX } from "react";
-
-import { Author, Contributor } from "../../types";
-import { ContributorAuthorSummary } from "../ContributorAuthorSummary";
 
 
 export interface SettingsModalProps extends React.ComponentProps<typeof ModalRoot> {
@@ -38,8 +38,8 @@ export interface SettingsModalProps extends React.ComponentProps<typeof ModalRoo
 export const SettingsModal = (props: SettingsModalProps) => {
     const doneButton =
         <Button
-            size={Button.Sizes.SMALL}
-            color={Button.Colors.BRAND}
+            size="small"
+            variant="primary"
             onClick={props.onDone}
         >
             {props.closeButtonName ?? "Done"}
@@ -48,7 +48,7 @@ export const SettingsModal = (props: SettingsModalProps) => {
     return (
         <ModalRoot {...props}>
             <ModalHeader separator={false}>
-                {props.title && <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{props.title}</Text>}
+                {props.title && <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>{props.title}</BaseText>}
                 <div style={{ marginLeft: "auto" }}>
                     <ModalCloseButton onClick={props.onClose} />
                 </div>
