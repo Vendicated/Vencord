@@ -471,6 +471,7 @@ export type ListScrollerThin = ComponentType<ScrollerBaseProps & {
 
 export type Clickable = <T extends "a" | "div" | "span" | "li" = "div">(props: PropsWithChildren<ComponentPropsWithRef<T>> & {
     tag?: T;
+    onClick?(e: React.MouseEvent<any>): void;
 }) => ReactNode;
 
 export type Avatar = ComponentType<PropsWithChildren<{
