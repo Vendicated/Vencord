@@ -16,24 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Forms } from "@webpack/common";
 import React from "react";
 
-export interface SettingsModalCardItemProps extends Pick<React.ComponentProps<"div">,
-    | "children"> {
-    title?: string;
+export interface SettingsModalRowProps extends Pick<React.ComponentProps<"div">,
+    | "children"
+    | "style"> {
+    gap?: string;
 }
 
-export const SettingsModalCardItem = ({ children, title }: SettingsModalCardItemProps) => {
+export const SettingsModalCardRow = ({ children, style, gap }: SettingsModalRowProps) => {
     return (
-        <div style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.4em",
-            width: "100%"
-        }}>
-            {title && <Forms.FormTitle tag="h5" style={{ margin: 0 }}>{title}</Forms.FormTitle>}
-            {children}
-        </div>
+        <div style={{ display: "flex", gap: gap ?? "1em", ...style }}>{children}</div>
     );
 };
