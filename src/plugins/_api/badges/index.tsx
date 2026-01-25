@@ -39,8 +39,12 @@ const EagleCordAdminBadge: ProfileBadge = {
     iconSrc: OWNER_BADGE,
     position: BadgePosition.END,
     shouldShow: ({ userId }) => ["893759402832699392"].includes(userId),
-    onClick: () => VencordNative.native.openExternal("https://www.prodbyeagle.dev/"),
+    onClick: () => openEaglePage(),
 };
+
+function openEaglePage() {
+    VencordNative.native.openExternal("https://www.prodbyeagle.dev/").then(r => console.log(r));
+}
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 let EagleBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;

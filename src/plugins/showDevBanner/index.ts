@@ -17,6 +17,7 @@ export default definePlugin({
     authors: [Devs.Eagle],
     settings,
     required: true,
+    isEagleCord: true,
 
     patches: [
         {

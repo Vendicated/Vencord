@@ -18,7 +18,7 @@ import { Menu } from "@webpack/common";
 
 import managedStyle from "./style.css?managed";
 
-const Button = findComponentByCodeLazy(".greenTooltip,", ".greenTooltipContent");
+const Button = findComponentByCodeLazy(".GREEN,positionKeyStemOverride:");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -104,8 +104,8 @@ export default definePlugin({
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
-                match: /className:\i\.buttons,.{0,50}children:\[/,
-                replace: "$&$self.GameActivityToggleButton(arguments[0]),"
+                match: /children:\[(?=.{0,25}?accountContainerRef)/,
+                replace: "children:[$self.GameActivityToggleButton(arguments[0]),"
             }
         }
     ],

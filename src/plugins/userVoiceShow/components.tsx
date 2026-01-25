@@ -20,11 +20,8 @@ import { PropsWithChildren } from "react";
 const cl = classNameFactory("vc-uvs-");
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
-const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
-    useChannelName: filters.byCode("()=>null==")
-});
 
-const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
+const ActionButtonClasses = findCssClassesLazy("actionButton", "highlight");
 
 type IconProps = Omit<React.ComponentPropsWithoutRef<"div">, "children"> & {
     size?: number;

@@ -96,7 +96,7 @@ export default definePlugin({
         },
         // Enable experiment embed on sent experiment links
         {
-            find: ".experimentOverride,children:",
+            find: '"Clear Treatment "',
             replacement: [
                 {
                     match: /\i\.isStaff\(\)/,

@@ -13,7 +13,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 const API_URL = "https://usrbg.is-hardly.online/users";
 const EAGLECORD_INDEX_URL =
-    "https://github.com/prodbyeagle/dotfiles/raw/refs/heads/main/Vencord/eagleCord/usrbg.json";
+    "https://raw.githubusercontent.com/prodbyeagle/dotfiles/main/Vencord/eagleCord/usrbg.json";
 const EAGLECORD_IMAGE_BASE =
     "https://raw.githubusercontent.com/prodbyeagle/dotfiles/refs/heads/main/Vencord/eagleCord/images/";
 
@@ -48,6 +48,7 @@ export default definePlugin({
     description: "Displays user banners from USRBG and EagleCord, allowing anyone to get a banner without Nitro",
     authors: [Devs.AutumnVN, Devs.katlyn, Devs.pylix, Devs.TheKodeToad, Devs.Eagle],
     settings,
+    isEagleCord: true,
     patches: [
         {
             find: '.banner)==null?"COMPLETE"',
@@ -138,17 +139,26 @@ export default definePlugin({
     },
 
     async start() {
-        const [usrbgRes, eagleRes] = await Promise.all([
-            fetch(API_URL),
-            fetch(EAGLECORD_INDEX_URL)
-        ]);
+        try {
+            const [usrbgRes, eagleRes] = await Promise.all([
+                fetch(API_URL),
+                fetch(EAGLECORD_INDEX_URL),
+            ]);
 
-        if (usrbgRes.ok) {
-            this.data = await usrbgRes.json();
-        }
+            if (usrbgRes.ok) {
+                this.data = (await usrbgRes.json()) as UsrbgApiReturn;
+            } else {
+                console.error("[USRBG] Failed to fetch USRBG API:", usrbgRes.status);
+            }
 
-        if (eagleRes.ok) {
-            this.eagleData = await eagleRes.json();
+            if (eagleRes.ok) {
+                this.eagleData = (await eagleRes.json()) as EagleCordBannerIndex;
+            } else {
+                console.error("[USRBG] Failed to fetch EagleCord index:", eagleRes.status);
+            }
+        } catch (err) {
+            console.error("[USRBG] Network error while fetching banner data:", err);
         }
     }
+
 });

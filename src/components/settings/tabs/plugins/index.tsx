@@ -11,6 +11,7 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -24,7 +25,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { Alerts, Button, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Alerts, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -67,7 +68,8 @@ const enum SearchStatus {
     DISABLED,
     NEW,
     USER_PLUGINS,
-    API_PLUGINS
+    API_PLUGINS,
+    EAGLECORD
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -175,6 +177,9 @@ function PluginSettings() {
             case SearchStatus.API_PLUGINS:
                 if (!plugin.name.endsWith("API")) return false;
                 break;
+            case SearchStatus.EAGLECORD:
+                if (!plugin.isEagleCord) return false;
+                break;
         }
 
         if (!search.length) return true;
@@ -208,7 +213,7 @@ function PluginSettings() {
 
     const showApi = searchValue.status === SearchStatus.API_PLUGINS;
     for (const p of sortedPlugins) {
-        if (p.hidden || (!p.options && p.name.endsWith("API") && !showApi))
+        if (p.hidden || (!p.settings && p.name.endsWith("API") && !showApi))
             continue;
 
         if (!pluginFilter(p)) continue;
@@ -271,6 +276,7 @@ function PluginSettings() {
                                 { label: "Show New", value: SearchStatus.NEW },
                                 hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
                                 { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
+                                { label: "Show EagleCord Plugins", value: SearchStatus.EAGLECORD },
                             ].filter(isTruthy)}
                             serialize={String}
                             select={onStatusChange}
