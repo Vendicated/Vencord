@@ -7,6 +7,7 @@
 import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getOrderedNames } from "@components/settings/tabs/plugins/UIElements";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
@@ -79,6 +80,25 @@ export interface ChatBarProps {
     };
 }
 
+function getOrderedKeys(
+    map: Map<string, any>,
+    settings: Record<string, any>
+) {
+    const known = new Set(map.keys());
+
+    // keys in saved order
+    const ordered = Object.keys(settings).filter(k => known.has(k));
+
+    // append new / unknown buttons
+    for (const key of known) {
+        if (!ordered.includes(key)) {
+            ordered.push(key);
+        }
+    }
+
+    return ordered;
+}
+
 export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean; isAnyChat: boolean; }) => JSX.Element | null;
 export type ChatBarButtonData = {
     render: ChatBarButtonFactory;
@@ -96,21 +116,44 @@ export const ChatBarButtonMap = new Map<string, ChatBarButtonData>();
 const logger = new Logger("ChatButtons");
 
 function VencordChatBarButtons(props: ChatBarProps) {
-    const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
+    const { chatBarButtons } =
+        useSettings(["uiElements.chatBarButtons.*"]).uiElements;
 
     const { analyticsName } = props.type;
+
+    // 1. Compute ordered keys
+    const orderedKeys = getOrderedNames(ChatBarButtonMap, chatBarButtons);
+
+    // 2. Render in that order
     return (
         <>
-            {Array.from(ChatBarButtonMap)
-                .filter(([key]) => chatBarButtons[key]?.enabled !== false)
-                .map(([key, { render: Button }]) => (
-                    <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
-                        <Button {...props} isMainChat={analyticsName === "normal"} isAnyChat={["normal", "sidebar"].includes(analyticsName)} />
+            {orderedKeys.map(key => {
+                const data = ChatBarButtonMap.get(key);
+                if (!data) return null;
+                if (chatBarButtons[key]?.enabled === false) return null;
+
+                const Button = data.render;
+
+                return (
+                    <ErrorBoundary
+                        noop
+                        key={key}
+                        onError={e =>
+                            logger.error(`Failed to render ${key}`, e.error)
+                        }
+                    >
+                        <Button
+                            {...props}
+                            isMainChat={analyticsName === "normal"}
+                            isAnyChat={["normal", "sidebar"].includes(analyticsName)}
+                        />
                     </ErrorBoundary>
-                ))}
+                );
+            })}
         </>
     );
 }
+
 
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     if (props.disabled || buttons.length === 0) return;

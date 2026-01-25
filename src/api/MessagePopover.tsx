@@ -17,6 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getOrderedNames } from "@components/settings/tabs/plugins/UIElements";
 import { Logger } from "@utils/Logger";
 import { IconComponent } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
@@ -64,29 +65,35 @@ export function removeMessagePopoverButton(identifier: string) {
     MessagePopoverButtonMap.delete(identifier);
 }
 
-function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePopoverButtonItem>, message: Message; }) {
+function VencordPopoverButtons(props: {
+    Component: React.ComponentType<MessagePopoverButtonItem>;
+    message: Message;
+}) {
     const { Component, message } = props;
 
     const { messagePopoverButtons } = useSettings(["uiElements.messagePopoverButtons.*"]).uiElements;
+    const orderedKeys = getOrderedNames(MessagePopoverButtonMap, messagePopoverButtons);
 
-    const elements = Array.from(MessagePopoverButtonMap.entries())
-        .filter(([key]) => messagePopoverButtons[key]?.enabled !== false)
-        .map(([key, { render }]) => {
-            try {
-                // FIXME: this should use proper React to ensure hooks work
-                const item = render(message);
-                if (!item) return null;
+    const elements = orderedKeys.map(key => {
+        const data = MessagePopoverButtonMap.get(key);
+        if (!data) return null;
+        if (messagePopoverButtons[key]?.enabled === false) return null;
 
-                return (
-                    <ErrorBoundary noop>
-                        <Component key={key} {...item} />
-                    </ErrorBoundary>
-                );
-            } catch (err) {
-                logger.error(`[${key}]`, err);
-                return null;
-            }
-        });
+        try {
+            // FIXME: this should use proper React to ensure hooks work
+            const item = data.render(message);
+            if (!item) return null;
+
+            return (
+                <ErrorBoundary noop key={key}>
+                    <Component {...item} />
+                </ErrorBoundary>
+            );
+        } catch (err) {
+            logger.error(`[${key}]`, err);
+            return null;
+        }
+    });
 
     return <>{elements}</>;
 }
