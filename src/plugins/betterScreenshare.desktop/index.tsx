@@ -29,7 +29,7 @@ import { initScreenshareAudioStore, initScreenshareStore } from "@plugins/better
 export default definePlugin({
     name: "BetterScreenshare",
     description: "This plugin allows you to further customize your screenshare.",
-    authors:  [{
+    authors: [{
         name: "rz30",
         id: 786315593963536415n
     }],
