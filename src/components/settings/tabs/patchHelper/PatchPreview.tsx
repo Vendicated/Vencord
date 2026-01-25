@@ -6,11 +6,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
 import { ReplaceFn } from "@utils/types";
-import { Button, Forms, Parser, useMemo, useState } from "@webpack/common";
+import { Parser, useMemo, useState } from "@webpack/common";
 import type { Change } from "diff";
 
 // Do not include diff in non dev builds (side effects import)
@@ -55,7 +58,7 @@ function Match({ matchResult }: { matchResult: RegExpMatchArray | null; }) {
 
     return (
         <>
-            <Forms.FormTitle>Match</Forms.FormTitle>
+            <Heading>Match</Heading>
             <div style={{ userSelect: "text" }}>{Parser.parse(fullMatch)}</div>
             <div style={{ userSelect: "text" }}>{Parser.parse(groups)}</div>
         </>
@@ -85,7 +88,7 @@ function Diff({ diff }: { diff: Change[] | null; }) {
 
     return (
         <>
-            <Forms.FormTitle>Diff</Forms.FormTitle>
+            <Heading>Diff</Heading>
             {diffLines}
         </>
     );
@@ -119,8 +122,8 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
     }, [id, match, replacement]);
 
     return (
-        <>
-            <Forms.FormTitle>Module {id}</Forms.FormTitle>
+        <Paragraph>
+            <Heading>Module {id}</Heading>
 
             <Match matchResult={matchResult} />
             <Diff diff={diff} />
@@ -142,10 +145,10 @@ export function PatchPreview({ module, match, replacement, setReplacementError }
             )}
 
             {compileResult && (
-                <Forms.FormText style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-feedback-critical)" }}>
+                <Paragraph style={{ color: compileResult[0] ? "var(--status-positive)" : "var(--text-feedback-critical)" }}>
                     {compileResult[1]}
-                </Forms.FormText>
+                </Paragraph>
             )}
-        </>
+        </Paragraph>
     );
 }
