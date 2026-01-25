@@ -55,21 +55,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         });
     }
 
-<<<<<<< HEAD
-        function reportRev() {
-            Alerts.show({
-                title: "Are you sure?",
-                body: "Do you really you want to report this review?",
-                confirmText: "Report",
-                cancelText: "Nevermind",
-                // confirmColor: "red", this just adds a class name and breaks the submit button guh
-                onConfirm: async () => {
-                    if (!(await getToken())) {
-                        return showToast("You must be logged in to report reviews.");
-                    } else {
-                        await reportReview(review.id);
-                    }
-=======
     function reportRev() {
         Alerts.show({
             title: "Are you sure?",
@@ -82,7 +67,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                     return showToast("You must be logged in to report reviews.");
                 } else {
                     reportReview(review.id);
->>>>>>> 8ecae352fd6a713147f17915f8dcf2c0e0b64f52
                 }
             }
         });
@@ -94,20 +78,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         if (isAuthorBlocked)
             return unblockUser(review.sender.discordID);
 
-<<<<<<< HEAD
-            Alerts.show({
-                title: "Are you sure?",
-                body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
-                confirmText: "Block",
-                cancelText: "Nevermind",
-                // confirmColor: "red", this just adds a class name and breaks the submit button guh
-                onConfirm: async () => {
-                    if (!(await getToken())) {
-                        return showToast("You must be logged in to block users.");
-                    } else {
-                        await blockUser(review.sender.discordID);
-                    }
-=======
         Alerts.show({
             title: "Are you sure?",
             body: "Do you really you want to block this user? They will be unable to leave further reviews on your profile. You can unblock users in the plugin settings.",
@@ -119,7 +89,6 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
                     return showToast("You must be logged in to block users.");
                 } else {
                     blockUser(review.sender.discordID);
->>>>>>> 8ecae352fd6a713147f17915f8dcf2c0e0b64f52
                 }
             }
         });
