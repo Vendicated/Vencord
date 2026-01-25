@@ -208,6 +208,7 @@ export interface ExpressionPickerStoreState extends Record<PropertyKey, any> {
     activeView: ActiveView | null;
     lastActiveView: ActiveView | null;
     activeViewType: any | null;
+    activeChannelId: string | null;
     searchQuery: string;
     isSearchSuggestion: boolean,
     pickerId: string;
