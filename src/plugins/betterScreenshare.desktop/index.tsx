@@ -16,64 +16,58 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
-import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
-import { PluginInfo } from "./constants";
-import { openScreenshareModal } from "./modals";
-import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
-import { GoLivePanelWrapper, replacedSubmitFunction } from "./patches";
-import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
+import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "@plugins/philsPluginLibrary";
+import { PluginInfo } from "@plugins/betterScreenshare.desktop/constants";
+import { openScreenshareModal } from "@plugins/betterScreenshare.desktop/modals";
+import { ScreenshareAudioPatcher, ScreensharePatcher } from "@plugins/betterScreenshare.desktop/patchers";
+import { GoLivePanelWrapper, replacedSubmitFunction } from "@plugins/betterScreenshare.desktop/patches";
+import { initScreenshareAudioStore, initScreenshareStore } from "@plugins/betterScreenshare.desktop/stores";
 
 export default definePlugin({
     name: "BetterScreenshare",
-    description: "This plugin allows you to further customize your screen sharing.",
-    authors:[{
+    description: "This plugin allows you to further customize your screenshare.",
+    authors:  [{
         name: "rz30",
         id: 786315593963536415n
     }],
     dependencies: ["PhilsPluginLibrary"],
     patches: [
         {
-            find: "GoLiveModal: user cannot be undefined", // Module: 60594; canaryRelease: 364525; L431
+            find: ':"go-live-modal"',
             replacement: {
-                match: /onSubmit:(\w+)/,
-                replace: "onSubmit:$self.replacedSubmitFunction($1)"
+                match: /function (\i)\((.{1,20})\)\{.{0,300}null==.{0,50}\?(\(0,.{1,10}\.jsxs?\)\(.{1,50}\..{1,10},{).{0,500}channel:.{0,20}}}\)/,
+                replace: "$self.GoLivePanelWrapper($1,$2,$3)"
             }
         },
         {
-            find: "StreamSettings: user cannot be undefined", // Module: 641115; canaryRelease: 364525; L254
+            find: ".STREAM_FPS_OPTION.",
             replacement: {
-                match: /\(.{0,10}(,{.{0,100}modalContent)/,
-                replace: "($self.GoLivePanelWrapper$1"
+                match: /,onSubmit:function\(\){/,
+                replace: ",onSubmit:function(){$self.replacedSubmitFunction(arguments[0]);"
             }
         }
     ],
-    settings: definePluginSettings({
-        hideDefaultSettings: {
-            type: OptionType.BOOLEAN,
-            description: "Hide Discord screen sharing settings",
-            default: true,
-        }
-    }),
     start(): void {
         initScreenshareStore();
         initScreenshareAudioStore();
+
         this.screensharePatcher = new ScreensharePatcher().patch();
         this.screenshareAudioPatcher = new ScreenshareAudioPatcher().patch();
 
-        addSettingsPanelButton({
-            name: PluginInfo.PLUGIN_NAME,
-            icon: ScreenshareSettingsIcon,
-            tooltipText: "Screenshare Settings",
-            onClick: openScreenshareModal
+        addSettingsPanelButton({ 
+            name: PluginInfo.PLUGIN_NAME, 
+            icon: ScreenshareSettingsIcon, 
+            tooltipText: "Screenshare Settings", 
+            onClick: openScreenshareModal 
         });
     },
     stop(): void {
         this.screensharePatcher?.unpatch();
         this.screenshareAudioPatcher?.unpatch();
+
         Emitter.removeAllListeners(PluginInfo.PLUGIN_NAME);
 
         removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
@@ -81,6 +75,6 @@ export default definePlugin({
     toolboxActions: {
         "Open Screenshare Settings": openScreenshareModal
     },
-    replacedSubmitFunction,
-    GoLivePanelWrapper
+    GoLivePanelWrapper,
+    replacedSubmitFunction
 });
