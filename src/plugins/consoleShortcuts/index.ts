@@ -46,14 +46,14 @@ const define: typeof Object.defineProperty =
     };
 
 function makeShortcuts() {
-    function newFindWrapper(filterFactory: (...props: any[]) => Webpack.FilterFn) {
+    function newFindWrapper(filterFactory: (...props: any[]) => Webpack.FilterFn, topLevelOnly = false) {
         const cache = new Map<string, unknown>();
 
         return function (...filterProps: unknown[]) {
             const cacheKey = String(filterProps);
             if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-            const matches = findAll(filterFactory(...filterProps));
+            const matches = findAll(filterFactory(...filterProps), { topLevelOnly });
 
             const result = (() => {
                 switch (matches.length) {
@@ -108,6 +108,7 @@ function makeShortcuts() {
         findByProps,
         findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
         findByCode: newFindWrapper(filters.byCode),
+        findCssClasses: newFindWrapper(filters.byClassNames, true),
         findAllByCode: (code: string) => findAll(filters.byCode(code)),
         findComponentByCode: newFindWrapper(filters.componentByCode),
         findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),

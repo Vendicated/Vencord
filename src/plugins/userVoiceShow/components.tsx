@@ -13,18 +13,20 @@ import ShowHiddenChannelsPlugin from "@plugins/showHiddenChannels";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { Channel } from "@vencord/discord-types";
+<<<<<<< HEAD
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
+=======
+import { findByPropsLazy, findCssClassesLazy } from "@webpack";
+import { ChannelRouter, ChannelStore, Parser, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, UserSummaryItem, useStateFromStores, VoiceStateStore } from "@webpack/common";
+>>>>>>> 8ecae352fd6a713147f17915f8dcf2c0e0b64f52
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-uvs-");
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
-const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
-    useChannelName: filters.byCode("()=>null==")
-});
 
-const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
+const ActionButtonClasses = findCssClassesLazy("actionButton", "highlight");
 
 type IconProps = Omit<React.ComponentPropsWithoutRef<"div">, "children"> & {
     size?: number;

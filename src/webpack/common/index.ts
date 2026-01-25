@@ -6,7 +6,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export * from "./classes";
 export * from "./components";
 export * from "./menu";
 export * from "./react";

@@ -74,7 +74,7 @@ const settings = definePluginSettings({
         description: "Size of the emojis when sending",
         type: OptionType.SLIDER,
         default: 48,
-        markers: [32, 48, 64, 96, 128, 160, 256, 512]
+        markers: [32, 48, 56, 64, 96, 128, 160, 256, 512]
     },
     transformEmojis: {
         description: "Whether to transform fake emojis into real ones",
@@ -173,11 +173,11 @@ export default definePlugin({
         makeBypassPatches(),
         // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
-            find: "emojiItemDisabled]",
+            find: '.getByName("fork_and_knife")',
             predicate: () => settings.store.enableEmojiBypass,
             replacement: {
-                match: /CHAT/,
-                replace: "STATUS"
+                match: ".CHAT",
+                replace: ".STATUS"
             }
         },
         {
@@ -852,6 +852,7 @@ export default definePlugin({
 
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
+                    url.searchParams.set("lossless", "true");
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
@@ -871,6 +872,7 @@ export default definePlugin({
                     const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
+                    url.searchParams.set("lossless", "true");
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
@@ -904,6 +906,7 @@ export default definePlugin({
                 const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
+                url.searchParams.set("lossless", "true");
 
                 const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
