@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as types from "@plugins/philsPluginLibrary/types";
-import { findCssClassesLazy } from "@webpack";
+import { Logger } from "@utils/Logger";
 
-export const panelClasses: types.PanelClasses = findCssClassesLazy("button", "buttonContents", "buttonColor", "container", "actionButtons", "buttonIcon");
+import { PluginInfo } from "../constants";
 
-// waitFor(filters.byProps("button", "buttonContents", "buttonColor"), result => panelClasses = result);
+export const logger = new Logger(PluginInfo.PLUGIN_NAME);

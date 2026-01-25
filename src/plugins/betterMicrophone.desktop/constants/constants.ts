@@ -16,9 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as types from "@plugins/philsPluginLibrary/types";
-import { findCssClassesLazy } from "@webpack";
+import { Devs } from "@utils/constants";
 
-export const panelClasses: types.PanelClasses = findCssClassesLazy("button", "buttonContents", "buttonColor", "container", "actionButtons", "buttonIcon");
+import { types } from "../../philsPluginLibrary";
 
-// waitFor(filters.byProps("button", "buttonContents", "buttonColor"), result => panelClasses = result);
+export const PluginInfo = {
+    PLUGIN_NAME: "BetterMicrophone",
+    DESCRIPTION: "This plugin allows you to further customize your microphone.",
+    AUTHOR: {
+        ...Devs.pluckerpilple,
+        github: "https://github.com/pluckerpilple"
+    },
+    CONTRIBUTORS: {}
+} as const satisfies types.PluginInfo;

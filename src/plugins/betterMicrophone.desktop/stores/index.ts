@@ -16,9 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as types from "@plugins/philsPluginLibrary/types";
-import { findCssClassesLazy } from "@webpack";
-
-export const panelClasses: types.PanelClasses = findCssClassesLazy("button", "buttonContents", "buttonColor", "container", "actionButtons", "buttonIcon");
-
-// waitFor(filters.byProps("button", "buttonContents", "buttonColor"), result => panelClasses = result);
+export * from "./microphoneStore";

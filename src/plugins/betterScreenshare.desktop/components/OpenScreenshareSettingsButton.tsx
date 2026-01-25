@@ -16,9 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as types from "@plugins/philsPluginLibrary/types";
-import { findCssClassesLazy } from "@webpack";
+import { Button } from "@webpack/common";
+import React from "react";
 
-export const panelClasses: types.PanelClasses = findCssClassesLazy("button", "buttonContents", "buttonColor", "container", "actionButtons", "buttonIcon");
+import { openScreenshareModal } from "../modals";
 
-// waitFor(filters.byProps("button", "buttonContents", "buttonColor"), result => panelClasses = result);
+export interface OpenScreenshareSettingsButtonProps {
+    title?: string;
+}
+
+export const OpenScreenshareSettingsButton = (props: OpenScreenshareSettingsButtonProps) => {
+    return (
+        <Button
+            size={Button.Sizes.SMALL}
+            color={Button.Colors.PRIMARY}
+            onClick={openScreenshareModal}
+        >
+            {props.title ? props.title : "Screenshare Settings"}
+        </Button>
+    );
+};

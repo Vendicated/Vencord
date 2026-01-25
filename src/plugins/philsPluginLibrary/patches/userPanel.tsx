@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { SettingsPanel } from "@plugins/philsPluginLibrary/components";
+import { IconComponent, SettingsPanelButton } from "@plugins/philsPluginLibrary/components/settingsPanel/SettingsPanelButton";
+import { SettingsPanelRow } from "@plugins/philsPluginLibrary/components/settingsPanel/SettingsPanelRow";
+import { SettingsPanelTooltipButton } from "@plugins/philsPluginLibrary/components/settingsPanel/SettingsPanelTooltipButton";
 import { React } from "@webpack/common";
 import { JSX } from "react";
-
-import { SettingsPanel } from "../components";
-import { IconComponent, SettingsPanelButton } from "../components/settingsPanel/SettingsPanelButton";
-import { SettingsPanelRow } from "../components/settingsPanel/SettingsPanelRow";
-import { SettingsPanelTooltipButton } from "../components/settingsPanel/SettingsPanelTooltipButton";
 
 export interface PanelButton {
     name: string,

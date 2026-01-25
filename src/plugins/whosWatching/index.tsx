@@ -13,9 +13,9 @@ import { getIntlMessage, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { User } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Clickable, Forms, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { Forms, RelationshipStore, Text, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+
 import { JSX } from "react";
 
 interface WatchingProps {
@@ -25,8 +25,27 @@ interface WatchingProps {
 
 const cl = classNameFactory("whosWatching-");
 
+
 function getUsername(user: any): string {
-    return RelationshipStore.getNickname(user.id) || user.globalName || user.username;
+    if (!user) return "Unknown User";
+    try {
+        return RelationshipStore?.getNickname?.(user.id) || user.globalName || user.username || "Unknown User";
+    } catch {
+        return user.username || "Unknown User";
+    }
+}
+
+
+function getAvatarURL(user: any, guildId?: string, size: number = 80): string {
+    if (!user) return "";
+    try {
+        if (typeof user.getAvatarURL === 'function') {
+            return user.getAvatarURL(guildId, size, true) || "";
+        }
+        return "";
+    } catch {
+        return "";
+    }
 }
 
 const settings = definePluginSettings({
@@ -38,41 +57,81 @@ const settings = definePluginSettings({
     },
 });
 
+
 function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
-    // Missing Users happen when UserStore.getUser(id) returns null
-    // The client should automatically cache spectators, so this might not be possible but it's better to be sure just in case
-    let missingUsers = 0;
-    const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
+    if (!userIds || !Array.isArray(userIds)) {
+        return <div className={cl("content")}>
+            <span className={cl("no_viewers")}>No spectators</span>
+        </div>;
+    }
+
+    const users = userIds
+        .map(id => {
+            try {
+                return UserStore.getUser(id);
+            } catch {
+                return null;
+            }
+        })
+        .filter(user => user !== null && user !== undefined);
+
+    const missingUsers = userIds.length - users.length;
+
     return (
         <div className={cl("content")}>
-            {userIds.length ?
-                (<>
-                    <Forms.FormTitle>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Forms.FormTitle>
-                    <Flex flexDirection="column" style={{ gap: 6 }} >
-                        {users.map(user => (
-                            <Flex key={user.id} flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
-                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} alt="" />
-                                {getUsername(user)}
-                            </Flex>
-                        ))}
-                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}</span>}
+            {users.length > 0 ? (
+                <>
+                    <Forms.FormTitle>
+                        {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
+                    </Forms.FormTitle>
+                    <Flex flexDirection="column" style={{ gap: 6 }}>
+                        {users.map((user) => {
+                            if (!user?.id) return null;
+                            const avatarUrl = getAvatarURL(user, guildId, 16);
+                            return (
+                                <Flex
+                                    key={user.id}
+                                    flexDirection="row"
+                                    style={{ gap: 6, alignItems: "center" }}
+                                    className={cl("user")}
+                                >
+                                    {avatarUrl && (
+                                        <img
+                                            src={avatarUrl}
+                                            style={{ borderRadius: 8, width: 16, height: 16 }}
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                            }}
+                                        />
+                                    )}
+                                    <Text variant="text-sm/normal">{getUsername(user)}</Text>
+                                </Flex>
+                            );
+                        })}
+                        {missingUsers > 0 && (
+                            <span className={cl("more_users")}>
+                                +{getIntlMessage("NUM_USERS", { num: missingUsers })}
+                            </span>
+                        )}
                     </Flex>
-                </>)
-                : (<span className={cl("no_viewers")}>No spectators</span>)}
+                </>
+            ) : (
+                <span className={cl("no_viewers")}>No spectators</span>
+            )}
         </div>
     );
 }
 
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+
+
 
 export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
     authors: [Devs.pluckerpilple],
-    settings,
+    settings: settings,
     patches: [
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
@@ -82,6 +141,7 @@ export default definePlugin({
             }
         },
         {
+            predicate: () => settings.store.showPanel,
             find: "this.renderEmbeddedActivity()",
             replacement: {
                 match: /"div"(?=.{0,50}this.renderActions)/,
@@ -89,84 +149,180 @@ export default definePlugin({
             }
         }
     ],
-    WrapperComponent: ErrorBoundary.wrap(props => {
-        const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-        if (!stream) return <div {...props}>{props.children}</div>;
 
-        const userIds: string[] = ApplicationStreamingStore.getViewerIds(stream);
-        let missingUsers = 0;
-        const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
 
-        function renderMoreUsers(_label: string, count: number) {
-            const sliced = users.slice(count - 1);
-            return (
-                <Tooltip text={<Watching userIds={userIds} guildId={stream.guildId} />}>
-                    {({ onMouseEnter, onMouseLeave }) => (
-                        <div
-                            className={AvatarStyles.moreUsers}
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                        >
-                            +{sliced.length + missingUsers}
-                        </div>
-                    )}
-                </Tooltip>
+
+
+
+
+
+
+    
+    WrapperComponent: ErrorBoundary.wrap((props: any) => {
+        let stream;
+        try {
+            stream = useStateFromStores(
+                [ApplicationStreamingStore],
+                () => ApplicationStreamingStore.getCurrentUserActiveStream?.() || null
+
+
+
+
+
+
+
             );
+        } catch (error) {
+            console.error("[WhosWatching] Error getting stream:", error);
+            return <div {...props}>{props.children}</div>;
         }
+
+        if (!stream) {
+            return <div {...props}>{props.children}</div>;
+        }
+
+        let userIds: string[] = [];
+        try {
+            userIds = ApplicationStreamingStore.getViewerIds?.(stream) || [];
+        } catch (error) {
+            console.error("[WhosWatching] Error getting viewer IDs:", error);
+            return <div {...props}>{props.children}</div>;
+        }
+
+        const users = userIds
+            .map(id => {
+                try {
+                    return UserStore.getUser(id);
+                } catch {
+                    return null;
+                }
+            })
+            .filter(user => user !== null && user !== undefined);
+
+        const missingUsers = userIds.length - users.length;
 
         return (
             <>
                 <div {...props}>{props.children}</div>
                 <div className={classes(cl("spectators_panel"), Margins.top8)}>
-                    <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
-                        {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
-                    </Forms.FormTitle>
-                    {users.length ?
+                    {users.length > 0 ? (
+
+
+
                         <>
-                            <UserSummaryItem
-                                users={users}
-                                count={userIds.length}
-                                renderIcon={false}
-                                max={12}
-                                showDefaultAvatarsForNullUsers
-                                renderMoreUsers={renderMoreUsers}
-                                renderUser={(user: User, index: number) => (
-                                    <Clickable
-                                        key={index}
-                                        className={AvatarStyles.clickableAvatar}
-                                        onClick={() => openUserProfile(user.id)}
-                                    >
-                                        <img
-                                            className={AvatarStyles.avatar}
-                                            src={user.getAvatarURL(void 0, 80, true)}
-                                            alt={user.username}
-                                            title={user.username}
-                                        />
-                                    </Clickable>
+                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 8, textTransform: "uppercase" }}>
+                                {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
+                            </Forms.FormTitle>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                                {users.slice(0, 12).map((user) => {
+                                    if (!user?.id) return null;
+                                    const avatarUrl = getAvatarURL(user, stream.guildId, 80);
+                                    const username = getUsername(user);
+
+                                    return (
+                                        <Tooltip key={user.id} text={username}>
+                                            {({ onMouseEnter, onMouseLeave }) => (
+                                                <img
+                                                    src={avatarUrl || ""}
+                                                    alt={username}
+                                                    className="vc-whoswatching-avatar"
+                                                    style={{
+                                                        width: 24,
+                                                        height: 24,
+                                                        borderRadius: "50%",
+                                                        cursor: "pointer",
+                                                        objectFit: "cover"
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        try {
+                                                            
+                                                            openUserProfile(user.id);
+                                                        } catch (error) {
+                                                            console.error("[WhosWatching] Error opening profile:", error);
+                                                        }
+                                                    }}
+                                                    onMouseEnter={onMouseEnter}
+                                                    onMouseLeave={onMouseLeave}
+                                                    onError={(e) => {
+                                                        e.currentTarget.src = "";
+                                                        e.currentTarget.style.display = 'none';
+                                                    }}
+                                                />
+                                            )}
+                                        </Tooltip>
+                                    );
+                                })}
+                                {(users.length > 12 || missingUsers > 0) && (
+                                    <Tooltip text={<Watching userIds={userIds} guildId={stream.guildId} />}>
+                                        {({ onMouseEnter, onMouseLeave }) => (
+                                            <div
+                                                onMouseEnter={onMouseEnter}
+                                                onMouseLeave={onMouseLeave}
+                                                style={{
+                                                    width: 24,
+                                                    height: 24,
+                                                    borderRadius: "50%",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    backgroundColor: "var(--background-tertiary)",
+                                                    fontSize: 10,
+                                                    fontWeight: 600,
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                +{(users.length > 12 ? users.length - 12 : 0) + missingUsers}
+                                            </div>
+                                        )}
+                                    </Tooltip>
                                 )}
-                            />
+                            </div>
                         </>
-                        : <Forms.FormText>No spectators</Forms.FormText>
-                    }
+                    ) : (
+                        <Forms.FormText style={{ marginTop: 8 }}>No spectators</Forms.FormText>
+                    )}
                 </div>
             </>
         );
     }),
+
+    
     component: function ({ OriginalComponent }) {
         return ErrorBoundary.wrap((props: any) => {
-            const stream = useStateFromStores(
-                [ApplicationStreamingStore],
-                () => ApplicationStreamingStore.getCurrentUserActiveStream()
+            let stream;
+            try {
+                stream = useStateFromStores(
+                    [ApplicationStreamingStore],
+                    () => ApplicationStreamingStore.getCurrentUserActiveStream?.() || null
+                );
+            } catch (error) {
+                console.error("[WhosWatching] Error getting stream:", error);
+                return <OriginalComponent {...props} />;
+            }
+
+            if (!stream) {
+                return <OriginalComponent {...props} />;
+            }
+
+            let viewers: string[] = [];
+            try {
+                viewers = ApplicationStreamingStore.getViewerIds?.(stream) || [];
+            } catch (error) {
+                console.error("[WhosWatching] Error getting viewers:", error);
+                return <OriginalComponent {...props} />;
+            }
+
+            return (
+                <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                            <OriginalComponent {...props} />
+                        </div>
+                    )}
+                </Tooltip>
             );
-            if (!stream) return null;
-            const viewers = ApplicationStreamingStore.getViewerIds(stream);
-            return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
-                {({ onMouseEnter, onMouseLeave }) => (
-                    <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                        <OriginalComponent {...props} />
-                    </div>
-                )}
-            </Tooltip>;
         });
     }
 });
