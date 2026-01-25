@@ -16,19 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Tooltip } from "@webpack/common";
+import { panelClasses } from "@plugins/philsPluginLibrary/discordModules";
+import { classes } from "@utils/misc";
 import React from "react";
 
-import { SettingsPanelButton, SettingsPanelButtonProps } from "./SettingsPanelButton";
-
-export interface SettingsPanelTooltipButtonProps extends SettingsPanelButtonProps {
-    tooltipProps: Omit<React.ComponentProps<typeof Tooltip>, "children">;
+export interface SettingsPanelRowProps {
+    children: React.ComponentProps<"div">["children"];
 }
 
-export const SettingsPanelTooltipButton = (props: SettingsPanelTooltipButtonProps) => {
+export const SettingsPanelRow = ({ children }: SettingsPanelRowProps) => {
     return (
-        <Tooltip {...props.tooltipProps}>
-            {tooltipProps => <SettingsPanelButton {...tooltipProps} {...props} />}
-        </Tooltip>
+        <div
+            className={classes(panelClasses.actionButtons)}
+            style={{ padding: 0 }}
+        >
+            {children}
+        </div>
     );
 };
