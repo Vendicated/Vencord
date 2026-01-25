@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
-import { ModalSize, openModalLazy } from "@utils/modal";
-import { SelectOption } from "@vencord/discord-types";
-import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
-
-import { MicrophoneSettingsModal } from "../../betterMicrophone.desktop/components";
+import { MicrophoneSettingsModal } from "@plugins/betterMicrophone.desktop/components";
+import { PluginInfo } from "@plugins/betterScreenshare.desktop/constants";
+import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "@plugins/betterScreenshare.desktop/stores";
 import {
     MediaEngineStore,
     openURL,
@@ -35,10 +35,11 @@ import {
     types,
     validateNumberInput,
     validateTextInputNumber
-} from "../../philsPluginLibrary";
-import { Styles } from "../../philsPluginLibrary/styles";
-import { PluginInfo } from "../constants";
-import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "../stores";
+} from "@plugins/philsPluginLibrary";
+import { Styles } from "@plugins/philsPluginLibrary/styles";
+import { ModalSize, openModalLazy } from "@utils/modal";
+import { SelectOption } from "@vencord/discord-types";
+import { Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 
 const simpleResolutions: readonly (SelectOption & { value: types.Resolution; })[] = [
     {
@@ -344,8 +345,8 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
     const settingsCardItemAudio =
         <SettingsModalCardItem >
             <Button
-                color={Button.Colors.PRIMARY}
-                size={Button.Sizes.SMALL}
+                variant="primary"
+                size="small"
                 onClick={() => {
                     if (screenshareAudioStore)
                         openModalLazy(async () => {
