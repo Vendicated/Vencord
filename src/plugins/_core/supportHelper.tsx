@@ -25,8 +25,10 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel } from "@vencord/discord-types";
-import { Alerts, Button, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
+import { Paragraph } from "@components/Paragraph";
+import { Button } from "@components/Button";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
@@ -49,6 +51,16 @@ const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
+interface clientData {
+    name: string;
+    version?: string | null | undefined;
+    info?: string | boolean | null | undefined;
+    spoofed?: string | null | undefined;
+    shortHash?: string | null | undefined;
+    hash?: string | null | undefined;
+    dev?: boolean | null | undefined;
+}
+
 const isSupportAllowedChannel = (channel: Channel) => channel.parent_id === SUPPORT_CATEGORY_ID || AdditionalAllowedChannelIds.includes(channel.id);
 
 async function forceUpdate() {
@@ -59,6 +71,37 @@ async function forceUpdate() {
     }
 
     return outdated;
+}
+
+export function detectClient(): clientData {
+    if (IS_DISCORD_DESKTOP) {
+        return {
+            name: "Discord Desktop",
+            version: DiscordNative.app.getVersion(),
+        };
+    }
+    if (IS_VESKTOP) return {
+        name: "Vesktop",
+        version: VesktopNative.app.getVersion(),
+    };
+
+
+
+    if ("legcord" in window) return {
+        name: "LegCord",
+        version: window.legcord.version,
+    };
+
+    if ("goofcord" in window) return {
+        name: "GoofCord",
+        version: window.goofcord.version,
+    };
+
+    const name = typeof unsafeWindow !== "undefined" ? "UserScript" : "Web";
+    return {
+        name: name,
+        info: navigator.userAgent
+    };
 }
 
 async function generateDebugInfoMessage() {
@@ -173,10 +216,10 @@ export default definePlugin({
                     return Alerts.show({
                         title: "Hold on!",
                         body: <div>
-                            <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
-                            <Forms.FormText className={Margins.top8}>
+                            <Paragraph>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Paragraph>
+                            <Paragraph className={Margins.top8}>
                                 Please first update before asking for support!
-                            </Forms.FormText>
+                            </Paragraph>
                         </div>,
                         onCancel: () => openSettingsTabModal(UpdaterTab!),
                         cancelText: "View Updates",
@@ -194,11 +237,11 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
-                        <Forms.FormText className={Margins.top8}>
+                        <Paragraph>You are using an externally updated Vencord version, which we do not provide support for!</Paragraph>
+                        <Paragraph className={Margins.top8}>
                             Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
                             contact your package maintainer for support instead.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                 });
             }
@@ -207,14 +250,14 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+                        <Paragraph>You are using a custom build of Vencord, which we do not provide support for!</Paragraph>
 
-                        <Forms.FormText className={Margins.top8}>
+                        <Paragraph className={Margins.top8}>
                             We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
                             Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
-                        </Forms.FormText>
+                        </Paragraph>
 
-                        <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
+                        <Paragraph className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Paragraph>
                     </div>,
                     confirmText: "Understood",
                     secondaryConfirmText: "Don't show again",
@@ -239,7 +282,7 @@ export default definePlugin({
             buttons.push(
                 <Button
                     key="vc-update"
-                    color={Button.Colors.GREEN}
+                    variant="positive"
                     onClick={async () => {
                         try {
                             if (await forceUpdate())
@@ -262,14 +305,14 @@ export default definePlugin({
                 buttons.push(
                     <Button
                         key="vc-dbg"
-                        color={Button.Colors.PRIMARY}
+                        variant="primary"
                         onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                     >
                         Run /vencord-debug
                     </Button>,
                     <Button
+                        variant="primary"
                         key="vc-plg-list"
-                        color={Button.Colors.PRIMARY}
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
                         Run /vencord-plugins

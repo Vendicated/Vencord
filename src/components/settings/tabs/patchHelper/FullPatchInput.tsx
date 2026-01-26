@@ -6,10 +6,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { Patch, ReplaceFn } from "@utils/types";
 import { TextArea, useEffect, useRef, useState } from "@webpack/common";
-import { Paragraph } from "@components/Paragraph";
 
 export interface FullPatchInputProps {
     setFind(v: string): void;

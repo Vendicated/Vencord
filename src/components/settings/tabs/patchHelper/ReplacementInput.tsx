@@ -7,10 +7,10 @@
  */
 
 import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { Parser, TextInput, useEffect, useState } from "@webpack/common";
-import { Paragraph } from "@components/Paragraph";
-import { Heading } from "@components/Heading";
 
 const RegexGuide = {
     "\\i": "Special regex escape sequence that matches identifiers (varnames, classnames, etc.)",
