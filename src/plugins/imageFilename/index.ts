@@ -27,10 +27,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".clickableWrapper",
+            find: ".RESPONSIVE?",
             replacement: {
-                match: /\.originalLink,href:(\i)/,
-                replace: "$&,title:$self.getTitle($1)"
+                match: /(?="data-role":"img","data-safe-src":)(?<=href:(\i).+?)/,
+                replace: "title:$self.getTitle($1),"
             }
         },
     ],

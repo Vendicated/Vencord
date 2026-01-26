@@ -628,6 +628,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     MVDW_Java: {
         name: "MVDW-Java",
         id: 1323414484555010049n,
+    prism: {
+        name: "prism",
+        id: 390884143749136386n,
     },
 } satisfies Record<string, Dev>);
 
