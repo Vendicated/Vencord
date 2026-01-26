@@ -6,8 +6,12 @@
 
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { Divider } from "@components/Divider";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
+import definePlugin, { OptionType } from "@utils/types";
+import { Forms } from "@webpack/common";
 
 import { encode, decode, checkEncode, SHOULD_ENCODE_PATTERN } from "./encoding";
 
@@ -27,11 +31,44 @@ const preSendListener = (channelId: string, msg: any) => {
     }
 };
 
+function SettingsComponent() {
+    return (
+        <section>
+            <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
+            <Forms.FormText>
+                Wrap text with <code>&gt;</code> and <code>&lt;</code> to make it invisible.
+            </Forms.FormText>
+            <Forms.FormText className={Margins.top8}>
+                <strong>Example:</strong>
+                <ul>
+                    <li>You type: <code>hello &gt;secret&lt; world</code></li>
+                    <li>Others see: <code>hello  world</code> (invisible gap)</li>
+                    <li>Plugin users see: <code>hello Encrypted message: secret world</code></li>
+                </ul>
+            </Forms.FormText>
+            <Divider className={classes(Margins.top8, Margins.bottom8)} />
+            <Forms.FormTitle tag="h3">Note</Forms.FormTitle>
+            <Forms.FormText>
+                This is <strong>NOT</strong> real encryption! Anyone with this plugin can decode messages.
+                Perfect for fun secrets with friends.
+            </Forms.FormText>
+        </section>
+    );
+}
+
 export default definePlugin({
     name: "InvisibleMessage",
-    description: "Hide secret messages in plain sight! Wrap text with >< to make it invisible. Example: 'hello >secret< world' - only users with this plugin can see the hidden text.",
+    description: "Send invisible messages using zero-width characters. Wrap text with >< to hide it.",
     authors: [Devs.nyankoiscat],
     dependencies: ["MessageAccessoriesAPI"],
+
+    options: {
+        usage: {
+            type: OptionType.COMPONENT,
+            description: "",
+            component: SettingsComponent
+        }
+    },
 
     start() {
         addMessagePreSendListener(preSendListener);
