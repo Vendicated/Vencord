@@ -121,9 +121,15 @@ const PreviewButton: ChatBarButtonFactory = ({ isAnyChat, isEmpty, type: { attac
 };
 
 export default definePlugin({
-    name: "PreviewMessage",
-    description: "Lets you preview your message before sending it.",
-    authors: [Devs.Aria],
+    name: "تشوف الرساله",
+    description: "تشوف رسالتك قبل لا ترسلها.",
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     // start early to ensure we're the first plugin to add our button
     // This makes the popping in less awkward
     startAt: StartAt.Init,
