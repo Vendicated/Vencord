@@ -71,9 +71,15 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 };
 
 export default definePlugin({
-    name: "VoiceMessages",
-    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
-    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
+    name: "رساله صوتيه",
+    description: "ترسل رساله صوتيه",
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settings,
     contextMenus: {
         "channel-attach": ctxMenuPatch
