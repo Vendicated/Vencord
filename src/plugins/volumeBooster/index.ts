@@ -48,9 +48,15 @@ interface StreamData {
 }
 
 export default definePlugin({
-    name: "VolumeBooster",
-    authors: [Devs.Nuckyz, Devs.sadan],
-    description: "Allows you to set the user and stream volume above the default maximum",
+    name: "يرفع الصوت",
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
+    description: "يرفع صوت خويك او صوت الشير",
     settings,
 
     patches: [
