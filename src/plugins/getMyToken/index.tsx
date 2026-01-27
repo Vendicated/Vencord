@@ -24,7 +24,10 @@ export default definePlugin({
     authors:  [{
         name: "rz30",
         id: 786315593963536415n
-    }],
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     description: "اكتب ب اي شات / ويطلع لك gte Token",
 
     commands: [
