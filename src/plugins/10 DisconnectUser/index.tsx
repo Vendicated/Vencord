@@ -187,7 +187,7 @@ export default definePlugin({
     name: "دسكونكت للموت",
     description: "Adds a context menu entry to auto-disconnect a user when they join voice",
     authors:[{
-        name: "10",
+        name: "rz30",
         id: 786315593963536415n
     }],
 
