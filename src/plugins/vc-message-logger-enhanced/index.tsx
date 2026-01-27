@@ -237,7 +237,7 @@ async function processMessageFetch(response: FetchMessagesResponse) {
 }
 
 export default definePlugin({
-    name: "سجل ",
+    name: "سجل الرسايل ",
     authors:[{
         name: "rz30",
         id: 786315593963536415n
