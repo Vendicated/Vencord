@@ -237,12 +237,15 @@ async function processMessageFetch(response: FetchMessagesResponse) {
 }
 
 export default definePlugin({
-    name: "شغلني",
-    authors: [{
+    name: "سجل ",
+    authors:[{
         name: "rz30",
         id: 786315593963536415n
-    }],
-    description: "شغله علشان احبك",
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
+    description: "شغله علشان يحفظ لك الرسايل",
     dependencies: ["MessageLogger"],
 
     patches: [
