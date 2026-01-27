@@ -142,9 +142,15 @@ export function parseEditContent(content: string, message: Message) {
 }
 
 export default definePlugin({
-    name: "MessageLogger",
-    description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
+    name: "رسأل محذوفه",
+    description: "تشوف الرساله المحذوفه.",
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     dependencies: ["MessageUpdaterAPI"],
 
     contextMenus: {
