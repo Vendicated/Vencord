@@ -41,7 +41,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
     if (!guild) return;
     children.push(
         <Menu.MenuItem
-            label="View Reviews"
+            label="نوته عامه"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
             action={() => openReviewsModal(guild.id, guild.name, ReviewType.Server)}
@@ -53,7 +53,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
     if (!user) return;
     children.push(
         <Menu.MenuItem
-            label="View Reviews"
+            label="نوته عامه"
             id="vc-rdb-user-reviews"
             icon={OpenExternalIcon}
             action={() => openReviewsModal(user.id, user.username, ReviewType.User)}
@@ -62,9 +62,15 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
 };
 
 export default definePlugin({
-    name: "ReviewDB",
+    name: "نوته عامه",
     description: "Review other users (Adds a new settings to profiles)",
-    authors: [Devs.mantikafasi, Devs.Ven],
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
 
     settings,
     contextMenus: {
