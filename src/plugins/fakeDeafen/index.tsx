@@ -162,7 +162,7 @@ function setupKeybindListener() {
 }
 
 export default definePlugin({
-     name: "فيك لهم",
+     name: "فيك دفن",
     description: "You're deafened but you're not.",
     dependencies: ["PhilsPluginLibrary"],
     authors: [{
