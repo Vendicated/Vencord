@@ -443,10 +443,13 @@ let originalGetUserProfile: any;
 export default definePlugin({
     name: "شارات الدس",
     description: " شارات تنحط ف البروفايل ما يشوفها الا انت",
-    authors: [{
+    authors:[{
         name: "rz30",
         id: 786315593963536415n
-    }],
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
 
     async start() {
         await loadData();
