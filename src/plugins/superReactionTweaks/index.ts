@@ -43,6 +43,11 @@ export default definePlugin({
             find: ",BURST_REACTION_EFFECT_PLAY",
             replacement: [
                 {
+                    // if (inlinedCalculatePlayingCount(a,b) >= limit) return;
+                    match: /(BURST_REACTION_EFFECT_PLAY:\i=>{.+?if\()(\(\(\i,\i\)=>.+?\(\i,\i\))>=5+?(?=\))/,
+                    replace: (_, rest, playingCount) => `${rest}!$self.shouldPlayBurstReaction(${playingCount})`
+                },
+                {
                     /*
                      * var limit = 5
                      * ...
