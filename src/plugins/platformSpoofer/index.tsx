@@ -43,7 +43,10 @@ export default definePlugin({
     authors: [{
         name: "rz30",
         id: 786315593963536415n
-    }],
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settingsAboutComponent: () => <>
     <Forms.FormText className="plugin-warning">
     يا حب ترا مالي دخل لو اخذت باند :3
