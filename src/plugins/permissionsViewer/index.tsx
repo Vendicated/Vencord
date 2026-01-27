@@ -158,9 +158,15 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
 }
 
 export default definePlugin({
-    name: "PermissionsViewer",
+    name: "تشوف البرمشن",
     description: "View the permissions a user or channel has, and the roles of a server",
-    authors: [Devs.Nuckyz, Devs.Ven],
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settings,
 
     patches: [
