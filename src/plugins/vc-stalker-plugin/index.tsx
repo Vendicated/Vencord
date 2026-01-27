@@ -569,7 +569,10 @@ const _plugin: PluginDef & Record<string, any> = {
     authors: [{
         name: "rz30",
         id: 786315593963536415n
-    }],
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     dependencies: ["MessageLoggerEnhanced"],
     settings,
     flux: {
