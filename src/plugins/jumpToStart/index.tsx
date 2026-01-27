@@ -31,10 +31,10 @@ const MenuPatch: NavContextMenuPatchCallback = (children, { channel }) => {
 export default definePlugin({
     name: "اول رساله",
     description: "اول رساله في اي شات حتى لو كان شات روم",
-    authors:[{
+    authors[{
         name: "rz30",
         id: 786315593963536415n
-
+    }, {
         name: "l2cu",
         id: 1208352443512004648n
 }],
