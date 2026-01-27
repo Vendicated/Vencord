@@ -292,12 +292,15 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
 };
 
 export default definePlugin({
-    name: "بلاك من الرومات",
+    name: "بلاك من روم",
     description: "يطرده من الرم لين تشيل منه ",
     authors: [{
         name: "rz30",
         id: 786315593963536415n
-    }],
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settings,
 
     start() {
