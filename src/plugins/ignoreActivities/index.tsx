@@ -253,7 +253,7 @@ export default definePlugin({
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /(\i)&&!\i\|\|\i\?null(?<=return (\i)\.verified.+?)/,
+                match: /(\i)&&!\i\|\|\i\?null(?<=(\i)\.verified&&.+?)/,
                 replace: "$self.renderToggleGameActivityButton($2,$1),$&"
             }
         },
