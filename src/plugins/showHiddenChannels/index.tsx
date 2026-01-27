@@ -69,9 +69,15 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 }
 
 export default definePlugin({
-    name: "ShowHiddenChannels",
+    name: "رومات المخفيه",
     description: "Show channels that you do not have access to view.",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
+    authors:[{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settings,
 
     patches: [
