@@ -1,0 +1,17 @@
+.vc-alert-title {
+    margin-block: 1rem 1.5rem;
+    text-align: center;
+}
+
+.vc-alert-secondaryConfirm {
+    cursor: pointer;
+}
+
+.vc-alert-secondaryConfirm-text {
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.vc-alert-secondaryConfirm:hover .vc-alert-secondaryConfirm-text {
+    color: var(--text-default);
+}

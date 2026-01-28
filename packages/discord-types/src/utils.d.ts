@@ -39,10 +39,8 @@ export interface Alerts {
         confirmColor?: string;
         cancelText?: string;
         confirmText?: string;
-        secondaryConfirmText?: string;
         onCancel?(): void;
         onConfirm?(): void;
-        onConfirmSecondary?(): void;
         onCloseCallback?(): void;
     }): void;
     /** This is a noop, it does nothing. */

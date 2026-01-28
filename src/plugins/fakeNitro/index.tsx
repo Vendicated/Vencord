@@ -18,6 +18,7 @@
 
 import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
+import { showAlert } from "@components/AlertModal";
 import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
@@ -793,7 +794,7 @@ export default definePlugin({
 
         function cannotEmbedNotice() {
             return new Promise<boolean>(resolve => {
-                Alerts.show({
+                showAlert({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>

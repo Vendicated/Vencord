@@ -17,10 +17,11 @@
 */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { showAlert } from "@components/AlertModal";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Alerts, Forms, Tooltip, useEffect, useState } from "@webpack/common";
+import { Tooltip, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateModal } from "./TranslateModal";
@@ -56,20 +57,16 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         const newState = !autoTranslate;
         settings.store.autoTranslate = newState;
         if (newState && settings.store.showAutoTranslateAlert !== false)
-            Alerts.show({
+            showAlert({
                 title: "Vencord Auto-Translate Enabled",
                 body: <>
-                    <Forms.FormText>
-                        You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
-                    </Forms.FormText>
+                    You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
                 </>,
                 confirmText: "Disable Auto-Translate",
                 cancelText: "Got it",
                 secondaryConfirmText: "Don't show again",
                 onConfirmSecondary: () => settings.store.showAutoTranslateAlert = false,
-                onConfirm: () => settings.store.autoTranslate = false,
-                // troll
-                confirmColor: "vc-notification-log-danger-btn",
+                onConfirm: () => settings.store.autoTranslate = false
             });
     };
 

@@ -19,6 +19,7 @@
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { showAlert } from "@components/AlertModal";
 import { Card } from "@components/Card";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -180,7 +181,7 @@ export default definePlugin({
                 await checkForUpdatesOnce().catch(() => { });
 
                 if (isOutdated) {
-                    return Alerts.show({
+                    return showAlert({
                         title: "Hold on!",
                         body: <div>
                             <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
@@ -214,7 +215,7 @@ export default definePlugin({
             }
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
-                return Alerts.show({
+                return showAlert({
                     title: "Hold on!",
                     body: <div>
                         <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
