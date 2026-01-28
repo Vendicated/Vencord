@@ -72,7 +72,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const pluginSettings = useSettings([`plugins.${plugin.name}.*`]).plugins[plugin.name];
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
-    const [authors, setAuthors] = useState<Partial<User>[]>([]);
+    // prefill dummy user to avoid layout shift
+    const [authors, setAuthors] = useState<Partial<User>[]>(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })]);
 
     useEffect(() => {
         (async () => {
@@ -157,7 +158,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
 
-            <ModalContent className={Margins.bottom16}>
+            <ModalContent className={"vc-settings-modal-content"}>
                 <section>
                     <Flex className={cl("info")}>
                         <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>

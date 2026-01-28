@@ -144,11 +144,11 @@
 }
 
 .vc-btn-positive {
-    background-color: var(--redesign-button-positive-background, var(--green-430));
+    background-color: var(--control-connected-background-default, var(--green-430));
     color: var(--white);
 
     &:hover {
-        background-color: var(--redesign-button-positive-pressed-background, var(--green-460));
+        background-color: var(--control-connected-background-hover, var(--green-460));
     }
 }
 
