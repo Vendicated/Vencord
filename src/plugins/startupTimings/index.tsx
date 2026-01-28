@@ -27,7 +27,7 @@ export default definePlugin({
     authors: [Devs.Megu],
 
     patches: [{
-        find: "#{intl::ACTIVITY_SETTINGS}",
+        find: ".SEARCH_NO_RESULTS&&0===",
         replacement: [
             {
                 match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+\)\)\}\))(?=\)\})/,
