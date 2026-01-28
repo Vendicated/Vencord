@@ -1,0 +1,123 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+
+.vc-popoutplus-clear-view [class*="titleBar"],
+:fullscreen [class*="titleBar"] {
+    display: none !important;
+}
+
+.vc-popoutplus-control-btn {
+    -webkit-app-region: no-drag;
+    background: rgb(0 0 0 / 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.15s, background 0.15s, transform 0.1s;
+    pointer-events: auto;
+}
+
+.vc-popoutplus-control-btn:hover {
+    opacity: 1;
+    background: rgb(0 0 0 / 80%);
+}
+
+.vc-popoutplus-control-btn.vc-popoutplus-active {
+    background: rgb(88 101 242 / 90%);
+    opacity: 1;
+}
+
+.vc-popoutplus-control-btn.vc-popoutplus-active:hover {
+    background: rgb(88 101 242);
+}
+
+/* SVG Icon styling to match Discord's control icons */
+.vc-popoutplus-control-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+#vc-popoutplus-controls {
+    position: fixed;
+    bottom: 10px;
+    right: 12px;
+    z-index: 99999;
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+/* Move Discord's zoom controls up to avoid collision with our controls.
+   Discord do same thing when we open default popout */
+[class*="zoomControlsContainer"] {
+    bottom: 50px !important;
+}
+
+#vc-popoutplus-drag-layer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    background: transparent;
+    pointer-events: auto;
+}
+
+#vc-popoutplus-drag-layer.vc-popoutplus-dragging {
+    cursor: grabbing;
+}
+
+#vc-popoutplus-drag-layer:not(.vc-popoutplus-dragging) {
+    cursor: grab;
+}
+
+.vc-popoutplus-drag-hint {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgb(0 0 0 / 80%);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 14px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.vc-popoutplus-drag-hint.vc-popoutplus-visible {
+    opacity: 1;
+}
+
+.vc-popoutplus-controls-wrapper {
+    -webkit-app-region: no-drag;
+    position: relative;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+}
+
+.vc-popoutplus-controls-wrapper.vc-popoutplus-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.vc-popoutplus-dragging {
+    -webkit-app-region: drag;
+}
