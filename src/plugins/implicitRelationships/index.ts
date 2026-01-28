@@ -51,7 +51,7 @@ export default definePlugin({
         {
             find: "#{intl::FRIENDS_SECTION_ONLINE}),className:",
             replacement: {
-                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.item)/,
+                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.\i)(?=\},\{id:)/,
                 replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
             }
         },
