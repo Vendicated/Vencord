@@ -47,10 +47,9 @@ export default definePlugin({
     flux: {
         RUNNING_GAMES_CHANGE({ games }) {
             const status = StatusSettings.getSetting();
-            if (status === "invisible") return;
 
             if (games.length > 0) {
-                if (status !== settings.store.statusToSet) {
+                if (status !== settings.store.statusToSet && status !== "invisible") {
                     savedStatus = status;
                     StatusSettings.updateSetting(settings.store.statusToSet);
                 }
