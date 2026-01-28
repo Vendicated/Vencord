@@ -22,6 +22,7 @@ import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, U
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
+import { t } from "@utils/translation";
 import definePlugin, { IconProps, OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { React } from "@webpack/common";
@@ -229,7 +230,7 @@ export default definePlugin({
             buildEntry({
                 key: "vencord_main",
                 title: "Vencord",
-                panelTitle: "Vencord Settings",
+                panelTitle: t("vencord.tabs.settings"),
                 Component: VencordTab,
                 Icon: MainSettingsIcon
             }),
