@@ -36,11 +36,6 @@ const settings = definePluginSettings({
                 value: "invisible",
             }
         ]
-    },
-    excludeInvisible: {
-        type: OptionType.BOOLEAN,
-        description: "Prevent automatic status changes while your status is set to invisible",
-        default: false
     }
 });
 
@@ -52,8 +47,7 @@ export default definePlugin({
     flux: {
         RUNNING_GAMES_CHANGE({ games }) {
             const status = StatusSettings.getSetting();
-
-            if (settings.store.excludeInvisible && (savedStatus ?? status) === "invisible") return;
+            if (status === "invisible") return;
 
             if (games.length > 0) {
                 if (status !== settings.store.statusToSet) {
