@@ -34,7 +34,7 @@ import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
-import { findCssClassesLazy, findLazy, findStoreLazy } from "@webpack";
+import { findLazy, findStoreLazy } from "@webpack";
 import { Constants, FluxDispatcher, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
