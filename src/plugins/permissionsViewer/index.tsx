@@ -81,7 +81,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
                         if (guild.ownerId === id) {
                             permissions.push({
-                                type: PermissionType.Owner,
+                                type: PermissionType.Server_OWNER,
                                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
                             });
                         }
