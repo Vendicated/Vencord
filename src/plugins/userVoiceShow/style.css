@@ -5,6 +5,14 @@
     justify-content: center;
 }
 
+.vc-uvs-same-channel {
+    color: var(--status-positive) !important;
+}
+
+.vc-uvs-same-channel:hover {
+    color: var(--green-400) !important;
+}
+
 .vc-uvs-clickable {
     cursor: pointer;
 }

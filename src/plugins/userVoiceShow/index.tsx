@@ -44,6 +44,11 @@ const settings = definePluginSettings({
         description: "Show a user's Voice Channel indicator in messages",
         default: true,
         restartNeeded: true
+    },
+    highlightSameChannel: {
+        type: OptionType.BOOLEAN,
+        description: "Highlight the indicator in green when the user is in the same voice channel as you",
+        default: true
     }
 });
 
@@ -96,10 +101,10 @@ export default definePlugin({
 
     start() {
         if (settings.store.showInMemberList) {
-            addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
+            addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} highlightSameChannel={settings.store.highlightSameChannel} />);
         }
         if (settings.store.showInMessages) {
-            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} />);
+            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} highlightSameChannel={settings.store.highlightSameChannel} />);
         }
     },
 
@@ -108,5 +113,5 @@ export default definePlugin({
         removeMessageDecoration("UserVoiceShow");
     },
 
-    VoiceChannelIndicator
+    VoiceChannelIndicator: (props: any) => <VoiceChannelIndicator {...props} highlightSameChannel={settings.store.highlightSameChannel} />
 });

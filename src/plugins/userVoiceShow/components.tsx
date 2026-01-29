@@ -118,12 +118,17 @@ export interface VoiceChannelIndicatorProps {
     isProfile?: boolean;
     isActionButton?: boolean;
     shouldHighlight?: boolean;
+    highlightSameChannel?: boolean;
 }
 
 const clickTimers = new Map<string, any>();
 
-export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
+export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, isActionButton, shouldHighlight, highlightSameChannel = true }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId);
+
+    const currentUserId = UserStore.getCurrentUser()?.id;
+    const currentUserChannelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(currentUserId)?.channelId);
+    const isInSameChannel = highlightSameChannel && channelId != null && channelId === currentUserChannelId;
 
     const { isMuted, isDeaf } = useStateFromStores([VoiceStateStore], () => {
         const voiceState = VoiceStateStore.getVoiceStateForUser(userId);
@@ -190,7 +195,8 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
                         cl("clickable"),
                         isActionButton && ActionButtonClasses.actionButton,
                         isActionButton && shouldHighlight && ActionButtonClasses.highlight,
-                        cl(isProfile && "profile-speaker")
+                        cl(isProfile && "profile-speaker"),
+                        isInSameChannel && cl("same-channel")
                     )}
                     size={isActionButton ? 20 : 16}
                 />
