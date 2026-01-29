@@ -33,7 +33,8 @@ import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } fr
 export const enum PermissionType {
     Role = 0,
     User = 1,
-    Owner = 2
+    Owner = 2,
+    Server_OWNER
 }
 
 export interface RoleOrUserPermission {
@@ -139,7 +140,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                 }
                                             }}
                                         >
-                                            {(permission.type === PermissionType.Role || permission.type === PermissionType.Owner) && (
+                                            {(permission.type === PermissionType.Role || permission.type === PermissionType.Server_OWNER) && (
                                                 <span
                                                     className={cl("modal-role-circle")}
                                                     style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
@@ -165,7 +166,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                             ? (user != null && getUniqueUsername(user)) ?? "Unknown User"
                                                             : (
                                                                 <Flex gap="0.2em">
-                                                                    @owner
+                                                                    @ ( Server_OWNER )
                                                                     <OwnerCrownIcon height={18} width={18} aria-hidden="true" />
                                                                 </Flex>
                                                             )
