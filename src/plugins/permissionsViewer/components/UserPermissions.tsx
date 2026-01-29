@@ -96,14 +96,14 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
 
         if (guild.ownerId === guildMember.userId) {
             rolePermissions.push({
-                type: PermissionType.Owner,
+                type: PermissionType.Server_OWNER,
                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
             });
 
-            const OWNER = getIntlMessage("GUILD_OWNER") ?? "Server Owner";
+            const Server_OWNER = getIntlMessage("GUILD_OWNER") ?? "Server Owner";
             userPermissions.push({
-                permission: OWNER,
-                roleName: "Owner",
+                permission: Server_OWNER,
+                roleName: "( Server Owner )",
                 roleColor: "var(--primary-300)",
                 rolePosition: Infinity
             });
