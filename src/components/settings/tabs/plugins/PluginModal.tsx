@@ -73,10 +73,13 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
     // prefill dummy user to avoid layout shift
-    const [authors, setAuthors] = useState<Partial<User>[]>(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })]);
+    const dummyAuthor = makeDummyUser({ username: "Loading...", id: "-1465912127305809920" });
+    const [authors, setAuthors] = useState<Partial<User>[]>(() => [dummyAuthor]);
 
     useEffect(() => {
         (async () => {
+            const loadedAuthors: Partial<User>[] = [];
+
             for (const user of plugin.authors.slice(0, 6)) {
                 try {
                     const author = user.id
@@ -84,11 +87,13 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             .catch(() => makeDummyUser({ username: user.name }))
                         : makeDummyUser({ username: user.name });
 
-                    setAuthors(a => [...a, author]);
+                    loadedAuthors.push(author);
                 } catch (e) {
                     continue;
                 }
             }
+
+            setAuthors(loadedAuthors.length ? loadedAuthors : [dummyAuthor]);
         })();
     }, [plugin.authors]);
 
