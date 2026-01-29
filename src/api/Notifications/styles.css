@@ -136,6 +136,6 @@
 }
 
 .vc-notification-log-danger-btn {
-    color: var(--white-500);
-    background-color: var(--redesign-button-danger-background);
+    color: var(--control-critical-primary-text-default);
+    background-color: var(--control-critical-primary-background-default);
 }
