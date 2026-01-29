@@ -1,4 +1,4 @@
-# Fix Images Quality
+# FixImagesQuality
 
 Improves quality of images by loading them at their original resolution
 

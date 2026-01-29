@@ -72,13 +72,13 @@ export default definePlugin({
     options: {
         bothStyles: {
             type: OptionType.BOOLEAN,
-            description: "Show both role dot and coloured names",
+            description: "Show both role dot and coloured names in chat",
             restartNeeded: true,
             default: false,
         },
         copyRoleColorInProfilePopout: {
             type: OptionType.BOOLEAN,
-            description: "Allow click on role dot in profile popout to copy role color",
+            description: "Allow clicking on role dots to copy role colour in profiles",
             restartNeeded: true,
             default: false
         }
