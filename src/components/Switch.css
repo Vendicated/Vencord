@@ -61,6 +61,10 @@
     left: 24px;
 }
 
+.vc-switch-checked .vc-switch-thumb rect {
+    fill: var(--switch-thumb-background-selected-default);
+}
+
 .vc-switch-input {
     border-radius: 14px;
     cursor: pointer;
