@@ -9,6 +9,7 @@ import definePlugin, { StartAt, OptionType, PluginNative } from "@utils/types";
 import { definePluginSettings } from "@api/Settings";
 import { updateMessage } from "@api/MessageUpdater";
 import { React, useEffect, useState, showToast, Toasts } from "@webpack/common";
+import { Devs } from "@utils/constants";
 
 let controller = null;
 
