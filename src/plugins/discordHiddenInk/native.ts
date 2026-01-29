@@ -7,12 +7,12 @@
 import { IpcMainInvokeEvent, net } from "electron";
 
 export async function fetchBinary(_: IpcMainInvokeEvent, url: string) {
-  return await new Promise((resolve) => {
+  return await new Promise(resolve => {
     try {
       const request = net.request({ url, method: "GET" });
-      request.on("response", (response) => {
+      request.on("response", response => {
         const chunks = [] as Buffer[];
-        response.on("data", (chunk) => {
+        response.on("data", chunk => {
           chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
         });
         response.on("end", () => {
@@ -27,11 +27,11 @@ export async function fetchBinary(_: IpcMainInvokeEvent, url: string) {
             contentType: contentType
           });
         });
-        response.on("error", (error) => {
+        response.on("error", error => {
           resolve({ status: -1, error: String(error) });
         });
       });
-      request.on("error", (error) => {
+      request.on("error", error => {
         resolve({ status: -1, error: String(error) });
       });
       request.end();

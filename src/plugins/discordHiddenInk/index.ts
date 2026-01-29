@@ -1,15 +1,16 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+
 // @ts-nocheck
 
-import definePlugin, { StartAt, OptionType, PluginNative } from "@utils/types";
-import { definePluginSettings } from "@api/Settings";
 import { updateMessage } from "@api/MessageUpdater";
-import { React, useEffect, useState, showToast, Toasts } from "@webpack/common";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { showToast, Toasts } from "@webpack/common";
 
 let controller = null;
 
@@ -56,7 +57,6 @@ function installHiddenInk(initialEnabled, initialKey) {
     }
 
     const state = { enabled: true, sharedKey: "" };
-    const USE_ACCESSORY_PREVIEW = false;
 
     function setEnabled(value) {
       state.enabled = !!value;
@@ -190,7 +190,7 @@ function installHiddenInk(initialEnabled, initialKey) {
     }
 
     function digitsToAlphabet(digits, alphabet) {
-      return digits.map((d) => alphabet[d]).join("");
+      return digits.map(d => alphabet[d]).join("");
     }
 
     function digitsPerByte(base) {
@@ -443,7 +443,7 @@ function installHiddenInk(initialEnabled, initialKey) {
         const salt = HEADER_ENCODER.encode(KEY_SALT);
         cryptoKeysPromise = crypto.subtle
           .importKey("raw", HEADER_ENCODER.encode(keyText), "PBKDF2", false, ["deriveKey"])
-          .then((material) => {
+          .then(material => {
             const params = {
               name: "PBKDF2",
               salt: salt,
@@ -453,7 +453,7 @@ function installHiddenInk(initialEnabled, initialKey) {
             return Promise.all([
               crypto.subtle.deriveKey(params, material, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]),
               crypto.subtle.deriveKey(params, material, { name: "AES-CTR", length: 256 }, false, ["encrypt", "decrypt"])
-            ]).then((keys) => ({ gcm: keys[0], ctr: keys[1] }));
+            ]).then(keys => ({ gcm: keys[0], ctr: keys[1] }));
           })
           .catch(() => null);
       }
@@ -884,7 +884,7 @@ function installHiddenInk(initialEnabled, initialKey) {
 
     function aesGcmEncrypt(plainBytes, keyState, ivBytes) {
       if (!ivBytes || ivBytes.length !== TEXT_IV_BYTES) return null;
-      const expanded = keyState.expanded;
+      const { expanded } = keyState;
       const hSubkey = aesEncryptBlock(new Uint8Array(16), expanded);
       const j0 = new Uint8Array(16);
       j0.set(ivBytes, 0);
@@ -913,7 +913,7 @@ function installHiddenInk(initialEnabled, initialKey) {
     function aesGcmDecrypt(cipherBytes, keyState, ivBytes) {
       if (!ivBytes || ivBytes.length !== TEXT_IV_BYTES) return null;
       if (!cipherBytes || cipherBytes.length < TEXT_TAG_BYTES) return null;
-      const expanded = keyState.expanded;
+      const { expanded } = keyState;
       const hSubkey = aesEncryptBlock(new Uint8Array(16), expanded);
       const j0 = new Uint8Array(16);
       j0.set(ivBytes, 0);
@@ -1111,7 +1111,7 @@ function installHiddenInk(initialEnabled, initialKey) {
 
     function extractFilenameFromUrl(url) {
       try {
-        const pathname = new URL(url, location.href).pathname;
+        const { pathname } = new URL(url, location.href);
         const parts = pathname.split("/");
         return decodeURIComponent(parts[parts.length - 1] || "");
       } catch (_) {
@@ -1670,7 +1670,7 @@ function installHiddenInk(initialEnabled, initialKey) {
 
     function gmFetchArrayBuffer(url) {
       if (typeof GM_xmlhttpRequest === "function") {
-        return new Promise((resolve) => {
+      return new Promise(resolve => {
           try {
             GM_xmlhttpRequest({
               method: "GET",
@@ -2020,7 +2020,6 @@ function installHiddenInk(initialEnabled, initialKey) {
     }
 
     async function processHiddenMessageAnchor(anchor) {
-      if (USE_ACCESSORY_PREVIEW) return;
       if (!state.enabled) return;
       if (!anchor || anchor.dataset.dhiTextIgnored === "1") return;
       if (anchor.dataset.dhiTextProcessed === "failed") {
@@ -2075,7 +2074,6 @@ function installHiddenInk(initialEnabled, initialKey) {
     }
 
     async function processEncryptedAnchor(anchor) {
-      if (USE_ACCESSORY_PREVIEW) return;
       if (!state.enabled) return;
       if (!anchor || anchor.dataset.dhiIgnored === "1") return;
       if (isHiddenMessageUrl(anchor.href || "")) {
@@ -2195,7 +2193,7 @@ function installHiddenInk(initialEnabled, initialKey) {
 
       scanForEncryptedAnchors(target);
 
-      const observer = new MutationObserver((mutations) => {
+      const observer = new MutationObserver(mutations => {
         for (const mutation of mutations) {
           for (const node of mutation.addedNodes) {
             scanForEncryptedAnchors(node);
@@ -2205,211 +2203,6 @@ function installHiddenInk(initialEnabled, initialKey) {
 
       observer.observe(target, { childList: true, subtree: true });
     }
-
-    function findMessageRoot(message) {
-      if (!message || !message.id) return null;
-      const root = document.querySelector("[data-list-item-id*='" + message.id + "']");
-      if (root) return root;
-      const content = document.getElementById("message-content-" + message.id);
-      if (content) return content.closest("[data-list-item-id]") || content.parentElement;
-      return null;
-    }
-
-    function hideOriginalAttachmentsForMessage(message) {
-      if (!message || !Array.isArray(message.attachments) || message.attachments.length === 0) return;
-
-      const urlSet = new Set();
-      for (const attachment of message.attachments) {
-        if (!attachment) continue;
-        if (attachment.url) urlSet.add(normalizeUrlNoQuery(attachment.url));
-        if (attachment.proxy_url) urlSet.add(normalizeUrlNoQuery(attachment.proxy_url));
-      }
-      if (urlSet.size === 0) return;
-
-      const root = findMessageRoot(message) || document;
-      const anchors = root.querySelectorAll ? root.querySelectorAll("a[href]") : [];
-      for (const anchor of anchors) {
-        if (!anchor || !anchor.href) continue;
-        const hrefKey = normalizeUrlNoQuery(anchor.href);
-        if (!urlSet.has(hrefKey)) continue;
-        if (anchor.dataset && anchor.dataset.dhiHidden === "1") continue;
-        hideAttachmentAnchor(anchor);
-        const host = findPreviewHost(anchor);
-        removeOriginalFileCard(host);
-        if (anchor.dataset) anchor.dataset.dhiHidden = "1";
-      }
-    }
-
-    function AttachmentTextPreview(props) {
-      const text = props.text || "";
-      const [expanded, setExpanded] = useState(false);
-      if (text.length <= TEXT_PREVIEW_LIMIT) {
-        return React.createElement("div", { className: "dhi-text-preview" }, text);
-      }
-
-      const displayText = expanded ? text : text.slice(0, TEXT_PREVIEW_LIMIT);
-      return React.createElement(
-        "div",
-        { className: "dhi-text-preview" },
-        React.createElement("span", null, displayText + (expanded ? "" : "...")),
-        !expanded
-          ? React.createElement(
-            "button",
-            {
-              type: "button",
-              className: "dhi-text-toggle",
-              onClick: function () {
-                setExpanded(true);
-              }
-            },
-            "Show more..."
-          )
-          : null
-      );
-    }
-
-    function HiddenInkAccessory(props) {
-      const message = props && props.message ? props.message : null;
-      const [items, setItems] = useState([]);
-
-      useEffect(
-        function () {
-          let cancelled = false;
-
-          async function load() {
-            if (!state.enabled) {
-              if (!cancelled) setItems([]);
-              return;
-            }
-            if (!message || !Array.isArray(message.attachments) || message.attachments.length === 0) {
-              if (!cancelled) setItems([]);
-              return;
-            }
-
-            const previews = [];
-            for (const attachment of message.attachments) {
-              const url = attachment && (attachment.url || attachment.proxy_url);
-              if (!url) continue;
-
-              if (isHiddenMessageUrl(url)) {
-                const buffer = await fetchAttachmentBuffer([url]);
-                if (!buffer) continue;
-                const decoded = decodeHiddenMessageFileBytes(new Uint8Array(buffer));
-                if (decoded === null) continue;
-                const parsed = parseMetaPayload(decoded);
-                previews.push({
-                  kind: "text",
-                  key: url,
-                  text: parsed.text || "",
-                  name: attachment.filename || "hidden-message"
-                });
-                continue;
-              }
-
-              const meta = getMetaForUrl(url);
-              if (!meta && !isEncryptedAttachmentUrl(url)) continue;
-
-              const decrypted = await getDecryptedAttachmentUrl(url, meta);
-              if (!decrypted) continue;
-
-              if (typeof decrypted.text === "string" && isTextAttachment(decrypted.mime, decrypted.name)) {
-                previews.push({
-                  kind: "text",
-                  key: url,
-                  text: decrypted.text,
-                  name: decrypted.name || attachment.filename || "text"
-                });
-                continue;
-              }
-
-              if (decrypted.mime && decrypted.mime.indexOf("image/") === 0) {
-                previews.push({
-                  kind: "image",
-                  key: url,
-                  url: decrypted.url,
-                  name: decrypted.name || attachment.filename || "image"
-                });
-                continue;
-              }
-
-              previews.push({
-                kind: "file",
-                key: url,
-                url: decrypted.url,
-                name: decrypted.name || attachment.filename || "file",
-                mime: decrypted.mime || "application/octet-stream"
-              });
-            }
-
-            if (!cancelled) {
-              if (previews.length > 0) {
-                ensureAttachmentStyles();
-                requestAnimationFrame(function () {
-                  hideOriginalAttachmentsForMessage(message);
-                });
-              }
-              setItems(previews);
-            }
-          }
-
-          load();
-          return function () {
-            cancelled = true;
-          };
-        },
-        [
-          message ? message.id : "",
-          message && Array.isArray(message.attachments) ? message.attachments.length : 0,
-          state.sharedKey,
-          state.enabled
-        ]
-      );
-
-      if (!items || items.length === 0) return null;
-
-      return React.createElement(
-        "div",
-        { className: "dhi-accessory" },
-        items.map(function (item) {
-          if (item.kind === "image") {
-            return React.createElement(
-              "div",
-              { className: "dhi-preview-wrap", key: item.key },
-              React.createElement("img", {
-                className: "dhi-preview",
-                src: item.url,
-                alt: item.name || "image",
-                loading: "lazy"
-              })
-            );
-          }
-
-          if (item.kind === "text") {
-            return React.createElement(
-              AttachmentTextPreview,
-              {
-                key: item.key,
-                text: item.text || ""
-              }
-            );
-          }
-
-          return React.createElement(
-            "a",
-            {
-              key: item.key,
-              className: "dhi-accessory-link",
-              href: item.url,
-              download: item.name || "file",
-              rel: "noopener"
-            },
-            "Download decrypted file",
-            item.name ? " (" + item.name + ")" : ""
-          );
-        })
-      );
-    }
-
     // === Mention preservation ===
     const MENTION_REGEX = /<@!?\d+>|<@&\d+>|<#\d+>|@everyone|@here/g;
 
@@ -3035,7 +2828,7 @@ function installHiddenInk(initialEnabled, initialKey) {
           if (uploadMeta) {
             debugLog("Intercept PUT upload (XHR)", { id: uploadMeta.id });
             encryptUploadBody(body, uploadMeta)
-              .then((cipher) => {
+              .then(cipher => {
                 if (cipher) {
                   if (uploadMeta.uploadFilename || uploadMeta.dhiName) {
                     pendingMetaByFilename.set(uploadMeta.uploadFilename || uploadMeta.dhiName, uploadMeta);
@@ -3048,7 +2841,7 @@ function installHiddenInk(initialEnabled, initialKey) {
                   sendXhrWithHeaders(this, meta, body, body instanceof FormData);
                 }
               })
-              .catch((error) => {
+              .catch(error => {
                 debugLog("Encrypt upload body exception", { id: uploadMeta.id, error: String(error) });
                 sendXhrWithHeaders(this, meta, body, body instanceof FormData);
               });
@@ -3064,7 +2857,7 @@ function installHiddenInk(initialEnabled, initialKey) {
         if (shouldInterceptOutgoing(path, meta.method)) {
           if (body instanceof FormData) {
             encryptFormData(body)
-              .then((newForm) => sendXhrWithHeaders(this, meta, newForm, true))
+              .then(newForm => sendXhrWithHeaders(this, meta, newForm, true))
               .catch(() => sendXhrWithHeaders(this, meta, body, true));
             return;
           }
@@ -3161,9 +2954,6 @@ function installHiddenInk(initialEnabled, initialKey) {
     if (win.__DISCORD_STEG__) {
       win.__DISCORD_STEG__.decodeFluxAction = decodeFluxAction;
       win.__DISCORD_STEG__.encryptUploads = encryptUploads;
-      if (USE_ACCESSORY_PREVIEW) {
-        win.__DISCORD_STEG__.renderMessageAccessory = HiddenInkAccessory;
-      }
     }
   })();
 
@@ -3204,21 +2994,15 @@ export default definePlugin({
       await controller.encryptUploads(uploads);
     }
   },
-  renderMessageAccessory(props) {
-    if (controller && controller.renderMessageAccessory) {
-      return React.createElement(controller.renderMessageAccessory, props);
-    }
-    return null;
-  },
   start() {
     controller = installHiddenInk(settings.store.enabled, settings.store.sharedKey);
 
     if (typeof VencordNative !== "undefined" && VencordNative.csp) {
       const origins = ["https://cdn.discordapp.com", "https://media.discordapp.net"];
-      origins.forEach((origin) => {
-        VencordNative.csp.isDomainAllowed(origin, ["connect-src"]).then((allowed) => {
+      origins.forEach(origin => {
+        VencordNative.csp.isDomainAllowed(origin, ["connect-src"]).then(allowed => {
           if (allowed) return;
-          VencordNative.csp.requestAddOverride(origin, ["connect-src"], "DiscordHiddenInk").then((result) => {
+          VencordNative.csp.requestAddOverride(origin, ["connect-src"], "DiscordHiddenInk").then(result => {
             if (result === "ok") {
               showToast("Hidden Ink: Allow CDN connect-src and restart Discord", Toasts.Type.MESSAGE);
             }
