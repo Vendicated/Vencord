@@ -160,7 +160,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "UserProfilePopoutBody",
+            find: /\.POPOUT,onClose:\i}\),nicknameIcons:.+?\.isProvisional/,
             replacement: {
                 match: /userId:\i\.id,guild:\i\}\)(?=])/,
                 replace: "$&,$self.profilePopoutComponent(arguments[0])"
