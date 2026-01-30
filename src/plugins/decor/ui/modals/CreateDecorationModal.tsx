@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "@plugins/decor/lib/constants";
 import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
-import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
+import { cl, DecorationModalClasses, requireAvatarDecorationModal, requireCreateStickerModal } from "@plugins/decor/ui";
 import { AvatarDecorationModalPreview } from "@plugins/decor/ui/components";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -16,11 +16,11 @@ import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeade
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-const FileUpload = findComponentByCodeLazy(".fileUpload),");
+const FileUpload = findComponentByCodeLazy(".currentTarget.files)", "lineClamp:1");
 
 const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
-    HelpMessage: filters.byCode(".iconDiv")
+    HelpMessage: filters.byCode("messageType:")
 });
 
 function useObjectURL(object: Blob | MediaSource | null) {
@@ -60,7 +60,7 @@ function CreateDecorationModal(props: ModalProps) {
     return <ModalRoot
         {...props}
         size={ModalSize.MEDIUM}
-        className={DecorationModalStyles.modal}
+        className={DecorationModalClasses.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
             <Text
