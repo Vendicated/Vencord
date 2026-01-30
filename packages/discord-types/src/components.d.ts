@@ -1,5 +1,9 @@
-import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
-
+import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FocusEventHandler, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, KeyboardEventHandler, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
+import type { BaseEditor } from "slate";
+import type { ReactEditor } from "slate-react";
+import type { DraftType, EditorLayout, EditorToolbarType } from "../enums";
+import type { Application, Channel, Command, Emoji, Message, Sticker } from "./common";
+import type { CloudUpload } from "./modules";
 
 // #region Old compability
 
@@ -509,3 +513,184 @@ export type ColorPicker = ComponentType<{
     label?: ReactNode;
     onChange(value: number | null): void;
 }>;
+
+interface SlateElement {
+    type: string;
+    children: SlateNode[];
+}
+
+interface SlateTextNode {
+    text: string;
+}
+
+type SlateNode = SlateElement | SlateTextNode;
+
+// Not all properties of ReactEditor are actually present, most likely due to treeshaking
+export interface SlateEditor extends BaseEditor, Partial<Omit<ReactEditor, keyof BaseEditor>> {
+    children: SlateNode[];
+    chatInputType: Partial<RichInputType>;
+    undo: () => void;
+    redo: () => void;
+    previewMarkdown: boolean;
+}
+
+// All command option values are converted into their text representation when accessed
+interface CommandOptionTextValue {
+    type: "text";
+    text: string
+}
+
+export interface RichInputRef {
+    getSlateEditor: () => SlateEditor;
+
+    submit: (event: Event) => void;
+    blur: () => void;
+    focus: () => void;
+
+    getCurrentWord: () => { word: string; isAtStart: boolean; fullWord?: string; };
+    getFirstText: () => string;
+    getCurrentCommandOption: () => string;
+    getCurrentCommandOptionValue: () => CommandOptionTextValue[];
+    getCommandOptionValues: () => Record<string, CommandOptionTextValue[]>;
+
+    // `text` is the simplest representation of the input, eg `:emoji:`, while rawText stores the full `<:emoji:id>`
+    insertText: (text: string, rawText?: string | null, addSpace?: boolean) => void;
+    insertAutocomplete: (text: string, rawText?: string | null, options?: { addSpace?: boolean; replaceFullWord?: boolean }) => void;
+    insertInlineAutocompleteInput: (type: string) => void;
+    insertEmoji: (options: { emoji: Emoji; addSpace?: boolean }) => void;
+
+    replaceInlineAutocompleteInput: (text: string, rawText?: string | null) => void;
+}
+
+interface RichInputState {
+    focused: boolean;
+    submitting: boolean;
+    popup: {
+        id: string | null;
+        activeDescendant: string | null;
+    };
+}
+
+interface RichInputInstance {
+    state: RichInputState;
+    ref: RefObject<RichInputRef | null>;
+
+    focus: () => void;
+    hideAutocomplete: () => void;
+    maybeShowAutocomplete: () => void;
+    saveCurrentText: () => void;
+    saveCurrentTextThrottled: (() => void) & { cancel: () => void; flush: () => void };
+}
+
+interface CommandSection {
+    name: string;
+    id: string;
+    botId: string;
+    icon: string;
+    isUserApp: boolean;
+    type: 0 | 1;
+    permissions: bigint | undefined;
+    application: Application;
+}
+
+interface RichInputSubmitState {
+    value: string;
+    isGif: boolean;
+    uploads: CloudUpload[];
+    stickers: Sticker[];
+    command: Command | null;
+    commandOptionValues: Record<string, CommandOptionTextValue[]> | undefined;
+}
+
+export type RichInput = ComponentType<PropsWithChildren<{
+    id?: string;
+    type: Partial<RichInputType>;
+    textValue: string;
+    richValue?: SlateNode[];
+    parentModalKey?: string;
+    maxCharacterCount?: number;
+
+    error?: string;
+    placeholder?: string;
+    accessibilityLabel?: string;
+
+    disabled?: boolean;
+    focused?: boolean;
+    highlighted?: boolean;
+    required?: boolean;
+
+    className?: string;
+    innerClassName?: string;
+    editorClassName?: string;
+    characterCountClassName?: string;
+
+    canMentionRoles?: boolean;
+    canMentionChannels?: boolean;
+    showRemainingCharsAfterCount?: number;
+    allowNewLines?: boolean;
+    autoCompletePosition?: "top" | "bottom";
+    disableThemedBackground?: boolean;
+    emojiPickerCloseOnModalOuterClick?: boolean;
+    showValueWhenDisabled?: boolean;
+
+    channel: Channel;
+    pendingReply?: { channel: Channel; message: Message; shouldMention: boolean; showMentionToggle: boolean };
+    pendingScheduledMessage?: { channelId: string; scheduledTimestamp: string | number };
+
+    ref?: RefObject<HTMLDivElement>;
+    setEditorRef?: (editor: RichInputInstance) => void;
+
+    renderAttachButton?: (hasPendingReply: boolean, className: string) => ReactNode;
+    renderApplicationCommandIcon?: (activeCommand: Command, activeCommandSection: CommandSection, className: string) => ReactNode;
+    renderButtons?: () => ReactNode;
+
+    onChange?: (_: unknown, textValue: string, richValue: SlateNode[]) => void;
+    onResize?: (editorHeight: number) => void;
+    onBlur?: FocusEventHandler<HTMLDivElement>;
+    onFocus?: FocusEventHandler<HTMLDivElement>;
+    onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+    onSubmit?: (state: RichInputSubmitState) => Promise<{ shouldClear: boolean; shouldRefocus: boolean }>;
+
+    promptToUpload?: (files: FileList, channel: Channel, draftType: DraftType) => Promise<undefined>;
+
+    "aria-describedby"?: string;
+    "aria-labelledby"?: string;
+}>>;
+
+type EditorOption<T extends string | null = null> = [T] extends [string] ? Partial<Record<T, boolean>> : boolean;
+
+export interface RichInputType {
+    analyticsName: string;
+
+    attachments: EditorOption;
+    commands: EditorOption<"enabled">;
+    emojis: EditorOption<"button">;
+    expressionPicker: EditorOption<"onlyEmojis">;
+    gifs: EditorOption<"button" | "allowSending">;
+    gifts: EditorOption<"button">;
+    soundmoji: EditorOption<"allowSending">;
+    stickers: EditorOption<"button" | "allowSending" | "autoSuggest">;
+    users: EditorOption<"allowMentioning">;
+
+    uploadLongMessages: EditorOption;
+    upsellLongMessages: EditorOption<"iconOnly">;
+    showCharacterCount: EditorOption;
+
+    permissions: EditorOption<"requireSendMessages" | "requireCreateTherads">; // `therads` is not a typo!
+    showSlowmodeIndicator: EditorOption;
+    showThreadPromptOnReply: EditorOption;
+    showTypingIndicator: EditorOption;
+
+    autocomplete: EditorOption<"addReactionShortcut" | "forceChatLayer" | "reactions" | "mentionSuggestions" | "alwaysUseLayer" | "small">;
+    disableAutoFocus: EditorOption;
+    drafts: Partial<{ type: DraftType; commandType: DraftType; autoSave: boolean }>;
+    hideAccessoryBar: EditorOption;
+    hideAttachmentArea: EditorOption;
+    submit: EditorOption<"button" | "ignorePreference" | "disableEnterToSubmit" | "clearOnSubmit" | "useDisabledStylesOnSubmit" | "allowEmptyMessage">;
+    layout: EditorLayout;
+    markdown: EditorOption<"disableCodeBlocks" | "disableBlockQuotes" | "disableInlineCode">;
+    toolbarType: EditorToolbarType;
+
+    confetti: EditorOption<"button">;
+    sedReplace: EditorOption;
+}
