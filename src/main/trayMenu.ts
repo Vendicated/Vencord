@@ -61,14 +61,11 @@ function openAboutWindow() {
         return;
     }
 
-    const height = 525;
-    const width = 900;
-
     aboutWindow = new BrowserWindow({
         center: true,
         autoHideMenuBar: true,
-        height,
-        width
+        height: 525,
+        width: 900
     });
 
     const aboutParams = aboutHtml.replace("{{VERSION}}", VERSION).replace("{{GIT_HASH}}", gitHash); // change to gitHashShort if/when its added
