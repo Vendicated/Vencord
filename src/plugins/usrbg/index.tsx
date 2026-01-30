@@ -70,6 +70,14 @@ export default definePlugin({
                     replace: "$1.style=$self.getVoiceBackgroundStyles($1);"
                 }
             ]
+        },
+        {
+            find: '"VideoBackground-web"',
+            predicate: () => settings.store.voiceBackground,
+            replacement: {
+                match: /backgroundColor:.{0,25},\{style:(?=\i\?)/,
+                replace: "$&$self.userHasBackground(arguments[0]?.userId)?null:",
+            }
         }
     ],
 
@@ -84,7 +92,7 @@ export default definePlugin({
     },
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
-        if (className.includes("tile_")) {
+        if (className.includes("tile")) {
             if (this.userHasBackground(participantUserId)) {
                 return {
                     backgroundImage: `url(${this.getImageUrl(participantUserId)})`,

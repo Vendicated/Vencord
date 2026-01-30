@@ -293,6 +293,8 @@ interface IsValid<T, D = unknown> {
 export interface PluginSettingStringDef {
     type: OptionType.STRING;
     default?: string;
+    /** Whether to use a multiline text area */
+    multiline?: boolean;
 }
 export interface PluginSettingNumberDef {
     type: OptionType.NUMBER;

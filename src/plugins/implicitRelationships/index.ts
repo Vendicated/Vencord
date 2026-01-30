@@ -51,7 +51,7 @@ export default definePlugin({
         {
             find: "#{intl::FRIENDS_SECTION_ONLINE}),className:",
             replacement: {
-                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.item)/,
+                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.\i)(?=\},\{id:)/,
                 replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
             }
         },
@@ -84,9 +84,9 @@ export default definePlugin({
 
         // Add support for the nonce parameter to Discord's shitcode
         {
-            find: ".REQUEST_GUILD_MEMBERS",
+            find: ".REQUEST_GUILD_MEMBERS,",
             replacement: {
-                match: /\.send\(8,{/,
+                match: /\.send\(\i\.\i\.REQUEST_GUILD_MEMBERS,{/,
                 replace: "$&nonce:arguments[1].nonce,"
             }
         },
