@@ -57,4 +57,5 @@ export const enum IpcEvents {
     SET_TRAY_UPDATE_STATE = "VencordSetTrayUpdateState",
     TRAY_REPAIR = "VencordTrayRepair",
     TRAY_CHECK_UPDATES = "VencordTrayCheckUpdates",
+    TRAY_ABOUT = "VencordTrayAbout",
 }

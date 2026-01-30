@@ -1,0 +1,167 @@
+<!doctype html>
+<meta charset="utf-8" />
+
+<head>
+    <title>About Vencord</title>
+    <style>
+        body {
+            padding: 2em;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+                "Open Sans", "Helvetica Neue", sans-serif;
+            margin: 0;
+        }
+
+        :root {
+            --bg: #282828;
+            --fg: #d4be98;
+            --fg-secondary: #ddc7a0;
+        }
+
+        html,
+        body {
+            background: var(--bg);
+            color: var(--fg);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1.25em;
+            margin-bottom: 2em;
+        }
+
+        .header img {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+        }
+
+        .header-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25em;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5em;
+        }
+
+        .header-text h1 {
+            margin: 0;
+            font-size: 1.75em;
+            font-weight: 700;
+            color: var(--fg);
+        }
+
+        .header-text .version {
+            color: var(--fg-secondary);
+            font-size: 0.875em;
+        }
+
+        .header-text .tagline {
+            color: var(--fg-secondary);
+            margin: 0;
+        }
+
+        h2 {
+            color: var(--fg);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        p {
+            color: var(--fg-secondary);
+        }
+
+        ul {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+            padding-left: 1.5em;
+        }
+
+        li {
+            color: var(--fg-secondary);
+        }
+
+        a {
+            color: var(--fg-secondary);
+            text-decoration: underline;
+            transition: color 0.2s linear;
+        }
+
+        a:hover {
+            color: var(--fg);
+        }
+
+        section {
+            margin-bottom: 1.5em;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <img src="https://vencord.dev/assets/favicon-dark.png" alt="Vencord" />
+        <div class="header-text">
+            <div class="header-top">
+                <h1>Vencord</h1>
+                <span class="version">v{{VERSION}} ({{GIT_HASH}})</span>
+            </div>
+            <p class="tagline">
+                A lightweight, user friendly Discord mod focused on privacy and stability.
+            </p>
+        </div>
+    </header>
+
+    <section>
+        <h2>Links</h2>
+        <ul>
+            <li>
+                <a href="https://vencord.dev" target="_blank">Vencord Website</a>
+            </li>
+            <li>
+                <a href="https://docs.vencord.dev" target="_blank">Vencord Docs</a>
+            </li>
+            <li>
+                <a href="https://github.com/Vendicated/Vencord" target="_blank">Source Code</a>
+            </li>
+            <li>
+                <a href="https://vencord.dev/discord" target="_blank">Support Server</a>
+            </li>
+        </ul>
+    </section>
+    <section>
+        <h2>License</h2>
+        <p>
+            Vencord is licensed under the
+            <a href="https://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">GNU General Public License v3.0</a>.
+            <br />
+            This is free software, and you are welcome to redistribute it under certain conditions; see the license for
+            details.
+        </p>
+    </section>
+</body>
+<script>
+    const data = new URLSearchParams(location.search);
+
+    // replace all {{FOO}} placeholders in the document with the values from the URL
+
+    /** @param {Node} [node] */
+    function walk(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            node.textContent = node.textContent.replace(/{{(\w+)}}/g, (match, key) => data.get(key) || match);
+            return;
+        }
+
+        if (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== "SCRIPT") {
+            for (const child of node.childNodes) {
+                walk(child);
+            }
+        }
+    }
+
+    walk(document.body);
+</script>
