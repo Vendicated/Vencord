@@ -540,7 +540,7 @@ interface CommandOptionTextValue {
     text: string
 }
 
-export interface RichInputRef {
+export interface SlateEditorRef {
     getSlateEditor: () => SlateEditor;
 
     submit: (event: Event) => void;
@@ -571,9 +571,9 @@ interface RichInputState {
     };
 }
 
-interface RichInputInstance {
+interface RichInputRef {
     state: RichInputState;
-    ref: RefObject<RichInputRef | null>;
+    ref: RefObject<SlateEditorRef | null>;
 
     focus: () => void;
     hideAutocomplete: () => void;
@@ -638,7 +638,7 @@ export type RichInput = ComponentType<PropsWithChildren<{
     pendingScheduledMessage?: { channelId: string; scheduledTimestamp: string | number };
 
     ref?: RefObject<HTMLDivElement>;
-    setEditorRef?: (editor: RichInputInstance) => void;
+    setEditorRef?: (editor: RichInputRef) => void;
 
     renderAttachButton?: (hasPendingReply: boolean, className: string) => ReactNode;
     renderApplicationCommandIcon?: (activeCommand: Command, activeCommandSection: CommandSection, className: string) => ReactNode;

@@ -23,7 +23,7 @@ import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "@plugins/revi
 import { settings } from "@plugins/reviewDB/settings";
 import { cl, showToast } from "@plugins/reviewDB/utils";
 import { useAwaiter, useForceUpdater } from "@utils/react";
-import { RichInputInstance } from "@vencord/discord-types";
+import { RichInputRef } from "@vencord/discord-types";
 import { Editor, Forms, RelationshipStore, Transforms, useRef, UserStore } from "@webpack/common";
 
 import ReviewComponent from "./ReviewComponent";
@@ -120,7 +120,7 @@ export function ReviewsInputComponent(
     { discordId, isAuthor, refetch, name, modalKey }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; modalKey?: string; }
 ) {
     const { token } = Auth;
-    const editorRef = useRef<RichInputInstance>(null);
+    const editorRef = useRef<RichInputRef>(null);
 
     return (
         <div onClick={() => {
