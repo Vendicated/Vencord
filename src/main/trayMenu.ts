@@ -68,7 +68,9 @@ function openAboutWindow() {
         width: 900
     });
 
-    const aboutParams = aboutHtml.replace("{{VERSION}}", VERSION).replace("{{GIT_HASH}}", gitHash); // change to gitHashShort if/when its added
+    const aboutParams = aboutHtml
+        .replaceAll("{{VERSION}}", VERSION)
+        .replaceAll("{{GIT_HASH}}", gitHash); // change to gitHashShort if/when its added
     const base64Html = Buffer.from(aboutParams).toString("base64");
     aboutWindow.loadURL(`data:text/html;base64,${base64Html}`);
     aboutWindow.on("closed", () => {

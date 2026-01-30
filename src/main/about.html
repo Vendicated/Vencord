@@ -108,7 +108,13 @@
         <div class="header-text">
             <div class="header-top">
                 <h1>Vencord</h1>
-                <span class="version">v{{VERSION}} ({{GIT_HASH}})</span>
+                <span class="version">
+                    <a href="https://github.com/Vendicated/Vencord/releases/tag/v{{VERSION}}">
+                        v{{VERSION}}
+                    </a>
+                    (<a href="https://github.com/Vendicated/Vencord/commit/{{GIT_HASH}}">{{GIT_HASH}}</a>)
+                </span>
+
             </div>
             <p class="tagline">
                 A lightweight, user friendly Discord mod focused on privacy and stability.
@@ -164,4 +170,12 @@
     }
 
     walk(document.body);
+
+    document.addEventListener("click", (e) => {
+        const a = e.target.closest("a[href]");
+        if (!a) return;
+
+        e.preventDefault();
+        window.open(a.href);
+    });
 </script>
