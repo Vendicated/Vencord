@@ -99,5 +99,11 @@ export default {
             invoke<CspRequestResult>(IpcEvents.CSP_REQUEST_ADD_OVERRIDE, url, directives, callerName),
     },
 
+    tray: {
+        setUpdateState: (available: boolean) => ipcRenderer.send(IpcEvents.SET_TRAY_UPDATE_STATE, available),
+        onCheckUpdates: (cb: () => void) => { ipcRenderer.on(IpcEvents.TRAY_CHECK_UPDATES, cb); },
+        onRepair: (cb: () => void) => { ipcRenderer.on(IpcEvents.TRAY_REPAIR, cb); },
+    },
+
     pluginHelpers: PluginHelpers
 };
