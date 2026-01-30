@@ -1,5 +1,4 @@
-name: Build DevBuilld
-
+name: Build DevBuild
 on:
     workflow_run:
         workflows: ["Upstream Sync"]
@@ -17,7 +16,6 @@ on:
             - package.json
             - pnpm-lock.yaml
     workflow_dispatch:
-
 env:
     FORCE_COLOR: true
 
@@ -28,7 +26,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: pnpm/action-setup@v3
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
             - name: Use Node.js 20
               uses: actions/setup-node@v4
@@ -54,11 +52,11 @@ jobs:
               run: |
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-            - name: Upload DevBuilld as release
+            - name: Upload DevBuild as release
               if: github.repository == 'pluckerpilple/Vencord'
               run: |
-                  gh release upload devbuilld --clobber dist/*
-                  gh release edit devbuilld --title "DevBuilld $RELEASE_TAG"
+                  gh release upload devbuild --clobber dist/*
+                  gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   RELEASE_TAG: ${{ env.release_tag }}
