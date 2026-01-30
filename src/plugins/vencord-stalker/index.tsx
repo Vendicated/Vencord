@@ -944,7 +944,7 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
             <Menu.MenuItem
                 key="stalker-item"
                 id="stalker-v1"
-                label={isWhitelisted ? "Stop Stalking User" : "Stalk User"}
+                label={isWhitelisted ? "وقف يا تعبان خلاص" : "راقب الورع السعيل"}
                 action={() => isWhitelisted ? unStalkUser(userId) : stalkUser(userId)}
             />
         ];
@@ -953,7 +953,7 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
             menuItems.push(
                 <Menu.MenuItem
                     id="stalker-view-log"
-                    label="View Stalker History"
+                    label="لوق التتبع"
                     action={() => openPresenceHistoryModal(userId)}
                 />
             );
@@ -964,4 +964,3 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 };
 
 export { settings };
-
