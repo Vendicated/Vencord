@@ -16,22 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { RichEditor } from "@components/RichEditor";
 import { Auth, authorize } from "@plugins/reviewDB/auth";
 import { Review, ReviewType } from "@plugins/reviewDB/entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "@plugins/reviewDB/reviewDbApi";
 import { settings } from "@plugins/reviewDB/settings";
 import { cl, showToast } from "@plugins/reviewDB/utils";
 import { useAwaiter, useForceUpdater } from "@utils/react";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
+import { RichInputInstance } from "@vencord/discord-types";
+import { Editor, Forms, RelationshipStore, Transforms, useRef, UserStore } from "@webpack/common";
 
 import ReviewComponent from "./ReviewComponent";
-
-const Transforms = findByPropsLazy("insertNodes", "textToText");
-const Editor = findByPropsLazy("start", "end", "toSlateRange");
-const ChatInputTypes = findByPropsLazy("FORM", "USER_PROFILE");
-const InputComponent = findComponentByCodeLazy("editorClassName", "CHANNEL_TEXT_AREA");
-const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
 
 interface UserProps {
     discordId: string;
@@ -121,71 +116,57 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId, type }: { refe
     );
 }
 
-
 export function ReviewsInputComponent(
     { discordId, isAuthor, refetch, name, modalKey }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; modalKey?: string; }
 ) {
     const { token } = Auth;
-    const editorRef = useRef<any>(null);
-    const inputType = ChatInputTypes.USER_PROFILE_REPLY;
-    inputType.disableAutoFocus = true;
-
-    const channel = createChannelRecordFromServer({ id: "0", type: 1 });
+    const editorRef = useRef<RichInputInstance>(null);
 
     return (
-        <>
-            <div onClick={() => {
-                if (!token) {
-                    showToast("Opening authorization window...");
-                    authorize();
+        <div onClick={() => {
+            if (!token) {
+                showToast("Opening authorization window...");
+                authorize();
+            }
+        }}>
+            <RichEditor
+                className={cl("input")}
+                placeholder={
+                    !token
+                        ? "You need to authorize to review users!"
+                        : isAuthor
+                            ? `Update review for @${name}`
+                            : `Review @${name}`
                 }
-            }}>
-                <InputComponent
-                    className={cl("input")}
-                    channel={channel}
-                    placeholder={
-                        !token
-                            ? "You need to authorize to review users!"
-                            : isAuthor
-                                ? `Update review for @${name}`
-                                : `Review @${name}`
-                    }
-                    type={inputType}
-                    disableThemedBackground={true}
-                    setEditorRef={ref => editorRef.current = ref}
-                    parentModalKey={modalKey}
-                    textValue=""
-                    onSubmit={
-                        async res => {
-                            const response = await addReview({
-                                userid: discordId,
-                                comment: res.value,
+                type={RichEditor.PresetTypes.USER_PROFILE_REPLY}
+                disableThemedBackground
+                emojiPickerCloseOnModalOuterClick
+                setEditorRef={ref => editorRef.current = ref}
+                parentModalKey={modalKey}
+                defaultValue=""
+                onSubmit={
+                    async ({ value }) => {
+                        const response = await addReview({
+                            userid: discordId,
+                            comment: value,
+                        });
+
+                        if (response) {
+                            refetch();
+
+                            const slateEditor = editorRef.current!.ref.current!.getSlateEditor();
+
+                            // clear editor
+                            Transforms.delete(slateEditor, {
+                                at: {
+                                    anchor: Editor.start(slateEditor, []),
+                                    focus: Editor.end(slateEditor, []),
+                                }
                             });
-
-                            if (response) {
-                                refetch();
-
-                                const slateEditor = editorRef.current.ref.current.getSlateEditor();
-
-                                // clear editor
-                                Transforms.delete(slateEditor, {
-                                    at: {
-                                        anchor: Editor.start(slateEditor, []),
-                                        focus: Editor.end(slateEditor, []),
-                                    }
-                                });
-                            }
-
-                            // even tho we need to return this, it doesnt do anything
-                            return {
-                                shouldClear: false,
-                                shouldRefocus: true,
-                            };
                         }
                     }
-                />
-            </div>
-
-        </>
+                }
+            />
+        </div>
     );
 }
