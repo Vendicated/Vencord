@@ -45,6 +45,7 @@ const settings = definePluginSettings({
         description: "Additional custom quotes to possibly appear, separated by the below delimiter",
         type: OptionType.STRING,
         default: "",
+        multiline: true
     },
     additionalQuotesDelimiter: {
         description: "Delimiter for additional quotes",

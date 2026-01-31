@@ -82,8 +82,9 @@ const settings = definePluginSettings({
     },
     whitelistedLoggers: {
         type: OptionType.STRING,
-        description: "Semi colon separated list of loggers to allow even if others are hidden",
+        description: "Semicolon (;) separated list of loggers to allow even if others are hidden",
         default: "GatewaySocket; Routing/Utils",
+        multiline: true,
         onChange(newVal: string) {
             logAllow.clear();
             newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
