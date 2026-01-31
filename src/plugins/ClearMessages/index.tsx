@@ -197,14 +197,14 @@ async function deleteMessagesInChannel(channelId: string, authorId: string) {
 }
 
 export default definePlugin({
-    name: "MessageDeleter",
-    description: "Delete your messages",
+    name: "ClearMessages",
+    description: "Delete your messages, if u want to delete ur message type to dm this command /delete ",
     authors: [Devs.pluckerpilple],
     settings,
 
     commands: [
         {
-            name: "delete-my-messages",
+            name: "delete",
             description: "Delete your messages",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (args, ctx) => {
@@ -214,7 +214,7 @@ export default definePlugin({
         },
         {
             name: "stop-delete",
-            description: "Stop the current deletion process",
+            description: "Stop the delete message",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
                 if (deleteState.running) {
