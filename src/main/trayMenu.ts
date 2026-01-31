@@ -114,7 +114,8 @@ export function patchTrayMenu(): void {
     const originalBuildFromTemplate = Menu.buildFromTemplate;
 
     Menu.buildFromTemplate = function (template: MenuItemConstructorOptions[]) {
-        if (isTrayMenu(template)) {
+        const alreadyPatched = template.some(item => item.label === "Vencord");
+        if (isTrayMenu(template) && !alreadyPatched) {
             const insertIndex = findInsertIndex(template);
             const vencordItems = createVencordMenuItems();
             template.splice(insertIndex, 0, ...vencordItems);
