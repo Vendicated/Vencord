@@ -92,7 +92,7 @@ export default definePlugin({
     authors:  [{
         name: "rz30",
         id: 786315593963536415n
-    }, {
+
         name: "go.ld8",
         id: 1413154958832046151n
 }],
