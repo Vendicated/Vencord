@@ -1,4 +1,4 @@
-import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FocusEventHandler, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, KeyboardEventHandler, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject } from "react";
+import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FocusEventHandler, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, KeyboardEventHandler, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject, SyntheticEvent } from "react";
 import type { BaseEditor } from "slate";
 import type { ReactEditor } from "slate-react";
 import type { DraftType, EditorLayout, EditorToolbarType } from "../enums";
@@ -543,7 +543,7 @@ interface CommandOptionTextValue {
 export interface SlateEditorRef {
     getSlateEditor: () => SlateEditor;
 
-    submit: (event: Event) => void;
+    submit: (event: SyntheticEvent) => void;
     blur: () => void;
     focus: () => void;
 
@@ -556,7 +556,7 @@ export interface SlateEditorRef {
     // `text` is the simplest representation of the input, eg `:emoji:`, while rawText stores the full `<:emoji:id>`
     insertText: (text: string, rawText?: string | null, addSpace?: boolean) => void;
     insertAutocomplete: (text: string, rawText?: string | null, options?: { addSpace?: boolean; replaceFullWord?: boolean }) => void;
-    insertInlineAutocompleteInput: (type: string) => void;
+    insertInlineAutocompleteInput: (type: SlateElement["type"]) => void;
     insertEmoji: (options: { emoji: Emoji; addSpace?: boolean }) => void;
 
     replaceInlineAutocompleteInput: (text: string, rawText?: string | null) => void;
@@ -582,13 +582,18 @@ interface RichInputRef {
     saveCurrentTextThrottled: (() => void) & { cancel: () => void; flush: () => void };
 }
 
+declare enum CommandType {
+    BUILT_IN = 0,
+    APPLICATION = 1
+}
+
 interface CommandSection {
     name: string;
     id: string;
     botId: string;
     icon: string;
     isUserApp: boolean;
-    type: 0 | 1;
+    type: CommandType;
     permissions: bigint | undefined;
     application: Application;
 }
@@ -651,7 +656,7 @@ export type RichInput = ComponentType<PropsWithChildren<{
     onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
     onSubmit?: (state: RichInputSubmitState) => Promise<{ shouldClear: boolean; shouldRefocus: boolean }>;
 
-    promptToUpload?: (files: FileList, channel: Channel, draftType: DraftType) => Promise<undefined>;
+    promptToUpload?: (files: FileList, channel: Channel, draftType: DraftType) => Promise<void>;
 
     "aria-describedby"?: string;
     "aria-labelledby"?: string;
