@@ -68,6 +68,16 @@ function openAboutWindow() {
         width: 900
     });
 
+    aboutWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: "deny" };
+    });
+
+    aboutWindow.webContents.on("will-navigate", (e, url) => {
+        e.preventDefault();
+        shell.openExternal(url);
+    });
+
     const aboutParams = aboutHtml
         .replaceAll("{{VERSION}}", VERSION)
         .replaceAll("{{GIT_HASH}}", gitHash); // change to gitHashShort if/when its added
