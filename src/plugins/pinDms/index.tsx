@@ -147,7 +147,7 @@ export default definePlugin({
 
         // fix alt+shift+up/down
         {
-            find: ".getFlattenedGuildIds()],",
+            find: "=()=>!1,ensureChatIsVisible:",
             replacement: {
                 match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
