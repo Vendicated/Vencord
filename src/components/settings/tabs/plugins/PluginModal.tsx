@@ -78,22 +78,18 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     useEffect(() => {
         (async () => {
-            const loadedAuthors: Partial<User>[] = [];
-
-            for (const user of plugin.authors.slice(0, 6)) {
+            for (const [index, user] of plugin.authors.slice(0, 6).entries()) {
                 try {
                     const author = user.id
                         ? await UserUtils.getUser(String(user.id))
                             .catch(() => makeDummyUser({ username: user.name }))
                         : makeDummyUser({ username: user.name });
 
-                    loadedAuthors.push(author);
+                    setAuthors(a => index === 0 ? [author] : [...a, author]);
                 } catch (e) {
                     continue;
                 }
             }
-
-            setAuthors(loadedAuthors.length ? loadedAuthors : [dummyAuthor]);
         })();
     }, [plugin.authors]);
 
