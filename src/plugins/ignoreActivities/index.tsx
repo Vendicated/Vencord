@@ -11,7 +11,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, RunningGameStore, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Forms, RunningGameStore, showToast, TextArea, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -131,7 +131,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
         <section>
             <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
-            <TextInput
+            <TextArea
                 type="text"
                 value={idsList}
                 onChange={handleChange}
@@ -253,7 +253,7 @@ export default definePlugin({
         {
             find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /(\i)&&!\i\|\|\i\?null(?<=return (\i)\.verified.+?)/,
+                match: /(\i)&&!\i\|\|\i\?null(?<=(\i)\.verified&&.+?)/,
                 replace: "$self.renderToggleGameActivityButton($2,$1),$&"
             }
         },
