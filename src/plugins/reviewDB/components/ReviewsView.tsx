@@ -154,7 +154,7 @@ export function ReviewsInputComponent(
                         if (response) {
                             refetch();
 
-                            const slateEditor = editorRef.current!.ref.current!.getSlateEditor();
+                            const slateEditor = editorRef.current!.getSlateEditor()!;
 
                             // clear editor
                             Transforms.delete(slateEditor, {

@@ -534,7 +534,6 @@ export interface SlateEditor extends BaseEditor, Partial<Omit<ReactEditor, keyof
     previewMarkdown: boolean;
 }
 
-// All command option values are converted into their text representation when accessed
 export type CommandOptionValue =
     | { type: "text"; text: string }
     | { type: "userMention"; userId: string }
@@ -582,7 +581,7 @@ interface RichInputRef {
 
     focus: () => void;
     blur: () => void;
-    submit: (event: Event) => void;
+    submit: (event: SyntheticEvent) => void;
     clearValue: () => void;
 
     hideAutocomplete: () => void;
