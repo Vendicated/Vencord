@@ -10,7 +10,8 @@ import { session } from "electron";
 type PolicyMap = Record<string, string[]>;
 
 export const ConnectSrc = ["connect-src"];
-export const ImageSrc = [...ConnectSrc, "img-src"];
+export const MediaSrc = [...ConnectSrc, "media-src"];
+export const ImageSrc = [...MediaSrc, "img-src"];
 export const CssSrc = ["style-src", "font-src"];
 export const ImageAndCssSrc = [...ImageSrc, ...CssSrc];
 export const ImageScriptsAndCssSrc = [...ImageAndCssSrc, "script-src", "worker-src"];
@@ -63,6 +64,10 @@ export const CspPolicies: PolicyMap = {
     "dearrow-thumb.ajay.app": ImageSrc, // Dearrow Thumbnail CDN
     "usrbg.is-hardly.online": ImageSrc, // USRBG API
     "icons.duckduckgo.com": ImageSrc, // DuckDuckGo Favicon API (Reverse Image Search)
+    "dc.songspotlight.nexpid.xyz": ConnectSrc, // Song Spotlight API
+    "cf-media.sndcdn.com": MediaSrc, // Sound Cloud audio previews
+    "p.scdn.co": MediaSrc, // Spotify audio previews
+    "audio-ssl.itunes.apple.com": MediaSrc, // Apple Music audio previews
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
