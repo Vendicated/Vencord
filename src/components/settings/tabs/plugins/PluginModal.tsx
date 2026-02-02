@@ -32,7 +32,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, Mod
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -72,8 +72,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const pluginSettings = useSettings([`plugins.${plugin.name}.*`]).plugins[plugin.name];
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
-    // prefill dummy user to avoid layout shift
-    const [authors, setAuthors] = useState<Partial<User>[]>(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })]);
+    // avoid layout shift by showing dummy users while loading users
+    const fallbackAuthors = useMemo(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })], []);
+    const [authors, setAuthors] = useState<Partial<User>[]>([]);
 
     useEffect(() => {
         (async () => {
@@ -179,7 +180,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <div style={{ width: "fit-content" }}>
                         <ErrorBoundary noop>
                             <UserSummaryItem
-                                users={authors}
+                                users={authors.length ? authors : fallbackAuthors}
                                 guildId={undefined}
                                 renderIcon={false}
                                 max={6}
