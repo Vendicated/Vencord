@@ -1,0 +1,31 @@
+.vc-connection-container > div,
+.vc-connection-container > div > div,
+.vc-connection-container > div > div > div > div {
+    height: fit-content;
+}
+
+.vc-connection-container > div > div > div > div div[class^="default_"] {
+    display: flex;
+    gap: 3px;
+}
+
+.vc-connection-container > div > div > div > div div[class^="default_"] > div:first-child {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.pingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin-right: 7px;
+}
+
+.pingContainer > svg[class^="ping_"] {
+    margin: 0;
+}
+
+.pingDisplay {
+    text-align: center;
+}

@@ -1,0 +1,60 @@
+.vc-membercount-widget {
+    gap: 0.85em;
+    display: flex;
+    align-content: center;
+
+    --color-online: var(--green-360);
+    --color-total: var(--primary-400);
+    --color-voice: var(--primary-400);
+}
+
+.vc-membercount-tooltip {
+    margin-top: 0.25em;
+    margin-left: 2px;
+}
+
+.vc-membercount-member-list {
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1em;
+    padding-inline: 1em;
+    line-height: 1.2em;
+}
+
+.vc-membercount-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.vc-membercount-online {
+    color: var(--color-online);
+}
+
+.vc-membercount-total {
+    color: var(--color-total);
+}
+
+.vc-membercount-voice {
+    color: var(--color-voice);
+}
+
+.vc-membercount-online-count {
+    fill: var(--status-online);
+    width: 18px;
+    height: 18px;
+}
+
+.vc-membercount-total-count {
+    fill: none;
+    stroke: var(--icon-status-offline);
+    stroke-width: 4px;
+    width: 15px;
+    height: 15px;
+}
+
+.vc-membercount-voice-icon {
+    color: var(--color-voice);
+    width: 15px;
+    height: 15px;
+}
