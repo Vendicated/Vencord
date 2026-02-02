@@ -10,7 +10,13 @@ import { LinkIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { apiConstants } from "@plugins/songSpotlight.desktop/lib/api";
 import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore";
-import { cl, formatCoverTooltip, formatDurationMs, isProbablyListRender, sid } from "@plugins/songSpotlight.desktop/lib/utils";
+import {
+    cl,
+    formatCoverTooltip,
+    formatDurationMs,
+    isProbablyListRender,
+    sid,
+} from "@plugins/songSpotlight.desktop/lib/utils";
 import { parseLink, useLink, useRender } from "@plugins/songSpotlight.desktop/service";
 import {
     CardClasses,
@@ -236,9 +242,6 @@ function SongInfo({ owned, song, render, link, big }: SongInfoProps) {
                         justifyContent="center"
                         gap={0}
                         className={cl("clamped")}
-                        style={{
-                            ["--clamp" as any]: "2",
-                        }}
                     >
                         <Flex alignItems="center" gap="6px">
                             <BaseText size={baseSize} weight="semibold" className={cl("clamped")} title={render.label}>

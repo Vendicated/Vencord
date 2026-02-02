@@ -20,8 +20,8 @@
 
 .vc-songspotlight-clamped {
     display: -webkit-box;
-    -webkit-line-clamp: var(--clamp, 1);
-    line-clamp: var(--clamp, 1);
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -98,28 +98,26 @@
 .vc-songspotlight-songs-container {
     --base-height: 68px;
     --tall-height: calc(var(--base-height) + 80px);
-    --image-size: 64px;
     --number-size: 32px;
 
     padding: 8px;
     gap: 12px;
     overflow: visible;
+
+    .vc-songspotlight-songs-more {
+        cursor: pointer;
+        margin-right: 4px;
+    }
 }
 
 .user-profile-sidebar .vc-songspotlight-songs-container {
     padding: 12px;
 }
 
-.vc-songspotlight-songs-more {
-    cursor: pointer;
-    margin-right: 4px;
-}
-
 /* widget */
 .vc-songspotlight-widget-container {
     --base-height: 88px;
     --tall-height: calc(var(--base-height) + 120px);
-    --image-size: 86px;
     --number-size: 38px;
 }
 
@@ -163,113 +161,113 @@
     &:has(.vc-songspotlight-song)::after {
         opacity: 0;
     }
-}
 
-.vc-songspotlight-song-grid {
-    height: var(--base-height);
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: 1fr auto;
-    gap: 8px;
-    overflow: hidden;
-    border-radius: inherit;
-
-    .vc-songspotlight-song-core {
-        grid-column: 1;
-        grid-row: 1 / 3;
+    .vc-songspotlight-song-grid {
+        height: var(--base-height);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: 1fr auto;
+        gap: 8px;
+        overflow: hidden;
         border-radius: inherit;
 
-        .vc-songspotlight-song-cover {
-            position: relative;
-            height: var(--image-size);
-            aspect-ratio: 1 / 1;
+        .vc-songspotlight-song-core {
+            grid-column: 1;
+            grid-row: 1 / 3;
             border-radius: inherit;
-            background: var(--background-mod-muted);
-            flex-shrink: 0;
-            box-shadow: 0 3px 12px 0 rgb(0 0 0 / 16%);
-            overflow: visible;
 
-            a {
-                border-radius: inherit;
-            }
-
-            img {
+            .vc-songspotlight-song-cover {
                 position: relative;
-                border-radius: inherit;
-                width: 100%;
                 height: 100%;
-            }
-
-            &::after {
-                content: "";
-                position: absolute;
-                inset: 0;
+                aspect-ratio: 1 / 1;
                 border-radius: inherit;
-                pointer-events: none;
-                transition: 0.18s background;
+                background: var(--background-mod-muted);
+                flex-shrink: 0;
+                box-shadow: 0 3px 12px 0 rgb(0 0 0 / 16%);
+                overflow: visible;
+
+                a {
+                    border-radius: inherit;
+                }
+
+                img {
+                    position: relative;
+                    border-radius: inherit;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                &::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    border-radius: inherit;
+                    pointer-events: none;
+                    transition: 0.18s background;
+                }
+
+                &:hover::after {
+                    background: rgb(0 0 0 / 20%);
+                }
+            }
+        }
+
+        .vc-songspotlight-song-service {
+            grid-column: 2;
+            grid-row: 1 / 3;
+        }
+
+        .vc-songspotlight-song-player {
+            grid-column: 1 / 3;
+            grid-row: 2;
+            transition: 0.18s opacity;
+
+            &[data-idle="true"] {
+                opacity: 0;
+            }
+        }
+    }
+
+    .vc-songspotlight-song:hover .vc-songspotlight-song-player {
+        opacity: 1;
+    }
+
+    .vc-songspotlight-song-divider {
+        width: 100%;
+        background: var(--user-profile-border);
+        height: 1px;
+        margin-top: 6px;
+    }
+
+    .vc-songspotlight-song-list {
+        flex: 1;
+        padding: 6px 0;
+
+        .vc-songspotlight-song-entry {
+            padding-right: 8px;
+            border-radius: var(--radius-sm);
+            transition-property: opacity, background;
+            transition-duration: 0.18s;
+            cursor: pointer;
+
+            .vc-songspotlight-song-entry-number {
+                width: var(--number-size);
+                text-align: center;
+                flex-shrink: 0;
             }
 
-            &:hover::after {
-                background: rgb(0 0 0 / 20%);
+            &[aria-disabled="true"] {
+                cursor: unset;
+                opacity: 0.5;
             }
-        }
-    }
 
-    .vc-songspotlight-song-service {
-        grid-column: 2;
-        grid-row: 1 / 3;
-    }
+            &[aria-disabled="false"][data-playing="true"] {
+                background: var(--opacity-12);
+            }
 
-    .vc-songspotlight-song-player {
-        grid-column: 1 / 3;
-        grid-row: 2;
-        transition: 0.18s opacity;
-
-        &[data-idle="true"] {
-            opacity: 0;
-        }
-    }
-}
-
-.vc-songspotlight-song:hover .vc-songspotlight-song-player {
-    opacity: 1;
-}
-
-.vc-songspotlight-song-divider {
-    width: 100%;
-    background: var(--user-profile-border);
-    height: 1px;
-    margin-top: 6px;
-}
-
-.vc-songspotlight-song-list {
-    flex: 1;
-    padding: 6px 0;
-
-    .vc-songspotlight-song-entry {
-        padding-right: 8px;
-        border-radius: var(--radius-sm);
-        transition-property: opacity, background;
-        transition-duration: 0.18s;
-        cursor: pointer;
-
-        .vc-songspotlight-song-entry-number {
-            width: var(--number-size);
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        &[aria-disabled="true"] {
-            cursor: unset;
-            opacity: 0.5;
-        }
-
-        &[aria-disabled="false"][data-playing="true"] {
-            background: var(--opacity-12);
-        }
-
-        &[aria-disabled="false"]:hover {
-            background: var(--opacity-20);
+            &[aria-disabled="false"]:hover {
+                background: var(--opacity-20);
+            }
         }
     }
 }

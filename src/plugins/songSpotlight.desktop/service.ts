@@ -18,7 +18,9 @@ export function useRender(song: Song) {
     useEffect(() => {
         setFailed(false);
         setRender(null);
-        renderSong(song).then(info => setRender(info)).catch(() => setFailed(true));
+        renderSong(song)
+            .catch(() => null)
+            .then(info => info ? setRender(info) : setFailed(true));
     }, [sid(song)]);
 
     return { failed, render };
@@ -31,7 +33,9 @@ export function useLink(song: Song) {
     useEffect(() => {
         setFailed(false);
         setLink(null);
-        rebuildLink(song).then(link => setLink(link)).catch(() => setFailed(true));
+        rebuildLink(song)
+            .catch(() => null)
+            .then(link => link ? setLink(link) : setFailed(true));
     }, [sid(song)]);
 
     return { failed, link };

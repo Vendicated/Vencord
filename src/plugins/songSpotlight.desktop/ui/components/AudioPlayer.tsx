@@ -15,8 +15,9 @@ interface AudioPlayerProps {
     setLoaded(index: number, state: boolean): void;
 }
 
-const defaultVolume = 0.35;
+const DEFAULT_VOLUME = 0.35;
 
+// only allow one song to play at a time
 let globalPlaying: HTMLAudioElement | undefined = undefined;
 
 export function AudioPlayer({ list, playing, setPlaying, setLoaded }: AudioPlayerProps) {
@@ -31,7 +32,7 @@ export function AudioPlayer({ list, playing, setPlaying, setLoaded }: AudioPlaye
                 if (globalPlaying) globalPlaying.pause();
 
                 audio.currentTime = 0;
-                audio.volume = defaultVolume;
+                audio.volume = DEFAULT_VOLUME;
                 audio.play().catch(error => {
                     showToast("Failed to play song preview!", Toasts.Type.FAILURE);
                     logger.error("Failed to play audio", error);
@@ -61,24 +62,27 @@ export function AudioPlayer({ list, playing, setPlaying, setLoaded }: AudioPlaye
         if (audio) audios.current.set(index, audio);
         else audios.current.delete(index);
     }, []);
+
     const handleLoaded = useCallback((index: number) => {
         loaded.current.add(index);
         setLoaded(index, true);
     }, [setLoaded]);
+
     const handleErrored = useCallback((index: number) => {
         loaded.current.delete(index);
         setLoaded(index, false);
     }, [setLoaded]);
+
     const handleEnded = useCallback((index: number) => {
         if (playing !== index) return;
 
         const nextIndex = urls.findIndex((url, j) => url && j > index);
         setPlaying(nextIndex !== -1 ? nextIndex : false);
     }, [playing, setPlaying]);
-    const handlePaused = useCallback((index: number) => {
-        if (playing !== index) return;
 
-        setPlaying(false);
+    const handlePaused = useCallback((index: number) => {
+        if (playing === index)
+            setPlaying(false);
     }, [playing, setPlaying]);
 
     return (
