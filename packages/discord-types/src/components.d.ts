@@ -1,7 +1,7 @@
 import type { ComponentClass, ComponentPropsWithRef, ComponentType, CSSProperties, FocusEventHandler, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, KeyboardEventHandler, MouseEvent, PointerEvent, PropsWithChildren, ReactNode, Ref, RefObject, SyntheticEvent } from "react";
 import type { BaseEditor } from "slate";
 import type { ReactEditor } from "slate-react";
-import type { DraftType, EditorLayout, EditorToolbarType } from "../enums";
+import type { CommandSectionType, DraftType, EditorLayout, EditorToolbarType } from "../enums";
 import type { Application, Channel, Command, Emoji, Message, Sticker } from "./common";
 import type { CloudUpload } from "./modules";
 
@@ -535,10 +535,15 @@ export interface SlateEditor extends BaseEditor, Partial<Omit<ReactEditor, keyof
 }
 
 // All command option values are converted into their text representation when accessed
-interface CommandOptionTextValue {
-    type: "text";
-    text: string
-}
+export type CommandOptionValue =
+    | { type: "text"; text: string }
+    | { type: "userMention"; userId: string }
+    | { type: "channelMention"; channelId: string }
+    | { type: "roleMention"; roleId: string }
+    | { type: "textMention"; text: string }
+    | { type: "soundboard"; guildId: string; soundId: string }
+    | { type: "emoji"; name: string; surrogate: string }
+    | { type: "customEmoji"; emojiId: string; name: string; animated: boolean };
 
 export interface SlateEditorRef {
     getSlateEditor: () => SlateEditor;
@@ -547,11 +552,11 @@ export interface SlateEditorRef {
     blur: () => void;
     focus: () => void;
 
-    getCurrentWord: () => { word: string; isAtStart: boolean; fullWord?: string; };
+    getCurrentWord: () => { word: string | null; isAtStart: boolean; fullWord?: string };
     getFirstText: () => string;
-    getCurrentCommandOption: () => string;
-    getCurrentCommandOptionValue: () => CommandOptionTextValue[];
-    getCommandOptionValues: () => Record<string, CommandOptionTextValue[]>;
+    getCurrentCommandOption: () => string | null;
+    getCurrentCommandOptionValue: () => CommandOptionValue[];
+    getCommandOptionValues: () => Record<string, CommandOptionValue[]>;
 
     // `text` is the simplest representation of the input, eg `:emoji:`, while rawText stores the full `<:emoji:id>`
     insertText: (text: string, rawText?: string | null, addSpace?: boolean) => void;
@@ -559,7 +564,7 @@ export interface SlateEditorRef {
     insertInlineAutocompleteInput: (type: SlateElement["type"]) => void;
     insertEmoji: (options: { emoji: Emoji; addSpace?: boolean }) => void;
 
-    replaceInlineAutocompleteInput: (text: string, rawText?: string | null) => void;
+    replaceInlineAutocompleteInput: (type: SlateElement["type"], text: string, rawText?: string | null) => void;
 }
 
 interface RichInputState {
@@ -576,25 +581,42 @@ interface RichInputRef {
     ref: RefObject<SlateEditorRef | null>;
 
     focus: () => void;
+    blur: () => void;
+    submit: (event: Event) => void;
+    clearValue: () => void;
+
     hideAutocomplete: () => void;
     maybeShowAutocomplete: () => void;
     saveCurrentText: () => void;
     saveCurrentTextThrottled: (() => void) & { cancel: () => void; flush: () => void };
-}
 
-declare enum CommandType {
-    BUILT_IN = 0,
-    APPLICATION = 1
+    getCurrentWord: () => { word: string | null; isAtStart: boolean; fullWord?: string };
+    getFirstText: () => string | null;
+    getCurrentCommandOption: () => string | null;
+    getCurrentCommandOptionValue: () => CommandOptionValue[];
+    getCommandOptionValues: () => Record<string, CommandOptionValue[]>;
+
+    insertText: (text: string, rawText?: string | null, addSpace?: boolean) => void;
+    insertAutocomplete: (text: string, rawText?: string | null, options?: { addSpace?: boolean; replaceFullWord?: boolean }) => void;
+    insertInlineAutocompleteElement: (type: SlateElement["type"]) => void;
+    insertEmoji: (options: { emoji: Emoji; willClose?: boolean }) => void;
+    insertGIF: (gif: { url: string }) => void;
+    insertSound: (sound: { guildId: string; soundId: string }) => void;
+    appendText: (text: string, rawText?: string | null, addSpace?: boolean) => void;
+
+    replaceInlineAutocompleteInput: (type: SlateElement["type"], text: string, rawText?: string | null) => void;
+
+    getSlateEditor: () => SlateEditor | null;
 }
 
 interface CommandSection {
     name: string;
     id: string;
-    botId: string;
+    botId?: string;
     icon: string;
     isUserApp: boolean;
-    type: CommandType;
-    permissions: bigint | undefined;
+    type: CommandSectionType;
+    permissions?: bigint;
     application: Application;
 }
 
@@ -604,7 +626,7 @@ interface RichInputSubmitState {
     uploads: CloudUpload[];
     stickers: Sticker[];
     command: Command | null;
-    commandOptionValues: Record<string, CommandOptionTextValue[]> | undefined;
+    commandOptionValues: Record<string, CommandOptionValue[]> | undefined;
 }
 
 export type RichInput = ComponentType<PropsWithChildren<{
@@ -656,7 +678,7 @@ export type RichInput = ComponentType<PropsWithChildren<{
     onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
     onSubmit?: (state: RichInputSubmitState) => Promise<{ shouldClear: boolean; shouldRefocus: boolean }>;
 
-    promptToUpload?: (files: FileList, channel: Channel, draftType: DraftType) => Promise<void>;
+    promptToUpload?: (files: FileList, channel: Channel, draftType: DraftType, options?: { filesMetadata?: unknown[]; requireConfirm?: boolean; isThumbnail?: boolean; origin?: string }) => Promise<void>;
 
     "aria-describedby"?: string;
     "aria-labelledby"?: string;
