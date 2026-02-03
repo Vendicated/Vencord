@@ -10,20 +10,16 @@ import { classes } from "@utils/misc";
 import { Tooltip } from "@webpack/common";
 import { HTMLAttributes } from "react";
 
-interface ExplicitTagProps extends HTMLAttributes<HTMLDivElement> {
-    size: "xs" | "sm" | "md";
-}
-
 // rated E for Everybody ^_^
-export function ExplicitTag({ className, size, ...props }: ExplicitTagProps) {
+export function ExplicitTag({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
     return (
         <Tooltip text="Explicit">
             {tooltipProps => (
                 <BaseText
                     {...tooltipProps}
                     {...props}
-                    size={size}
-                    weight="semibold"
+                    size="xs"
+                    weight="medium"
                     className={classes(cl("explicit-tag"), className)}
                 >
                     E

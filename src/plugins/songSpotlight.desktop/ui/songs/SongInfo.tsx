@@ -119,7 +119,7 @@ function SongEntry({ entry, number, isLoaded, isPlaying, big, onClick }: SongEnt
                         <BaseText size={subSize} weight="semibold" className={cl("clamped")} title={entry.label}>
                             {entry.label}
                         </BaseText>
-                        {entry.explicit && <ExplicitTag size={subSize} />}
+                        {entry.explicit && <ExplicitTag />}
                     </Flex>
                     <BaseText size={subSize} weight="medium" className={cl("clamped", "sub")} title={entry.sublabel}>
                         {entry.sublabel}
@@ -142,6 +142,7 @@ function SongInfo({ owned, song, render, link, big }: SongInfoProps) {
     const [playing, setPlaying] = useState<number | false>(false);
     const [loaded, setLoaded] = useState(new Set<number>());
     const audios = useMemo(() => render.form === "single" ? [render.single] : render.list, [render]);
+    const duration = useMemo(() => playing !== false ? audios[playing].audio?.duration : render.form === "single" ? render.single.audio?.duration : undefined, [playing, render]);
 
     const setLoadedAudio = useCallback((index: number, state: boolean) =>
         setLoaded(ld => {
@@ -247,7 +248,7 @@ function SongInfo({ owned, song, render, link, big }: SongInfoProps) {
                             <BaseText size={baseSize} weight="semibold" className={cl("clamped")} title={render.label}>
                                 {render.label}
                             </BaseText>
-                            {render.explicit && <ExplicitTag size={subSize} />}
+                            {render.explicit && <ExplicitTag />}
                         </Flex>
                         <BaseText
                             size={baseSize}
@@ -269,9 +270,9 @@ function SongInfo({ owned, song, render, link, big }: SongInfoProps) {
                     className={cl("song-player")}
                     data-idle={playing === false && !big}
                 >
-                    {render.form === "single" && render.single.audio?.duration && (
+                    {duration && (
                         <BaseText size={subSize} weight="medium" className={cl("mono", "sub")}>
-                            {formatDurationMs(render.single.audio.duration)}
+                            {formatDurationMs(duration)}
                         </BaseText>
                     )}
                     <PlayButton
@@ -332,12 +333,12 @@ export const SongInfoContainer = LazyComponent(() =>
         if (failed) return null;
 
         return (
-            <article
+            <div
                 className={classes(
                     OverlayClasses.overlay,
                     CardClasses.card,
                     cl("song-container", {
-                        "tall-song": render?.form === "list" || isProbablyListRender(song),
+                        "list-song-container": render?.form === "list" || isProbablyListRender(song),
                     }),
                 )}
                 style={{
@@ -345,7 +346,7 @@ export const SongInfoContainer = LazyComponent(() =>
                 }}
             >
                 {render && <SongInfo owned={owned} song={song} render={render} link={link} big={big} />}
-            </article>
+            </div>
         );
     })
 );

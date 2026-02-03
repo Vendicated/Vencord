@@ -14,7 +14,7 @@ export function presentOAuth2Modal() {
     openModal(props => (
         <OAuth2AuthorizeModal
             {...props}
-            scopes={["identify"]}
+            scopes={["applications.commands", "identify"]}
             responseType="code"
             redirectUri={apiConstants.oauth2.redirectURL}
             permissions={0n}

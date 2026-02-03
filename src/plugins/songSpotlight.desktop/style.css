@@ -55,12 +55,8 @@
 .vc-songspotlight-explicit-tag {
     background-color: var(--opacity-40);
     border-radius: 4px;
-    padding: 0 4px;
+    padding: 0 5px;
     flex-shrink: 0;
-
-    &.vc-text-sm {
-        padding: 0 6px;
-    }
 }
 
 /* settings */
@@ -97,7 +93,7 @@
 /* popout */
 .vc-songspotlight-songs-container {
     --base-height: 68px;
-    --tall-height: calc(var(--base-height) + 80px);
+    --list-height: calc(var(--base-height) + 80px);
     --number-size: 32px;
 
     padding: 8px;
@@ -117,7 +113,7 @@
 /* widget */
 .vc-songspotlight-widget-container {
     --base-height: 88px;
-    --tall-height: calc(var(--base-height) + 120px);
+    --list-height: calc(var(--base-height) + 120px);
     --number-size: 38px;
 }
 
@@ -130,8 +126,8 @@
     height: var(--base-height);
     flex-shrink: 0;
 
-    &.vc-songspotlight-tall-song {
-        height: var(--tall-height);
+    &.vc-songspotlight-list-song-container {
+        height: var(--list-height);
     }
 
     &::after {
@@ -270,6 +266,10 @@
             }
         }
     }
+}
+
+.user-profile-popout:not(.custom-user-profile-theme) .vc-songspotlight-song-container {
+    background: var(--opacity-16);
 }
 
 @keyframes songspotlight-skeleton-shine {
