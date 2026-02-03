@@ -84,7 +84,13 @@ function Layer({ mode, baseLayer = false, ...props }: LayerProps) {
 export default definePlugin({
     name: "BetterSettings",
     description: "Enhances your settings-menu-opening experience",
-    authors: [Devs.Kyuuhachi],
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settings,
 
     start() {
