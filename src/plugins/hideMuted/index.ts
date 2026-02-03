@@ -70,7 +70,7 @@ export default definePlugin({
             find: /;(\i)>=(\i)\.length\?\1=0:\1<0&&\(\1=\2\.length-1\);/,
             replacement: [
                 {
-                    match: /(?<={let{channelId:(\i),[^;]+?,\i=)((?:\i\.)+getPrivateChannelIds\(\))/g,
+                    match: /(?<=[{;]let{channelId:(\i),[^;]+?,\i=)((?:\i\.)+getPrivateChannelIds\(\))/g,
                     replace: "$self.mapPrivateChannelIds($2, $1)"
                 }
             ]
