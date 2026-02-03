@@ -17,13 +17,13 @@ import openQrModal from "./ui/modals/QrModal";
 export default definePlugin({
     name: "LoginWithQR",
     description: "Allows you to login to another device by scanning a login QR code, just like on mobile!",
-    authors: [
-        {
-            name: "Nexpid",
-            id: 853550207039832084n,
-        },
-    ],
-
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settings: definePluginSettings({
         scanQr: {
             type: OptionType.COMPONENT,
@@ -125,3 +125,4 @@ export default definePlugin({
         unload?.();
     },
 });
+
