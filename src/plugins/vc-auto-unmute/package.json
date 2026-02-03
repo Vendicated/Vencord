@@ -1,0 +1,29 @@
+{
+  "name": "vc-auto-unmute",
+  "version": "1.0.0",
+  "description": "Auto-unmute plugin for Vencord that automatically unmutes/undeafens you when server muted or deafened",
+  "main": "index.tsx",
+  "scripts": {
+    "build": "echo 'No build step needed for Vencord plugins'",
+    "dev": "echo 'Development mode - copy to Vencord userplugins folder'"
+  },
+  "keywords": [
+    "vencord",
+    "discord",
+    "plugin",
+    "auto-unmute",
+    "voice",
+    "mute",
+    "deafen"
+  ],
+  "author": "Your Name",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/vc-auto-unmute"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/vc-auto-unmute/issues"
+  },
+  "homepage": "https://github.com/yourusername/vc-auto-unmute#readme"
+} 

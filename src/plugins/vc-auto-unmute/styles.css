@@ -1,0 +1,96 @@
+/* Auto-Unmute Plugin Styles */
+
+.vc-unmute-icon {
+    color: #ed4245;
+    transition: color 0.2s ease;
+}
+
+.vc-unmute-icon:hover {
+    color: #f04747;
+}
+
+.vc-mute-icon {
+    color: #43b581;
+    transition: color 0.2s ease;
+}
+
+.vc-mute-icon:hover {
+    color: #3ca374;
+}
+
+
+@keyframes unmutePulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.vc-unmute-icon.auto-unmuting {
+    animation: unmutePulse 0.5s ease-in-out;
+}
+
+/* Tooltip styles */
+.vc-auto-unmute-tooltip {
+    background: var(--background-floating);
+    border: 1px solid var(--background-tertiary);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-normal);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+/* Status indicator styles */
+.vc-auto-unmute-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.vc-auto-unmute-status.enabled {
+    background: rgba(67, 181, 129, 0.1);
+    color: #43b581;
+}
+
+.vc-auto-unmute-status.disabled {
+    background: rgba(237, 66, 69, 0.1);
+    color: #ed4245;
+}
+
+/* Settings panel styles */
+.vc-auto-unmute-settings {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--background-tertiary);
+}
+
+.vc-auto-unmute-settings h3 {
+    margin: 0 0 12px 0;
+    color: var(--text-normal);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.vc-auto-unmute-settings .setting-item {
+    margin-bottom: 12px;
+}
+
+.vc-auto-unmute-settings .setting-item:last-child {
+    margin-bottom: 0;
+} 
