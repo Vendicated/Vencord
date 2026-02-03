@@ -156,7 +156,13 @@ const Section = findComponentByCodeLazy("headingVariant:", ".section", ".header"
 export default definePlugin({
     name: "Stalker",
     description: "Advanced user tracking plugin that logs presence changes, profile updates, and activities. Track when users go online/offline, monitor profile changes, view activity history, and receive customizable notifications for each tracked user.",
-    authors: [{ id: 534759293065625620n, name: "Ondra_D" }],
+    authors: [{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     dependencies: [],
     settings,
     patches: [
@@ -958,4 +964,5 @@ const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 };
 
 export { settings };
+
 
