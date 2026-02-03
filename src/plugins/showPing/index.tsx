@@ -18,10 +18,13 @@ const oldContainer = classes.container;
 export default definePlugin({
     name: "ShowPing",
     description: "Displays your live ping.",
-    authors: [{
-        name: "nicola02nb",
-        id: 257900031351193600n
-    }],
+    authors:[{
+        name: "rz30",
+        id: 786315593963536415n
+    }, {
+        name: "l2cu",
+        id: 1208352443512004648n
+}],
     settings,
     patches: [
         {
@@ -58,5 +61,6 @@ export default definePlugin({
         </div>;
     }
 });
+
 
 
