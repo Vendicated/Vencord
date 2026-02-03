@@ -1,0 +1,6 @@
+@import url("https://unpkg.com/katex@0.16.9/dist/katex.min.css");
+
+.katex-display {
+    width: min-content;
+    margin: 1em;
+}
