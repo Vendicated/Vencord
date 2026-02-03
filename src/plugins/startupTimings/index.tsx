@@ -30,7 +30,6 @@ export default definePlugin({
     start() {
         const { customEntries, customSections } = SettingsPlugin;
 
-                replace: (_, commaOrSemi, settings, elements) => "" +
         customEntries.push({
             key: "vencord_startup_timings",
             title: "Startup Timings",
