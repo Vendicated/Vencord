@@ -1,0 +1,24 @@
+name: Discord Notify
+
+on:
+  push:
+  pull_request:
+  issues:
+  issue_comment:             
+  pull_request_review_comment: 
+  release:
+  watch:                    
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send message to Discord
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_MESSAGE: |
+            🚀 New activity in the repository!
+            Repository: ${{ github.repository }}
+            Event: ${{ github.event_name }}
+            Actor: ${{ github.actor }}
