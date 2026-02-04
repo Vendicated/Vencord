@@ -25,8 +25,8 @@ import { filters, mapMangledModuleLazy } from "@webpack";
 import { ComponentDispatch } from "@webpack/common";
 
 const ctxMenuCallbacks = mapMangledModuleLazy('.tagName)==="TEXTAREA"||', {
-    contextMenuCallbackWeb: filters.byCode('.tagName)==="INPUT"||'),
-    contextMenuCallbackNative: filters.byCode('.tagName)==="TEXTAREA"||')
+    contextMenuCallbackWeb: filters.byCode('"[contenteditable=true]"'),
+    contextMenuCallbackNative: filters.byCode('.getPropertyValue("-webkit-user-select")')
 });
 
 async function fetchImage(url: string) {
