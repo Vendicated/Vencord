@@ -5,6 +5,7 @@
  */
 
 import { openModal } from "@utils/modal";
+import { ApplicationIntegrationType } from "@vencord/discord-types/enums";
 import { OAuth2AuthorizeModal, showToast, Toasts } from "@webpack/common";
 
 import { apiConstants, authFetch, getData } from "./api";
@@ -14,11 +15,12 @@ export function presentOAuth2Modal() {
     openModal(props => (
         <OAuth2AuthorizeModal
             {...props}
+            clientId={apiConstants.oauth2.clientId}
             scopes={["applications.commands", "identify"]}
+            integrationType={ApplicationIntegrationType.USER_INSTALL}
+            permissions={0n}
             responseType="code"
             redirectUri={apiConstants.oauth2.redirectURL}
-            permissions={0n}
-            clientId={apiConstants.oauth2.clientId}
             cancelCompletesFlow={false}
             callback={async ({ location }) => {
                 if (!location) return;
