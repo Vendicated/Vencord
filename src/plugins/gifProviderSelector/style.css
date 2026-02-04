@@ -1,0 +1,15 @@
+.vc-gif-provider-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+}
+
+.vc-gif-provider-search {
+    flex-grow: 1;
+}
+
+.vc-gif-provider-selector {
+    flex-shrink: 0;
+    min-width: 90px;
+}
