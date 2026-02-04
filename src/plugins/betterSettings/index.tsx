@@ -101,8 +101,13 @@ export default definePlugin({
             find: "this.renderArtisanalHack()",
             replacement: [
                 { // Fade in on layer
-                    match: /(?<=\((\i),"contextType",\i\.\i\);)/,
-                    replace: "$1=$self.Layer;",
+                    // class Layer {
+                    // static contextType = ...;
+                    // ...
+                    // }
+                    // class OtherClass {
+                    match: /(static contextType=\i\.\i;.+?})(?=class)(?<=class (\i).+?)/,
+                    replace: (_, before, Layer) => `${before};${Layer}=$self.Layer;`,
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
