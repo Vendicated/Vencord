@@ -7,8 +7,10 @@
 import { logger } from "@plugins/songSpotlight.desktop/lib/utils";
 import { RenderInfoEntry } from "@song-spotlight/api/handlers";
 import { showToast, Toasts, useCallback, useEffect, useMemo, useRef } from "@webpack/common";
+import { RefObject } from "react";
 
 interface AudioPlayerProps {
+    audioRef: RefObject<HTMLAudioElement | undefined>;
     list: RenderInfoEntry[];
     playing: number | false;
     setPlaying(playing: number | false): void;
@@ -20,7 +22,7 @@ const DEFAULT_VOLUME = 0.35;
 // only allow one song to play at a time
 let globalPlaying: HTMLAudioElement | undefined = undefined;
 
-export function AudioPlayer({ list, playing, setPlaying, setLoaded }: AudioPlayerProps) {
+export function AudioPlayer({ audioRef, list, playing, setPlaying, setLoaded }: AudioPlayerProps) {
     const urls = useMemo(() => list.map(x => x.audio?.previewUrl), [list]);
     const audios = useRef(new Map<number, HTMLAudioElement>());
     const loaded = useRef(new Set<number>());
@@ -54,6 +56,9 @@ export function AudioPlayer({ list, playing, setPlaying, setLoaded }: AudioPlaye
                 audio.pause();
             } else if (audio === globalPlaying && audio.paused) {
                 globalPlaying = undefined;
+                audioRef.current = undefined;
+            } else if (audio === globalPlaying) {
+                audioRef.current = audio;
             }
         }
     }, [playing]);

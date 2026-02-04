@@ -32,7 +32,6 @@
     justify-content: center;
     align-items: center;
     background: var(--opacity-20);
-    border: 1px solid var(--border-muted);
     padding: 5px;
     border-radius: 64px;
     transition-property: opacity, background;
@@ -53,7 +52,7 @@
 }
 
 .vc-songspotlight-explicit-tag {
-    background-color: var(--opacity-40);
+    background: var(--opacity-40);
     border-radius: 4px;
     padding: 0 5px;
     flex-shrink: 0;
@@ -61,7 +60,7 @@
 
 /* settings */
 .vc-songspotlight-editable-song {
-    background-color: var(--background-surface-higher);
+    background: var(--background-surface-higher);
     padding: 10px;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -69,7 +68,7 @@
     transition: 0.18s background;
 
     &:hover {
-        background-color: var(--background-surface-highest);
+        background: var(--background-surface-highest);
     }
 }
 
@@ -78,7 +77,7 @@
 }
 
 .vc-songspotlight-empty-song {
-    background-color: var(--background-base-low);
+    background: var(--background-base-low);
     height: 30px;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -220,6 +219,26 @@
 
             &[data-idle="true"] {
                 opacity: 0;
+            }
+
+            .vc-songspotlight-song-progress-container {
+                position: relative;
+                padding: 2px;
+
+                .vc-songspotlight-song-progress {
+                    position: absolute;
+                    inset: 0;
+                    color: white;
+                    pointer-events: none;
+
+                    circle {
+                        will-change: stroke-dashoffset;
+
+                        &[data-empty="true"] {
+                            transition: 0.18s stroke-dashoffset;
+                        }
+                    }
+                }
             }
         }
     }

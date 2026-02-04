@@ -22,6 +22,7 @@ import {
 import { AudioPlayer } from "@plugins/songSpotlight.desktop/ui/components/AudioPlayer";
 import { ExplicitTag } from "@plugins/songSpotlight.desktop/ui/components/ExplicitTag";
 import { PlayButton } from "@plugins/songSpotlight.desktop/ui/components/PlayButton";
+import { ProgressCircle } from "@plugins/songSpotlight.desktop/ui/components/ProgressCircle";
 import { ServiceIcon } from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
 import { openManageSongs } from "@plugins/songSpotlight.desktop/ui/settings/ManageSongs";
 import { RenderInfoEntryBased, RenderSongInfo } from "@song-spotlight/api/handlers";
@@ -42,6 +43,7 @@ import {
     Tooltip,
     useCallback,
     useMemo,
+    useRef,
     useState,
 } from "@webpack/common";
 
@@ -136,6 +138,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
     const [playing, setPlaying] = useState<number | false>(false);
     const [loaded, setLoaded] = useState(new Set<number>());
     const audios = useMemo(() => render.form === "single" ? [render.single] : render.list, [render]);
+    const audioRef = useRef<HTMLAudioElement>(undefined);
     const duration = useMemo(
         () =>
             playing !== false
@@ -159,6 +162,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
     return (
         <Flex flexDirection="column" gap={0} className={cl("song")}>
             <AudioPlayer
+                audioRef={audioRef}
                 list={audios}
                 playing={playing}
                 setPlaying={setPlaying}
@@ -276,18 +280,25 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                             {formatDurationMs(duration)}
                         </BaseText>
                     )}
-                    <PlayButton
-                        size={subSize}
-                        state={playing !== false}
-                        disabled={loaded.size < 1}
-                        onClick={() => {
-                            const loadedI = loaded.values().toArray().sort()[0];
-                            if (loadedI === undefined) return;
+                    <div className={cl("song-progress-container")}>
+                        <ProgressCircle
+                            border={2}
+                            audioRef={audioRef}
+                            className={cl("song-progress")}
+                        />
+                        <PlayButton
+                            size={subSize}
+                            state={playing !== false}
+                            disabled={loaded.size < 1}
+                            onClick={() => {
+                                const loadedI = loaded.values().toArray().sort()[0];
+                                if (loadedI === undefined) return;
 
-                            if (playing !== false) setPlaying(false);
-                            else setPlaying(loadedI);
-                        }}
-                    />
+                                if (playing !== false) setPlaying(false);
+                                else setPlaying(loadedI);
+                            }}
+                        />
+                    </div>
                 </Flex>
             </div>
             {render.form === "list" && (
