@@ -33,9 +33,9 @@ export default definePlugin({
         },
         // Message user popout
         {
-            find: ".hasAvatarForGuild(null==",
+            find: ".isProvisional?(",
             replacement: {
-                match: /user:(\i),bio:null.{0,60}}\)/,
+                match: /user:(\i),bio:.{0,60}}\)/,
                 replace: "$&,$self.renderProfileSongs({userId:$1.id})",
             },
         },
