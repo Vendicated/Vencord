@@ -37,6 +37,11 @@ export async function authFetch(_url: string | URL, options?: RequestInit) {
         // not modified
         if (res.status === 304) return null;
 
+        // unauthorized
+        if (res.status === 401) {
+            useAuthorizationStore.getState().deleteToken();
+        }
+
         const text = await res.text();
         showToast(
             !text.includes("<body>") && res.status >= 400 && res.status <= 599
