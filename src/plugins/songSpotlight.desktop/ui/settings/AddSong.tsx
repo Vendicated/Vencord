@@ -36,7 +36,7 @@ function AddSongModal({ modalProps, close, onAdd }: AddSongModalProps) {
                 <ModalContent>
                     <Flex flexDirection="column" gap="10px">
                         <BaseText size="md" weight="normal" className={cl("sub")}>
-                            Song Spotlight supports these services: <b>{parsers.map(x => x.name).join(", ")}</b>
+                            Song Spotlight supports these services: <b>{parsers.map(x => x.label).join(", ")}</b>
                         </BaseText>
                         <TextInput
                             placeholder="https://open.spotify.com/..."
