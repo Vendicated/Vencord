@@ -12,14 +12,15 @@ import { apiConstants, deleteData, getData, saveData } from "@plugins/songSpotli
 import { presentOAuth2Modal } from "@plugins/songSpotlight.desktop/lib/oauth2";
 import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/store/AuthorizationStore";
 import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore";
-import { cl, sid } from "@plugins/songSpotlight.desktop/lib/utils";
+import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { validateSong } from "@plugins/songSpotlight.desktop/service";
 import { Spinner } from "@plugins/songSpotlight.desktop/ui/common";
 import { Song, UserData, UserDataSchema } from "@song-spotlight/api/structs";
+import { sid } from "@song-spotlight/api/util";
 import { readClipboard } from "@utils/clipboard";
 import { copyWithToast } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Alerts, showToast, Toasts, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { Alerts, Parser, showToast, Toasts, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
 
 import { AddSong } from "./AddSong";
 import { EditableSong } from "./EditableSong";
@@ -176,6 +177,9 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
 
     return (
         <Flex flexDirection="column" gap="20px">
+            <BaseText size="md" weight="normal">
+                You can also view your songs via the {Parser.parse("</songspotlight:1468320979938971802>")} command!
+            </BaseText>
             {localData
                 ? (
                     <Flex flexDirection="column" gap="12px">

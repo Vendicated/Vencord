@@ -71,9 +71,9 @@ export default definePlugin({
     },
     start() {
         // the cache lives in native.ts so it persists between reloads and
-        // only gets cleared on full restart. initially i thought this was
-        // a good thing but the audio preview URLs expire very quickly so
-        // we just clear it on plugin restart instead
+        // only gets cleared on full restart. we don't want that since
+        // audio preview URLs expire very fast, so we just clear it on
+        // // plugin restart instead
         clearCache();
 
         useSongStore.getState().$refresh();

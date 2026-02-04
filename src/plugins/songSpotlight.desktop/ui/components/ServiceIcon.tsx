@@ -6,22 +6,14 @@
 
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { AppleMusicIcon, SoundCloudIcon, SpotifyIcon } from "@plugins/songSpotlight.desktop/ui/common";
+import { getServiceLabel } from "@song-spotlight/api/util";
 import { Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
-const serviceMap = {
-    spotify: {
-        title: "Spotify",
-        Icon: SpotifyIcon,
-    },
-    applemusic: {
-        title: "Apple Music",
-        Icon: AppleMusicIcon,
-    },
-    soundcloud: {
-        title: "Soundcloud",
-        Icon: SoundCloudIcon,
-    },
+const serviceIcons = {
+    spotify: SpotifyIcon,
+    applemusic: AppleMusicIcon,
+    soundcloud: SoundCloudIcon,
 };
 
 interface ServiceIconProps extends SvgProps {
@@ -30,12 +22,13 @@ interface ServiceIconProps extends SvgProps {
 type SvgProps = JSX.IntrinsicElements["svg"];
 
 export function ServiceIcon({ service, width, height, ...props }: ServiceIconProps) {
-    const info: { title: string; Icon: typeof SpotifyIcon; } = useMemo(() => serviceMap[service], [service]);
+    const Icon: typeof SpotifyIcon = useMemo(() => serviceIcons[service], [service]);
+    const label = useMemo(() => getServiceLabel(service), [service]);
 
-    return info && (
-        <Tooltip text={info.title}>
+    return Icon && label && (
+        <Tooltip text={label}>
             {tooltipProps => (
-                <info.Icon
+                <Icon
                     {...tooltipProps}
                     {...props}
                     className={cl("icon")}

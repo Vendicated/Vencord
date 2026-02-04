@@ -10,14 +10,8 @@ import { LinkIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { apiConstants } from "@plugins/songSpotlight.desktop/lib/api";
 import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore";
-import {
-    cl,
-    formatCoverTooltip,
-    formatDurationMs,
-    isProbablyListRender,
-    sid,
-} from "@plugins/songSpotlight.desktop/lib/utils";
-import { parseLink, useLink, useRender } from "@plugins/songSpotlight.desktop/service";
+import { cl, formatCoverTooltip, formatDurationMs } from "@plugins/songSpotlight.desktop/lib/utils";
+import { parseLink, useRender } from "@plugins/songSpotlight.desktop/service";
 import {
     CardClasses,
     ImageBrokenIcon,
@@ -32,6 +26,7 @@ import { ServiceIcon } from "@plugins/songSpotlight.desktop/ui/components/Servic
 import { openManageSongs } from "@plugins/songSpotlight.desktop/ui/settings/ManageSongs";
 import { RenderInfoEntryBased, RenderSongInfo } from "@song-spotlight/api/handlers";
 import { Song } from "@song-spotlight/api/structs";
+import { isListLayout, sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
 import { LazyComponent } from "@utils/lazyReact";
 import { classes } from "@utils/misc";
@@ -134,15 +129,22 @@ interface SongInfoProps {
     owned: boolean;
     song: Song;
     render: RenderSongInfo;
-    link: string | null;
     big?: boolean;
 }
 
-function SongInfo({ owned, song, render, link, big }: SongInfoProps) {
+function SongInfo({ owned, song, render, big }: SongInfoProps) {
     const [playing, setPlaying] = useState<number | false>(false);
     const [loaded, setLoaded] = useState(new Set<number>());
     const audios = useMemo(() => render.form === "single" ? [render.single] : render.list, [render]);
-    const duration = useMemo(() => playing !== false ? audios[playing].audio?.duration : render.form === "single" ? render.single.audio?.duration : undefined, [playing, render]);
+    const duration = useMemo(
+        () =>
+            playing !== false
+                ? audios[playing].audio?.duration
+                : render.form === "single"
+                    ? render.single.audio?.duration
+                    : undefined,
+        [playing, render],
+    );
 
     const setLoadedAudio = useCallback((index: number, state: boolean) =>
         setLoaded(ld => {
@@ -179,8 +181,7 @@ function SongInfo({ owned, song, render, link, big }: SongInfoProps) {
                                                 id="copy-link"
                                                 label="Copy link"
                                                 icon={LinkIcon}
-                                                action={() => link && copyWithToast(link)}
-                                                disabled={!link}
+                                                action={() => copyWithToast(render.link)}
                                             />
                                             {owned
                                                 ? (
@@ -226,7 +227,7 @@ function SongInfo({ owned, song, render, link, big }: SongInfoProps) {
                                 gap={0}
                                 className={cl("song-cover")}
                             >
-                                <Link href={link || undefined} style={{ display: "contents" }}>
+                                <Link href={render.link} style={{ display: "contents" }}>
                                     {render.thumbnailUrl
                                         ? <img src={render.thumbnailUrl} alt={render.label} />
                                         : (
@@ -328,7 +329,6 @@ interface SongInfoContainerProps {
 export const SongInfoContainer = LazyComponent(() =>
     React.memo(function SongInfoContainer({ owned, song, index, big }: SongInfoContainerProps) {
         const { failed, render } = useRender(song);
-        const { link } = useLink(song);
 
         if (failed) return null;
 
@@ -338,14 +338,14 @@ export const SongInfoContainer = LazyComponent(() =>
                     OverlayClasses.overlay,
                     CardClasses.card,
                     cl("song-container", {
-                        "list-song-container": render?.form === "list" || isProbablyListRender(song),
+                        "list-song-container": isListLayout(song, render || undefined),
                     }),
                 )}
                 style={{
                     ["--index" as any]: index.toString(),
                 }}
             >
-                {render && <SongInfo owned={owned} song={song} render={render} link={link} big={big} />}
+                {render && <SongInfo owned={owned} song={song} render={render} big={big} />}
             </div>
         );
     })

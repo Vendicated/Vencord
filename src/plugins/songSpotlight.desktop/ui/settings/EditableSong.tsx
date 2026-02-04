@@ -9,7 +9,7 @@ import { Flex } from "@components/Flex";
 import { LinkIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
-import { useLink, useRender } from "@plugins/songSpotlight.desktop/service";
+import { useRender } from "@plugins/songSpotlight.desktop/service";
 import { TrashIcon } from "@plugins/songSpotlight.desktop/ui/common";
 import { ServiceIcon } from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
 import { Song } from "@song-spotlight/api/structs";
@@ -24,11 +24,10 @@ interface EditableSongProps {
 
 export function EditableSong({ song, index, onRemove }: EditableSongProps) {
     const { render, failed } = useRender(song);
-    const { link } = useLink(song);
 
     return (
         <Link
-            href={link || undefined}
+            href={render?.link}
             onContextMenu={e =>
                 ContextMenuApi.openContextMenu(e, () => (
                     <Menu.Menu
@@ -40,8 +39,8 @@ export function EditableSong({ song, index, onRemove }: EditableSongProps) {
                             id="copy-link"
                             label="Copy link"
                             icon={LinkIcon}
-                            action={() => link && copyWithToast(link)}
-                            disabled={!link}
+                            action={() => render && copyWithToast(render.link)}
+                            disabled={!render}
                         />
                         <Menu.MenuItem
                             id="remove-song"

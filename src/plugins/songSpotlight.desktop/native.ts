@@ -14,9 +14,6 @@ setFetchHandler(net.fetch as unknown as typeof fetch);
 export async function parseLink(_: IpcMainInvokeEvent, link: string) {
     return handlers.parseLink(link);
 }
-export async function rebuildLink(_: IpcMainInvokeEvent, song: Song) {
-    return handlers.rebuildLink(song);
-}
 export async function renderSong(_: IpcMainInvokeEvent, song: Song) {
     return handlers.renderSong(song);
 }

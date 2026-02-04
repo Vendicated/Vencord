@@ -81,8 +81,9 @@ export function AudioPlayer({ list, playing, setPlaying, setLoaded }: AudioPlaye
     }, [playing, setPlaying]);
 
     const handlePaused = useCallback((index: number) => {
-        if (playing === index)
+        if (playing === index) {
             setPlaying(false);
+        }
     }, [playing, setPlaying]);
 
     return (
