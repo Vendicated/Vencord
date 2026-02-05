@@ -147,7 +147,7 @@ export default definePlugin({
             all: true,
             // Render null instead of the buttons if the channel is hidden
             replacement: {
-                match: /(?<="renderOpenChatButton",\(\)=>{)/,
+                match: /(?<=renderOpenChatButton(?:",|=)\(\)=>{)/,
                 replace: "if($self.isHiddenChannel(this.props.channel))return null;"
             }
         },
