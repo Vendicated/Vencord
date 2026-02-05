@@ -98,7 +98,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "this.renderLayers",
+            find: "this.renderArtisanalHack()",
             replacement: [
                 {
                     match: /class (\i)(?= extends \i\.PureComponent.+?static contextType=.+?jsx\)\(\1,\{mode:)/,
