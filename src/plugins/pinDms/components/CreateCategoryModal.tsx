@@ -24,8 +24,7 @@ interface ColorPickerWithSwatchesProps {
 
 const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>('id:"color-picker"');
 
-// 701663 this is terrible imo
-export const requireSettingsMenu = extractAndLoadChunksLazy(['"AppSkeleton"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}\}\),(?=.{0,15}createPromise.*?\}\),)/);
+export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
 
 const cl = classNameFactory("vc-pindms-modal-");
 
