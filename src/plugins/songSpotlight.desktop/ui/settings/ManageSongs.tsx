@@ -193,13 +193,13 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
                                 )}
                         </Flex>
                         <Flex flexDirection="column" gap="6px">
-                            {editable.map(({ slot, song }, i) =>
-                                slot === "song"
-                                    ? <EditableSong song={song} index={i} onRemove={onRemove} key={sid(song)} />
-                                    : slot === "add"
-                                        ? <AddSong onAdd={onAdd} key={slot} />
-                                        : <div className={cl("empty-song")} key={`${slot}-${i}`} />
-                            )}
+                            {editable.map(({ slot, song }, i) => {
+                                if (slot === "song") {
+                                    return <EditableSong song={song} index={i} onRemove={onRemove} key={sid(song)} />;
+                                } else if (slot === "add") {
+                                    return <AddSong onAdd={onAdd} key={slot} />;
+                                } else return <div className={cl("empty-song")} key={`${slot}-${i}`} />;
+                            })}
                         </Flex>
                         <Flex flexDirection="column" gap="8px">
                             <div className={cl("twin-buttons")}>

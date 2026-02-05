@@ -140,12 +140,13 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
     const audios = useMemo(() => render.form === "single" ? [render.single] : render.list, [render]);
     const audioRef = useRef<HTMLAudioElement>(undefined);
     const duration = useMemo(
-        () =>
-            playing !== false
-                ? audios[playing].audio?.duration
-                : render.form === "single"
-                    ? render.single.audio?.duration
-                    : undefined,
+        () => {
+            if (playing !== false) {
+                return audios[playing].audio?.duration;
+            } else {
+                return render.form === "single" ? render.single.audio?.duration : undefined;
+            }
+        },
         [playing, render],
     );
 
