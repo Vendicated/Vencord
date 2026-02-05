@@ -299,7 +299,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "}renderEmbeds(",
+            find: "}renderStickersAccessories(",
             replacement: [
                 {
                     // Call our function to decide whether the embed should be ignored or not
