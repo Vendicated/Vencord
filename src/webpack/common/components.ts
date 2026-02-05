@@ -107,7 +107,7 @@ waitFor(m => {
     }
 
     const str = String(m);
-    return str.includes(".resolve({theme:null") && !str.includes("useMemo");
+    return str.includes(".resolve({theme:") && str.includes('"refresh-fast-follow-avatars"') && !str.includes("useMemo");
 }, m => useToken = m);
 
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));

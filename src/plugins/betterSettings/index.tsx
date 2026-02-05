@@ -100,9 +100,9 @@ export default definePlugin({
         {
             find: "this.renderArtisanalHack()",
             replacement: [
-                { // Fade in on layer
-                    match: /(?<=\((\i),"contextType",\i\.\i\);)/,
-                    replace: "$1=$self.Layer;",
+                {
+                    match: /class (\i)(?= extends \i\.PureComponent.+?static contextType=.+?jsx\)\(\1,\{mode:)/,
+                    replace: "var $1=$self.Layer;class VencordPatchedOldFadeLayer",
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
@@ -129,8 +129,8 @@ export default definePlugin({
         { // Load menu TOC eagerly
             find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
             replacement: {
-                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)).*?,(?=\1\(this)/,
-                replace: "$&(async ()=>$2)(),"
+                match: /(?=handleOpenSettingsContextMenu=.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)))/,
+                replace: "_vencordBetterSettingsEagerLoad=(async ()=>$1)();"
             },
             predicate: () => settings.store.eagerLoad
         },

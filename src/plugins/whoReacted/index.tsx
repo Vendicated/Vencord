@@ -99,7 +99,7 @@ export default definePlugin({
 
             find: "cleanAutomaticAnchor(){",
             replacement: {
-                match: /constructor\(\i\)\{(?=.{0,100}automaticAnchor)/,
+                match: /constructor\(\i\)\{(?=.{0,100}(?:automaticAnchor|\.messages\.loadingMore))/,
                 replace: "$&$self.setScrollObj(this);"
             }
         }

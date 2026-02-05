@@ -45,7 +45,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "}renderEmbeds(",
+            find: "}renderStickersAccessories(",
             replacement: [
                 {
                     match: /(\.renderReactions\(\i\).+?className:)/,

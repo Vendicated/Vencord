@@ -147,7 +147,7 @@ export default definePlugin({
             all: true,
             // Render null instead of the buttons if the channel is hidden
             replacement: {
-                match: /(?<="renderOpenChatButton",\(\)=>{)/,
+                match: /(?<=renderOpenChatButton(?:",|=)\(\)=>{)/,
                 replace: "if($self.isHiddenChannel(this.props.channel))return null;"
             }
         },
@@ -200,7 +200,7 @@ export default definePlugin({
         },
         {
             // Hide the new version of unreads box for hidden channels
-            find: '"ChannelListUnreadsStore",',
+            find: '"ChannelListUnreadsStore"',
             replacement: {
                 match: /(?<=\.id\)\))(?=&&\(0,\i\.\i\)\((\i)\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
@@ -227,19 +227,19 @@ export default definePlugin({
             find: "Missing channel in Channel.renderHeaderToolbar",
             replacement: [
                 {
-                    match: /"renderHeaderToolbar",\(\)=>{.+?case \i\.\i\.GUILD_TEXT:(?=.+?(\i\.push.{0,50}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
+                    match: /renderHeaderToolbar(?:",|=)\(\)=>{.+?case \i\.\i\.GUILD_TEXT:(?=.+?(\i\.push.{0,50}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
                     replace: (m, pushNotificationButtonExpression, channel, isLurking) => `${m}if(!${isLurking}&&$self.isHiddenChannel(${channel})){${pushNotificationButtonExpression};break;}`
                 },
                 {
-                    match: /"renderHeaderToolbar",\(\)=>{.+?case \i\.\i\.GUILD_MEDIA:(?=.+?(\i\.push.{0,40}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
+                    match: /renderHeaderToolbar(?:",|=)\(\)=>{.+?case \i\.\i\.GUILD_MEDIA:(?=.+?(\i\.push.{0,40}channel:(\i)},"notifications"\)\)))(?<=isLurking:(\i).+?)/,
                     replace: (m, pushNotificationButtonExpression, channel, isLurking) => `${m}if(!${isLurking}&&$self.isHiddenChannel(${channel})){${pushNotificationButtonExpression};break;}`
                 },
                 {
-                    match: /"renderMobileToolbar",\(\)=>{.+?case \i\.\i\.GUILD_DIRECTORY:(?<=let{channel:(\i).+?)/,
+                    match: /renderMobileToolbar(?:",|=)\(\)=>{.+?case \i\.\i\.GUILD_DIRECTORY:(?<=let{channel:(\i).+?)/,
                     replace: (m, channel) => `${m}if($self.isHiddenChannel(${channel}))break;`
                 },
                 {
-                    match: /(?<="renderHeaderBar",\(\)=>{.+?hideSearch:(\i)\.isDirectory\(\))/,
+                    match: /(?<=renderHeaderBar(?:",|=)\(\)=>{.+?hideSearch:(\i)\.isDirectory\(\))/,
                     replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
                 },
                 {
@@ -333,6 +333,13 @@ export default definePlugin({
                     // Show only the plus text without overflowed children amount
                     // if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
                     match: /(?<="\+"\.concat\()\i/,
+                    replace: overflowTextAmount => "" +
+                        `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&(${overflowTextAmount}-1)<=0?"":${overflowTextAmount}`
+                },
+                {
+                    // Show only the plus text without overflowed children amount
+                    // if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
+                    match: /(?<=`\+\$\{)\i(?=\})/,
                     replace: overflowTextAmount => "" +
                         `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&(${overflowTextAmount}-1)<=0?"":${overflowTextAmount}`
                 }
