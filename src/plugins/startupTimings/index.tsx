@@ -28,7 +28,7 @@ export default definePlugin({
     description: "Adds Startup Timings to the Settings menu",
     authors: [Devs.Megu],
     start() {
-        const { customEntries, customSections } = SettingsPlugin;
+        const { customEntries } = SettingsPlugin;
 
         customEntries.push({
             key: "vencord_startup_timings",
@@ -37,26 +37,16 @@ export default definePlugin({
             Icon: ClockIcon
         });
 
-        customSections.push(() => ({
-            section: "VencordStartupTimings",
-            label: "Startup Timings",
-            searchableTitles: ["Startup Timings"],
-            element: StartupTimingPage,
-            id: "VencordStartupTimings",
-        }));
-
         settingsSectionMap.push(["VencordStartupTimings", "vencord_startup_timings"]);
     },
     stop() {
-        const { customEntries, customSections } = SettingsPlugin;
-
+        const { customEntries } = SettingsPlugin;
         const removeByKey = (arr, predicate) => {
             const idx = arr.findIndex(predicate);
             if (idx !== -1) arr.splice(idx, 1);
         };
 
         removeByKey(customEntries, e => e.key === "vencord_startup_timings");
-        removeByKey(customSections, s => s({} as any).id === "VencordStartupTimings");
         removeByKey(settingsSectionMap, entry => entry[1] === "vencord_startup_timings");
     },
 });
