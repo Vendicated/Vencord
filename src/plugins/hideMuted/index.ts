@@ -53,7 +53,7 @@ export default definePlugin({
 
     patches: [
         { // private channel list
-            find: 'this,"renderDM",',
+            find: ";renderDM=(",
             replacement: [
                 {
                     match: /(?<=let(?:{[^}]*}=(?:[^,;(]+),)*{[^}]*privateChannelIds:\i[^}]*}=)([^,;]+)/g,
