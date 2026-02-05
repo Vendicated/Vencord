@@ -101,3 +101,15 @@ export const enum VoiceProcessingStateReason {
     VAD_CPU_OVERUSE = 3,
     INITIALIZED = 4,
 }
+
+export const enum EditorLayout {
+    DEFAULT = 0,
+    INLINE = 1,
+    FLUSH = 2,
+}
+
+export const enum EditorToolbarType {
+    TOOLTIP = 0,
+    STATIC = 1,
+    NONE = 2,
+}
