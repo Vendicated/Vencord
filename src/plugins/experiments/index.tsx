@@ -106,10 +106,11 @@ export default definePlugin({
         },
         // Enable experiment embed on sent experiment links
         {
-            find: '"Clear Treatment "',
+            find: "Clear Treatment ",
             replacement: [
                 {
-                    match: /\i\.isStaff\(\)/,
+                    // TODO: stable compat optional chaining remove once some time has passed
+                    match: /\i\??\.isStaff\(\)/,
                     replace: "true"
                 },
                 // Fix some tricky experiments name causing a client crash

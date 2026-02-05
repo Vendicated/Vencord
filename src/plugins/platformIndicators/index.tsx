@@ -42,7 +42,7 @@ export interface Session {
 const SessionsStore = findStoreLazy("SessionsStore") as {
     getSessions(): Record<string, Session>;
 };
-const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
+const { useStatusFillColor } = mapMangledModuleLazy([".5625*", "translate"], {
     useStatusFillColor: filters.byCode(".hex")
 });
 
