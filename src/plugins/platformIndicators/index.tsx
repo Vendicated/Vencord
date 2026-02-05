@@ -236,8 +236,8 @@ export default definePlugin({
                 },
                 {
                     // Fix sizes for mobile indicators which aren't online
-                    match: /(?<=\(\i\.status,)(\i)(?=,(\i),\i\))/,
-                    replace: (_, userStatus, isMobile) => `${isMobile}?"online":${userStatus}`
+                    match: /(?<=\(\i\.status,)(\i)(?=,\{.{0,15}isMobile:(\i))/,
+                    replace: '$2?"online":$1'
                 },
                 {
                     // Make isMobile true no matter the status
