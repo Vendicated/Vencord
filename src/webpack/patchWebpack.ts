@@ -28,7 +28,7 @@ export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, 
 export const getBuildNumber = makeLazy(() => {
     try {
         function matchBuildNumber(factoryStr: string) {
-            const buildNumberMatch = factoryStr.match(/.concat\("(\d+?)"\)/);
+            const buildNumberMatch = factoryStr.match(/"Trying to open a changelog for an invalid build number (\d+?)"\)/);
             if (buildNumberMatch == null) {
                 return -1;
             }
@@ -36,7 +36,7 @@ export const getBuildNumber = makeLazy(() => {
             return Number(buildNumberMatch[1]);
         }
 
-        const hardcodedFactoryStr = String(wreq.m[128014]);
+        const hardcodedFactoryStr = String(wreq.m[446023]);
         if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
             const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
 
