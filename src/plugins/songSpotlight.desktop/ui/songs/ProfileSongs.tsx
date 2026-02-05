@@ -56,6 +56,8 @@ export const ProfileSongs = LazyComponent(
                             {props => (
                                 <MoreHorizontalIcon
                                     {...props}
+                                    width={16}
+                                    height={16}
                                     onClick={e =>
                                         ContextMenuApi.openContextMenu(e, () => (
                                             <Menu.Menu
@@ -79,7 +81,6 @@ export const ProfileSongs = LazyComponent(
                                                 />
                                             </Menu.Menu>
                                         ))}
-                                    size="xs"
                                     className={cl("icon", "songs-more")}
                                 />
                             )}
