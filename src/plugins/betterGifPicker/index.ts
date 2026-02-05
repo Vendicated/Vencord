@@ -13,11 +13,17 @@ export default definePlugin({
     authors: [Devs.Samwich],
     patches: [
         {
-            find: '"state",{resultType:',
-            replacement: [{
-                match: /(?<="state",{resultType:)null/,
-                replace: '"Favorites"'
-            }]
+            find: "renderHeaderContent(){",
+            replacement: [
+                {
+                    match: /(?<="state",{resultType:)null/,
+                    replace: '"Favorites"'
+                },
+                {
+                    match: /(?<=state={resultType:)null/,
+                    replace: '"Favorites"'
+                }
+            ]
         }
     ]
 });
