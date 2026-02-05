@@ -106,7 +106,7 @@ export default definePlugin({
         },
         // Enable experiment embed on sent experiment links
         {
-            find: "`Clear Treatment ${",
+            find: "Clear Treatment ",
             replacement: [
                 {
                     // TODO: stable compat optional chaining remove once some time has passed
