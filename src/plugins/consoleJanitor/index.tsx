@@ -173,7 +173,7 @@ export default definePlugin({
                     replace: '!$1.message.includes("EADDRINUSE")&&$&'
                 },
                 {
-                    match: /\i\.error\(`Error: \$\{\i\.message\}/,
+                    match: /\i\.error\(`Error: \$\{(\i)\.message\}/,
                     replace: '!$1.message.includes("EADDRINUSE")&&$&'
                 }
             ]
