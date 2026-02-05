@@ -9,19 +9,24 @@ import { PauseIcon, PlayIcon } from "@plugins/songSpotlight.desktop/ui/common";
 import { classes } from "@utils/misc";
 import { HTMLAttributes } from "react";
 
+const Sizes = {
+    xs: 16,
+    sm: 20,
+} as const;
+
 interface PlayButtonProps extends HTMLAttributes<HTMLButtonElement> {
-    size?: "xs" | "sm";
+    size?: keyof typeof Sizes;
     state: boolean;
     disabled?: boolean;
     onClick(): void;
 }
 
-export function PlayButton({ state, ...props }: PlayButtonProps) {
+export function PlayButton({ size, state, ...props }: PlayButtonProps) {
     const Icon = state ? PauseIcon : PlayIcon;
 
     return (
         <button {...props} data-toggled={state} className={classes(cl("icon-button"), props.className)}>
-            <Icon size="xs" className={cl("icon")} />
+            <Icon width={size && Sizes[size]} height={size && Sizes[size]} className={cl("icon")} />
         </button>
     );
 }

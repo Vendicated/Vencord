@@ -5,15 +5,15 @@
  */
 
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
-import { AppleMusicIcon, SoundCloudIcon, SpotifyIcon } from "@plugins/songSpotlight.desktop/ui/common";
+import { AppleMusicIcon, SoundcloudIcon, SpotifyIcon } from "@plugins/songSpotlight.desktop/ui/common";
 import { getServiceLabel } from "@song-spotlight/api/util";
 import { Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 const serviceIcons = {
-    spotify: SpotifyIcon,
     applemusic: AppleMusicIcon,
-    soundcloud: SoundCloudIcon,
+    soundcloud: SoundcloudIcon,
+    spotify: SpotifyIcon,
 };
 
 interface ServiceIconProps extends SvgProps {
