@@ -43,6 +43,8 @@ export const getBuildNumber = makeLazy(() => {
             if (hardcodedBuildNumber !== -1) {
                 return hardcodedBuildNumber;
             }
+        } else if (IS_DEV || IS_REPORTER) {
+            logger.error("Hardcoded build number module id is invalid");
         }
 
         const moduleFactory = findModuleFactory("Trying to open a changelog for an invalid build number");
