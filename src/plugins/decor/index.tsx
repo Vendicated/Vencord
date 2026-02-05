@@ -50,7 +50,7 @@ export default definePlugin({
             find: "80,onlyAnimateOnHoverOrFocus:!",
             replacement: [
                 {
-                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i=!1\}=\i/,
+                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i=!1.{0,5}\}=\i/,
                     replace: "$self.DecorationGridItem=$&",
                 },
                 {
@@ -105,6 +105,10 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=userValue.{0,25}void 0:)((\i)\.avatarDecoration)/,
+                    replace: "$self.useUserDecorAvatarDecoration($2)??$1"
+                },
+                {
+                    match: /(?<=userValue:)((\i)(?:.{0,10})?\.avatarDecoration)/,
                     replace: "$self.useUserDecorAvatarDecoration($2)??$1"
                 }
             ]
