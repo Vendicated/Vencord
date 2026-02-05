@@ -5,8 +5,7 @@
  */
 
 import { AvatarDecoration } from "@plugins/decor";
-import { findComponentByCode, LazyComponentWebpack } from "@webpack";
-import { React } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
 import type { ComponentType, HTMLProps, PropsWithChildren } from "react";
 
 type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement>> & {
@@ -17,10 +16,7 @@ type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTM
 export let DecorationGridItem: DecorationGridItemComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
-export const AvatarDecorationModalPreview = LazyComponentWebpack(() => {
-    const component = findComponentByCode(".shopPreviewBanner");
-    return React.memo(component);
-});
+export const AvatarDecorationModalPreview = findComponentByCodeLazy("#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}");
 
 type DecorationGridDecorationComponent = React.ComponentType<HTMLProps<HTMLDivElement> & {
     avatarDecoration: AvatarDecoration;

@@ -243,7 +243,7 @@ export default definePlugin({
                 (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
                 (props.channel.parent_id === SUPPORT_CATEGORY_ID && props.message.author.id === VENBOT_USER_ID)
             )
-            && props.message.content?.includes("update");
+            && props.message.content?.toLowerCase().includes("update");
 
         if (shouldAddUpdateButton) {
             buttons.push(
