@@ -51,11 +51,17 @@ export default definePlugin({
         // Show plugin name instead of "Built-In"
         {
             find: "#{intl::COMMANDS_OPTIONAL_COUNT}",
-            replacement: {
-                // ...children: p?.name
-                match: /(?<=:(\i)\.displayDescription\}.{0,200}children:).{0,50}\.name(?=\}\))/,
-                replace: "$1.plugin||($&)"
-            }
+            replacement: [
+                {
+                    // ...children: p?.name
+                    match: /(?<=:(\i)\.displayDescription\}.{0,200}children:).{0,50}\.name(?=\}\))/,
+                    replace: "$1.plugin||($&)"
+                },
+                {
+                    match: /children:(?=\i\?\?\i\?\.name)(?<=command:(\i),.+?)/,
+                    replace: "children:$1.plugin??"
+                }
+            ]
         }
     ],
 });
