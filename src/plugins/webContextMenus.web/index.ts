@@ -24,7 +24,7 @@ import { saveFile } from "@utils/web";
 import { filters, mapMangledModuleLazy } from "@webpack";
 import { ComponentDispatch } from "@webpack/common";
 
-const ctxMenuCallbacks = mapMangledModuleLazy('.tagName)==="TEXTAREA"||', {
+const ctxMenuCallbacks = mapMangledModuleLazy('closest("[contenteditable=true]")', {
     contextMenuCallbackWeb: filters.byCode('"[contenteditable=true]"'),
     contextMenuCallbackNative: filters.byCode('.getPropertyValue("-webkit-user-select")')
 });
