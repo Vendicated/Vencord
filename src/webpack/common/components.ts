@@ -60,7 +60,7 @@ export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.comp
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("this.getPaddingRight()},id:"));
 export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('"Select"'));
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('"SearchableSelect"'));
-export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode('"markDash".concat('));
+export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode("markDash", "this.renderMark("));
 export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCode("ref:this.ref,", "renderPopout:this.renderPopout,"));
 export const Dialog = waitForComponent<t.Dialog>("Dialog", filters.componentByCode('role:"dialog",tabIndex:-1'));
 export const TabBar = waitForComponent("TabBar", filters.componentByCode("ref:this.tabBarRef,className:"));
@@ -107,7 +107,7 @@ waitFor(m => {
     }
 
     const str = String(m);
-    return str.includes(".resolve({theme:null") && !str.includes("useMemo");
+    return str.includes(".resolve({theme:") && str.includes('"refresh-fast-follow-avatars"') && !str.includes("useMemo");
 }, m => useToken = m);
 
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
