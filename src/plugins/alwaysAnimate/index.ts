@@ -17,6 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
@@ -62,6 +63,27 @@ export default definePlugin({
                 match: /animate:\i,loop:/,
                 replace: "animate:true,loop:true,_loop:"
             }
+        },
+        // Custom Nitro Roles
+        {
+            find: "=1,shouldUnderlineOnHover:",
+            replacement: {
+                match: /(?=let{[^}]*?effectDisplayType:\i=(\i\.\i)\.STATIC)/,
+                replace: "$self.setEffectDisplayType(arguments[0], $1);"
+            }
         }
-    ]
+    ],
+
+    setEffectDisplayType(props: { effectDisplayType?: number; }, types: Record<"STATIC" | "ANIMATED" | "PLAIN", number>) {
+        try {
+            if (!("ANIMATED" in types)) {
+                throw new Error("Missing ANIMATED type");
+            }
+            if (props.effectDisplayType === types.STATIC) {
+                props.effectDisplayType = types.ANIMATED;
+            }
+        } catch (e) {
+            new Logger("AlwaysAnimate").error("Failed to set effect display type", e);
+        }
+    }
 });
