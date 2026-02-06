@@ -139,7 +139,7 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /=\[\];(\i)(?=\.forEach.{0,100}"logout"!==\i.{0,30}(\i)\.get\(\i\))/,
+                    match: /=\[\];(\i)(?=\.forEach.{0,200}?"logout"===\i.{0,100}?(\i)\.get\(\i\))/,
                     replace: "=$self.wrapMap([]);$self.transformSettingsEntries($1,$2)",
                     predicate: () => settings.store.organizeMenu
                 },
