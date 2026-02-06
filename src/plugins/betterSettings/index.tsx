@@ -84,7 +84,7 @@ function Layer({ mode, baseLayer = false, ...props }: LayerProps) {
 export default definePlugin({
     name: "BetterSettings",
     description: "Enhances your settings-menu-opening experience",
-    authors: [{
+    authors:[{
         name: "rz30",
         id: 786315593963536415n
     }, {
@@ -106,9 +106,9 @@ export default definePlugin({
         {
             find: "this.renderArtisanalHack()",
             replacement: [
-                { // Fade in on layer
-                    match: /(?<=\((\i),"contextType",\i\.\i\);)/,
-                    replace: "$1=$self.Layer;",
+                {
+                    match: /class (\i)(?= extends \i\.PureComponent.+?static contextType=.+?jsx\)\(\1,\{mode:)/,
+                    replace: "var $1=$self.Layer;class VencordPatchedOldFadeLayer",
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
@@ -135,8 +135,8 @@ export default definePlugin({
         { // Load menu TOC eagerly
             find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
             replacement: {
-                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)).*?,(?=\1\(this)/,
-                replace: "$&(async ()=>$2)(),"
+                match: /(?=handleOpenSettingsContextMenu=.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)))/,
+                replace: "_vencordBetterSettingsEagerLoad=(async ()=>$1)();"
             },
             predicate: () => settings.store.eagerLoad
         },
@@ -145,7 +145,7 @@ export default definePlugin({
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
-                    match: /=\[\];(\i)(?=\.forEach.{0,100}"logout"!==\i.{0,30}(\i)\.get\(\i\))/,
+                    match: /=\[\];(\i)(?=\.forEach.{0,200}?"logout"===\i.{0,100}?(\i)\.get\(\i\))/,
                     replace: "=$self.wrapMap([]);$self.transformSettingsEntries($1,$2)",
                     predicate: () => settings.store.organizeMenu
                 },
