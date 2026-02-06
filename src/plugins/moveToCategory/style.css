@@ -1,0 +1,4 @@
+/* Make the Move to Category submenu list scrollable */
+[role="menu"][class*="submenu"]:has([id*="vc-move-to-category-none"]) > [class*="scroller"] {
+    max-height: 420px;
+}
