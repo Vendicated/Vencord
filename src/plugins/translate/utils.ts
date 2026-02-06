@@ -21,7 +21,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 
-import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
+import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages, GPTLanguages } from "./languages";
 import { resetLanguageDefaults, settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
@@ -47,12 +47,16 @@ export interface TranslationValue {
 
 export const getLanguages = () => IS_WEB || settings.store.service === "google"
     ? GoogleLanguages
-    : DeeplLanguages;
+    : settings.store.service === "openai"
+        ? GPTLanguages
+        : DeeplLanguages;
 
 export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const translate = IS_WEB || settings.store.service === "google"
         ? googleTranslate
-        : deeplTranslate;
+        : settings.store.service === "openai"
+            ? openAITranslate
+            : deeplTranslate;
 
     try {
         return await translate(
@@ -64,6 +68,10 @@ export async function translate(kind: "received" | "sent", text: string): Promis
         const userMessage = typeof e === "string"
             ? e
             : "Something went wrong. If this issue persists, please check the console or ask for help in the support server.";
+
+
+        // Log the full error object for debugging
+        console.error("Translation Error Details:", e);
 
         showToast(userMessage, Toasts.Type.FAILURE);
 
@@ -104,6 +112,36 @@ function fallbackToGoogle(text: string, sourceLang: string, targetLang: string):
         deeplLanguageToGoogleLanguage(sourceLang),
         deeplLanguageToGoogleLanguage(targetLang)
     );
+}
+
+async function openAITranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
+    if (!settings.store.openaiApiKey) {
+        showToast("OpenAI API key is not set.", Toasts.Type.FAILURE);
+    }
+
+    const prompt = `Translate the following ${sourceLang} chat message to ${targetLang} keeping it as authentic as possible including use of (internet) slang, tone, etc., responding solely with the translation: ${text}`;
+
+    const { status, data } = await Native.makeOpenAIAPITranslateRequest(
+        settings.store.openaiApiKey,
+        prompt,
+        settings.store.openaiModel
+    );
+
+    if (status !== 200) {
+        throw new Error(
+            `Failed to translate "${text}" (${sourceLang} -> ${targetLang})\n${status} ${data}`
+        );
+    }
+
+    const translatedText = data.choices[0].message.content;
+    if (!translatedText) {
+        throw new Error("Failed to retrieve a valid translation from OpenAI API.");
+    }
+
+    return {
+        sourceLanguage: sourceLang,
+        text: translatedText
+    };
 }
 
 const showDeeplApiQuotaToast = onlyOnce(
