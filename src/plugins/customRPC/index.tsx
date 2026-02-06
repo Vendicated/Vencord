@@ -225,7 +225,7 @@ export default definePlugin({
     // Discord hides buttons on your own Rich Presence for some reason. This patch disables that behaviour
     patches: [
         {
-            find: ".buttons.length)>=1",
+            find: ".USER_PROFILE_ACTIVITY_BUTTONS),",
             replacement: {
                 match: /.getId\(\)===\i.id/,
                 replace: "$& && false"
