@@ -12,8 +12,9 @@ import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
-import { classes, pluralise } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { Translate } from "@utils/translation";
 import { User } from "@vencord/discord-types";
 import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
@@ -60,8 +61,6 @@ function ContributorModal({ user }: { user: User; }) {
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
-    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
-
     return (
         <>
             <div className={cl("header")}>
@@ -88,15 +87,20 @@ function ContributorModal({ user }: { user: User; }) {
                 </div>
             </div>
 
-            {plugins.length ? (
-                <Forms.FormText>
-                    This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Forms.FormText>
-            ) : (
-                <Forms.FormText>
-                    This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
-                </Forms.FormText>
-            )}
+            <Forms.FormText>
+                {plugins.length > 0 ? (
+                    <Translate
+                        i18nKey="vencord.settings.plugins.contributorModal.contributorInfo.plugins"
+                        variables={{ count: plugins.length }}>
+                        This person has <Link href="https://vencord.dev/source">contributed</Link> to some plugins!
+                    </Translate>
+                ) : (
+                    <Translate i18nKey="vencord.settings.plugins.contributorModal.contributorInfo.noPlugins">
+                        This person has not made any plugins. They likely <Link href="https://vencord.dev/source">contributed</Link>
+                        to Vencord in other ways!
+                    </Translate>
+                )}
+            </Forms.FormText>
 
             {!!plugins.length && (
                 <div className={cl("plugins")}>

@@ -1,0 +1,95 @@
+{
+  "addonCard": {
+    "new": "NEW"
+  },
+  "cloud": {
+    "integrations": {
+      "header": "Cloud Integrations",
+      "reauthenticateOtherClient": "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will need to re-authenticate to continue using them. Click here to go to the settings page to do so!"
+    },
+    "settings": {
+      "header": "Cloud Settings",
+      "updatedRemote": "Your settings have been updated! Click here to restart to fully apply changes!"
+    }
+  },
+  "contributorCard": {
+    "contributionsButton": "See what you've contributed to",
+    "description": "Since you've contributed to Vencord you now have a cool new badge!",
+    "subtitle": "Thank you for contributing!",
+    "title": "Contributions"
+  },
+  "donate": "Donate",
+  "donorCard": {
+    "donated": {
+      "description": "You can manage your perks at any time by messaging @{v}.",
+      "subtitle": "Thank you for donating!",
+      "title": "Donations"
+    },
+    "notDonated": {
+      "description": "Please consider supporting the development of Vencord by donating!",
+      "title": "Support the Project"
+    }
+  },
+  "failedToRender": "Failed to render the {tab} tab. If this issue persists, try using the installer to reinstall!",
+  "quickActions": {
+    "editQuickCSS": "Edit QuickCSS",
+    "notificationLog": "Notification Log",
+    "openSettings": "Open Settings Folder",
+    "relaunchDiscord": "Relaunch Discord",
+    "title": "Quick Actions",
+    "viewSource": "View Source Code"
+  },
+  "settings": {
+    "disableMinSize": {
+      "title": "Disable minimum window size"
+    },
+    "enableReactDevtools": {
+      "title": "Enable React Developer Tools"
+    },
+    "frameless": {
+      "title": "Disable the window frame"
+    },
+    "hint": "Hint: You can change the position of this settings section in the <0>settings of the Settings plugin</0>!",
+    "macosVibrancyStyle": {
+      "placeholder": "Window vibrancy style",
+      "title": "Window vibrancy style (requires restart)"
+    },
+    "notification": {
+      "logButton": "View Notification Log",
+      "settingsButton": "Notification Settings"
+    },
+    "plugins": {
+      "contributorModal": {
+        "contributorInfo": {
+          "noPlugins": "This person has not made any plugins. They likely <0>contributed</0> to Vencord in other ways!",
+          "plugins_one": "This person has <0>contributed</0> to {count} plugin!",
+          "plugins_other": "This person has <0>contributed</0> to {count} plugins!"
+        }
+      }
+    },
+    "restartRequired": {
+      "body": "A restart is required to apply this change",
+      "cancel": "Later!",
+      "confirm": "Restart now",
+      "title": "Restart Required"
+    },
+    "title": "Settings",
+    "transparent": {
+      "description": "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart",
+      "title": "Enable window transparency"
+    },
+    "useQuickCss": {
+      "description": "Loads your Custom CSS",
+      "title": "Enable Custom CSS"
+    },
+    "winCtrlQ": {
+      "title": "Register Ctrl+Q as shortcut to close Discord (alternative to Alt+F4)"
+    },
+    "winNativeTitleBar": {
+      "title": "Use Windows' native title bar instead of Discord's custom one"
+    }
+  },
+  "tabs": {
+    "settings": "Vencord Settings"
+  }
+}
