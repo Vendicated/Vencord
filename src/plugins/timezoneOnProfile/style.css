@@ -1,0 +1,23 @@
+.vc-tzonprofile-container {
+    position: relative;
+    display: inline-block;
+}
+
+.vc-tzonprofile-selector {
+    color: var(--text-strong);
+}
+
+.vc-tzonprofile-time {
+    color: var(--text-strong);
+}
+
+.vc-tzonprofile-time * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.vc-tzonprofile-modal {
+    min-height: 140px;
+}
