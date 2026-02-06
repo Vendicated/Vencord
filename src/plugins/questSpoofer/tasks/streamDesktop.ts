@@ -6,16 +6,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Quest } from "@vencord/discord-types";
 import { FluxDispatcher, showToast, Toasts } from "@webpack/common";
 
 import { ApplicationStreamingStore, QuestSpooferLogger } from "../constants";
+import { claimQuestReward } from "../helpers";
 
 /**
  * Spoofs the STREAM_ON_DESKTOP quest by faking an active stream and
  * listening for quest heartbeat progress.
  */
 export function spoofStreamDesktopQuest(
-    quest: any,
+    quest: Quest,
     appId: string,
     appName: string,
     pid: number,
@@ -38,9 +40,9 @@ export function spoofStreamDesktopQuest(
 
     QuestSpooferLogger.log(`Simulating stream for ${appName} (pid ${pid})`);
 
-    const listener = (data: any) => {
+    const listener = async (data: any) => {
         const progress =
-            quest.config.configVersion === 1
+            (quest.config.configVersion ?? quest.config.config_version) === 1
                 ? data.userStatus.streamProgressSeconds
                 : Math.floor(data.userStatus.progress.STREAM_ON_DESKTOP.value);
 
@@ -56,6 +58,19 @@ export function spoofStreamDesktopQuest(
             ApplicationStreamingStore.getStreamerActiveStreamMetadata = backup;
             showToast("✅ Streaming quest completed!", Toasts.Type.SUCCESS);
             QuestSpooferLogger.info("Stream quest spoofed successfully.");
+
+            const claimResult = await claimQuestReward(quest.id);
+            if (claimResult.status === "captcha") {
+                showToast(
+                    "⚠️ Quest reward requires captcha. Claim manually in Discord.",
+                    Toasts.Type.MESSAGE,
+                );
+            } else if (claimResult.status === "error") {
+                showToast(
+                    "Quest reward claim failed. See console for details.",
+                    Toasts.Type.FAILURE,
+                );
+            }
         }
     };
 

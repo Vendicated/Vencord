@@ -6,7 +6,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Quest } from "@vencord/discord-types";
 import { QuestSpooferLogger, RunningGameStore } from "@plugins/questSpoofer/constants";
+import { claimQuestReward } from "@plugins/questSpoofer/helpers";
 import { FluxDispatcher, RestAPI, showToast, Toasts } from "@webpack/common";
 
 /**
@@ -14,7 +16,7 @@ import { FluxDispatcher, RestAPI, showToast, Toasts } from "@webpack/common";
  * and waiting for quest heartbeat progress to reach the required duration.
  */
 export async function spoofDesktopPlayQuest(
-    quest: any,
+    quest: Quest,
     appId: string,
     appName: string,
     pid: number,
@@ -69,9 +71,9 @@ export async function spoofDesktopPlayQuest(
             games: [fakeGame],
         });
 
-        const listener = (data: any) => {
+        const listener = async (data: any) => {
             const progress =
-                quest.config.configVersion === 1
+                (quest.config.configVersion ?? quest.config.config_version) === 1
                     ? data.userStatus.streamProgressSeconds
                     : Math.floor(
                         data.userStatus.progress.PLAY_ON_DESKTOP.value,
@@ -102,6 +104,19 @@ export async function spoofDesktopPlayQuest(
                 QuestSpooferLogger.info(
                     "Desktop play quest spoofed successfully.",
                 );
+
+                const claimResult = await claimQuestReward(quest.id);
+                if (claimResult.status === "captcha") {
+                    showToast(
+                        "⚠️ Quest reward requires captcha. Claim manually in Discord.",
+                        Toasts.Type.MESSAGE,
+                    );
+                } else if (claimResult.status === "error") {
+                    showToast(
+                        "Quest reward claim failed. See console for details.",
+                        Toasts.Type.FAILURE,
+                    );
+                }
             }
         };
 

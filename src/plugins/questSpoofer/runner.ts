@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Quest } from "@vencord/discord-types";
 import { QuestSpooferLogger, QuestTasks, randomPid } from "@plugins/questSpoofer/constants";
 import { fetchQuests } from "@plugins/questSpoofer/helpers";
 import { spoofDesktopPlayQuest } from "@plugins/questSpoofer/tasks/desktopPlay";
@@ -15,27 +16,6 @@ import { spoofVideoQuest } from "@plugins/questSpoofer/tasks/video";
 import { showToast, Toasts } from "@webpack/common";
 
 export type QuestTask = typeof QuestTasks[number];
-
-interface QuestProgress {
-    progress?: Record<string, { value: number }>;
-    streamProgressSeconds?: number;
-    enrolledAt?: string;
-    enrolled_at?: string;
-}
-
-interface QuestConfig {
-    application: { id: string; name: string };
-    messages: { game_title?: string; questName?: string };
-    taskConfig?: { tasks: Record<string, { target: number }> };
-    task_config_v2?: { tasks: Record<string, { target: number }> };
-}
-
-export interface Quest {
-    id: string;
-    config: QuestConfig;
-    user_status?: QuestProgress;
-    userStatus?: QuestProgress;
-}
 
 interface RunOptions {
     silentIfNone?: boolean;
@@ -50,7 +30,11 @@ const processedQuestIds = new Set<string>();
 
 /** Determines which task config block is present on the quest. */
 function getTaskConfig(quest: Quest) {
-    return quest.config.taskConfig ?? quest.config.task_config_v2;
+    return (
+        quest.config.taskConfig
+        ?? quest.config.task_config_v2
+        ?? quest.config.task_config
+    );
 }
 
 /** Finds the first supported quest task defined in the quest config. */
@@ -132,6 +116,7 @@ export async function runQuestSpoofer(options?: RunOptions) {
             const questName =
                 quest.config.messages.game_title ??
                 quest.config.messages.questName ??
+                quest.config.messages.quest_name ??
                 quest.config.application.name;
 
             QuestSpooferLogger.log(

@@ -6,15 +6,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Quest } from "@vencord/discord-types";
 import { QuestSpooferLogger } from "@plugins/questSpoofer/constants";
-import { postVideoProgress } from "@plugins/questSpoofer/helpers";
+import { claimQuestReward, postVideoProgress } from "@plugins/questSpoofer/helpers";
 import { showToast, Toasts } from "@webpack/common";
 
 /**
  * Spoofs video watch quests by incrementally posting progress timestamps until completion.
  */
 export async function spoofVideoQuest(
-    quest: any,
+    quest: Quest,
     secondsNeeded: number,
     secondsDone: number,
 ) {
@@ -37,6 +38,12 @@ export async function spoofVideoQuest(
     const enrolledAtMs = new Date(enrolledAt).getTime();
     const speed = 7;
     const interval = 1;
+
+    const questName =
+        quest.config.messages.questName
+        ?? quest.config.messages.quest_name
+        ?? quest.config.messages.game_title
+        ?? quest.config.application.name;
 
     await (async function spoof() {
         QuestSpooferLogger.info("Started video spoofing...");
@@ -70,12 +77,25 @@ export async function spoofVideoQuest(
         }
 
         await postVideoProgress(quest.id, secondsNeeded);
+        const claimResult = await claimQuestReward(quest.id);
+        if (claimResult.status === "captcha") {
+            showToast(
+                "⚠️ Quest reward requires captcha. Claim manually in Discord.",
+                Toasts.Type.MESSAGE,
+            );
+        } else if (claimResult.status === "error") {
+            showToast(
+                "Quest reward claim failed. See console for details.",
+                Toasts.Type.FAILURE,
+            );
+        }
+
         showToast("✅ Video quest completed!", Toasts.Type.SUCCESS);
         QuestSpooferLogger.info("Sent final video-progress to finish quest.");
     })();
 
     showToast(
-        `▶️ Spoofing video quest: ${quest.config.messages.questName}`,
+        `▶️ Spoofing video quest: ${questName}`,
         Toasts.Type.MESSAGE,
     );
 }

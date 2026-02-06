@@ -26,6 +26,7 @@ export * from "./OverridePremiumTypeStore";
 export * from "./PermissionStore";
 export * from "./PopoutWindowStore";
 export * from "./PresenceStore";
+export * from "./QuestStore";
 export * from "./ReadStateStore";
 export * from "./RelationshipStore";
 export * from "./RTCConnectionStore";

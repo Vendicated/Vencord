@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { QuestStore } from "@vencord/discord-types";
 import { Logger } from "@utils/Logger";
 import { findByPropsLazy } from "@webpack";
 
@@ -19,7 +20,7 @@ export const RunningGameStore = findByPropsLazy(
     "getGameForPID",
 );
 /** Store for quest metadata. */
-export const QuestsStore = findByPropsLazy("getQuest");
+export const QuestsStore = findByPropsLazy("getQuest") as QuestStore;
 
 export const QuestTasks = [
     "WATCH_VIDEO",

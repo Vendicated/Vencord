@@ -8,7 +8,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { BackupRestoreIcon, CloudIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
-import { BackupAndRestoreTab, CloudTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
+import { BackupAndRestoreTab, CloudTab, EagleCordTab,PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
@@ -70,7 +70,7 @@ interface SettingsLayoutBuilder {
 const settings = definePluginSettings({
     settingsLocation: {
         type: OptionType.SELECT,
-        description: "Where to put the Vencord settings section",
+        description: "Where to put the EagleCord settings section",
         options: [
             { label: "At the very top", value: "top" },
             { label: "Above the Nitro section", value: "aboveNitro", default: true },
@@ -196,13 +196,13 @@ export default definePlugin({
 
     getSettingsSectionMappings() {
         return [
-            ["VencordSettings", "vencord_main_panel"],
-            ["VencordPlugins", "vencord_plugins_panel"],
-            ["VencordThemes", "vencord_themes_panel"],
-            ["VencordUpdater", "vencord_updater_panel"],
-            ["VencordCloud", "vencord_cloud_panel"],
-            ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
-            ["VencordPatchHelper", "vencord_patch_helper_panel"]
+            ["EagleCordSettings", "EagleCord_main_panel"],
+            ["EagleCordPlugins", "EagleCord_plugins_panel"],
+            ["EagleCordThemes", "EagleCord_themes_panel"],
+            ["EagleCordUpdater", "EagleCord_updater_panel"],
+            ["EagleCordCloud", "EagleCord_cloud_panel"],
+            ["EagleCordBackupAndRestore", "EagleCord_backup_restore_panel"],
+            ["EagleCordPatchHelper", "EagleCord_patch_helper_panel"]
         ];
     },
 
@@ -211,52 +211,52 @@ export default definePlugin({
         if (originalLayoutBuilder.key !== "$Root") return layout;
         if (!Array.isArray(layout)) return layout;
 
-        if (layout.some(s => s?.key === "vencord_section")) return layout;
+        if (layout.some(s => s?.key === "EagleCord_section")) return layout;
 
         const { buildEntry } = this;
 
-        const vencordEntries: SettingsLayoutNode[] = [
+        const EagleCordEntries: SettingsLayoutNode[] = [
             buildEntry({
-                key: "vencord_main",
-                title: "Vencord",
-                panelTitle: "Vencord Settings",
-                Component: VencordTab,
+                key: "EagleCord_main",
+                title: "EagleCord",
+                panelTitle: "EagleCord Settings",
+                Component: EagleCordTab,
                 Icon: MainSettingsIcon
             }),
             buildEntry({
-                key: "vencord_plugins",
+                key: "EagleCord_plugins",
                 title: "Plugins",
                 Component: PluginsTab,
                 Icon: PluginsIcon
             }),
             buildEntry({
-                key: "vencord_themes",
+                key: "EagleCord_themes",
                 title: "Themes",
                 Component: ThemesTab,
                 Icon: PaintbrushIcon
             }),
             !IS_UPDATER_DISABLED && UpdaterTab && buildEntry({
-                key: "vencord_updater",
+                key: "EagleCord_updater",
                 title: "Updater",
-                panelTitle: "Vencord Updater",
+                panelTitle: "EagleCord Updater",
                 Component: UpdaterTab,
                 Icon: UpdaterIcon
             }),
             buildEntry({
-                key: "vencord_cloud",
+                key: "EagleCord_cloud",
                 title: "Cloud",
-                panelTitle: "Vencord Cloud",
+                panelTitle: "EagleCord Cloud",
                 Component: CloudTab,
                 Icon: CloudIcon
             }),
             buildEntry({
-                key: "vencord_backup_restore",
+                key: "EagleCord_backup_restore",
                 title: "Backup & Restore",
                 Component: BackupAndRestoreTab,
                 Icon: BackupRestoreIcon
             }),
             IS_DEV && PatchHelperTab && buildEntry({
-                key: "vencord_patch_helper",
+                key: "EagleCord_patch_helper",
                 title: "Patch Helper",
                 Component: PatchHelperTab,
                 Icon: PatchHelperIcon
@@ -268,7 +268,7 @@ export default definePlugin({
                 if (Object.values(FallbackSectionTypes).includes(section)) return null;
 
                 return buildEntry({
-                    key: `vencord_deprecated_custom_${section}`,
+                    key: `EagleCord_deprecated_custom_${section}`,
                     title: label,
                     Component: element,
                     Icon: section === "Vesktop" ? VesktopSettingsIcon : PlaceholderIcon
@@ -276,11 +276,11 @@ export default definePlugin({
             })
         ].filter(isTruthy);
 
-        const vencordSection: SettingsLayoutNode = {
-            key: "vencord_section",
+        const EagleCordSection: SettingsLayoutNode = {
+            key: "EagleCord_section",
             type: LayoutTypes.SECTION,
-            useTitle: () => "Vencord Settings",
-            buildLayout: () => vencordEntries
+            useTitle: () => "EagleCord Settings",
+            buildLayout: () => EagleCordEntries
         };
 
         const { settingsLocation } = settings.store;
@@ -303,7 +303,7 @@ export default definePlugin({
             idx += 1;
         }
 
-        layout.splice(idx, 0, vencordSection);
+        layout.splice(idx, 0, EagleCordSection);
 
         return layout;
     },
@@ -316,47 +316,47 @@ export default definePlugin({
         return [
             {
                 section: SectionTypes.HEADER,
-                label: "Vencord",
+                label: "EagleCord",
                 className: "vc-settings-header"
             },
             {
-                section: "VencordSettings",
-                label: "Vencord",
-                element: VencordTab,
+                section: "EagleCordSettings",
+                label: "EagleCord",
+                element: EagleCordTab,
                 className: "vc-settings"
             },
             {
-                section: "VencordPlugins",
+                section: "EagleCordPlugins",
                 label: "Plugins",
                 element: PluginsTab,
                 className: "vc-plugins"
             },
             {
-                section: "VencordThemes",
+                section: "EagleCordThemes",
                 label: "Themes",
                 element: ThemesTab,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {
-                section: "VencordUpdater",
+                section: "EagleCordUpdater",
                 label: "Updater",
                 element: UpdaterTab,
                 className: "vc-updater"
             },
             {
-                section: "VencordCloud",
+                section: "EagleCordCloud",
                 label: "Cloud",
                 element: CloudTab,
                 className: "vc-cloud"
             },
             {
-                section: "VencordBackupAndRestore",
+                section: "EagleCordBackupAndRestore",
                 label: "Backup & Restore",
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
             },
             IS_DEV && {
-                section: "VencordPatchHelper",
+                section: "EagleCordPatchHelper",
                 label: "Patch Helper",
                 element: PatchHelperTab,
                 className: "vc-patch-helper"
@@ -443,7 +443,7 @@ export default definePlugin({
     getInfoRows() {
         const { electronVersion, chromiumVersion, additionalInfo } = this;
 
-        const rows = [`Vencord ${gitHash}${additionalInfo}`];
+        const rows = [`EagleCord ${gitHash}${additionalInfo}`];
 
         if (electronVersion) rows.push(`Electron ${electronVersion}`);
         if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);

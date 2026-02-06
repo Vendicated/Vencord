@@ -6,7 +6,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Quest } from "@vencord/discord-types";
 import { QuestSpooferLogger } from "@plugins/questSpoofer/constants";
+import { claimQuestReward } from "@plugins/questSpoofer/helpers";
 import {
     ChannelStore,
     GuildChannelStore,
@@ -20,9 +22,14 @@ import {
  * against the user's current private call or a guild voice channel.
  */
 export async function spoofPlayActivityQuest(
-    quest: any,
+    quest: Quest,
     secondsNeeded: number,
 ) {
+    const questName =
+        quest.config.messages.questName
+        ?? quest.config.messages.quest_name
+        ?? quest.config.messages.game_title
+        ?? quest.config.application.name;
     const guilds = GuildChannelStore.getAllGuilds() as Record<
         string,
         { VOCAL?: { channel: { id: string } }[] }
@@ -65,6 +72,19 @@ export async function spoofPlayActivityQuest(
 
                 showToast("✅ Activity quest completed!", Toasts.Type.SUCCESS);
                 QuestSpooferLogger.info("Activity quest spoofed successfully.");
+
+                const claimResult = await claimQuestReward(quest.id);
+                if (claimResult.status === "captcha") {
+                    showToast(
+                        "⚠️ Quest reward requires captcha. Claim manually in Discord.",
+                        Toasts.Type.MESSAGE,
+                    );
+                } else if (claimResult.status === "error") {
+                    showToast(
+                        "Quest reward claim failed. See console for details.",
+                        Toasts.Type.FAILURE,
+                    );
+                }
                 break;
             }
 
@@ -73,7 +93,7 @@ export async function spoofPlayActivityQuest(
     })();
 
     showToast(
-        `🧠 Spoofing activity: ${quest.config.messages.questName}`,
+        `🧠 Spoofing activity: ${questName}`,
         Toasts.Type.MESSAGE,
     );
 }
