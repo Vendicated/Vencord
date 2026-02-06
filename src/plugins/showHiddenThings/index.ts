@@ -42,7 +42,7 @@ export default definePlugin({
             },
         },
         {
-            find: "INVITES_DISABLED))||",
+            find: "INVITES_DISABLED)||",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
                 match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,

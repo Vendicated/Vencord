@@ -30,12 +30,18 @@ import { createAndAppendStyle } from "@utils/css";
 import { localStorage } from "@utils/localStorage";
 import { relaunch } from "@utils/native";
 import { StartAt } from "@utils/types";
-import { checkForUpdates, update, UpdateLogger } from "@utils/updater";
-import { onceReady } from "@webpack";
 import { SettingsRouter } from "@webpack/common";
-import { patches } from "@webpack/patcher";
 
 import { get as dsGet } from "./api/DataStore";
+import { NotificationData, showNotification } from "./api/Notifications";
+import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
+import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
+import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
+import { localStorage } from "./utils/localStorage";
+import { relaunch } from "./utils/native";
+import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
+import { onceReady } from "./webpack";
+import { patches } from "./webpack/patchWebpack";
 
 if (IS_REPORTER) {
     require("./debug/runReporter");
@@ -58,7 +64,7 @@ async function syncSettings() {
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
             color: "var(--yellow-360)",
-            onClick: () => SettingsRouter.open("VencordCloud")
+            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel")
         });
         return;
     }

@@ -22,7 +22,7 @@ export default definePlugin({
         {
             find: ".removeObscurity,",
             replacement: {
-                match: /(?<="removeObscurity",(\i)=>{)/,
+                match: /(?<=removeObscurity(?:",|=)(\i)=>{)/,
                 replace: (_, event) => `$self.reveal(${event});`
             }
         }

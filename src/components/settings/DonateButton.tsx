@@ -6,8 +6,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ButtonProps } from "@components/Button";
-import { Button } from "@components/Button";
+import { type ButtonProps, Button } from "@components/Button";
 import { Heart } from "@components/Heart";
 
 export default function DonateButton({

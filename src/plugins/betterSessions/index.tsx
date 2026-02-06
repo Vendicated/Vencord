@@ -13,15 +13,14 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
-import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
+import { findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
+import { Constants, React, RestAPI, SettingsRouter, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
 const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
-const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
 const TimestampClasses = findCssClassesLazy("timestamp", "blockquoteContainer");
 const SessionIconClasses = findCssClassesLazy("sessionIcon");
@@ -165,7 +164,7 @@ export default definePlugin({
                 title: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
                 permanent: true,
-                onClick: () => UserSettingsModal.open("Sessions")
+                onClick: () => SettingsRouter.openUserSettings("sessions_panel")
             });
         }
 

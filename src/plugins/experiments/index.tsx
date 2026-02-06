@@ -20,7 +20,7 @@ import { Forms, React } from "@webpack/common";
 import hideBugReport from "./hideBugReport.css?managed";
 
 const KbdStyles = findByPropsLazy("key", "combo");
-const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
+const BugReporterExperiment = findLazy(m => m?.definition?.name === "2026-01-bug-reporter");
 
 const modKey = IS_MAC ? "cmd" : "ctrl";
 const altKey = IS_MAC ? "opt" : "alt";
@@ -99,6 +99,7 @@ export default definePlugin({
             find: "Clear Treatment ",
             replacement: [
                 {
+                    // TODO: stable compat optional chaining remove once some time has passed
                     match: /\i\??\.isStaff\(\)/,
                     replace: "true"
                 },
@@ -119,7 +120,7 @@ export default definePlugin({
         }
     ],
 
-    start: () => !BugReporterExperiment.getCurrentConfig().hasBugReporterAccess && enableStyle(hideBugReport),
+    start: () => !BugReporterExperiment.getConfig().hasBugReporterAccess && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
