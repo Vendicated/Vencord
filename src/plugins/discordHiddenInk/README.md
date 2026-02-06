@@ -1,0 +1,5 @@
+- Invisible zero-width encoding for message content with auto-decode for users who have this tool.
+- Mention preservation for user, role, and channel pings.
+- Optional "shared key" encryption for message payloads and supported attachments. Messages you send will be encoded and should decode for users with the same key
+- Attachment encryption/decryption for images and `.txt` files.
+- "Show more..." expands long decrypted text for easier reading.
