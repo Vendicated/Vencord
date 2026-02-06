@@ -37,6 +37,7 @@ export let ReadStateStore: t.ReadStateStore;
 export let PresenceStore: t.PresenceStore;
 export let AccessibilityStore: t.AccessibilityStore;
 
+export let ApplicationStreamingStore: t.ApplicationStreamingStore;
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
 export let GuildScheduledEventStore: t.GuildScheduledEventStore;
@@ -88,6 +89,7 @@ export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useState
 waitForStore("AccessibilityStore", s => AccessibilityStore = s);
 waitForStore("ApplicationStore", s => ApplicationStore = s);
 waitForStore("AuthenticationStore", s => AuthenticationStore = s);
+waitForStore("ApplicationStreamingStore", m => ApplicationStreamingStore = m);
 waitForStore("DraftStore", s => DraftStore = s);
 waitForStore("UserStore", s => UserStore = s);
 waitForStore("UserProfileStore", m => UserProfileStore = m);
@@ -136,3 +138,4 @@ waitForStore("ThemeStore", m => {
     // For this reason, use a non import access here.
     Vencord.Api.Themes.initQuickCssThemeStore(m);
 });
+
