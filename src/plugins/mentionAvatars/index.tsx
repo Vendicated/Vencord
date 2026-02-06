@@ -49,16 +49,10 @@ export default definePlugin({
 
     patches: [{
         find: ".USER_MENTION)",
-        replacement: [
-            {
-                match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
-                replace: "children:$self.renderUsername({username:$1,user:$2})"
-            },
-            {
-                match: /children:`@\$\{(\i\?\?\i)\}`(?<=\.useName\((\i)\).+?)/,
-                replace: "children:$self.renderUsername({username:$1,user:$2})"
-            }
-        ]
+        replacement: {
+            match: /children:`@\$\{(\i\?\?\i)\}`(?<=\.useName\((\i)\).+?)/,
+            replace: "children:$self.renderUsername({username:$1,user:$2})"
+        }
     },
     {
         find: ".ROLE_MENTION)",

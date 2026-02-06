@@ -16,11 +16,6 @@ export interface Category {
     collapsed?: boolean;
 }
 
-const CATEGORY_BASE_KEY = "PinDMsCategories-";
-const CATEGORY_MIGRATED_PINDMS_KEY = "PinDMsMigratedPinDMs";
-const CATEGORY_MIGRATED_KEY = "PinDMsMigratedOldCategories";
-const OLD_CATEGORY_KEY = "BetterPinDMsCategories-";
-
 let forceUpdateDms: (() => void) | undefined = undefined;
 export let currentUserCategories: Category[] = [];
 
