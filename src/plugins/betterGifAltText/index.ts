@@ -23,7 +23,7 @@ export default definePlugin({
     name: "BetterGifAltText",
     authors: [Devs.Ven],
     description:
-        "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
+        "Change GIF alt text from simply being 'GIF' to containing the gif tags (e.g. on Tenor gifs) / filename",
     patches: [
         {
             find: ".modalContext})};",
