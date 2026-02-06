@@ -22,11 +22,11 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { ChannelStore, Menu } from "@webpack/common";
+import { ChannelStore, Menu, MessageStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
-import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
+import { handleTranslate, TranslationAccessory, translationCache } from "./TranslationAccessory";
 import { translate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
@@ -59,12 +59,60 @@ function getMessageContent(message: Message) {
         || message.embeds?.find(embed => embed.type === "auto_moderation_message")?.rawDescription || "";
 }
 
+const inFlightTranslations = new Map<string, string>();
+
+function autoTranslateMessage(message: Message) {
+    if ((message as any).vencordEmbeddedBy) return;
+
+    const me = UserStore.getCurrentUser();
+    if (me && message.author?.id === me.id) return;
+
+    if (message.channel_id !== SelectedChannelStore.getChannelId()) return;
+    const content = getMessageContent(message);
+    if (!content) return;
+
+    if (inFlightTranslations.get(message.id) === content) return;
+
+    const cached = translationCache.get(message.id);
+    if (cached) {
+        handleTranslate(message.id, cached);
+        return;
+    }
+
+    inFlightTranslations.set(message.id, content);
+
+    translate("received", content)
+        .then(trans => {
+            if (inFlightTranslations.get(message.id) !== content) return;
+
+            handleTranslate(message.id, trans);
+        })
+        .finally(() => {
+            if (inFlightTranslations.get(message.id) === content)
+                inFlightTranslations.delete(message.id);
+        });
+}
+
+function queueRecentMessages(channelId: string) {
+    if (!channelId) return;
+    if (channelId !== SelectedChannelStore.getChannelId()) return;
+
+    const limit = settings.store.autoTranslateReceivedLimit ?? 0;
+    if (limit <= 0) return;
+
+    const messages = MessageStore.getMessages(channelId)?._array as Message[];
+    for (const message of messages.slice(-limit)) {
+        autoTranslateMessage(message);
+    }
+}
+
+
 let tooltipTimeout: any;
 
 export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate or DeepL",
-    authors: [Devs.Ven, Devs.AshtonMemer],
+    authors: [Devs.Ven, Devs.AshtonMemer, Devs.RumBugen],
     settings,
     contextMenus: {
         "message": messageCtxPatch
@@ -95,6 +143,36 @@ export default definePlugin({
                     handleTranslate(message.id, trans);
                 }
             };
+        }
+    },
+
+    flux: {
+        MESSAGE_CREATE({ message, optimistic }: { message: Message; optimistic: boolean; }) {
+            if (optimistic) return;
+            if (!settings.store.autoTranslateReceived) return;
+            if (message.channel_id !== SelectedChannelStore.getChannelId()) return;
+
+            autoTranslateMessage(message);
+        },
+        MESSAGE_UPDATE({ message }: { message: Message; }) {
+            if (!message?.id) return;
+            if (message.channel_id !== SelectedChannelStore.getChannelId()) return;
+            const limit = settings.store.autoTranslateReceivedLimit ?? 0;
+            if (!settings.store.autoTranslateReceived && limit <= 0) return;
+
+            translationCache.delete(message.id);
+            autoTranslateMessage(message);
+        },
+        async CHANNEL_SELECT({ channelId }: { channelId?: string; }) {
+            if (!channelId) return;
+            const limit = settings.store.autoTranslateReceivedLimit ?? 0;
+            if (limit <= 0) return;
+            if (!MessageStore.isReady(channelId)) {
+                await new Promise<void>(resolve => MessageStore.whenReady(channelId, resolve));
+            }
+            if (channelId !== SelectedChannelStore.getChannelId()) return;
+
+            queueRecentMessages(channelId);
         }
     },
 
