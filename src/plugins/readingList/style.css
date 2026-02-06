@@ -1,0 +1,344 @@
+/* Reading List Icon Styles */
+.vc-reading-list-header-icon {
+    vertical-align: middle;
+    margin-right: 8px;
+    color: var(--interactive-icon-default);
+}
+
+.vc-readinglist-icon {
+    color: var(--interactive-icon-default);
+}
+
+.vc-readinglist-btn[class*="selected"] .vc-readinglist-icon {
+    color: var(--interactive-active);
+}
+
+.vc-readinglist-btn:hover .vc-readinglist-icon {
+    color: var(--interactive-hover);
+}
+
+/* Icon wrapper for badge positioning */
+.vc-readinglist-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Unread badge - red dot */
+.vc-readinglist-unread-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--status-danger);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.vc-reading-list-popout {
+    width: 420px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0px;
+    border-radius: 8px;
+    background-color: var(--background-surface-high);
+    box-shadow: var(--elevation-high);
+    overflow: hidden;
+}
+
+/* Popout Header */
+.vc-reading-list-popout-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+
+.vc-reading-list-count-badge {
+    margin-left: auto;
+    color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+/* Popout Content (scrollable) */
+.vc-reading-list-popout-content {
+    flex: 1;
+    overflow: hidden scroll;
+    min-height: 100px;
+    max-height: 500px;
+}
+
+/* Popout Footer */
+.vc-reading-list-popout-footer {
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+    border-top: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+
+/* Loading and Empty States */
+.vc-reading-list-loading,
+.vc-reading-list-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 12px;
+    color: var(--text-muted);
+}
+
+.vc-reading-list-empty-hint {
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 280px;
+}
+
+/* Items Container */
+.vc-reading-list-items {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 2px;
+}
+
+/* Individual Item - Discord pinned message style */
+.vc-reading-list-popover-item {
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-8);
+    background-color: var(--background-surface-higher);
+    transition: background 0.1s ease;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+    /* For absolute positioning of actions */
+}
+
+.vc-reading-list-popover-item:hover {
+    background: var(--background-modifier-hover);
+}
+
+/* Native Rendering Overrides */
+.vc-reading-list-native {
+    display: block;
+    /* ChannelMessage is usually a block (li) */
+    padding: 0;
+    /* Let ChannelMessage handle padding */
+    border: none;
+    background: transparent;
+    overflow: hidden;
+    /* Contain floats */
+}
+
+.vc-reading-list-native .message-2CShn3 {
+    /* Discord message class might vary, but usually they have margin */
+    margin: 0;
+    padding: 8px 12px;
+}
+
+.vc-reading-list-native:hover {
+    background: var(--background-modifier-hover);
+}
+
+.vc-reading-list-native-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--background-surface-higher);
+    border-radius: 4px;
+    padding: 2px;
+    box-shadow: var(--elevation-stroke), var(--elevation-medium);
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    z-index: 10;
+}
+
+.vc-reading-list-native:hover .vc-reading-list-native-actions {
+    opacity: 1;
+}
+
+
+/* Item Header */
+.vc-reading-list-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.vc-reading-list-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vc-reading-list-right {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-reading-list-meta {
+    flex-grow: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+}
+
+.vc-reading-list-timestamp {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* Action Buttons */
+.vc-reading-list-actions {
+    display: flex;
+    gap: 2px;
+    /* Legacy opacity handling */
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+.vc-reading-list-popover-item:not(.vc-reading-list-native):hover .vc-reading-list-actions {
+    opacity: 1;
+}
+
+/* For native actions, we handle opacity on the container */
+.vc-reading-list-native-actions .vc-reading-list-actions {
+    opacity: 1;
+}
+
+
+.vc-reading-list-action-btn {
+    padding: 4px;
+    border-radius: 4px;
+    color: var(--interactive-icon-default);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.1s ease, background 0.1s ease;
+}
+
+.vc-reading-list-action-btn:hover {
+    color: var(--interactive-icon-hover);
+    background: var(--background-modifier-hover);
+}
+
+.vc-reading-list-action-btn-danger:hover {
+    color: var(--status-danger);
+}
+
+/* Content */
+.vc-reading-list-content {
+    color: var(--text-normal);
+    word-break: break-word;
+    line-height: 1.375;
+}
+
+.vc-reading-list-no-content {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Mentions */
+.vc-reading-list-mention {
+    background: var(--mention-background);
+    color: var(--text-link);
+    padding: 0 2px;
+    border-radius: 3px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.vc-reading-list-mention:hover {
+    background: var(--mention-foreground);
+    color: var(--white-500);
+}
+
+/* Attachments */
+.vc-reading-list-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.vc-reading-list-attachment {
+    display: block;
+    text-decoration: none;
+    border-radius: 4px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.vc-reading-list-attachment-image {
+    max-width: 200px;
+    max-height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+}
+
+.vc-reading-list-attachment-file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    color: var(--text-link);
+    font-size: 13px;
+    max-width: 200px;
+}
+
+.vc-reading-list-attachment-file:hover {
+    background: var(--background-secondary-alt);
+}
+
+.vc-reading-list-attachment-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-reading-list-note {
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--background-tertiary);
+    border-radius: 4px;
+    border-left: 3px solid var(--brand-experiment);
+}
+
+.vc-reading-list-note-label {
+    color: var(--brand-experiment);
+    margin-bottom: 4px;
+}
+
+.vc-reading-list-added {
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+
+.vc-reading-list-count {
+    margin-left: auto;
+    align-self: center;
+    margin-right: 8px;
+    color: var(--text-muted);
+}
