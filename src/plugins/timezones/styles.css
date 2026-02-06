@@ -1,0 +1,47 @@
+/** Based on Syncxv's vc-timezones user plugin **/
+
+.vc-timezones-tooltip {
+    max-width: none !important;
+    white-space: nowrap
+}
+
+.vc-timezones-profile-display {
+    display: flex;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 28px 14px 10px;
+    background: var(--profile-body-background-color, var(--background-primary));
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-normal);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.vc-timezones-message-display {
+    margin-left: 4px;
+    cursor: pointer;
+}
+
+.vc-timezones-modal-header {
+    justify-content: space-between;
+    align-content: center;
+}
+
+.vc-timezones-modal-header h1 {
+    margin-bottom: 0;
+}
+
+.vc-timezones-modal-content {
+    padding: 1em;
+}
+
+.vc-timezones-modal-footer {
+    gap: 16px;
+}
