@@ -85,8 +85,6 @@ function ImportButton({ overwrite, pending, setPending, onImport }: ImportButton
         <Button
             variant="secondary"
             onClick={async () => {
-                if (pending) return;
-
                 if (overwrite) {
                     Alerts.show({
                         title: "Are you sure?",
@@ -159,10 +157,7 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
                             <div className={cl("twin-buttons")}>
                                 <Button
                                     variant="secondary"
-                                    onClick={() => {
-                                        if (pending) return;
-                                        copyWithToast(JSON.stringify(localData));
-                                    }}
+                                    onClick={() => copyWithToast(JSON.stringify(localData))}
                                     disabled={pending}
                                 >
                                     Copy to clipboard
@@ -177,8 +172,6 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
                             <Button
                                 variant="primary"
                                 onClick={async () => {
-                                    if (isSame || pending) return;
-
                                     setPending(true);
                                     try {
                                         await saveData(localData);
@@ -201,7 +194,6 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
                     <Button
                         variant="dangerPrimary"
                         onClick={() => {
-                            if (pending) return;
                             deleteToken();
                             showToast("Successfully signed out!", Toasts.Type.SUCCESS);
                         }}

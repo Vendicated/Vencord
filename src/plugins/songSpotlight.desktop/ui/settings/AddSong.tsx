@@ -58,8 +58,6 @@ function AddSongModal({ modalProps, close, onAdd }: AddSongModalProps) {
                         <Button
                             variant="primary"
                             onClick={async () => {
-                                if (!url || error) return;
-
                                 setPending(true);
                                 try {
                                     const parsed = await parseLink(url);

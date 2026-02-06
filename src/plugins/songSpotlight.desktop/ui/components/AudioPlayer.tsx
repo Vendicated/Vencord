@@ -78,8 +78,11 @@ export function AudioPlayer({ audioRef, list, playing, setPlaying, setLoaded }: 
         setLoaded(index, false);
     }, [setLoaded]);
 
+    // onPaused runs before onEnded
+    const justPaused = useRef<number>(undefined);
+
     const handleEnded = useCallback((index: number) => {
-        if (playing !== index) return;
+        if (justPaused.current !== index && playing !== index) return;
 
         const nextIndex = urls.findIndex((url, j) => url && j > index);
         setPlaying(nextIndex !== -1 ? nextIndex : false);
@@ -87,6 +90,7 @@ export function AudioPlayer({ audioRef, list, playing, setPlaying, setLoaded }: 
 
     const handlePaused = useCallback((index: number) => {
         if (playing === index) {
+            justPaused.current = index;
             setPlaying(false);
         }
     }, [playing, setPlaying]);
