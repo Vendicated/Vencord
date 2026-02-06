@@ -11,6 +11,7 @@ type PolicyMap = Record<string, string[]>;
 
 export const ConnectSrc = ["connect-src"];
 export const ImageSrc = [...ConnectSrc, "img-src"];
+export const MediaSrc = [...ImageSrc, "media-src"];
 export const CssSrc = ["style-src", "font-src"];
 export const ImageAndCssSrc = [...ImageSrc, ...CssSrc];
 export const ImageScriptsAndCssSrc = [...ImageAndCssSrc, "script-src", "worker-src"];
@@ -63,6 +64,11 @@ export const CspPolicies: PolicyMap = {
     "dearrow-thumb.ajay.app": ImageSrc, // Dearrow Thumbnail CDN
     "usrbg.is-hardly.online": ImageSrc, // USRBG API
     "icons.duckduckgo.com": ImageSrc, // DuckDuckGo Favicon API (Reverse Image Search)
+    "dc.songspotlight.nexpid.xyz": ConnectSrc, // Song Spotlight API
+    "*.scdn.co": MediaSrc, // Spotify cover art/audio preview CDN
+    "*.sndcdn.com": MediaSrc, // Soundcloud cover art/audio preview CDN
+    "*.mzstatic.com": ImageSrc, // Apple Music cover art CDN
+    "audio-ssl.itunes.apple.com": MediaSrc, // Apple Music audio preview CDN
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
