@@ -657,7 +657,7 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
         const member = mod[key];
         for (const newName in mappers) {
             // if the current mapper matches this module
-            if (!(newName in exports) && mappers[newName](member)) {
+            if (mappers[newName](member)) {
                 exports[newName] = member;
                 continue outer;
             }
