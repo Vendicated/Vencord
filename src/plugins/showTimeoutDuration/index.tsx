@@ -7,15 +7,17 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
+import { classes } from "@utils/misc";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, Text } from "@webpack/common";
+import { ChannelStore, GuildMemberStore } from "@webpack/common";
 import { ReactNode } from "react";
 
 const countDownFilter = canonicalizeMatch(/#{intl::MAX_AGE_NEVER}/);
@@ -75,25 +77,23 @@ export default definePlugin({
     patches: [
         {
             find: "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",
-            replacement: [
-                {
-                    match: /\i\.\i,{(text:.{0,30}#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}\))/,
-                    replace: "$self.TooltipWrapper,{message:arguments[0].message,$1"
-                }
-            ]
+            replacement: {
+                match: /\i\.\i,{(text:.{0,30}#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}\))/,
+                replace: "$self.TooltipWrapper,{message:arguments[0].message,compact:arguments[0].compact,$1"
+            }
         }
     ],
 
-    TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: ReactNode; text: ReactNode; }) => {
+    TooltipWrapper: ErrorBoundary.wrap(({ message, compact, children, text }: { message: Message; compact: boolean; children: ReactNode; text: ReactNode }) => {
         if (settings.store.displayStyle === DisplayStyle.Tooltip)
             return <TooltipContainer text={renderTimeout(message, false)}>{children}</TooltipContainer>;
 
         return (
-            <div className="vc-std-wrapper">
+            <div className={classes("vc-std-wrapper", compact ? "vc-std-wrapper-compact" : "vc-std-wrapper-default")}>
                 <TooltipContainer text={text}>{children}</TooltipContainer>
-                <Text variant="text-md/normal" color="status-danger">
+                <BaseText weight="normal" size="md" tag="span">
                     {renderTimeout(message, true)} timeout remaining
-                </Text>
+                </BaseText>
             </div>
         );
     }, { noop: true })
