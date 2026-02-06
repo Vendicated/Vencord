@@ -15,15 +15,14 @@ import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { validateSong } from "@plugins/songSpotlight.desktop/service";
 import { Spinner } from "@plugins/songSpotlight.desktop/ui/common";
-import { Song, UserData, UserDataSchema } from "@song-spotlight/api/structs";
+import { UserData, UserDataSchema } from "@song-spotlight/api/structs";
 import { sid } from "@song-spotlight/api/util";
 import { readClipboard } from "@utils/clipboard";
 import { copyWithToast } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Parser, showToast, Toasts, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
 
-import { AddSong } from "./AddSong";
-import { EditableSong } from "./EditableSong";
+import { SongEditor } from "./SongEditor";
 
 interface ManageSongsModalProps extends ManageSongsProps {
     modalProps: ModalProps;
@@ -105,14 +104,6 @@ function ImportButton({ overwrite, pending, setPending, onImport }: ImportButton
     );
 }
 
-type Editable = {
-    slot: "song";
-    song: Song;
-} | {
-    slot: "add" | "empty";
-    song: undefined;
-};
-
 interface ManageSongsProps {
     templateData?: UserData;
 }
@@ -134,40 +125,6 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
         self?.data && localData
             ? self.data.length === localData.length && self.data.map(sid).join(",") === localData.map(sid).join(",")
             : true, [self?.data, localData]);
-
-    const onAdd = useCallback((song: Song) => {
-        if (!localData) return;
-
-        if (localData.length >= apiConstants.songLimit) return "Not enough space";
-        if (localData.some(x => sid(x) === sid(song))) return "You've already added this song";
-
-        showToast("Added song!");
-        setLocalData([
-            ...localData,
-            song,
-        ]);
-    }, [localData]);
-    const onRemove = useCallback((song: Song) => {
-        if (!localData) return;
-
-        const i = localData.indexOf(song);
-        if (i !== -1) {
-            showToast("Removed song!");
-            setLocalData(localData.toSpliced(i, 1));
-        }
-    }, [localData]);
-
-    const editable = useMemo<Editable[]>(
-        () =>
-            localData
-                ? new Array(apiConstants.songLimit).fill(null).map((_, i) => {
-                    if (localData[i]) return { slot: "song", song: localData[i] };
-                    else if (localData[i - 1] || i === 0) return { slot: "add" };
-                    else return { slot: "empty" };
-                })
-                : [],
-        [localData],
-    );
 
     useEffect(() => {
         if (isAuthorized() && !localData) getData().then(() => setPending(false));
@@ -193,13 +150,10 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
                                 )}
                         </Flex>
                         <Flex flexDirection="column" gap="6px">
-                            {editable.map(({ slot, song }, i) => {
-                                if (slot === "song") {
-                                    return <EditableSong song={song} index={i} onRemove={onRemove} key={sid(song)} />;
-                                } else if (slot === "add") {
-                                    return <AddSong onAdd={onAdd} key={slot} />;
-                                } else return <div className={cl("empty-song")} key={`${slot}-${i}`} />;
-                            })}
+                            <SongEditor
+                                localData={localData}
+                                setLocalData={setLocalData}
+                            />
                         </Flex>
                         <Flex flexDirection="column" gap="8px">
                             <div className={cl("twin-buttons")}>

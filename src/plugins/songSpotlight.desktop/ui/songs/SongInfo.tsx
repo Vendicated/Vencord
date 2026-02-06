@@ -109,7 +109,7 @@ function SongEntry({ entry, number, isLoaded, isPlaying, big, onClick }: SongEnt
                 data-playing={isPlaying}
             >
                 <Flex alignItems="center" justifyContent="center" gap={0} className={cl("song-entry-number")}>
-                    <BaseText size={baseSize} weight={isPlaying ? "semibold" : "medium"}>{number}</BaseText>
+                    <BaseText size={baseSize} weight="medium">{number}</BaseText>
                 </Flex>
                 <Flex flexDirection="column" justifyContent="center" gap={0}>
                     <Flex alignItems="center" gap="6px">
@@ -118,7 +118,7 @@ function SongEntry({ entry, number, isLoaded, isPlaying, big, onClick }: SongEnt
                         </BaseText>
                         {entry.explicit && <ExplicitTag />}
                     </Flex>
-                    <BaseText size={subSize} weight="medium" className={cl("clamped", "sub")} title={entry.sublabel}>
+                    <BaseText size={subSize} weight="normal" className={cl("clamped", "sub")} title={entry.sublabel}>
                         {entry.sublabel}
                     </BaseText>
                 </Flex>
@@ -258,7 +258,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                         </Flex>
                         <BaseText
                             size={baseSize}
-                            weight="medium"
+                            weight="normal"
                             className={cl("clamped", "sub")}
                             title={render.sublabel}
                         >
@@ -271,7 +271,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                 </Flex>
                 <Flex
                     justifyContent="flex-end"
-                    alignItems="center"
+                    alignItems="flex-end"
                     gap="6px"
                     className={cl("song-player")}
                     data-idle={playing === false && !big}
@@ -288,7 +288,6 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                             className={cl("song-progress")}
                         />
                         <PlayButton
-                            size={subSize}
                             state={playing !== false}
                             disabled={loaded.size < 1}
                             onClick={() => {
