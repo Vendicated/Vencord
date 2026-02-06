@@ -115,7 +115,8 @@ const settings = definePluginSettings({
     idList: {
         description: "Guild/channel/user IDs to blacklist or whitelist (separate with comma)",
         type: OptionType.STRING,
-        default: ""
+        default: "",
+        multiline: true,
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
