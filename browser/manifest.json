@@ -9,13 +9,16 @@
     "icons": {
         "128": "icon.png"
     },
+    "action": {
+        "default_popup": "popup.html"
+    },
 
     "host_permissions": [
         "*://*.discord.com/*",
         "https://raw.githubusercontent.com/*"
     ],
 
-    "permissions": ["declarativeNetRequest"],
+    "permissions": ["scripting", "declarativeNetRequest"],
 
     "content_scripts": [
         {
