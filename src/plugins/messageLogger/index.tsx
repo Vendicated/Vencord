@@ -252,6 +252,11 @@ export default definePlugin({
             default: "",
             multiline: true
         },
+        allowGuilds: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of guild IDs to allow",
+            default: ""
+        }
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
@@ -289,7 +294,7 @@ export default definePlugin({
 
     shouldIgnore(message: any, isEdit = false) {
         try {
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, allowGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
             const myId = UserStore.getCurrentUser().id;
 
             return ignoreBots && message.author?.bot ||
@@ -299,6 +304,7 @@ export default definePlugin({
                 ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
                 (isEdit ? !logEdits : !logDeletes) ||
                 ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+                !allowGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
                 // Ignore Venbot in the support channels
                 (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
         } catch (e) {
