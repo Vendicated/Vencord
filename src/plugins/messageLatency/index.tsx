@@ -116,11 +116,12 @@ export default definePlugin({
     description: "Displays an indicator for messages that took ≥n seconds to send",
     authors: [Devs.arHSM, Devs.Fox3000foxy],
 
-    contextMenus: {
-        "user-context": userContextPatch,
-        "user-profile-actions": userContextPatch,
-        "user-profile-overflow-menu": userContextPatch
-    },
+    // WIP
+    // contextMenus: {
+    //     "user-context": userContextPatch,
+    //     "user-profile-actions": userContextPatch,
+    //     "user-profile-overflow-menu": userContextPatch
+    // },
 
     settings: definePluginSettings({
         latency: {
@@ -218,7 +219,7 @@ export default definePlugin({
         }
 
         // Track latency for graph
-        this.addLatencyToHistory(message.author.id, Math.abs(delta));
+        // this.addLatencyToHistory(message.author.id, Math.abs(delta));
 
 
         // Old Discord Android clients have a delay of around 17 days
