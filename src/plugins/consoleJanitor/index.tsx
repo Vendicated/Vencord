@@ -7,9 +7,10 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { SettingsSection } from "@components/settings/tabs/plugins/components/Common";
+import { Span } from "@components/Span";
 import { Devs } from "@utils/constants";
 import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
-import { Checkbox, Text } from "@webpack/common";
+import { Checkbox } from "@webpack/common";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -50,7 +51,7 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
             onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
             size={20}
         >
-            <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
+            <Span>{settingKey[0].toUpperCase() + settingKey.slice(1)}</Span>
         </Checkbox>
     );
 }

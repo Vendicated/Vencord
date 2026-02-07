@@ -9,8 +9,8 @@ import "./UIElements.css";
 import { ChatBarButtonMap } from "@api/ChatButtons";
 import { MessagePopoverButtonMap } from "@api/MessagePopover";
 import { SettingsPluginUiElements, useSettings } from "@api/Settings";
-import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
+import { HeadingSecondary } from "@components/Heading";
 import { PlaceholderIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
@@ -75,7 +75,7 @@ function Section(props: {
 
     return (
         <section>
-            <BaseText tag="h3" size="xl" weight="bold">{title}</BaseText>
+            <HeadingSecondary>{title}</HeadingSecondary>
             <Paragraph size="sm" className={classes(Margins.top8, Margins.bottom20)}>{description}</Paragraph>
 
             <div className={cl("switches")}>

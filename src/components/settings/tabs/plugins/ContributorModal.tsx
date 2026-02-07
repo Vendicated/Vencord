@@ -8,14 +8,16 @@ import "./ContributorModal.css";
 
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { DevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { User } from "@vencord/discord-types";
-import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -70,7 +72,7 @@ function ContributorModal({ user }: { user: User; }) {
                     src={user.getAvatarURL(void 0, 512, true)}
                     alt=""
                 />
-                <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
+                <HeadingPrimary className={cl("name")}>{user.username}</HeadingPrimary>
 
                 <div className={classes("vc-settings-modal-links", cl("links"))}>
                     {website && (
@@ -89,13 +91,13 @@ function ContributorModal({ user }: { user: User; }) {
             </div>
 
             {plugins.length ? (
-                <Forms.FormText>
+                <Paragraph>
                     This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Forms.FormText>
+                </Paragraph>
             ) : (
-                <Forms.FormText>
+                <Paragraph>
                     This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
-                </Forms.FormText>
+                </Paragraph>
             )}
 
             {!!plugins.length && (

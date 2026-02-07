@@ -18,9 +18,10 @@
 
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
+import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Forms, SearchableSelect, useMemo } from "@webpack/common";
+import { SearchableSelect, useMemo } from "@webpack/common";
 
 import { settings } from "./settings";
 import { cl, getLanguages } from "./utils";
@@ -42,9 +43,9 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
 
     return (
         <section className={Margins.bottom16}>
-            <Forms.FormTitle tag="h3">
+            <HeadingSecondary>
                 {settings.def[settingsKey].description}
-            </Forms.FormTitle>
+            </HeadingSecondary>
 
             <SearchableSelect
                 options={options}
@@ -77,9 +78,9 @@ export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
+                <HeadingPrimary className={cl("modal-title")}>
                     Translate
-                </Forms.FormTitle>
+                </HeadingPrimary>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
 

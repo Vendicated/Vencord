@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { cl, getGuildPermissionSpecMap, getSortedRolesForMember, sortUserRoles } from "@plugins/permissionsViewer/utils";
@@ -23,7 +24,7 @@ import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import type { Guild, GuildMember } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
+import { PermissionsBits, Tooltip, useMemo, UserStore } from "@webpack/common";
 
 import { PermissionsSortOrder, settings } from "..";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
@@ -55,12 +56,13 @@ function FakeRole({ text, color, ...props }: FakeRoleProps) {
                 />
             </div>
             <div className={RoleClasses.roleName}>
-                <Text
+                <BaseText
+                    size="xs"
+                    weight="medium"
                     className={RoleClasses.roleNameOverflow}
-                    variant="text-xs/medium"
                 >
                     {text}
-                </Text>
+                </BaseText>
             </div>
         </div>
     );
@@ -74,7 +76,7 @@ interface GrantedByTooltipProps {
 function GrantedByTooltip({ roleName, roleColor }: GrantedByTooltipProps) {
     return (
         <>
-            <Text variant="text-sm/medium">Granted By</Text>
+            <BaseText size="sm" weight="medium">Granted By</BaseText>
             <FakeRole text={roleName} color={roleColor} />
         </>
     );

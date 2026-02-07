@@ -19,6 +19,8 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { getGuildAcronym } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -28,7 +30,7 @@ import definePlugin from "@utils/types";
 import { Guild, GuildSticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, GuildStore, IconUtils, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickersStore, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
@@ -228,7 +230,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
 
     return (
         <>
-            <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
+            <Heading className={Margins.top20}>Custom Name</Heading>
             <CheckedTextInput
                 value={name}
                 onChange={v => {
@@ -294,7 +296,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                         alt={g.name}
                                     />
                                 ) : (
-                                    <Forms.FormText
+                                    <Paragraph
                                         style={{
                                             fontSize: getFontSize(getGuildAcronym(g)),
                                             width: "100%",
@@ -305,7 +307,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                         }}
                                     >
                                         {getGuildAcronym(g)}
-                                    </Forms.FormText>
+                                    </Paragraph>
                                 )}
                             </div>
                         )}
@@ -340,7 +342,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                                     width={24}
                                     style={{ marginRight: "0.5em" }}
                                 />
-                                <Forms.FormText>Clone {data.name}</Forms.FormText>
+                                <Paragraph>Clone {data.name}</Paragraph>
                             </ModalHeader>
                             <ModalContent>
                                 <CloneModal data={data} />

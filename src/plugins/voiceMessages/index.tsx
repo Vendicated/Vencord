@@ -19,7 +19,9 @@
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
+import { Heading } from "@components/Heading";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
@@ -33,7 +35,7 @@ import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import { findLazy, findStoreLazy } from "@webpack";
-import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Constants, FluxDispatcher, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
@@ -189,7 +191,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
+                <Heading>Record Voice Message</Heading>
             </ModalHeader>
 
             <ModalContent className={cl("modal")}>
@@ -215,7 +217,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     </Button>
                 </div>
 
-                <Forms.FormTitle>Preview</Forms.FormTitle>
+                <Heading>Preview</Heading>
                 {metaError
                     ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
                     : (
@@ -228,11 +230,11 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
                 {isUnsupportedFormat && (
                     <Card variant="warning" className={Margins.top16} defaultPadding>
-                        <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+                        <Paragraph>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Paragraph>
 
-                        <Forms.FormText className={Margins.top8}>
+                        <Paragraph className={Margins.top8}>
                             To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
-                        </Forms.FormText>
+                        </Paragraph>
                     </Card>
                 )}
 
