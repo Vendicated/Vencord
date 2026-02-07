@@ -134,4 +134,10 @@ window.VencordNative = {
 
     pluginHelpers: {} as any,
     csp: {} as any,
+    tray: {
+        setUpdateState: NOOP,
+        onCheckUpdates: NOOP,
+        onRepair: NOOP,
+        onAbout: NOOP,
+    },
 };
