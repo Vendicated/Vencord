@@ -334,18 +334,17 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::FRIENDS_ALL_HEADER}",
+            find: "online:t.toString()",
             replacement: {
-                match: /concat\(n\)\);case (\i\.\i)\.SUGGESTIONS/,
-                replace:
-                    'concat(n));case $1.TYPING:return "Typing — "+arguments[1];case $1.SUGGESTIONS'
+                match: /case\s+([A-Za-z0-9_$]+\.[A-Za-z0-9_$]+)\.ONLINE:\s*return\b/,
+                replace: 'case $1.TYPING:return "Typing — " + arguments[1];case $1.ONLINE:return '
             }
         },
         {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                match: /case (\i\.\i)\.ONLINE:(?=return (\i)\.SECTION_ONLINE)/,
-                replace: "case $1.ONLINE:case $1.TYPING:"
+                match: /(case\s+([A-Za-z0-9_$.]+)\.ONLINE:\s*((?:case\s+\2\.[A-Za-z0-9_$.]+:\s*)*))return\s+([A-Za-z0-9_$.]+)\.SECTION_ONLINE;/,
+                replace: 'case $2.ONLINE:$3case $2.TYPING:return $4.SECTION_ONLINE;'
             }
         },
         {
@@ -366,10 +365,11 @@ export default definePlugin({
             }
         },
         {
-            find: "subText:(0,r.jsx)(I.A,{",
+            find: "this.handleOpenPrivateChannel",
             replacement: {
-                match: /subText:\s*\(0,r\.jsx\)\(I\.A,\{([\s\S]*?)\}\)/,
-                replace: 'subText:(window.__typingUsers?.has(e.id)?(0,r.jsx)("div",{children:"Typing in "+window.__typingUsers.get(e.id)}):(0,r.jsx)(I.A,{$1}))'
+                match: /subText:\s*\(0,\s*([A-Za-z0-9_$]+)\.jsx\)\(\s*([A-Za-z0-9_$]+\.[A-Za-z0-9_$]+)\s*,\s*\{([\s\S]*?)\}\s*\)/,
+                replace:
+                    'subText:(window.__typingUsers?.has(e.id)?(0,$1.jsx)("div",{children:"Typing in "+window.__typingUsers.get(e.id)}):(0,$1.jsx)($2,{$3}))'
             }
         },
         {
