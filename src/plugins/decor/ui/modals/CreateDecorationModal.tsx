@@ -20,7 +20,7 @@ import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeade
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import { FluxDispatcher, GuildStore, NavigationRouter, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-const FileUpload = findComponentByCodeLazy(".currentTarget.files)", "lineClamp:1");
+const FileUpload = findComponentByCodeLazy(".currentTarget.files", "lineClamp:1");
 
 const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),

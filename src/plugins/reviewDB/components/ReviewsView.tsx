@@ -32,7 +32,7 @@ const Transforms = findByPropsLazy("insertNodes", "textToText");
 const Editor = findByPropsLazy("start", "end", "toSlateRange");
 const ChatInputTypes = findByPropsLazy("FORM", "USER_PROFILE");
 const InputComponent = findComponentByCodeLazy("editorClassName", "CHANNEL_TEXT_AREA");
-const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
+const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT]", "fromServer)");
 
 interface UserProps {
     discordId: string;
