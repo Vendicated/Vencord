@@ -16,7 +16,7 @@ import { findCssClassesLazy, findStoreLazy } from "@webpack";
 import { Clickable, ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
 
 import { contextMenus } from "./components/contextMenu";
-import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
+import { openCategoryModal, requireSettingsModal } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
 import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory, usePinnedDms } from "./data";
 
@@ -72,7 +72,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"private-channels-".concat(',
+            find: '"dm-quick-launcher"===',
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
@@ -87,15 +87,15 @@ export default definePlugin({
 
                 // Rendering
                 {
-                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.\i),\{channel:.+?)/,
+                    match: /renderRow(?:",|=)(\i)=>{(?<=renderDM(?:",|=).+?(\i\.\i),\{channel:.+?)/,
                     replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2)();"
                 },
                 {
-                    match: /"renderSection",(\i)=>{/,
+                    match: /renderSection(?:",|=)(\i)=>{/,
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
-                    match: /"renderSection".{0,300}?"span",{/,
+                    match: /renderSection(?:",|=).{0,300}?"span",{/,
                     replace: "$&...$self.makeSpanProps(),"
                 },
 
@@ -105,7 +105,7 @@ export default definePlugin({
                     replace: "$1($2-$self.categoryLen())"
                 },
                 {
-                    match: /"getRowHeight",\((\i),(\i)\)=>{/,
+                    match: /getRowHeight(?:",|=)\((\i),(\i)\)=>{/,
                     replace: "$&if($self.isChannelHidden($1,$2))return 0;"
                 },
 
@@ -173,7 +173,7 @@ export default definePlugin({
     categoryLen,
     getSections,
     getAllUncollapsedChannels,
-    requireSettingsMenu,
+    requireSettingsMenu: requireSettingsModal,
 
     makeProps(instance, { sections }: { sections: number[]; }) {
         this._instance = instance;
