@@ -55,7 +55,7 @@ export default definePlugin({
                 break;
             case ",":
                 e.preventDefault();
-                SettingsRouter.open("My Account");
+                SettingsRouter.openUserSettings("my_account_panel");
                 break;
             default:
                 if (e.key >= "1" && e.key <= "9") {
