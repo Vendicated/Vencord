@@ -1,0 +1,312 @@
+.vc-snotes-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    flex-shrink: 0;
+    background-color: var(--background-secondary-alt);
+}
+
+.vc-snotes-header-info-wrapper {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    margin-right: 16px;
+    overflow: hidden;
+}
+
+.vc-snotes-guild-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    margin-right: 10px;
+    object-fit: cover;
+    background-color: var(--background-accent);
+    flex-shrink: 0;
+}
+
+.vc-snotes-guild-icon.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--interactive-normal);
+}
+
+.vc-snotes-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--header-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-snotes-header-actions-wrapper {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.vc-snotes-edit-button {
+    color: var(--interactive-normal);
+    margin-right: 8px;
+}
+
+.vc-snotes-edit-button:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-snotes-edit-button-inner svg {
+    width: 20px;
+    height: 20px;
+}
+
+.vc-snotes-modal-header .vc-snotes-modal-close-button {
+    color: var(--interactive-normal);
+}
+
+.vc-snotes-modal-header .vc-snotes-modal-close-button:hover {
+    color: var(--interactive-hover);
+}
+
+
+.vc-snotes-modal-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--background-primary);
+}
+
+.vc-snotes-modal-content.vc-snotes-viewing {
+    padding: 20px;
+}
+
+.vc-snotes-modal-content.vc-snotes-editing {
+    padding: 0;
+}
+
+.vc-snotes-rendered-note-area {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    flex-grow: 1;
+    position: relative;
+    line-height: 1.65;
+    color: var(--text-normal);
+    font-size: 14px;
+}
+
+.vc-snotes-rendered-note-area.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    min-height: 150px;
+}
+
+.vc-snotes-rendered-note-area.parse-error {
+    color: var(--text-danger);
+}
+
+.vc-snotes-rendered-note-area.parse-error p {
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.vc-snotes-rendered-note-area.parse-error pre {
+    background-color: var(--background-tertiary);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: var(--text-normal);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.vc-snotes-empty-text-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 10px 0;
+}
+
+.vc-snotes-edit-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.vc-snotes-textarea {
+    flex-grow: 1;
+    width: 100%;
+    min-height: 150px;
+    padding: 16px 20px;
+    border: none!important;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    border-radius: 0;
+    box-sizing: border-box;
+    resize: none;
+    color: var(--text-normal);
+    background-color: var(--input-background);
+    font-family: var(--font-primary);
+    font-size: 15px;
+    line-height: 1.65;
+    outline: none;
+}
+
+.vc-snotes-tags-view-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed var(--background-modifier-accent);
+    flex-shrink: 0;
+}
+
+.vc-snotes-tag-item.vc-snotes-view-mode-tag {
+    background-color: var(--background-secondary-alt);
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.vc-snotes-tags-edit-section {
+    padding: 16px 20px;
+    border-top: 1px solid var(--background-modifier-accent);
+    flex-shrink: 0;
+    background-color: var(--background-primary);
+}
+
+.vc-snotes-tags-edit-section .vc-snotes-form-title {
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--header-secondary);
+    text-transform: uppercase;
+    line-height: 16px;
+}
+
+.vc-snotes-tag-input-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.vc-snotes-tag-input {
+    flex-grow: 1;
+}
+
+.vc-snotes-tag-add-button {
+    flex-shrink: 0;
+}
+
+.vc-snotes-tags-list-scroller {
+    max-height: 80px;
+    position: relative;
+    padding-right: 4px;
+}
+
+.vc-snotes-tags-list-editable {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 30px;
+}
+
+.vc-snotes-no-tags-text {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 30px;
+    font-style: italic;
+}
+
+.vc-snotes-tag-item {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--background-secondary);
+    color: var(--interactive-normal);
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: default;
+    gap: 6px;
+    border: 1px solid var(--background-tertiary);
+    transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
+}
+
+.vc-snotes-tag-item:not(.readonly):hover {
+    border-color: var(--background-modifier-hover);
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-snotes-tag-item-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--interactive-muted);
+    flex-shrink: 0;
+}
+
+.vc-snotes-tag-item-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.vc-snotes-tag-item-remove {
+    background: none;
+    border: none;
+    color: var(--interactive-muted);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+}
+
+.vc-snotes-tag-item-remove:hover {
+    color: var(--interactive-hover);
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-snotes-tag-item-remove svg {
+    width: 14px;
+    height: 14px;
+}
+
+.vc-snotes-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 16px 20px;
+    background-color: var(--background-secondary);
+    border-top: 1px solid var(--background-modifier-accent);
+    flex-shrink: 0;
+}
+
+.vc-snotes-cancel-button,
+.vc-snotes-save-button,
+.vc-snotes-close-button-footer {
+    margin-left: 12px;
+}
+
+.vc-snotes-save-button {
+    min-width: 96px;
+}
