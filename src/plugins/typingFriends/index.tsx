@@ -341,19 +341,24 @@ export default definePlugin({
             }
         },
         {
+            find: "SECTION_ONLINE:",
+            replacement: {
+                match: /(SECTION_ONLINE:\s*\{[\s\S]*?\}\s*,)/,
+                replace: '$1SECTION_TYPING:{lightSrc:n(939333),darkSrc:n(492055),width:421,height:218,renderContent:()=> (0,r.jsx)(o.SGT,{note:"No one is typing right now."})},'
+            }
+        },
+        {
             find: "FriendsEmptyState: Invalid empty state",
             replacement: {
-                match: /(case\s+([A-Za-z0-9_$.]+)\.ONLINE:\s*((?:case\s+\2\.[A-Za-z0-9_$.]+:\s*)*))return\s+([A-Za-z0-9_$.]+)\.SECTION_ONLINE;/,
-                replace: 'case $2.ONLINE:$3case $2.TYPING:return $4.SECTION_ONLINE;'
+                match: /return\s+([A-Za-z0-9_$.]+)\.SECTION_ALL;\s*case\s+([A-Za-z0-9_$.]+)\./,
+                replace: "return $1.SECTION_ALL;case $2.TYPING:return $1.SECTION_TYPING;case $2."
             }
         },
         {
             find: "#{intl::FRIENDS_SECTION_ONLINE}),className:",
             replacement: {
-                match:
-                    /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.\i)(?=\},\{id:)/,
-                replace: (rest, relationShipTypes, className) =>
-                    `,{id:${relationShipTypes}.TYPING,show:window.__friendsTypingShowSection,className:${className},content:"Typing"}${rest}`
+                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.\i)(?=\},\{id:)/,
+                replace: ',{id:$1.TYPING,show:window.__friendsTypingShowSection,className:$2,content:"Typing"}$&'
             }
         },
         {
@@ -361,7 +366,7 @@ export default definePlugin({
             replacement: {
                 match:
                     /(?<=case (\i\.\i)\.SUGGESTIONS:return \d+===(\i)\.type)/,
-                replace: `;case $1.TYPING:return (window.__friendsTypingShowSection && $2.type===${TYPING_REL})`
+                replace: ";case $1.TYPING:return (window.__friendsTypingShowSection && $2.type===69)"
             }
         },
         {
