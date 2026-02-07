@@ -214,7 +214,7 @@ function renderTypingIcons(guildId: string, users: any[]) {
     }
 }
 
-function cleanupTyping(gid: string, userId: string): void {
+function cleanupTyping(gid: string | null, userId: string): void {
     const relationships = RelationshipStore.getMutableRelationships();
     const original = ORIGINAL_TYPES.get(userId);
 
@@ -224,12 +224,14 @@ function cleanupTyping(gid: string, userId: string): void {
         RelationshipStore.emitChange();
     }
 
+    TYPING_USERS.delete(String(userId));
+    TIMERS.delete(userId);
+
+    if (!gid) return;
+
     const set = TYPING_GUILDS.get(gid);
     set?.delete(String(userId));
     if (set?.size === 0) TYPING_GUILDS.delete(gid);
-
-    TYPING_USERS.delete(String(userId));
-    TIMERS.delete(userId);
 
     setTimeout(() => {
         const set = TYPING_GUILDS.get(gid);
@@ -256,7 +258,22 @@ function onTypingStart(e: TypingEvent) {
     }
 
     const channel = ChannelStore.getChannel(e.channelId);
-    if (!channel?.guild_id) return;
+    if (!channel) return;
+
+    if (!channel.guild_id) {
+        TYPING_USERS.set(String(e.userId), "DMs");
+
+        relationships.set(e.userId, TYPING_REL as any);
+        RelationshipStore.emitChange();
+
+        clearTimeout(TIMERS.get(e.userId));
+        TIMERS.set(
+            e.userId,
+            window.setTimeout(() => cleanupTyping(null, e.userId), settings.store.typingTimeout)
+        );
+
+        return;
+    }
 
     const gid = channel.guild_id;
     const guild = GuildStore.getGuild(gid);
@@ -291,8 +308,7 @@ function onTypingStop(e: TypingEvent) {
     TIMERS.delete(e.userId);
 
     const channel = ChannelStore.getChannel(e.channelId);
-    if (!channel?.guild_id) return;
-    cleanupTyping(channel.guild_id, e.userId);
+    cleanupTyping(channel?.guild_id ?? null, e.userId);
 }
 
 function syncShowFriendsSection() {
