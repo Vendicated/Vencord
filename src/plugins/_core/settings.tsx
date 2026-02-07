@@ -92,6 +92,16 @@ const settings = definePluginSettings({
     }
 });
 
+export const settingsSectionMap: [string, string][] = [
+    ["VencordSettings", "vencord_main_panel"],
+    ["VencordPlugins", "vencord_plugins_panel"],
+    ["VencordThemes", "vencord_themes_panel"],
+    ["VencordUpdater", "vencord_updater_panel"],
+    ["VencordCloud", "vencord_cloud_panel"],
+    ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
+    ["VencordPatchHelper", "vencord_patch_helper_panel"]
+];
+
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
@@ -205,15 +215,7 @@ export default definePlugin({
     },
 
     getSettingsSectionMappings() {
-        return [
-            ["VencordSettings", "vencord_main_panel"],
-            ["VencordPlugins", "vencord_plugins_panel"],
-            ["VencordThemes", "vencord_themes_panel"],
-            ["VencordUpdater", "vencord_updater_panel"],
-            ["VencordCloud", "vencord_cloud_panel"],
-            ["VencordBackupAndRestore", "vencord_backup_restore_panel"],
-            ["VencordPatchHelper", "vencord_patch_helper_panel"]
-        ];
+        return settingsSectionMap;
     },
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
