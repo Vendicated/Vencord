@@ -6,6 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
@@ -91,7 +92,6 @@ const settings = definePluginSettings({
 });
 
 function isBlacklisted(userId: string): boolean {
-    console.log("isBlacklisted called with:", userId);
     const ids = settings.store.blacklistedUserIds;
     if (!ids) return false;
     return ids.split(",").includes(userId);
@@ -384,7 +384,7 @@ function scanForUsers() {
     }
 }
 
-export const userContextPatch: NavContextMenuPatchCallback = (children, { user }: userContextProps) => {
+export const userContextPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
     const VoiceNormalizationToggle = (
         <Menu.MenuCheckboxItem
             id="voice-normalization-toggle"
@@ -399,10 +399,7 @@ export const userContextPatch: NavContextMenuPatchCallback = (children, { user }
 export default definePlugin({
     name: "VoiceNormalizer",
     description: "Automatically adjusts voice chat volumes to maintain a consistent listening level across all speakers",
-    authors: [{
-        name: "omniologist"
-    }
-    ],
+    authors: [Devs.omniologist],
     settings,
     contextMenus: {
         "user-context": userContextPatch
