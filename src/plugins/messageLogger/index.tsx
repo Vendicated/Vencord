@@ -408,7 +408,7 @@ export default definePlugin({
 
         {
             // Updated message transformer(?)
-            find: "THREAD_STARTER_MESSAGE?null==",
+            find: ".PREMIUM_REFERRAL&&(",
             replacement: [
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
