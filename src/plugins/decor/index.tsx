@@ -102,16 +102,10 @@ export default definePlugin({
             "#{intl::ayozFl::raw}", // Avatar preview
         ].map(find => ({
             find,
-            replacement: [
-                {
-                    match: /(?<=userValue.{0,25}void 0:)((\i)\.avatarDecoration)/,
-                    replace: "$self.useUserDecorAvatarDecoration($2)??$1"
-                },
-                {
-                    match: /(?<=userValue:)((\i(?:\.author)?)\?\.avatarDecoration)/,
-                    replace: "$self.useUserDecorAvatarDecoration($2)??$1"
-                }
-            ]
+            replacement: {
+                match: /(?<=userValue:)((\i(?:\.author)?)\?\.avatarDecoration)/,
+                replace: "$self.useUserDecorAvatarDecoration($2)??$1"
+            }
         })),
         // Patch avatar decoration preview to display Decor avatar decorations as if they are purchased
         {
