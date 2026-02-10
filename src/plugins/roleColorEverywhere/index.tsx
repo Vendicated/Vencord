@@ -92,7 +92,7 @@ export default definePlugin({
         // Slate
         {
             // Same find as FullUserInChatbox
-            find: ':"text":',
+            find: '"text":"locked"',
             replacement: [
                 {
                     match: /let\{id:(\i),guildId:\i,channelId:(\i)[^}]*\}.*?\.\i,{(?=children)/,

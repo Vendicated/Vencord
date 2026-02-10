@@ -598,6 +598,8 @@ export function findCssClasses<S extends string>(...classes: S[]): Record<S, str
 
     if (!res) {
         handleModuleNotFound("findCssClasses", ...classes);
+
+        if (IS_REPORTER) return null as any;
         return {} as Record<S, string>;
     }
 

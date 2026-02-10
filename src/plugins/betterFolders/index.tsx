@@ -21,6 +21,7 @@ import "./style.css";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
@@ -341,7 +342,13 @@ export default definePlugin({
             }
 
             try {
-                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+                // can cause hang if intl message is not found
+                const serversIntlMsg = getIntlMessage("SERVERS");
+                if (!serversIntlMsg) {
+                    new Logger("BetterFolders").error("Failed to get SERVERS intl message");
+                    return true;
+                }
+                return child?.props?.["aria-label"] === serversIntlMsg;
             } catch (e) {
                 console.error(e);
                 return true;
