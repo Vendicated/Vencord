@@ -17,7 +17,7 @@
 */
 
 import { ClockIcon } from "@components/Icons";
-import SettingsPlugin, { settingsSectionMap } from "@plugins/_core/settings";
+import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -28,25 +28,20 @@ export default definePlugin({
     description: "Adds Startup Timings to the Settings menu",
     authors: [Devs.Megu],
     start() {
-        const { customEntries } = SettingsPlugin;
-
-        customEntries.push({
+        SettingsPlugin.customEntries.push({
             key: "vencord_startup_timings",
             title: "Startup Timings",
             Component: StartupTimingPage,
             Icon: ClockIcon
         });
-
-        settingsSectionMap.push(["VencordStartupTimings", "vencord_startup_timings"]);
+        SettingsPlugin.settingsSectionMap.push(["VencordStartupTimings", "vencord_startup_timings"]);
     },
     stop() {
-        const { customEntries } = SettingsPlugin;
-        const removeByKey = (arr, predicate) => {
+        function removeFromArray<T>(arr: T[], predicate: (e: T) => boolean) {
             const idx = arr.findIndex(predicate);
             if (idx !== -1) arr.splice(idx, 1);
-        };
-
-        removeByKey(customEntries, e => e.key === "vencord_startup_timings");
-        removeByKey(settingsSectionMap, entry => entry[1] === "vencord_startup_timings");
+        }
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_startup_timings");
+        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "vencord_startup_timings");
     },
 });

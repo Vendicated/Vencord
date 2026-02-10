@@ -92,7 +92,7 @@ const settings = definePluginSettings({
     }
 });
 
-export const settingsSectionMap: [string, string][] = [
+const settingsSectionMap: [string, string][] = [
     ["VencordSettings", "vencord_main_panel"],
     ["VencordPlugins", "vencord_plugins_panel"],
     ["VencordThemes", "vencord_themes_panel"],
@@ -109,6 +109,7 @@ export default definePlugin({
     required: true,
 
     settings,
+    settingsSectionMap,
 
     patches: [
         {
