@@ -29,7 +29,7 @@ export default definePlugin({
     required: true,
     patches: [
         {
-            find: '"Menu API',
+            find: "Menu API only allows Items",
             replacement: {
                 match: /function.{0,80}type===(\i\.\i)\).{0,50}navigable:.+?Menu API/s,
                 replace: (m, mod) => {

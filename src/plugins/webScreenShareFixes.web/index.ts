@@ -18,17 +18,17 @@ export default definePlugin({
             find: "x-google-max-bitrate",
             replacement: [
                 {
-                    match: /"x-google-max-bitrate=".concat\(\i\)/,
-                    replace: '"x-google-max-bitrate=".concat("80_000")'
+                    match: /`x-google-max-bitrate=\$\{\i\}`/,
+                    replace: '"x-google-max-bitrate=80_000"'
                 },
                 {
                     match: ";level-asymmetry-allowed=1",
                     replace: ";b=AS:800000;level-asymmetry-allowed=1"
                 },
                 {
-                    match: /;usedtx=".concat\((\i)\?"0":"1"\)/,
-                    replace: '$&.concat($1?";stereo=1;sprop-stereo=1":"")'
-                }
+                    match: /;usedtx=\$\{(\i)\?"0":"1"\}/,
+                    replace: '$&${$1?";stereo=1;sprop-stereo=1":""}'
+                },
             ]
         }
     ]
