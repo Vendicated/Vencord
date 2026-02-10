@@ -570,3 +570,19 @@ export function CloudUploadIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export const ClockIcon = (props?: any) => {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm1-18a1 1 0 1 0-2 0v7c0 .27.1.52.3.7l3 3a1 1 0 0 0 1.4-1.4L13 11.58V5Z"
+            />
+        </Icon>
+    );
+};
