@@ -28,7 +28,7 @@ export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, 
 export const getBuildNumber = makeLazy(() => {
     try {
         function matchBuildNumber(factoryStr: string) {
-            const buildNumberMatch = factoryStr.match(/.concat\("(\d+?)"\)/);
+            const buildNumberMatch = factoryStr.match(/"Trying to open a changelog for an invalid build number (\d+?)"\)/);
             if (buildNumberMatch == null) {
                 return -1;
             }
@@ -36,13 +36,15 @@ export const getBuildNumber = makeLazy(() => {
             return Number(buildNumberMatch[1]);
         }
 
-        const hardcodedFactoryStr = String(wreq.m[128014]);
+        const hardcodedFactoryStr = String(wreq.m[446023]);
         if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
             const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
 
             if (hardcodedBuildNumber !== -1) {
                 return hardcodedBuildNumber;
             }
+        } else if (IS_DEV || IS_REPORTER) {
+            logger.error("Hardcoded build number module id is invalid");
         }
 
         const moduleFactory = findModuleFactory("Trying to open a changelog for an invalid build number");
@@ -495,8 +497,11 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
  * @returns The patched module factory
  */
 function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory): PatchedModuleFactory {
+    const originalFactoryCode = String(originalFactory);
+    const isArrowFunction = originalFactoryCode.startsWith("(");
+
     // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-    let code: string = "0," + String(originalFactory);
+    let code = "0," + (!isArrowFunction ? "function" : "") + originalFactoryCode.slice(originalFactoryCode.indexOf("("));
     let patchedSource = code;
     let patchedFactory = originalFactory;
 
@@ -586,7 +591,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 }
 
                 code = newCode;
-                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
+                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${code}\n//# sourceURL=file:///WebpackModule${String(moduleId)}`;
                 patchedFactory = (0, eval)(patchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {

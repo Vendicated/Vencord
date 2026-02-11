@@ -28,7 +28,7 @@ import type { PropsWithChildren } from "react";
 
 import { renderPopout } from "./menu";
 
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '"aria-haspopup":');
 
 export const settings = definePluginSettings({
     showPluginMenu: {
