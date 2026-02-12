@@ -50,14 +50,14 @@ export default definePlugin({
     patches: [{
         find: ".USER_MENTION)",
         replacement: {
-            match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
+            match: /children:`@\$\{(\i\?\?\i)\}`(?<=\.useName\((\i)\).+?)/,
             replace: "children:$self.renderUsername({username:$1,user:$2})"
         }
     },
     {
         find: ".ROLE_MENTION)",
         replacement: {
-            match: /children:\[\i&&.{0,100}className:\i.roleDot,.{0,200},\i(?=\])/,
+            match: /children:\[\i&&.{0,100}className:\i.\i,background:!1,.{0,50}?,\i(?=\])/,
             replace: "$&,$self.renderRoleIcon(arguments[0])"
         }
     }],

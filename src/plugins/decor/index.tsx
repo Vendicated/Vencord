@@ -47,14 +47,14 @@ export default definePlugin({
         },
         // Decoration modal module
         {
-            find: ".decorationGridItem,",
+            find: "80,onlyAnimateOnHoverOrFocus:!",
             replacement: [
                 {
-                    match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
+                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i=!1.{0,5}\}=\i/,
                     replace: "$self.DecorationGridItem=$&",
                 },
                 {
-                    match: /(?<==)\i=>{var{user:\i,avatarDecoration/,
+                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
                     replace: "$self.DecorationGridDecoration=$&",
                 },
                 // Remove NEW label from decor avatar decorations
@@ -98,7 +98,7 @@ export default definePlugin({
         },
         ...[
             '"Message Username"', // Messages
-            ".nameplatePreview,{", // Nameplate preview
+            "#{intl::COLLECTIBLES_NAMEPLATE_PREVIEW_A11Y}", // Nameplate preview
             "#{intl::ayozFl::raw}", // Avatar preview
         ].map(find => ({
             find,
@@ -106,9 +106,21 @@ export default definePlugin({
                 {
                     match: /(?<=userValue.{0,25}void 0:)((\i)\.avatarDecoration)/,
                     replace: "$self.useUserDecorAvatarDecoration($2)??$1"
+                },
+                {
+                    match: /(?<=userValue:)((\i(?:\.author)?)\?\.avatarDecoration)/,
+                    replace: "$self.useUserDecorAvatarDecoration($2)??$1"
                 }
             ]
         })),
+        // Patch avatar decoration preview to display Decor avatar decorations as if they are purchased
+        {
+            find: "#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}",
+            replacement: {
+                match: /(#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}.+?return null!=(\i)&&\()(null==\i)/,
+                replace: (_, rest, avatarDecoration, hasPurchase) => `${rest}(${avatarDecoration}.skuId!==$self.SKU_ID&&${avatarDecoration}.skuId!==$self.RAW_SKU_ID&&${hasPurchase})`
+            }
+        }
     ],
     settings,
 
@@ -132,6 +144,7 @@ export default definePlugin({
     },
 
     SKU_ID,
+    RAW_SKU_ID,
 
     useUserDecorAvatarDecoration,
 

@@ -45,11 +45,13 @@ export default definePlugin({
 
     patches: [
         {
-            find: "}renderEmbeds(",
-            replacement: [{
-                match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
-            }]
+            find: "}renderStickersAccessories(",
+            replacement: [
+                {
+                    match: /(\.renderReactions\(\i\).+?className:)/,
+                    replace: '$&(this.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
+                }
+            ]
         }
     ],
 

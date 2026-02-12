@@ -17,7 +17,7 @@
 */
 
 import { PluginOptionString } from "@utils/types";
-import { React, TextInput, useState } from "@webpack/common";
+import { React, TextArea, TextInput, useState } from "@webpack/common";
 
 import { resolveError, SettingProps, SettingsSection } from "./Common";
 
@@ -38,15 +38,23 @@ export function TextSetting({ option, pluginSettings, definedSettings, id, onCha
 
     return (
         <SettingsSection name={id} description={option.description} error={error}>
-            <TextInput
-                type="text"
-                placeholder={option.placeholder ?? "Enter a value"}
-                value={state}
-                onChange={handleChange}
-                maxLength={null}
-                disabled={option.disabled?.call(definedSettings) ?? false}
-                {...option.componentProps}
-            />
+            {option.multiline
+                ? <TextArea
+                    placeholder={option.placeholder ?? "Enter a value"}
+                    value={state}
+                    onChange={handleChange}
+                    disabled={option.disabled?.call(definedSettings) ?? false}
+                    {...option.componentProps} />
+                : <TextInput
+                    type="text"
+                    placeholder={option.placeholder ?? "Enter a value"}
+                    value={state}
+                    onChange={handleChange}
+                    maxLength={null}
+                    disabled={option.disabled?.call(definedSettings) ?? false}
+                    {...option.componentProps}
+                />
+            }
         </SettingsSection>
     );
 }

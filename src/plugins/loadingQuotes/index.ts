@@ -45,6 +45,7 @@ const settings = definePluginSettings({
         description: "Additional custom quotes to possibly appear, separated by the below delimiter",
         type: OptionType.STRING,
         default: "",
+        multiline: true
     },
     additionalQuotesDelimiter: {
         description: "Delimiter for additional quotes",
@@ -65,11 +66,11 @@ export default definePlugin({
             find: "#{intl::LOADING_DID_YOU_KNOW}",
             replacement: [
                 {
-                    match: /"_loadingText".+?(?=(\i)\[.{0,10}\.random)/,
+                    match: /_loadingText.+?(?=(\i)\[.{0,10}\.random)/,
                     replace: "$&$self.mutateQuotes($1),"
                 },
                 {
-                    match: /"_eventLoadingText".+?(?=(\i)\[.{0,10}\.random)/,
+                    match: /_eventLoadingText.+?(?=(\i)\[.{0,10}\.random)/,
                     replace: "$&$self.mutateQuotes($1),",
                     predicate: () => settings.store.replaceEvents
                 }
