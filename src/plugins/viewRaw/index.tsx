@@ -137,6 +137,8 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
         const value = props[name.toLowerCase()];
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
+        const isMessage = name === "Message";
+        if (isMessage && !settings.store.messageContextMenu) return;
 
         const lastChild = children.at(-1);
         if (lastChild?.key === "developer-actions") {
@@ -149,7 +151,7 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Mess
 
         // typescript parser goes crazy if this is inline
         const id = `vc-view-${name.toLowerCase()}-raw`;
-        const action = name === "Message"
+        const action = isMessage
             ? () => openViewRawModalMessage(value)
             : () => openViewRawModal(JSON.stringify(value, null, 4), name);
         children.splice(-1, 0,
@@ -194,11 +196,7 @@ export default definePlugin({
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
         "dev-context": devContextCallback,
-        "message": (children, { message }) => {
-            if (settings.store.messageContextMenu) {
-                MakeContextCallback("Message")(children, { message });
-            }
-        },
+        "message": MakeContextCallback("Message"),
     },
 
     messagePopoverButton: {
