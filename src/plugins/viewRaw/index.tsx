@@ -124,10 +124,15 @@ const settings = definePluginSettings({
             { label: "Left Click to view the raw content.", value: "Left", default: true },
             { label: "Right click to view the raw content.", value: "Right" }
         ]
+    },
+    messageContextMenu: {
+        description: "Show in message context menu",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
-function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavContextMenuPatchCallback {
+function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Message"): NavContextMenuPatchCallback {
     return (children, props) => {
         const value = props[name.toLowerCase()];
         if (!value) return;
@@ -144,11 +149,14 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavCo
 
         // typescript parser goes crazy if this is inline
         const id = `vc-view-${name.toLowerCase()}-raw`;
+        const action = name === "Message"
+            ? () => openViewRawModalMessage(value)
+            : () => openViewRawModal(JSON.stringify(value, null, 4), name);
         children.splice(-1, 0,
             <Menu.MenuItem
                 id={id}
                 label="View Raw"
-                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
+                action={action}
                 icon={CopyIcon}
             />
         );
@@ -185,7 +193,12 @@ export default definePlugin({
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
-        "dev-context": devContextCallback
+        "dev-context": devContextCallback,
+        "message": (children, { message }) => {
+            if (settings.store.messageContextMenu) {
+                MakeContextCallback("Message")(children, { message });
+            }
+        },
     },
 
     messagePopoverButton: {
