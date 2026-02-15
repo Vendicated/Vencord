@@ -58,8 +58,8 @@ export default definePlugin({
         {
             find: "showCommunicationDisabledStyles",
             replacement: {
-                match: /(message:(\i),avatar:\i,username:\(0,\i.jsxs\)\(\i.Fragment,\{children:\[)(\i&&)/,
-                replace: "$1$self.Tooltip()({ message: $2 }),$3"
+                match: /(message:(\i),avatar:\i,username:\(0,\i.jsxs\)\(\i.Fragment,\{children:\[)/,
+                replace: "$1$self.Tooltip()({ message: $2 }),"
             }
         }
     ],
