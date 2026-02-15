@@ -28,23 +28,23 @@ export * as Webpack from "./webpack";
 export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
-import { addVencordUiStyles } from "@components/css";
+import { coreStyleRootNode, initStyles } from "@api/Styles";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { IS_WINDOWS } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
+import { SettingsRouter } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
-import { getCloudSettings, putCloudSettings } from "./api/SettingsSync/cloudSync";
+import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
-import { SettingsRouter } from "./webpack/common";
 import { patches } from "./webpack/patchWebpack";
 
 if (IS_REPORTER) {
@@ -52,6 +52,11 @@ if (IS_REPORTER) {
 }
 
 async function syncSettings() {
+    if (localStorage.Vencord_cloudSyncDirection === undefined) {
+        // by default, sync bi-directionally
+        localStorage.Vencord_cloudSyncDirection = "both";
+    }
+
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
@@ -63,19 +68,19 @@ async function syncSettings() {
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
             color: "var(--yellow-360)",
-            onClick: () => SettingsRouter.open("VencordCloud")
+            onClick: () => SettingsRouter.openUserSettings("vencord_cloud_panel")
         });
         return;
     }
 
     if (
         Settings.cloud.settingsSync && // if it's enabled
-        Settings.cloud.authenticated // if cloud integrations are enabled
+        Settings.cloud.authenticated && // if cloud integrations are enabled
+        localStorage.Vencord_cloudSyncDirection !== "manual" // if we're not in manual mode
     ) {
-        if (localStorage.Vencord_settingsDirty) {
+        if (localStorage.Vencord_settingsDirty && shouldCloudSync("push")) {
             await putCloudSettings();
-            delete localStorage.Vencord_settingsDirty;
-        } else if (await getCloudSettings(false)) { // if we synchronized something (false means no sync)
+        } else if (shouldCloudSync("pull") && await getCloudSettings(false)) { // if we synchronized something (false means no sync)
             // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
             // potential notifications that might occur. getCloudSettings() will always send a notification regardless if
             // there was an error to notify the user, but besides that we only want to show one notification instead of all
@@ -90,9 +95,8 @@ async function syncSettings() {
     }
 
     const saveSettingsOnFrequentAction = debounce(async () => {
-        if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
+        if (Settings.cloud.settingsSync && Settings.cloud.authenticated && shouldCloudSync("push")) {
             await putCloudSettings();
-            delete localStorage.Vencord_settingsDirty;
         }
     }, 60_000);
 
@@ -174,16 +178,15 @@ async function init() {
 }
 
 initPluginManager();
+initStyles();
 startAllPlugins(StartAt.Init);
 init();
 
 document.addEventListener("DOMContentLoaded", () => {
-    addVencordUiStyles();
-
     startAllPlugins(StartAt.DOMContentLoaded);
 
     // FIXME
     if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
-        createAndAppendStyle("vencord-native-titlebar-style").textContent = "[class*=titleBar]{display: none!important}";
+        createAndAppendStyle("vencord-native-titlebar-style", coreStyleRootNode).textContent = "[class*=titleBar]{display: none!important}";
     }
 }, { once: true });

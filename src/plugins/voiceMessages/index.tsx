@@ -24,6 +24,7 @@ import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
@@ -31,20 +32,19 @@ import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { CloudUpload as TCloudUpload } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
-import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { findLazy, findStoreLazy } from "@webpack";
 import { Button, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
 import { settings } from "./settings";
-import { cl } from "./utils";
 import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload: typeof TCloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
-const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
+export const cl = classNameFactory("vc-vmsg-");
 export type VoiceRecorder = ComponentType<{
     setAudioBlob(blob: Blob): void;
     onRecordingChange?(recording: boolean): void;
@@ -58,12 +58,12 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     children.push(
         <Menu.MenuItem
             id="vc-send-vmsg"
-            label={
-                <div className={OptionClasses.optionLabel}>
-                    <Microphone className={OptionClasses.optionIcon} height={24} width={24} />
-                    <div className={OptionClasses.optionName}>Send voice message</div>
-                </div>
-            }
+            iconLeft={Microphone}
+            leadingAccessory={{
+                type: "icon",
+                icon: Microphone
+            }}
+            label="Send Voice Message"
             action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
         />
     );

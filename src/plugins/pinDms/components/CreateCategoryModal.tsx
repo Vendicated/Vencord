@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
 import { Divider } from "@components/Divider";
 import { DEFAULT_COLOR, SWATCHES } from "@plugins/pinDms/constants";
 import { categoryLen, createCategory, getCategory } from "@plugins/pinDms/data";
+import { classNameFactory } from "@utils/css";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ColorPicker, Forms, Text, TextInput, Toasts, useMemo, useState } from "@webpack/common";
@@ -24,7 +24,7 @@ interface ColorPickerWithSwatchesProps {
 
 const ColorPickerWithSwatches = findComponentByCodeLazy<ColorPickerWithSwatchesProps>('id:"color-picker"');
 
-export const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
+export const requireSettingsModal = extractAndLoadChunksLazy(['type:"USER_SETTINGS_MODAL_OPEN"']);
 
 const cl = classNameFactory("vc-pindms-modal-");
 
@@ -119,7 +119,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
 
 export const openCategoryModal = (categoryId: string | null, channelId: string | null) =>
     openModalLazy(async () => {
-        await requireSettingsMenu();
+        await requireSettingsModal();
         return modalProps => <NewCategoryModal categoryId={categoryId} modalProps={modalProps} initialChannelId={channelId} />;
     });
 

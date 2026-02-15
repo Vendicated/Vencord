@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classNameFactory } from "@api/Styles";
-import { extractAndLoadChunksLazy, findByPropsLazy } from "@webpack";
+import { classNameFactory } from "@utils/css";
+import { extractAndLoadChunksLazy, findCssClassesLazy } from "@webpack";
 
 export const cl = classNameFactory("vc-decor-");
-export const DecorationModalStyles = findByPropsLazy("modalPreview", "modalCloseButton", "spinner", "modal");
+export const DecorationModalClasses = findCssClassesLazy("modalPreview", "modalCloseButton", "spinner", "modal");
 
 export const requireAvatarDecorationModal = extractAndLoadChunksLazy(["initialSelectedDecoration:", /initialSelectedDecoration:\i,.{0,300}\i\.e\(/]);
-export const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
+export const requireCreateStickerModal = extractAndLoadChunksLazy([".CREATE_STICKER_MODAL,", "isDisplayingIndividualStickers"]);

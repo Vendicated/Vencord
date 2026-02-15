@@ -127,6 +127,10 @@ export interface PluginDef {
      */
     enabledByDefault?: boolean;
     /**
+     * Whether enabling or disabling this plugin requires a restart. Defaults to true if the plugin has patches.
+     */
+    requiresRestart?: boolean;
+    /**
      * When to call the start() method
      * @default StartAt.WebpackReady
      */
@@ -289,6 +293,8 @@ interface IsValid<T, D = unknown> {
 export interface PluginSettingStringDef {
     type: OptionType.STRING;
     default?: string;
+    /** Whether to use a multiline text area */
+    multiline?: boolean;
 }
 export interface PluginSettingNumberDef {
     type: OptionType.NUMBER;

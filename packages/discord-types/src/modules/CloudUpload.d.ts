@@ -27,7 +27,7 @@ export interface WebUploadItem extends BaseUploadItem {
 export type CloudUploadItem = ReactNativeUploadItem | WebUploadItem;
 
 export class CloudUpload extends EventEmitter {
-    constructor(item: CloudUploadItem, channelId: string, showLargeMessageDialog?: boolean, reactNativeFileIndex?: number);
+    constructor(item: CloudUploadItem, channelId: string, reactNativeFileIndex?: number);
 
     channelId: string;
     classification: string;
@@ -56,7 +56,6 @@ export class CloudUpload extends EventEmitter {
     preCompressionSize: number;
     responseUrl: string;
     sensitive: boolean;
-    showLargeMessageDialog: boolean;
     spoiler: boolean;
     startTime: number;
     status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED" | "REMOVED_FROM_MSG_DRAFT";
