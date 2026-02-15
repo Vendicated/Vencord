@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
+import OpenInAppPlugin from "@plugins/openInApp";
 import { findByProps, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
@@ -89,7 +91,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
+            const url = Settings.plugins.SpotifyControls.useSpotifyUris || isPluginEnabled(OpenInAppPlugin.name)
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 

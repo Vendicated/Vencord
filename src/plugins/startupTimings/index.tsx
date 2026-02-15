@@ -27,12 +27,12 @@ export default definePlugin({
     authors: [Devs.Megu],
 
     patches: [{
-        find: "#{intl::ACTIVITY_SETTINGS}",
+        find: ".SEARCH_NO_RESULTS&&0===",
         replacement: [
             {
                 match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+\)\)\}\))(?=\)\})/,
                 replace: (_, commaOrSemi, settings, elements) => "" +
-                    `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
+                    `${commaOrSemi}${settings}?.[0]==="EXPERIMENTS"` +
                     `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
             },
         ]

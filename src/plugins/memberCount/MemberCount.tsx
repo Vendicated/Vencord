@@ -6,9 +6,10 @@
 
 import { getCurrentChannel } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
-import { ChannelStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores, VoiceStateStore } from "@webpack/common";
+import { ChannelStore, GuildMemberCountStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
-import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, settings, ThreadMemberListStore } from ".";
+import { ChannelMemberStore, cl, numberFormat, settings, ThreadMemberListStore } from ".";
+import { CircleIcon } from "./CircleIcon";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 import { VoiceIcon } from "./VoiceIcon";
 
@@ -39,7 +40,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
     const totalCount = useStateFromStores(
         [GuildMemberCountStore],
-        () => GuildMemberCountStore.getMemberCount(guildId)
+        () => GuildMemberCountStore.getMemberCount(guildId!)
     );
 
     let onlineCount = useStateFromStores(
@@ -80,7 +81,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
             <Tooltip text={`${formattedOnlineCount} online in this channel`} position="bottom">
                 {props => (
                     <div {...props} className={cl("container")}>
-                        <span className={cl("online-dot")} />
+                        <CircleIcon className={cl("online-count")} />
                         <span className={cl("online")}>{formattedOnlineCount}</span>
                     </div>
                 )}
@@ -88,7 +89,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
             <Tooltip text={`${numberFormat(totalCount)} total server members`} position="bottom">
                 {props => (
                     <div {...props} className={cl("container")}>
-                        <span className={cl("total-dot")} />
+                        <CircleIcon className={cl("total-count")} />
                         <span className={cl("total")}>{numberFormat(totalCount)}</span>
                     </div>
                 )}

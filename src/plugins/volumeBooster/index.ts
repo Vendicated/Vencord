@@ -24,7 +24,7 @@ const settings = definePluginSettings({
     multiplier: {
         description: "Volume Multiplier",
         type: OptionType.SLIDER,
-        markers: makeRange(1, 5, 1),
+        markers: makeRange(1, 5, 0.5),
         default: 2,
         stickToMarkers: true,
     }

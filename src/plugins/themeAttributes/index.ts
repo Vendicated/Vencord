@@ -5,6 +5,7 @@
  */
 
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { UserStore } from "@webpack/common";
@@ -28,10 +29,10 @@ export default definePlugin({
 
         // Add data-author-id and data-is-self to all messages
         {
-            find: ".messageListItem",
+            find: "Message must not be a thread starter message",
             replacement: {
-                match: /\.messageListItem(?=,"aria)/,
-                replace: "$&,...$self.getMessageProps(arguments[0])"
+                match: /"aria-setsize":-1,(?=.{0,150}?#{intl::MESSAGE_A11Y_ROLE_DESCRIPTION})/,
+                replace: "...$self.getMessageProps(arguments[0]),$&"
             }
         },
 
@@ -39,10 +40,12 @@ export default definePlugin({
         // popout profiles
         {
             find: "#{intl::LABEL_WITH_ONLINE_STATUS}",
-            replacement: {
-                match: /src:null!=\i\?(\i).{1,50}"aria-hidden":!0/,
-                replace: "$&,style:$self.getAvatarStyles($1)"
-            }
+            replacement: [
+                {
+                    match: /src:(\i)\?\?void 0.{1,50}"aria-hidden":!0/,
+                    replace: "$&,style:$self.getAvatarStyles($1)"
+                }
+            ]
         },
         // chat avatars
         {
@@ -66,12 +69,17 @@ export default definePlugin({
     },
 
     getMessageProps(props: { message: Message; }) {
-        const author = props.message?.author;
-        const authorId = author?.id;
-        return {
-            "data-author-id": authorId,
-            "data-author-username": author?.username,
-            "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
-        };
+        try {
+            const author = props.message?.author;
+            const authorId = author?.id;
+            return {
+                "data-author-id": authorId,
+                "data-author-username": author?.username,
+                "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
+            };
+        } catch (e) {
+            new Logger("ThemeAttributes").error("Error in getMessageProps", e);
+            return {};
+        }
     }
 });
