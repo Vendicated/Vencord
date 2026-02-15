@@ -12,6 +12,40 @@ import type { TrackData } from ".";
 
 const exec = promisify(execFile);
 
+let authorization: string = '';
+
+(async () => {
+    const mainReq = await fetch('https://music.apple.com/us/new', { headers: { 'user-agent': VENCORD_USER_AGENT } });
+    const mainRes = await mainReq.text();
+    const scriptURL = mainRes.match(/<script type="module" crossorigin src="(.*?)"/)?.[1];
+    if (!scriptURL) return console.log('dangit, apple music patched it [err 1]');
+
+    const scriptReq = await fetch(`https://music.apple.com${scriptURL}`, { headers: { 'user-agent': VENCORD_USER_AGENT } });
+    const scriptRes = await scriptReq.text();
+    const authExtract = scriptRes.match(/"eyJ(.*?)"/)?.[1];
+    if (!authExtract) return console.log('dangit, apple music patched it [err 2]');
+
+    authorization = `eyJ${authExtract}`;
+})();
+
+const baseParams = new URLSearchParams();
+
+baseParams.append('art[url]', 'f');
+baseParams.append('extend', 'artistUrl');
+baseParams.append('fields[albums]', 'artistName,artistUrl,artwork,name,url');
+baseParams.append('fields[artists]', 'url,name,artwork');
+baseParams.append('format[resources]', 'map');
+baseParams.append('include[albums]', 'artists');
+baseParams.append('include[songs]', 'artists');
+baseParams.append('l', new Intl.DateTimeFormat().resolvedOptions().locale);
+baseParams.append('limit', '1');
+baseParams.append('omit[resource]', 'autos');
+baseParams.append('platform', 'web');
+baseParams.append('relate[albums]', 'artists');
+baseParams.append('relate[songs]', 'albums');
+baseParams.append('types', 'songs');
+baseParams.append('with', 'lyricHighlights,lyrics,naturalLanguage,serverBubbles,subtitles');
+
 async function applescript(cmds: string[]) {
     const { stdout } = await exec("osascript", cmds.map(c => ["-e", c]).flat());
     return stdout;
@@ -26,41 +60,45 @@ interface RemoteData {
 
 let cachedRemoteData: { id: string, data: RemoteData; } | { id: string, failures: number; } | null = null;
 
+const highResify = (string: string) => string.replace("{w}x{h}", "512x512").replace("{f}", "png");
+
 async function fetchRemoteData({ id, name, artist, album }: { id: string, name: string, artist: string, album: string; }) {
     if (id === cachedRemoteData?.id) {
         if ("data" in cachedRemoteData) return cachedRemoteData.data;
         if ("failures" in cachedRemoteData && cachedRemoteData.failures >= 5) return null;
     }
 
-    try {
-        const dataUrl = new URL("https://itunes.apple.com/search");
-        dataUrl.searchParams.set("term", `${name} ${artist} ${album}`);
-        dataUrl.searchParams.set("media", "music");
-        dataUrl.searchParams.set("entity", "song");
+    if (!authorization) return null;
 
-        const songData = await fetch(dataUrl, {
+    try {
+        const params = new URLSearchParams(baseParams);
+        params.set("term", `${name} by ${artist} on ${album}`);
+
+        const songReq = await fetch("https://amp-api-edge.music.apple.com/v1/catalog/us/search?" + params.toString(), {
             headers: {
+                "accept-language": "en-US,en;q=0.9",
+                "authorization": "Bearer " + authorization,
+                "origin": "https://music.apple.com",
+                "Referer": "https://music.apple.com/",
                 "user-agent": VENCORD_USER_AGENT,
             },
-        })
-            .then(r => r.json())
-            .then(data => data.results.find(song => song.collectionName === album) || data.results[0]);
+        });
 
-        const artistArtworkURL = await fetch(songData.artistViewUrl)
-            .then(r => r.text())
-            .then(data => {
-                const match = data.match(/<meta property="og:image" content="(.+?)">/);
-                return match ? match[1].replace(/[0-9]+x.+/, "220x220bb-60.png") : undefined;
-            })
-            .catch(() => void 0);
+        const songRes = await songReq.json();
+        const songData = songRes.results.song.data[0];
+        if (!songData) return null;
+
+        const extendedData = songRes.resources.songs[songData.id];
+        const primaryArtistId = extendedData.relationships.artists.data[0].id;
+        const extendedArtistData = songRes.resources.artists[primaryArtistId];
 
         cachedRemoteData = {
             id,
             data: {
-                appleMusicLink: songData.trackViewUrl,
-                songLink: `https://song.link/i/${new URL(songData.trackViewUrl).searchParams.get("i")}`,
-                albumArtwork: (songData.artworkUrl100).replace("100x100", "512x512"),
-                artistArtwork: artistArtworkURL
+                appleMusicLink: `https://music.apple.com${songData.href}`,
+                songLink: `https://song.link/i/${songData.id}`,
+                albumArtwork: highResify(extendedData.attributes.artwork.url),
+                artistArtwork: highResify(extendedArtistData.attributes.artwork.url)
             }
         };
 
