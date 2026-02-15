@@ -16,10 +16,6 @@ export default definePlugin({
             find: "renderHeaderContent(){",
             replacement: [
                 {
-                    match: /(?<="state",{resultType:)null/,
-                    replace: '"Favorites"'
-                },
-                {
                     match: /(?<=state={resultType:)null/,
                     replace: '"Favorites"'
                 }

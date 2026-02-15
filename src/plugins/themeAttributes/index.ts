@@ -42,10 +42,6 @@ export default definePlugin({
             find: "#{intl::LABEL_WITH_ONLINE_STATUS}",
             replacement: [
                 {
-                    match: /src:null!=\i\?(\i).{1,50}"aria-hidden":!0/,
-                    replace: "$&,style:$self.getAvatarStyles($1)"
-                },
-                {
                     match: /src:(\i)\?\?void 0.{1,50}"aria-hidden":!0/,
                     replace: "$&,style:$self.getAvatarStyles($1)"
                 }

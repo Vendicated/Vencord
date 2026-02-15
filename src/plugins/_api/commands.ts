@@ -55,7 +55,8 @@ export default definePlugin({
                 {
                     // ...children: p?.name
                     match: /(?<=:(\i)\.displayDescription\}.{0,200}children:).{0,50}\.name(?=\}\))/,
-                    replace: "$1.plugin||($&)"
+                    replace: "$1.plugin||($&)",
+                    noWarn: true // TODO: remove legacy compatibility code in the future
                 },
                 {
                     match: /children:(?=\i\?\?\i\?\.name)(?<=command:(\i),.+?)/,
