@@ -79,7 +79,7 @@ export default definePlugin({
                     replace: "$&$self.onPopoutClose();"
                 },
                 {
-                    match: /onRequestClose.{0,250}ref:(\i),style:\i/,
+                    match: /ref:(\i),style:\i(?=.{0,250}#{intl::5fWB8U::raw})/,
                     replace: "$&,onContextMenu:($self.grabRef($1),$self.openAccountPanelContextMenu)"
                 }
             ]
