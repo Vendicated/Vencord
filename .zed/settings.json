@@ -1,0 +1,26 @@
+{
+    "format_on_save": "on",
+    "languages": {
+        "JavaScript": {
+            "formatter": [],
+            "code_actions_on_format": {
+                "source.fixAll.eslint": true
+            }
+        },
+        "TypeScript": {
+            "formatter": [],
+            "code_actions_on_format": {
+                "source.fixAll.eslint": true
+            }
+        },
+        "TSX": {
+            "formatter": [],
+            "code_actions_on_format": {
+                "source.fixAll.eslint": true
+            }
+        }
+    },
+    "prettier": {
+        "allowed": false
+    }
+}
