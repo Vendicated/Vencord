@@ -245,6 +245,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "hunt-g",
         id: 222800179697287168n
     },
+    haumlab: {
+        name: "haumlab",
+        id: 962796877768708198n,
+    },
     cloudburst: {
         name: "cloudburst",
         id: 892128204150685769n
