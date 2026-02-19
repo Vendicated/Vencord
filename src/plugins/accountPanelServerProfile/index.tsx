@@ -67,7 +67,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
+            find: ".WIDGETS_RTC_UPSELL_COACHMARK)",
             group: true,
             replacement: [
                 {

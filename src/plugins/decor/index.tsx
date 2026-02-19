@@ -87,7 +87,7 @@ export default definePlugin({
         },
         // Current user area, at bottom of channels/dm list
         {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
+            find: ".WIDGETS_RTC_UPSELL_COACHMARK),",
             replacement: [
                 // Use Decor avatar decoration hook
                 {
