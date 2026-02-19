@@ -34,8 +34,14 @@ interface ChannelStreamBlockedGroup {
     content: ChannelStreamMessage[],
 }
 
-// There is other types too, such as for the date separators, but these are not relevant here
-type ChannelStreamProps = ChannelStreamMessage | ChannelStreamBlockedGroup;
+interface ChannelStreamDivider {
+    // TODO remove all empty dividers (ergo divider -> divider remove the first divider)
+    type: "DIVIDER",
+    content: string,
+    contentKey: string,
+}
+
+type ChannelStreamProps = ChannelStreamMessage | ChannelStreamBlockedGroup | ChannelStreamDivider;
 
 interface IncompleteMessageReplyRenderProps {
     baseAuthor: User,
@@ -81,7 +87,7 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     hideUsersFromReactions: {
-        description: "Hides blocked users from the reaction list and prevents their avatar from showing up (the reaction itself is not hidden)",
+        description: "Hides blocked users from the reaction list (the reaction itself is not hidden)",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true
@@ -114,7 +120,7 @@ export default definePlugin({
             ]
         })),
         {
-            find: '"forum-post-action-bar-"',
+            find: ".shouldShowTopicsBar()&&",
             replacement: [
                 {
                     // There is only one occurrence of .map in this module.
@@ -177,12 +183,21 @@ export default definePlugin({
             });
             return newStream;
         }
-        return channelStream.filter(
+        const semiFilteredStream = channelStream.filter(
             elem => {
                 if (elem.type === "MESSAGE_GROUP_BLOCKED" || (settings.store.applyToIgnoredUsers && elem.type === "MESSAGE_GROUP_IGNORED")) return false;
                 else if (elem.type !== "MESSAGE") return true;
                 return !this.isReplyToBlocked(elem.content);
             });
+        // Not removing doubled-dividers would lead to empty date separators which looks bad.
+        return semiFilteredStream.filter(elem => {
+            if (elem.type !== "DIVIDER") return true;
+            const index = semiFilteredStream.indexOf(elem);
+            const next = semiFilteredStream[index + 1];
+            if (!next) return false;
+            if (next.type === "DIVIDER") return false;
+            return true;
+        });
     },
 
     undoBlockedRepliesInDms(data: IncompleteMessageReplyRenderProps) {
