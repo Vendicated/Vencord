@@ -23,11 +23,9 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { CustomEmoji, Message, ReactionEmoji, User } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserSummaryItem } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, useEffect, useLayoutEffect, UserStore, UserSummaryItem } from "@webpack/common";
 import NoBlockedUsersPlugin from "plugins/noBlockedUsers";
 
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;
@@ -102,7 +100,7 @@ export default definePlugin({
 
             find: "cleanAutomaticAnchor(){",
             replacement: {
-                match: /constructor\(\i\)\{(?=.{0,100}automaticAnchor)/,
+                match: /constructor\(\i\)\{(?=.{0,100}(?:automaticAnchor|\.messages\.loadingMore))/,
                 replace: "$&$self.setScrollObj(this);"
             }
         }
@@ -131,7 +129,7 @@ export default definePlugin({
 
         useEffect(() => {
             const cb = (e: any) => {
-                if (e.messageId === message.id)
+                if (e?.messageId === message.id)
                     forceUpdate();
             };
             FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
@@ -139,15 +137,13 @@ export default definePlugin({
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
         }, [message.id, forceUpdate]);
 
-        const reactions = getReactionsWithQueue(message, emoji, type);
-
         const hasNoBlockedUsers = Vencord.Plugins.isPluginEnabled(NoBlockedUsersPlugin.name) && NoBlockedUsersPlugin.settings.store.hideUsersFromReactions;
 
+        const reactions = getReactionsWithQueue(message, emoji, type);
         const users = hasNoBlockedUsers
-            ? [...reactions.values()].filter(user => user && !NoBlockedUsersPlugin.shouldHide(user.id))
-            : [...reactions.values()].filter(Boolean);
-
-        if (users.length === 0) return null;
+            ? Array.from(reactions, ([id]) => UserStore.getUser(id)).filter(user => user && !NoBlockedUsersPlugin.shouldHide(user.id))
+            : Array.from(reactions, ([id]) => UserStore.getUser(id)).filter(Boolean);
+        if (hasNoBlockedUsers) users.filter(user => !NoBlockedUsersPlugin.shouldHide(user.id));
 
         return (
             <div

@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { moment } from "@webpack/common";
-
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
 
 // Case style to words
@@ -54,6 +52,7 @@ function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
  * @param short Whether to use short units like "d" instead of "days"
  */
 export function formatDuration(time: number, unit: Units, short: boolean = false) {
+    const { moment } = require("@webpack/common") as typeof import("@webpack/common");
     const dur = moment.duration(time, unit);
 
     let unitsAmounts = units.map(unit => ({ amount: dur[unit](), unit }));
@@ -147,3 +146,8 @@ export const ZWSP = "\u200b";
 export function toInlineCode(s: string) {
     return "``" + ZWSP + s.replaceAll("`", ZWSP + "`" + ZWSP) + ZWSP + "``";
 }
+
+// @ts-expect-error Missing RegExp.escape
+export const escapeRegExp: (s: string) => string = RegExp.escape ?? function (s: string) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};

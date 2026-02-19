@@ -9,7 +9,7 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { CopyIcon, NoEntrySignIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { copyWithToast } from "@utils/misc";
+import { copyWithToast } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Tooltip, useState } from "@webpack/common";
 
@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "#{intl::PREVIEW_BYTES_LEFT}",
             replacement: {
-                match: /\.footerGap.+?url:\i,fileName:\i,fileSize:\i}\),(?<=fileContents:(\i),bytesLeft:(\i).+?)/g,
+                match: /fileName:\i,fileSize:\i}\),(?=.{0,75}?setLanguage:)(?<=fileContents:(\i),bytesLeft:(\i).+?)/g,
                 replace: "$&$self.addCopyButton({fileContents:$1,bytesLeft:$2}),"
             }
         }

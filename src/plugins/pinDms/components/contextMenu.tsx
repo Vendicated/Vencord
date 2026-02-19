@@ -5,10 +5,10 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { PinOrder, settings } from "@plugins/pinDms";
+import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "@plugins/pinDms/data";
 import { Menu } from "@webpack/common";
 
-import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "../data";
-import { PinOrder, settings } from "../index";
 import { openCategoryModal } from "./CreateCategoryModal";
 
 function createPinMenuItem(channelId: string) {
