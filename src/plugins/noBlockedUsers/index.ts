@@ -86,12 +86,6 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: true
     },
-    hideUsersFromReactions: {
-        description: "Hides blocked users from the reaction list (the reaction itself is not hidden)",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: true
-    },
     applyToIgnoredUsers: {
         description: "Additionally apply everything to 'ignored' users",
         type: OptionType.BOOLEAN,
@@ -138,16 +132,6 @@ export default definePlugin({
                 },
             ],
             predicate: () => settings.store.hideUsersFromMemberList,
-        },
-        {
-            find: ".reactorDefault",
-            replacement: [
-                {
-                    match: /return(?=.{0,30}.reactorDefault,onContextMenu:\i=>.{0,15}\(\i,(\i),\i\))/,
-                    replace: "return $self.shouldHide($1?.id)?null:",
-                }
-            ],
-            predicate: () => settings.store.hideUsersFromReactions,
         },
         {
             find: "contextCommandMessage:{",
