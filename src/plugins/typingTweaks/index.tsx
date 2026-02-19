@@ -102,7 +102,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "handleDismissInviteEducation=",
+            find: "#{intl::SEVERAL_USERS_TYPING_STRONG}",
             group: true,
             replacement: [
                 {
