@@ -134,7 +134,7 @@ export default definePlugin({
             predicate: () => settings.store.hideUsersFromMemberList,
         },
         {
-            find: "contextCommandMessage:{",
+            find: ".CONTEXT_MENU_COMMAND?",
             replacement: [
                 {
                     match: /\{let(?=.{0,10}\{repliedAuthor)/,
