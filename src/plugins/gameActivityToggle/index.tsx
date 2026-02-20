@@ -112,7 +112,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
+            find: ".WIDGETS_RTC_UPSELL_COACHMARK),",
             replacement: {
                 match: /children:\[(?=.{0,25}?accountContainerRef)/,
                 replace: "children:[$self.GameActivityToggleButton(arguments[0]),"
