@@ -100,7 +100,7 @@ export default definePlugin({
         {
             find: "useCanFavoriteChannel",
             replacement: {
-                match: /\i\.isDM\(\)\|\|\i\.isThread\(\)/,
+                match: /(?<=isFavorite\(\i\.id\).{0,5})\i\.isThread\(\)/,
                 replace: "false",
             }
         },
