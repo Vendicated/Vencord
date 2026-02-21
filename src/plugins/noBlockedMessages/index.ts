@@ -35,7 +35,6 @@ interface ChannelStreamBlockedGroup {
 }
 
 interface ChannelStreamDivider {
-    // TODO remove all empty dividers (ergo divider -> divider remove the first divider)
     type: "DIVIDER",
     content: string,
     contentKey: string,
