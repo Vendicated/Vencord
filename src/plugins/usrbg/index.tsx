@@ -85,7 +85,7 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
+            <LinkButton href="https://github.com/AutumnVN/usrbg/blob/main/README.md" variant="primary">
                 Get your own USRBG banner
             </LinkButton>
         );
