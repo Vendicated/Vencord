@@ -67,7 +67,7 @@ export default definePlugin({
             find: "currentVolume:",
             replacement: {
                 match: /(?<=maxValue:)\i\.\i\?(\d+?):\d+?(?=,)/,
-                replace: (_, higherMaxVolume, _lowerMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
+                replace: (_, higherMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
         },
         // Patches needed for web/vesktop
