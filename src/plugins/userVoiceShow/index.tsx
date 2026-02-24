@@ -59,8 +59,8 @@ export default definePlugin({
         {
             find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
-                match: /(\i).isVerifiedBot\(\)}\),/,
-                replace: "$&$self.VoiceChannelIndicator({userId:$1.id,isProfile:true}),"
+                match: /(?<=children:\[\i," ",\i)(?=\])/,
+                replace: ",$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id,isProfile:true})"
             },
             predicate: () => settings.store.showInUserProfileModal
         },
