@@ -1,0 +1,75 @@
+:root {
+    --vc-private-blur-amount: 3.5px;
+    --vc-private-blur-none: 0px;
+    --vc-private-blur-transition: 0.2s;
+}
+
+body.vc-private-blur-username [id^="message-username-"],
+body.vc-private-blur-username [class*="username_"],
+body.vc-private-blur-username [class*="headerText-"],
+body.vc-private-blur-username [class*="headerText_"] {
+    filter: blur(var(--vc-private-blur-amount));
+    transition: filter var(--vc-private-blur-transition) ease;
+}
+
+body.vc-private-blur-username [id^="message-username-"]:hover,
+body.vc-private-blur-username [class*="username_"]:hover,
+body.vc-private-blur-username [class*="headerText-"]:hover,
+body.vc-private-blur-username [class*="headerText_"]:hover {
+    filter: blur(var(--vc-private-blur-none));
+}
+
+body.vc-private-blur-text [data-privacy-blur-message="true"] {
+    filter: blur(var(--vc-private-blur-amount));
+    transition: filter var(--vc-private-blur-transition) ease;
+    cursor: pointer;
+}
+
+body.vc-private-blur-text [data-privacy-blur-message="true"]:hover {
+    filter: blur(var(--vc-private-blur-none));
+}
+
+body.vc-private-blur-channel [class*="sidebar_"] [class*="name_"],
+body.vc-private-blur-channel [class*="privateChannels_"] [class*="name_"],
+body.vc-private-blur-channel [class*="channel_"] [class*="name_"],
+body.vc-private-blur-channel [class*="headerContent_"] [class*="name_"],
+body.vc-private-blur-channel nav[class*="wrapper_"] [class*="name_"] {
+    filter: blur(var(--vc-private-blur-amount));
+    transition: filter var(--vc-private-blur-transition) ease;
+}
+
+body.vc-private-blur-channel [class*="headerContent_"]:hover [class*="name_"],
+body.vc-private-blur-channel nav[class*="wrapper_"]:hover [class*="name_"],
+body.vc-private-blur-channel [class*="sidebar_"] [class*="wrapper"]:hover [class*="name_"],
+body.vc-private-blur-channel [class*="privateChannels_"] [class*="interactive_"]:hover [class*="name_"],
+body.vc-private-blur-channel [class*="channel_"] [class*="interactive_"]:hover [class*="name_"],
+body.vc-private-blur-channel [class*="titleWrapper_"]:hover [class*="title_"],
+body.vc-private-blur-channel [class*="titleWrapper_"]:hover h1 {
+    filter: blur(var(--vc-private-blur-none));
+}
+
+body.vc-private-blur-channel li[class*="channel_"][class*="dm_"][class*="container_"] {
+    filter: blur(var(--vc-private-blur-amount));
+    transition: filter var(--vc-private-blur-transition) ease;
+}
+
+body.vc-private-blur-channel li[class*="channel_"][class*="dm_"][class*="container_"]:hover {
+    filter: blur(var(--vc-private-blur-none));
+}
+
+
+body.vc-private-blur-channel aside[class*="membersWrap"] div[class*="members_"] div[class*="member_"][class*="container_"] {
+    filter: blur(var(--vc-private-blur-amount));
+    transition: filter var(--vc-private-blur-transition) ease;
+}
+
+body.vc-private-blur-channel aside[class*="membersWrap"] div[class*="members_"] div[class*="member_"][class*="container_"] [class*="username_"],
+body.vc-private-blur-channel aside[class*="membersWrap"] div[class*="members_"] div[class*="member_"][class*="container_"] [class*="name_"] {
+    filter: none;
+}
+
+body.vc-private-blur-channel aside[class*="membersWrap"] div[class*="members_"] div[class*="member_"][class*="container_"]:hover,
+body.vc-private-blur-channel aside[class*="membersWrap"] div[class*="members_"] div[class*="member_"][class*="container_"]:hover * {
+    filter: blur(var(--vc-private-blur-none));
+
+}
