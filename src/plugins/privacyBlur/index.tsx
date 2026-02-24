@@ -48,6 +48,84 @@ const settings = definePluginSettings({
     }
 });
 
+let currentHoverGroup: string | null = null;
+let hoverTimeout: number | null = null;
+let isScrolling = false;
+let scrollTimeout: number | null = null;
+
+function handleScroll() {
+    isScrolling = true;
+
+    if (currentHoverGroup) {
+        clearGroupHover(currentHoverGroup);
+        currentHoverGroup = null;
+    }
+
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = window.setTimeout(() => {
+        isScrolling = false;
+    }, 150);
+}
+
+function handleMessageHover(event: MouseEvent) {
+    if (isScrolling) return;
+
+    const target = event.target as HTMLElement;
+    const messageElement = target.closest('[data-privacy-blur-message="true"]');
+
+    if (!messageElement) {
+        if (currentHoverGroup) {
+            clearGroupHover(currentHoverGroup);
+            currentHoverGroup = null;
+        }
+        return;
+    }
+
+    const labelledElement = messageElement.querySelector("[aria-labelledby]");
+    if (!labelledElement) return;
+
+    const labelledBy = labelledElement.getAttribute("aria-labelledby");
+    if (!labelledBy) return;
+
+    const usernameMatch = labelledBy.match(/message-username-(\d+)/);
+    if (!usernameMatch) return;
+
+    const usernameId = usernameMatch[1];
+
+    if (currentHoverGroup === usernameId) return;
+
+
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    hoverTimeout = window.setTimeout(() => {
+        if (currentHoverGroup) {
+            clearGroupHover(currentHoverGroup);
+        }
+
+        currentHoverGroup = usernameId;
+        applyGroupHover(usernameId);
+    }, 100);
+}
+
+function applyGroupHover(usernameId: string) {
+    const allMessages = document.querySelectorAll(`[aria-labelledby*="message-username-${usernameId}"]`);
+    allMessages.forEach(msg => {
+        const listItem = msg.closest('[data-privacy-blur-message="true"]');
+        if (listItem && !listItem.classList.contains("privacy-blur-group-hover")) {
+            listItem.classList.add("privacy-blur-group-hover");
+        }
+    });
+}
+
+function clearGroupHover(usernameId: string) {
+    const allMessages = document.querySelectorAll(`[aria-labelledby*="message-username-${usernameId}"]`);
+    allMessages.forEach(msg => {
+        const listItem = msg.closest('[data-privacy-blur-message="true"]');
+        if (listItem && listItem.classList.contains("privacy-blur-group-hover")) {
+            listItem.classList.remove("privacy-blur-group-hover");
+        }
+    });
+}
+
 export default definePlugin({
     name: "PrivacyBlur",
     description: "Blur sensitive chat information (usernames, messages, links, and more) until you hover over them",
@@ -57,6 +135,8 @@ export default definePlugin({
 
     start() {
         updateBodyClasses();
+        document.addEventListener("mouseover", handleMessageHover);
+        document.addEventListener("scroll", handleScroll, true);
     },
 
     stop() {
@@ -65,6 +145,16 @@ export default definePlugin({
             PRIVACY_TARGETS.USERNAMES,
             PRIVACY_TARGETS.MESSAGES
         );
+        document.removeEventListener("mouseover", handleMessageHover);
+        document.removeEventListener("scroll", handleScroll, true);
+
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+
+        if (currentHoverGroup) {
+            clearGroupHover(currentHoverGroup);
+            currentHoverGroup = null;
+        }
     },
 
     patches: [
