@@ -126,6 +126,28 @@ export default definePlugin({
             ],
             predicate: () => settings.store.disableFade
         },
+        { // Disable fade animations for settings menu
+            find: "layer-modal",
+            replacement: [
+                {
+                    match: /(\i)\.animated\.div,\{"data-mana-component":"layer-modal"/,
+                    replace: '"div",{"data-mana-component":"layer-modal"'
+                },
+                {
+                    match: /("data-mana-component":"layer-modal"[^}]*?)style:(\i),/,
+                    replace: "$1style:{},"
+                }
+            ],
+            predicate: () => settings.store.disableFade
+        },
+        { // Disable initial and exit delay for settings menu
+            find: "headerId:void 0,headerIdIsManaged:!1",
+            replacement: {
+                match: /let (\i)=300/,
+                replace: "let $1=0"
+            },
+            predicate: () => settings.store.disableFade
+        },
         { // Load menu TOC eagerly
             find: "handleOpenSettingsContextMenu=",
             replacement: {
