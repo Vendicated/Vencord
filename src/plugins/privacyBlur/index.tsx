@@ -49,7 +49,6 @@ const settings = definePluginSettings({
 });
 
 let currentHoverGroup: string | null = null;
-let hoverTimeout: number | null = null;
 let isScrolling = false;
 let scrollTimeout: number | null = null;
 
@@ -94,16 +93,12 @@ function handleMessageHover(event: MouseEvent) {
 
     if (currentHoverGroup === usernameId) return;
 
+    if (currentHoverGroup) {
+        clearGroupHover(currentHoverGroup);
+    }
 
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-    hoverTimeout = window.setTimeout(() => {
-        if (currentHoverGroup) {
-            clearGroupHover(currentHoverGroup);
-        }
-
-        currentHoverGroup = usernameId;
-        applyGroupHover(usernameId);
-    }, 100);
+    currentHoverGroup = usernameId;
+    applyGroupHover(usernameId);
 }
 
 function applyGroupHover(usernameId: string) {
@@ -148,7 +143,6 @@ export default definePlugin({
         document.removeEventListener("mouseover", handleMessageHover);
         document.removeEventListener("scroll", handleScroll, true);
 
-        if (hoverTimeout) clearTimeout(hoverTimeout);
         if (scrollTimeout) clearTimeout(scrollTimeout);
 
         if (currentHoverGroup) {
