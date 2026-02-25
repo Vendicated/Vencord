@@ -31,7 +31,6 @@ body.vc-private-blur-text.vc-private-blur-username [data-privacy-blur-message="t
 
 body.vc-private-blur-text [data-privacy-blur-message="true"] {
     filter: blur(var(--vc-private-blur-amount));
-    transition: filter var(--vc-private-blur-transition) ease;
     cursor: pointer;
 }
 
