@@ -126,16 +126,37 @@ export default definePlugin({
             ],
             predicate: () => settings.store.disableFade
         },
+        { // Disable fade animations for settings menu
+            find: '"data-mana-component":"layer-modal"',
+            replacement: [
+                {
+                    match: /(\i)\.animated\.div(?=,\{"data-mana-component":"layer-modal")/,
+                    replace: '"div"'
+                },
+                {
+                    match: /(?<="data-mana-component":"layer-modal"[^}]*?)style:\i,/,
+                    replace: "style:{},"
+                }
+            ],
+            predicate: () => settings.store.disableFade
+        },
+        { // Disable initial and exit delay for settings menu
+            find: "headerId:void 0,headerIdIsManaged:!1",
+            replacement: {
+                match: /let (\i)=300/,
+                replace: "let $1=0"
+            },
+            predicate: () => settings.store.disableFade
+        },
         { // Load menu TOC eagerly
-            find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
+            find: "handleOpenSettingsContextMenu=",
             replacement: {
                 match: /(?=handleOpenSettingsContextMenu=.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)))/,
                 replace: "_vencordBetterSettingsEagerLoad=(async ()=>$1)();"
             },
             predicate: () => settings.store.eagerLoad
         },
-        {
-            // Settings cog context menu
+        { // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
