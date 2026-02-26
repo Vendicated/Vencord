@@ -140,8 +140,7 @@ export default definePlugin({
             ],
             predicate: () => settings.store.disableFade
         },
-		// Disable initial and exit delay for settings menu
-        {
+        { // Disable initial and exit delay for settings menu
             find: "headerId:void 0,headerIdIsManaged:!1",
             replacement: {
                 match: /let (\i)=300/,
@@ -157,8 +156,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.eagerLoad
         },
-        {
-            // Settings cog context menu
+        { // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
