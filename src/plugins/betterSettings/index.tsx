@@ -127,7 +127,7 @@ export default definePlugin({
             predicate: () => settings.store.disableFade
         },
         { // Disable fade animations for settings menu
-            find: "layer-modal",
+            find: '"data-mana-component":"layer-modal"',
             replacement: [
                 {
                     match: /(\i)\.animated\.div(?=,\{"data-mana-component":"layer-modal")/,
