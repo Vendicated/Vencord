@@ -15,7 +15,7 @@ export default definePlugin({
     authors: [Devs.puv],
     patches: [
         {
-            find: "#{intl::LgCPMt::raw}",
+            find: "#{intl::VOICE_MESSAGES_PLAYBACK_RATE_LABEL}",
             replacement: {
                 match: /(?<=onVolumeHide:\i\}\))/,
                 replace: ",$self.renderDownload(arguments[0].src)"
