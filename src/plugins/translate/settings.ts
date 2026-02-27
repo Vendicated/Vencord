@@ -52,7 +52,8 @@ export const settings = definePluginSettings({
         options: [
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
-            { label: "DeepL Pro", value: "deepl-pro" }
+            { label: "DeepL Pro", value: "deepl-pro" },
+            { label: "LibreTranslate", value: "libretranslate" }
         ] as const,
         onChange: resetLanguageDefaults
     },
@@ -62,6 +63,20 @@ export const settings = definePluginSettings({
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
         disabled: () => IS_WEB
+    },
+    libreTranslateUrl: {
+        type: OptionType.STRING,
+        description: "LibreTranslate instance URL",
+        default: "https://libretranslate.com",
+        placeholder: "https://libretranslate.com",
+        disabled: () => IS_WEB || settings.store.service !== "libretranslate"
+    },
+    libreTranslateApiKey: {
+        type: OptionType.STRING,
+        description: "LibreTranslate API key (optional for self-hosted instances)",
+        default: "",
+        placeholder: "Only needed if your instance requires it",
+        disabled: () => IS_WEB || settings.store.service !== "libretranslate"
     },
     autoTranslate: {
         type: OptionType.BOOLEAN,
@@ -78,7 +93,7 @@ export const settings = definePluginSettings({
 }>();
 
 export function resetLanguageDefaults() {
-    if (IS_WEB || settings.store.service === "google") {
+    if (IS_WEB || settings.store.service === "google" || settings.store.service === "libretranslate") {
         settings.store.receivedInput = "auto";
         settings.store.receivedOutput = "en";
         settings.store.sentInput = "auto";

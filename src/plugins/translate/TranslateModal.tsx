@@ -20,25 +20,34 @@ import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Forms, SearchableSelect, useMemo } from "@webpack/common";
+import { Forms, SearchableSelect, useEffect, useMemo, useState } from "@webpack/common";
 
 import { settings } from "./settings";
-import { cl, getLanguages } from "./utils";
+import { cl, getLanguages, getLibreTranslateLanguages } from "./utils";
 
 const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;
 
 function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof LanguageSettingKeys[number]; includeAuto: boolean; }) {
     const currentValue = settings.use([settingsKey])[settingsKey];
+    const { service, libreTranslateUrl, libreTranslateApiKey } = settings.use(["service", "libreTranslateUrl", "libreTranslateApiKey"]);
+    const [langVersion, bumpLangVersion] = useState(0);
 
-    const options = useMemo(
-        () => {
-            const options = Object.entries(getLanguages()).map(([value, label]) => ({ value, label }));
-            if (!includeAuto)
-                options.shift();
+    useEffect(() => {
+        if (service !== "libretranslate") return;
+        let cancelled = false;
+        (async () => {
+            await getLibreTranslateLanguages();
+            if (!cancelled) bumpLangVersion(v => v + 1);
+        })();
+        return () => { cancelled = true; };
+    }, [service, libreTranslateUrl, libreTranslateApiKey]);
 
-            return options;
-        }, []
-    );
+    const options = useMemo(() => {
+        const options = Object.entries(getLanguages()).map(([value, label]) => ({ value, label }));
+        if (!includeAuto)
+            options.shift();
+        return options;
+    }, [includeAuto, service, langVersion]);
 
     return (
         <section className={Margins.bottom16}>

@@ -40,19 +40,120 @@ interface DeeplData {
     }[];
 }
 
+interface LibreTranslateData {
+    translatedText: string;
+    detectedLanguage?: {
+        confidence: number;
+        language: string;
+    };
+}
+
+interface LibreLanguageEntry {
+    code: string;
+    name: string;
+    targets?: string[];
+}
+
+type LibreLanguagesMap = Record<string, string>;
+
+let cachedLibreLanguages: LibreLanguagesMap | null = null;
+let cachedLibreBaseUrl: string | null = null;
+let cachedLibreLanguagesPromise: Promise<LibreLanguagesMap | null> | null = null;
+
+function normalizeLibreBaseUrl(url: string) {
+    return url.replace(/\/+$/, "");
+}
+
+export async function getLibreTranslateLanguages(): Promise<LibreLanguagesMap | null> {
+    if (IS_WEB) return null;
+
+    const baseUrl = normalizeLibreBaseUrl(settings.store.libreTranslateUrl || "https://libretranslate.com");
+    if (cachedLibreLanguages && cachedLibreBaseUrl === baseUrl) return cachedLibreLanguages;
+    if (cachedLibreLanguagesPromise && cachedLibreBaseUrl === baseUrl)
+        return cachedLibreLanguagesPromise.then(() => cachedLibreLanguages);
+
+    cachedLibreBaseUrl = baseUrl;
+    cachedLibreLanguagesPromise = (async () => {
+        try {
+            const { status, data } = await Native.makeLibreTranslateLanguagesRequest(`${baseUrl}/languages`);
+            if (status === -1)
+                throw new Error(`Failed to connect to LibreTranslate API: ${data}`);
+            if (status !== 200)
+                throw new Error(`Failed to fetch /languages: ${status}${data ? `\n${data}` : ""}`);
+
+            const list: LibreLanguageEntry[] = JSON.parse(data);
+            const entries = list
+                .map(l => [l.code, l.name] as const)
+                .sort((a, b) => a[1].localeCompare(b[1]));
+
+            cachedLibreLanguages = {
+                auto: "Detect language",
+                ...Object.fromEntries(entries)
+            };
+        } catch (e) {
+            // Non-blocking: translation can still work and we fall back to raw codes if needed.
+            console.warn("[Translate] Failed to load LibreTranslate languages:", e);
+            cachedLibreLanguages = null;
+        }
+        return cachedLibreLanguages;
+    })();
+
+    return cachedLibreLanguagesPromise;
+}
+
+function googleLanguageToLibreLanguage(language: string) {
+    switch (language) {
+        case "auto":
+            return "auto";
+        case "iw":
+            return "he";
+        case "jw":
+            return "jv";
+        case "zh-CN":
+        case "zh-TW":
+            return "zh";
+        default:
+            return language.split("-")[0].toLowerCase();
+    }
+}
+
+function libreLanguageToGoogleLanguage(language: string) {
+    switch (language) {
+        case "he":
+            return "iw";
+        case "jv":
+            return "jw";
+        case "zh":
+            return "zh-CN";
+        default:
+            return language;
+    }
+}
+
 export interface TranslationValue {
     sourceLanguage: string;
     text: string;
 }
 
-export const getLanguages = () => IS_WEB || settings.store.service === "google"
-    ? GoogleLanguages
-    : DeeplLanguages;
+export const getLanguages = () => {
+    if (settings.store.service === "deepl" || settings.store.service === "deepl-pro")
+        return DeeplLanguages;
+
+    if (settings.store.service === "libretranslate") {
+        // Fire-and-forget (the modal also triggers the fetch).
+        void getLibreTranslateLanguages();
+        return cachedLibreLanguages ?? GoogleLanguages;
+    }
+
+    return GoogleLanguages;
+};
 
 export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const translate = IS_WEB || settings.store.service === "google"
         ? googleTranslate
-        : deeplTranslate;
+        : settings.store.service === "libretranslate"
+            ? libreTranslate
+            : deeplTranslate;
 
     try {
         return await translate(
@@ -95,6 +196,43 @@ async function googleTranslate(text: string, sourceLang: string, targetLang: str
     return {
         sourceLanguage: GoogleLanguages[sourceLanguage] ?? sourceLanguage,
         text: translation
+    };
+}
+
+async function libreTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
+    const baseUrl = normalizeLibreBaseUrl(settings.store.libreTranslateUrl || "https://libretranslate.com");
+
+    const body: Record<string, string> = {
+        q: text,
+        source: googleLanguageToLibreLanguage(sourceLang || "auto"),
+        target: googleLanguageToLibreLanguage(targetLang),
+        format: "text"
+    };
+
+    // api_key is optional for self-hosted instances, but required on some public ones.
+    if (settings.store.libreTranslateApiKey)
+        body.api_key = settings.store.libreTranslateApiKey;
+
+    const { status, data } = await Native.makeLibreTranslateRequest(`${baseUrl}/translate`, JSON.stringify(body));
+    if (status === -1)
+        throw new Error(`Failed to connect to LibreTranslate API: ${data}`);
+    if (status !== 200)
+        throw new Error(
+            `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
+            + `\n${status}${data ? `\n${data}` : ""}`
+        );
+
+    const parsed: LibreTranslateData = JSON.parse(data);
+    const langCode = parsed.detectedLanguage?.language ?? body.source;
+
+    const langs = await getLibreTranslateLanguages();
+    const prettyName = langs?.[langCode]
+        ?? GoogleLanguages[libreLanguageToGoogleLanguage(langCode)]
+        ?? langCode;
+
+    return {
+        sourceLanguage: prettyName,
+        text: parsed.translatedText
     };
 }
 
