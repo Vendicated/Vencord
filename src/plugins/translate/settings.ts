@@ -66,9 +66,9 @@ export const settings = definePluginSettings({
     },
     libreTranslateUrl: {
         type: OptionType.STRING,
-        description: "LibreTranslate instance URL",
+        description: "LibreTranslate instance URL (HTTPS required)",
         default: "https://libretranslate.com",
-        placeholder: "https://libretranslate.com",
+        placeholder: "https://your-instance.example",
         disabled: () => IS_WEB || settings.store.service !== "libretranslate"
     },
     libreTranslateApiKey: {

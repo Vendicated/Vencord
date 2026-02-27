@@ -59,15 +59,55 @@ type LibreLanguagesMap = Record<string, string>;
 let cachedLibreLanguages: LibreLanguagesMap | null = null;
 let cachedLibreBaseUrl: string | null = null;
 let cachedLibreLanguagesPromise: Promise<LibreLanguagesMap | null> | null = null;
+const checkedLibreHosts = new Set<string>();
 
 function normalizeLibreBaseUrl(url: string) {
-    return url.replace(/\/+$/, "");
+    const normalized = (url || "https://libretranslate.com").trim().replace(/\/+$/, "");
+    let parsed: URL;
+
+    try {
+        parsed = new URL(normalized);
+    } catch {
+        throw "Invalid LibreTranslate URL. Use a full URL like https://your-instance.example.";
+    }
+
+    if (parsed.protocol !== "https:") {
+        throw "LibreTranslate must use HTTPS. HTTP endpoints are blocked by Discord.";
+    }
+
+    return parsed.toString().replace(/\/+$/, "");
+}
+
+async function ensureLibreTranslateCspAllowed(baseUrl: string) {
+    if (IS_WEB) return;
+
+    const { host, origin } = new URL(baseUrl);
+    if (checkedLibreHosts.has(host)) return;
+
+    if (await VencordNative.csp.isDomainAllowed(origin, ["connect-src"])) {
+        checkedLibreHosts.add(host);
+        return;
+    }
+
+    const result = await VencordNative.csp.requestAddOverride(origin, ["connect-src"], "Translate");
+    switch (result) {
+        case "ok":
+            throw "LibreTranslate domain was allowed. Please fully restart the app and try again.";
+        case "conflict":
+            throw "A CSP rule for this domain already exists but does not allow connections. Please update your CSP override.";
+        case "cancelled":
+        case "unchecked":
+            throw "Connection to LibreTranslate was blocked by CSP. Allow the domain when prompted to continue.";
+        case "invalid":
+        default:
+            throw "Invalid LibreTranslate URL.";
+    }
 }
 
 export async function getLibreTranslateLanguages(): Promise<LibreLanguagesMap | null> {
     if (IS_WEB) return null;
 
-    const baseUrl = normalizeLibreBaseUrl(settings.store.libreTranslateUrl || "https://libretranslate.com");
+    const baseUrl = normalizeLibreBaseUrl(settings.store.libreTranslateUrl);
     if (cachedLibreLanguages && cachedLibreBaseUrl === baseUrl) return cachedLibreLanguages;
     if (cachedLibreLanguagesPromise && cachedLibreBaseUrl === baseUrl)
         return cachedLibreLanguagesPromise.then(() => cachedLibreLanguages);
@@ -75,13 +115,12 @@ export async function getLibreTranslateLanguages(): Promise<LibreLanguagesMap | 
     cachedLibreBaseUrl = baseUrl;
     cachedLibreLanguagesPromise = (async () => {
         try {
-            const { status, data } = await Native.makeLibreTranslateLanguagesRequest(`${baseUrl}/languages`);
-            if (status === -1)
-                throw new Error(`Failed to connect to LibreTranslate API: ${data}`);
-            if (status !== 200)
-                throw new Error(`Failed to fetch /languages: ${status}${data ? `\n${data}` : ""}`);
+            await ensureLibreTranslateCspAllowed(baseUrl);
 
-            const list: LibreLanguageEntry[] = JSON.parse(data);
+            const res = await fetch(`${baseUrl}/languages`);
+            if (!res.ok) throw new Error(`Failed to fetch /languages: ${res.status} ${res.statusText}`);
+
+            const list: LibreLanguageEntry[] = await res.json();
             const entries = list
                 .map(l => [l.code, l.name] as const)
                 .sort((a, b) => a[1].localeCompare(b[1]));
@@ -200,7 +239,7 @@ async function googleTranslate(text: string, sourceLang: string, targetLang: str
 }
 
 async function libreTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
-    const baseUrl = normalizeLibreBaseUrl(settings.store.libreTranslateUrl || "https://libretranslate.com");
+    const baseUrl = normalizeLibreBaseUrl(settings.store.libreTranslateUrl);
 
     const body: Record<string, string> = {
         q: text,
@@ -213,16 +252,23 @@ async function libreTranslate(text: string, sourceLang: string, targetLang: stri
     if (settings.store.libreTranslateApiKey)
         body.api_key = settings.store.libreTranslateApiKey;
 
-    const { status, data } = await Native.makeLibreTranslateRequest(`${baseUrl}/translate`, JSON.stringify(body));
-    if (status === -1)
-        throw new Error(`Failed to connect to LibreTranslate API: ${data}`);
-    if (status !== 200)
+    await ensureLibreTranslateCspAllowed(baseUrl);
+
+    const res = await fetch(`${baseUrl}/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const extra = await res.text().catch(() => "");
         throw new Error(
             `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
-            + `\n${status}${data ? `\n${data}` : ""}`
+            + `\n${res.status} ${res.statusText}${extra ? `\n${extra}` : ""}`
         );
+    }
 
-    const parsed: LibreTranslateData = JSON.parse(data);
+    const parsed: LibreTranslateData = await res.json();
     const langCode = parsed.detectedLanguage?.language ?? body.source;
 
     const langs = await getLibreTranslateLanguages();
