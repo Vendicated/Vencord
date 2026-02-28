@@ -5,8 +5,8 @@
  */
 
 import { RendererSettings } from "@main/settings";
-import { app } from "electron";
 import { Logger } from "@utils/Logger";
+import { app } from "electron";
 // @ts-ignore
 import sponsorLogic from "file://sponsorLogic.js?minify";
 const logger = new Logger("SponsorBlock");
