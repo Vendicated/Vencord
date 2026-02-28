@@ -53,10 +53,10 @@ export default definePlugin({
     },
     patches: [
         {
-            find: "this.isCopiedStreakGodlike",
+            find: ".WIDGETS_RTC_UPSELL_COACHMARK),",
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
-                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
+                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,occluded:)/,
                 // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
                 replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             }
