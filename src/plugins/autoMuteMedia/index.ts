@@ -22,14 +22,14 @@ export default definePlugin({
                 // Don't call it the first time the play button is clicked so our default is not overwritten
                 {
                     match: /\i!==this\.state\.muted/,
-                    replace: "this.state.hasClickedPlay && $&"
+                    replace: "!this.state.hasClickedPlay && $&"
                 },
                 // when the play button is clicked, if it hasn't been clicked before discord sets the muted state to the default
                 // overwrite the default to always be true
                 {
-                    match: /(?<=this\.setState\(\{[^}]+muted:)\(!!\i\|\|!\i\)&&\i/,
-                    replace: "true"
-                }
+                    match: /(?<=this\.setState\(\{[^}]+muted:)\(!!\i\|\|!\i\)&&\i(?=[,}])/,
+                    replace: "this.state.hasClickedPlay ? this.state.muted : true"
+                },
             ]
         }
     ]
