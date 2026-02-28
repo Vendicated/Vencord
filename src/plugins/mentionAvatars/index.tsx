@@ -50,7 +50,7 @@ export default definePlugin({
     patches: [{
         find: ".USER_MENTION)",
         replacement: {
-            match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
+            match: /children:`@\$\{(\i\?\?\i)\}`(?<=\.useName\((\i)\).+?)/,
             replace: "children:$self.renderUsername({username:$1,user:$2})"
         }
     },

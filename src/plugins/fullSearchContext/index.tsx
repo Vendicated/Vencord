@@ -34,7 +34,7 @@ interface CopyIdMenuItemProps {
 }
 
 let CopyIdMenuItem: (props: CopyIdMenuItemProps) => React.ReactElement | null = NoopComponent;
-waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => CopyIdMenuItem = m);
+waitFor(filters.componentByCode('"cannot copy null text"'), m => CopyIdMenuItem = m);
 
 function MessageMenu({ message, channel, onHeightUpdate }) {
     const canReport = message.author &&

@@ -247,11 +247,13 @@ export default definePlugin({
 
     patches: [
         {
-            find: 'this,"_changeCallbacks",',
-            replacement: {
-                match: /\i\(this,"_changeCallbacks",/,
-                replace: "Reflect.defineProperty(this,Symbol.toStringTag,{value:this.getName(),configurable:!0,writable:!0,enumerable:!1}),$&"
-            }
+            find: "&&this.initializeIfNeeded()",
+            replacement: [
+                {
+                    match: /\i&&this\.initializeIfNeeded\(\)/,
+                    replace: "$&,Reflect.defineProperty(this,Symbol.toStringTag,{value:this.getName(),configurable:!0,writable:!0,enumerable:!1})"
+                }
+            ]
         }
     ],
 
