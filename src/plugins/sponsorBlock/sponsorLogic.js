@@ -106,9 +106,7 @@
             });
 
 
-        } catch (e) {
-
-        }
+        } catch (e) { }
     };
 
     initSponsorBlock();
