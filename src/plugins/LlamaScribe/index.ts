@@ -1,14 +1,13 @@
 /*
- * LlamaScribe - AI Grammar & Style
- * Copyright (c) 2026 Caeden
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { definePluginSettings } from "@api/Settings";
-import definePlugin from "@utils/types";
-import { OptionType } from "@utils/types";
+import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-
+import definePlugin, { OptionType } from "@utils/types";
 const logger = new Logger("LlamaScribe");
 
 const settings = definePluginSettings({
@@ -34,7 +33,7 @@ let styleElement: HTMLStyleElement | null = null;
 export default definePlugin({
     name: "LlamaScribe",
     description: "Instant AI text improvement. Press Alt + G. Requires a Groq API Key.",
-    authors: [{ name: "Caeden", id: 832663333529845772n }],
+    authors: [Devs.caeden],
     settings,
 
     start() {
@@ -70,7 +69,7 @@ export default definePlugin({
             const text = target.innerText;
             if (!text || text.trim().length < 2) return;
 
-            const apiKey = settings.store.apiKey;
+            const { apiKey } = settings.store;
             if (!apiKey) {
                 logger.error("Set your Groq API Key in settings!");
                 return;
@@ -104,7 +103,7 @@ export default definePlugin({
                 const data = await response.json();
                 target.classList.remove("polishing-active");
 
-                let fixedText = data.choices[0].message.content.trim().replace(/^"|"$/g, '');
+                const fixedText = data.choices[0].message.content.trim().replace(/^"|"$/g, "");
                 if (!fixedText || fixedText === text) return;
 
                 target.focus();
@@ -115,16 +114,16 @@ export default definePlugin({
                 sel?.addRange(range);
 
                 const dataTransfer = new DataTransfer();
-                dataTransfer.setData('text/plain', fixedText);
+                dataTransfer.setData("text/plain", fixedText);
 
-                const pasteEvent = new ClipboardEvent('paste', {
+                const pasteEvent = new ClipboardEvent("paste", {
                     clipboardData: dataTransfer,
                     bubbles: true,
                     cancelable: true
                 });
 
                 target.dispatchEvent(pasteEvent);
-                target.dispatchEvent(new Event('input', { bubbles: true }));
+                target.dispatchEvent(new Event("input", { bubbles: true }));
 
             } catch (err) {
                 target.classList.remove("polishing-active");
