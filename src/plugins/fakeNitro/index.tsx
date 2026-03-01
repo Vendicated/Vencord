@@ -127,7 +127,7 @@ const settings = definePluginSettings({
         default: true
     },
     hyperLinkText: {
-        description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
+        description: "What text the hyperlink should use, {{NAME}} will be replaced with the emoji/sticker name",
         type: OptionType.STRING,
         default: "{{NAME}}"
     },
