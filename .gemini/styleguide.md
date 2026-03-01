@@ -32,7 +32,7 @@ import { EquicordDevs } from "@utils/constants";
 
 export default definePlugin({
     name: "PluginName",            // PascalCase, matches directory name
-    description: "Does something.", // Capital first, period at end
+    description: "Does something", // Capital first
     authors: [EquicordDevs.Name],   // EquicordDevs for new, Devs for upstream
 });
 ```
@@ -245,7 +245,7 @@ Vencord.Plugins.plugins["OtherPlugin"].someFunction();
 
 ## Text and Descriptions
 
-- Plugin and setting descriptions: capital first letter, for descriptions end with a period.
+- Plugin and setting descriptions: capital first letter.
 - Error messages and toasts: natural human text, no dashes or robotic formatting.
 
 ```typescript
