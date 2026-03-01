@@ -37,13 +37,12 @@ type Spinner =
 export const Spinner = findByCodeLazy("pulsingEllipsis") as unknown as Spinner;
 
 // basic components
-export function ExplicitTag({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function ExplicitTag({ className }: HTMLAttributes<HTMLDivElement>) {
     return (
         <Tooltip text="Explicit">
             {tooltipProps => (
                 <BaseText
                     {...tooltipProps}
-                    {...props}
                     size="xs"
                     weight="medium"
                     className={classes(cl("explicit-tag"), className)}

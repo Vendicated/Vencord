@@ -28,8 +28,8 @@ export async function authFetch(_url: string | URL, options?: RequestInit) {
             ...options,
             headers: {
                 ...options?.headers,
-                authorization: useAuthorizationStore.getState().getToken(),
-            } as any,
+                Authorization: useAuthorizationStore.getState().getToken()!,
+            },
         });
 
         if (res.ok) return res;
@@ -59,7 +59,6 @@ export async function authFetch(_url: string | URL, options?: RequestInit) {
         );
         throw new Error(text);
     } catch (error) {
-        // dedupe this code?
         showToast(`Song Spotlight: ${error}`, Toasts.Type.FAILURE);
 
         logger.error(
@@ -75,15 +74,15 @@ export async function authFetch(_url: string | URL, options?: RequestInit) {
 export async function getData(): Promise<UserData | undefined> {
     return await authFetch(new URL("api/data", apiConstants.api), {
         headers: {
-            "if-modified-since": useSongStore.getState().self?.at,
-        } as any,
+            "If-Modified-Since": useSongStore.getState().self?.at,
+        } as HeadersInit,
     }).then(async res => {
         if (!res) return useSongStore.getState().self?.data;
 
         const data = await res.json();
         useSongStore.getState().update({
             data,
-            at: res.headers.get("last-modified") || undefined,
+            at: res.headers.get("Last-Modified") || undefined,
         });
         return data;
     });
@@ -93,8 +92,8 @@ export async function listData(userId: string): Promise<UserData | undefined> {
 
     return await authFetch(new URL(`api/data/${userId}`, apiConstants.api), {
         headers: {
-            "if-modified-since": useSongStore.getState().users[userId]?.at,
-        } as any,
+            "If-Modified-Since": useSongStore.getState().users[userId]?.at,
+        } as HeadersInit,
     }).then(async res => {
         if (!res) return useSongStore.getState().users[userId]?.data;
 
@@ -102,7 +101,7 @@ export async function listData(userId: string): Promise<UserData | undefined> {
         useSongStore.getState().update({
             userId,
             data,
-            at: res.headers.get("last-modified") || undefined,
+            at: res.headers.get("Last-Modified") || undefined,
         });
         return data;
     });
@@ -112,7 +111,7 @@ export async function saveData(data: UserData): Promise<true> {
         method: "PUT",
         body: JSON.stringify(data),
         headers: {
-            "content-type": "application/json",
+            "Content-Type": "application/json",
         },
     })
         .then(res => res?.json())

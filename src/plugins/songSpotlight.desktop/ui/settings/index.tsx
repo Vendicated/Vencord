@@ -35,7 +35,7 @@ export function ImportButton({ overwrite, pending, setPending, onImport }: Impor
     const checkClipboard = useCallback(async () => {
         setPending(true);
 
-        let json: any;
+        let json: unknown;
         try {
             json = JSON.parse(await readClipboard());
         } catch {
@@ -211,7 +211,7 @@ export default function Settings({ templateData }: SettingsProps) {
     );
 }
 
-export function SettingsModal({ modalProps, ...props }: SettingsProps & { modalProps: ModalProps }) {
+export function SettingsModal({ modalProps, ...props }: SettingsProps & { modalProps: ModalProps; }) {
     return (
         <ErrorBoundary>
             <ModalRoot {...modalProps} size={ModalSize.LARGE}>

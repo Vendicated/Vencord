@@ -35,9 +35,10 @@ export const useSongStore: ZustandStore<SongState> = proxyLazy(() =>
                 userId ??= UserStore.getCurrentUser()?.id;
                 if (userId) {
                     set({
-                        users: Object.assign(get().users, {
-                            [userId]: { data, at },
-                        }),
+                        users: {
+                            ...get().users,
+                            [userId]: { data, at }
+                        }
                     });
                 }
                 get().$refresh();
@@ -45,8 +46,7 @@ export const useSongStore: ZustandStore<SongState> = proxyLazy(() =>
             delete(userId) {
                 userId ??= UserStore.getCurrentUser()?.id;
                 if (userId) {
-                    const { users } = get();
-                    delete users[userId];
+                    const { [userId]: _, ...users } = get().users;
                     set({ users });
                 }
                 get().$refresh();

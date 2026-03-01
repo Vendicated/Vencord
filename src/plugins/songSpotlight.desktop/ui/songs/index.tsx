@@ -216,7 +216,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                                                         action={() => {
                                                             const self = useSongStore.getState().self?.data ?? [];
 
-                                                            const i = self.indexOf(song);
+                                                            const i = self.findIndex(x => sid(x) === sid(song));
                                                             if (i === -1) {
                                                                 return showToast("You... don't have this song added?");
                                                             }

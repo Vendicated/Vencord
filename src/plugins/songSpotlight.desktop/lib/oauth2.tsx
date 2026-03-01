@@ -10,6 +10,7 @@ import { OAuth2AuthorizeModal, showToast, Toasts } from "@webpack/common";
 
 import { apiConstants, authFetch, getData } from "./api";
 import { useAuthorizationStore } from "./stores/AuthorizationStore";
+import { logger } from "./utils";
 
 export function presentOAuth2Modal() {
     openModal(props => (
@@ -24,6 +25,7 @@ export function presentOAuth2Modal() {
             cancelCompletesFlow={false}
             callback={async ({ location }) => {
                 if (!location) return;
+
                 try {
                     const url = new URL(location);
                     url.searchParams.append("whois", "vencord");
@@ -35,8 +37,8 @@ export function presentOAuth2Modal() {
                     getData();
 
                     showToast("Successfully authorized!", Toasts.Type.SUCCESS);
-                } catch {
-                    // handled in authFetch
+                } catch (error) {
+                    logger.error("Got an error during OAuth2", error);
                 }
             }}
         />
