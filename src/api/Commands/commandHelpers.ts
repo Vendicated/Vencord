@@ -37,7 +37,13 @@ export function generateId() {
 export function sendBotMessage(channelId: string, message: PartialDeep<Message>): Message {
     const botMessage = createBotMessage({ channelId, content: "", embeds: [] });
 
-    MessageActions.receiveMessage(channelId, mergeDefaults(message, botMessage));
+    // If author is provided, completely replace it instead of merging to ensure avatar URL updates
+    const mergedMessage = mergeDefaults(message, botMessage);
+    if (message.author) {
+        mergedMessage.author = message.author;
+    }
+
+    MessageActions.receiveMessage(channelId, mergedMessage);
 
     return message as Message;
 }

@@ -1,0 +1,29 @@
+/* NoModalAnimation - Remove open/close animation from Discord modals */
+
+/* Modal layers */
+[class^="modal-"],
+[class*=" modal-"] {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+}
+
+/* Layer containers (wraps modals) */
+[class^="layer-"],
+[class*=" layer-"] {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+}
+
+/* Backdrop/overlay behind modals */
+[class^="backdrop-"],
+[class*=" backdrop-"] {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+}
+
+/* Fallback: catch any nested animated elements inside modals */
+[class*="layerContainer-"] * {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+}
+
