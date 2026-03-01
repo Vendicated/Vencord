@@ -76,8 +76,7 @@ Flag these and suggest the fix:
 | `value \|\| defaultValue` | `value ?? defaultValue` | `\|\|` falsifies `0`, `""`, `false` |
 | `` `${classA} ${classB}` `` | `classes(classA, classB)` | Handles null/false gracefully |
 | `"vc-plugin-class"` hardcoded | `cl("class")` via `classNameFactory` | Consistent, typo-proof |
-| `console.log/warn/error` | Remove it | No logging in plugin code |
-| `new Logger(...)` / `logger.log(...)` | Remove it | No logging in plugin code |
+| `console.log/warn` | Remove it | No logging in plugin code |
 | `cdn.discordapp.com/avatars/...` | `IconUtils.getUserAvatarURL(user)` | Handles animated, sizing, CDN |
 | `cdn.discordapp.com/icons/...` | `IconUtils.getGuildIconURL(...)` | Same |
 | `cdn.discordapp.com/banners/...` | `IconUtils.getUserBannerURL(...)` | Same |
@@ -317,8 +316,7 @@ stop() {}
 - **No overengineering.** No premature abstractions, no "just in case" handling, no features not requested. Three similar lines beats a one-use helper. If code can be half the size and do the same thing, it should be.
 - **No bloat.** Flag unnecessary wrapper functions, redundant type annotations, excessive error handling for things that can't fail, useless try/catch around synchronous code, or 50 lines doing what 10 could do. Code should be lean.
 - **No unused imports.** Every import must be referenced.
-- **No logging in plugin code.** No `console.log/warn/error`, no `Logger`. Remove all logging statements.
-- **No empty catch blocks.** Handle every error (show toast, return fallback, rethrow, etc.).
+- **No logging in plugin code besides for errors.** No `console.log/warn`.
 
 ---
 
@@ -378,6 +376,6 @@ If a PR reimplements any of these, flag it. They already exist:
 ## Review Severity
 
 1. **CRITICAL** — `any` types, hardcoded CDN/API URLs, direct DOM manipulation, security issues, massive overengineering/bloat, suspected AI slop (note it, but still review everything)
-2. **HIGH** — Missing useEffect cleanup, forbidden React APIs, hardcoded class names, logging statements (console or Logger), missing definePluginSettings, unnecessary abstractions
+2. **HIGH** — Missing useEffect cleanup, forbidden React APIs, hardcoded class names, console logging statements, missing definePluginSettings, unnecessary abstractions
 3. **MEDIUM** — Anti-patterns (`||` instead of `??`), utility reimplementations, commented-out code, bad description format, excessive comments
 4. **LOW** — Style preferences, minor performance wins, organization
