@@ -245,7 +245,7 @@ Vencord.Plugins.plugins["OtherPlugin"].someFunction();
 
 ## Text and Descriptions
 
-- Plugin and setting descriptions: capital first letter, end with period.
+- Plugin and setting descriptions: capital first letter, for descriptions end with a period.
 - Error messages and toasts: natural human text, no dashes or robotic formatting.
 
 ```typescript
