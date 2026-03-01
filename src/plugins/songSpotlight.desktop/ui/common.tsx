@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/index";
+import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
+import { classes } from "@utils/index";
 import { findByCodeLazy, findCssClassesLazy } from "@webpack";
+import { Tooltip } from "@webpack/common";
 import { ComponentType, HTMLAttributes, JSX } from "react";
 
 export const OverlayClasses = findCssClassesLazy("overlay", "inner", "outer");
@@ -32,6 +36,63 @@ type Spinner =
 
 export const Spinner = findByCodeLazy("pulsingEllipsis") as unknown as Spinner;
 
+// basic components
+export function ExplicitTag({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+    return (
+        <Tooltip text="Explicit">
+            {tooltipProps => (
+                <BaseText
+                    {...tooltipProps}
+                    {...props}
+                    size="xs"
+                    weight="medium"
+                    className={classes(cl("explicit-tag"), className)}
+                >
+                    E
+                </BaseText>
+            )}
+        </Tooltip>
+    );
+}
+interface PlayButtonProps extends HTMLAttributes<HTMLButtonElement> {
+    state: boolean;
+    disabled?: boolean;
+    onClick(): void;
+}
+
+export function PlayButton({ state, disabled, ...props }: PlayButtonProps) {
+    const Icon = state ? PauseIcon : PlayIcon;
+
+    return (
+        <button
+            {...props}
+            disabled={disabled}
+            data-toggled={state}
+            className={classes(cl("icon-button"), props.className)}
+        >
+            {disabled
+                ? <Spinner type={Spinner.Type.PULSING_ELLIPSIS} className={cl("icon-spinner")} />
+                : <Icon width={16} height={16} className={cl("icon")} />}
+        </button>
+    );
+}
+
+// icons
+export function AppleMusicIcon(props: JSX.IntrinsicElements["svg"]) {
+    return (
+        <svg
+            width={24}
+            height={24}
+            viewBox="0 0 24 24"
+            {...props}
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M19.7 1C21.5 1 23 2.5 23 4.3v15.4c0 1.8-1.5 3.3-3.3 3.3H4.3A3.3 3.3 0 0 1 1 19.7V4.3C1 2.5 2.5 1 4.3 1h15.4Zm-2.4 3.8s0-.9-.7-.7L9.3 5.6s-.6.1-.6.8v8.7c0 .5-.7.8-2 .9-2.4.4-2 4.5 1.3 3.4 1.3-.5 1.6-1.7 1.6-3V9.6c0-.3 0-.5.4-.5l6-1.2c.2 0 .4 0 .4.4v5.2c0 .5-.6.8-2 1-2.4.3-2 4.4 1.4 3.3 1.3-.5 1.5-1.7 1.5-3v-10Z"
+            />
+        </svg>
+    );
+}
 export function ImageBrokenIcon(props: JSX.IntrinsicElements["svg"]) {
     return (
         <svg
@@ -111,6 +172,36 @@ export function PuzzlePieceIcon(props: JSX.IntrinsicElements["svg"]) {
         </svg>
     );
 }
+export function SoundcloudIcon(props: JSX.IntrinsicElements["svg"]) {
+    return (
+        <svg
+            width={24}
+            height={24}
+            viewBox="0 0 24 24"
+            {...props}
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M1 15.8q0 .4.3.7t.6.1q.3 0 .5-.2l.1-.6V13a.7.7 0 0 0-.2-.5.7.7 0 0 0-.6-.2.7.7 0 0 0-.5.2.7.7 0 0 0-.2.5zm2.4 1.3q0 .3.2.4a1 1 0 0 0 .5.2l.6-.2q.2-.1.2-.4v-6.8a.7.7 0 0 0-.3-.5.7.7 0 0 0-.5-.2.7.7 0 0 0-.5.2.7.7 0 0 0-.2.5zm2.3.3q0 .3.2.5a1 1 0 0 0 .6.1 1 1 0 0 0 .5-.1q.2-.2.2-.5v-6.2a.7.7 0 0 0-.2-.5.7.7 0 0 0-.5-.2.8.8 0 0 0-.6.2.7.7 0 0 0-.2.5zm2.4 0q0 .6.7.6.8 0 .8-.6v-10q0-.9-.6-1l-.6.2Q8 7 8 7.4zm2.3.3v-11q0-.4.4-.5a6 6 0 0 1 4.2.5q1.4.7 2.2 2t1 2.8q.6-.3 1.3-.3a3.4 3.4 0 0 1 2.5 1q1 1 1 2.4T22 17a3.4 3.4 0 0 1-2.5 1h-8.9a.2.2 0 0 1-.1-.1.3.3 0 0 1 0-.2"
+            />
+        </svg>
+    );
+}
+export function SpotifyIcon(props: JSX.IntrinsicElements["svg"]) {
+    return (
+        <svg
+            width={24}
+            height={24}
+            viewBox="0 0 24 24"
+            {...props}
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M12 1a11 11 0 1 0 0 22 11 11 0 0 0 0-22Zm4.8 15.8a.7.7 0 0 1-1 .2c-2.5-1.6-5.8-2-9.6-1a.7.7 0 1 1-.3-1.4A14 14 0 0 1 16.6 16c.3.2.4.6.2.9Zm1.3-3a.9.9 0 0 1-1.1.3c-3-1.8-7.5-2.3-11-1.3a.9.9 0 0 1-.5-1.6c4-1.2 9-.6 12.4 1.4.4.3.5.8.2 1.2Zm1.5-3.5a1 1 0 0 1-1.4.4A18.1 18.1 0 0 0 5.6 9.4a1 1 0 0 1-.6-2C8.8 6.4 15.2 6.6 19.3 9c.5.3.6 1 .4 1.4Z"
+            />
+        </svg>
+    );
+}
 export function TrashIcon(props: JSX.IntrinsicElements["svg"]) {
     return (
         <svg
@@ -128,53 +219,6 @@ export function TrashIcon(props: JSX.IntrinsicElements["svg"]) {
                 d="M5.06 7a1 1 0 0 0-1 1.06l.76 12.13a3 3 0 0 0 3 2.81h8.36a3 3 0 0 0 3-2.81l.75-12.13a1 1 0 0 0-1-1.06H5.07ZM11 12a1 1 0 1 0-2 0v6a1 1 0 1 0 2 0v-6Zm3-1a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Z"
                 clipRule="evenodd"
                 fillRule="evenodd"
-            />
-        </svg>
-    );
-}
-
-export function AppleMusicIcon(props: JSX.IntrinsicElements["svg"]) {
-    return (
-        <svg
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
-            {...props}
-        >
-            <path
-                fill={props.fill || "currentColor"}
-                d="M19.7 1C21.5 1 23 2.5 23 4.3v15.4c0 1.8-1.5 3.3-3.3 3.3H4.3A3.3 3.3 0 0 1 1 19.7V4.3C1 2.5 2.5 1 4.3 1h15.4Zm-2.4 3.8s0-.9-.7-.7L9.3 5.6s-.6.1-.6.8v8.7c0 .5-.7.8-2 .9-2.4.4-2 4.5 1.3 3.4 1.3-.5 1.6-1.7 1.6-3V9.6c0-.3 0-.5.4-.5l6-1.2c.2 0 .4 0 .4.4v5.2c0 .5-.6.8-2 1-2.4.3-2 4.4 1.4 3.3 1.3-.5 1.5-1.7 1.5-3v-10Z"
-            />
-        </svg>
-    );
-}
-export function SoundcloudIcon(props: JSX.IntrinsicElements["svg"]) {
-    return (
-        <svg
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
-            {...props}
-        >
-            <path
-                fill={props.fill || "currentColor"}
-                d="M1 15.8q0 .4.3.7t.6.1q.3 0 .5-.2l.1-.6V13a.7.7 0 0 0-.2-.5.7.7 0 0 0-.6-.2.7.7 0 0 0-.5.2.7.7 0 0 0-.2.5zm2.4 1.3q0 .3.2.4a1 1 0 0 0 .5.2l.6-.2q.2-.1.2-.4v-6.8a.7.7 0 0 0-.3-.5.7.7 0 0 0-.5-.2.7.7 0 0 0-.5.2.7.7 0 0 0-.2.5zm2.3.3q0 .3.2.5a1 1 0 0 0 .6.1 1 1 0 0 0 .5-.1q.2-.2.2-.5v-6.2a.7.7 0 0 0-.2-.5.7.7 0 0 0-.5-.2.8.8 0 0 0-.6.2.7.7 0 0 0-.2.5zm2.4 0q0 .6.7.6.8 0 .8-.6v-10q0-.9-.6-1l-.6.2Q8 7 8 7.4zm2.3.3v-11q0-.4.4-.5a6 6 0 0 1 4.2.5q1.4.7 2.2 2t1 2.8q.6-.3 1.3-.3a3.4 3.4 0 0 1 2.5 1q1 1 1 2.4T22 17a3.4 3.4 0 0 1-2.5 1h-8.9a.2.2 0 0 1-.1-.1.3.3 0 0 1 0-.2"
-            />
-        </svg>
-    );
-}
-
-export function SpotifyIcon(props: JSX.IntrinsicElements["svg"]) {
-    return (
-        <svg
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
-            {...props}
-        >
-            <path
-                fill={props.fill || "currentColor"}
-                d="M12 1a11 11 0 1 0 0 22 11 11 0 0 0 0-22Zm4.8 15.8a.7.7 0 0 1-1 .2c-2.5-1.6-5.8-2-9.6-1a.7.7 0 1 1-.3-1.4A14 14 0 0 1 16.6 16c.3.2.4.6.2.9Zm1.3-3a.9.9 0 0 1-1.1.3c-3-1.8-7.5-2.3-11-1.3a.9.9 0 0 1-.5-1.6c4-1.2 9-.6 12.4 1.4.4.3.5.8.2 1.2Zm1.5-3.5a1 1 0 0 1-1.4.4A18.1 18.1 0 0 0 5.6 9.4a1 1 0 0 1-.6-2C8.8 6.4 15.2 6.6 19.3 9c.5.3.6 1 .4 1.4Z"
             />
         </svg>
     );

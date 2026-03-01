@@ -6,14 +6,15 @@
 
 import "./style.css";
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
-import { useAuthorizationStore } from "./lib/store/AuthorizationStore";
-import { useSongStore } from "./lib/store/SongStore";
+import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
+import { useSongStore } from "./lib/stores/SongStore";
 import { clearCache } from "./service";
-import { settings } from "./settings";
+import Settings from "./ui/settings";
 import { ProfileSongs } from "./ui/songs/ProfileSongs";
 import { WidgetSongs } from "./ui/songs/WidgetSongs";
 
@@ -21,7 +22,12 @@ export default definePlugin({
     name: "SongSpotlight",
     description: "Show off songs on your profile",
     authors: [Devs.nexpid],
-    settings,
+    settings: definePluginSettings({
+        manager: {
+            type: OptionType.COMPONENT,
+            component: () => <Settings />,
+        },
+    }),
     patches: [
         // Personal profile popout
         {
@@ -73,7 +79,7 @@ export default definePlugin({
         // the cache lives in native.ts so it persists between reloads and
         // only gets cleared on full restart. we don't want that since
         // audio preview URLs expire very fast, so we just clear it on
-        // // plugin restart instead
+        // plugin restart instead
         clearCache();
 
         useSongStore.getState().$refresh();

@@ -118,12 +118,12 @@ type Editable = {
     last: undefined;
 };
 
-interface SongEditorProps {
+interface SongListProps {
     localData: UserData;
     setLocalData(localData: UserData): void;
 }
 
-export function SongEditor({ localData, setLocalData }: SongEditorProps) {
+export function SongList({ localData, setLocalData }: SongListProps) {
     const editable = useMemo<Editable[]>(
         () => {
             if (!localData) return [];

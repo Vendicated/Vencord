@@ -7,8 +7,8 @@
 import type { UserData } from "@song-spotlight/api/structs";
 import { showToast, Toasts, UserStore } from "@webpack/common";
 
-import { useAuthorizationStore } from "./store/AuthorizationStore";
-import { useSongStore } from "./store/SongStore";
+import { useAuthorizationStore } from "./stores/AuthorizationStore";
+import { useSongStore } from "./stores/SongStore";
 import { logger } from "./utils";
 
 export const apiConstants = {

@@ -9,7 +9,7 @@ import { ApplicationIntegrationType } from "@vencord/discord-types/enums";
 import { OAuth2AuthorizeModal, showToast, Toasts } from "@webpack/common";
 
 import { apiConstants, authFetch, getData } from "./api";
-import { useAuthorizationStore } from "./store/AuthorizationStore";
+import { useAuthorizationStore } from "./stores/AuthorizationStore";
 
 export function presentOAuth2Modal() {
     openModal(props => (

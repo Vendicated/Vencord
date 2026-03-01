@@ -10,8 +10,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { apiConstants, deleteData, getData, saveData } from "@plugins/songSpotlight.desktop/lib/api";
 import { presentOAuth2Modal } from "@plugins/songSpotlight.desktop/lib/oauth2";
-import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/store/AuthorizationStore";
-import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore";
+import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/stores/AuthorizationStore";
+import { useSongStore } from "@plugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { validateSong } from "@plugins/songSpotlight.desktop/service";
 import { Spinner } from "@plugins/songSpotlight.desktop/ui/common";
@@ -22,28 +22,7 @@ import { copyWithToast } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Parser, showToast, Toasts, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
 
-import { SongEditor } from "./SongEditor";
-
-interface ManageSongsModalProps extends ManageSongsProps {
-    modalProps: ModalProps;
-}
-
-export function ManageSongsModal({ modalProps, ...props }: ManageSongsModalProps) {
-    return (
-        <ErrorBoundary>
-            <ModalRoot {...modalProps} size={ModalSize.LARGE}>
-                <ModalHeader>
-                    <BaseText size="xl" weight="bold">Song Spotlight</BaseText>
-                </ModalHeader>
-                <ModalContent>
-                    <div style={{ marginBottom: "20px" }}>
-                        <ManageSongs {...props} />
-                    </div>
-                </ModalContent>
-            </ModalRoot>
-        </ErrorBoundary>
-    );
-}
+import { SongList } from "./SongList";
 
 interface ImportButtonProps {
     overwrite: boolean;
@@ -52,7 +31,7 @@ interface ImportButtonProps {
     onImport(data: UserData): void;
 }
 
-function ImportButton({ overwrite, pending, setPending, onImport }: ImportButtonProps) {
+export function ImportButton({ overwrite, pending, setPending, onImport }: ImportButtonProps) {
     const checkClipboard = useCallback(async () => {
         setPending(true);
 
@@ -102,11 +81,11 @@ function ImportButton({ overwrite, pending, setPending, onImport }: ImportButton
     );
 }
 
-interface ManageSongsProps {
+interface SettingsProps {
     templateData?: UserData;
 }
 
-export function ManageSongs({ templateData }: ManageSongsProps) {
+export default function Settings({ templateData }: SettingsProps) {
     const { isAuthorized, deleteToken } = useAuthorizationStore();
     const { self } = useSongStore();
 
@@ -148,7 +127,7 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
                                 )}
                         </Flex>
                         <Flex flexDirection="column" gap="6px">
-                            <SongEditor
+                            <SongList
                                 localData={localData}
                                 setLocalData={setLocalData}
                             />
@@ -232,6 +211,23 @@ export function ManageSongs({ templateData }: ManageSongsProps) {
     );
 }
 
-export function openManageSongs(templateData?: UserData) {
-    openModal(modalProps => <ManageSongsModal modalProps={modalProps} templateData={templateData} />);
+export function SettingsModal({ modalProps, ...props }: SettingsProps & { modalProps: ModalProps }) {
+    return (
+        <ErrorBoundary>
+            <ModalRoot {...modalProps} size={ModalSize.LARGE}>
+                <ModalHeader>
+                    <BaseText size="xl" weight="bold">Song Spotlight</BaseText>
+                </ModalHeader>
+                <ModalContent>
+                    <div style={{ marginBottom: "20px" }}>
+                        <Settings {...props} />
+                    </div>
+                </ModalContent>
+            </ModalRoot>
+        </ErrorBoundary>
+    );
+}
+
+export function openSettingsModal(templateData?: UserData) {
+    openModal(modalProps => <SettingsModal modalProps={modalProps} templateData={templateData} />);
 }

@@ -8,18 +8,18 @@ import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { LinkIcon, PencilIcon } from "@components/Icons";
 import { listData } from "@plugins/songSpotlight.desktop/lib/api";
-import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/store/AuthorizationStore";
-import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore";
+import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/stores/AuthorizationStore";
+import { useSongStore } from "@plugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { CardClasses, MoreHorizontalIcon, OverlayClasses, Spinner } from "@plugins/songSpotlight.desktop/ui/common";
-import { openManageSongs } from "@plugins/songSpotlight.desktop/ui/settings/ManageSongs";
+import { openSettingsModal } from "@plugins/songSpotlight.desktop/ui/settings";
 import { sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
 import { LazyComponent } from "@utils/lazyReact";
 import { classes } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Menu, React, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 
-import { SongInfoContainer } from "./SongInfo";
+import Song from ".";
 
 interface ProfileSongsProps {
     userId: string;
@@ -70,7 +70,7 @@ export const ProfileSongs = LazyComponent(
                                                         id="edit-songs"
                                                         label="Edit songs"
                                                         icon={PencilIcon}
-                                                        action={() => openManageSongs()}
+                                                        action={() => openSettingsModal()}
                                                     />
                                                 )}
                                                 <Menu.MenuItem
@@ -87,9 +87,7 @@ export const ProfileSongs = LazyComponent(
                         </Tooltip>
                     </Flex>
                     <Flex flexDirection="column" gap="6px">
-                        {data.map((song, i) => (
-                            <SongInfoContainer owned={owned} song={song} index={i} key={sid(song)} />
-                        ))}
+                        {data.map((song, i) => <Song owned={owned} song={song} index={i} key={sid(song)} />)}
                     </Flex>
                 </div>
             );

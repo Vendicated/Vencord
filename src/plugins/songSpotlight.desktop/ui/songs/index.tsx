@@ -9,24 +9,24 @@ import { Flex } from "@components/Flex";
 import { LinkIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { apiConstants } from "@plugins/songSpotlight.desktop/lib/api";
-import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore";
+import { useSongStore } from "@plugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl, formatCoverTooltip, formatDurationMs } from "@plugins/songSpotlight.desktop/lib/utils";
 import { parseLink, useRender } from "@plugins/songSpotlight.desktop/service";
 import {
     CardClasses,
+    ExplicitTag,
     ImageBrokenIcon,
     OverlayClasses,
+    PlayButton,
     PuzzlePieceIcon,
     TrashIcon,
 } from "@plugins/songSpotlight.desktop/ui/common";
 import { AudioPlayer } from "@plugins/songSpotlight.desktop/ui/components/AudioPlayer";
-import { ExplicitTag } from "@plugins/songSpotlight.desktop/ui/components/ExplicitTag";
-import { PlayButton } from "@plugins/songSpotlight.desktop/ui/components/PlayButton";
 import { ProgressCircle } from "@plugins/songSpotlight.desktop/ui/components/ProgressCircle";
 import { ServiceIcon } from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
-import { openManageSongs } from "@plugins/songSpotlight.desktop/ui/settings/ManageSongs";
+import { openSettingsModal } from "@plugins/songSpotlight.desktop/ui/settings";
 import { RenderInfoEntryBased, RenderSongInfo } from "@song-spotlight/api/handlers";
-import { Song } from "@song-spotlight/api/structs";
+import { Song as SongType } from "@song-spotlight/api/structs";
 import { isListLayout, sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
 import { LazyComponent } from "@utils/lazyReact";
@@ -94,7 +94,7 @@ function SongEntry({ entry, number, isLoaded, isPlaying, big, onClick }: SongEnt
                                     return showToast("You already have this song added!");
                                 }
 
-                                openManageSongs([...self, song]);
+                                openSettingsModal([...self, song]);
                             }}
                         />
                     </Menu.Menu>
@@ -129,7 +129,7 @@ function SongEntry({ entry, number, isLoaded, isPlaying, big, onClick }: SongEnt
 
 interface SongInfoProps {
     owned: boolean;
-    song: Song;
+    song: SongType;
     render: RenderSongInfo;
     big?: boolean;
 }
@@ -203,7 +203,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                                                                 return showToast("You already have this song added!");
                                                             }
 
-                                                            openManageSongs([...self, song]);
+                                                            openSettingsModal([...self, song]);
                                                         }}
                                                     />
                                                 )
@@ -221,7 +221,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                                                                 return showToast("You... don't have this song added?");
                                                             }
 
-                                                            openManageSongs(self.toSpliced(i, 1));
+                                                            openSettingsModal(self.toSpliced(i, 1));
                                                         }}
                                                     />
                                                 )}
@@ -332,12 +332,12 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
 
 interface SongInfoContainerProps {
     owned: boolean;
-    song: Song;
+    song: SongType;
     index: number;
     big?: boolean;
 }
 
-export const SongInfoContainer = LazyComponent(() =>
+const Song = LazyComponent(() =>
     React.memo(function SongInfoContainer({ owned, song, index, big }: SongInfoContainerProps) {
         const { failed, render } = useRender(song);
 
@@ -361,3 +361,5 @@ export const SongInfoContainer = LazyComponent(() =>
         );
     })
 );
+
+export default Song;

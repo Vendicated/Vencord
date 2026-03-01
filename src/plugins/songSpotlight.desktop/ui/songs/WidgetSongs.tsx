@@ -8,11 +8,11 @@ import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { listData } from "@plugins/songSpotlight.desktop/lib/api";
-import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/store/AuthorizationStore";
-import { useSongStore } from "@plugins/songSpotlight.desktop/lib/store/SongStore";
+import { useAuthorizationStore } from "@plugins/songSpotlight.desktop/lib/stores/AuthorizationStore";
+import { useSongStore } from "@plugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { Spinner, WidgetClasses } from "@plugins/songSpotlight.desktop/ui/common";
-import { openManageSongs } from "@plugins/songSpotlight.desktop/ui/settings/ManageSongs";
+import { openSettingsModal } from "@plugins/songSpotlight.desktop/ui/settings";
 import { sid } from "@song-spotlight/api/util";
 import { LazyComponent } from "@utils/lazyReact";
 import { classes } from "@utils/misc";
@@ -20,7 +20,7 @@ import { User } from "@vencord/discord-types";
 import { React, ScrollerThin, useEffect, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { SongInfoContainer } from "./SongInfo";
+import Song from ".";
 
 interface WidgetSongsProps {
     user: User;
@@ -62,7 +62,7 @@ export const WidgetSongs = LazyComponent(
                             <Button
                                 variant="secondary"
                                 style={{ marginTop: "14px", flexShrink: 1 }}
-                                onClick={() => openManageSongs()}
+                                onClick={() => openSettingsModal()}
                             >
                                 Edit songs
                             </Button>
@@ -85,9 +85,7 @@ export const WidgetSongs = LazyComponent(
                         style={full && { flex: 1, textAlign: "center" }}
                     >
                         {full
-                            || data.map((song, i) => (
-                                <SongInfoContainer owned={owned} song={song} index={i} big key={sid(song)} />
-                            ))}
+                            || data.map((song, i) => <Song owned={owned} song={song} index={i} big key={sid(song)} />)}
                     </Flex>
                 </ScrollerThin>
             );
