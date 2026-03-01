@@ -22,8 +22,18 @@ import { MessageStore } from "@webpack/common";
 import { LoggedMessageJSON, RefrencedMessage } from "../types";
 import { getGuildIdByChannel, isGhostPinged } from "./index";
 
+export function stripTransientRenderState(message: any) {
+    // These runtime-only fields can contain React elements and must never be persisted.
+    delete message.customRenderedContent;
+    delete message.__messageloggerDiff;
+    delete message.__messageloggerDiffKey;
+    delete message.__messageloggerAggregated;
+    delete message.__messageloggerLastAppliedKey;
+}
+
 export function cleanupMessage(message: any, removeDetails: boolean = true): LoggedMessageJSON {
     const ret: LoggedMessageJSON = typeof message.toJS === "function" ? JSON.parse(JSON.stringify(message.toJS())) : { ...message };
+    stripTransientRenderState(ret);
     if (removeDetails) {
         ret.author.phone = undefined;
         ret.author.email = undefined;
