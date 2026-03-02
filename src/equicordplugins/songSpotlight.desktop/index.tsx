@@ -49,7 +49,7 @@ export default definePlugin({
         {
             find: ".SIDEBAR}),nicknameIcons:",
             replacement: {
-                match: /{userId:(\i)\.id}\)}\)]}\)/,
+                match: /{userId:(\i)\.id}\)}\)]}\).{0,100}(?=\]\}\))/,
                 replace: "$&,$self.renderProfileSongs({userId:$1.id})",
             },
         },
