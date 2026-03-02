@@ -5,7 +5,7 @@
  */
 
 import { isPluginEnabled } from "@api/PluginManager";
-import betterUserArea from "@equicordplugins/betterUserArea";
+import declutter from "@equicordplugins/declutter";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findCssClassesLazy } from "@webpack";
@@ -43,6 +43,6 @@ export default definePlugin({
     },
 
     shouldHideTooltips() {
-        return isPluginEnabled(betterUserArea.name) && betterUserArea.settings.store.removeButtonTooltips;
+        return isPluginEnabled(declutter.name) && declutter.settings.store.removeButtonTooltips;
     }
 });
