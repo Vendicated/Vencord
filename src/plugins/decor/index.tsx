@@ -33,7 +33,7 @@ export default definePlugin({
         {
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /(?<=function \i\((\i)\){)(?=let{avatarDecoration)/,
+                match: /(?<=function \i\((\i)\){)(?=.{0,20}let{avatarDecoration)/,
                 replace: "const vcDecorDecoration=$self.getDecorAvatarDecorationURL($1);if(vcDecorDecoration)return vcDecorDecoration;"
             }
         },
