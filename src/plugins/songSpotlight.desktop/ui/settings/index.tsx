@@ -15,8 +15,8 @@ import { useSongStore } from "@plugins/songSpotlight.desktop/lib/stores/SongStor
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { validateSong } from "@plugins/songSpotlight.desktop/service";
 import { Spinner } from "@plugins/songSpotlight.desktop/ui/common";
-import { UserData, UserDataSchema } from "@song-spotlight/api/structs";
 import SongList from "@plugins/songSpotlight.desktop/ui/settings/SongList";
+import { UserData, UserDataSchema } from "@song-spotlight/api/structs";
 import { sid } from "@song-spotlight/api/util";
 import { readClipboard } from "@utils/clipboard";
 import { copyWithToast } from "@utils/discord";
