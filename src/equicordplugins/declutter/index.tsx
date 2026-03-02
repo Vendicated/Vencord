@@ -143,7 +143,7 @@ export default definePlugin({
             // Avatar decoration
             find: "getAvatarDecorationURL:",
             replacement: {
-                match: /(?<=function \i\((\i)\){)(?=.{0,100}let{avatarDecoration)/,
+                match: /(?<=function \i\((\i)\){)(?=.{0,150}let{avatarDecoration)/,
                 replace: "$&return null;"
             },
             predicate: () => settings.store.removeAvatarDecoration,
