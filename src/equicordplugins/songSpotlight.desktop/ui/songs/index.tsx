@@ -11,7 +11,7 @@ import { Link } from "@components/Link";
 import { apiConstants } from "@equicordplugins/songSpotlight.desktop/lib/api";
 import { useSongStore } from "@equicordplugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl, formatCoverTooltip, formatDurationMs } from "@equicordplugins/songSpotlight.desktop/lib/utils";
-import { parseLink, useRender } from "@equicordplugins/songSpotlight.desktop/service";
+import { Native, useRender } from "@equicordplugins/songSpotlight.desktop/service";
 import {
     CardClasses,
     ExplicitTag,
@@ -84,7 +84,7 @@ function SongEntry({ entry, number, isLoaded, isPlaying, big, onClick }: SongEnt
                                     return showToast("You don't have enough space!");
                                 }
 
-                                const song = await parseLink(entry.link);
+                                const song = await Native.parseLink(entry.link);
                                 if (!song) {
                                     return showToast("Uh oh, this song doesn't exist!", Toasts.Type.FAILURE);
                                 }

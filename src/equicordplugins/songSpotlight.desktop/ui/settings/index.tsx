@@ -13,7 +13,7 @@ import { presentOAuth2Modal } from "@equicordplugins/songSpotlight.desktop/lib/o
 import { useAuthorizationStore } from "@equicordplugins/songSpotlight.desktop/lib/stores/AuthorizationStore";
 import { useSongStore } from "@equicordplugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl } from "@equicordplugins/songSpotlight.desktop/lib/utils";
-import { validateSong } from "@equicordplugins/songSpotlight.desktop/service";
+import { Native } from "@equicordplugins/songSpotlight.desktop/service";
 import { Spinner } from "@equicordplugins/songSpotlight.desktop/ui/common";
 import SongList from "@equicordplugins/songSpotlight.desktop/ui/settings/SongList";
 import { UserData, UserDataSchema } from "@song-spotlight/api/structs";
@@ -48,7 +48,7 @@ function ImportButton({ overwrite, pending, setPending, onImport }: ImportButton
             return showToast("Invalid Song Spotlight data in clipboard!", Toasts.Type.FAILURE);
         }
 
-        const validated = await Promise.allSettled(data.map(song => validateSong(song)));
+        const validated = await Promise.allSettled(data.map(song => Native.validateSong(song)));
         if (!validated.every(x => x.status === "fulfilled" && x.value)) {
             setPending(false);
             return showToast("One or more imported songs were invalid.", Toasts.Type.FAILURE);

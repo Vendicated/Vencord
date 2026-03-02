@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { PlusIcon } from "@components/Icons";
 import { cl, logger } from "@equicordplugins/songSpotlight.desktop/lib/utils";
-import { parseLink } from "@equicordplugins/songSpotlight.desktop/service";
+import { Native } from "@equicordplugins/songSpotlight.desktop/service";
 import { parsers } from "@song-spotlight/api/handlers";
 import { Song } from "@song-spotlight/api/structs";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -60,7 +60,7 @@ function AddSongModal({ modalProps, close, onAdd }: AddSongModalProps) {
                             onClick={async () => {
                                 setPending(true);
                                 try {
-                                    const parsed = await parseLink(url);
+                                    const parsed = await Native.parseLink(url);
                                     if (!parsed) {
                                         setError("Invalid link");
                                         return setPending(false);

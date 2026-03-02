@@ -17,7 +17,7 @@ export function useRender(song: Song) {
     useEffect(() => {
         setFailed(false);
         setRender(null);
-        renderSong(song)
+        Native.renderSong(song)
             .catch(() => null)
             .then(info => info ? setRender(info) : setFailed(true));
     }, [sid(song)]);
@@ -25,5 +25,4 @@ export function useRender(song: Song) {
     return { failed, render };
 }
 
-export const { parseLink, renderSong, validateSong, clearCache } = VencordNative.pluginHelpers
-    .SongSpotlight as PluginNative<typeof import("./native")>;
+export const Native = VencordNative.pluginHelpers.SongSpotlight as PluginNative<typeof import("./native")>;

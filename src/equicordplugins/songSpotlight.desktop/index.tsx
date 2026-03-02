@@ -13,7 +13,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useSongStore } from "./lib/stores/SongStore";
-import { clearCache } from "./service";
+import { Native } from "./service";
 import Settings from "./ui/settings";
 import ProfileSongs from "./ui/songs/ProfileSongs";
 import WidgetSongs from "./ui/songs/WidgetSongs";
@@ -80,7 +80,7 @@ export default definePlugin({
         // only gets cleared on full restart. we don't want that since
         // audio preview URLs expire very fast, so we just clear it on
         // plugin restart instead
-        clearCache();
+        Native.clearCache();
 
         useSongStore.getState().$refresh();
         useAuthorizationStore.persist.rehydrate();
