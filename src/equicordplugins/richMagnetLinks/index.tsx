@@ -22,7 +22,7 @@ export default definePlugin({
             }
         },
         {
-            find: '"flattenMarkdown"',
+            find: 'before:"@silent"',
             replacement: {
                 match: /mention:{type:/,
                 replace: "magnet:{type:\"inlineObject\"},$&",
