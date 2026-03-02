@@ -1,5 +1,8 @@
 # NavIDs
 
+If you have `ConsoleShortcuts` enabled you can run loadLazyChunks()
+to get every navId after it loads everything with the section below
+
 ```js
 const wp = webpackChunkdiscord_app.push([[Symbol()], {}, r => r]);
 const navIds = [...new Set(
