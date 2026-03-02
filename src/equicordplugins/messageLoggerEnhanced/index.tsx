@@ -189,10 +189,17 @@ function messageCreateHandler(payload: MessageCreatePayload) {
 
 async function processMessageFetch(response: FetchMessagesResponse) {
     try {
-        if (!response.ok || response.body.length === 0) {
+        if (!response.ok) {
             Flogger.error("Failed to fetch messages", response);
             return;
         }
+
+        if (!Array.isArray(response.body)) {
+            Flogger.error("Failed to fetch messages: response body is not an array", response);
+            return;
+        }
+
+        if (response.body.length === 0) return;
 
         const firstMessage = response.body[response.body.length - 1];
         const messages = await idb.getMessagesByChannelAndAfterTimestampIDB(firstMessage.channel_id, firstMessage.timestamp);

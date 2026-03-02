@@ -25,6 +25,9 @@ importers:
       '@intrnl/xxhash64':
         specifier: ^0.1.2
         version: 0.1.2
+      '@song-spotlight/api':
+        specifier: ^2.0.0
+        version: 2.0.0(typescript@5.9.3)
       '@streamparser/json':
         specifier: ^0.0.22
         version: 0.0.22
@@ -717,6 +720,11 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@song-spotlight/api@2.0.0':
+    resolution: {integrity: sha512-a3gyrSojd3BzwloxZHyDXA7HhjmCNQZOYATh7AZJyCXIqilBMwFPgQ2FVkUpzf6MzZhN9emeN6OGZOJb/rkECw==}
+    peerDependencies:
+      typescript: ^5
 
   '@streamparser/json@0.0.22':
     resolution: {integrity: sha512-b6gTSBjJ8G8SuO3Gbbj+zXbVx8NSs1EbpbMKpzGLWMdkR+98McH9bEjSz3+0mPJf68c5nxa3CrJHp5EQNXM6zQ==}
@@ -2650,6 +2658,9 @@ packages:
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
 snapshots:
 
   '@babel/code-frame@7.24.7':
@@ -2994,6 +3005,12 @@ snapshots:
       - supports-color
 
   '@rtsao/scc@1.1.0': {}
+
+  '@song-spotlight/api@2.0.0(typescript@5.9.3)':
+    dependencies:
+      typescript: 5.9.3
+    optionalDependencies:
+      zod: 4.3.6
 
   '@streamparser/json@0.0.22': {}
 
@@ -5286,3 +5303,6 @@ snapshots:
       q: 1.5.1
 
   zod@3.24.2: {}
+
+  zod@4.3.6:
+    optional: true

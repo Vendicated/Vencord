@@ -30,11 +30,19 @@ export default definePlugin({
         {
             find: '["VIDEO","CLIP","AUDIO"]',
             replacement: {
-                match: /(\[\i>0&&\i\.length>0.{0,150}?children:)(\i.slice\(\i\))(?<=showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
-                replace: (_, rest, origChildren, showDownload, isVisualMediaType) => `${rest}[${showDownload}&&${isVisualMediaType}&&$self.PictureInPictureButton(),...${origChildren}]`
+                match: /(\[\i>0&&\i\.length>0.{0,150}?children:)(\i.slice\(\i\))(?<=mimeType:(\i),downloadURL:(\i).+?showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
+                replace: (_, rest, origChildren, mimeType, downloadURL, showDownload, isVisualMediaType) =>
+                    `${rest}[${showDownload}&&${isVisualMediaType}&&$self.shouldShowButton(${mimeType},${downloadURL})&&$self.PictureInPictureButton(),...${origChildren}]`
             }
         }
     ],
+
+    shouldShowButton(mimeType: string[] = [], downloadURL?: string) {
+        const normalizedMimeType = mimeType.join("/");
+        if (normalizedMimeType.startsWith("video/")) return true;
+        if (!downloadURL) return false;
+        return /\.(mp4|webm|mov|m4v|ogv|avi)(?:$|[?#])/i.test(downloadURL);
+    },
 
     PictureInPictureButton: ErrorBoundary.wrap(() => {
         return (

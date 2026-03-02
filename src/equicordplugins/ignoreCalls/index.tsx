@@ -19,14 +19,14 @@ import { FluxDispatcher, Menu, React, Tooltip, UserStore } from "@webpack/common
 
 interface CallUpdate {
     ringing: string[];
-    ongoingRings: Record<number, string>;
+    ongoingRings: string[];
     messageId: string;
     region: string;
 }
 
 const args: CallUpdate = {
     ringing: [],
-    ongoingRings: {},
+    ongoingRings: [],
     messageId: "",
     region: "",
 };
@@ -34,6 +34,8 @@ const args: CallUpdate = {
 const ignoredChannelIds = new Set<string>();
 const cl = classNameFactory("vc-ignore-calls-");
 const Deafen = findComponentByCodeLazy("0-1.02-.1H3.05a9");
+const filterOngoingRings = (currentUserId: string): CallUpdate["ongoingRings"] =>
+    args.ongoingRings.filter((id: string) => id !== currentUserId);
 
 const ContextMenuPatch: NavContextMenuPatchCallback = (children, { channel }: { channel: Channel; }) => {
     if (!channel || (!channel.isDM() && !channel.isGroupDM())) return;
@@ -109,7 +111,7 @@ export default definePlugin({
     flux: {
         async CALL_UPDATE({ ringing, ongoingRings, messageId, region }) {
             args.ringing = ringing || [];
-            args.ongoingRings = ongoingRings || {};
+            args.ongoingRings = Array.isArray(ongoingRings) ? ongoingRings : [];
             args.messageId = messageId;
             args.region = region;
         }
@@ -122,7 +124,7 @@ export default definePlugin({
                 type: "CALL_UPDATE",
                 channelId: channel.id,
                 ringing: args.ringing.filter((id: string) => id !== currentUserId),
-                ongoingRings: args.ongoingRings,
+                ongoingRings: filterOngoingRings(currentUserId),
                 messageId: args.messageId,
                 region: args.region
             });
@@ -143,7 +145,7 @@ export default definePlugin({
                                     type: "CALL_UPDATE",
                                     channelId: channel.id,
                                     ringing: args.ringing.filter((id: string) => id !== currentUserId),
-                                    ongoingRings: args.ongoingRings,
+                                    ongoingRings: filterOngoingRings(currentUserId),
                                     messageId: args.messageId,
                                     region: args.region
                                 });

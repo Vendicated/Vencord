@@ -294,9 +294,14 @@
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.vc-channeltabs-tab-selected .vc-channeltabs-name-text {
+.vc-channeltabs-dark-theme.vc-channeltabs-tab-selected .vc-channeltabs-name-text {
     font-weight: 600;
     color: var(--white-500);
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.vc-channeltabs-light-theme.vc-channeltabs-tab-selected .vc-channeltabs-name-text {
+    font-weight: 600;
 }
 
 .vc-channeltabs-tab-selected .vc-channeltabs-guild-acronym-icon span {

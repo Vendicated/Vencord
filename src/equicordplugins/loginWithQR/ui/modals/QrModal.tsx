@@ -5,6 +5,7 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { QrCodeIcon } from "@components/Icons";
 import { wrapTab } from "@components/settings";
 import loginWithQR from "@equicordplugins/loginWithQR";
 import { images } from "@equicordplugins/loginWithQR/images";
@@ -21,7 +22,7 @@ import {
 import jsQR, { QRCode } from "jsqr";
 import { MutableRefObject, ReactElement } from "react";
 
-import { cl, QrCodeIcon, Spinner, SpinnerTypes } from "..";
+import { cl, Spinner, SpinnerTypes } from "..";
 import openVerifyModal from "./VerifyModal";
 
 enum LoginStateType {

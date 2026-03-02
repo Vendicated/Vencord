@@ -20,7 +20,7 @@ import { classNameFactory, ModalCloseButton, ModalContent, ModalFooter, ModalHea
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, Menu, MessageStore, RelationshipStore, StreamerModeStore, TextInput, useEffect, useState } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, Menu, MessageStore, RelationshipStore, StreamerModeStore, TextInput, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
 
 const SMYNC = classNameFactory();
@@ -480,9 +480,7 @@ function renderUsername(
 
     const ircColorsEnabled = isPluginEnabled(ircColors.name);
 
-    const authorTopRole = (author as GuildMember)?.guildId && (author as any)?.highestRoleId;
-    const authorTopRoleColor = authorTopRole && GuildRoleStore.getRole((author as GuildMember).guildId, authorTopRole)?.colorStrings;
-    const authorColorStrings = colorStrings || (author as any)?.colorStrings || authorTopRoleColor || null;
+    const authorColorStrings = colorStrings || (author as any)?.colorStrings || null;
     const authorDisplayNameStyles = (!inGuild && !ircColorsEnabled && (author as any)?.displayNameStyles) || null;
     const effectType = authorDisplayNameStyles ? getEffectType(authorDisplayNameStyles.effectId) : null;
     const effectCSSVars = authorDisplayNameStyles ? computeEffectCSSVars(authorDisplayNameStyles) : {};
@@ -492,9 +490,9 @@ function renderUsername(
     const shouldAnimateEffect = shouldShowEffect && !AccessibilityStore.useReducedMotion;
 
     const canUseGradient = ((author as GuildMember)?.guildId ? (GuildStore.getGuild((author as GuildMember).guildId) ?? {}).premiumFeatures?.features.includes("ENHANCED_ROLE_COLORS") : !inGuild);
-    const useTopStyle = isMention || isReactionsPopout || channel?.isDM() || channel?.isGroupDM();
-    const topStyle = author ? resolveColor(authorColorStrings, authorDisplayNameStyles, "Role", canUseGradient, inGuild, ircColorsEnabled, isHovering) : null;
-    const hasGradient = !!topStyle?.gradient && Object.keys(topStyle.gradient).length > 0;
+    const useTopRoleStyle = isMention || isReactionsPopout || channel?.isDM() || channel?.isGroupDM();
+    const topRoleStyle = author ? resolveColor(authorColorStrings, authorDisplayNameStyles, "Role", canUseGradient, inGuild, ircColorsEnabled, isHovering) : null;
+    const hasGradient = !!topRoleStyle?.gradient && Object.keys(topRoleStyle.gradient).length > 0;
 
     const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
     const options = splitTemplate(includedNames);
@@ -649,7 +647,7 @@ function renderUsername(
 
     // Only mentions and reactions popouts should patch in the gradient glow or else a double glow will appear on messages.
     const hoveringClass = (isHovering ? " smyn-gradient-hovered" : "");
-    const gradientClasses = useTopStyle
+    const gradientClasses = useTopRoleStyle
         ? "smyn-gradient smyn-gradient-inherit-bg" + hoveringClass
         : "smyn-gradient smyn-gradient-unset-bg" + hoveringClass;
 
@@ -681,7 +679,7 @@ function renderUsername(
         <span
             style={{
                 ...topLevelStyle,
-                ...(topStyle?.normal.original || {})
+                ...(topRoleStyle?.normal.original || {})
             }}
             className="smyn-container"
         >
@@ -690,7 +688,7 @@ function renderUsername(
                 <span
                     className={SMYNC(firstGroupClasses, { [gradientClasses]: shouldGradientGlow })}
                     data-text={shouldGradientGlow ? firstDataText : undefined}
-                    style={(shouldGradientGlow && useTopStyle && topStyle ? topStyle.gradient.animated : undefined) as React.CSSProperties}
+                    style={(shouldGradientGlow && useTopRoleStyle && topRoleStyle ? topRoleStyle.gradient.animated : undefined) as React.CSSProperties}
                 >
                     <span
                         className={SMYNC(firstNameClasses, {
@@ -701,12 +699,12 @@ function renderUsername(
                         data-username-with-effects={needsEffectDataAttr && shouldShowEffect ? first.name : undefined}
                         style={shouldShowEffect
                             ? undefined
-                            : topStyle ?
-                                shouldAnimateGradients && topStyle.gradient
-                                    ? topStyle.gradient.animated
-                                    : topStyle.gradient
-                                        ? topStyle.gradient.static.original
-                                        : topStyle.normal.original
+                            : topRoleStyle ?
+                                shouldAnimateGradients && topRoleStyle.gradient
+                                    ? topRoleStyle.gradient.animated
+                                    : topRoleStyle.gradient
+                                        ? topRoleStyle.gradient.static.original
+                                        : topRoleStyle.normal.original
                                 : undefined
                         }>
                         {first.wrapped}</span>

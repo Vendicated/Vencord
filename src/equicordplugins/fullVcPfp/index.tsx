@@ -4,17 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { ChannelRTCStore, IconUtils, UserStore, VoiceStateStore } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { ChannelRTCStore, ChannelStore, GuildMemberStore, IconUtils, UserStore, VoiceStateStore } from "@webpack/common";
 
 import style from "./style.css?managed";
+
+const settings = definePluginSettings({
+    useServerProfileAvatars: {
+        type: OptionType.BOOLEAN,
+        description: "Use server profile avatars in guild voice channels when available.",
+        default: false
+    }
+});
 
 export default definePlugin({
     name: "FullVCPFP",
     description: "Makes avatars take up the entire vc tile",
     authors: [EquicordDevs.mochienya],
+    settings,
     patches: [
         {
             find: "\"data-selenium-video-tile\":",
@@ -29,13 +39,35 @@ export default definePlugin({
         if (!className.includes("tile") || !participantUserId) return;
 
         const user = UserStore.getUser(participantUserId);
-        const channelId = VoiceStateStore.getVoiceStateForUser(participantUserId)?.channelId!;
+        if (!user) return;
+
+        const channelId = VoiceStateStore.getVoiceStateForUser(participantUserId)?.channelId;
+        if (!channelId) return;
+
         const isSpeaking = ChannelRTCStore.getSpeakingParticipants(channelId).some(p => p.user.id === participantUserId && p.speaking);
-        const avatarUrl = IconUtils.getUserAvatarURL(user, isSpeaking, 1024);
+        const avatarUrl = settings.store.useServerProfileAvatars
+            ? this.getServerAvatarUrl(participantUserId, channelId, isSpeaking) ?? IconUtils.getUserAvatarURL(user, isSpeaking, 1024)
+            : IconUtils.getUserAvatarURL(user, isSpeaking, 1024);
 
         return {
             "--full-res-avatar": `url(${avatarUrl})`
         };
+    },
+
+    getServerAvatarUrl(userId: string, channelId: string, canAnimate: boolean) {
+        const guildId = ChannelStore.getChannel(channelId)?.guild_id;
+        if (!guildId) return;
+
+        const guildAvatar = GuildMemberStore.getMember(guildId, userId)?.avatar;
+        if (!guildAvatar) return;
+
+        return IconUtils.getGuildMemberAvatarURLSimple({
+            userId,
+            guildId,
+            avatar: guildAvatar,
+            canAnimate,
+            size: 1024
+        });
     },
 
     start() {

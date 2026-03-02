@@ -118,7 +118,7 @@ function makeContextCallback(
         children.push(
             <Menu.MenuItem
                 id={`c98-view-${name}-raw`}
-                label="View Raw"
+                label="View Raw Variant"
                 action={() => action(value)}
                 icon={CopyIcon}
             />,

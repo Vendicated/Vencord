@@ -8,11 +8,10 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Channel, Message, User } from "@vencord/discord-types";
-import { Constants, Menu, NavigationRouter, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts } from "@webpack/common";
+import { ChannelStore, Constants, Menu, NavigationRouter, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts } from "@webpack/common";
 
 function jumpToFirstMessage(channelId: string, guildId?: string | null) {
-    const url = `/channels/${guildId ?? "@me"}/${channelId}/0`;
-    NavigationRouter.transitionTo(url);
+    NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}/0`);
 }
 
 async function jumpToLastMessage(channelId: string, guildId?: string | null) {
@@ -20,12 +19,9 @@ async function jumpToLastMessage(channelId: string, guildId?: string | null) {
         url: Constants.Endpoints.MESSAGES(channelId),
         query: { limit: 1 }
     });
-
     const messageId = res.body?.[0]?.id;
     if (!messageId) return;
-
-    const url = `/channels/${guildId ?? "@me"}/${channelId}/${messageId}`;
-    NavigationRouter.transitionTo(url);
+    NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}/${messageId}`);
 }
 
 async function jumpToUserMessage(channelId: string, guildId: string, userId: string, first: boolean) {
@@ -50,8 +46,7 @@ async function jumpToUserMessage(channelId: string, guildId: string, userId: str
             return;
         }
 
-        const url = `/channels/${guildId}/${channelId}/${messageId}`;
-        NavigationRouter.transitionTo(url);
+        NavigationRouter.transitionTo(`/channels/${guildId}/${channelId}/${messageId}`);
     } catch (e) {
         Toasts.show({
             type: Toasts.Type.FAILURE,
@@ -61,28 +56,35 @@ async function jumpToUserMessage(channelId: string, guildId: string, userId: str
     }
 }
 
-const ChannelMenuPatch: NavContextMenuPatchCallback = (children, { channel }: { channel: Channel; }) => {
-    if (!channel) return;
+const ChannelMenuPatch: NavContextMenuPatchCallback = (
+    children,
+    { channel, thread }: { channel?: Channel; thread?: Channel; }
+) => {
+    const selectedId = SelectedChannelStore.getChannelId();
+    const selectedChannel = selectedId ? ChannelStore.getChannel(selectedId) : null;
+    const forumChild = channel?.isForumLikeChannel?.() && selectedChannel?.isThread?.() && selectedChannel.parent_id === channel.id
+        ? selectedChannel
+        : null;
+    const targetChannel = thread ?? forumChild ?? channel;
+    if (!targetChannel) return;
 
     children.push(
         <Menu.MenuItem
             id="vc-jump-to-first"
             label="Jump To First Message"
-            action={() => jumpToFirstMessage(channel.id, channel.guild_id)}
+            action={() => jumpToFirstMessage(targetChannel.id, targetChannel.guild_id)}
         />,
         <Menu.MenuItem
             id="vc-jump-to-last"
             label="Jump To Last Message"
-            action={() => jumpToLastMessage(channel.id, channel.guild_id)}
+            action={() => jumpToLastMessage(targetChannel.id, targetChannel.guild_id)}
         />
     );
 };
 
 const UserMenuPatch: NavContextMenuPatchCallback = (children, { user, channel }: { user: User; channel?: Channel; }) => {
     if (!user) return;
-
     if (!channel || channel.guild_id) return;
-
     children.push(
         <Menu.MenuItem
             id="vc-jump-to-first"
@@ -99,11 +101,9 @@ const UserMenuPatch: NavContextMenuPatchCallback = (children, { user, channel }:
 
 const MessageMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     if (!message) return;
-
     const channelId = SelectedChannelStore.getChannelId();
     const guildId = SelectedGuildStore.getGuildId();
     if (!channelId || !guildId) return;
-
     children.push(
         <Menu.MenuItem
             id="vc-jump-to-first-user"

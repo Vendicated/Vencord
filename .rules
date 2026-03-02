@@ -62,8 +62,8 @@
 
 ## Anti-Patterns
 
-- `value !== null && value !== undefined` ⟹ `value`
-- `array && array.length > 0` ⟹ `array.length`
+- `value !== null && value !== undefined` ⟹ `value != null`
+- `array && array.length > 0` ⟹ `array.length` (only when array is guaranteed to exist)
 - `settings?.store?.value` ⟹ `settings.store.value`
 - `value || defaultValue` ⟹ `value ?? defaultValue`
 
@@ -120,7 +120,7 @@ replace: "$&,$self.renderTooltip(arguments[0].guild)"
 **Wrapping:**
 
 ```js
-find: "#{intl::THREE_USERS_TYPING}"
+find: "#{intl::SEVERAL_USERS_TYPING_STRONG}"
 match: /(?<="aria-atomic":!0,children:)\i/
 replace: "$self.renderTypingUsers({ children: $& })"
 ```
@@ -171,6 +171,7 @@ Use `definePluginSettings` from `@api/Settings`, not inline settings object.
 From `@webpack/common`. **NEVER** hardcode `cdn.discordapp.com` URLs.
 
 - `IconUtils.getUserAvatarURL(user, canAnimate?, size?)`
+- `IconUtils.getDefaultAvatarURL(id)`
 - `IconUtils.getUserBannerURL({ id, banner, canAnimate?, size })`
 - `IconUtils.getGuildIconURL({ id, icon, size?, canAnimate? })`
 - `IconUtils.getGuildBannerURL(guild, canAnimate?)`

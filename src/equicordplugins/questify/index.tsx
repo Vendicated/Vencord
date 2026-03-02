@@ -1229,7 +1229,7 @@ export default definePlugin({
         },
         {
             // Hides Quests tab in the DMs tab list.
-            find: "QUEST_HOME_V2):",
+            find: ".QUEST_HOME):",
             replacement: [
                 {
                     match: /(?<="family-center"\):null,)/,

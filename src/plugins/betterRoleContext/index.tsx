@@ -18,6 +18,31 @@ const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild"
 
 const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
 
+async function openRoleIconModal(roleId: string, roleIcon: string, roleName: string) {
+    const format = settings.store.roleIconFileFormat;
+    const contentType = format === "jpg" ? "image/jpeg" : `image/${format}`;
+    const original = `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${roleId}/${roleIcon}.${format}`;
+    const url = original.replace(`//${window.GLOBAL_ENV.CDN_HOST}/`, "//media.discordapp.net/");
+
+    openImageModal({
+        url,
+        original,
+        height: 128,
+        width: 128,
+        contentType,
+        originalContentType: contentType,
+        sourceMetadata: {
+            identifier: {
+                type: "attachment",
+                attachmentId: roleId,
+                filename: `role-icon-${roleId}.${format}`,
+                title: roleName,
+                size: 1,
+            }
+        }
+    });
+}
+
 function PencilIcon() {
     return (
         <svg
@@ -109,17 +134,12 @@ export default definePlugin({
             }
 
             if (role.icon) {
+                const roleIcon = role.icon;
                 children.push(
                     <Menu.MenuItem
                         id="vc-view-role-icon"
                         label="View Role Icon"
-                        action={() => {
-                            openImageModal({
-                                url: `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`,
-                                height: 128,
-                                width: 128
-                            });
-                        }}
+                        action={() => openRoleIconModal(role.id, roleIcon, role.name)}
                         icon={ImageIcon}
                     />
 

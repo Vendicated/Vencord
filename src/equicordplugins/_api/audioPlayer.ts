@@ -72,7 +72,7 @@ export default definePlugin({
             // regardless of if the "discodo" effect is enabled or not. This is due to the volume setter
             // internally calling the ensureAudio function which is where the internal sounds module is loaded
             // by default. To account for this, the module is force loaded in the first patch in the above group.
-            find: "UPDATE_OPEN_ON_STARTUP",
+            find: '"UPDATE_OPEN_ON_STARTUP"',
             group: true,
             replacement: [
                 {
