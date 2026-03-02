@@ -15,8 +15,8 @@ import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useSongStore } from "./lib/stores/SongStore";
 import { clearCache } from "./service";
 import Settings from "./ui/settings";
-import { ProfileSongs } from "./ui/songs/ProfileSongs";
-import { WidgetSongs } from "./ui/songs/WidgetSongs";
+import ProfileSongs from "./ui/songs/ProfileSongs";
+import WidgetSongs from "./ui/songs/WidgetSongs";
 
 export default definePlugin({
     name: "SongSpotlight",

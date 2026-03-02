@@ -14,7 +14,6 @@ import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { Spinner, WidgetClasses } from "@plugins/songSpotlight.desktop/ui/common";
 import { openSettingsModal } from "@plugins/songSpotlight.desktop/ui/settings";
 import { sid } from "@song-spotlight/api/util";
-import { LazyComponent } from "@utils/lazyReact";
 import { classes } from "@utils/misc";
 import { User } from "@vencord/discord-types";
 import { React, ScrollerThin, useEffect, UserStore, useState } from "@webpack/common";
@@ -26,68 +25,65 @@ interface WidgetSongsProps {
     user: User;
 }
 
-export const WidgetSongs = LazyComponent(
-    () =>
-        React.memo(function WidgetSongs({ user }: WidgetSongsProps) {
-            const [failed, setFailed] = useState(false);
-            const { isAuthorized } = useAuthorizationStore();
-            const { users } = useSongStore();
+export default function WidgetSongs({ user }: WidgetSongsProps) {
+    const [failed, setFailed] = useState(false);
+    const { isAuthorized } = useAuthorizationStore();
+    const { users } = useSongStore();
 
-            const data = users[user.id]?.data;
-            useEffect(() => {
-                if (isAuthorized() && !data) listData(user.id).catch(() => setFailed(true));
-            }, [isAuthorized()]);
+    const data = users[user.id]?.data;
+    useEffect(() => {
+        if (isAuthorized() && !data) listData(user.id).catch(() => setFailed(true));
+    }, [isAuthorized()]);
 
-            const owned = UserStore.getCurrentUser().id === user.id;
+    const owned = UserStore.getCurrentUser().id === user.id;
 
-            let full: JSX.Element | undefined;
-            if (failed) {
-                full = (
-                    <BaseText size="md" weight="semibold" className={cl("errored")}>
-                        Uh oh! Song Spotlight failed to load. You can check the console for more details.
-                    </BaseText>
-                );
-            } else if (isAuthorized() && !data) {
-                full = <Spinner type={Spinner.Type.SPINNING_CIRCLE} />;
-            } else if (!data?.[0]) {
-                full = (
-                    <>
-                        <BaseText size="lg" weight="semibold">Looks like there's nothing here!</BaseText>
-                        <BaseText size="md" weight="normal">
-                            {owned
-                                ? "Well? What are you waiting for? Go add some songs to your Song Spotlight!"
-                                : `Tell ${user.globalName || user.username} to add some songs to their Song Spotlight!`}
-                        </BaseText>
-                        {owned && (
-                            <Button
-                                variant="secondary"
-                                style={{ marginTop: "14px", flexShrink: 1 }}
-                                onClick={() => openSettingsModal()}
-                            >
-                                Edit songs
-                            </Button>
-                        )}
-                    </>
-                );
-            }
-
-            return (
-                <ScrollerThin
-                    fade
-                    className={classes(WidgetClasses.tabPanelScroller, cl("widget-container"))}
-                    key="song-spotlight-widget-songs"
-                >
-                    <Flex
-                        flexDirection="column"
-                        justifyContent={full && "center"}
-                        alignItems={full && "center"}
-                        gap={full ? "8px" : "10px"}
-                        style={full && { flex: 1, textAlign: "center" }}
+    let full: JSX.Element | undefined;
+    if (failed) {
+        full = (
+            <BaseText size="md" weight="semibold" className={cl("errored")}>
+                Uh oh! Song Spotlight failed to load. You can check the console for more details.
+            </BaseText>
+        );
+    } else if (isAuthorized() && !data) {
+        full = <Spinner type={Spinner.Type.SPINNING_CIRCLE} />;
+    } else if (!data?.[0]) {
+        full = (
+            <>
+                <BaseText size="lg" weight="semibold">Looks like there's nothing here!</BaseText>
+                <BaseText size="md" weight="normal">
+                    {owned
+                        ? "Well? What are you waiting for? Go add some songs to your Song Spotlight!"
+                        : `Tell ${user.globalName || user.username} to add some songs to their Song Spotlight!`}
+                </BaseText>
+                {owned && (
+                    <Button
+                        variant="secondary"
+                        style={{ marginTop: "14px", flexShrink: 1 }}
+                        onClick={() => openSettingsModal()}
                     >
-                        {full
-                            || data.map((song, i) => <Song owned={owned} song={song} index={i} big key={sid(song)} />)}
-                    </Flex>
-                </ScrollerThin>
-            );
-        }),
-);
+                        Edit songs
+                    </Button>
+                )}
+            </>
+        );
+    }
+
+    return (
+        <ScrollerThin
+            fade
+            className={classes(WidgetClasses.tabPanelScroller, cl("widget-container"))}
+            key="song-spotlight-widget-songs"
+        >
+            <Flex
+                flexDirection="column"
+                justifyContent={full && "center"}
+                alignItems={full && "center"}
+                gap={full ? "8px" : "10px"}
+                style={full && { flex: 1, textAlign: "center" }}
+            >
+                {full
+                    || data.map((song, i) => <Song owned={owned} song={song} index={i} big key={sid(song)} />)}
+            </Flex>
+        </ScrollerThin>
+    );
+}

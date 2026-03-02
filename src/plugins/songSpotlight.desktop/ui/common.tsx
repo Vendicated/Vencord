@@ -34,7 +34,7 @@ type Spinner =
         Type: typeof SpinnerTypes;
     };
 
-export const Spinner = findByCodeLazy("pulsingEllipsis") as unknown as Spinner;
+export const Spinner = findByCodeLazy('"pulsingEllipsis"') as unknown as Spinner;
 
 // basic components
 export function ExplicitTag({ className }: HTMLAttributes<HTMLDivElement>) {

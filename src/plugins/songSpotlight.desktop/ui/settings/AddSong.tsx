@@ -95,7 +95,7 @@ interface AddSongProps {
     onAdd(song: Song): string | undefined;
 }
 
-export function AddSong({ onAdd }: AddSongProps) {
+export default function AddSong({ onAdd }: AddSongProps) {
     return (
         <Clickable
             onClick={() => {

@@ -16,13 +16,12 @@ import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { validateSong } from "@plugins/songSpotlight.desktop/service";
 import { Spinner } from "@plugins/songSpotlight.desktop/ui/common";
 import { UserData, UserDataSchema } from "@song-spotlight/api/structs";
+import SongList from "@plugins/songSpotlight.desktop/ui/settings/SongList";
 import { sid } from "@song-spotlight/api/util";
 import { readClipboard } from "@utils/clipboard";
 import { copyWithToast } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Parser, showToast, Toasts, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
-
-import { SongList } from "./SongList";
 
 interface ImportButtonProps {
     overwrite: boolean;
@@ -31,7 +30,7 @@ interface ImportButtonProps {
     onImport(data: UserData): void;
 }
 
-export function ImportButton({ overwrite, pending, setPending, onImport }: ImportButtonProps) {
+function ImportButton({ overwrite, pending, setPending, onImport }: ImportButtonProps) {
     const checkClipboard = useCallback(async () => {
         setPending(true);
 

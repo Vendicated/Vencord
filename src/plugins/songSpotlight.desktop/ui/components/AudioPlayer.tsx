@@ -22,7 +22,7 @@ const DEFAULT_VOLUME = 0.35;
 // only allow one song to play at a time
 let globalPlaying: HTMLAudioElement | undefined = undefined;
 
-export function AudioPlayer({ audioRef, list, playing, setPlaying, setLoaded }: AudioPlayerProps) {
+export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLoaded }: AudioPlayerProps) {
     const urls = useMemo(() => list.map(x => x.audio?.previewUrl), [list]);
     const audios = useRef(new Map<number, HTMLAudioElement>());
     const loaded = useRef(new Set<number>());

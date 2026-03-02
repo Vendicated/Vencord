@@ -12,11 +12,11 @@ import { apiConstants } from "@plugins/songSpotlight.desktop/lib/api";
 import { cl } from "@plugins/songSpotlight.desktop/lib/utils";
 import { useRender } from "@plugins/songSpotlight.desktop/service";
 import { TrashIcon } from "@plugins/songSpotlight.desktop/ui/common";
-import { ServiceIcon } from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
+import ServiceIcon from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
+import AddSong from "@plugins/songSpotlight.desktop/ui/settings/AddSong";
 import { Song, UserData } from "@song-spotlight/api/structs";
 import { sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
-import { LazyComponent } from "@utils/lazyReact";
 import {
     ContextMenuApi,
     FluxDispatcher,
@@ -30,8 +30,6 @@ import {
 } from "@webpack/common";
 import { DragEvent } from "react";
 
-import { AddSong } from "./AddSong";
-
 interface EditableSongProps {
     song: Song;
     insert?: "top" | "bottom";
@@ -41,72 +39,69 @@ interface EditableSongProps {
     onRemove(song: Song): void;
 }
 
-const EditableSong = LazyComponent(
-    () =>
-        React.memo(function EditableSong({ song, insert, setSongRef, onDrag, onDrop, onRemove }: EditableSongProps) {
-            const { render, failed } = useRender(song);
-            const [dragging, setDragging] = useState(false);
+function EditableSong({ song, insert, setSongRef, onDrag, onDrop, onRemove }: EditableSongProps) {
+    const { render, failed } = useRender(song);
+    const [dragging, setDragging] = useState(false);
 
-            return (
-                <Link
-                    href={render?.link}
-                    onContextMenu={e =>
-                        ContextMenuApi.openContextMenu(e, () => (
-                            <Menu.Menu
-                                navId="vc-songspotlight-editable-song"
-                                onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-                                aria-label={render?.label}
-                            >
-                                <Menu.MenuItem
-                                    id="copy-link"
-                                    label="Copy link"
-                                    icon={LinkIcon}
-                                    action={() => render && copyWithToast(render.link)}
-                                    disabled={!render}
-                                />
-                                <Menu.MenuItem
-                                    id="remove-song"
-                                    color="danger"
-                                    label="Remove song"
-                                    icon={TrashIcon}
-                                    action={() => onRemove(song)}
-                                />
-                            </Menu.Menu>
-                        ))}
-                    draggable="true"
-                    data-dragging={dragging}
-                    data-insert={insert}
-                    onDragStart={event => {
-                        setDragging(true);
-                        onDrag(event);
-                    }}
-                    onDrag={onDrag}
-                    onDragEnd={() => {
-                        setDragging(false);
-                        onDrop(song);
-                    }}
-                    ref={div => setSongRef(div)}
-                    className={cl("editable-song-container")}
-                >
-                    <Flex alignItems="center" gap="12px" className={cl("editable-song")}>
-                        <ServiceIcon width={28} height={28} service={song.service} />
-                        {failed
-                            ? <BaseText size="md" weight="normal" className={cl("errored")}>Failed to load!</BaseText>
-                            : (
-                                <Flex flexDirection="column" justifyContent="center" gap={0}>
-                                    <BaseText size="md" weight="medium" className={cl("clamped")}>
-                                        {render ? render.label : "..."}
-                                    </BaseText>
-                                    <BaseText size="sm" weight="normal" className={cl("clamped", "sub")}>
-                                        {render ? render.sublabel : "..."}
-                                    </BaseText>
-                                </Flex>
-                            )}
-                    </Flex>
-                </Link>
-            );
-        }),
-);
+    return (
+        <Link
+            href={render?.link}
+            onContextMenu={e =>
+                ContextMenuApi.openContextMenu(e, () => (
+                    <Menu.Menu
+                        navId="vc-songspotlight-editable-song"
+                        onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                        aria-label={render?.label}
+                    >
+                        <Menu.MenuItem
+                            id="copy-link"
+                            label="Copy link"
+                            icon={LinkIcon}
+                            action={() => render && copyWithToast(render.link)}
+                            disabled={!render}
+                        />
+                        <Menu.MenuItem
+                            id="remove-song"
+                            color="danger"
+                            label="Remove song"
+                            icon={TrashIcon}
+                            action={() => onRemove(song)}
+                        />
+                    </Menu.Menu>
+                ))}
+            draggable="true"
+            data-dragging={dragging}
+            data-insert={insert}
+            onDragStart={event => {
+                setDragging(true);
+                onDrag(event);
+            }}
+            onDrag={onDrag}
+            onDragEnd={() => {
+                setDragging(false);
+                onDrop(song);
+            }}
+            ref={div => setSongRef(div)}
+            className={cl("editable-song-container")}
+        >
+            <Flex alignItems="center" gap="12px" className={cl("editable-song")}>
+                <ServiceIcon width={28} height={28} service={song.service} />
+                {failed
+                    ? <BaseText size="md" weight="normal" className={cl("errored")}>Failed to load!</BaseText>
+                    : (
+                        <Flex flexDirection="column" justifyContent="center" gap={0}>
+                            <BaseText size="md" weight="medium" className={cl("clamped")}>
+                                {render ? render.label : "..."}
+                            </BaseText>
+                            <BaseText size="sm" weight="normal" className={cl("clamped", "sub")}>
+                                {render ? render.sublabel : "..."}
+                            </BaseText>
+                        </Flex>
+                    )}
+            </Flex>
+        </Link>
+    );
+}
 
 type Editable = {
     slot: "song";
@@ -123,7 +118,7 @@ interface SongListProps {
     setLocalData(localData: UserData): void;
 }
 
-export function SongList({ localData, setLocalData }: SongListProps) {
+export default function SongList({ localData, setLocalData }: SongListProps) {
     const editable = useMemo<Editable[]>(
         () => {
             if (!localData) return [];

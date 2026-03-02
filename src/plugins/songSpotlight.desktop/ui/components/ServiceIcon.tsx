@@ -21,7 +21,7 @@ interface ServiceIconProps extends SvgProps {
 }
 type SvgProps = JSX.IntrinsicElements["svg"];
 
-export function ServiceIcon({ service, width, height, ...props }: ServiceIconProps) {
+export default function ServiceIcon({ service, width, height, ...props }: ServiceIconProps) {
     const Icon: typeof SpotifyIcon = useMemo(() => serviceIcons[service], [service]);
     const label = useMemo(() => getServiceLabel(service), [service]);
 

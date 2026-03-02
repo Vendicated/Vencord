@@ -13,7 +13,7 @@ interface ProgressCircleProps extends SvgProps {
 }
 type SvgProps = JSX.IntrinsicElements["svg"];
 
-export function ProgressCircle({ border, audioRef, ...props }: ProgressCircleProps) {
+export default function ProgressCircle({ border, audioRef, ...props }: ProgressCircleProps) {
     const { radius, stroke, circumference } = useMemo(() => {
         const radius = 50 - border * 2;
         return {

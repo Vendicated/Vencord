@@ -21,15 +21,14 @@ import {
     PuzzlePieceIcon,
     TrashIcon,
 } from "@plugins/songSpotlight.desktop/ui/common";
-import { AudioPlayer } from "@plugins/songSpotlight.desktop/ui/components/AudioPlayer";
-import { ProgressCircle } from "@plugins/songSpotlight.desktop/ui/components/ProgressCircle";
-import { ServiceIcon } from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
+import AudioPlayer from "@plugins/songSpotlight.desktop/ui/components/AudioPlayer";
+import ProgressCircle from "@plugins/songSpotlight.desktop/ui/components/ProgressCircle";
+import ServiceIcon from "@plugins/songSpotlight.desktop/ui/components/ServiceIcon";
 import { openSettingsModal } from "@plugins/songSpotlight.desktop/ui/settings";
 import { RenderInfoEntryBased, RenderSongInfo } from "@song-spotlight/api/handlers";
 import { Song as SongType } from "@song-spotlight/api/structs";
 import { isListLayout, sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
-import { LazyComponent } from "@utils/lazyReact";
 import { classes } from "@utils/misc";
 import {
     Clickable,
@@ -337,29 +336,25 @@ interface SongInfoContainerProps {
     big?: boolean;
 }
 
-const Song = LazyComponent(() =>
-    React.memo(function SongInfoContainer({ owned, song, index, big }: SongInfoContainerProps) {
-        const { failed, render } = useRender(song);
+export default function Song({ owned, song, index, big }: SongInfoContainerProps) {
+    const { failed, render } = useRender(song);
 
-        if (failed) return null;
+    if (failed) return null;
 
-        return (
-            <div
-                className={classes(
-                    OverlayClasses.overlay,
-                    CardClasses.card,
-                    cl("song-container", {
-                        "list-song-container": isListLayout(song, render || undefined),
-                    }),
-                )}
-                style={{
-                    ["--index" as any]: index.toString(),
-                }}
-            >
-                {render && <SongInfo owned={owned} song={song} render={render} big={big} />}
-            </div>
-        );
-    })
-);
-
-export default Song;
+    return (
+        <div
+            className={classes(
+                OverlayClasses.overlay,
+                CardClasses.card,
+                cl("song-container", {
+                    "list-song-container": isListLayout(song, render || undefined),
+                }),
+            )}
+            style={{
+                ["--index" as any]: index.toString(),
+            }}
+        >
+            {render && <SongInfo owned={owned} song={song} render={render} big={big} />}
+        </div>
+    );
+}

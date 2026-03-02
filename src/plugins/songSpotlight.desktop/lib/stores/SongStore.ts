@@ -37,8 +37,8 @@ export const useSongStore: ZustandStore<SongState> = proxyLazy(() =>
                     set({
                         users: {
                             ...get().users,
-                            [userId]: { data, at }
-                        }
+                            [userId]: { data, at },
+                        },
                     });
                 }
                 get().$refresh();
