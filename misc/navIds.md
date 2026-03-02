@@ -11,8 +11,9 @@ const navIds = [...new Set(
       .matchAll(/navId:\s*["'`]([^"'`]+)["'`]/g)]
       .map(m => m[1])
   )
-)]
-copy(navIds.sort().join("\n"));
+)].sort().join("\n");
+console.log(navIds);
+copy(navIds);
 ```
 
 Updated: 3/1/2026
