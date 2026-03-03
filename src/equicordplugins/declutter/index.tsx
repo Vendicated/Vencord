@@ -36,12 +36,6 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => SectionSeparator("User Profile"),
     },
-    removeAvatarDecoration: {
-        type: OptionType.BOOLEAN,
-        description: "Remove avatar decorations.",
-        default: true,
-        restartNeeded: true,
-    },
     removeNameplate: {
         type: OptionType.BOOLEAN,
         description: "Remove nameplates.",
@@ -149,15 +143,6 @@ export default definePlugin({
     authors: [EquicordDevs.Leon135, Devs.prism, Devs.Kyuuhachi],
     settings,
     patches: [
-        {
-            // Avatar decoration
-            find: "getAvatarDecorationURL:",
-            replacement: {
-                match: /(?<=function \i\((\i)\){)(?=.{0,150}let{avatarDecoration)/,
-                replace: "$&return null;"
-            },
-            predicate: () => settings.store.removeAvatarDecoration,
-        },
         {
             // Nameplate
             find: "#{intl::AVATAR_MALLOW}",
