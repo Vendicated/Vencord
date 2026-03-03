@@ -28,12 +28,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
-              if: ${{ github.event_name == 'schedule' }}
               with:
-                  ref: dev
-
-            - uses: actions/checkout@v4
-              if: ${{ github.event_name == 'workflow_dispatch' }}
+                  ref: ${{ github.event_name == 'schedule' && 'dev' || github.ref }}
 
             - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
@@ -45,13 +41,7 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  pnpm install --frozen-lockfile
-
-            - name: Install Google Chrome
-              id: setup-chrome
-              uses: browser-actions/setup-chrome@82b9ce628cc5595478a9ebadc480958a36457dc2
-              with:
-                  chrome-version: stable
+                  pnpm install --frozen-lockfile --prefer-offline
 
             - name: Build Equicord Reporter Version
               run: pnpm buildReporter
@@ -60,7 +50,7 @@ jobs:
               timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
-                  export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
+                  export CHROMIUM_BIN=/usr/bin/google-chrome
 
                   esbuild scripts/generateReport.ts > dist/report.mjs
 

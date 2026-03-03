@@ -6,15 +6,14 @@
 
 import "./style.css";
 
-import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
 import { useSongStore } from "./lib/stores/SongStore";
 import { Native } from "./service";
-import Settings from "./ui/settings";
+import settings from "./settings";
 import ProfileSongs from "./ui/songs/ProfileSongs";
 import WidgetSongs from "./ui/songs/WidgetSongs";
 
@@ -22,12 +21,7 @@ export default definePlugin({
     name: "SongSpotlight",
     description: "Show off songs on your profile",
     authors: [EquicordDevs.nexpid],
-    settings: definePluginSettings({
-        manager: {
-            type: OptionType.COMPONENT,
-            component: () => <Settings />,
-        },
-    }),
+    settings,
     patches: [
         // Personal profile popout
         {
@@ -50,7 +44,7 @@ export default definePlugin({
             find: ".SIDEBAR}),nicknameIcons:",
             replacement: {
                 match: /{userId:(\i)\.id}\)}\).{0,100}]}\)(?=\]\}\))/,
-                replace: "$&,$self.renderProfileSongs({userId:$1.id})",
+                replace: "$&,$self.renderProfileSongs({userId:$1.id,isSidebar:true})",
             },
         },
         // Full profile modal sections (lazy loaded)
@@ -58,14 +52,14 @@ export default definePlugin({
             find: ".MUTUAL_GUILDS})),",
             replacement: {
                 match: /(\i).push\({text.{0,50}}\);/,
-                replace: "$&$1.push({text:\"Song Spotlight\",section:\"SONG_SPOTLIGHT\"});",
+                replace: '$&$1.push({text:"Song Spotlight",section:"SONG_SPOTLIGHT"});',
             },
         },
         {
             find: ".hasUnsavedChanges()&&",
             replacement: {
                 match: /({user:(\i),.{0,80}return (\i===))/,
-                replace: "$1\"SONG_SPOTLIGHT\"?$self.renderWidgetSongs({user:$2}):$3",
+                replace: '$1"SONG_SPOTLIGHT"?$self.renderWidgetSongs({user:$2}):$3',
             },
         },
     ],

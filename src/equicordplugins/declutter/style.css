@@ -1,0 +1,19 @@
+.vc-declutter-accessibility-notice {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.vc-declutter-section-separator {
+    margin-top: 12px;
+    margin-bottom: 6px;
+}
+
+.vc-declutter-section-title {
+    margin-top: 14px;
+    margin-bottom: 0;
+    font-size: 16px;
+    line-height: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+}
