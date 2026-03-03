@@ -187,7 +187,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                                                 icon={LinkIcon}
                                                 action={() => copyWithToast(render.link)}
                                             />
-                                            {owned
+                                            {!owned
                                                 ? (
                                                     <Menu.MenuItem
                                                         id="steal-song"

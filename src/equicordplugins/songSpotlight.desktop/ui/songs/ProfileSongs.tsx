@@ -7,10 +7,12 @@
 import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { LinkIcon, PencilIcon } from "@components/Icons";
+import { Link } from "@components/Link";
 import { listData } from "@equicordplugins/songSpotlight.desktop/lib/api";
 import { useAuthorizationStore } from "@equicordplugins/songSpotlight.desktop/lib/stores/AuthorizationStore";
 import { useSongStore } from "@equicordplugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl } from "@equicordplugins/songSpotlight.desktop/lib/utils";
+import settings from "@equicordplugins/songSpotlight.desktop/settings";
 import {
     CardClasses,
     MoreHorizontalIcon,
@@ -20,40 +22,75 @@ import {
 import { openSettingsModal } from "@equicordplugins/songSpotlight.desktop/ui/settings";
 import { sid } from "@song-spotlight/api/util";
 import { copyWithToast } from "@utils/discord";
-import { classes } from "@utils/misc";
-import { ContextMenuApi, FluxDispatcher, Menu, React, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import { classes } from "@utils/index";
+import {
+    ContextMenuApi,
+    FluxDispatcher,
+    Menu,
+    React,
+    Tooltip,
+    useEffect,
+    useMemo,
+    UserStore,
+    useState,
+} from "@webpack/common";
 
 import Song from ".";
+import CollapsedProfileSongs from "./CollapsedProfileSongs";
 
-interface ProfileSongsProps {
+export interface ProfileSongsProps {
     userId: string;
+    isSidebar: boolean;
 }
 
-export default function ProfileSongs({ userId }: ProfileSongsProps) {
+export default function ProfileSongs({ userId, isSidebar }: ProfileSongsProps) {
     const [failed, setFailed] = useState(false);
     const { isAuthorized } = useAuthorizationStore();
     const { users } = useSongStore();
+    const { profileSongsLimit, collapseSongList } = settings.use();
 
-    const data = users[userId]?.data, at = users[userId]?.at;
+    const data = users[userId]?.data;
     useEffect(() => {
         if (isAuthorized() && !data) listData(userId).catch(() => setFailed(true));
     }, [isAuthorized()]);
 
+    const [clamped, setClamped] = useState(true);
+    const clampedData = useMemo(() => data && (clamped ? data.slice(0, profileSongsLimit) : data), [
+        data,
+        clamped,
+        profileSongsLimit,
+    ]);
+
     const owned = UserStore.getCurrentUser().id === userId;
 
-    if (isAuthorized() && !data && !failed) {
+    const pending = isAuthorized() && !clampedData && !data && !failed;
+    if (!pending && !clampedData?.[0]) return null;
+
+    if (collapseSongList) {
+        return (
+            <CollapsedProfileSongs
+                data={data}
+                userId={userId}
+                isSidebar={isSidebar}
+            />
+        );
+    } else if (pending) {
         return <Spinner type={Spinner.Type.WANDERING_CUBES} />;
-    } else if (!data?.[0]) {
-        return null;
     }
 
     return (
         <div
-            className={classes(OverlayClasses.overlay, CardClasses.card, cl("songs-container"))}
+            className={classes(
+                isSidebar && OverlayClasses.overlay,
+                isSidebar && CardClasses.card,
+                cl("songs-container", isSidebar && "songs-container-sidebar"),
+            )}
             key="song-spotlight-profile-songs"
         >
             <Flex justifyContent="space-between">
-                <BaseText size="xs" weight="semibold" className={cl("header")}>Song Spotlight</BaseText>
+                <BaseText size="xs" weight={isSidebar ? "semibold" : "medium"} className={cl("header")}>
+                    Song Spotlight
+                </BaseText>
                 <Tooltip text="More">
                     {props => (
                         <MoreHorizontalIcon
@@ -89,8 +126,17 @@ export default function ProfileSongs({ userId }: ProfileSongsProps) {
                 </Tooltip>
             </Flex>
             <Flex flexDirection="column" gap="6px">
-                {data.map((song, i) => <Song owned={owned} song={song} index={i} key={sid(song)} />)}
+                {clampedData.map((song, i) => <Song owned={owned} song={song} index={i} key={sid(song)} />)}
             </Flex>
+            {clamped && data.length > profileSongsLimit && (
+                <Link
+                    onClick={() => setClamped(false)}
+                >
+                    <BaseText size="sm" weight="medium" className={cl("sub")} style={{ textAlign: "center" }}>
+                        Show {data.length - profileSongsLimit} more
+                    </BaseText>
+                </Link>
+            )}
         </div>
     );
 }
