@@ -12,6 +12,14 @@ import { Tooltip } from "@webpack/common";
 import { ComponentType, HTMLAttributes, JSX } from "react";
 
 export const OverlayClasses = findCssClassesLazy("overlay", "inner", "outer");
+export const ContainerClasses = findCssClassesLazy(
+    "breadcrumb",
+    "innerContainer",
+    "icons",
+    "icon",
+    "displayCount",
+    "displayCountText",
+);
 export const CardClasses = findCssClassesLazy("card", "headerText", "headerContextMenu");
 export const WidgetClasses = findCssClassesLazy("tabPanelScroller", "tabListScroller");
 

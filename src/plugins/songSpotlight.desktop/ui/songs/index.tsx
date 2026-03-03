@@ -11,7 +11,7 @@ import { Link } from "@components/Link";
 import { apiConstants } from "@plugins/songSpotlight.desktop/lib/api";
 import { useSongStore } from "@plugins/songSpotlight.desktop/lib/stores/SongStore";
 import { cl, formatCoverTooltip, formatDurationMs } from "@plugins/songSpotlight.desktop/lib/utils";
-import { parseLink, useRender } from "@plugins/songSpotlight.desktop/service";
+import { Native, useRender } from "@plugins/songSpotlight.desktop/service";
 import {
     CardClasses,
     ExplicitTag,
@@ -84,7 +84,7 @@ function SongEntry({ entry, number, isLoaded, isPlaying, big, onClick }: SongEnt
                                     return showToast("You don't have enough space!");
                                 }
 
-                                const song = await parseLink(entry.link);
+                                const song = await Native.parseLink(entry.link);
                                 if (!song) {
                                     return showToast("Uh oh, this song doesn't exist!", Toasts.Type.FAILURE);
                                 }
@@ -187,7 +187,7 @@ function SongInfo({ owned, song, render, big }: SongInfoProps) {
                                                 icon={LinkIcon}
                                                 action={() => copyWithToast(render.link)}
                                             />
-                                            {owned
+                                            {!owned
                                                 ? (
                                                     <Menu.MenuItem
                                                         id="steal-song"
