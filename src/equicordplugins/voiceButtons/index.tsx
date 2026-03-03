@@ -24,7 +24,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\[\i\.\i\]:\i\}\),children:\[/,
-                    replace: "$&$self.renderButtons(arguments[0].user),"
+                    replace: "$&$self.renderButtons(arguments[0]?.user),"
                 }
             ]
         }
