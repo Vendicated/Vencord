@@ -147,7 +147,7 @@ export function EquicordTranslatorModal() {
                         <img
                             className="vc-translate-modal-icon"
                             role="presentation"
-                            src="https://badge.equicord.org/badges/848339671629299742/f8154d5ae343292050cf63dc3a1a4fdda451b602.png"
+                            src="https://badge.equicord.org/translator.png"
                             alt=""
                         />
                     </Flex>
