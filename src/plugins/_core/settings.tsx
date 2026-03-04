@@ -153,14 +153,6 @@ export default definePlugin({
             ]
         },
         {
-            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
-            replacement: {
-                // Skip the check Discord performs to make sure the section being selected in the user settings context menu is valid
-                match: /null!=\(\i=Object.values\(\i\.\i\).{0,50}?&&(?=\(0,\i\.openUserSettings\)\(\i,\{section:\i)/,
-                replace: ""
-            }
-        },
-        {
             find: ".buildLayout().map",
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
