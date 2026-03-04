@@ -6,7 +6,12 @@
 
 import { BaseText } from "@components/index";
 import { Native } from "@equicordplugins/songSpotlight.desktop/service";
-import { CardClasses, ContainerClasses, OverlayClasses, Spinner } from "@equicordplugins/songSpotlight.desktop/ui/common";
+import {
+    CardClasses,
+    ContainerClasses,
+    OverlayClasses,
+    Spinner,
+} from "@equicordplugins/songSpotlight.desktop/ui/common";
 import { RenderSongInfo } from "@song-spotlight/api/handlers";
 import { UserData } from "@song-spotlight/api/structs";
 import { sid } from "@song-spotlight/api/util";
