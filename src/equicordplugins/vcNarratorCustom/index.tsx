@@ -794,7 +794,7 @@ function VoiceSelectModal({ modalProps, user }: { modalProps: ModalProps; user: 
                     <HeadingSecondary>Select voice for {user.username}</HeadingSecondary>
                     <SearchableSelect
                         options={options}
-                        value={options.find(o => o.value === currentValue)}
+                        value={options.find(o => o.value === currentValue)?.value}
                         placeholder="Select a voice"
                         maxVisibleItems={6}
                         closeOnSelect={true}

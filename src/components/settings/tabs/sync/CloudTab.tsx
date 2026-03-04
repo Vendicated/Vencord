@@ -123,14 +123,15 @@ function CloudTab() {
                 Choose which cloud backend to use for storing your settings. You can switch between Equicord's and Vencord's cloud services, or use a self-hosted instance.
             </Paragraph>
 
-            <SearchableSelect
-                options={cloudBackendOptions}
-                value={cloudBackendOptions.find(o => o.value === cloud.url)}
-                onChange={v => changeUrl(v)}
-                className={Margins.bottom16}
-                closeOnSelect={true}
-                renderOptionPrefix={o => o?.value?.includes("equicord") ? <EquicordIcon /> : <VencordIcon />}
-            />
+            <div className={Margins.bottom8}>
+                <SearchableSelect
+                    options={cloudBackendOptions}
+                    value={cloudBackendOptions.find(o => o.value === cloud.url)?.value}
+                    onChange={v => changeUrl(v)}
+                    closeOnSelect={true}
+                    renderOptionPrefix={o => o?.value?.includes("equicord") ? <EquicordIcon /> : <VencordIcon />}
+                />
+            </div>
 
             <Flex gap="8px" alignItems="center">
                 <div style={{ flex: 1 }}>

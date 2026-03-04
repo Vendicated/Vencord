@@ -30,7 +30,7 @@ function GuildSelector() {
     return (
         <SearchableSelect
             options={options}
-            value={options.find(o => o.value === soundGuildId)}
+            value={options.find(o => o.value === soundGuildId)?.value}
             placeholder="Select a server..."
             maxVisibleItems={6}
             closeOnSelect={true}

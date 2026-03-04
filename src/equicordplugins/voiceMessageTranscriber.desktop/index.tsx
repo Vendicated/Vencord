@@ -132,7 +132,7 @@ function LanguageSelectionModal(props: { modalProps: ModalProps, src: string; })
                         </BaseText>
                         <SearchableSelect
                             options={languageOptions}
-                            value={languageOptions.find(o => o.value === language)}
+                            value={languageOptions.find(o => o.value === language)?.value}
                             onChange={setLanguage}
                         />
                     </div>

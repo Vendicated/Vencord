@@ -105,7 +105,7 @@ function StreamSimplePicker({ streamMediaSelection, streamMedia }: PickerProps) 
             placeholder="Select a media source to stream "
             maxVisibleItems={5}
             options={options}
-            value={options.find(o => o.value === streamMedia)}
+            value={options.find(o => o.value === streamMedia)?.value}
             onChange={v => settings.store.streamMedia = v}
             closeOnSelect
         />
