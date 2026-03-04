@@ -78,9 +78,9 @@ if (!IS_VANILLA) {
                 // work around discord unloading when in background
                 options.webPreferences.backgroundThrottling = false;
 
-                if (settings.mainWindowFrameless && isMainWindow) {
+                if (settings.frameless) {
                     options.frame = false;
-                } else if (settings.frameless) {
+                } else if (settings.mainWindowFrameless && isMainWindow) {
                     options.frame = false;
                 } else if (process.platform === "win32" && settings.winNativeTitleBar) {
                     delete options.frame;
