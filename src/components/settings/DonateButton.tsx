@@ -67,3 +67,22 @@ export function InviteButton({
         </Button>
     );
 }
+
+export function TranslateButton({
+    className,
+    ...props
+}: Partial<ButtonProps>) {
+    const link = "https://weblate.equicord.org/projects/equicord/";
+    return (
+        <Button
+            {...props}
+            variant="none"
+            size="medium"
+            type="button"
+            onClick={() => VencordNative.native.openExternal(link)}
+            className={className || "vc-translate-button"}
+        >
+            Translate Here
+        </Button>
+    );
+}
