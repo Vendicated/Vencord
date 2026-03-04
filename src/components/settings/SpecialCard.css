@@ -29,13 +29,13 @@
 .vc-translate-button {
     overflow: visible !important;
     color: black;
-    background-color: color-mix(in srgb, #575757 50%, rgb(255, 255, 255));
+    background-color: color-mix(in srgb, #575757 50%, rgb(255 255 255));
 }
 
 .vc-translate-button:hover {
     overflow: visible !important;
     color: black;
-    background-color: color-mix(in srgb, #575757 50%, rgb(201, 201, 201));
+    background-color: color-mix(in srgb, #575757 50%, rgb(201 201 201));
 }
 
 .vc-invite-link {
