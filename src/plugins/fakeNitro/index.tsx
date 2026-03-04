@@ -142,11 +142,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
-    enableFavoriteServersBypass: {
-        description: "Allow favoriting servers without nitro",
-        type: OptionType.BOOLEAN,
-        default: true
-    },
 });
 
 function hasPermission(channelId: string, permission: bigint) {
@@ -380,15 +375,6 @@ export default definePlugin({
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
-            }
-        },
-        // Might bypass favorites req
-        {
-            find: ".favoriteAdded,notifyFavoriteAdded:",
-            predicate: () => settings.store.enableFavoriteServersBypass,
-            replacement: {
-                match: /(?<=getCurrentUser\(\)\),\i=).{0,25}\.PremiumTypes.TIER_2\)/,
-                replace: "true",
             }
         },
     ],
