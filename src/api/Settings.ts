@@ -49,6 +49,7 @@ export interface Settings {
     themeNames: Record<string, string>;
     enableReactDevtools: boolean;
     themeLinks: string[];
+    mainWindowFrameless: boolean;
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
@@ -116,6 +117,7 @@ const DefaultSettings: Settings = {
     pinnedThemes: [],
     themeNames: {},
     enableReactDevtools: false,
+    mainWindowFrameless: false,
     frameless: false,
     transparent: false,
     winCtrlQ: false,

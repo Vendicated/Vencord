@@ -81,11 +81,18 @@ function EquicordSettings() {
                 restartRequired: true,
                 warning: { enabled: false },
             },
+            (!IS_WEB && !IS_DISCORD_DESKTOP || !IS_WINDOWS) && {
+                key: "mainWindowFrameless",
+                title: "Disable the Main Window Frame",
+                description: "Remove the native window frame for a cleaner look. You can still move the window by dragging the title bar area.",
+                restartRequired: true,
+                warning: { enabled: false },
+            },
             !IS_WEB &&
             (!IS_DISCORD_DESKTOP || !IS_WINDOWS
                 ? {
                     key: "frameless",
-                    title: "Disable the Window Frame",
+                    title: "Disable All Window Frames",
                     description: "Remove the native window frame for a cleaner look. You can still move the window by dragging the title bar area.",
                     restartRequired: true,
                     warning: { enabled: false },
@@ -96,7 +103,8 @@ function EquicordSettings() {
                     description: "Replace Discord's custom title bar with the standard Windows title bar. This may improve compatibility with some window management tools.",
                     restartRequired: true,
                     warning: { enabled: false },
-                }),
+                }
+            ),
             !IS_WEB && {
                 key: "transparent",
                 title: "Enable Window Transparency",
