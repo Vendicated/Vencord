@@ -30,15 +30,23 @@ export function presentOAuth2Modal() {
                     const url = new URL(location);
                     url.searchParams.append("whois", "vencord");
 
-                    const token = await (await authFetch(url))?.text();
-                    if (!token) return;
+                    const res = await authFetch(url);
+                    if (!res) throw "Response wasn't ok";
 
-                    useAuthorizationStore.getState().setToken(token);
+                    const access = await res.text();
+                    if (!access) throw "Access token is missing";
+
+                    const refresh = res.headers.get("X-Refresh-Token");
+                    // STUB uncomment this once API is fully rolled out
+                    // if (!refresh) throw "Refresh token is missing";
+
+                    useAuthorizationStore.getState().setToken(access, refresh || "");
                     getData();
 
                     showToast("Successfully authorized!", Toasts.Type.SUCCESS);
                 } catch (error) {
                     logger.error("Got an error during OAuth2", error);
+                    if (typeof error === "string") showToast(error, Toasts.Type.FAILURE);
                 }
             }}
         />

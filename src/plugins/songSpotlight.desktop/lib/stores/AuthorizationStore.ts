@@ -10,11 +10,16 @@ import { UserStore, zustandCreate, zustandPersist } from "@webpack/common";
 
 import { PersistedZustandStore, ZustandDefinition } from "./zustand";
 
+export interface Token {
+    access: string;
+    refresh: string;
+}
+
 interface AuthorizationState {
-    tokens: Record<string, string>;
-    getToken(): string | undefined;
-    setToken(token: string): void;
-    deleteToken(): void;
+    tokens: Record<string, Token>;
+    getToken(): Token | undefined;
+    setToken(access: string, refresh: string): void;
+    deleteTokens(): void;
     isAuthorized(): boolean;
 }
 
@@ -26,17 +31,18 @@ export const useAuthorizationStore: PersistedZustandStore<AuthorizationState> = 
                 getToken() {
                     return get().tokens[UserStore.getCurrentUser()?.id];
                 },
-                setToken(token) {
+                setToken(access, refresh) {
                     const userId = UserStore.getCurrentUser()?.id;
                     if (userId) {
                         set({
-                            tokens: Object.assign(get().tokens, {
-                                [userId]: token,
-                            }),
+                            tokens: {
+                                ...get().tokens,
+                                [userId]: { access, refresh },
+                            },
                         });
                     }
                 },
-                deleteToken() {
+                deleteTokens() {
                     set({ tokens: {} });
                 },
                 isAuthorized() {
@@ -45,11 +51,24 @@ export const useAuthorizationStore: PersistedZustandStore<AuthorizationState> = 
             })) as ZustandDefinition<AuthorizationState>,
             {
                 name: "songspotlight-auth",
+                version: 1,
+                migrate(persisted: any, version: number) {
+                    if (version === 0) {
+                        persisted.tokens = Object.fromEntries(
+                            Object.entries(persisted.tokens).map(([userId, access]) => [userId, {
+                                access,
+                                refresh: "",
+                            }]),
+                        );
+                    }
+
+                    return persisted;
+                },
                 storage: {
                     async getItem(name: string) {
                         return (await DataStore.get(name)) ?? null;
                     },
-                    async setItem(name: string, value: string) {
+                    async setItem(name: string, value: unknown) {
                         return await DataStore.set(name, value);
                     },
                     async removeItem(name: string) {

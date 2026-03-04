@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { makeRange, OptionType } from "@utils/types";
 
+import { apiConstants } from "./lib/api";
 import Settings from "./ui/settings";
 
 export default definePluginSettings({
@@ -18,8 +19,8 @@ export default definePluginSettings({
     profileSongsLimit: {
         type: OptionType.SLIDER,
         description: "How many songs are shown when initially clicking on a user",
-        default: 6,
-        markers: makeRange(1, 6),
+        default: apiConstants.songLimit,
+        markers: makeRange(1, apiConstants.songLimit),
     },
     manager: {
         type: OptionType.COMPONENT,

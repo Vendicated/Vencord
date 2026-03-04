@@ -85,7 +85,7 @@ interface SettingsProps {
 }
 
 export default function Settings({ templateData }: SettingsProps) {
-    const { isAuthorized, deleteToken } = useAuthorizationStore();
+    const { isAuthorized, deleteTokens } = useAuthorizationStore();
     const { self } = useSongStore();
 
     const ticked = useRef(false);
@@ -172,7 +172,7 @@ export default function Settings({ templateData }: SettingsProps) {
                     <Button
                         variant="dangerPrimary"
                         onClick={() => {
-                            deleteToken();
+                            deleteTokens();
                             showToast("Successfully signed out!", Toasts.Type.SUCCESS);
                         }}
                         disabled={pending}
@@ -189,7 +189,7 @@ export default function Settings({ templateData }: SettingsProps) {
                                     setPending(true);
                                     try {
                                         await deleteData();
-                                        deleteToken();
+                                        deleteTokens();
 
                                         showToast("Successfully deleted songs!", Toasts.Type.SUCCESS);
                                     } finally {
