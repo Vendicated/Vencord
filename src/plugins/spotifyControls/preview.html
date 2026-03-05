@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpotifyControls Preview</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, 'gg sans', 'Noto Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #313338;
+    gap: 24px;
+    padding: 40px 20px;
+}
+
+.theme-switcher {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.theme-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+.theme-btn:hover, .theme-btn.active {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border-color: rgba(255,255,255,0.3);
+}
+
+.discord-panel {
+    width: 240px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Discord sidebar bg */
+.discord-sidebar {
+    background: var(--bg-secondary, #2b2d31);
+    padding: 0 0 8px 0;
+}
+
+.channel-list {
+    padding: 8px 8px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.channel-item {
+    padding: 6px 8px;
+    border-radius: 4px;
+    color: rgba(255,255,255,0.35);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.channel-item.active {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+}
+.channel-item::before { content: '#'; opacity: 0.5; }
+
+.account-panel {
+    background: var(--bg-tertiary, #1e1f22);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+.avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5865f2, #eb459e);
+}
+.account-info { flex:1; }
+.account-name { font-size: 13px; color: #fff; font-weight: 600; }
+.account-status { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+/* ───── PLAYER ───── */
+
+.vc-spotify-player {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    margin: 6px 6px 4px;
+    isolation: isolate;
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+    max-height: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.vc-spotify-player.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 300px;
+    pointer-events: all;
+}
+.vc-spotify-player.leaving {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+    max-height: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.35s cubic-bezier(0.4, 0, 1, 1),
+        transform 0.35s cubic-bezier(0.4, 0, 1, 1),
+        max-height 0.35s ease;
+}
+
+.vc-spotify-bg-blur {
+    position: absolute;
+    inset: -20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(28px) saturate(1.8) brightness(0.4);
+    z-index: 0;
+    transform: scale(1.2);
+    transition: background-image 0.6s ease;
+}
+
+.vc-spotify-glass {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: 10px;
+    background: var(--glass-bg, rgba(30, 31, 34, 0.5));
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 1px solid rgba(255, 255, 255, 0.07);
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.vc-spotify-content {
+    position: relative;
+    z-index: 2;
+    padding: 10px 11px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.vc-spotify-track-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.vc-spotify-album-art {
+    width: 42px; height: 42px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    animation: artIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes artIn {
+    from { transform: scale(0.75) rotate(-6deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.vc-spotify-meta { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+
+.vc-spotify-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    display: block;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.vc-spotify-title:hover { color: #1db954; }
+
+.vc-spotify-artist {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* SEEKBAR */
+.vc-spotify-seekbar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vc-spotify-time {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    min-width: 26px;
+    letter-spacing: 0.02em;
+    transition: color 0.2s;
+}
+.vc-spotify-time:last-child { text-align: right; }
+
+.vc-spotify-seekbar {
+    flex: 1;
+    padding: 6px 0;
+    cursor: pointer;
+}
+
+.vc-spotify-seekbar-track {
+    position: relative;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.14);
+    transition: height 0.15s ease;
+}
+.vc-spotify-seekbar:hover .vc-spotify-seekbar-track { height: 4px; }
+
+.vc-spotify-seekbar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #1db954, #1ed760);
+    box-shadow: 0 0 6px rgba(29,185,84,0.45);
+    pointer-events: none;
+}
+
+.vc-spotify-seekbar-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+}
+.vc-spotify-seekbar:hover .vc-spotify-seekbar-thumb,
+.vc-spotify-seekbar-thumb.dragging {
+    transform: translate(-50%, -50%) scale(1);
+}
+.vc-spotify-seekbar-thumb.dragging {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* CONTROLS */
+.vc-spotify-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: opacity 0.25s, transform 0.25s;
+}
+.vc-spotify-controls.hover-only { opacity: 0; transform: translateY(4px); }
+.vc-spotify-player:hover .vc-spotify-controls.hover-only { opacity: 1; transform: translateY(0); }
+
+.vc-spotify-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    transition: color .15s, background .15s, transform .15s cubic-bezier(0.34,1.56,0.64,1), box-shadow .15s;
+    position: relative;
+}
+.vc-spotify-btn:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+    transform: scale(1.14);
+}
+.vc-spotify-btn:active { transform: scale(0.88); }
+
+.vc-spotify-btn.active { color: #1db954; }
+.vc-spotify-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 50%;
+    transform: translateX(-50%);
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #1db954;
+    box-shadow: 0 0 4px #1db954;
+}
+
+.vc-spotify-btn.play-btn {
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.12) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.18);
+}
+.vc-spotify-btn.play-btn:hover {
+    background: rgba(255,255,255,0.22) !important;
+    box-shadow: 0 0 14px rgba(29,185,84,0.3);
+    transform: scale(1.08) !important;
+}
+
+/* THEME DEFINITIONS */
+.theme-dark    { --bg-secondary:#2b2d31; --bg-tertiary:#1e1f22; --glass-bg:rgba(20,21,23,0.5); }
+.theme-darker  { --bg-secondary:#1a1b1e; --bg-tertiary:#111214; --glass-bg:rgba(10,10,12,0.55); }
+.theme-midnight{ --bg-secondary:#0d1117; --bg-tertiary:#0a0c10; --glass-bg:rgba(5,7,12,0.6); }
+.theme-light   { --bg-secondary:#e3e5e8; --bg-tertiary:#ebedef; --glass-bg:rgba(230,232,236,0.45); }
+.theme-light .vc-spotify-title  { color: #060607; }
+.theme-light .vc-spotify-artist { color: rgba(0,0,0,0.5); }
+.theme-light .vc-spotify-btn    { color: rgba(0,0,0,0.5); }
+.theme-light .vc-spotify-btn:hover { color: #060607; background: rgba(0,0,0,0.08); }
+.theme-light .vc-spotify-btn.play-btn { color: #060607 !important; border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.07) !important; }
+.theme-light .vc-spotify-time  { color: rgba(0,0,0,0.4); }
+.theme-light .vc-spotify-seekbar-track { background: rgba(0,0,0,0.12); }
+.theme-light .vc-spotify-glass { background: rgba(235,237,239,0.5); border-top-color: rgba(255,255,255,0.7); }
+.theme-light .channel-item { color: rgba(0,0,0,0.4); }
+.theme-light .channel-item.active { color: rgba(0,0,0,0.85); background: rgba(0,0,0,0.07); }
+.theme-light .account-name { color: #060607; }
+.theme-light .account-status { color: rgba(0,0,0,0.4); }
+
+/* toggle row */
+.toggle-row {
+    display: flex; gap: 10px; align-items: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+label { display:flex; align-items:center; gap:5px; cursor:pointer; }
+input[type=checkbox] { accent-color: #1db954; }
+
+.label-note {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="theme-switcher" id="themes">
+    <button class="theme-btn active" data-theme="theme-dark">Dark</button>
+    <button class="theme-btn" data-theme="theme-darker">Darker</button>
+    <button class="theme-btn" data-theme="theme-midnight">Midnight</button>
+    <button class="theme-btn" data-theme="theme-light">Light</button>
+</div>
+
+<div class="discord-panel discord-sidebar theme-dark" id="panel">
+    <div class="channel-list">
+        <div class="channel-item active">general</div>
+        <div class="channel-item">music</div>
+        <div class="channel-item">off-topic</div>
+    </div>
+
+    <!-- SPOTIFY PLAYER -->
+    <div class="vc-spotify-player" id="player">
+        <div class="vc-spotify-bg-blur" id="bgBlur"></div>
+        <div class="vc-spotify-glass"></div>
+        <div class="vc-spotify-content">
+            <div class="vc-spotify-track-info">
+                <img class="vc-spotify-album-art" id="albumArt" src="" alt="Album" />
+                <div class="vc-spotify-meta">
+                    <a class="vc-spotify-title" id="trackTitle" href="#">Track Name</a>
+                    <span class="vc-spotify-artist" id="trackArtist">Artist</span>
+                </div>
+            </div>
+
+            <div class="vc-spotify-seekbar-wrapper">
+                <span class="vc-spotify-time" id="timePos">0:00</span>
+                <div class="vc-spotify-seekbar" id="seekbar">
+                    <div class="vc-spotify-seekbar-track">
+                        <div class="vc-spotify-seekbar-fill" id="seekFill" style="width:0%"></div>
+                        <div class="vc-spotify-seekbar-thumb" id="seekThumb" style="left:0%"></div>
+                    </div>
+                </div>
+                <span class="vc-spotify-time" id="timeDur">0:00</span>
+            </div>
+
+            <div class="vc-spotify-controls" id="controls">
+                <button class="vc-spotify-btn" id="btnShuffle" title="Shuffle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+                    </svg>
+                </button>
+                <button class="vc-spotify-btn" id="btnPrev" title="Previous">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                </button>
+                <button class="vc-spotify-btn play-btn" id="btnPlay" title="Play/Pause">
+                    <svg id="iconPlay" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="iconPause" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <button class="vc-spotify-btn" id="btnNext" title="Next">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
+                <button class="vc-spotify-btn" id="btnRepeat" title="Repeat">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="account-panel">
+        <div class="avatar"></div>
+        <div class="account-info">
+            <div class="account-name">username</div>
+            <div class="account-status">Online</div>
+        </div>
+    </div>
+</div>
+
+<div class="toggle-row">
+    <label><input type="checkbox" id="togglePlayer" checked> Show Player</label>
+    <label><input type="checkbox" id="toggleHover"> Hover Controls Only</label>
+</div>
+<div class="label-note">Hover over the player to interact · Drag the seekbar</div>
+
+<script>
+const tracks = [
+    {
+        title: "Blinding Lights",
+        artist: "The Weeknd",
+        duration: 200040,
+        art: "https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36"
+    },
+    {
+        title: "As It Was",
+        artist: "Harry Styles",
+        duration: 167303,
+        art: "https://i.scdn.co/image/ab67616d0000b273b46f74097655d7f353caab14"
+    },
+    {
+        title: "Stay With Me",
+        artist: "Sam Smith",
+        duration: 172360,
+        art: "https://i.scdn.co/image/ab67616d0000b2735c4f7b2cd3596e3dc5d9dc0f"
+    },
+];
+
+let trackIndex = 0;
+let position = 0;
+let playing = false;
+let shuffle = false;
+let repeat = "off";
+let dragging = false;
+let dragPct = 0;
+let ticker = null;
+
+const player = document.getElementById("player");
+const bgBlur = document.getElementById("bgBlur");
+const albumArt = document.getElementById("albumArt");
+const trackTitle = document.getElementById("trackTitle");
+const trackArtist = document.getElementById("trackArtist");
+const seekFill = document.getElementById("seekFill");
+const seekThumb = document.getElementById("seekThumb");
+const timePos = document.getElementById("timePos");
+const timeDur = document.getElementById("timeDur");
+const iconPlay = document.getElementById("iconPlay");
+const iconPause = document.getElementById("iconPause");
+const controls = document.getElementById("controls");
+
+function msToTime(ms) {
+    const s = Math.floor(ms / 1000);
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+}
+
+function loadTrack(idx) {
+    const t = tracks[idx];
+    albumArt.src = t.art;
+    albumArt.style.animation = "none";
+    requestAnimationFrame(() => { albumArt.style.animation = ""; });
+    trackTitle.textContent = t.title;
+    trackArtist.textContent = t.artist;
+    bgBlur.style.backgroundImage = `url(${t.art})`;
+    timeDur.textContent = msToTime(t.duration);
+    position = 0;
+    updateSeek();
+}
+
+function updateSeek() {
+    const t = tracks[trackIndex];
+    const pct = t.duration > 0 ? Math.min(100, (position / t.duration) * 100) : 0;
+    const p = dragging ? dragPct * 100 : pct;
+    seekFill.style.width = p + "%";
+    seekThumb.style.left = p + "%";
+    timePos.textContent = msToTime(dragging ? dragPct * t.duration : position);
+}
+
+function startTicker() {
+    stopTicker();
+    ticker = setInterval(() => {
+        if (!dragging) {
+            position = Math.min(position + 500, tracks[trackIndex].duration);
+            if (position >= tracks[trackIndex].duration) {
+                nextTrack();
+            } else {
+                updateSeek();
+            }
+        }
+    }, 500);
+}
+
+function stopTicker() { if (ticker) { clearInterval(ticker); ticker = null; } }
+
+function setPlaying(val) {
+    playing = val;
+    iconPlay.style.display = playing ? "none" : "block";
+    iconPause.style.display = playing ? "block" : "none";
+    if (playing) startTicker(); else stopTicker();
+}
+
+function nextTrack() {
+    trackIndex = (trackIndex + 1) % tracks.length;
+    loadTrack(trackIndex);
+    if (playing) startTicker();
+}
+
+function prevTrack() {
+    if (position > 3000) { position = 0; updateSeek(); return; }
+    trackIndex = (trackIndex - 1 + tracks.length) % tracks.length;
+    loadTrack(trackIndex);
+}
+
+// Seekbar drag
+const seekbar = document.getElementById("seekbar");
+seekbar.addEventListener("mousedown", e => {
+    dragging = true;
+    seekThumb.classList.add("dragging");
+    const rect = seekbar.getBoundingClientRect();
+    dragPct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    updateSeek();
+
+    const onMove = ev => {
+        dragPct = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+        updateSeek();
+    };
+    const onUp = ev => {
+        dragPct = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+        position = Math.round(dragPct * tracks[trackIndex].duration);
+        dragging = false;
+        seekThumb.classList.remove("dragging");
+        updateSeek();
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+});
+
+document.getElementById("btnPlay").addEventListener("click", () => setPlaying(!playing));
+document.getElementById("btnNext").addEventListener("click", nextTrack);
+document.getElementById("btnPrev").addEventListener("click", prevTrack);
+document.getElementById("btnShuffle").addEventListener("click", () => {
+    shuffle = !shuffle;
+    document.getElementById("btnShuffle").classList.toggle("active", shuffle);
+});
+document.getElementById("btnRepeat").addEventListener("click", () => {
+    const states = ["off","context","track"];
+    repeat = states[(states.indexOf(repeat)+1)%states.length];
+    document.getElementById("btnRepeat").classList.toggle("active", repeat !== "off");
+});
+
+// Toggle player visibility
+document.getElementById("togglePlayer").addEventListener("change", e => {
+    if (e.target.checked) {
+        player.classList.remove("leaving");
+        requestAnimationFrame(() => player.classList.add("visible"));
+    } else {
+        player.classList.remove("visible");
+        player.classList.add("leaving");
+        setTimeout(() => player.classList.remove("leaving"), 400);
+    }
+});
+
+document.getElementById("toggleHover").addEventListener("change", e => {
+    controls.classList.toggle("hover-only", e.target.checked);
+});
+
+// Theme switcher
+document.querySelectorAll(".theme-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".theme-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const panel = document.getElementById("panel");
+        panel.className = "discord-panel discord-sidebar " + btn.dataset.theme;
+    });
+});
+
+// Init
+loadTrack(0);
+requestAnimationFrame(() => {
+    setTimeout(() => player.classList.add("visible"), 200);
+});
+</script>
+</body>
+</html>

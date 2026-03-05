@@ -1,0 +1,288 @@
+.vc-spotify-player {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    margin: 8px;
+    isolation: isolate;
+
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+    max-height: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vc-spotify-player[data-visible="true"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 220px;
+    pointer-events: all;
+}
+
+.vc-spotify-player[data-leaving="true"] {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+    max-height: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.35s cubic-bezier(0.4, 0, 1, 1),
+        transform 0.35s cubic-bezier(0.4, 0, 1, 1),
+        max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vc-spotify-bg-blur {
+    position: absolute;
+    inset: -20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(28px) saturate(1.6) brightness(0.45);
+    z-index: 0;
+    transform: scale(1.15);
+    border-radius: 12px;
+}
+
+.vc-spotify-glass {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: 12px;
+    background: var(--background-tertiary, rgba(30, 31, 34, 0.6));
+    opacity: 0.55;
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.vc-spotify-content {
+    position: relative;
+    z-index: 2;
+    padding: 10px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vc-spotify-track-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vc-spotify-album-art {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: vc-spotify-art-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes vc-spotify-art-in {
+    from {
+        transform: scale(0.8) rotate(-4deg);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.vc-spotify-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.vc-spotify-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--header-primary, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    display: block;
+    letter-spacing: -0.01em;
+    transition: color 0.2s;
+}
+
+.vc-spotify-title:hover {
+    color: #1db954;
+    text-decoration: none;
+}
+
+.vc-spotify-artist {
+    font-size: 11px;
+    color: var(--header-secondary, rgba(255,255,255,0.55));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.01em;
+}
+
+/* ── SEEKBAR ── */
+
+.vc-spotify-seekbar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 2px;
+}
+
+.vc-spotify-time {
+    font-size: 10px;
+    color: var(--header-secondary, rgba(255,255,255,0.45));
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    min-width: 28px;
+    letter-spacing: 0.02em;
+}
+
+.vc-spotify-time:last-child {
+    text-align: right;
+}
+
+.vc-spotify-seekbar {
+    flex: 1;
+    padding: 6px 0;
+    cursor: pointer;
+}
+
+.vc-spotify-seekbar-track {
+    position: relative;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.15);
+    overflow: visible;
+}
+
+.vc-spotify-seekbar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #1db954, #1ed760);
+    box-shadow: 0 0 6px rgba(29, 185, 84, 0.4);
+    transition: width 0.25s linear;
+    will-change: width;
+}
+
+.vc-spotify-seekbar-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.25s linear;
+    pointer-events: none;
+    will-change: left;
+}
+
+.vc-spotify-seekbar-thumb[data-dragging="true"] {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.vc-spotify-seekbar:hover .vc-spotify-seekbar-thumb {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.vc-spotify-seekbar:hover .vc-spotify-seekbar-track {
+    height: 4px;
+}
+
+.vc-spotify-seekbar-track {
+    transition: height 0.15s ease;
+}
+
+/* ── CONTROLS ── */
+
+.vc-spotify-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.vc-spotify-controls[data-hover-only="true"] {
+    opacity: 0;
+    transform: translateY(4px);
+}
+
+.vc-spotify-player:hover .vc-spotify-controls[data-hover-only="true"] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.vc-spotify-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--header-secondary, rgba(255, 255, 255, 0.6));
+    cursor: pointer;
+    transition:
+        color 0.15s ease,
+        background 0.15s ease,
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+.vc-spotify-btn:hover {
+    color: var(--header-primary, #fff);
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.12);
+}
+
+.vc-spotify-btn:active {
+    transform: scale(0.9);
+}
+
+.vc-spotify-btn[data-active="true"] {
+    color: #1db954;
+}
+
+.vc-spotify-btn[data-active="true"]::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #1db954;
+}
+
+.vc-spotify-btn-play {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.vc-spotify-btn-play:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 0 16px rgba(29, 185, 84, 0.3);
+}
