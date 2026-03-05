@@ -27,7 +27,7 @@ import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
 import { copyWithToast, openImageModal } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { SeekBar } from "./SeekBar";
 import { SpotifyStore, Track } from "./SpotifyStore";
@@ -57,6 +57,9 @@ function Svg(path: string, label: string) {
     );
 }
 
+// KraXen's icons :yesyes:
+// from https://fonts.google.com/icons?icon.style=Rounded&icon.set=Material+Icons
+// older material icon style, but still really good
 const PlayButton = Svg("M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z", "play");
 const PauseButton = Svg("M8 19c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2v10c0 1.1.9 2 2 2zm6-12v10c0 1.1.9 2 2 2s2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2z", "pause");
 const SkipPrev = Svg("M7 6c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1s-1-.45-1-1V7c0-.55.45-1 1-1zm3.66 6.82l5.77 4.07c.66.47 1.58-.01 1.58-.82V7.93c0-.81-.91-1.28-1.58-.82l-5.77 4.07c-.57.4-.57 1.24 0 1.64z", "previous");
@@ -66,7 +69,10 @@ const Shuffle = Svg("M10.59 9.17L6.12 4.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.
 
 function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     return (
-        <button className={cl("button")} {...props}>
+        <button
+            className={cl("button")}
+            {...props}
+        >
             {props.children}
         </button>
     );
@@ -79,9 +85,24 @@ function CopyContextMenu({ name, type, path }: { type: string; name: string; pat
             onClose={ContextMenuApi.closeContextMenu}
             aria-label={`Spotify ${type} Menu`}
         >
-            <Menu.MenuItem id="vc-spotify-copy-name" label={`Copy ${type} Name`} action={() => copyWithToast(name)} icon={CopyIcon} />
-            <Menu.MenuItem id="vc-spotify-copy-link" label={`Copy ${type} Link`} action={() => copyWithToast("https://open.spotify.com" + path)} icon={LinkIcon} />
-            <Menu.MenuItem id="vc-spotify-open" label={`Open ${type} in Spotify`} action={() => SpotifyStore.openExternal(path)} icon={OpenExternalIcon} />
+            <Menu.MenuItem
+                id="vc-spotify-copy-name"
+                label={`Copy ${type} Name`}
+                action={() => copyWithToast(name)}
+                icon={CopyIcon}
+            />
+            <Menu.MenuItem
+                id="vc-spotify-copy-link"
+                label={`Copy ${type} Link`}
+                action={() => copyWithToast("https://open.spotify.com" + path)}
+                icon={LinkIcon}
+            />
+            <Menu.MenuItem
+                id="vc-spotify-open"
+                label={`Open ${type} in Spotify`}
+                action={() => SpotifyStore.openExternal(path)}
+                icon={OpenExternalIcon}
+            />
         </Menu.Menu>
     );
 }
@@ -101,6 +122,7 @@ function Controls() {
         }
     })();
 
+    // the 1 is using position absolute so it does not make the button jump around
     return (
         <Flex className={cl("button-row")} gap="0">
             <Button
@@ -165,7 +187,12 @@ function SpotifySeekBar() {
 
     return (
         <div id={cl("progress-bar")}>
-            <Span size="xs" weight="medium" className={cl("progress-time") + " " + cl("time-left")} aria-label="Progress">
+            <Span
+                size="xs"
+                weight="medium"
+                className={cl("progress-time") + " " + cl("time-left")}
+                aria-label="Progress"
+            >
                 {msToHuman(position)}
             </Span>
             <SeekBar
@@ -176,12 +203,18 @@ function SpotifySeekBar() {
                 asValueChanges={onChange}
                 onValueRender={msToHuman}
             />
-            <Span size="xs" weight="medium" className={cl("progress-time") + " " + cl("time-right")} aria-label="Total Duration">
+            <Span
+                size="xs"
+                weight="medium"
+                className={cl("progress-time") + " " + cl("time-right")}
+                aria-label="Total Duration"
+            >
                 {msToHuman(duration)}
             </Span>
         </div>
     );
 }
+
 
 function AlbumContextMenu({ track }: { track: Track; }) {
     const volume = useStateFromStores([SpotifyStore], () => SpotifyStore.volume);
@@ -192,8 +225,21 @@ function AlbumContextMenu({ track }: { track: Track; }) {
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label="Spotify Album Menu"
         >
-            <Menu.MenuItem key="open-album" id="open-album" label="Open Album" action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)} icon={OpenExternalIcon} />
-            <Menu.MenuItem key="view-cover" id="view-cover" label="View Album Cover" action={() => openImageModal(track.album.image)} icon={ImageIcon} />
+            <Menu.MenuItem
+                key="open-album"
+                id="open-album"
+                label="Open Album"
+                action={() => SpotifyStore.openExternal(`/album/${track.album.id}`)}
+                icon={OpenExternalIcon}
+            />
+            <Menu.MenuItem
+                key="view-cover"
+                id="view-cover"
+                label="View Album Cover"
+                // trolley
+                action={() => openImageModal(track.album.image)}
+                icon={ImageIcon}
+            />
             <Menu.MenuControlItem
                 id="spotify-volume"
                 key="spotify-volume"
@@ -226,6 +272,7 @@ function makeLinkProps(type: "Song" | "Artist" | "Album", condition: unknown, na
 
 function Info({ track }: { track: Track; }) {
     const img = track?.album?.image;
+
     const [coverExpanded, setCoverExpanded] = useState(false);
 
     const i = (
@@ -236,20 +283,32 @@ function Info({ track }: { track: Track; }) {
                     src={img.url}
                     alt="Album Image"
                     onClick={() => setCoverExpanded(!coverExpanded)}
-                    onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <AlbumContextMenu track={track} />)}
+                    onContextMenu={e => {
+                        ContextMenuApi.openContextMenu(e, () => <AlbumContextMenu track={track} />);
+                    }}
                 />
             )}
         </>
     );
 
     if (coverExpanded && img)
-        return <div id={cl("album-expanded-wrapper")}>{i}</div>;
+        return (
+            <div id={cl("album-expanded-wrapper")}>
+                {i}
+            </div>
+        );
 
     return (
         <div id={cl("info-wrapper")}>
             {i}
             <div id={cl("titles")}>
-                <Paragraph weight="semibold" id={cl("song-title")} className={cl("ellipoverflow")} title={track.name} {...makeLinkProps("Song", track.id, track.name, `/track/${track.id}`)}>
+                <Paragraph
+                    weight="semibold"
+                    id={cl("song-title")}
+                    className={cl("ellipoverflow")}
+                    title={track.name}
+                    {...makeLinkProps("Song", track.id, track.name, `/track/${track.id}`)}
+                >
                     {track.name}
                 </Paragraph>
                 {track.artists.some(a => a.name) && (
@@ -257,7 +316,12 @@ function Info({ track }: { track: Track; }) {
                         <span className={cl("song-info-prefix")}>by&nbsp;</span>
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
-                                <span className={cl("artist")} style={{ fontSize: "inherit" }} title={a.name} {...makeLinkProps("Artist", a.id, a.name, `/artist/${a.id}`)}>
+                                <span
+                                    className={cl("artist")}
+                                    style={{ fontSize: "inherit" }}
+                                    title={a.name}
+                                    {...makeLinkProps("Artist", a.id, a.name, `/artist/${a.id}`)}
+                                >
                                     {a.name}
                                 </span>
                                 {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
@@ -268,7 +332,13 @@ function Info({ track }: { track: Track; }) {
                 {track.album.name && (
                     <Paragraph className={cl(["ellipoverflow", "secondary-song-info"])}>
                         <span className={cl("song-info-prefix")}>on&nbsp;</span>
-                        <span id={cl("album-title")} className={cl("album")} style={{ fontSize: "inherit" }} title={track.album.name} {...makeLinkProps("Album", track.album.id, track.album.name, `/album/${track.album.id}`)}>
+                        <span
+                            id={cl("album-title")}
+                            className={cl("album")}
+                            style={{ fontSize: "inherit" }}
+                            title={track.album.name}
+                            {...makeLinkProps("Album", track.album.id, track.album.name, `/album/${track.album.id}`)}
+                        >
                             {track.album.name}
                         </span>
                     </Paragraph>
@@ -277,8 +347,6 @@ function Info({ track }: { track: Track; }) {
         </div>
     );
 }
-
-const EXIT_DURATION = 350;
 
 export function Player() {
     const track = useStateFromStores(
@@ -297,9 +365,8 @@ export function Player() {
 
     const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
     const [shouldHide, setShouldHide] = useState(false);
-    const [isExiting, setIsExiting] = useState(false);
-    const [lastTrack, setLastTrack] = useState(track);
-    const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Hide player after 5 minutes of inactivity
 
     React.useEffect(() => {
         setShouldHide(false);
@@ -309,39 +376,17 @@ export function Player() {
         }
     }, [isPlaying]);
 
-    const shouldRender = !!(track && device?.is_active && !shouldHide);
-
-    React.useEffect(() => {
-        if (shouldRender) {
-            if (exitTimer.current) clearTimeout(exitTimer.current);
-            setIsExiting(false);
-            setLastTrack(track);
-        } else if (lastTrack) {
-            setIsExiting(true);
-            exitTimer.current = setTimeout(() => {
-                setIsExiting(false);
-                setLastTrack(null);
-            }, EXIT_DURATION);
-        }
-        return () => { if (exitTimer.current) clearTimeout(exitTimer.current); };
-    }, [shouldRender]);
-
-    if (!shouldRender && !isExiting) return null;
-
-    const displayTrack = track ?? lastTrack;
+    if (!track || !device?.is_active || shouldHide)
+        return null;
 
     const exportTrackImageStyle = {
-        "--vc-spotify-track-image": `url(${displayTrack?.album?.image?.url || ""})`,
+        "--vc-spotify-track-image": `url(${track?.album?.image?.url || ""})`,
     } as React.CSSProperties;
 
     return (
-        <div
-            id={cl("player")}
-            style={exportTrackImageStyle}
-            data-exiting={isExiting ? "true" : undefined}
-        >
-            {displayTrack && <Info track={displayTrack} />}
-            {displayTrack && <SpotifySeekBar />}
+        <div id={cl("player")} style={exportTrackImageStyle}>
+            <Info track={track} />
+            <SpotifySeekBar />
             <Controls />
         </div>
     );
