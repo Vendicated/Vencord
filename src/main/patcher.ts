@@ -72,12 +72,15 @@ if (!IS_VANILLA) {
         constructor(options: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
+                const isMainWindow = options.title === "Discord";
                 options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
                 // work around discord unloading when in background
                 options.webPreferences.backgroundThrottling = false;
 
                 if (settings.frameless) {
+                    options.frame = false;
+                } else if (settings.mainWindowFrameless && isMainWindow) {
                     options.frame = false;
                 } else if (process.platform === "win32" && settings.winNativeTitleBar) {
                     delete options.frame;

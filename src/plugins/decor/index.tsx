@@ -87,7 +87,7 @@ export default definePlugin({
         },
         // Current user area, at bottom of channels/dm list
         {
-            find: ".WIDGETS_RTC_UPSELL_COACHMARK),",
+            find: ".DISPLAY_NAME_STYLES_COACHMARK),",
             replacement: [
                 // Use Decor avatar decoration hook
                 {

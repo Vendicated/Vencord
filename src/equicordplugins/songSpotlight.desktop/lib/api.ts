@@ -9,7 +9,6 @@ import { showToast, Toasts, UserStore } from "@webpack/common";
 
 import { useAuthorizationStore } from "./stores/AuthorizationStore";
 import { useSongStore } from "./stores/SongStore";
-import { logger } from "./utils";
 
 export const apiConstants = {
     api: "https://dc.songspotlight.nexpid.xyz/",
@@ -20,16 +19,36 @@ export const apiConstants = {
     songLimit: 6,
 };
 
-export async function authFetch(_url: string | URL, options?: RequestInit) {
-    const url = new URL(_url);
+let refreshPromise: Promise<boolean> | undefined;
+async function refreshAccessToken() {
+    const token = useAuthorizationStore.getState().getToken();
+    if (!token) return false;
 
+    return refreshPromise ??= fetch(new URL("api/auth/refresh", apiConstants.api), {
+        method: "POST",
+        headers: {
+            "X-Refresh-Token": token.refresh,
+        },
+        body: token.access,
+    }).then(async res => {
+        if (!res.ok) return false;
+
+        const access = await res.text();
+        useAuthorizationStore.getState().setToken(access, token.refresh);
+        return true;
+    }).finally(() => refreshPromise = undefined);
+}
+
+export async function authFetch(url: string | URL, options?: RequestInit, retried = false) {
+    url = new URL(url);
     try {
+        const token = useAuthorizationStore.getState().getToken();
         const res = await fetch(url, {
             ...options,
             headers: {
                 ...options?.headers,
-                Authorization: useAuthorizationStore.getState().getToken()!,
-            },
+                Authorization: token?.access,
+            } as HeadersInit,
         });
 
         if (res.ok) return res;
@@ -37,36 +56,29 @@ export async function authFetch(_url: string | URL, options?: RequestInit) {
         // not modified
         if (res.status === 304) return null;
 
+        const text = await res.text();
+
         // unauthorized
         if (res.status === 401) {
-            useAuthorizationStore.getState().deleteToken();
+            const retry = !retried && await refreshAccessToken();
+            if (retry) return await authFetch(url, options, true);
+            else {
+                useAuthorizationStore.getState().deleteTokens();
+                showToast("You have been signed out from Song Spotlight. Please sign in again.", Toasts.Type.FAILURE);
+            }
+        } else {
+            showToast(
+                !text.includes("<body>") && res.status >= 400 && res.status <= 599
+                    ? `Song Spotlight: ${text}`
+                    : `Song Spotlight fetch error at ${url.pathname}`,
+                Toasts.Type.FAILURE,
+            );
         }
 
-        const text = await res.text();
-        showToast(
-            !text.includes("<body>") && res.status >= 400 && res.status <= 599
-                ? `Song Spotlight: ${text}`
-                : `Song Spotlight fetch error at ${url.pathname}`,
-            Toasts.Type.FAILURE,
-        );
-
-        logger.error(
-            "Got an authFetch response error",
-            options?.method ?? "GET",
-            url.toString(),
-            res.status,
-            text,
-        );
         throw new Error(text);
     } catch (error) {
         showToast(`Song Spotlight: ${error}`, Toasts.Type.FAILURE);
 
-        logger.error(
-            "Got an authFetch request error",
-            options?.method ?? "GET",
-            url.toString(),
-            error,
-        );
         throw error;
     }
 }

@@ -11,7 +11,7 @@ export const settings = definePluginSettings({
     addFreakyEnding: {
         type: OptionType.BOOLEAN,
         description: "Add 👅 or ❤️ at the end",
-        default: true
+        default: false
     },
     uwuEveryMessage: {
         description: "Make every single message uwuified",

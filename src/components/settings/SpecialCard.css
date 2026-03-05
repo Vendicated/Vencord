@@ -26,6 +26,18 @@
     background-color: color-mix(in srgb, #c3a3ce 50%, rgb(240 178 240));
 }
 
+.vc-translate-button {
+    overflow: visible !important;
+    color: black;
+    background-color: color-mix(in srgb, #575757 50%, rgb(255 255 255));
+}
+
+.vc-translate-button:hover {
+    overflow: visible !important;
+    color: black;
+    background-color: color-mix(in srgb, #575757 50%, rgb(201 201 201));
+}
+
 .vc-invite-link {
     width: 16px;
     height: 16px;
@@ -142,4 +154,14 @@
 
 .vc-special-image {
     width: 65%;
+}
+
+.vc-translate-modal-icon {
+    margin: auto;
+    width: 60px;
+}
+
+.vc-translate-modal-paragraph {
+    padding: 12px;
+    text-align: center;
 }

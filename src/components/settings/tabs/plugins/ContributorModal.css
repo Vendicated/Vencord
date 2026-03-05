@@ -5,17 +5,19 @@
 .vc-author-modal-header {
     display: flex;
     align-items: center;
+    gap: 8px;
     margin-bottom: 1em;
 }
 
 .vc-author-modal-name {
     text-transform: none;
+    margin: 0;
     flex-grow: 0;
     background: var(--background-base-lowest);
     border-radius: 0 9999px 9999px 0;
     padding: 6px 0.8em 6px 0.5em;
     font-size: 20px;
-    height: 20px;
+    line-height: 1;
     position: relative;
     text-wrap: nowrap;
 }
@@ -35,9 +37,17 @@
 }
 
 .vc-author-modal-avatar {
+    flex-shrink: 0;
+    transform: translateX(4px);
+    position: relative;
+    z-index: 2;
     height: 32px;
     width: 32px;
     border-radius: 50%;
+    border: 2px solid var(--background-primary);
+    box-shadow:
+        0 0 0 1px rgb(255 255 255 / 18%),
+        0 2px 6px rgb(0 0 0 / 35%);
 }
 
 .vc-author-modal-root+[class*="footer"] {

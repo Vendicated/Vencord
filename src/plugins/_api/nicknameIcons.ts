@@ -14,10 +14,16 @@ export default definePlugin({
     patches: [
         {
             find: "#{intl::USER_PROFILE_PRONOUNS}",
-            replacement: {
-                match: /(?<=shouldUnderlineOnHover:null.{0,200})children:(\i)/,
-                replace: "children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"
-            }
+            replacement: [
+                {
+                    match: /(?<=,\i\]\}\)\),)null!=\i/,
+                    replace: "($&||Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"
+                },
+                {
+                    match: /(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)/,
+                    replace: "children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"
+                }
+            ]
         }
     ]
 });
