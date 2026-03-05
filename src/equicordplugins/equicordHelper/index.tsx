@@ -188,16 +188,6 @@ export default definePlugin({
                 replace: "{_enableHangStatus:$1=false,"
             }
         },
-        // Always show open legacy settings
-        {
-            find: ".DEVELOPER_SECTION,",
-            replacement: [
-                {
-                    match: /\i\.\i\.isDeveloper/,
-                    replace: "true"
-                },
-            ]
-        },
         // Force Role Icon
         {
             find: "Message Username",
