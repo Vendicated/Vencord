@@ -37,10 +37,9 @@ export function presentOAuth2Modal() {
                     if (!access) throw "Access token is missing";
 
                     const refresh = res.headers.get("X-Refresh-Token");
-                    // STUB uncomment this once API is fully rolled out
-                    // if (!refresh) throw "Refresh token is missing";
+                    if (!refresh) throw "Refresh token is missing";
 
-                    useAuthorizationStore.getState().setToken(access, refresh || "");
+                    useAuthorizationStore.getState().setToken(access, refresh);
                     getData();
 
                     showToast("Successfully authorized!", Toasts.Type.SUCCESS);
