@@ -17,18 +17,6 @@ import type { HTMLAttributes } from "react";
 
 import fullHeightStyle from "./fullHeightContext.css?managed";
 
-type SettingsEntry = {
-    ariaLabel?: string;
-    element?: any;
-    label?: string;
-    newIndicator?: any;
-    newIndicatorDismissibleContentTypes?: number[];
-    predicate?: () => boolean;
-    searchableTitles?: string[];
-    section: string,
-    tabPredicate?: () => boolean;
-};
-
 const cl = classNameFactory("");
 const Classes = findCssClassesLazy("animating", "baseLayer", "bg", "layer", "layers");
 
@@ -52,11 +40,6 @@ const settings = definePluginSettings({
         restartNeeded: true
     }
 });
-
-interface TransformedSettingsEntry {
-    section: string;
-    items: SettingsEntry[];
-}
 
 interface LayerProps extends HTMLAttributes<HTMLDivElement> {
     mode: "SHOWN" | "HIDDEN";
@@ -168,6 +151,7 @@ export default definePlugin({
         },
         { // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
+            predicate: () => settings.store.organizeMenu,
             replacement: [
                 {
                     match: /(\i)=(.{0,20}openUserSettings\)\(\i\)\));/,
