@@ -168,6 +168,7 @@ export default definePlugin({
         },
         { // Settings cog context menu
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
+            predicate: () => settings.store.organizeMenu,
             replacement: [
                 {
                     match: /(\i)=(.{0,20}openUserSettings\)\(\i\)\));/,
