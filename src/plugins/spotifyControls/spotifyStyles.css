@@ -1,15 +1,66 @@
 #vc-spotify-player {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
     padding: 12px;
-    background: var(--background-base-low);
     margin: 0;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     border-bottom: 1px solid var(--border-subtle);
 
-    /* so custom themes can easily change it */
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+    animation: vc-spotify-enter 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
     --vc-spotify-green: var(--spotify, #1db954);
     --vc-spotify-green-90: color-mix(in hsl, var(--vc-spotify-green), transparent 90%);
     --vc-spotify-green-80: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
+}
+
+@keyframes vc-spotify-enter {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#vc-spotify-player[data-exiting="true"] {
+    animation: vc-spotify-exit 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes vc-spotify-exit {
+    from { opacity: 1; transform: translateY(0) scale(1); max-height: 200px; }
+    to   { opacity: 0; transform: translateY(10px) scale(0.96); max-height: 0; padding-top: 0; padding-bottom: 0; }
+}
+
+/* Blurred album art background */
+#vc-spotify-player::before {
+    content: '';
+    position: absolute;
+    inset: -24px;
+    background-image: var(--vc-spotify-track-image);
+    background-size: cover;
+    background-position: center;
+    filter: blur(32px) saturate(1.8) brightness(0.35);
+    z-index: 0;
+    transform: scale(1.2);
+    transition: background-image 0.6s ease;
+}
+
+/* Glass overlay */
+#vc-spotify-player::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: color-mix(in srgb, var(--background-base-low) 55%, transparent);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+#vc-spotify-player > * {
+    position: relative;
+    z-index: 2;
 }
 
 .vc-spotify-button {
@@ -23,11 +74,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: color 0.15s, background 0.15s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .vc-spotify-button:hover {
     color: var(--interactive-icon-hover);
-    background-color: var(--background-mod-strong);
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.12);
+}
+
+.vc-spotify-button:active {
+    transform: scale(0.88);
 }
 
 .vc-spotify-button-icon {
@@ -40,10 +97,6 @@
     width: 22px;
     height: 22px;
 }
-
-/* .vc-spotify-button:hover {
-    filter: brightness(1.3);
-} */
 
 .vc-spotify-repeat-context,
 .vc-spotify-repeat-track,
@@ -97,12 +150,20 @@
 #vc-spotify-album-image {
     height: 90%;
     object-fit: contain;
-    border-radius: 3px;
-    transition: filter 0.2s;
+    border-radius: 5px;
+    transition: filter 0.2s, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    animation: vc-spotify-art-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes vc-spotify-art-pop {
+    from { transform: scale(0.75) rotate(-5deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 #vc-spotify-album-image:hover {
     filter: brightness(1.2);
+    transform: scale(1.05);
     cursor: pointer;
 }
 
@@ -151,6 +212,8 @@
     cursor: pointer;
 }
 
+/* ── SEEKBAR ── */
+
 #vc-spotify-progress-bar {
     position: relative;
     color: var(--text-default);
@@ -168,31 +231,43 @@
 #vc-spotify-progress-bar > [class*="slider"] [class*="bar"] {
     height: 3px !important;
     top: calc(12px - 4px / 2 + var(--bar-offset));
+    transition: height 0.15s ease;
+}
+
+#vc-spotify-progress-bar:hover > [class*="slider"] [class*="bar"] {
+    height: 4px !important;
 }
 
 #vc-spotify-progress-bar > [class*="slider"] [class*="barFill"] {
-    background-color: var(--interactive-icon-active);
+    background: linear-gradient(90deg, #1db954, #1ed760);
+    box-shadow: 0 0 6px rgba(29, 185, 84, 0.4);
+    transition: width 1s linear !important;
 }
 
-#vc-spotify-progress-bar > [class*="slider"]:hover [class*="barFill"] {
-    background-color: var(--vc-spotify-green);
+#vc-spotify-progress-bar:hover > [class*="slider"] [class*="barFill"] {
+    box-shadow: 0 0 10px rgba(29, 185, 84, 0.55);
+}
+
+#vc-spotify-progress-bar:has([class*="grabber"]:active) > [class*="slider"] [class*="barFill"] {
+    transition: none !important;
 }
 
 #vc-spotify-progress-bar > [class*="slider"] [class*="grabber"] {
-    /* these importants are necessary, it applies a width and height through inline styles */
-    height: 16px !important;
-    width: 16px !important;
+    height: 14px !important;
+    width: 14px !important;
     margin-top: calc(17px/-2 + var(--bar-offset)/2);
     margin-left: -0.5px;
-    background-color: var(--interactive-icon-active);
-    border-color: var(--interactive-icon-default);
-    color: var(--interactive-icon-default);
+    background-color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     opacity: 0;
-    transition: opacity 0.1s;
+    transition: opacity 0.15s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: scale(0.7);
 }
 
 #vc-spotify-progress-bar:hover > [class*="slider"] [class*="grabber"] {
     opacity: 1;
+    transform: scale(1);
 }
 
 #vc-spotify-progress-text {
@@ -207,13 +282,8 @@
     font-family: var(--font-code);
 }
 
-.vc-spotify-time-left {
-    left: 0;
-}
-
-.vc-spotify-time-right {
-    right: 0;
-}
+.vc-spotify-time-left { left: 0; }
+.vc-spotify-time-right { right: 0; }
 
 .vc-spotify-fallback {
     padding: 0.5em;
