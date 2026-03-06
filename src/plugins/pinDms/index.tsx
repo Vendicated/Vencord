@@ -217,7 +217,8 @@ export default definePlugin({
     },
 
     isChannelIndex(sectionIndex: number, channelIndex: number) {
-        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && sectionIndex !== 0) {
+        // only apply DM section collapse logic to the last section (uncategorized DMs)
+        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && sectionIndex === this.getSections().length + 1) {
             return true;
         }
 
@@ -232,7 +233,8 @@ export default definePlugin({
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && this.getSections().length + 1 === categoryIndex)
+        // only hide channels in the last section (uncategorized DMs) when DM section is collapsed
+        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && categoryIndex === this.getSections().length + 1)
             return true;
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
