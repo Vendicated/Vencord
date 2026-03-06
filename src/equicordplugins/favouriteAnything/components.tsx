@@ -23,7 +23,7 @@ const FavoriteButton = findComponentByCodeLazy<FavoriteButtonProps>("#{intl::GIF
 const SendIcon = findComponentByCodeLazy("M6.6 10.02 14 11.4a.6.6");
 
 const DmChannel: Channel & { new(base?: Partial<Channel>): Channel; } = findByPropsLazy("fromServer", "sortRecipients");
-const MessageClass: Message & { new(base?: Partial<Message>): Message; } = findByCodeLazy(";mentionChannels;mentionGames;");
+const MessageClass: Message & { new(base?: Partial<Message>): Message; } = findByCodeLazy(";mentionRoles;mentionChannels;");
 
 const Classes = findCssClassesLazy("gifFavoriteButton", "ctaButtonContainer");
 
