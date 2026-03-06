@@ -1,0 +1,71 @@
+.vc-better-experiments-refresh-button {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.vc-experiment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.vc-experiment-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-experiment-info-label {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.vc-experiment-info-value {
+    color: var(--text-normal);
+    font-size: 14px;
+    font-family: var(--font-code);
+}
+
+.vc-guild-experiment-bucket-name,
+.vc-user-experiment-bucket-name {
+    color: var(--text-primary);
+    padding: 4px 0;
+    font-size: 14px;
+}
+
+.vc-experiment-bucket-icons {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-flow: row wrap;
+}
+
+.vc-experiment-bucket-icons img {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+}
+
+.vc-experiment-bucket-empty {
+    color: var(--text-muted);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+}
+
+.vc-better-experiments-api-provider {
+    padding: 8px;
+}
+
+.vc-better-experiments-api-text {
+    color: var(--text-muted);
+    font-size: 14px;
+}
