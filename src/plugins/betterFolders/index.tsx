@@ -149,7 +149,7 @@ export default definePlugin({
                 // Create the isBetterFolders and betterFoldersExpandedIds variables in the GuildsBar component
                 // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
-                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
+                    match: /let\s*\{\s*disableAppDownload:\s*\w+\s*=\s*\w+\.isPlatformEmbedded,\s*isOverlay:\s*\w+\s*=\s*!1[^}]*}/,
                     replace: "$&,isBetterFolders,betterFoldersExpandedIds"
                 },
                 // Export the isBetterFolders and betterFoldersExpandedIds variable to the Guild List component
