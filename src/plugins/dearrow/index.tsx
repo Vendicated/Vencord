@@ -54,14 +54,11 @@ async function embedDidMount(this: Component<Props>) {
         if (!videoId) return;
 
         const res = await fetch(`https://sponsor.ajay.app/api/branding?videoID=${videoId}`);
-        if (!res.ok) return;
 
         const { titles, thumbnails } = await res.json();
 
         const hasTitle = titles[0]?.votes >= 0;
         const hasThumb = thumbnails[0]?.votes >= 0 && !thumbnails[0].original;
-
-        if (!hasTitle && !hasThumb) return;
 
 
         embed.dearrow = {
@@ -76,6 +73,12 @@ async function embedDidMount(this: Component<Props>) {
         }
         if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
             const replacementProxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
+
+            embed.dearrow.oldThumb = dearrowByDefault ? embed.thumbnail.proxyURL : replacementProxyURL;
+            if (dearrowByDefault) embed.thumbnail.proxyURL = replacementProxyURL;
+        }
+        if (!hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
+            const replacementProxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}`;
 
             embed.dearrow.oldThumb = dearrowByDefault ? embed.thumbnail.proxyURL : replacementProxyURL;
             if (dearrowByDefault) embed.thumbnail.proxyURL = replacementProxyURL;
@@ -171,9 +174,11 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Dearrow",
     description: "Makes YouTube embed titles and thumbnails less sensationalist, powered by Dearrow",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, {
+        name: "ichi0995",
+        id: 176761898581229569n
+    }],
     settings,
-
     embedDidMount,
     renderButton(component: Component<Props>) {
         return (
