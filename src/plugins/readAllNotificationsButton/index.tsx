@@ -19,32 +19,62 @@
 import "./style.css";
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import { definePluginSettings } from "@api/Settings";
 import { TextButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { ActiveJoinedThreadsStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { ActiveJoinedThreadsStore, ChannelStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+
+const settings = definePluginSettings({
+    readAllGuilds: {
+        type: OptionType.BOOLEAN,
+        description: "Mark all guild notifications as read",
+        default: true,
+    },
+    readAllDms: {
+        type: OptionType.BOOLEAN,
+        description: "Mark all DM notifications as read",
+        default: true,
+    },
+});
 
 function onClick() {
     const channels: Array<any> = [];
 
-    Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE
-            .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
-            .concat(
-                Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
-                    .flatMap(threadChannels => Object.values(threadChannels))
-            )
-            .forEach((c: { channel: { id: string; }; }) => {
-                if (!ReadStateStore.hasUnread(c.channel.id)) return;
+    if (settings.store.readAllGuilds) {
+        Object.values(GuildStore.getGuilds()).forEach(guild => {
+            GuildChannelStore.getChannels(guild.id).SELECTABLE
+                .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+                .concat(
+                    Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
+                        .flatMap(threadChannels => Object.values(threadChannels))
+                )
+                .forEach((c: { channel: { id: string; }; }) => {
+                    if (!ReadStateStore.hasUnread(c.channel.id)) return;
+
+                    channels.push({
+                        channelId: c.channel.id,
+                        messageId: ReadStateStore.lastMessageId(c.channel.id),
+                        readStateType: 0
+                    });
+                });
+        });
+    }
+
+    if (settings.store.readAllDms) {
+        ChannelStore.getChannelIds()
+            .map(channelId => ChannelStore.getChannel(channelId))
+            .forEach((c: { id: string; }) => {
+                if (!ReadStateStore.hasUnread(c.id)) return;
 
                 channels.push({
-                    channelId: c.channel.id,
-                    messageId: ReadStateStore.lastMessageId(c.channel.id),
+                    channelId: c.id,
+                    messageId: ReadStateStore.lastMessageId(c.id),
                     readStateType: 0
                 });
             });
-    });
+    }
 
     FluxDispatcher.dispatch({
         type: "BULK_ACK",
@@ -65,9 +95,10 @@ const ReadAllButton = () => (
 
 export default definePlugin({
     name: "ReadAllNotificationsButton",
-    description: "Read all server notifications with a single button click!",
+    description: "Read all server and DM notifications with a single button click!",
     authors: [Devs.kemo],
     dependencies: ["ServerListAPI"],
+    settings,
 
     renderReadAllButton: ErrorBoundary.wrap(ReadAllButton, { noop: true }),
 
