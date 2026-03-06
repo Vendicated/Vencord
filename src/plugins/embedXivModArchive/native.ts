@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { IpcMainInvokeEvent, net } from "electron";
 import { ConnectSrc, CspPolicies, ImageSrc } from "@main/csp";
+import { IpcMainInvokeEvent, net } from "electron";
 
 CspPolicies["xivmodarchive.com"] = ConnectSrc;
 CspPolicies["www.xivmodarchive.com"] = ConnectSrc;
@@ -46,7 +46,7 @@ export async function fetchImageAsDataUrl(_: IpcMainInvokeEvent, url: string): P
         try {
             const req = net.request(url);
             const chunks: Buffer[] = [];
-            req.on("response", (res) => {
+            req.on("response", res => {
                 const status = res.statusCode ?? 0;
                 if (status !== 200) {
                     const err = new Error(`HTTP ${status}`);
@@ -70,7 +70,7 @@ export async function fetchImageAsDataUrl(_: IpcMainInvokeEvent, url: string): P
                     }
                 });
             });
-            req.on("error", (err) => {
+            req.on("error", err => {
                 reject(err);
             });
             req.end();

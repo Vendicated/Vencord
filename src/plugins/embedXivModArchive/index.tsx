@@ -5,13 +5,13 @@
  */
 
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
+import { LinkButton } from "@components/Button";
 import { Devs } from "@utils/constants.js";
+import { Logger } from "@utils/Logger";
 import definePlugin, { PluginNative } from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
 import { ChannelStore, React, useEffect, useState } from "@webpack/common";
-import { Logger } from "@utils/Logger";
-import { Button, LinkButton } from "@components/Button";
 
 // Regex for https://www.xivmodarchive.com/modid/<number>
 const XMA_REGEX = /https?:\/\/www\.xivmodarchive\.com\/modid\/(\d+)/i;
@@ -26,7 +26,7 @@ export default definePlugin({
     name: "EmbedXivModArchive",
     description: "Embeds XIV Mod Archive mod links",
     authors: [Devs.infiniti],
-    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "UserSettingsAPI"],
+    dependencies: ["MessageAccessoriesAPI", "UserSettingsAPI"],
 
     start() {
         addMessageAccessory("EmbedXivModArchive", props => {
