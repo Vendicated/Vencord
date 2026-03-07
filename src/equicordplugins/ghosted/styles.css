@@ -53,6 +53,93 @@
     gap: 2px;
 }
 
+/* Jumpscare overlay styling */
+.vc-boo-jumpscare-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgb(0 0 0 / 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.vc-boo-jumpscare-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+/* job application */
+@keyframes boo-jumpscare-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes boo-jumpscare-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes boo-jumpscare-shake {
+
+    /* stylelint-disable-next-line rule-empty-line-before */
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    10% {
+        transform: translate(-5px, -5px) rotate(-2deg);
+    }
+
+    20% {
+        transform: translate(5px, 5px) rotate(2deg);
+    }
+
+    30% {
+        transform: translate(-5px, 5px) rotate(-1deg);
+    }
+
+    40% {
+        transform: translate(5px, -5px) rotate(1deg);
+    }
+
+    50% {
+        transform: translate(-3px, -3px) rotate(-1deg);
+    }
+
+    60% {
+        transform: translate(3px, 3px) rotate(1deg);
+    }
+
+    70% {
+        transform: translate(-3px, 3px) rotate(-0.5deg);
+    }
+
+    80% {
+        transform: translate(3px, -3px) rotate(0.5deg);
+    }
+
+    90% {
+        transform: translate(-2px, -2px) rotate(-0.5deg);
+    }
+}
+
 .vc-boo-clear {
     margin-right: 16px;
 }

@@ -1,0 +1,23 @@
+.eq-googlefonts-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.eq-googlefonts-card {
+    padding: 16px;
+    cursor: pointer !important;
+    background: var(--background-secondary-alt);
+    border: 1px solid var(--background-base-low);
+}
+
+.eq-googlefonts-card:hover {
+    background: var(--background-mod-subtle);
+    cursor: pointer !important;
+}
+
+.eq-googlefonts-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer !important;
+}

@@ -1,0 +1,42 @@
+.vc-voice-channel-log {
+    list-style-type: none;
+    height: 50px;
+    display: grid;
+    grid-template-columns: 2.25rem 24px 40px max-content;
+    gap: 4px;
+    width: 4px;
+    background-color: var(--border-subtle);
+}
+
+.vc-voice-channel-log-date-separator,
+.vc-voice-channel-log-timestamp {
+    margin-left: 4px;
+    height: 48px;
+    line-height: 48px;
+    font-size: .75rem;
+    text-align: center;
+    display: inline-block;
+    vertical-align: middle;
+    color: var(--text-default, white);
+}
+
+.vc-voice-channel-log-avatar {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    overflow: hidden;
+    text-align: center;
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+.vc-voice-channel-log-icon {
+    margin: auto 3px;
+    margin-left: 15px;
+}
