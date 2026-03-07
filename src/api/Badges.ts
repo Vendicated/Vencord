@@ -48,7 +48,7 @@ export interface ProfileBadge {
 
     /**
      * Allows dynamically returning multiple badges.
-     * May call hooks but then you must not use shouldShow
+     * Must not call hooks
      */
     getBadges?(userInfo: BadgeUserArgs): ProfileBadge[];
 }

@@ -22,19 +22,19 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { SafetyIcon } from "@components/Icons";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Guild, GuildMember } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, useRef, UserStore } from "@webpack/common";
+import type { Guild } from "@vencord/discord-types";
+import { findCssClassesLazy } from "@webpack";
+import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, useRef, UserStore } from "@webpack/common";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
 
-const PopoutClasses = findByPropsLazy("container", "scroller", "list");
-const RoleButtonClasses = findByPropsLazy("button", "icon");
+const PopoutClasses = findCssClassesLazy("container", "scroller", "list");
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -167,13 +167,16 @@ export default definePlugin({
         {
             find: "#{intl::COLLAPSE_ROLES}",
             replacement: {
-                match: /className:(\i\.expandButton),.+?null,/,
-                replace: "$&$self.ViewPermissionsButton({className:$1,props:arguments[0]}),"
+                match: /(?<=\i\.id\)\),\i\(\))(?=,\i\?)/,
+                replace: ",$self.ViewPermissionsButton(arguments[0])"
             }
         }
     ],
 
-    ViewPermissionsButton: ErrorBoundary.wrap(({ className, props: { guild, guildMember } }: { className: string, props: { guild: Guild; guildMember: GuildMember; }; }) => {
+    ViewPermissionsButton: ErrorBoundary.wrap(({ className, guild, userId }: { className: string; guild: Guild; userId: string; }) => {
+        const guildMember = GuildMemberStore.getMember(guild.id, userId);
+        if (!guildMember) return null;
+
         const buttonRef = useRef(null);
 
         return (

@@ -17,7 +17,9 @@
 */
 
 import { Settings } from "@api/Settings";
+import { managedStyleRootNode } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { createAndAppendStyle } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 
 let style: HTMLStyleElement;
@@ -43,11 +45,13 @@ export default definePlugin({
 
     patches: [
         {
-            find: "}renderEmbeds(",
-            replacement: [{
-                match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
-            }]
+            find: "}renderStickersAccessories(",
+            replacement: [
+                {
+                    match: /(\.renderReactions\(\i\).+?className:)/,
+                    replace: '$&(this.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
+                }
+            ]
         }
     ],
 
@@ -61,9 +65,7 @@ export default definePlugin({
     },
 
     start() {
-        style = document.createElement("style");
-        style.id = "VcBlurNsfw";
-        document.head.appendChild(style);
+        style = createAndAppendStyle("VcBlurNsfw", managedStyleRootNode);
 
         setCss();
     },

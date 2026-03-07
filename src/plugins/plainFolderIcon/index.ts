@@ -28,12 +28,12 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".folderPreviewGuildIconError",
+            find: "#{intl::GUILD_FOLDER_TOOLTIP_A11Y_LABEL}",
             replacement: [
                 {
                     // Discord always renders both plain and guild icons folders and uses a css transtion to switch between them
-                    match: /(?<=.folderButtonContent]:(!\i))/,
-                    replace: (_, hasFolderButtonContentClass) => `,"vc-plainFolderIcon-plain":${hasFolderButtonContentClass}`
+                    match: /\.slice\(0,4\).+?\]:(\i),\[\i\.\i\]:!\1/,
+                    replace: (m, hasFolderButtonContent) => `${m},"vc-plainFolderIcon-plain":!${hasFolderButtonContent}`
                 }
 
             ]
