@@ -92,8 +92,8 @@ export default definePlugin({
             find: ".MINI_PREVIEW,[",
             predicate: () => settings.store.nameplates,
             replacement: {
-                match: /animate:\i,loop:(?:!0===\i(?:&&)?){2}/,
-                replace: "animate:true,loop:true"
+                match: /animate:\i,loop:/,
+                replace: "animate:true,loop:true,_loop:"
             },
         },
         {

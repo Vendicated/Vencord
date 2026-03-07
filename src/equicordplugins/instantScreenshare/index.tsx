@@ -15,8 +15,9 @@ import { ChannelStore, MediaEngineStore, PermissionsBits, PermissionStore, Selec
 
 import { getCurrentMedia, settings } from "./utils";
 
-let hasStreamed;
+let hasStreamed, isStreaming, streamKey;
 const startStream = findByCodeLazy('type:"STREAM_START"');
+const stopStream = findByCodeLazy('type:"STREAM_STOP"');
 const StreamPreviewSettings = getUserSettingLazy("voiceAndVideo", "disableStreamPreviews")!;
 const ApplicationStreamingSettingsStore = findStoreLazy("ApplicationStreamingSettingsStore");
 
@@ -44,14 +45,18 @@ async function autoStartStream(instant = true) {
     let sourceId = streamMedia.id;
     if (streamMedia.type === "video_device") sourceId = `camera:${streamMedia.id}`;
 
-    startStream(channel.guild_id ?? null, selected, {
-        "pid": null,
-        "sourceId": sourceId,
-        "sourceName": streamMedia.name,
-        "audioSourceId": streamMedia.name,
-        "sound": soundshareEnabled,
-        "previewDisabled": preview
-    });
+    if (isStreaming && streamKey.endsWith(UserStore.getCurrentUser().id)) {
+        stopStream(streamKey);
+    } else {
+        startStream(channel.guild_id ?? null, selected, {
+            "pid": null,
+            "sourceId": sourceId,
+            "sourceName": streamMedia.name,
+            "audioSourceId": streamMedia.name,
+            "sound": soundshareEnabled,
+            "previewDisabled": preview
+        });
+    }
 }
 
 export default definePlugin({
@@ -122,6 +127,14 @@ export default definePlugin({
 
                 break;
             }
+        },
+        STREAM_CREATE: d => {
+            streamKey = d;
+            isStreaming = true;
+        },
+        STREAM_DELETE: d => {
+            streamKey = d;
+            isStreaming = false;
         }
     },
 

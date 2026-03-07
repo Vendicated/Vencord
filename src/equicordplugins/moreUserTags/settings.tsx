@@ -115,4 +115,10 @@ export const settings = definePluginSettings({
         component: SettingsComponent,
         description: "fill me"
     },
+    noAppsAllowed: {
+        description: "Replaces app for bot",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    }
 });

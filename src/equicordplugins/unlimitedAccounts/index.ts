@@ -36,7 +36,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "pushSyncToken:null",
+            find: "pushSyncToken:null}),",
             replacement: [
                 {
                     match: /(\).length>)5/,
@@ -56,11 +56,7 @@ export default definePlugin({
                     replace: "$1$self.getMaxAccounts()",
                 },
                 {
-                    match: /(\i.length<)5/,
-                    replace: "$1$self.getMaxAccounts()",
-                },
-                {
-                    match: /(\i.length>=)5/,
+                    match: /(\i.length(<|>=))5/g,
                     replace: "$1$self.getMaxAccounts()",
                 },
             ]

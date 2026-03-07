@@ -13,7 +13,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findCssClassesLazy } from "@webpack";
 import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 import fullHeightStyle from "./fullHeightContext.css?managed";
 
@@ -154,8 +154,8 @@ export default definePlugin({
             predicate: () => settings.store.organizeMenu,
             replacement: [
                 {
-                    match: /(\i)=(.{0,20}openUserSettings\)\(\i\)\));/,
-                    replace: "$1=$self.transformSettingsElements($2);",
+                    match: /children:\[(\i),(?<=\1=.{0,30}\.openUserSettings.+?)/,
+                    replace: "children:[$self.transformSettingsEntries($1),",
                 },
             ]
         },
@@ -179,8 +179,8 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    transformSettingsElements(list) {
-        const items: any[] = [];
+    transformSettingsEntries(list) {
+        const items: ReactNode[] = [];
 
         for (const item of list) {
             const { key, props } = item;
@@ -199,7 +199,7 @@ export default definePlugin({
             } else if (key.endsWith("_section") && props.label) {
                 items.push(
                     <Menu.MenuItem key={key} label={props.label} id={props.label}>
-                        {this.transformSettingsElements(props.children)}
+                        {this.transformSettingsEntries(props.children)}
                     </Menu.MenuItem>
                 );
             } else {

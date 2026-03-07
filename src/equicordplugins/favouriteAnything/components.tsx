@@ -7,9 +7,9 @@
 import { BaseText } from "@components/BaseText";
 import { Button } from "@components/Button";
 import { LazyComponentWrapper } from "@utils/lazyReact";
-import { Channel, Message, MessageAttachment, ScrollerBaseRef } from "@vencord/discord-types";
+import { Message, MessageAttachment, ScrollerBaseRef } from "@vencord/discord-types";
 import { ChannelType } from "@vencord/discord-types/enums";
-import { findByCodeLazy, findByPropsLazy, findComponentByCode, findComponentByCodeLazy, findCssClassesLazy, proxyLazyWebpack } from "@webpack";
+import { findByCodeLazy, findComponentByCode, findComponentByCodeLazy, findCssClassesLazy, proxyLazyWebpack } from "@webpack";
 import { ChannelStore, ExpressionPickerStore, ListScrollerThin, lodash, PermissionsBits, PermissionStore, React, useCallback, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 import { ReactNode } from "react";
 
@@ -22,10 +22,23 @@ const ManaSearchBar = findComponentByCodeLazy<ManaSearchBarProps>("#{intl::SEARC
 const FavoriteButton = findComponentByCodeLazy<FavoriteButtonProps>("#{intl::GIF_TOOLTIP_ADD_TO_FAVORITES}");
 const SendIcon = findComponentByCodeLazy("M6.6 10.02 14 11.4a.6.6");
 
-const DmChannel: Channel & { new(base?: Partial<Channel>): Channel; } = findByPropsLazy("fromServer", "sortRecipients");
-const MessageClass: Message & { new(base?: Partial<Message>): Message; } = findByCodeLazy(";mentionChannels;mentionGames;");
+const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT]", "fromServer)");
+const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
 
 const Classes = findCssClassesLazy("gifFavoriteButton", "ctaButtonContainer");
+
+function createPreviewMessage(attachment: MessageAttachment, channelId: string) {
+    const previewMessage = {
+        id: `favourite-anything-preview-${attachment.id}`,
+        attachments: [attachment],
+        channel_id: channelId,
+        content: "",
+        type: 0,
+        timestamp: new Date().toISOString()
+    };
+
+    return createMessageRecord(previewMessage) as Message;
+}
 
 export const AttachmentPreview = proxyLazyWebpack(() => {
     // findComponentByCodeLazy doesn't work properly with component classes, this must be kept within the lazy scope
@@ -37,12 +50,12 @@ export const AttachmentPreview = proxyLazyWebpack(() => {
         }
     }
 
-    const channel = Object.freeze(new DmChannel({ id: "0", type: ChannelType.GUILD_TEXT }));
+    const channel = Object.freeze(createChannelRecordFromServer({ id: "0", type: ChannelType.GUILD_TEXT }));
 
     return function AttachmentPreview({ attachment }: AttachmentsComponentProps) {
         const message = useMemo(
-            () => new MessageClass({ attachments: [attachment], channel_id: channel.id }),
-            [attachment]
+            () => createPreviewMessage(attachment, channel.id),
+            [attachment, channel.id]
         );
 
         return (

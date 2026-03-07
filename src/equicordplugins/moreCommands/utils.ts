@@ -6,6 +6,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
+import { CommandArgument, CommandContext } from "@vencord/discord-types";
+import { DraftType, UploadAttachmentStore, UploadManager, UserSettingsActionCreators } from "@webpack/common";
 
 export const settings = definePluginSettings({
     addFreakyEnding: {
@@ -206,4 +208,181 @@ export function uwuifyArray(arr) {
     });
 
     return newArr;
+}
+
+export function getMessage(opts, other) {
+    const frecencyStore = UserSettingsActionCreators.FrecencyUserSettingsActionCreators.getCurrentValue();
+
+    const gifsArray = Object.keys(frecencyStore.favoriteGifs.gifs);
+
+    const chosenGifUrl = gifsArray[Math.floor(Math.random() * gifsArray.length)];
+
+    return `${chosenGifUrl}`;
+}
+
+export function calculateAffinityScore(affinity): number {
+    const weights = {
+        friend: 0.15,
+        dm: 0.30,
+        vc: 0.25,
+        serverMsg: 0.20,
+        communication: 0.10
+    };
+
+    let score = 0;
+    if (affinity.isFriend) score += weights.friend * 100;
+    score += affinity.dmProbability * weights.dm * 100;
+    score += affinity.vcProbability * weights.vc * 100;
+    score += affinity.serverMessageProbability * weights.serverMsg * 100;
+    score += affinity.communicationProbability * weights.communication * 100;
+
+    return Math.round(Math.min(100, Math.max(0, score)) * 100) / 100;
+}
+
+// stolen from petpet thanks vee
+export function loadFriendImage(source: File | string): Promise<HTMLImageElement> {
+    const isFile = source instanceof File;
+    const url = isFile ? URL.createObjectURL(source) : source;
+
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            if (isFile) URL.revokeObjectURL(url);
+            resolve(img);
+        };
+        img.onerror = (event, _source, _lineno, _colno, err) => reject(err || event);
+        img.crossOrigin = "anonymous";
+        img.src = url;
+    });
+}
+
+export function generatePoissonDiskPosition(
+    existingPositions: Array<{ x: number, y: number, size: number; }>,
+    canvasWidth: number,
+    canvasHeight: number,
+    size: number
+): { x: number, y: number; } {
+    const edgePadding = 10;
+    const minDist = size * 1.5;
+    const textSpace = 60;
+    const k = 30;
+
+    function isValid(x: number, y: number) {
+        if (
+            x < edgePadding ||
+            x + size > canvasWidth - edgePadding ||
+            y < edgePadding ||
+            y + size > canvasHeight - textSpace - edgePadding
+        ) return false;
+
+        return !existingPositions.some(pos => {
+            const dx = pos.x - x;
+            const dy = pos.y - y;
+            const dist = Math.hypot(dx, dy);
+            const minAllowed = (pos.size + size) / 2 + (minDist - size);
+            return dist < minAllowed;
+        });
+    }
+
+    if (existingPositions.length === 0) {
+        return {
+            x: canvasWidth / 2 - size / 2,
+            y: canvasHeight / 2 - size / 2
+        };
+    }
+
+    for (let tries = 0; tries < 100; tries++) {
+        const base = existingPositions[Math.floor(Math.random() * existingPositions.length)];
+        for (let i = 0; i < k; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = minDist + Math.random() * minDist;
+            const x = base.x + Math.cos(angle) * radius;
+            const y = base.y + Math.sin(angle) * radius;
+            if (isValid(x, y)) {
+                return {
+                    x: Math.max(edgePadding, Math.min(x, canvasWidth - size - edgePadding)),
+                    y: Math.max(edgePadding, Math.min(y, canvasHeight - size - textSpace - edgePadding))
+                };
+            }
+        }
+    }
+
+    for (let tries = 0; tries < 100; tries++) {
+        const x = Math.random() * (canvasWidth - size - edgePadding * 2) + edgePadding;
+        const y = Math.random() * (canvasHeight - size - textSpace - edgePadding * 2) + edgePadding;
+        if (isValid(x, y)) {
+            return {
+                x: Math.max(edgePadding, Math.min(x, canvasWidth - size - edgePadding)),
+                y: Math.max(edgePadding, Math.min(y, canvasHeight - size - textSpace - edgePadding))
+            };
+        }
+    }
+
+    return {
+        x: edgePadding,
+        y: edgePadding
+    };
+}
+
+export function calculateCanvasSize(userCount: number, avatarSize: number): { width: number, height: number; } {
+    const padding = 50;
+    const textSpace = 60;
+    const itemWidth = avatarSize + padding;
+    const itemHeight = avatarSize + textSpace + padding;
+    const aspectRatio = 16 / 9;
+    const cols = Math.ceil(Math.sqrt(userCount * aspectRatio));
+    const rows = Math.ceil(userCount / cols);
+
+    return {
+        width: Math.max(1000, cols * itemWidth + padding),
+        height: Math.max(700, rows * itemHeight + padding)
+    };
+}
+
+export const FRAMES = 1;
+
+export function loadImage(source: File | string) {
+    const isFile = source instanceof File;
+    const url = isFile ? URL.createObjectURL(source) : source;
+
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            if (isFile) URL.revokeObjectURL(url);
+            resolve(img);
+        };
+        img.onerror = (event, _source, _lineno, _colno, err) => reject(err || event);
+        img.crossOrigin = "Anonymous";
+        img.src = url;
+    });
+}
+
+export async function resolveImage(options: CommandArgument[], ctx: CommandContext): Promise<{ image: File | null; width: number | null; height: number | null; }> {
+    let image: File | null = null;
+    let width: number | null = null;
+    let height: number | null = null;
+
+    for (const opt of options) {
+        switch (opt.name) {
+            case "image":
+                const upload = UploadAttachmentStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
+                if (upload) {
+                    if (!upload.isImage) {
+                        UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
+                        throw "Upload is not an image";
+                    }
+                    image = upload.item.file;
+                }
+                break;
+            case "width":
+                width = Number(opt.value);
+                break;
+            case "height":
+                height = Number(opt.value);
+                break;
+        }
+    }
+
+    UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
+    return { image, width, height };
 }

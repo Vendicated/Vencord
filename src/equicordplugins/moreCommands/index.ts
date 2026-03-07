@@ -18,17 +18,55 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
 import { addMessagePreEditListener, addMessagePreSendListener, MessageObject, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { DraftType, UploadHandler, UploadManager, UserAffinitiesStore, UserStore } from "@webpack/common";
+import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
-import { fromMorse, getCuteAnimeBoys, getCuteNeko, getCutePats, isMorse, makeFreaky, mock, settings, toMorse, uwuify, uwuifyArray } from "./utils";
+import {
+    calculateAffinityScore,
+    calculateCanvasSize,
+    FRAMES,
+    fromMorse,
+    generatePoissonDiskPosition,
+    getCuteAnimeBoys,
+    getCuteNeko,
+    getCutePats,
+    getMessage,
+    isMorse,
+    loadFriendImage,
+    loadImage,
+    makeFreaky,
+    mock,
+    resolveImage,
+    settings,
+    toMorse,
+    uwuify,
+    uwuifyArray
+} from "./utils";
+
+migratePluginSettings("MoreCommands", "FriendCloud", "GifRoulette", "ImgToGif", "MoreKaomoji");
 
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",
-    authors: [Devs.Arjix, Devs.amy, Devs.Samu, EquicordDevs.zyqunix, EquicordDevs.ShadyGoat, Devs.thororen, Devs.Korbo, Devs.nyx, Devs.amy],
+    authors: [
+        Devs.Arjix,
+        Devs.amy,
+        Devs.Samu,
+        EquicordDevs.zyqunix,
+        EquicordDevs.ShadyGoat,
+        Devs.thororen,
+        Devs.Korbo,
+        Devs.nyx,
+        Devs.amy,
+        Devs.Samwich,
+        EquicordDevs.Fafa,
+        Devs.JacobTm,
+        EquicordDevs.voidbbg
+    ],
     settings,
     commands: [
         {
@@ -435,7 +473,394 @@ export default definePlugin({
                 content: uwuify(findOption(opts, "message", "")),
             }),
         },
+        {
+            name: "gifroulette",
+            description: "Tempt fate and send a gif",
+            execute: (opts, other) => ({
+                content: getMessage(opts, other)
+            }),
+        },
+        {
+            inputType: ApplicationCommandInputType.BUILT_IN,
+            name: "friendcloud",
+            description: "Display user you most interact with in a cloud",
+            options: [
+                {
+                    name: "count",
+                    description: "Number of users to display",
+                    type: ApplicationCommandOptionType.NUMBER,
+                    required: false
+                }
+            ],
+            execute: async (opts, cmdCtx) => {
+                const count = findOption(opts, "count", 25);
+
+                if (!count) return sendBotMessage(cmdCtx.channel.id, { content: "The count must be 1 or higher!" });
+
+                try {
+                    const affinities = UserAffinitiesStore.getUserAffinities();
+
+                    if (!affinities?.length) {
+                        return sendBotMessage(cmdCtx.channel.id, {
+                            content: "No affinities found. Check your [privacy settings](<https://support.discord.com/hc/en-us/articles/21864805694999-Data-Used-to-Improve-Discord>)."
+                        });
+                    }
+
+                    const users = affinities
+                        .map(e => ({
+                            member: UserStore.getUser(e.otherUserId),
+                            affinity: calculateAffinityScore(e)
+                        }))
+                        .filter(x => x.member?.id)
+                        .sort((a, b) => b.affinity - a.affinity)
+                        .slice(0, count);
+
+                    if (!users.length) {
+                        return sendBotMessage(cmdCtx.channel.id, {
+                            content: "No valid users found in affinities. Check your [privacy settings](<https://support.discord.com/hc/en-us/articles/21864805694999-Data-Used-to-Improve-Discord>)."
+                        });
+                    }
+
+                    const minAffinity = Math.min(...users.map(u => u.affinity));
+                    const maxAffinity = Math.max(...users.map(u => u.affinity));
+                    const minSize = 120;
+                    const maxSize = 240;
+
+                    const getSize = (affinity: number): number => {
+                        if (maxAffinity === minAffinity) return (minSize + maxSize) / 2;
+                        return minSize + ((affinity - minAffinity) / (maxAffinity - minAffinity)) * (maxSize - minSize);
+                    };
+
+                    const avgSize = (minSize + maxSize) / 2;
+                    const { width: canvasWidth, height: canvasHeight } = calculateCanvasSize(users.length, avgSize);
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
+                    const ctx = canvas.getContext("2d")!;
+
+                    const positions: Array<{ x: number, y: number, size: number; }> = [];
+                    const userPositions = users.map(user => {
+                        const size = getSize(user.affinity);
+                        const pos = generatePoissonDiskPosition(positions, canvasWidth, canvasHeight, size);
+                        positions.push({ x: pos.x, y: pos.y, size });
+                        return { ...user, x: pos.x, y: pos.y, size };
+                    });
+
+                    let loadedImages = 0;
+                    const totalImages = userPositions.length;
+
+                    const drawImage = async user => {
+                        try {
+                            const avatarUrl = user.member?.avatar
+                                ? `https://cdn.discordapp.com/avatars/${user.member.id}/${user.member?.avatar}.webp?size=256`
+                                : `https://cdn.discordapp.com/embed/avatars/${user.member.id as any as number % 5}.png`;
+
+                            const img = await loadFriendImage(avatarUrl);
+                            const centerX = user.x + user.size / 2;
+                            const centerY = user.y + user.size / 2;
+
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, user.size / 2, 0, Math.PI * 2);
+                            ctx.clip();
+                            ctx.drawImage(img, user.x, user.y, user.size, user.size);
+                            ctx.restore();
+
+                            ctx.strokeStyle = "#808080";
+                            ctx.lineWidth = 3;
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, user.size / 2 + 1, 0, Math.PI * 2);
+                            ctx.stroke();
+                        } catch {
+                            // we ignore
+                        } finally {
+                            loadedImages++;
+                            if (loadedImages === totalImages) {
+                                canvas.toBlob(blob => {
+                                    if (!blob) {
+                                        sendBotMessage(cmdCtx.channel.id, { content: "Couldn't generate the image :c" });
+                                        return;
+                                    }
+                                    const file = new File([blob], "affinities-cloud.png", { type: "image/png" });
+                                    UploadHandler.promptToUpload([file], cmdCtx.channel, DraftType.ChannelMessage);
+                                }, "image/png");
+                            }
+                        }
+                    };
+
+                    userPositions.forEach(drawImage);
+                } catch (e: unknown) {
+                    if (e instanceof Error) sendBotMessage(cmdCtx.channel.id, { content: e.message });
+                }
+            },
+        },
+        {
+            inputType: ApplicationCommandInputType.BUILT_IN,
+            name: "imgtogif",
+            description: "Allows you to turn an image to a gif",
+            options: [
+                {
+                    name: "image",
+                    description: "Image attachment to use",
+                    type: ApplicationCommandOptionType.ATTACHMENT
+                },
+                {
+                    name: "width",
+                    description: "Width of the gif",
+                    type: ApplicationCommandOptionType.INTEGER
+                },
+                {
+                    name: "height",
+                    description: "Height of the gif",
+                    type: ApplicationCommandOptionType.INTEGER
+                }
+            ],
+            execute: async (opts, cmdCtx) => {
+                try {
+                    const { image, width, height } = await resolveImage(opts, cmdCtx);
+                    if (!image) throw "No Image specified!";
+
+                    const avatar = await loadImage(image);
+
+                    let gifWidth: number;
+                    let gifHeight: number;
+
+                    if (width && height) {
+                        gifWidth = width;
+                        gifHeight = height;
+                    } else if (width) {
+                        gifWidth = width;
+                        gifHeight = Math.round((avatar.height / avatar.width) * width);
+                    } else if (height) {
+                        gifHeight = height;
+                        gifWidth = Math.round((avatar.width / avatar.height) * height);
+                    } else {
+                        gifWidth = avatar.width;
+                        gifHeight = avatar.height;
+                    }
+
+                    const gif = GIFEncoder();
+                    const canvas = document.createElement("canvas");
+                    canvas.width = gifWidth;
+                    canvas.height = gifHeight;
+                    const ctx = canvas.getContext("2d")!;
+
+                    UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+
+                    for (let i = 0; i < FRAMES; i++) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(avatar, 0, 0, avatar.width, avatar.height, 0, 0, canvas.width, canvas.height);
+
+                        const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const palette = quantize(data, 256);
+                        const index = applyPalette(data, palette);
+
+                        gif.writeFrame(index, canvas.width, canvas.height, {
+                            transparent: true,
+                            palette,
+                        });
+                    }
+
+                    gif.finish();
+                    const originalName = image.name ? image.name.replace(/\.[^/.]+$/, "") : "converted";
+                    const file = new File([new Uint8Array(gif.bytesView())], `${originalName}.gif`, { type: "image/gif" });
+                    setTimeout(() => UploadHandler.promptToUpload([file], cmdCtx.channel, DraftType.ChannelMessage), 10);
+                } catch (err) {
+                    UploadManager.clearAll(cmdCtx.channel.id, DraftType.SlashCommand);
+                    sendBotMessage(cmdCtx.channel.id, { content: String(err) });
+                }
+            },
+        },
+        {
+            name: "dissatisfaction",
+            description: " ＞﹏＜",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + " ＞﹏＜",
+            }),
+        },
+        {
+            name: "smug",
+            description: "ಠ_ಠ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ಠ_ಠ",
+            }),
+        },
+        {
+            name: "happy",
+            description: "ヽ(´▽`)/",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ヽ(´▽`)/",
+            }),
+        },
+        {
+            name: "crying",
+            description: "ಥ_ಥ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ಥ_ಥ",
+            }),
+        },
+        {
+            name: "angry",
+            description: "ヽ(｀Д´)ﾉ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ヽ(｀Д´)ﾉ",
+            }),
+        },
+        {
+            name: "anger",
+            description: "ヽ(ｏ`皿′ｏ)ﾉ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ヽ(ｏ`皿′ｏ)ﾉ",
+            }),
+        },
+        {
+            name: "joy",
+            description: "<(￣︶￣)>",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "<(￣︶￣)>",
+            }),
+        },
+        {
+            name: "blush",
+            description: "૮ ˶ᵔ ᵕ ᵔ˶ ა",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "૮ ˶ᵔ ᵕ ᵔ˶ ა",
+            }),
+        },
+        {
+            name: "confused",
+            description: "(•ิ_•ิ)?",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(•ิ_•ิ)?",
+            }),
+        },
+        {
+            name: "sleeping",
+            description: "(ᴗ_ᴗ)",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(ᴗ_ᴗ)",
+            }),
+        },
+        {
+            name: "laughing",
+            description: "o(≧▽≦)o",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "o(≧▽≦)o",
+            }),
+        },
+        /*
+        even more kaomoji
+        */
+        {
+            name: "giving",
+            description: "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧",
+            }),
+        },
+        {
+            name: "peace",
+            description: "✌(◕‿-)✌",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "✌(◕‿-)✌",
+            }),
+        },
+        {
+            name: "ending1",
+            description: "Ꮺ ָ࣪ ۰ ͙⊹",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "Ꮺ ָ࣪ ۰ ͙⊹",
+            }),
+        },
+        {
+            name: "uwu",
+            description: "(>⩊<)",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(>⩊<)",
+            }),
+        },
+        {
+            name: "comfy",
+            description: "(─‿‿─)♡",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(─‿‿─)♡",
+            }),
+        },
+        {
+            name: "lovehappy",
+            description: "(*≧ω≦*)",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(*≧ω≦*)",
+            }),
+        },
+        {
+            name: "loveee",
+            description: "(⁄ ⁄>⁄ ▽ ⁄<⁄ ⁄)",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(⁄ ⁄>⁄ ▽ ⁄<⁄ ⁄)",
+            }),
+        },
+        {
+            name: "give",
+            description: "(ノ= ⩊ = )ノ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(ノ= ⩊ = )ノ",
+            }),
+        },
+        {
+            name: "lovegive",
+            description: "ღゝ◡╹)ノ♡",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ღゝ◡╹)ノ♡",
+            }),
+        },
+        {
+            name: "music",
+            description: "(￣▽￣)/♫•¨•.¸¸♪",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(￣▽￣)/♫•¨•.¸¸♪",
+            }),
+        },
+        {
+            name: "stars",
+            description: ".𖥔 ݁ ˖๋ ࣭ ⭑",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + ".𖥔 ݁ ˖๋ ࣭ ⭑",
+            }),
+        },
+        {
+            name: "lovegiving",
+            description: "⸜(｡˃ ᵕ ˂ )⸝♡",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "⸜(｡˃ ᵕ ˂ )⸝♡",
+            }),
+        }
     ],
+
     patches: [
         {
             find: ".isPureReactComponent=!0;",
