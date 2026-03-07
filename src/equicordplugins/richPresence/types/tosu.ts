@@ -407,7 +407,7 @@ export interface Play {
     accuracy: number;
     healthBar: HealthBar;
     hits: Hits;
-    hitErrorArray: any[];
+    hitErrorArray: number[];
     combo: Combo;
     mods: NumberName;
     rank: Rank;

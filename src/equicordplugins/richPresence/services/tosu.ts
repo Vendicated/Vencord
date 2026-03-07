@@ -1,98 +1,90 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
 import { Activity } from "@vencord/discord-types";
 import { ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
 
-import { BanchoStatusEnum, GameState, Modes, TosuApi, UserLoginStatus } from "./type";
+import { BanchoStatusEnum, GameState, Modes, TosuApi } from "../types/tosu";
 
-const socketId = "tosu";
 const OSU_APP_ID = "367827983903490050";
 const OSU_LARGE_IMAGE = "373344233077211136";
 const OSU_STARDARD_SMALL_IMAGE = "373370493127884800";
 const OSU_MANIA_SMALL_IMAGE = "373370588703621136";
 const OSU_TAIKO_SMALL_IMAGE = "373370519891738624";
 const OSU_CATCH_SMALL_IMAGE = "373370543161999361";
-
-const throttledOnMessage = throttle(onMessage, 3000, () => FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null, socketId: "tosu" }));
+const SOCKET_ID = "RichPresence_Tosu";
 
 let ws: WebSocket;
 let wsReconnect: NodeJS.Timeout;
 let shouldReconnect = false;
 
-export default definePlugin({
-    name: "TosuRPC",
-    description: "osu! RPC with data from tosu",
-    authors: [Devs.AutumnVN],
-    start() {
-        shouldReconnect = true;
-        (function connect() {
-            ws = new WebSocket("ws://127.0.0.1:24050/websocket/v2");
-            ws.addEventListener("error", () => ws.close());
-            ws.addEventListener("close", () => {
-                if (!shouldReconnect) return;
-                wsReconnect = setTimeout(connect, 5000);
-            });
-            ws.addEventListener("message", ({ data }) => throttledOnMessage(data));
-        })();
-    },
-    stop() {
-        shouldReconnect = false;
-        if (wsReconnect) clearTimeout(wsReconnect);
-        if (ws) ws.close();
-        FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null, socketId: "tosu" });
-    }
-});
+function throttle<T extends (...args: never[]) => void>(func: T, limit: number, timedOutCallback?: () => void): T {
+    let inThrottle: boolean;
+    let callbackTimeout: NodeJS.Timeout;
+    return function (...args: Parameters<T>) {
+        if (!inThrottle) {
+            func(...args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+            if (timedOutCallback) {
+                clearTimeout(callbackTimeout);
+                callbackTimeout = setTimeout(timedOutCallback, limit * 2);
+            }
+        }
+    } as T;
+}
+
+async function getAsset(key: string): Promise<string> {
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key))
+        return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
+    return (await ApplicationAssetUtils.fetchAssetIds(OSU_APP_ID, [key]))[0];
+}
+
+const throttledOnMessage = throttle(onMessage, 3000, () =>
+    FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null, socketId: SOCKET_ID })
+);
 
 async function onMessage(data: string) {
     const json: TosuApi = JSON.parse(data);
     // @ts-ignore
-    if (json.error) return FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null, socketId: "tosu" });
+    if (json.error) return FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null, socketId: SOCKET_ID });
 
     const { state, session, profile, beatmap, play, resultsScreen } = json;
+
+    const assets: NonNullable<Activity["assets"]> = {};
+
+    switch (profile.mode.number) {
+        case Modes.Osu:
+            assets.small_image = OSU_STARDARD_SMALL_IMAGE;
+            assets.small_text = "osu!";
+            break;
+        case Modes.Mania:
+            assets.small_image = OSU_MANIA_SMALL_IMAGE;
+            assets.small_text = "osu!mania";
+            break;
+        case Modes.Taiko:
+            assets.small_image = OSU_TAIKO_SMALL_IMAGE;
+            assets.small_text = "osu!taiko";
+            break;
+        case Modes.Fruits:
+            assets.small_image = OSU_CATCH_SMALL_IMAGE;
+            assets.small_text = "osu!catch";
+            break;
+    }
 
     const activity: Activity = {
         application_id: OSU_APP_ID,
         name: "osu!",
         type: ActivityType.PLAYING,
-        assets: {
-            large_image: OSU_LARGE_IMAGE,
-            large_text: profile.userStatus.number === UserLoginStatus.Connected ? `${profile.name} | #${profile.globalRank} | ${Math.round(profile.pp)}pp` : undefined,
-        },
-        timestamps: {
-            start: Date.now() - session.playTime
-        },
+        assets,
+        timestamps: { start: Date.now() - session.playTime },
         flags: 1 << 0,
     };
 
-    activity.assets = {};
-
-    switch (profile.mode.number) {
-        case Modes.Osu:
-            activity.assets.small_image = OSU_STARDARD_SMALL_IMAGE;
-            activity.assets.small_text = "osu!";
-            break;
-        case Modes.Mania:
-            activity.assets.small_image = OSU_MANIA_SMALL_IMAGE;
-            activity.assets.small_text = "osu!mania";
-            break;
-        case Modes.Taiko:
-            activity.assets.small_image = OSU_TAIKO_SMALL_IMAGE;
-            activity.assets.small_text = "osu!taiko";
-            break;
-        case Modes.Fruits:
-            activity.assets.small_image = OSU_CATCH_SMALL_IMAGE;
-            activity.assets.small_text = "osu!catch";
-            break;
-    }
-
-    let player = "";
     let mods = "";
     let fc = "";
     let combo = "";
@@ -101,11 +93,13 @@ async function onMessage(data: string) {
     let h0 = "";
     let sb = "";
     let pp = "";
-    switch (state.number) {
-        case GameState.Play:
-            activity.type = profile.banchoStatus.number === BanchoStatusEnum.Playing ? ActivityType.PLAYING : ActivityType.WATCHING;
 
-            player = profile.banchoStatus.number === BanchoStatusEnum.Playing ? "" : `${play.playerName} | `;
+    switch (state.number) {
+        case GameState.Play: {
+            activity.type = profile.banchoStatus.number === BanchoStatusEnum.Playing
+                ? ActivityType.PLAYING : ActivityType.WATCHING;
+
+            const player = profile.banchoStatus.number === BanchoStatusEnum.Playing ? "" : `${play.playerName} | `;
             mods = play.mods.name ? `+${play.mods.name} ` : "";
             activity.name = `${player}${beatmap.artist} - ${beatmap.title} [${beatmap.version}] ${mods}(${beatmap.mapper}, ${beatmap.stats.stars.total.toFixed(2)}*)`;
 
@@ -124,10 +118,11 @@ async function onMessage(data: string) {
             activity.state = [h100, h50, h0, sb].filter(Boolean).join(" | ");
 
             const playRank = await getAsset(`https://raw.githubusercontent.com/AutumnVN/gosu-rich-presence/main/grade/${play.rank.current.toLowerCase().replace("x", "ss")}.png`);
-            activity.assets.small_image = playRank;
-            activity.assets.small_text = undefined;
+            assets.small_image = playRank;
+            assets.small_text = undefined;
             break;
-        case GameState.ResultScreen:
+        }
+        case GameState.ResultScreen: {
             activity.type = ActivityType.WATCHING;
 
             mods = resultsScreen.mods.name ? `+${resultsScreen.mods.name} ` : "";
@@ -147,10 +142,11 @@ async function onMessage(data: string) {
             activity.state = [h100, h50, h0].filter(Boolean).join(" | ");
 
             const resultRank = await getAsset(`https://raw.githubusercontent.com/AutumnVN/gosu-rich-presence/main/grade/${resultsScreen.rank.toLowerCase().replace("x", "ss")}.png`);
-            activity.assets.small_image = resultRank;
-            activity.assets.small_text = undefined;
+            assets.small_image = resultRank;
+            assets.small_text = undefined;
             break;
-        default:
+        }
+        default: {
             activity.type = ActivityType.LISTENING;
             mods = play.mods.name ? `+${play.mods.name} ` : "";
             activity.name = `${beatmap.artist} - ${beatmap.title} [${beatmap.version}] ${mods}(${beatmap.mapper}, ${beatmap.stats.stars.total.toFixed(2)}*)`;
@@ -193,36 +189,35 @@ async function onMessage(data: string) {
                 case BanchoStatusEnum.Multiplaying: activity.state = "Multiplaying"; break;
                 case BanchoStatusEnum.OsuDirect: activity.state = "osu!direct"; break;
             }
-
             break;
+        }
     }
 
     if (beatmap.set > 0) {
         const mapBg = await getAsset(`https://assets.ppy.sh/beatmaps/${beatmap.set}/covers/list@2x.jpg`);
         const res = await fetch(mapBg.replace(/^mp:/, "https://media.discordapp.net/"), { method: "HEAD" });
-        if (res.ok) activity.assets.large_image = mapBg;
+        if (res.ok) assets.large_image = mapBg;
     }
 
-    FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity, socketId: "tosu" });
+    FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity, socketId: SOCKET_ID });
 }
 
-function throttle<T extends Function>(func: T, limit: number, timedOutCallback?: () => void): T {
-    let inThrottle: boolean;
-    let callbackTimeout: NodeJS.Timeout;
-    return function (this: any, ...args: any[]) {
-        if (!inThrottle) {
-            func.apply(this, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-            if (timedOutCallback) {
-                clearTimeout(callbackTimeout);
-                callbackTimeout = setTimeout(timedOutCallback, limit * 2);
-            }
-        }
-    } as any;
+export function start() {
+    shouldReconnect = true;
+    (function connect() {
+        ws = new WebSocket("ws://127.0.0.1:24050/websocket/v2");
+        ws.addEventListener("error", () => ws.close());
+        ws.addEventListener("close", () => {
+            if (!shouldReconnect) return;
+            wsReconnect = setTimeout(connect, 5000);
+        });
+        ws.addEventListener("message", ({ data }) => throttledOnMessage(data));
+    })();
 }
 
-async function getAsset(key: string): Promise<string> {
-    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
-    return (await ApplicationAssetUtils.fetchAssetIds(OSU_APP_ID, [key]))[0];
+export function stop() {
+    shouldReconnect = false;
+    if (wsReconnect) clearTimeout(wsReconnect);
+    if (ws) ws.close();
+    FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null, socketId: SOCKET_ID });
 }
