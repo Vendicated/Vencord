@@ -60,6 +60,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 674710789138939916n,
         badge: false
     },
+    marga: {
+        name: "marga",
+        id: 1211360347366236214n,
+    },
     Cyn: {
         name: "Cynosphere",
         id: 150745989836308480n
