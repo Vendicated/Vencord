@@ -1,0 +1,29 @@
+.vc-inrole-member-list {
+    max-height: 400px;
+    margin-top: 10px;
+    margin-bottom: 13px;
+    overflow-x: hidden;
+}
+
+.vc-inrole-member-list::-webkit-scrollbar {
+    background-color: #fff1;
+    border-radius: 100px;
+    width: 10px;
+}
+
+.vc-inrole-member-list::-webkit-scrollbar-thumb {
+    background-color: #fff3;
+    border-radius: 100px;
+}
+
+.vc-inrole-modal-member {
+    margin: 11px 0;
+}
+
+.vc-inrole-header {
+    padding-top: 15px;
+}
+
+.vc-inrole-close {
+    margin-left: auto;
+}

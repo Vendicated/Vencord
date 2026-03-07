@@ -156,8 +156,9 @@ async function generateDebugInfoMessage() {
     }
 
     const potentiallyProblematicPlugins = ([
-        "NoRPC", "NoProfileThemes", "NoMosaic", "NoSystemBadge",
-        "AlwaysAnimate", "ClientTheme", "SoundTroll", "NeverPausePreviews",
+        "NoRPC", "NoProfileThemes", "NoMosaic", "NoRoleHeaders", "NoSystemBadge",
+        "AlwaysAnimate", "ClientTheme", "SoundTroll", "Ingtoninator", "NeverPausePreviews",
+        "IdleAutoRestart",
     ].filter(isPluginEnabled) ?? []).sort();
 
     if (isPluginEnabled(customIdle.name) && customIdle.settings.store.idleTimeout === 0) {
