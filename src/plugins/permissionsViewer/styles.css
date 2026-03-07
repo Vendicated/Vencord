@@ -138,6 +138,24 @@
     color: var(--interactive-icon-active);
 }
 
+.vc-permviewer-modal-role-members {
+    margin-top: 10px;
+    padding: 10px;
+    border-top: 2px solid var(--background-mod-normal);
+}
+
+.vc-permviewer-modal-role-members-title {
+    display: inline-block;
+    margin-bottom: 6px;
+}
+
+.vc-permviewer-modal-role-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
 /* copy pasted from discord cause impossible to webpack find */
 .vc-permviewer-role-button {
     border-radius: var(--radius-sm);

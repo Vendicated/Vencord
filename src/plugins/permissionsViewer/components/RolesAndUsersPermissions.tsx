@@ -25,7 +25,7 @@ import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Guild, Role, UnicodeEmoji, User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildRoleStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
@@ -57,6 +57,7 @@ function getRoleIconSrc(role: Role) {
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
     const guildPermissionSpecMap = useMemo(() => getGuildPermissionSpecMap(guild), [guild.id]);
+    const requestedRoleMemberIds = useRef(new Set<string>());
 
     useStateFromStores(
         [GuildMemberStore],
@@ -85,6 +86,49 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     const selectedItem = permissions[selectedItemIndex];
 
     const roles = GuildRoleStore.getRolesSnapshot(guild.id);
+    const roleMembers = useMemo(() => {
+        if (selectedItem?.type !== PermissionType.Role || selectedItem.id == null) return [];
+        const roleId = selectedItem.id;
+
+        return GuildMemberStore
+            .getMemberIds(guild.id)
+            .filter(memberId => {
+                const member = GuildMemberStore.getMember(guild.id, memberId);
+                if (!member) return false;
+
+                return roleId === guild.id || member.roles.includes(roleId);
+            })
+            .map(memberId => UserStore.getUser(memberId))
+            .filter((user): user is User => user != null)
+            .sort((a, b) => getUniqueUsername(a).localeCompare(getUniqueUsername(b)));
+    }, [guild.id, selectedItem?.id, selectedItem?.type]);
+
+    useEffect(() => {
+        if (selectedItem?.type !== PermissionType.Role || selectedItem.id == null) return;
+        const roleId = selectedItem.id;
+
+        const missingMemberIds = GuildMemberStore
+            .getMemberIds(guild.id)
+            .filter(memberId => {
+                const member = GuildMemberStore.getMember(guild.id, memberId);
+                if (!member) return false;
+
+                const hasRole = roleId === guild.id || member.roles.includes(roleId);
+                return hasRole && !UserStore.getUser(memberId) && !requestedRoleMemberIds.current.has(memberId);
+            });
+
+        if (!missingMemberIds.length) return;
+
+        for (const memberId of missingMemberIds) {
+            requestedRoleMemberIds.current.add(memberId);
+        }
+
+        FluxDispatcher.dispatch({
+            type: "GUILD_MEMBERS_REQUEST",
+            guildIds: [guild.id],
+            userIds: missingMemberIds
+        });
+    }, [guild.id, selectedItem?.id, selectedItem?.type]);
 
     return (
         <ModalRoot
@@ -209,6 +253,28 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     </Tooltip>
                                 </div>
                             ))}
+
+                            {selectedItem.type === PermissionType.Role && (
+                                <div className={cl("modal-role-members")}>
+                                    <Text variant="text-sm/semibold" className={cl("modal-role-members-title")}>Role Members ({roleMembers.length})</Text>
+
+                                    {!roleMembers.length && (
+                                        <Text variant="text-sm/normal" color="text-muted">No members found for this role.</Text>
+                                    )}
+
+                                    {roleMembers.map(user => (
+                                        <div key={user.id} className={cl("modal-role-member")}>
+                                            <img
+                                                className={cl("modal-user-img")}
+                                                src={user.getAvatarURL(void 0, void 0, false)}
+                                            />
+                                            <Text variant="text-sm/normal" className={cl("modal-list-item-text")}>
+                                                {getUniqueUsername(user)}
+                                            </Text>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </ScrollerThin>
                     </div>
                 )}
