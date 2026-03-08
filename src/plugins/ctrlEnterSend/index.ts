@@ -36,6 +36,12 @@ export default definePlugin({
             description: "Whether to send a message in the middle of a code block",
             type: OptionType.BOOLEAN,
             default: true,
+        },
+        disableCallKeybind: {
+            description: "Whether the default call keybind should be disabled to prevent misclicks",
+            type: OptionType.BOOLEAN,
+            restartNeeded: true,
+            default: false,
         }
     }),
     patches: [
@@ -53,6 +59,13 @@ export default definePlugin({
             replacement: {
                 match: /!(\i).shiftKey&&!(this.hasOpenCodeBlock\(\))&&\(.{0,100}?\)/,
                 replace: "$self.shouldSubmit($1, $2)"
+            }
+        },
+        {
+            find: 'binds:["ctrl\+\'',
+            replacement: {
+                match: /binds:\["ctrl\+'",\s*"ctrl\+shift\+'"\]/,
+                replace: 'binds:$self.getCallKeybinds()'
             }
         }
     ],
@@ -73,5 +86,8 @@ export default definePlugin({
             result &&= !codeblock;
         }
         return result;
+    },
+    getCallKeybinds(): string[] {
+        return this.settings.store.disableCallKeybind ? ['disabled by ctrlentersend'] : ["ctrl+'", "ctrl+shift+'"];
     }
 });
