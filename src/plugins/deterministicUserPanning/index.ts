@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { SelectedChannelStore, UserStore, VoiceStateStore } from "@webpack/common";
+import { MediaEngineStore,SelectedChannelStore, UserStore, VoiceStateStore } from "@webpack/common";
 
 // lot of code here is common with vcNarrator; the VoiceStateChangeEvent parsing is nearly identical
 
@@ -62,9 +63,21 @@ function panFromString(str: string): Pan {
 }
 // END shameless LLM use
 
+var hasToasted = false;
+
 function handleUserPan(userId: string): undefined {
     const userPan = panFromString(userId);
     setLocalPan(userId, userPan.left, userPan.right);
+
+    const currentMediaEngine = MediaEngineStore.getMediaEngine();
+    const canPan = currentMediaEngine.supports("VOICE_PANNING");
+    if (!canPan && !hasToasted) {
+        showNotification({
+            title: "DeterministicUserPanning",
+            body: "This media engine doesn't support panning! User voices will not pan.",
+        });
+        hasToasted = true;
+    }
 }
 
 export default definePlugin({
