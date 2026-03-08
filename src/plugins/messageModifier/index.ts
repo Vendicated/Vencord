@@ -29,7 +29,7 @@ export default definePlugin({
     },
 
     onStop() {
-        // Crucial: Cleaning up the patcher to ensure the client returns to its original state
+        
         patcher.unpatchAll();
     }
 });
