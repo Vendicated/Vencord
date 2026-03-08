@@ -1,10 +1,5 @@
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2026 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
-import { definePlugin } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+import { Devs } from "@utils/constants";
 import { MessageActions } from "@webpack/common";
 
 export default definePlugin({
@@ -13,17 +8,17 @@ export default definePlugin({
     authors: [Devs.ikito],
     settings: {
         suffix: {
-            type: "string",
+            type: OptionType.STRING,
             default: " (sent via Vencord)",
             description: "The text to append to your messages",
         }
     },
     patches: [
         {
-            find: "sendMessage:{",
+            find: "sendMessage:function",
             replacement: {
-                match: /sendMessage:function\(\w+,(\w+)\)/,
-                replace: "sendMessage:function(e,$1){$1.content+=(plugin.settings.suffix.get()??' (sent via Vencord)');"
+                match: /sendMessage:function\(\w+,(\w+)\)\{/,
+                replace: "sendMessage:function(e,$1){$1.content+=this.settings.suffix.get()||' (sent via Vencord)';",
             }
         }
     ]
