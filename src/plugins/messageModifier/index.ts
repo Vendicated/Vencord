@@ -1,14 +1,8 @@
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2026 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
 import { patcher, webpack } from "@vendicated/patch";
-import definePlugin from "@utils/types";
+import { definePlugin } from "@utils/types";
 import { Devs } from "@utils/constants";
 
-const MessageModule = webpack.getByProps("sendMessage", "editMessage");
+const MessageActions = webpack.getByProps("sendMessage", "editMessage");
 
 export default definePlugin({
     name: "MessageModifier",
@@ -16,16 +10,20 @@ export default definePlugin({
     authors: [Devs.ikito],
 
     onStart() {
-        patcher.before(MessageModule, "sendMessage", (args) => {
-            const messageData = args[1];
-            
-            if (messageData && typeof messageData.content === "string") {
-                messageData.content += " (sent via Vencord patch)";
+        if (!MessageActions) {
+            console.error("MessageModifier: Failed to find MessageActions module");
+            return;
+        }
+
+        this.patch = patcher.before(MessageActions, "sendMessage", (args) => {
+            const message = args[1];
+            if (message && typeof message.content === "string") {
+                message.content += " (sent via Vencord)";
             }
         });
     },
 
     onStop() {
-        patcher.unpatchAll();
+        this.patch?.();
     }
 });
