@@ -628,18 +628,18 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     prism: {
         name: "prism",
         id: 390884143749136386n,
-    },    
+    },
     ikito: {
-        name: ".ikito1",
+        name: "ikito",
         id: 227280645343150081n,
     },
 } satisfies Record<string, Dev>);
 
-// iife so #__PURE__ works correctly
+/* iife so #__PURE__ works correctly */
 export const DevsById = /* #__PURE__*/ (() =>
     Object.freeze(Object.fromEntries(
         Object.entries(Devs)
             .filter(d => d[1].id !== 0n)
             .map(([_, v]) => [v.id, v] as const)
     ))
-)() as Record<string, Dev>;
+)() as Record<string, Dev>;    
