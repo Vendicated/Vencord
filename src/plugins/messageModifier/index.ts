@@ -8,7 +8,6 @@ import { patcher, webpack } from "@vendicated/patch";
 import definePlugin from "@utils/types";
 import { Devs } from "@utils/constants";
 
-
 const MessageModule = webpack.getByProps("sendMessage", "editMessage");
 
 export default definePlugin({
@@ -17,10 +16,8 @@ export default definePlugin({
     authors: [Devs.ikito],
 
     onStart() {
-
         patcher.before(MessageModule, "sendMessage", (args) => {
             const messageData = args[1];
-            
             
             if (messageData && typeof messageData.content === "string") {
                 messageData.content += " (sent via Vencord patch)";
@@ -29,7 +26,6 @@ export default definePlugin({
     },
 
     onStop() {
-        
         patcher.unpatchAll();
     }
 });
