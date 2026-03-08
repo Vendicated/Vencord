@@ -18,17 +18,20 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heading } from "@components/Heading";
 import { Devs } from "@utils/constants";
 import { copyWithToast, getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { Message } from "@vencord/discord-types";
-import { Button, ChannelStore, Forms, GuildRoleStore, Menu, Text } from "@webpack/common";
+import { ChannelStore, GuildRoleStore, Menu } from "@webpack/common";
 
 
 const CopyIcon: IconComponent = ({ height = 20, width = 20, className }) => {
@@ -75,20 +78,20 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>View Raw</Text>
+                    <BaseText size="lg" weight="semibold" style={{ flexGrow: 1 }}>View Raw</BaseText>
                     <ModalCloseButton onClick={() => closeModal(key)} />
                 </ModalHeader>
                 <ModalContent>
                     <div style={{ padding: "16px 0" }}>
                         {!!msgContent && (
                             <>
-                                <Forms.FormTitle tag="h5">Content</Forms.FormTitle>
+                                <Heading>Content</Heading>
                                 <CodeBlock content={msgContent} lang="" />
                                 <Divider className={Margins.bottom20} />
                             </>
                         )}
 
-                        <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
+                        <Heading>{type} Data</Heading>
                         <CodeBlock content={json} lang="json" />
                     </div>
                 </ModalContent >

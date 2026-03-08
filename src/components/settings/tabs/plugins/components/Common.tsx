@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
+import { Span } from "@components/Span";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { DefinedSettings, PluginOptionBase } from "@utils/types";
-import { Text } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 export const cl = classNameFactory("vc-plugins-setting-");
@@ -46,12 +47,12 @@ export function SettingsSection({ tag: Tag = "div", name, description, error, in
         <Tag className={cl("section")}>
             <div className={classes(cl("content"), inlineSetting && cl("inline"))}>
                 <div className={cl("label")}>
-                    {name && <Text className={cl("title")} variant="text-md/medium">{wordsToTitle(wordsFromCamel(name))}</Text>}
-                    {description && <Text className={cl("description")} variant="text-sm/normal">{description}</Text>}
+                    {name && <BaseText weight="medium" className={cl("title")}>{wordsToTitle(wordsFromCamel(name))}</BaseText>}
+                    {description && <Span className={cl("description")}>{description}</Span>}
                 </div>
                 {children}
             </div>
-            {error && <Text className={cl("error")} variant="text-sm/normal">{error}</Text>}
+            {error && <Span className={cl("error")}>{error}</Span>}
         </Tag>
     );
 }

@@ -20,6 +20,7 @@ import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { SafetyIcon } from "@components/Icons";
 import { TooltipContainer } from "@components/TooltipContainer";
@@ -28,7 +29,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Guild } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Button, ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, useRef, UserStore } from "@webpack/common";
+import { ChannelStore, Dialog, GuildMemberStore, GuildRoleStore, GuildStore, match, Menu, PermissionsBits, Popout, useRef, UserStore } from "@webpack/common";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
@@ -195,9 +196,8 @@ export default definePlugin({
                         <Button
                             {...popoutProps}
                             ref={buttonRef}
-                            color={Button.Colors.CUSTOM}
-                            look={Button.Looks.FILLED}
-                            size={Button.Sizes.NONE}
+                            variant="none"
+                            size="min"
                             className={classes(className, "vc-permviewer-role-button")}
                         >
                             <SafetyIcon height="16" width="16" />
