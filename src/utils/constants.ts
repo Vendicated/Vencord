@@ -628,10 +628,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     prism: {
         name: "prism",
         id: 390884143749136386n,
-        prism: {
-        name: "prism",
-        id: 390884143749136386n,
-    },
+    },    
     ikito: {
         name: ".ikito1",
         id: 227280645343150081n,
