@@ -6,7 +6,7 @@ export interface UserAndActivity {
     activity: Activity;
 }
 
-export type DiscordPlatform = "desktop" | "mobile" | "web" | "embedded";
+export type DiscordPlatform = "desktop" | "mobile" | "web" | "embedded" | "vr";
 
 export interface PresenceStoreState {
     presencesForGuilds: Record<string, Record<string, { status: OnlineStatus; activities: Activity[]; clientStatus: Partial<Record<DiscordPlatform, OnlineStatus>>; }>>;
