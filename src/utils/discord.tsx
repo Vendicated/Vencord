@@ -205,9 +205,9 @@ interface FetchUserProfileOptions {
 /**
  * Fetch a user's profile
  */
-export async function fetchUserProfile(id: string, options?: FetchUserProfileOptions) {
+export async function fetchUserProfile(id: string, options?: FetchUserProfileOptions, cache = true) {
     const cached = UserProfileStore.getUserProfile(id);
-    if (cached) return cached;
+    if (cached && cache) return cached;
 
     FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId: id });
 
