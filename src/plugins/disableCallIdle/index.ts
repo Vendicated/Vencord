@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "DisableCallIdle",
-    description: "Disables automatically getting kicked from a DM voice call after 3 minutes and being moved to an AFK voice channel.",
+    description: "Disables automatic kicks from DM voice calls if you've been alone for 3 minutes and getting moved to an AFK voice channel",
     authors: [Devs.Nuckyz],
     patches: [
         {
