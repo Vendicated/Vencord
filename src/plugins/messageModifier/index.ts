@@ -1,29 +1,30 @@
-import { patcher, webpack } from "@vendicated/patch";
-import { definePlugin } from "@utils/types";
-import { Devs } from "@utils/constants";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-const MessageActions = webpack.getByProps("sendMessage", "editMessage");
+import { definePlugin } from "@utils/types";
+import { MessageActions } from "@webpack/common";
 
 export default definePlugin({
     name: "MessageModifier",
     description: "Modifies outgoing messages with custom suffixes.",
     authors: [Devs.ikito],
-
-    onStart() {
-        if (!MessageActions) {
-            console.error("MessageModifier: Failed to find MessageActions module");
-            return;
+    settings: {
+        suffix: {
+            type: "string",
+            default: " (sent via Vencord)",
+            description: "The text to append to your messages",
         }
-
-        this.patch = patcher.before(MessageActions, "sendMessage", (args) => {
-            const message = args[1];
-            if (message && typeof message.content === "string") {
-                message.content += " (sent via Vencord)";
-            }
-        });
     },
-
-    onStop() {
-        this.patch?.();
-    }
+    patches: [
+        {
+            find: "sendMessage:{",
+            replacement: {
+                match: /sendMessage:function\(\w+,(\w+)\)/,
+                replace: "sendMessage:function(e,$1){$1.content+=(plugin.settings.suffix.get()??' (sent via Vencord)');"
+            }
+        }
+    ]
 });
