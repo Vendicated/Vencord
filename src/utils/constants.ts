@@ -628,6 +628,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     prism: {
         name: "prism",
         id: 390884143749136386n,
+    prism: {
+        name: "prism",
+        id: 390884143749136386n,
     },
     ikito: {
         name: "ikito",
@@ -642,4 +645,4 @@ export const DevsById = /* #__PURE__*/ (() =>
             .filter(d => d[1].id !== 0n)
             .map(([_, v]) => [v.id, v] as const)
     ))
-)() as Record<string, Dev>;    
+)() as Record<string, Dev>;
