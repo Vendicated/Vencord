@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
-import { Channel } from "@vencord/discord-types";
+import { Channel, RichInputType } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { Clickable, Menu, Tooltip } from "@webpack/common";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
@@ -25,58 +25,7 @@ export interface ChatBarProps {
     channel: Channel;
     disabled: boolean;
     isEmpty: boolean;
-    type: {
-        analyticsName: string;
-        attachments: boolean;
-        autocomplete: {
-            addReactionShortcut: boolean,
-            forceChatLayer: boolean,
-            reactions: boolean;
-        },
-        commands: {
-            enabled: boolean;
-        },
-        drafts: {
-            type: number,
-            commandType: number,
-            autoSave: boolean;
-        },
-        emojis: {
-            button: boolean;
-        },
-        gifs: {
-            button: boolean,
-            allowSending: boolean;
-        },
-        gifts: {
-            button: boolean;
-        },
-        permissions: {
-            requireSendMessages: boolean;
-        },
-        showThreadPromptOnReply: boolean,
-        stickers: {
-            button: boolean,
-            allowSending: boolean,
-            autoSuggest: boolean;
-        },
-        users: {
-            allowMentioning: boolean;
-        },
-        submit: {
-            button: boolean,
-            ignorePreference: boolean,
-            disableEnterToSubmit: boolean,
-            clearOnSubmit: boolean,
-            useDisabledStylesOnSubmit: boolean;
-        },
-        uploadLongMessages: boolean,
-        upsellLongMessages: {
-            iconOnly: boolean;
-        },
-        showCharacterCount: boolean,
-        sedReplace: boolean;
-    };
+    type: Partial<RichInputType>
 }
 
 export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean; isAnyChat: boolean; }) => JSX.Element | null;
@@ -98,7 +47,7 @@ const logger = new Logger("ChatButtons");
 function VencordChatBarButtons(props: ChatBarProps) {
     const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
 
-    const { analyticsName } = props.type;
+    const { analyticsName = "" } = props.type;
     return (
         <>
             {Array.from(ChatBarButtonMap)
@@ -159,7 +108,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     );
 }, { noop: true });
 
-addContextMenuPatch("textarea-context", (children, args) => {
+addContextMenuPatch("textarea-context", children => {
     const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
 
     const buttons = Array.from(ChatBarButtonMap.entries());
