@@ -1,0 +1,33 @@
+.vc-latex-block {
+    display: block;
+    text-align: left;
+    margin: 8px 0;
+    overflow-x: auto;
+    padding: 4px;
+}
+
+.vc-latex-inline {
+    display: inline;
+    vertical-align: middle;
+}
+
+.vc-latex-block .katex-display {
+    text-align: left !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.vc-latex-block .katex-display > .katex {
+    text-align: left !important;
+}
+
+.vc-latex-block .katex,
+.vc-latex-inline .katex {
+    color: var(--text-normal);
+    font-size: 1.1em;
+}
+
+.vc-latex-block .katex-error,
+.vc-latex-inline .katex-error {
+    color: var(--text-danger);
+}
