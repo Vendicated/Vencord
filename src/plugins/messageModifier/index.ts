@@ -8,7 +8,7 @@ import { patcher, webpack } from "@vendicated/patch";
 import definePlugin from "@utils/types";
 import { Devs } from "@utils/constants";
 
-// Target the specific module responsible for message sending
+
 const MessageModule = webpack.getByProps("sendMessage", "editMessage");
 
 export default definePlugin({
