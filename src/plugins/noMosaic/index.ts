@@ -27,7 +27,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '=>"IMAGE"===',
+            find: '"PLAINTEXT_PREVIEW":"OTHER"',
             replacement: {
                 match: /=>"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i))?;/,
                 replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `=>${visualPlaceholderPred};` : "=>false;"
