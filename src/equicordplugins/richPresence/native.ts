@@ -1,12 +1,12 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { TrackData } from "./types";
+import type { GrTrackData } from "./types/gensokyoRadio";
 
-export async function fetchTrackData(): Promise<TrackData | null> {
+export async function fetchTrackData(): Promise<GrTrackData | null> {
     const song = await (await fetch("https://gensokyoradio.net/api/station/playing/")).json();
 
     return {
@@ -15,6 +15,6 @@ export async function fetchTrackData(): Promise<TrackData | null> {
         artist: song.SONGINFO.ARTIST,
         position: song.SONGTIMES.SONGSTART,
         duration: song.SONGTIMES.SONGEND,
-        artwork: song.MISC.ALBUMART ? `https://gensokyoradio.net/images/albums/500/${song.MISC.ALBUMART}` : "undefined",
+        artwork: song.MISC.ALBUMART ? `https://gensokyoradio.net/images/albums/500/${song.MISC.ALBUMART}` : "",
     };
 }
