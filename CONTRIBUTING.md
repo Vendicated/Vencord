@@ -21,7 +21,7 @@ Before starting your plugin:
 - Check our [plugin requests tracker](https://github.com/Vencord/plugin-requests/issues) to see if there is an existing request, or if the same idea has been rejected
 - If there isn't an existing request, [open one](https://github.com/Vencord/plugin-requests/issues/new?assignees=&labels=&projects=&template=request.yml) yourself
   and include that you'd like to work on this yourself. Then wait for feedback to see if the idea even has any chance of being accepted. Or maybe others have some ideas to improve it!
-- Familarise yourself with our plugin rules below to ensure your plugin is not banned
+- Familiarise yourself with our plugin rules below to ensure your plugin is not banned
 
 ### Plugin Rules
 
@@ -31,7 +31,7 @@ Before starting your plugin:
 - No FakeDeafen or FakeMute
 - No StereoMic
 - No plugins that simply hide or redesign ui elements. This can be done with CSS
-- No plugins that interact with specific Discord bots (official Discord apps like Youtube WatchTogether are okay)
+- No plugins that interact with specific Discord bots (official Discord apps like YouTube WatchTogether are okay)
 - No selfbots or API spam (animated status, message pruner, auto reply, nitro snipers, etc)
 - No untrusted third party APIs. Popular services like Google or GitHub are fine, but absolutely no self hosted ones
 - No plugins that require the user to enter their own API key
@@ -47,8 +47,8 @@ Or if you notice any bugs or typos, feel free to fix them!
 
 The source code of our documentation is available at <https://github.com/Vencord/Docs>
 
-If you see anything outdated, incorrect or lacking, please fix it!
-If you think a new page should be added, feel free to suggest it via an issue and we can discuss.
+If you see anything outdated, incorrect, or lacking, please fix it!
+If you think a new page should be added, feel free to suggest it via an issue, and we can discuss.
 
 ## Help out users in our Discord community
 
