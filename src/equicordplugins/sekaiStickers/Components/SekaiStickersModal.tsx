@@ -23,7 +23,7 @@ export default function SekaiStickersModal({ modalProps, settings }: { modalProp
     const [curve, setCurve] = React.useState<boolean>(false);
     const [isImgLoaded, setImgLoaded] = React.useState<boolean>(false);
     const [position, setPosition] = React.useState<{ x: number, y: number; }>({ x: characters[character].defaultText.x, y: characters[character].defaultText.y });
-    const [spaceSize, setSpaceSize] = React.useState<number>(1);
+    const [spaceSize, setSpaceSize] = React.useState<number>(36);
     let canvast!: HTMLCanvasElement;
     const img = new Image();
     img.crossOrigin = "anonymous";

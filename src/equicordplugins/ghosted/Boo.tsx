@@ -98,6 +98,9 @@ export function Boo({ channel }: { channel: Channel; }) {
     });
     const [isCleared, setIsCleared] = useState(false);
 
+    const lastMessageTimestampMs = lastMessage ? new Date(lastMessage.timestamp).getTime() : 0;
+    const isInactive = !!lastMessage && settings.store.maxInactiveTimeMs > 0 && Number.isFinite(lastMessageTimestampMs) && Date.now() - lastMessageTimestampMs > settings.store.maxInactiveTimeMs;
+
     useEffect(() => {
         if (!lastMessage || !currentUserId) return;
 
@@ -167,7 +170,7 @@ export function Boo({ channel }: { channel: Channel; }) {
         }
 
         // if exempted or bot (if setting enabled), remove from ghost tracking
-        if (isExempted || (settings.store.ignoreBots && lastMessage.author.bot)) {
+        if (isExempted || (settings.store.ignoreBots && lastMessage.author.bot) || isInactive) {
             if (countedChannels.has(id)) {
                 countedChannels.delete(id);
                 setBooCount(getBooCount() - 1);
@@ -187,9 +190,9 @@ export function Boo({ channel }: { channel: Channel; }) {
                 setBooCount(getBooCount() + 1);
             }
         }
-    }, [state.isCurrentUser, state.isDataProcessed, id, lastMessage?.id]);
+    }, [state.isCurrentUser, state.isDataProcessed, id, lastMessage?.id, isInactive]);
 
-    if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser || isChannelExempted(channel) || isCleared || (settings.store.ignoreBots && lastMessage.author.bot))
+    if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser || isChannelExempted(channel) || isCleared || (settings.store.ignoreBots && lastMessage.author.bot) || isInactive)
         return null;
 
     if (!settings.store.showDmIcons) return null;
