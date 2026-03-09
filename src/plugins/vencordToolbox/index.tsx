@@ -88,7 +88,7 @@ export default definePlugin({
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i))/,
+                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i\.\i))/,
                 replace: "$self.TrailingWrapper,{className:$1,"
             }
         }
