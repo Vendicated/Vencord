@@ -1,0 +1,16 @@
+.vc-theme-switcher-btn,
+.vc-theme-switcher-icon {
+    -webkit-app-region: no-drag;
+}
+
+.vc-theme-switcher-icon {
+    color: var(--interactive-icon-default);
+}
+
+.vc-theme-switcher-btn[class*="selected"] .vc-theme-switcher-icon {
+    color: var(--interactive-icon-active);
+}
+
+.vc-theme-switcher-btn:hover .vc-theme-switcher-icon {
+    color: var(--interactive-icon-hover);
+}
