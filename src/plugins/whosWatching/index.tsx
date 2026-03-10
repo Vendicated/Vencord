@@ -79,14 +79,14 @@ export default definePlugin({
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /jsx\)\((\i\.\i),{mask:/,
-                replace: "jsx)($self.component({OriginalComponent:$1}),{mask:"
+                match: /\((\i\.\i)(?=,{mask:\i\.\i\.Masks\.STATUS_SCREENSHARE)/,
+                replace: "($self.component({OriginalComponent:$1})"
             }
         },
         {
             find: "this.renderEmbeddedActivity()",
             replacement: {
-                match: /"div"(?=.{0,50}this.renderActions)/,
+                match: /"div"(?=.{0,40},this.renderActions\(\))/,
                 replace: "$self.WrapperComponent"
             }
         }
