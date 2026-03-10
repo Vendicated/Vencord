@@ -17,18 +17,17 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Auth } from "@plugins/reviewDB/auth";
-import { ReviewType } from "@plugins/reviewDB/entities";
-import { Response, REVIEWS_PER_PAGE } from "@plugins/reviewDB/reviewDbApi";
-import { cl } from "@plugins/reviewDB/utils";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import { Paginator, Text, useRef, useState } from "@webpack/common";
 
+import { Auth } from "../auth";
+import { Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
+import { cl } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
-function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: any; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
+function Modal({ modalProps, modalKey, discordId, name }: { modalProps: any; modalKey: string, discordId: string; name: string; }) {
     const [data, setData] = useState<Response>();
     const [signal, refetch] = useForceUpdater(true);
     const [page, setPage] = useState(1);
@@ -59,13 +58,12 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
                             onFetchReviews={setData}
                             scrollToTop={() => ref.current?.scrollTo({ top: 0, behavior: "smooth" })}
                             hideOwnReview
-                            type={type}
                         />
                     </div>
                 </ModalContent>
 
                 <ModalFooter className={cl("modal-footer")}>
-                    <div className={cl("modal-footer-wrapper")}>
+                    <div>
                         {ownReview && (
                             <ReviewComponent
                                 refetch={refetch}
@@ -97,7 +95,7 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
     );
 }
 
-export function openReviewsModal(discordId: string, name: string, type: ReviewType) {
+export function openReviewsModal(discordId: string, name: string) {
     const modalKey = "vc-rdb-modal-" + Date.now();
 
     openModal(props => (
@@ -106,7 +104,6 @@ export function openReviewsModal(discordId: string, name: string, type: ReviewTy
             modalProps={props}
             discordId={discordId}
             name={name}
-            type={type}
         />
     ), { modalKey });
 }

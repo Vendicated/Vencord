@@ -20,9 +20,9 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { GuildStore, PresenceStore, RelationshipStore, useStateFromStores } from "@webpack/common";
+import { GuildStore, PresenceStore, RelationshipStore } from "@webpack/common";
 
 const enum IndicatorType {
     SERVER = 1 << 0,
@@ -30,24 +30,13 @@ const enum IndicatorType {
     BOTH = SERVER | FRIEND,
 }
 
-const UserGuildJoinRequestStore = findStoreLazy("UserGuildJoinRequestStore");
+let onlineFriends = 0;
+let guildCount = 0;
+let forceUpdateFriendCount: () => void;
+let forceUpdateGuildCount: () => void;
 
 function FriendsIndicator() {
-    const onlineFriendsCount = useStateFromStores([RelationshipStore, PresenceStore], () => {
-        let count = 0;
-
-        const friendIds = RelationshipStore.getFriendIDs();
-        for (const id of friendIds) {
-            const status = PresenceStore.getStatus(id) ?? "offline";
-            if (status === "offline") {
-                continue;
-            }
-
-            count++;
-        }
-
-        return count;
-    });
+    forceUpdateFriendCount = useForceUpdater();
 
     return (
         <span id="vc-friendcount" style={{
@@ -55,23 +44,17 @@ function FriendsIndicator() {
             width: "100%",
             fontSize: "12px",
             fontWeight: "600",
-            color: "var(--text-default)",
+            color: "var(--header-secondary)",
             textTransform: "uppercase",
             textAlign: "center",
         }}>
-            {onlineFriendsCount} online
+            {onlineFriends} online
         </span>
     );
 }
 
 function ServersIndicator() {
-    const guildCount = useStateFromStores([GuildStore, UserGuildJoinRequestStore], () => {
-        const guildJoinRequests: string[] = UserGuildJoinRequestStore.computeGuildIds();
-        const guilds = GuildStore.getGuilds();
-
-        // Filter only pending guild join requests
-        return GuildStore.getGuildCount() + guildJoinRequests.filter(id => guilds[id] == null).length;
-    });
+    forceUpdateGuildCount = useForceUpdater();
 
     return (
         <span id="vc-guildcount" style={{
@@ -79,13 +62,31 @@ function ServersIndicator() {
             width: "100%",
             fontSize: "12px",
             fontWeight: "600",
-            color: "var(--text-default)",
+            color: "var(--header-secondary)",
             textTransform: "uppercase",
             textAlign: "center",
         }}>
             {guildCount} servers
         </span>
     );
+}
+
+function handlePresenceUpdate() {
+    onlineFriends = 0;
+    const relations = RelationshipStore.getRelationships();
+    for (const id of Object.keys(relations)) {
+        const type = relations[id];
+        // FRIEND relationship type
+        if (type === 1 && PresenceStore.getStatus(id) !== "offline") {
+            onlineFriends += 1;
+        }
+    }
+    forceUpdateFriendCount?.();
+}
+
+function handleGuildUpdate() {
+    guildCount = GuildStore.getGuildCount();
+    forceUpdateGuildCount?.();
 }
 
 export default definePlugin({
@@ -116,8 +117,18 @@ export default definePlugin({
         </ErrorBoundary>;
     },
 
+    flux: {
+        PRESENCE_UPDATES: handlePresenceUpdate,
+        GUILD_CREATE: handleGuildUpdate,
+        GUILD_DELETE: handleGuildUpdate,
+    },
+
+
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderIndicator);
+
+        handlePresenceUpdate();
+        handleGuildUpdate();
     },
 
     stop() {

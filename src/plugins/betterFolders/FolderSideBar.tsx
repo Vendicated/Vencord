@@ -17,53 +17,40 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findComponentByCodeLazy } from "@webpack";
-import { Animations, ChannelRTCStore, useStateFromStores } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
+import { ExpandedGuildFolderStore, settings } from ".";
 
+const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
+const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
-function getExpandedFolderIds() {
-    const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
-    const folders = SortedGuildStore.getGuildFolders();
-
-    const expandedFolderIds = new Set<string>();
-
-    for (const folder of folders) {
-        if (expandedFolders.has(folder.folderId) && folder.guildIds?.length) {
-            expandedFolderIds.add(folder.folderId);
-        }
-    }
-
-    return expandedFolderIds;
-}
-
 export default ErrorBoundary.wrap(guildsBarProps => {
-    const expandedFolderIds = useStateFromStores([ExpandedGuildFolderStore, SortedGuildStore], () => getExpandedFolderIds());
+    const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
     const Sidebar = (
         <GuildsBar
             {...guildsBarProps}
             isBetterFolders={true}
-            betterFoldersExpandedIds={expandedFolderIds}
+            betterFoldersExpandedIds={expandedFolders}
         />
     );
 
-    const visible = !!expandedFolderIds.size;
+    const visible = !!expandedFolders.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
-    // Also display flex otherwise to fix scrolling.
-    const sidebarStyle = {
-        display: isFullscreen ? "none" : "flex"
-    } satisfies CSSProperties;
+    // Also display flex otherwise to fix scrolling
+    const barStyle = {
+        display: isFullscreen ? "none" : "flex",
+    } as CSSProperties;
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div className="vc-betterFolders-sidebar" style={sidebarStyle}>{Sidebar}</div>
+            ? <div style={barStyle}>{Sidebar}</div>
             : null;
     }
 
@@ -75,9 +62,9 @@ export default ErrorBoundary.wrap(guildsBarProps => {
             leave={{ width: 0 }}
             config={{ duration: 200 }}
         >
-            {(animationStyle: any, show: any) =>
+            {(animationStyle, show) =>
                 show && (
-                    <Animations.animated.div className="vc-betterFolders-sidebar" style={{ ...animationStyle, ...sidebarStyle }}>
+                    <Animations.animated.div style={{ ...animationStyle, ...barStyle }}>
                         {Sidebar}
                     </Animations.animated.div>
                 )

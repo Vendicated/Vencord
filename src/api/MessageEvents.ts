@@ -17,8 +17,9 @@
 */
 
 import { Logger } from "@utils/Logger";
-import type { Channel, CloudUpload, CustomEmoji, Message } from "@vencord/discord-types";
 import { MessageStore } from "@webpack/common";
+import { CustomEmoji } from "@webpack/types";
+import type { Channel, Message } from "discord-types/general";
 import type { Promisable } from "type-fest";
 
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
@@ -30,6 +31,30 @@ export interface MessageObject {
     tts: boolean;
 }
 
+export interface Upload {
+    classification: string;
+    currentSize: number;
+    description: string | null;
+    filename: string;
+    id: string;
+    isImage: boolean;
+    isVideo: boolean;
+    item: {
+        file: File;
+        platform: number;
+    };
+    loaded: number;
+    mimeType: string;
+    preCompressionSize: number;
+    responseUrl: string;
+    sensitive: boolean;
+    showLargeMessageDialog: boolean;
+    spoiler: boolean;
+    status: "NOT_STARTED" | "STARTED" | "UPLOADING" | "ERROR" | "COMPLETED" | "CANCELLED";
+    uniqueId: string;
+    uploadedFilename: string;
+}
+
 export interface MessageReplyOptions {
     messageReference: Message["messageReference"];
     allowedMentions?: {
@@ -38,9 +63,9 @@ export interface MessageReplyOptions {
     };
 }
 
-export interface MessageOptions {
+export interface MessageExtra {
     stickers?: string[];
-    uploads?: CloudUpload[];
+    uploads?: Upload[];
     replyOptions: MessageReplyOptions;
     content: string;
     channel: Channel;
@@ -48,17 +73,17 @@ export interface MessageOptions {
     openWarningPopout: (props: any) => any;
 }
 
-export type MessageSendListener = (channelId: string, messageObj: MessageObject, options: MessageOptions) => Promisable<void | { cancel: boolean; }>;
-export type MessageEditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
+export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
+export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
 
-const sendListeners = new Set<MessageSendListener>();
-const editListeners = new Set<MessageEditListener>();
+const sendListeners = new Set<SendListener>();
+const editListeners = new Set<EditListener>();
 
-export async function _handlePreSend(channelId: string, messageObj: MessageObject, options: MessageOptions, replyOptions: MessageReplyOptions) {
-    options.replyOptions = replyOptions;
+export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
+    extra.replyOptions = replyOptions;
     for (const listener of sendListeners) {
         try {
-            const result = await listener(channelId, messageObj, options);
+            const result = await listener(channelId, messageObj, extra);
             if (result?.cancel) {
                 return true;
             }
@@ -86,29 +111,29 @@ export async function _handlePreEdit(channelId: string, messageId: string, messa
 /**
  * Note: This event fires off before a message is sent, allowing you to edit the message.
  */
-export function addMessagePreSendListener(listener: MessageSendListener) {
+export function addPreSendListener(listener: SendListener) {
     sendListeners.add(listener);
     return listener;
 }
 /**
  * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
  */
-export function addMessagePreEditListener(listener: MessageEditListener) {
+export function addPreEditListener(listener: EditListener) {
     editListeners.add(listener);
     return listener;
 }
-export function removeMessagePreSendListener(listener: MessageSendListener) {
+export function removePreSendListener(listener: SendListener) {
     return sendListeners.delete(listener);
 }
-export function removeMessagePreEditListener(listener: MessageEditListener) {
+export function removePreEditListener(listener: EditListener) {
     return editListeners.delete(listener);
 }
 
 
 // Message clicks
-export type MessageClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
+type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
 
-const listeners = new Set<MessageClickListener>();
+const listeners = new Set<ClickListener>();
 
 export function _handleClick(message: Message, channel: Channel, event: MouseEvent) {
     // message object may be outdated, so (try to) fetch latest one
@@ -122,11 +147,11 @@ export function _handleClick(message: Message, channel: Channel, event: MouseEve
     }
 }
 
-export function addMessageClickListener(listener: MessageClickListener) {
+export function addClickListener(listener: ClickListener) {
     listeners.add(listener);
     return listener;
 }
 
-export function removeMessageClickListener(listener: MessageClickListener) {
+export function removeClickListener(listener: ClickListener) {
     return listeners.delete(listener);
 }

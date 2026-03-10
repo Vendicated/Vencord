@@ -25,16 +25,16 @@ export default definePlugin({
     description: "Api required for plugins that modify the server list",
     patches: [
         {
-            find: "#{intl::DISCODO_DISABLED}",
+            find: "Messages.DISCODO_DISABLED",
             replacement: {
-                match: /(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,
+                match: /(?<=Messages\.DISCODO_DISABLED.+?return)(\(.{0,75}?tutorialContainer.+?}\))(?=}function)/,
                 replace: "[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
             }
         },
         {
-            find: ".setGuildsTree(",
+            find: "Messages.SERVERS,children",
             replacement: {
-                match: /(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,
+                match: /(?<=Messages\.SERVERS,children:).+?default:return null\}\}\)/,
                 replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
             }
         }

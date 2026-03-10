@@ -5,8 +5,7 @@
  */
 
 import { NoEntrySignIcon } from "@components/Icons";
-import { getIntlMessage } from "@utils/discord";
-import { Text } from "@webpack/common";
+import { i18n, Text } from "@webpack/common";
 import { HTMLProps } from "react";
 
 import { DecorationGridItem } from ".";
@@ -23,9 +22,9 @@ export default function DecorationGridNone(props: DecorationGridNoneProps) {
         <NoEntrySignIcon />
         <Text
             variant="text-xs/normal"
-            color="text-strong"
+            color="header-primary"
         >
-            {getIntlMessage("NONE")}
+            {i18n.Messages.NONE}
         </Text>
     </DecorationGridItem >;
 }

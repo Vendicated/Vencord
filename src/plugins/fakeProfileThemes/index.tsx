@@ -17,22 +17,23 @@
 */
 
 // This plugin is a port from Alyxia's Vendetta plugin
-import "./styles.css";
+import "./index.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import { copyWithToast, fetchUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
+import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { User, UserProfile } from "@vencord/discord-types";
-import { findComponentByCodeLazy } from "@webpack";
-import { Button, ColorPicker, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
+import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
+import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
+
+interface UserProfile extends User {
+    themeColors?: Array<number>;
+}
 
 interface Colors {
     primary: number;
@@ -56,7 +57,7 @@ function decode(bio: string): Array<number> | null {
     if (bio == null) return null;
 
     const colorString = bio.match(
-        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e005d}/u,
+        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u,
     );
     if (colorString != null) {
         const parsed = [...colorString[0]]
@@ -84,6 +85,14 @@ const settings = definePluginSettings({
     }
 });
 
+interface ColorPickerProps {
+    color: number | null;
+    label: React.ReactElement;
+    showEyeDropper?: boolean;
+    suggestedColors?: string[];
+    onChange(value: number | null): void;
+}
+
 // I can't be bothered to figure out the semantics of this component. The
 // functions surely get some event argument sent to them and they likely aren't
 // all required. If anyone who wants to use this component stumbles across this
@@ -96,102 +105,13 @@ interface ProfileModalProps {
     canUsePremiumCustomization: boolean;
     hideExampleButton: boolean;
     hideFakeActivity: boolean;
-    isTryItOut: boolean;
+    isTryItOutFlow: boolean;
 }
 
-const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOut:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
-function SettingsAboutComponentWrapper() {
-    const [, , userProfileLoading] = useAwaiter(() => fetchUserProfile(UserStore.getCurrentUser().id));
-
-    return !userProfileLoading && <SettingsAboutComponent />;
-}
-
-function SettingsAboutComponent() {
-    const existingColors = decode(
-        UserProfileStore.getUserProfile(UserStore.getCurrentUser().id)?.bio ?? ""
-    ) ?? [0, 0];
-    const [color1, setColor1] = useState(existingColors[0]);
-    const [color2, setColor2] = useState(existingColors[1]);
-
-    return (
-        <section>
-            <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
-            <Forms.FormText>
-                After enabling this plugin, you will see custom colors in
-                the profiles of other people using compatible plugins.{" "}
-            </Forms.FormText>
-            <Forms.FormText className={Margins.top8}>
-                <strong>To set your own profile theme colors:</strong>
-                <ul>
-                    <li>&mdash; use the color pickers below to choose your colors</li>
-                    <li>&mdash; click the "Copy 3y3" button</li>
-                    <li>&mdash; paste the invisible text anywhere in your bio</li>
-                </ul>
-                <Divider
-                    className={classes(Margins.top8, Margins.bottom8)}
-                />
-                <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
-                <Flex gap="1em">
-                    <ColorPicker
-                        color={color1}
-                        label={
-                            <Text
-                                variant={"text-xs/normal"}
-                                style={{ marginTop: "4px" }}
-                            >
-                                Primary
-                            </Text>
-                        }
-                        onChange={(color: number) => {
-                            setColor1(color);
-                        }}
-                    />
-                    <ColorPicker
-                        color={color2}
-                        label={
-                            <Text
-                                variant={"text-xs/normal"}
-                                style={{ marginTop: "4px" }}
-                            >
-                                Accent
-                            </Text>
-                        }
-                        onChange={(color: number) => {
-                            setColor2(color);
-                        }}
-                    />
-                    <Button
-                        onClick={() => {
-                            const colorString = encode(color1, color2);
-                            copyWithToast(colorString);
-                        }}
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.XLARGE}
-                        style={{ marginBottom: "auto" }}
-                    >
-                        Copy 3y3
-                    </Button>
-                </Flex>
-                <Divider
-                    className={classes(Margins.top8, Margins.bottom8)}
-                />
-                <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
-                <div className="vc-fpt-preview">
-                    <ProfileModal
-                        user={UserStore.getCurrentUser()}
-                        pendingThemeColors={[color1, color2]}
-                        onAvatarChange={() => { }}
-                        onBannerChange={() => { }}
-                        canUsePremiumCustomization={true}
-                        hideExampleButton={true}
-                        hideFakeActivity={true}
-                        isTryItOut={true}
-                    />
-                </div>
-            </Forms.FormText>
-        </section>);
-}
+const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
 
 export default definePlugin({
     name: "FakeProfileThemes",
@@ -201,24 +121,113 @@ export default definePlugin({
         {
             find: "UserProfileStore",
             replacement: {
-                match: /(?<=getUserProfile\(\i\){return )(.+?)(?=})/,
+                match: /(?<=getUserProfile\(\i\){return )(\i\[\i\])/,
                 replace: "$self.colorDecodeHook($1)"
-            },
+            }
         },
         {
-            find: "#{intl::USER_SETTINGS_RESET_PROFILE_THEME}",
+            find: ".USER_SETTINGS_RESET_PROFILE_THEME",
             replacement: {
-                match: /#{intl::USER_SETTINGS_RESET_PROFILE_THEME}\).+?}\)(?=\])(?<=color:(\i),.{0,500}?color:(\i),.{0,500}?)/,
+                match: /RESET_PROFILE_THEME}\)(?<=color:(\i),.{0,500}?color:(\i),.{0,500}?)/,
                 replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
             }
         }
     ],
+    settingsAboutComponent: () => {
+        const existingColors = decode(
+            UserProfileStore.getUserProfile(UserStore.getCurrentUser().id).bio
+        ) ?? [0, 0];
+        const [color1, setColor1] = useState(existingColors[0]);
+        const [color2, setColor2] = useState(existingColors[1]);
 
-    settingsAboutComponent: SettingsAboutComponentWrapper,
+        const [, , loadingColorPickerChunk] = useAwaiter(requireColorPicker);
 
+        return (
+            <Forms.FormSection>
+                <Forms.FormTitle tag="h3">Usage</Forms.FormTitle>
+                <Forms.FormText>
+                    After enabling this plugin, you will see custom colors in
+                    the profiles of other people using compatible plugins.{" "}
+                    <br />
+                    To set your own colors:
+                    <ul>
+                        <li>
+                            • use the color pickers below to choose your colors
+                        </li>
+                        <li>• click the "Copy 3y3" button</li>
+                        <li>• paste the invisible text anywhere in your bio</li>
+                    </ul><br />
+                    <Forms.FormDivider
+                        className={classes(Margins.top8, Margins.bottom8)}
+                    />
+                    <Forms.FormTitle tag="h3">Color pickers</Forms.FormTitle>
+                    {!loadingColorPickerChunk && (
+                        <Flex
+                            direction={Flex.Direction.HORIZONTAL}
+                            style={{ gap: "1rem" }}
+                        >
+                            <ColorPicker
+                                color={color1}
+                                label={
+                                    <Text
+                                        variant={"text-xs/normal"}
+                                        style={{ marginTop: "4px" }}
+                                    >
+                                        Primary
+                                    </Text>
+                                }
+                                onChange={(color: number) => {
+                                    setColor1(color);
+                                }}
+                            />
+                            <ColorPicker
+                                color={color2}
+                                label={
+                                    <Text
+                                        variant={"text-xs/normal"}
+                                        style={{ marginTop: "4px" }}
+                                    >
+                                        Accent
+                                    </Text>
+                                }
+                                onChange={(color: number) => {
+                                    setColor2(color);
+                                }}
+                            />
+                            <Button
+                                onClick={() => {
+                                    const colorString = encode(color1, color2);
+                                    copyWithToast(colorString);
+                                }}
+                                color={Button.Colors.PRIMARY}
+                                size={Button.Sizes.XLARGE}
+                            >
+                                Copy 3y3
+                            </Button>
+                        </Flex>
+                    )}
+                    <Forms.FormDivider
+                        className={classes(Margins.top8, Margins.bottom8)}
+                    />
+                    <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
+                    <div className="vc-fpt-preview">
+                        <ProfileModal
+                            user={UserStore.getCurrentUser()}
+                            pendingThemeColors={[color1, color2]}
+                            onAvatarChange={() => { }}
+                            onBannerChange={() => { }}
+                            canUsePremiumCustomization={true}
+                            hideExampleButton={true}
+                            hideFakeActivity={true}
+                            isTryItOutFlow={true}
+                        />
+                    </div>
+                </Forms.FormText>
+            </Forms.FormSection>);
+    },
     settings,
     colorDecodeHook(user: UserProfile) {
-        if (user?.bio) {
+        if (user) {
             // don't replace colors if already set with nitro
             if (settings.store.nitroFirst && user.themeColors) return user;
             const colors = decode(user.bio);

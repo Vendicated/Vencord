@@ -41,26 +41,18 @@ export default definePlugin({
         },
         {
             // Status emojis
-            find: "#{intl::GUILD_OWNER}),children:",
+            find: ".Messages.GUILD_OWNER,",
             replacement: {
-                match: /(\.CUSTOM_STATUS.+?animateEmoji:)\i/,
-                replace: "$1!0"
+                match: /(?<=\.activityEmoji,.+?animate:)\i/,
+                replace: "!0"
             }
         },
         {
             // Guild Banner
-            find: "#{intl::DISCOVERABLE_GUILD_HEADER_PUBLIC_INFO}",
+            find: ".animatedBannerHoverLayer,onMouseEnter:",
             replacement: {
-                match: /(guildBanner:\i,animate:)\i(?=}\):null)/,
-                replace: "$1!0"
-            }
-        },
-        {
-            // Nameplates
-            find: ".MINI_PREVIEW,[",
-            replacement: {
-                match: /animate:\i,loop:/,
-                replace: "animate:true,loop:true,_loop:"
+                match: /(?<=guildBanner:\i,animate:)\i(?=}\))/,
+                replace: "!0"
             }
         }
     ]

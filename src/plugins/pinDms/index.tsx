@@ -11,14 +11,14 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { Channel } from "@vencord/discord-types";
-import { findCssClassesLazy, findStoreLazy } from "@webpack";
-import { Clickable, ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
+import { Channel } from "discord-types/general";
 
 import { contextMenus } from "./components/contextMenu";
-import { openCategoryModal, requireSettingsModal } from "./components/CreateCategoryModal";
+import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory, usePinnedDms } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -26,11 +26,13 @@ interface ChannelComponentProps {
     selected: boolean;
 }
 
-const headerClasses = findCssClassesLazy("privateChannelsHeaderContainer", "headerText");
+
+const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
 export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let instance: any;
+export const forceUpdate = () => instance?.props?._forceUpdate?.();
 
 export const enum PinOrder {
     LastMessage,
@@ -44,39 +46,32 @@ export const settings = definePluginSettings({
         options: [
             { label: "Most recent message", value: PinOrder.LastMessage, default: true },
             { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
-        ]
+        ],
+        onChange: () => forceUpdate()
     },
-    canCollapseDmSection: {
+
+    dmSectioncollapsed: {
         type: OptionType.BOOLEAN,
-        description: "Allow uncategorised DMs section to be collapsable",
-        default: false
-    },
-    dmSectionCollapsed: {
-        type: OptionType.BOOLEAN,
-        description: "Collapse DM section",
+        description: "Collapse DM sections",
         default: false,
-        hidden: true
-    },
-    userBasedCategoryList: {
-        type: OptionType.CUSTOM,
-        default: {} as Record<string, Category[]>
+        onChange: () => forceUpdate()
     }
 });
 
 export default definePlugin({
     name: "PinDMs",
-    description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or re-order pins, right click DMs",
+    description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or reorder pins, right click DMs",
     authors: [Devs.Ven, Devs.Aria],
     settings,
     contextMenus,
 
     patches: [
         {
-            find: '"dm-quick-launcher"===',
+            find: ".privateChannelsHeaderContainer,",
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
-                    match: /(?<=channels:\i,)privateChannelIds:(\i)(?=,listRef:)/,
+                    match: /(?<=\i,{channels:\i,)privateChannelIds:(\i)/,
                     replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c))"
                 },
                 {
@@ -87,25 +82,25 @@ export default definePlugin({
 
                 // Rendering
                 {
-                    match: /renderRow(?:",|=)(\i)=>{(?<=renderDM(?:",|=).+?(\i\.\i),\{channel:.+?)/,
+                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.\i),\{channel:.+?)/,
                     replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2)();"
                 },
                 {
-                    match: /renderSection(?:",|=)(\i)=>{/,
+                    match: /"renderSection",(\i)=>{/,
                     replace: "$&if($self.isCategoryIndex($1.section))return $self.renderCategory($1);"
                 },
                 {
-                    match: /renderSection(?:",|=).{0,300}?"span",{/,
-                    replace: "$&...$self.makeSpanProps(),"
+                    match: /(?<=span",{)className:\i\.headerText,/,
+                    replace: "...$self.makeSpanProps(),$&"
                 },
 
                 // Fix Row Height
                 {
-                    match: /(\.startsWith\("section-divider"\).+?return 1===)(\i)/,
-                    replace: "$1($2-$self.categoryLen())"
+                    match: /(?<="getRowHeight",.{1,100}return 1===)\i/,
+                    replace: "($&-$self.categoryLen())"
                 },
                 {
-                    match: /getRowHeight(?:",|=)\((\i),(\i)\)=>{/,
+                    match: /"getRowHeight",\((\i),(\i)\)=>{/,
                     replace: "$&if($self.isChannelHidden($1,$2))return 0;"
                 },
 
@@ -129,8 +124,8 @@ export default definePlugin({
         {
             find: ".FRIENDS},\"friends\"",
             replacement: {
-                match: /let{showLibrary:\i,/,
-                replace: "$self.usePinnedDms();$&"
+                match: /(?<=\i=\i=>{).{1,100}premiumTabSelected.{1,800}showDMHeader:.+?,/,
+                replace: "let forceUpdate = Vencord.Util.useForceUpdater();$&_forceUpdate:forceUpdate,"
             }
         },
 
@@ -147,14 +142,13 @@ export default definePlugin({
 
         // fix alt+shift+up/down
         {
-            find: "=()=>!1,ensureChatIsVisible:",
+            find: ".getFlattenedGuildIds()],",
             replacement: {
                 match: /(?<=\i===\i\.ME\?)\i\.\i\.getPrivateChannelIds\(\)/,
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },
     ],
-
     sections: null as number[] | null,
 
     set _instance(i: any) {
@@ -168,12 +162,11 @@ export default definePlugin({
         CONNECTION_OPEN: init,
     },
 
-    usePinnedDms,
     isPinned,
     categoryLen,
     getSections,
     getAllUncollapsedChannels,
-    requireSettingsMenu: requireSettingsModal,
+    requireSettingsMenu,
 
     makeProps(instance, { sections }: { sections: number[]; }) {
         this._instance = instance;
@@ -193,11 +186,11 @@ export default definePlugin({
     },
 
     makeSpanProps() {
-        return settings.store.canCollapseDmSection ? {
+        return {
             onClick: () => this.collapseDMList(),
             role: "button",
             style: { cursor: "pointer" }
-        } : undefined;
+        };
     },
 
     getChunkSize() {
@@ -217,27 +210,30 @@ export default definePlugin({
     },
 
     isChannelIndex(sectionIndex: number, channelIndex: number) {
-        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && sectionIndex !== 0) {
+        if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
             return true;
-        }
+        const cat = categories[sectionIndex - 1];
+        return this.isCategoryIndex(sectionIndex) && (cat?.channels?.length === 0 || cat?.channels[channelIndex]);
+    },
 
-        const category = getCategoryByIndex(sectionIndex - 1);
-        return this.isCategoryIndex(sectionIndex) && (category?.channels?.length === 0 || category?.channels[channelIndex]);
+    isDMSectioncollapsed() {
+        return settings.store.dmSectioncollapsed;
     },
 
     collapseDMList() {
-        settings.store.dmSectionCollapsed = !settings.store.dmSectionCollapsed;
+        settings.store.dmSectioncollapsed = !settings.store.dmSectioncollapsed;
+        forceUpdate();
     },
 
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && this.getSections().length + 1 === categoryIndex)
+        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
             return true;
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
 
-        const category = getCategoryByIndex(categoryIndex - 1);
+        const category = categories[categoryIndex - 1];
         if (!category) return false;
 
         return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
@@ -255,12 +251,18 @@ export default definePlugin({
     },
 
     renderCategory: ErrorBoundary.wrap(({ section }: { section: number; }) => {
-        const category = getCategoryByIndex(section - 1);
+        const category = categories[section - 1];
+
         if (!category) return null;
 
         return (
-            <Clickable
-                onClick={() => collapseCategory(category.id, !category.collapsed)}
+            <h2
+                className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.collapsed ? "vc-pindms-collapsed" : "")}
+                style={{ color: `#${category.color.toString(16).padStart(6, "0")}` }}
+                onClick={async () => {
+                    await collapseCategory(category.id, !category.collapsed);
+                    forceUpdate();
+                }}
                 onContextMenu={e => {
                     ContextMenuApi.openContextMenu(e, () => (
                         <Menu.Menu
@@ -282,14 +284,14 @@ export default definePlugin({
                                             canMoveCategoryInDirection(category.id, -1) && <Menu.MenuItem
                                                 id="vc-pindms-move-category-up"
                                                 label="Move Up"
-                                                action={() => moveCategory(category.id, -1)}
+                                                action={() => moveCategory(category.id, -1).then(() => forceUpdate())}
                                             />
                                         }
                                         {
                                             canMoveCategoryInDirection(category.id, 1) && <Menu.MenuItem
                                                 id="vc-pindms-move-category-down"
                                                 label="Move Down"
-                                                action={() => moveCategory(category.id, 1)}
+                                                action={() => moveCategory(category.id, 1).then(() => forceUpdate())}
                                             />
                                         }
                                     </>
@@ -302,7 +304,7 @@ export default definePlugin({
                                 id="vc-pindms-delete-category"
                                 color="danger"
                                 label="Delete Category"
-                                action={() => removeCategory(category.id)}
+                                action={() => removeCategory(category.id).then(() => forceUpdate())}
                             />
 
 
@@ -310,18 +312,13 @@ export default definePlugin({
                     ));
                 }}
             >
-                <h2
-                    className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.collapsed ? "vc-pindms-collapsed" : "")}
-                    style={{ color: `#${category.color.toString(16).padStart(6, "0")}` }}
-                >
-                    <span className={headerClasses.headerText}>
-                        {category?.name ?? "uh oh"}
-                    </span>
-                    <svg className="vc-pindms-collapse-icon" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"></path>
-                    </svg>
-                </h2>
-            </Clickable>
+                <span className={headerClasses.headerText}>
+                    {category?.name ?? "uh oh"}
+                </span>
+                <svg className="vc-pindms-collapse-icon" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"></path>
+                </svg>
+            </h2>
         );
     }, { noop: true }),
 
@@ -344,7 +341,7 @@ export default definePlugin({
     },
 
     getChannel(sectionIndex: number, index: number, channels: Record<string, Channel>) {
-        const category = getCategoryByIndex(sectionIndex - 1);
+        const category = categories[sectionIndex - 1];
         if (!category) return { channel: null, category: null };
 
         const channelId = this.getCategoryChannels(category)[index];

@@ -20,22 +20,24 @@ import "./style.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { ExpandableHeader } from "@components/ExpandableHeader";
 import { NotesIcon, OpenExternalIcon } from "@components/Icons";
-import { TooltipContainer } from "@components/TooltipContainer";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Guild, User } from "@vencord/discord-types";
-import { findCssClassesLazy } from "@webpack";
-import { Alerts, Clickable, Menu, Parser } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Alerts, Button, Menu, Parser, TooltipContainer, useState } from "@webpack/common";
+import { Guild, User } from "discord-types/general";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
-import { NotificationType, ReviewType } from "./entities";
+import ReviewsView from "./components/ReviewsView";
+import { NotificationType } from "./entities";
 import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const BannerButtonClasses = findCssClassesLazy("bannerButton");
+const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
@@ -44,7 +46,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(guild.id, guild.name, ReviewType.Server)}
+            action={() => openReviewsModal(guild.id, guild.name)}
         />
     );
 };
@@ -56,7 +58,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
             label="View Reviews"
             id="vc-rdb-user-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(user.id, user.username, ReviewType.User)}
+            action={() => openReviewsModal(user.id, user.username)}
         />
     );
 };
@@ -77,17 +79,17 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".POPOUT,user:",
+            find: "showBorder:null",
             replacement: {
-                match: /children:\[(?=[^[]+?shouldShowTooltip:)/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /user:(\i),setNote:\i,canDM.+?\}\)/,
+                replace: "$&,$self.getReviewsComponent($1)"
             }
         },
         {
-            find: ".SIDEBAR,disableToolbar:",
+            find: ".BITE_SIZE,user:",
             replacement: {
-                match: /children:\[(?=[^[]+?\.SIDEBAR}\),\i\.bot)/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /(?<=\.BITE_SIZE,children:\[)\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),/,
+                replace: "$self.BiteSizeReviewsButton({user:$1}),$&"
             }
         }
     ],
@@ -146,15 +148,44 @@ export default definePlugin({
         }, 4000);
     },
 
+    getReviewsComponent: ErrorBoundary.wrap((user: User) => {
+        const [reviewCount, setReviewCount] = useState<number>();
+
+        return (
+            <ExpandableHeader
+                headerText="User Reviews"
+                onMoreClick={() => openReviewsModal(user.id, user.username)}
+                moreTooltipText={
+                    reviewCount && reviewCount > 50
+                        ? `View all ${reviewCount} reviews`
+                        : "Open Review Modal"
+                }
+                onDropDownClick={state => settings.store.reviewsDropdownState = !state}
+                defaultState={settings.store.reviewsDropdownState}
+            >
+                <ReviewsView
+                    discordId={user.id}
+                    name={user.username}
+                    onFetchReviews={r => setReviewCount(r.reviewCount)}
+                    showInput
+                />
+            </ExpandableHeader>
+        );
+    }, { message: "Failed to render Reviews" }),
+
     BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: User; }) => {
         return (
             <TooltipContainer text="View Reviews">
-                <Clickable
-                    onClick={() => openReviewsModal(user.id, user.username, ReviewType.User)}
-                    className={BannerButtonClasses.bannerButton}
+                <Button
+                    onClick={() => openReviewsModal(user.id, user.username)}
+                    look={Button.Looks.FILLED}
+                    size={Button.Sizes.NONE}
+                    color={RoleButtonClasses.bannerColor}
+                    className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
+                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
                 >
                     <NotesIcon height={16} width={16} />
-                </Clickable>
+                </Button>
             </TooltipContainer>
         );
     }, { noop: true })

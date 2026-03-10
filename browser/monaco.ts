@@ -15,7 +15,7 @@ declare global {
     const getTheme: () => string;
 }
 
-const BASE = "/vendor/monaco/vs";
+const BASE = "/dist/monaco/vs";
 
 self.MonacoEnvironment = {
     getWorkerUrl(_moduleId: unknown, label: string) {

@@ -25,9 +25,9 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "ensureAudio(){",
+            find: "_ensureAudio(){",
             replacement: {
-                match: /(?=Math\.min\(\i\.\i\.getOutputVolume\(\)\/100)/g,
+                match: /(?=Math\.min\(\i\.\i\.getOutputVolume\(\)\/100)/,
                 replace: "$self.settings.store.notificationVolume/100*"
             },
         },

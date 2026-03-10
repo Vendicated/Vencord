@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
+import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
-import { Channel, Message } from "@vencord/discord-types";
-import { findComponentByCodeLazy, findComponentLazy, findCssClassesLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -40,19 +40,19 @@ import {
     Text,
     UserStore
 } from "@webpack/common";
-import { JSX } from "react";
+import { Channel, Message } from "discord-types/general";
 
 const messageCache = new Map<string, {
     message?: Message;
     fetched: boolean;
 }>();
 
-const Embed = findComponentLazy(m => m.prototype?.renderSuppressButton);
-const AutoModEmbed = findComponentByCodeLazy("withFooter", "childrenMessageContent:");
+const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
+const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 
-const SearchResultClasses = findCssClassesLazy("message", "searchResult");
-const EmbedClasses = findCssClassesLazy("embedAuthorIcon", "embedAuthor", "embedAuthor", "embedMargin");
+const SearchResultClasses = findByPropsLazy("message", "searchResult");
+const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
@@ -115,16 +115,15 @@ const settings = definePluginSettings({
     idList: {
         description: "Guild/channel/user IDs to blacklist or whitelist (separate with comma)",
         type: OptionType.STRING,
-        default: "",
-        multiline: true,
+        default: ""
     },
     clearMessageCache: {
         type: OptionType.COMPONENT,
-        component: () => (
+        description: "Clear the linked message cache",
+        component: () =>
             <Button onClick={() => messageCache.clear()}>
                 Clear the linked message cache
             </Button>
-        )
     }
 });
 
@@ -218,7 +217,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
     return new Proxy(message, {
         get(_, prop) {
             if (prop === "vencordEmbeddedBy") return embeddedBy;
-            // @ts-expect-error ts so bad
+            // @ts-ignore ts so bad
             return Reflect.get(...arguments);
         }
     });
@@ -226,7 +225,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
 
 
 function MessageEmbedAccessory({ message }: { message: Message; }) {
-    // @ts-expect-error
+    // @ts-ignore
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
     const accessories = [] as (JSX.Element | null)[];
@@ -295,7 +294,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
         <Embed
             embed={{
                 rawDescription: "",
-                color: "var(--background-base-lower)",
+                color: "var(--background-secondary)",
                 author: {
                     name: <Text variant="text-xs/medium" tag="span">
                         <span>{channelLabel} - </span>
@@ -348,10 +347,10 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                     ? parse(message.content)
                     : [noContent(message.attachments.length, message.embeds.length)]
                 }
-                {images.map((a, idx) => {
+                {images.map(a => {
                     const { width, height } = computeWidthAndHeight(a.width, a.height);
                     return (
-                        <div key={idx}>
+                        <div>
                             <img src={a.url} width={width} height={height} />
                         </div>
                     );
@@ -373,7 +372,7 @@ export default definePlugin({
     settings,
 
     start() {
-        addMessageAccessory("MessageLinkEmbeds", props => {
+        addAccessory("messageLinkEmbed", props => {
             if (!messageLinkRegex.test(props.message.content))
                 return null;
 
@@ -381,14 +380,16 @@ export default definePlugin({
             messageLinkRegex.lastIndex = 0;
 
             return (
-                <MessageEmbedAccessory
-                    message={props.message}
-                />
+                <ErrorBoundary>
+                    <MessageEmbedAccessory
+                        message={props.message}
+                    />
+                </ErrorBoundary>
             );
         }, 4 /* just above rich embeds */);
     },
 
     stop() {
-        removeMessageAccessory("MessageLinkEmbeds");
+        removeAccessory("messageLinkEmbed");
     }
 });

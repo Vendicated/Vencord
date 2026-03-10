@@ -16,40 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { MessageObject } from "@api/MessageEvents";
-import type { Channel, CloudUpload, Guild, GuildFeatures, Message, User } from "@vencord/discord-types";
-import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, RestAPI, SelectedChannelStore, SelectedGuildStore, Toasts, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Except } from "type-fest";
+import { MessageObject } from "@api/MessageEvents";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { Guild, Message, User } from "discord-types/general";
 
-import { copyToClipboard } from "./clipboard";
-import { runtimeHashMessageKey } from "./intlHash";
-import { Logger } from "./Logger";
-import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
-
-const IntlManagerLogger = new Logger("IntlManager");
-
-/**
- * Get an internationalized message from a non hashed key
- * @param key The plain message key
- * @param values The values to interpolate, if it's a rich message
- */
-export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): any {
-    return getIntlMessageFromHash(runtimeHashMessageKey(key), values, key);
-}
-
-/**
- * Get an internationalized message from a hashed key
- * @param hashedKey The hashed message key
- * @param values The values to interpolate, if it's a rich message
- */
-export function getIntlMessageFromHash(hashedKey: string, values?: Record<PropertyKey, any>, originalKey?: string): any {
-    try {
-        return values == null ? i18n.intl.string(i18n.t[hashedKey]) : i18n.intl.format(i18n.t[hashedKey], values);
-    } catch (e) {
-        IntlManagerLogger.error(`Failed to get intl message for key: ${originalKey ?? hashedKey}`, e);
-        return originalKey ?? "";
-    }
-}
+import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -83,16 +54,16 @@ export async function openInviteModal(code: string) {
     });
 }
 
-export function getCurrentChannel(): Channel | undefined {
+export function getCurrentChannel() {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
 }
 
 export function getCurrentGuild(): Guild | undefined {
-    return GuildStore.getGuild(getCurrentChannel()?.guild_id!);
+    return GuildStore.getGuild(getCurrentChannel()?.guild_id);
 }
 
 export function openPrivateChannel(userId: string) {
-    ChannelActionCreators.openPrivateChannel(userId);
+    PrivateChannelsStore.openPrivateChannel(userId);
 }
 
 export const enum Theme {
@@ -101,11 +72,7 @@ export const enum Theme {
 }
 
 export function getTheme(): Theme {
-    try {
-        return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
-    } catch {
-        return Theme.Dark;
-    }
+    return UserSettingsActionCreators.PreloadedUserSettingsActionCreators.getCurrentValue()?.appearance?.theme;
 }
 
 export function insertTextIntoChatInputBox(text: string) {
@@ -115,43 +82,20 @@ export function insertTextIntoChatInputBox(text: string) {
     });
 }
 
-export async function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    await copyToClipboard(text);
-    Toasts.show({
-        message: toastMessage,
-        id: Toasts.genId(),
-        type: Toasts.Type.SUCCESS
-    });
-}
-
-interface MessageOptions {
+interface MessageExtra {
     messageReference: Message["messageReference"];
     allowedMentions: {
         parse: string[];
         replied_user: boolean;
     };
     stickerIds: string[];
-    attachmentsToUpload: CloudUpload[];
-    poll: {
-        allow_multiselect: boolean;
-        answers: Array<{
-            poll_media: {
-                text: string;
-                attachment_ids?: unknown;
-                emoji?: { name: string; id?: string; };
-            };
-        }>;
-        duration: number;
-        layout_type: number;
-        question: { text: string; };
-    };
 }
 
 export function sendMessage(
     channelId: string,
     data: Partial<MessageObject>,
-    waitForChannelReady = true,
-    options: Partial<MessageOptions> = {}
+    waitForChannelReady?: boolean,
+    extra?: Partial<MessageExtra>
 ) {
     const messageData = {
         content: "",
@@ -161,21 +105,29 @@ export function sendMessage(
         ...data
     };
 
-    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, options);
+    return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-/**
- * You must specify either height or width in the item
- */
-export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalProps?: Omit<MediaModalProps, "items">) {
-    return openMediaModal({
-        items: [{
-            type: "IMAGE",
-            original: item.original ?? item.url,
-            ...item,
-        }],
-        ...mediaModalProps
-    });
+export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
+    return openModal(modalProps => (
+        <ModalRoot
+            {...modalProps}
+            className={ModalImageClasses.modal}
+            size={ModalSize.DYNAMIC}>
+            <ImageModal
+                className={ModalImageClasses.image}
+                original={url}
+                placeholder={url}
+                src={url}
+                renderLinkComponent={props => <MaskedLink {...props} />}
+                // Don't render forward message button
+                renderForwardComponent={() => null}
+                shouldHideMediaOptions={false}
+                shouldAnimate
+                {...props}
+            />
+        </ModalRoot>
+    ));
 }
 
 export async function openUserProfile(id: string) {
@@ -222,7 +174,7 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
     });
 
     FluxDispatcher.dispatch({ type: "USER_UPDATE", user: body.user });
-    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", userProfile: body });
+    await FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_SUCCESS", ...body });
     if (options?.guild_id && body.guild_member)
         FluxDispatcher.dispatch({ type: "GUILD_MEMBER_PROFILE_UPDATE", guildId: options.guild_id, guildMember: body.guild_member });
 
@@ -234,16 +186,4 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
  */
 export function getUniqueUsername(user: User) {
     return user.discriminator === "0" ? user.username : user.tag;
-}
-
-// Discord has a similar function in their code
-export function getGuildAcronym(guild: Guild): string {
-    return guild.name
-        .replaceAll("'s ", " ")
-        .replace(/\w+/g, m => m[0])
-        .replace(/\s/g, "");
-}
-
-export function hasGuildFeature(guild: Guild, feature: GuildFeatures): boolean {
-    return guild.features?.has(feature) ?? false;
 }

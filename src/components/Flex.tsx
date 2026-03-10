@@ -16,30 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { CSSProperties, HTMLAttributes } from "react";
+import type { React } from "@webpack/common";
 
-export interface FlexProps extends HTMLAttributes<HTMLDivElement> {
-    flexDirection?: CSSProperties["flexDirection"];
-    gap?: CSSProperties["gap"];
-    justifyContent?: CSSProperties["justifyContent"];
-    alignItems?: CSSProperties["alignItems"];
-    flexWrap?: CSSProperties["flexWrap"];
-}
-
-export function Flex({ flexDirection, gap = "1em", justifyContent, alignItems, flexWrap, children, style, ...restProps }: FlexProps) {
-    style = {
-        display: "flex",
-        flexDirection,
-        gap,
-        justifyContent,
-        alignItems,
-        flexWrap,
-        ...style
-    };
-
+export function Flex(props: React.PropsWithChildren<{
+    flexDirection?: React.CSSProperties["flexDirection"];
+    style?: React.CSSProperties;
+    className?: string;
+} & React.HTMLProps<HTMLDivElement>>) {
+    props.style ??= {};
+    props.style.display = "flex";
+    // TODO(ven): Remove me, what was I thinking??
+    props.style.gap ??= "1em";
+    props.style.flexDirection ||= props.flexDirection;
+    delete props.flexDirection;
     return (
-        <div style={style} {...restProps}>
-            {children}
+        <div {...props}>
+            {props.children}
         </div>
     );
 }

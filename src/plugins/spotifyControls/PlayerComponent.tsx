@@ -18,21 +18,16 @@
 
 import "./spotifyStyles.css";
 
-import { Settings } from "@api/Settings";
 import { Flex } from "@components/Flex";
-import { CopyIcon, ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
-import { Paragraph } from "@components/Paragraph";
-import { Span } from "@components/Span";
+import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
-import { classNameFactory } from "@utils/css";
-import { copyWithToast, openImageModal } from "@utils/discord";
-import { classes } from "@utils/misc";
-import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { openImageModal } from "@utils/discord";
+import { classes, copyWithToast } from "@utils/misc";
+import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
-import { SeekBar } from "./SeekBar";
 import { SpotifyStore, Track } from "./SpotifyStore";
 
-const cl = classNameFactory("vc-spotify-");
+const cl = (className: string) => `vc-spotify-${className}`;
 
 function msToHuman(ms: number) {
     const minutes = ms / 1000 / 60;
@@ -44,7 +39,7 @@ function msToHuman(ms: number) {
 function Svg(path: string, label: string) {
     return () => (
         <svg
-            className={cl("button-icon", label)}
+            className={classes(cl("button-icon"), cl(label))}
             height="24"
             width="24"
             viewBox="0 0 24 24"
@@ -78,33 +73,37 @@ function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     );
 }
 
-function CopyContextMenu({ name, type, path }: { type: string; name: string; path: string; }) {
+function CopyContextMenu({ name, path }: { name: string; path: string; }) {
+    const copyId = `spotify-copy-${name}`;
+    const openId = `spotify-open-${name}`;
+
     return (
         <Menu.Menu
-            navId="vc-spotify-menu"
-            onClose={ContextMenuApi.closeContextMenu}
-            aria-label={`Spotify ${type} Menu`}
+            navId={`spotify-${name}-menu`}
+            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            aria-label={`Spotify ${name} Menu`}
         >
             <Menu.MenuItem
-                id="vc-spotify-copy-name"
-                label={`Copy ${type} Name`}
-                action={() => copyWithToast(name)}
-                icon={CopyIcon}
-            />
-            <Menu.MenuItem
-                id="vc-spotify-copy-link"
-                label={`Copy ${type} Link`}
+                key={copyId}
+                id={copyId}
+                label={`Copy ${name} Link`}
                 action={() => copyWithToast("https://open.spotify.com" + path)}
                 icon={LinkIcon}
             />
             <Menu.MenuItem
-                id="vc-spotify-open"
-                label={`Open ${type} in Spotify`}
+                key={openId}
+                id={openId}
+                label={`Open ${name} in Spotify`}
                 action={() => SpotifyStore.openExternal(path)}
                 icon={OpenExternalIcon}
             />
         </Menu.Menu>
     );
+}
+
+function makeContextMenu(name: string, path: string) {
+    return (e: React.MouseEvent<HTMLElement, MouseEvent>) =>
+        ContextMenuApi.openContextMenu(e, () => <CopyContextMenu name={name} path={path} />);
 }
 
 function Controls() {
@@ -124,16 +123,14 @@ function Controls() {
 
     // the 1 is using position absolute so it does not make the button jump around
     return (
-        <Flex className={cl("button-row")} gap="0">
+        <Flex className={cl("button-row")} style={{ gap: 0 }}>
             <Button
-                className={classes(cl("button"), cl("shuffle"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
+                className={classes(cl("button"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
                 onClick={() => SpotifyStore.setShuffle(!shuffle)}
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => {
-                Settings.plugins.SpotifyControls.previousButtonRestartsTrack && SpotifyStore.position > 3000 ? SpotifyStore.seek(0) : SpotifyStore.prev();
-            }}>
+            <Button onClick={() => SpotifyStore.prev()}>
                 <SkipPrev />
             </Button>
             <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
@@ -143,7 +140,7 @@ function Controls() {
                 <SkipNext />
             </Button>
             <Button
-                className={classes(cl("button"), cl("repeat"), cl(repeatClassName))}
+                className={classes(cl("button"), cl(repeatClassName))}
                 onClick={() => SpotifyStore.setRepeat(nextRepeat)}
                 style={{ position: "relative" }}
             >
@@ -158,7 +155,7 @@ const seek = debounce((v: number) => {
     SpotifyStore.seek(v);
 });
 
-function SpotifySeekBar() {
+function SeekBar() {
     const { duration } = SpotifyStore.track!;
 
     const [storePosition, isSettingPosition, isPlaying] = useStateFromStores(
@@ -168,6 +165,7 @@ function SpotifySeekBar() {
 
     const [position, setPosition] = useState(storePosition);
 
+    // eslint-disable-next-line consistent-return
     useEffect(() => {
         if (isPlaying && !isSettingPosition) {
             setPosition(SpotifyStore.position);
@@ -179,38 +177,33 @@ function SpotifySeekBar() {
         }
     }, [storePosition, isSettingPosition, isPlaying]);
 
-    const onChange = (v: number) => {
-        if (isSettingPosition) return;
-        setPosition(v);
-        seek(v);
-    };
-
     return (
         <div id={cl("progress-bar")}>
-            <Span
-                size="xs"
-                weight="medium"
+            <Forms.FormText
+                variant="text-xs/medium"
                 className={cl("progress-time") + " " + cl("time-left")}
                 aria-label="Progress"
             >
                 {msToHuman(position)}
-            </Span>
-            <SeekBar
-                initialValue={position}
+            </Forms.FormText>
+            <Menu.MenuSliderControl
                 minValue={0}
                 maxValue={duration}
-                onValueChange={onChange}
-                asValueChanges={onChange}
-                onValueRender={msToHuman}
+                value={position}
+                onChange={(v: number) => {
+                    if (isSettingPosition) return;
+                    setPosition(v);
+                    seek(v);
+                }}
+                renderValue={msToHuman}
             />
-            <Span
-                size="xs"
-                weight="medium"
+            <Forms.FormText
+                variant="text-xs/medium"
                 className={cl("progress-time") + " " + cl("time-right")}
                 aria-label="Total Duration"
             >
                 {msToHuman(duration)}
-            </Span>
+            </Forms.FormText>
         </div>
     );
 }
@@ -237,7 +230,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 id="view-cover"
                 label="View Album Cover"
                 // trolley
-                action={() => openImageModal(track.album.image)}
+                action={() => openImageModal(track.album.image.url)}
                 icon={ImageIcon}
             />
             <Menu.MenuControlItem
@@ -259,14 +252,13 @@ function AlbumContextMenu({ track }: { track: Track; }) {
     );
 }
 
-function makeLinkProps(type: "Song" | "Artist" | "Album", condition: unknown, name: string, path: string) {
+function makeLinkProps(name: string, condition: unknown, path: string) {
     if (!condition) return {};
 
     return {
         role: "link",
         onClick: () => SpotifyStore.openExternal(path),
-        onContextMenu: e =>
-            ContextMenuApi.openContextMenu(e, () => <CopyContextMenu type={type} name={name} path={path} />)
+        onContextMenu: makeContextMenu(name, path)
     } satisfies React.HTMLAttributes<HTMLElement>;
 }
 
@@ -291,57 +283,56 @@ function Info({ track }: { track: Track; }) {
         </>
     );
 
-    if (coverExpanded && img)
-        return (
-            <div id={cl("album-expanded-wrapper")}>
-                {i}
-            </div>
-        );
+    if (coverExpanded && img) return (
+        <div id={cl("album-expanded-wrapper")}>
+            {i}
+        </div>
+    );
 
     return (
         <div id={cl("info-wrapper")}>
             {i}
             <div id={cl("titles")}>
-                <Paragraph
-                    weight="semibold"
+                <Forms.FormText
+                    variant="text-sm/semibold"
                     id={cl("song-title")}
                     className={cl("ellipoverflow")}
                     title={track.name}
-                    {...makeLinkProps("Song", track.id, track.name, `/track/${track.id}`)}
+                    {...makeLinkProps("Song", track.id, `/track/${track.id}`)}
                 >
                     {track.name}
-                </Paragraph>
+                </Forms.FormText>
                 {track.artists.some(a => a.name) && (
-                    <Paragraph className={cl(["ellipoverflow", "secondary-song-info"])}>
-                        <span className={cl("song-info-prefix")}>by&nbsp;</span>
+                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
+                        by&nbsp;
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
                                 <span
                                     className={cl("artist")}
                                     style={{ fontSize: "inherit" }}
                                     title={a.name}
-                                    {...makeLinkProps("Artist", a.id, a.name, `/artist/${a.id}`)}
+                                    {...makeLinkProps("Artist", a.id, `/artist/${a.id}`)}
                                 >
                                     {a.name}
                                 </span>
                                 {i !== track.artists.length - 1 && <span className={cl("comma")}>{", "}</span>}
                             </React.Fragment>
                         ))}
-                    </Paragraph>
+                    </Forms.FormText>
                 )}
                 {track.album.name && (
-                    <Paragraph className={cl(["ellipoverflow", "secondary-song-info"])}>
-                        <span className={cl("song-info-prefix")}>on&nbsp;</span>
+                    <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
+                        on&nbsp;
                         <span
                             id={cl("album-title")}
                             className={cl("album")}
                             style={{ fontSize: "inherit" }}
                             title={track.album.name}
-                            {...makeLinkProps("Album", track.album.id, track.album.name, `/album/${track.album.id}`)}
+                            {...makeLinkProps("Album", track.album.id, `/album/${track.album.id}`)}
                         >
                             {track.album.name}
                         </span>
-                    </Paragraph>
+                    </Forms.FormText>
                 )}
             </div>
         </div>
@@ -367,7 +358,7 @@ export function Player() {
     const [shouldHide, setShouldHide] = useState(false);
 
     // Hide player after 5 minutes of inactivity
-
+    // eslint-disable-next-line consistent-return
     React.useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {
@@ -386,7 +377,7 @@ export function Player() {
     return (
         <div id={cl("player")} style={exportTrackImageStyle}>
             <Info track={track} />
-            <SpotifySeekBar />
+            <SeekBar />
             <Controls />
         </div>
     );

@@ -1,4 +1,4 @@
-# Client Theme
+# Classic Client Theme
 
 Revival of the old client theme experiment (The one that came before the sucky one that we actually got)
 

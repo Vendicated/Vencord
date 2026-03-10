@@ -18,17 +18,17 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
+import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { createRoot, Menu } from "@webpack/common";
-import { JSX } from "react";
+import { Menu, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
-import managedStyle from "./styles.css?managed";
+import styles from "./styles.css?managed";
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -58,14 +58,14 @@ export const settings = definePluginSettings({
     zoom: {
         description: "Zoom of the lens",
         type: OptionType.SLIDER,
-        markers: [1, 5, 10, 20, 30, 40, 50],
+        markers: makeRange(1, 50, 4),
         default: 2,
         stickToMarkers: false,
     },
     size: {
         description: "Radius / Size of the lens",
         type: OptionType.SLIDER,
-        markers: [50, 100, 250, 500, 750, 1000],
+        markers: makeRange(50, 1000, 50),
         default: 100,
         stickToMarkers: false,
     },
@@ -73,19 +73,14 @@ export const settings = definePluginSettings({
     zoomSpeed: {
         description: "How fast the zoom / lens size changes",
         type: OptionType.SLIDER,
-        markers: [0.1, 0.5, 1, 2, 3, 4, 5],
+        markers: makeRange(0.1, 5, 0.2),
         default: 0.5,
         stickToMarkers: false,
     },
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    // Discord re-uses the image context menu for links to for the copy and open buttons
-    if ("href" in props) return;
-    // emojis in user statuses
-    if (props.target?.classList?.contains("emoji")) return;
-
+const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
     const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
 
     children.push(
@@ -159,28 +154,16 @@ export default definePlugin({
     authors: [Devs.Aria],
     tags: ["ImageUtilities"],
 
-    managedStyle,
-
     patches: [
         {
-            find: "disableArrowKeySeek:!0",
-            replacement: [
-                {
-                    match: /useFullWidth:!0,shouldLink:/,
-                    replace: `id:"${ELEMENT_ID}",$&`
-                },
-                {
-                    match: /(?<=null!=(\i)\?.{0,20})\i\.\i,{children:\1/,
-                    replace: "'div',{onClick:e=>e.stopPropagation(),children:$1"
-                }
-            ]
-        },
-        // Make media viewer options not hide when zoomed in with the default Discord feature
-        {
-            find: '="FOCUS_SENSITIVE",',
+            find: "Messages.OPEN_IN_BROWSER",
             replacement: {
-                match: /(?<=\[\i\.\i]:)\i&&!\i&&"PINNED"!==\i/,
-                replace: "false"
+                // there are 2 image thingies. one for carosuel and one for the single image.
+                // so thats why i added global flag.
+                // also idk if this patch is good, should it be more specific?
+                // https://regex101.com/r/xfvNvV/1
+                match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
+                replace: `$&id: '${ELEMENT_ID}',`
             }
         },
 
@@ -188,7 +171,7 @@ export default definePlugin({
             find: ".handleImageLoad)",
             replacement: [
                 {
-                    match: /placeholderVersion:\i,(?=.{0,50}children:)/,
+                    match: /placeholderVersion:\i,/,
                     replace: "...$self.makeProps(this),$&"
                 },
 
@@ -200,13 +183,15 @@ export default definePlugin({
                 {
                     match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
-                },
-
-                {
-                    match: /componentDidUpdate\(\i\){/,
-                    replace: "$&$self.updateMagnifier(this);"
                 }
             ]
+        },
+        {
+            find: ".carouselModal",
+            replacement: {
+                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
+                replace: "()=>{},"
+            }
         }
     ],
 
@@ -232,22 +217,13 @@ export default definePlugin({
     },
 
     renderMagnifier(instance) {
-        try {
-            if (instance.props.id === ELEMENT_ID) {
-                if (!this.currentMagnifierElement) {
-                    this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
-                    this.root = createRoot(this.element!);
-                    this.root.render(this.currentMagnifierElement);
-                }
+        if (instance.props.id === ELEMENT_ID) {
+            if (!this.currentMagnifierElement) {
+                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                this.root = ReactDOM.createRoot(this.element!);
+                this.root.render(this.currentMagnifierElement);
             }
-        } catch (error) {
-            new Logger("ImageZoom").error("Failed to render magnifier:", error);
         }
-    },
-
-    updateMagnifier(instance) {
-        this.unMountMagnifier();
-        this.renderMagnifier(instance);
     },
 
     unMountMagnifier() {
@@ -271,12 +247,14 @@ export default definePlugin({
     },
 
     start() {
+        enableStyle(styles);
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
         document.body.appendChild(this.element);
     },
 
     stop() {
+        disableStyle(styles);
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();

@@ -32,7 +32,7 @@ export default definePlugin({
     patches: [
         // Permission lockout, just set the check to true
         {
-            find: "#{intl::STAGE_CHANNEL_CANNOT_OVERWRITE_PERMISSION}",
+            find: ".STAGE_CHANNEL_CANNOT_OVERWRITE_PERMISSION",
             replacement: [
                 {
                     match: /case"DENY":.{0,50}if\((?=\i\.\i\.can)/,
@@ -43,12 +43,11 @@ export default definePlugin({
         },
         // Onboarding, same thing but we need to prevent the check
         {
-            find: "#{intl::ONBOARDING_CHANNEL_THRESHOLD_WARNING}",
+            find: ".ONBOARDING_CHANNEL_THRESHOLD_WARNING",
             replacement: [
                 {
-                    // replace export getters with functions that always resolve to true
-                    match: /{(?:\i:\(\)=>\i,?){2}}/,
-                    replace: m => m.replaceAll(canonicalizeMatch(/\(\)=>\i/g), "()=>()=>Promise.resolve(true)")
+                    match: /{(\i:function\(\){return \i},?){2}}/,
+                    replace: m => m.replaceAll(canonicalizeMatch(/return \i/g), "return ()=>Promise.resolve(true)")
                 }
             ],
             predicate: () => settings.store.onboarding

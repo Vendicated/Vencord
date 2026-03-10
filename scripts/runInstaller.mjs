@@ -118,11 +118,8 @@ const installerBin = await ensureBinary();
 
 console.log("Now running Installer...");
 
-const argStart = process.argv.indexOf("--");
-const args = argStart === -1 ? [] : process.argv.slice(argStart + 1);
-
 try {
-    execFileSync(installerBin, args, {
+    execFileSync(installerBin, {
         stdio: "inherit",
         env: {
             ...process.env,

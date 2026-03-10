@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
-import { useAuthorizationStore } from "@plugins/decor/lib/stores/AuthorizationStore";
-import { useCurrentUserDecorationsStore } from "@plugins/decor/lib/stores/CurrentUserDecorationsStore";
-import { cl } from "@plugins/decor/ui";
-import { openChangeDecorationModal } from "@plugins/decor/ui/modals/ChangeDecorationModal";
-import { findComponentByCodeLazy } from "@webpack";
-import { useEffect } from "@webpack/common";
+import { findByCodeLazy } from "@webpack";
+import { Button, useEffect } from "@webpack/common";
 
-const CustomizationSection = findComponentByCodeLazy(".DESCRIPTION", "hasBackground:");
+import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
+import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
+import { cl } from "../";
+import { openChangeDecorationModal } from "../modals/ChangeDecorationModal";
+
+const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
 
 export interface DecorSectionProps {
     hideTitle?: boolean;
@@ -35,22 +35,22 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
         hideDivider={hideDivider}
         className={noMargin && cl("section-remove-margin")}
     >
-        <Flex gap="4px">
+        <Flex>
             <Button
                 onClick={() => {
                     if (!authorization.isAuthorized()) {
                         authorization.authorize().then(openChangeDecorationModal).catch(() => { });
                     } else openChangeDecorationModal();
                 }}
-                variant="primary"
-                size="small"
+                size={Button.Sizes.SMALL}
             >
                 Change Decoration
             </Button>
             {selectedDecoration && authorization.isAuthorized() && <Button
                 onClick={() => selectDecoration(null)}
-                variant="secondary"
-                size={"small"}
+                color={Button.Colors.PRIMARY}
+                size={Button.Sizes.SMALL}
+                look={Button.Looks.LINK}
             >
                 Remove Decoration
             </Button>}

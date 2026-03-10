@@ -29,11 +29,9 @@ import * as $MessagePopover from "./MessagePopover";
 import * as $MessageUpdater from "./MessageUpdater";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
-export * as PluginManager from "./PluginManager";
 import * as $ServerList from "./ServerList";
 import * as $Settings from "./Settings";
 import * as $Styles from "./Styles";
-import * as $Themes from "./Themes";
 import * as $UserSettings from "./UserSettings";
 
 /**
@@ -124,8 +122,3 @@ export const MessageUpdater = $MessageUpdater;
  * An API allowing you to get an user setting
  */
 export const UserSettings = $UserSettings;
-
-/**
- * Don't use this
- */
-export const Themes = $Themes;

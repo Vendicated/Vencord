@@ -25,6 +25,7 @@ import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { filters, findAll, search } from "@webpack";
 
 const PORT = 8485;
+const NAV_ID = "dev-companion-reconnect";
 
 const logger = new Logger("DevCompanion");
 
@@ -90,7 +91,7 @@ function parseNode(node: Node) {
 function initWs(isManual = false) {
     let wasConnected = isManual;
     let hasErrored = false;
-    const ws = socket = new WebSocket(`ws://127.0.0.1:${PORT}`);
+    const ws = socket = new WebSocket(`ws://localhost:${PORT}`);
 
     ws.addEventListener("open", () => {
         wasConnected = true;
@@ -159,12 +160,10 @@ function initWs(isManual = false) {
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
                 const mod = candidates[keys[0]];
-                let src = String(mod).replaceAll("\n", "");
+                let src = String(mod.original ?? mod).replaceAll("\n", "");
 
                 if (src.startsWith("function(")) {
                     src = "0," + src;
-                } else if (src.charCodeAt(0) >= 49 /* 1*/ && src.charCodeAt(0) <= 57 /* 9*/) {
-                    src = "0,function" + src.substring(src.indexOf("("));
                 }
 
                 let i = 0;
@@ -174,7 +173,7 @@ function initWs(isManual = false) {
 
                     try {
                         const matcher = canonicalizeMatch(parseNode(match));
-                        const replacement = canonicalizeReplace(parseNode(replace), 'Vencord.Plugins.plugins["PlaceHolderPluginName"]');
+                        const replacement = canonicalizeReplace(parseNode(replace), "PlaceHolderPluginName");
 
                         const newSource = src.replace(matcher, replacement as string);
 
@@ -203,9 +202,6 @@ function initWs(isManual = false) {
                     switch (type.replace("find", "").replace("Lazy", "")) {
                         case "":
                             results = findAll(parsedArgs[0]);
-                            break;
-                        case "CssClasses":
-                            results = findAll(filters.byClassNames(...parsedArgs), { topLevelOnly: true });
                             break;
                         case "ByProps":
                             results = findAll(filters.byProps(...parsedArgs));

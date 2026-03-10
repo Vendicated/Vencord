@@ -16,23 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
-export const VENBOT_USER_ID = "1017176847865352332";
-export const VENCORD_GUILD_ID = "1015060230222131221";
-export const DONOR_ROLE_ID = "1042507929485586532";
-export const CONTRIB_ROLE_ID = "1026534353167208489";
-export const REGULAR_ROLE_ID = "1026504932959977532";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
-export const SUPPORT_CATEGORY_ID = "1108135649699180705";
-export const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
-
-const platform = navigator.platform.toLowerCase();
-export const IS_WINDOWS = platform.startsWith("win");
-export const IS_MAC = platform.startsWith("mac");
-export const IS_LINUX = platform.startsWith("linux");
-// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
-// "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
-export const IS_MOBILE = navigator.userAgent.includes("Mobi");
 
 export interface Dev {
     name: string;
@@ -47,18 +33,17 @@ export interface Dev {
  * If you are fine with attribution but don't want the badge, add badge: false
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
-    Ven: {
-        name: "V",
-        id: 343383572805058560n
+    Nobody: {
+        name: "Nobody",
+        id: 0n,
     },
-    Apexo: {
-        name: "Apexo",
-        id: 228548952687902720n
+    Ven: {
+        name: "Vee",
+        id: 343383572805058560n
     },
     Arjix: {
         name: "ArjixWasTaken",
-        id: 674710789138939916n,
-        badge: false
+        id: 674710789138939916n
     },
     Cyn: {
         name: "Cynosphere",
@@ -100,9 +85,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Mai",
         id: 722647978577363026n
     },
-    amy: {
-        name: "Amy",
-        id: 603229858612510720n
+    echo: {
+        name: "ECHO",
+        id: 712639419785412668n
     },
     katlyn: {
         name: "katlyn",
@@ -204,9 +189,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "sunnie",
         id: 406028027768733696n
     },
-    rae: {
-        name: "rae",
-        id: 1398136199503282277n
+    axyie: {
+        name: "'ax",
+        id: 273562710745284628n,
     },
     pointy: {
         name: "pointy",
@@ -284,6 +269,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     arHSM: {
         name: "arHSM",
         id: 841509053422632990n
+    },
+    F53: {
+        name: "F53",
+        id: 280411966126948353n
     },
     AutumnVN: {
         name: "AutumnVN",
@@ -447,7 +436,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     nin0dev: {
         name: "nin0dev",
-        id: 1395533040914141235n
+        id: 886685857560539176n
     },
     Elvyra: {
         name: "Elvyra",
@@ -477,9 +466,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "puv",
         id: 469441552251355137n
     },
-    IcedMarina: {
-        name: "icedmarina",
-        id: 594406131670188042n
+    Kodarru: {
+        name: "Kodarru",
+        id: 785227396218748949n
     },
     nakoyasha: {
         name: "nakoyasha",
@@ -489,11 +478,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Sqaaakoi",
         id: 259558259491340288n
     },
-    iamme: {
-        name: "i am me",
-        id: 984392761929256980n
-    },
-    Byeoon: {
+    Byron: {
         name: "byeoon",
         id: 1167275288036655133n
     },
@@ -538,8 +523,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 721717126523781240n,
     },
     nyx: {
-        name: "verticalsync.",
-        id: 1207087393929171095n
+        name: "verticalsync",
+        id: 328165170536775680n
     },
     nekohaxx: {
         name: "nekohaxx",
@@ -548,86 +533,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Antti: {
         name: "Antti",
         id: 312974985876471810n
-    },
-    Joona: {
-        name: "Joona",
-        id: 297410829589020673n
-    },
-    sadan: {
-        name: "sadan",
-        id: 521819891141967883n,
-    },
-    Kylie: {
-        name: "Cookie",
-        id: 721853658941227088n
-    },
-    AshtonMemer: {
-        name: "AshtonMemer",
-        id: 373657230530052099n
-    },
-    surgedevs: {
-        name: "Chloe",
-        id: 1084592643784331324n
-    },
-    Lumap: {
-        name: "Lumap",
-        id: 585278686291427338n,
-    },
-    Obsidian: {
-        name: "Obsidian",
-        id: 683171006717755446n,
-    },
-    SerStars: {
-        name: "SerStars",
-        id: 861631850681729045n,
-    },
-    niko: {
-        name: "niko",
-        id: 341377368075796483n,
-    },
-    relitrix: {
-        name: "Relitrix",
-        id: 423165393901715456n,
-    },
-    RamziAH: {
-        name: "RamziAH",
-        id: 1279957227612147747n,
-    },
-    SomeAspy: {
-        name: "SomeAspy",
-        id: 516750892372852754n,
-    },
-    jamesbt365: {
-        name: "jamesbt365",
-        id: 158567567487795200n,
-    },
-    samsam: {
-        name: "samsam",
-        id: 400482410279469056n,
-    },
-    Cootshk: {
-        name: "Cootshk",
-        id: 921605971577548820n
-    },
-    thororen: {
-        name: "thororen",
-        id: 848339671629299742n
-    },
-    alfred: {
-        name: "alfred",
-        id: 1038466644353232967n
-    },
-    vv: {
-        name: "VV",
-        id: 254866377087778816n
-    },
-    u32: {
-        name: "u32",
-        id: 1063237286818488351n,
-    },
-    prism: {
-        name: "prism",
-        id: 390884143749136386n,
     },
     Fres: {
         name: "fres",

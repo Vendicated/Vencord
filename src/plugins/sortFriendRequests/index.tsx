@@ -16,29 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./styles.css";
-
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
-import { TooltipContainer } from "@components/TooltipContainer";
+import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
-import { User } from "@vencord/discord-types";
-import { DateUtils, RelationshipStore, Text } from "@webpack/common";
-import { PropsWithChildren } from "react";
-
-const formatter = new Intl.DateTimeFormat(undefined, {
-    month: "numeric",
-    day: "numeric",
-    year: "numeric",
-});
-
-const cl = classNameFactory("vc-sortFriendRequests-");
-
-function getSince(user: User) {
-    return new Date(RelationshipStore.getSince(user.id));
-}
+import { RelationshipStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
     showDates: {
@@ -62,30 +45,31 @@ export default definePlugin({
             replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
         }
     }, {
-        find: "#{intl::FRIEND_REQUEST_CANCEL}",
+        find: ".Messages.FRIEND_REQUEST_CANCEL",
         replacement: {
             predicate: () => settings.store.showDates,
-            match: /(?<=children:\[)\(0,.{0,100}user:\i,hovered:\i.+?(?=,\(0)(?<=user:(\i).+?)/,
-            replace: (children, user) => `$self.WrapperDateComponent({user:${user},children:${children}})`
+            match: /subText:(\i)(?=,className:\i\.userInfo}\))(?<=user:(\i).+?)/,
+            replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
         }
     }],
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 3 || row.type === 4
-            ? -getSince(row.user)
+            ? -this.getSince(row.user)
             : comparator(row);
     },
 
-    WrapperDateComponent: ErrorBoundary.wrap(({ user, children }: PropsWithChildren<{ user: User; }>) => {
-        const since = getSince(user);
+    getSince(user: User) {
+        return new Date(RelationshipStore.getSince(user.id));
+    },
 
-        return <div className={cl("wrapper")}>
-            {children}
-            {!isNaN(since.getTime()) && (
-                <TooltipContainer text={DateUtils.dateFormat(since, "LLLL")} tooltipClassName={cl("tooltip")}>
-                    <Text variant="text-xs/normal" className={cl("date")}>{formatter.format(since)}</Text>
-                </TooltipContainer>
-            )}
-        </div>;
-    }, { noop: true })
+    makeSubtext(text: string, user: User) {
+        const since = this.getSince(user);
+        return (
+            <Flex flexDirection="row" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
+                <span>{text}</span>
+                {!isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
+            </Flex>
+        );
+    }
 });

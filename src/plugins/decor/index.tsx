@@ -41,25 +41,25 @@ export default definePlugin({
         {
             find: "DefaultCustomizationSections",
             replacement: {
-                match: /(?<=#{intl::USER_SETTINGS_AVATAR_DECORATION}\)},"decoration"\),)/,
+                match: /(?<=USER_SETTINGS_AVATAR_DECORATION},"decoration"\),)/,
                 replace: "$self.DecorSection(),"
             }
         },
         // Decoration modal module
         {
-            find: "80,onlyAnimateOnHoverOrFocus:!",
+            find: ".decorationGridItem,",
             replacement: [
                 {
-                    match: /(?<==)\i=>{let{children.{20,200}isSelected:\i=!1.{0,5}\}=\i/,
-                    replace: "$self.DecorationGridItem=$&",
+                    match: /(?<==)\i=>{let{children.{20,100}decorationGridItem/,
+                    replace: "$self.DecorationGridItem=$&"
                 },
                 {
-                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
-                    replace: "$self.DecorationGridDecoration=$&",
+                    match: /(?<==)\i=>{let{user:\i,avatarDecoration.{300,600}decorationGridItemChurned/,
+                    replace: "$self.DecorationGridDecoration=$&"
                 },
                 // Remove NEW label from decor avatar decorations
                 {
-                    match: /(?<=\.\i\.PURCHASE)(?=,)(?<=avatarDecoration:(\i).+?)/,
+                    match: /(?<=\.\i\.PREMIUM_PURCHASE&&\i)(?<=avatarDecoration:(\i).+?)/,
                     replace: "||$1.skuId===$self.SKU_ID"
                 }
             ]
@@ -70,7 +70,7 @@ export default definePlugin({
             replacement: [
                 // Add Decor avatar decoration hook to avatar decoration hook
                 {
-                    match: /(?<=\.avatarDecoration,guildId:\i\}\)\),)(?<=user:(\i).+?)/,
+                    match: /(?<=TryItOut:\i,guildId:\i}\),)(?<=user:(\i).+?)/,
                     replace: "vcDecorAvatarDecoration=$self.useUserDecorAvatarDecoration($1),"
                 },
                 // Use added hook
@@ -87,33 +87,14 @@ export default definePlugin({
         },
         // Current user area, at bottom of channels/dm list
         {
-            find: ".DISPLAY_NAME_STYLES_COACHMARK),",
+            find: "renderAvatarWithPopout(){",
             replacement: [
                 // Use Decor avatar decoration hook
                 {
-                    match: /(?<=\i\)\({avatarDecoration:)\i(?=,)(?<=currentUser:(\i).+?)/,
+                    match: /(?<=\i\)\({avatarDecoration:)(\i).avatarDecoration(?=,)/,
                     replace: "$self.useUserDecorAvatarDecoration($1)??$&"
                 }
             ]
-        },
-        ...[
-            '"Message Username"', // Messages
-            "#{intl::COLLECTIBLES_NAMEPLATE_PREVIEW_A11Y}", // Nameplate preview
-            "#{intl::COLLECTIBLES_PROFILE_PREVIEW_A11Y}", // Avatar preview
-        ].map(find => ({
-            find,
-            replacement: {
-                match: /(?<=userValue:)((\i(?:\.author)?)\?\.avatarDecoration)/,
-                replace: "$self.useUserDecorAvatarDecoration($2)??$1"
-            }
-        })),
-        // Patch avatar decoration preview to display Decor avatar decorations as if they are purchased
-        {
-            find: "#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}",
-            replacement: {
-                match: /(#{intl::PREMIUM_UPSELL_PROFILE_AVATAR_DECO_INLINE_UPSELL_DESCRIPTION}.+?return null!=(\i)&&\()(null==\i)/,
-                replace: (_, rest, avatarDecoration, hasPurchase) => `${rest}(${avatarDecoration}.skuId!==$self.SKU_ID&&${avatarDecoration}.skuId!==$self.RAW_SKU_ID&&${hasPurchase})`
-            }
         }
     ],
     settings,
@@ -138,7 +119,6 @@ export default definePlugin({
     },
 
     SKU_ID,
-    RAW_SKU_ID,
 
     useUserDecorAvatarDecoration,
 
@@ -158,5 +138,5 @@ export default definePlugin({
         }
     },
 
-    DecorSection: ErrorBoundary.wrap(DecorSection, { noop: true })
+    DecorSection: ErrorBoundary.wrap(DecorSection)
 });

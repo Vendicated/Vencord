@@ -25,10 +25,10 @@ export default definePlugin({
     authors: [Devs.Cyn],
     patches: [
         {
-            find: "#{intl::REMOVE_ATTACHMENT_BODY}",
+            find: ".Messages.REMOVE_ATTACHMENT_BODY",
             replacement: {
-                match: /children:(\[[^\]]{0,100}?this.renderSuppressConfirmModal[^\]]{0,100}?\])/,
-                replace: "children:Vencord.Api.MessageAccessories._modifyAccessories($1,this.props)",
+                match: /(?<=.container\)?,children:)(\[.+?\])/,
+                replace: "Vencord.Api.MessageAccessories._modifyAccessories($1,this.props)",
             },
         },
     ],

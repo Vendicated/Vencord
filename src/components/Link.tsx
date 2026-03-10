@@ -28,9 +28,6 @@ export function Link(props: React.PropsWithChildren<Props>) {
         props.style.pointerEvents = "none";
         props["aria-disabled"] = true;
     }
-
-    props.rel ??= "noreferrer";
-
     return (
         <a role="link" target="_blank" {...props}>
             {props.children}

@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { cl } from "@plugins/shikiCodeblocks.desktop/utils/misc";
 import type { IThemedToken } from "@vap/shiki";
 import { hljs } from "@webpack/common";
-import { JSX } from "react";
 
+import { cl } from "../utils/misc";
 import { ThemeBase } from "./Highlighter";
 
 export interface CodeProps {
@@ -42,12 +41,12 @@ export const Code = ({
 
     if (useHljs) {
         try {
-            const { value: hljsHtml } = hljs.highlight(content, { language: lang!, ignoreIllegals: true });
+            const { value: hljsHtml } = hljs.highlight(lang!, content, true);
             lines = hljsHtml
                 .split("\n")
                 .map((line, i) => <span key={i} dangerouslySetInnerHTML={{ __html: line }} />);
         } catch {
-            lines = content.split("\n").map((line, idx) => <span key={idx}>{line}</span>);
+            lines = content.split("\n").map(line => <span>{line}</span>);
         }
     } else {
         const renderTokens =
@@ -56,11 +55,11 @@ export const Code = ({
                 .split("\n")
                 .map(line => [{ color: theme.plainColor, content: line } as IThemedToken]);
 
-        lines = renderTokens.map((line, idx) => {
+        lines = renderTokens.map(line => {
             // [Cynthia] this makes it so when you highlight the codeblock
             // empty lines are also selected and copied when you Ctrl+C.
             if (line.length === 0) {
-                return <span key={idx}>{"\n"}</span>;
+                return <span>{"\n"}</span>;
             }
 
             return (
@@ -84,9 +83,9 @@ export const Code = ({
     }
 
     const codeTableRows = lines.map((line, i) => (
-        <tr className={cl("table-row")} key={i}>
-            <td className={cl("table-cell")} style={{ color: theme.plainColor }}>{i + 1}</td>
-            <td className={cl("table-cell")}>{line}</td>
+        <tr key={i}>
+            <td style={{ color: theme.plainColor }}>{i + 1}</td>
+            <td>{line}</td>
         </tr>
     ));
 

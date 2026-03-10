@@ -5,20 +5,17 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Heading, HeadingSecondary } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
-import { classNameFactory } from "@utils/css";
-import { getIntlMessage, openUserProfile } from "@utils/discord";
+import { openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { User } from "@vencord/discord-types";
-import { findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
-import { Clickable, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
-import { JSX } from "react";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { Clickable, Forms, i18n, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { User } from "discord-types/general";
 
 interface WatchingProps {
     userIds: string[];
@@ -49,15 +46,15 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
         <div className={cl("content")}>
             {userIds.length ?
                 (<>
-                    <Heading>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Heading>
+                    <Forms.FormTitle>{i18n.Messages.SPECTATORS.format({ numViewers: userIds.length })}</Forms.FormTitle>
                     <Flex flexDirection="column" style={{ gap: 6 }} >
                         {users.map(user => (
-                            <Flex key={user.id} flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
-                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} alt="" />
+                            <Flex flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
+                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} />
                                 {getUsername(user)}
                             </Flex>
                         ))}
-                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}</span>}
+                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${i18n.Messages.NUM_USERS.format({ num: missingUsers })}`}</span>}
                     </Flex>
                 </>)
                 : (<span className={cl("no_viewers")}>No spectators</span>)}
@@ -68,26 +65,29 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findCssClassesLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar", "avatar");
+const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 
 export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
-    authors: [Devs.Fres],
-    settings,
+    authors: [
+        Devs.Fres
+    ],
+    settings: settings,
     patches: [
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /\((\i\.\i)(?=,{mask:\i\.\i\.Masks\.STATUS_SCREENSHARE)/,
-                replace: "($self.component({OriginalComponent:$1})"
+                match: /jsx\)\((\i\.\i),{mask:/,
+                replace: "jsx)($self.component({OriginalComponent:$1}),{mask:"
             }
         },
         {
-            find: "this.renderEmbeddedActivity()",
+            predicate: () => settings.store.showPanel,
+            find: "this.isJoinableActivity()||",
             replacement: {
-                match: /"div"(?=.{0,40}?,this.renderActions\(\))/,
-                replace: "$self.WrapperComponent"
+                match: /(this\.isJoinableActivity\(\).{0,200}children:.{0,50})"div"/,
+                replace: "$1$self.WrapperComponent"
             }
         }
     ],
@@ -120,11 +120,11 @@ export default definePlugin({
             <>
                 <div {...props}>{props.children}</div>
                 <div className={classes(cl("spectators_panel"), Margins.top8)}>
-                    <HeadingSecondary style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
-                        {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
-                    </HeadingSecondary>
                     {users.length ?
                         <>
+                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
+                                {i18n.Messages.SPECTATORS.format({ numViewers: userIds.length })}
+                            </Forms.FormTitle>
                             <UserSummaryItem
                                 users={users}
                                 count={userIds.length}
@@ -132,9 +132,8 @@ export default definePlugin({
                                 max={12}
                                 showDefaultAvatarsForNullUsers
                                 renderMoreUsers={renderMoreUsers}
-                                renderUser={(user: User, index: number) => (
+                                renderUser={(user: User) => (
                                     <Clickable
-                                        key={index}
                                         className={AvatarStyles.clickableAvatar}
                                         onClick={() => openUserProfile(user.id)}
                                     >
@@ -148,7 +147,7 @@ export default definePlugin({
                                 )}
                             />
                         </>
-                        : <Paragraph>No spectators</Paragraph>
+                        : <Forms.FormText>No spectators</Forms.FormText>
                     }
                 </div>
             </>

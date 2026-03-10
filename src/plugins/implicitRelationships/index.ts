@@ -18,13 +18,12 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
-const UserAffinitiesStore = findStoreLazy("UserAffinitiesV2Store");
+const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
 
 export default definePlugin({
     name: "ImplicitRelationships",
@@ -33,9 +32,9 @@ export default definePlugin({
     patches: [
         // Counts header
         {
-            find: "#{intl::FRIENDS_ALL_HEADER}",
+            find: ".FRIENDS_ALL_HEADER",
             replacement: {
-                match: /toString\(\)\}\);case (\i\.\i)\.PENDING/,
+                match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
                 replace: 'toString()});case $1.IMPLICIT:return "Implicit — "+arguments[1];case $1.BLOCKED'
             },
         },
@@ -49,17 +48,17 @@ export default definePlugin({
         },
         // Sections header
         {
-            find: "#{intl::FRIENDS_SECTION_ONLINE}),className:",
+            find: ".FRIENDS_SECTION_ONLINE",
             replacement: {
-                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.\i)(?=\},\{id:)/,
-                replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
-            }
+                match: /(\(0,\i\.jsx\)\(\i\.TabBar\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
+                replace: "$1.IMPLICIT,className:$2.item,children:\"Implicit\"}),$&"
+            },
         },
         // Sections content
         {
             find: '"FriendsStore"',
             replacement: {
-                match: /(?<=case (\i\.\i)\.SUGGESTIONS:return \d+===(\i)\.type)/,
+                match: /(?<=case (\i\.\i)\.BLOCKED:return (\i)\.type===\i\.\i\.BLOCKED)/,
                 replace: ";case $1.IMPLICIT:return $2.type===5"
             },
         },
@@ -84,9 +83,9 @@ export default definePlugin({
 
         // Add support for the nonce parameter to Discord's shitcode
         {
-            find: ".REQUEST_GUILD_MEMBERS,",
+            find: ".REQUEST_GUILD_MEMBERS",
             replacement: {
-                match: /\.send\(\i\.\i\.REQUEST_GUILD_MEMBERS,{/,
+                match: /\.send\(8,{/,
                 replace: "$&nonce:arguments[1].nonce,"
             }
         },
@@ -118,53 +117,59 @@ export default definePlugin({
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 5
-            ? (UserAffinitiesStore.getUserAffinity(row.user.id)?.communicationRank ?? 0)
+            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
             : comparator(row);
     },
 
     async fetchImplicitRelationships() {
         // Implicit relationships are defined as users that you:
         // 1. Have an affinity for
-        // 2. Do not have a relationship with
-        const userAffinities: Record<string, any>[] = UserAffinitiesStore.getUserAffinities();
-        const relationships = RelationshipStore.getMutableRelationships();
-        const nonFriendAffinities = userAffinities.filter(a => !RelationshipStore.getRelationshipType(a.otherUserId));
-        nonFriendAffinities.forEach(a => {
-            relationships.set(a.otherUserId, 5);
-        });
-        RelationshipStore.emitChange();
+        // 2. Do not have a relationship with // TODO: Check how this works with pending/blocked relationships
+        // 3. Have a mutual guild with
+        const userAffinities: Set<string> = UserAffinitiesStore.getUserAffinitiesUserIds();
+        const nonFriendAffinities = Array.from(userAffinities).filter(
+            id => !RelationshipStore.getRelationshipType(id)
+        );
 
-        const toRequest = nonFriendAffinities.filter(a => !UserStore.getUser(a.otherUserId));
+        // I would love to just check user cache here (falling back to the gateway of course)
+        // However, users in user cache may just be there because they share a DM or group DM with you
+        // So there's no guarantee that a user being in user cache means they have a mutual with you
+        // To get around this, we request users we have DMs with, and ignore them below if we don't get them back
+        const dmUserIds = new Set(
+            Object.values(ChannelStore.getSortedPrivateChannels()).flatMap(c => c.recipients)
+        );
+        const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id) || dmUserIds.has(id));
         const allGuildIds = Object.keys(GuildStore.getGuilds());
         const sentNonce = SnowflakeUtils.fromTimestamp(Date.now());
         let count = allGuildIds.length * Math.ceil(toRequest.length / 100);
 
         // OP 8 Request Guild Members allows 100 user IDs at a time
-        // Note: As we are using OP 8 here, implicit relationships who we do not share a guild
-        // with will not be fetched; so, if they're not otherwise cached, they will not be shown
-        // This should not be a big deal as these should be rare
+        const ignore = new Set(toRequest);
+        const relationships = RelationshipStore.getRelationships();
         const callback = ({ chunks }) => {
-            try {
-                const chunkCount = chunks.filter(chunk => chunk.nonce === sentNonce).length;
-                if (chunkCount === 0) return;
+            for (const chunk of chunks) {
+                const { nonce, members } = chunk;
+                if (nonce !== sentNonce) return;
+                members.forEach(member => {
+                    ignore.delete(member.user.id);
+                });
 
-                count -= chunkCount;
+                nonFriendAffinities.map(id => UserStore.getUser(id)).filter(user => user && !ignore.has(user.id)).forEach(user => relationships[user.id] = 5);
                 RelationshipStore.emitChange();
-                if (count <= 0) {
+                if (--count === 0) {
+                    // @ts-ignore
                     FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
                 }
-            } catch (e) {
-                new Logger("ImplicitRelationships").error("Error in GUILD_MEMBERS_CHUNK_BATCH handler", e);
             }
         };
 
+        // @ts-ignore
         FluxDispatcher.subscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
         for (let i = 0; i < toRequest.length; i += 100) {
             FluxDispatcher.dispatch({
                 type: "GUILD_MEMBERS_REQUEST",
                 guildIds: allGuildIds,
                 userIds: toRequest.slice(i, i + 100),
-                presences: true,
                 nonce: sentNonce,
             });
         }

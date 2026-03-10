@@ -23,14 +23,14 @@ import { updateMessage } from "@api/MessageUpdater";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs, SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
+import { Devs } from "@utils/constants";
+import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message } from "@vencord/discord-types";
-import { findCssClassesLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -42,7 +42,8 @@ interface MLMessage extends Message {
     firstEditTimestamp?: Date;
 }
 
-const MessageClasses = findCssClassesLazy("edited", "communicationDisabled", "isSystemMessage");
+const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const getMessage = findByCodeLazy('replace(/^\\n+|\\n+$/g,"")');
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -150,7 +151,6 @@ export default definePlugin({
     contextMenus: {
         "message": patchMessageContextMenu,
         "channel-context": patchChannelContextMenu,
-        "thread-context": patchChannelContextMenu,
         "user-context": patchChannelContextMenu,
         "gdm-context": patchChannelContextMenu
     },
@@ -169,15 +169,15 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map((edit, idx) => (
-                    <div key={idx} className="messagelogger-edited">
+                {message.editHistory?.map(edit => (
+                    <div className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
                             timestamp={edit.timestamp}
                             isEdited={true}
                             isInline={false}
                         >
-                            <span className={MessageClasses.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
+                            <span className={styles.edited}>{" "}({i18n.Messages.MESSAGE_EDITED})</span>
                         </Timestamp>
                     </div>
                 ))}
@@ -211,8 +211,7 @@ export default definePlugin({
         collapseDeleted: {
             type: OptionType.BOOLEAN,
             description: "Whether to collapse deleted messages, similar to blocked messages",
-            default: false,
-            restartNeeded: true,
+            default: false
         },
         logEdits: {
             type: OptionType.BOOLEAN,
@@ -237,20 +236,17 @@ export default definePlugin({
         ignoreUsers: {
             type: OptionType.STRING,
             description: "Comma-separated list of user IDs to ignore",
-            default: "",
-            multiline: true
+            default: ""
         },
         ignoreChannels: {
             type: OptionType.STRING,
             description: "Comma-separated list of channel IDs to ignore",
-            default: "",
-            multiline: true
+            default: ""
         },
         ignoreGuilds: {
             type: OptionType.STRING,
             description: "Comma-separated list of guild IDs to ignore",
-            default: "",
-            multiline: true
+            default: ""
         },
     },
 
@@ -288,22 +284,18 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        try {
-            const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
-            const myId = UserStore.getCurrentUser().id;
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+        const myId = UserStore.getCurrentUser().id;
 
-            return ignoreBots && message.author?.bot ||
-                ignoreSelf && message.author?.id === myId ||
-                ignoreUsers.includes(message.author?.id) ||
-                ignoreChannels.includes(message.channel_id) ||
-                ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
-                (isEdit ? !logEdits : !logDeletes) ||
-                ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
-                // Ignore Venbot in the support channels
-                (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
-        } catch (e) {
-            return false;
-        }
+        return ignoreBots && message.author?.bot ||
+            ignoreSelf && message.author?.id === myId ||
+            ignoreUsers.includes(message.author?.id) ||
+            ignoreChannels.includes(message.channel_id) ||
+            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+            (isEdit ? !logEdits : !logDeletes) ||
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            // Ignore Venbot in the support channel
+            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
     },
 
     EditMarker({ message, className, children, ...props }: any) {
@@ -312,40 +304,16 @@ export default definePlugin({
                 {...props}
                 className={classes("messagelogger-edit-marker", className)}
                 onClick={() => openHistoryModal(message)}
-                role="button"
+                aria-role="button"
             >
                 {children}
             </span>
         );
     },
 
-    // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
-    // TODO: Find a better way to generate intl messages
-    DELETED_MESSAGE_COUNT: () => ({
-        ast: [[
-            6,
-            "count",
-            {
-                "=0": ["No deleted messages"],
-                one: [
-                    [
-                        1,
-                        "count"
-                    ],
-                    " deleted message"
-                ],
-                other: [
-                    [
-                        1,
-                        "count"
-                    ],
-                    " deleted messages"
-                ]
-            },
-            0,
-            "cardinal"
-        ]]
-    }),
+    Messages: proxyLazy(() => ({
+        DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+    })),
 
     patches: [
         {
@@ -354,35 +322,35 @@ export default definePlugin({
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
+                    match: /MESSAGE_DELETE:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
                     replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, false);" +
-                        "   $3commit(cache);" +
-                        "}"
+                        "MESSAGE_DELETE:function($1){" +
+                        "   var cache = $2getOrCreate($1.channelId);" +
+                        "   cache = $self.handleDelete(cache, $1, false);" +
+                        "   $2commit(cache);" +
+                        "},"
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
+                    match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
                     replace:
-                        "function $1($2){" +
-                        "   var cache = $3getOrCreate($2.channelId);" +
-                        "   cache = $self.handleDelete(cache, $2, true);" +
-                        "   $3commit(cache);" +
-                        "}"
+                        "MESSAGE_DELETE_BULK:function($1){" +
+                        "   var cache = $2getOrCreate($1.channelId);" +
+                        "   cache = $self.handleDelete(cache, $1, true);" +
+                        "   $2commit(cache);" +
+                        "},"
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
+                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
                     replace: "$1" +
-                        ".update($4,m =>" +
-                        "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
-                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
+                        ".update($3,m =>" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
+                        "   $2.message.edited_timestamp && $2.message.content !== m.content ?" +
+                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
                         ")" +
-                        ".update($4"
+                        ".update($3"
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -408,7 +376,7 @@ export default definePlugin({
 
         {
             // Updated message transformer(?)
-            find: ".PREMIUM_REFERRAL&&(",
+            find: "THREAD_STARTER_MESSAGE?null===",
             replacement: [
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
@@ -448,11 +416,16 @@ export default definePlugin({
 
         {
             // Attachment renderer
-            find: "#{intl::REMOVE_ATTACHMENT_TOOLTIP_TEXT}",
+            find: ".removeMosaicItemHoverButton",
+            group: true,
             replacement: [
                 {
-                    match: /\.SPOILER,(?=\[\i\.\i\]:)/,
-                    replace: '$&"messagelogger-deleted-attachment":arguments[0]?.item?.originalItem?.deleted,'
+                    match: /(className:\i,item:\i),/,
+                    replace: "$1,item: deleted,"
+                },
+                {
+                    match: /\[\i\.obscured\]:.+?,/,
+                    replace: "$& 'messagelogger-deleted-attachment': deleted,"
                 }
             ]
         },
@@ -471,21 +444,19 @@ export default definePlugin({
 
         {
             // Message content renderer
-            find: ".SEND_FAILED,",
-            replacement: {
-                // Render editHistory behind the message content
-                match: /\]:\i.isUnsupported.{0,20}?,children:\[/,
-                replace: "$&arguments[0]?.message?.editHistory?.length>0&&$self.renderEdits(arguments[0]),"
-            }
-        },
-
-        {
-            find: "#{intl::MESSAGE_EDITED}",
-            replacement: {
-                // Make edit marker clickable
-                match: /(isInline:!1,children:.{0,50}?)"span",\{(?=className:)/,
-                replace: "$1$self.EditMarker,{message:arguments[0].message,"
-            }
+            find: "Messages.MESSAGE_EDITED,\")\"",
+            replacement: [
+                {
+                    // Render editHistory in the deepest div for message content
+                    match: /(\)\("div",\{id:.+?children:\[)/,
+                    replace: "$1 (!!arguments[0].message.editHistory?.length && $self.renderEdits(arguments[0])),"
+                },
+                {
+                    // Make edit marker clickable
+                    match: /"span",\{(?=className:\i\.edited,)/,
+                    replace: "$self.EditMarker,{message:arguments[0].message,"
+                }
+            ]
         },
 
         {
@@ -493,19 +464,19 @@ export default definePlugin({
             find: '"ReferencedMessageStore"',
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:\i,/,
-                    replace: "MESSAGE_DELETE:()=>{},"
+                    match: /MESSAGE_DELETE:function\((\i)\).+?},/,
+                    replace: "MESSAGE_DELETE:function($1){},"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:\i,/,
-                    replace: "MESSAGE_DELETE_BULK:()=>{},"
+                    match: /MESSAGE_DELETE_BULK:function\((\i)\).+?},/,
+                    replace: "MESSAGE_DELETE_BULK:function($1){},"
                 }
             ]
         },
 
         {
             // Message context base menu
-            find: ".MESSAGE,commandTargetId:",
+            find: "useMessageMenu:",
             replacement: [
                 {
                     // Remove the first section if message is deleted
@@ -525,7 +496,7 @@ export default definePlugin({
         },
         {
             // Message group rendering
-            find: "#{intl::NEW_MESSAGES_ESTIMATED_WITH_DATE}",
+            find: "Messages.NEW_MESSAGES_ESTIMATED_WITH_DATE",
             replacement: [
                 {
                     match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\|\|/,
@@ -533,7 +504,7 @@ export default definePlugin({
                 },
                 {
                     match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?.*?:/,
-                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.DELETED_MESSAGE_COUNT:',
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
                 },
             ],
             predicate: () => Settings.plugins.MessageLogger.collapseDeleted

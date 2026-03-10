@@ -18,11 +18,10 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { LinkIcon } from "@components/Icons";
-import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import type { Channel, User } from "@vencord/discord-types";
-import { Menu } from "@webpack/common";
+import { Clipboard, Menu } from "@webpack/common";
+import type { Channel, User } from "discord-types/general";
 
 interface UserContextProps {
     channel: Channel;
@@ -37,7 +36,7 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: U
         <Menu.MenuItem
             id="vc-copy-user-url"
             label="Copy User URL"
-            action={() => copyToClipboard(`<https://discord.com/users/${user.id}>`)}
+            action={() => Clipboard.copy(`<https://discord.com/users/${user.id}>`)}
             icon={LinkIcon}
         />
     );

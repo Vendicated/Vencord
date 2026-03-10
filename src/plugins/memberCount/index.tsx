@@ -19,39 +19,32 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
+import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
 
+export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
 export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
-    getProps(guildId?: string, channelId?: string): { groups: { count: number; id: string; }[]; };
-};
-export const ThreadMemberListStore = findStoreLazy("ThreadMemberListStore") as FluxStore & {
-    getMemberListSections(channelId?: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
+    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
 
-export const settings = definePluginSettings({
+const settings = definePluginSettings({
     toolTip: {
         type: OptionType.BOOLEAN,
-        description: "Show member count on the server tooltip",
+        description: "If the member count should be displayed on the server tooltip",
         default: true,
         restartNeeded: true
     },
     memberList: {
         type: OptionType.BOOLEAN,
-        description: "Show member count in the member list",
+        description: "If the member count should be displayed on the member list",
         default: true,
         restartNeeded: true
-    },
-    voiceActivity: {
-        type: OptionType.BOOLEAN,
-        description: "Show voice activity with member count in the member list",
-        default: true
     }
 });
 
@@ -61,30 +54,28 @@ export const cl = classNameFactory("vc-membercount-");
 
 export default definePlugin({
     name: "MemberCount",
-    description: "Shows the number of online members, total members, and users in voice channels on the server — in the member list and tooltip.",
-    authors: [Devs.Ven, Devs.Commandtechno, Devs.Apexo],
+    description: "Shows the amount of online & total members in the server member list and tooltip",
+    authors: [Devs.Ven, Devs.Commandtechno],
     settings,
 
     patches: [
         {
             find: "{isSidebarVisible:",
-            replacement: [
-                {
-                    match: /children:\[(\i\.useMemo[^}]+"aria-multiselectable")(?<=className:(\i),.+?)/,
-                    replace: "children:[$2?.includes('members')?$self.render():null,$1",
-                },
-            ],
+            replacement: {
+                match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                replace: ":[$1?.startsWith('members')?$self.render():null,$2"
+            },
             predicate: () => settings.store.memberList
         },
         {
-            find: "GuildTooltip - ",
+            find: ".invitesDisabledTooltip",
             replacement: {
-                match: /#{intl::VIEW_AS_ROLES_MENTIONS_WARNING}.{0,100}(?=])/,
+                match: /\.VIEW_AS_ROLES_MENTIONS_WARNING.{0,100}(?=])/,
                 replace: "$&,$self.renderTooltip(arguments[0].guild)"
             },
             predicate: () => settings.store.toolTip
         }
     ],
-    render: ErrorBoundary.wrap(() => <MemberCount />, { noop: true }),
+    render: ErrorBoundary.wrap(MemberCount, { noop: true }),
     renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });

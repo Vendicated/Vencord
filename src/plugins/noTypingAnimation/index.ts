@@ -11,13 +11,11 @@ export default definePlugin({
     name: "NoTypingAnimation",
     authors: [Devs.AutumnVN],
     description: "Disables the CPU-intensive typing dots animation",
-    patches: [
-        {
-            find: "dotCycle",
-            replacement: {
-                match: /focused:(\i)/g,
-                replace: (_, focused) => `_focused:${focused}=false`
-            }
+    patches: [{
+        find: "dotCycle",
+        replacement: {
+            match: /document.hasFocus\(\)/,
+            replace: "false"
         }
-    ]
+    }]
 });

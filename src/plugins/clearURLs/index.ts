@@ -17,79 +17,75 @@
 */
 
 import {
-    MessageObject
+    addPreEditListener,
+    addPreSendListener,
+    MessageObject,
+    removePreEditListener,
+    removePreSendListener
 } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-const CLEAR_URLS_JSON_URL = "https://raw.githubusercontent.com/ClearURLs/Rules/master/data.min.json";
+import { defaultRules } from "./defaultRules";
 
-interface Provider {
-    urlPattern: string;
-    completeProvider: boolean;
-    rules?: string[];
-    rawRules?: string[];
-    referralMarketing?: string[];
-    exceptions?: string[];
-    redirections?: string[];
-    forceRedirection?: boolean;
-}
-
-interface ClearUrlsData {
-    providers: Record<string, Provider>;
-}
-
-interface RuleSet {
-    name: string;
-    urlPattern: RegExp;
-    rules?: RegExp[];
-    rawRules?: RegExp[];
-    exceptions?: RegExp[];
-}
+// From lodash
+const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+const reHasRegExpChar = RegExp(reRegExpChar.source);
 
 export default definePlugin({
     name: "ClearURLs",
-    description: "Automatically removes tracking elements from URLs you send",
-    authors: [Devs.adryd, Devs.thororen],
+    description: "Removes tracking garbage from URLs",
+    authors: [Devs.adryd],
+    dependencies: ["MessageEventsAPI"],
 
-    rules: [] as RuleSet[],
-
-    async start() {
-        await this.createRules();
+    escapeRegExp(str: string) {
+        return (str && reHasRegExpChar.test(str))
+            ? str.replace(reRegExpChar, "\\$&")
+            : (str || "");
     },
 
-    stop() {
-        this.rules = [];
+    createRules() {
+        // Can be extended upon once user configs are available
+        // Eg. (useDefaultRules: boolean, customRules: Array[string])
+        const rules = defaultRules;
+
+        this.universalRules = new Set();
+        this.rulesByHost = new Map();
+        this.hostRules = new Map();
+
+        for (const rule of rules) {
+            const splitRule = rule.split("@");
+            const paramRule = new RegExp(
+                "^" +
+                this.escapeRegExp(splitRule[0]).replace(/\\\*/, ".+?") +
+                "$"
+            );
+
+            if (!splitRule[1]) {
+                this.universalRules.add(paramRule);
+                continue;
+            }
+            const hostRule = new RegExp(
+                "^(www\\.)?" +
+                this.escapeRegExp(splitRule[1])
+                    .replace(/\\\./, "\\.")
+                    .replace(/^\\\*\\\./, "(.+?\\.)?")
+                    .replace(/\\\*/, ".+?") +
+                "$"
+            );
+            const hostRuleIndex = hostRule.toString();
+
+            this.hostRules.set(hostRuleIndex, hostRule);
+            if (this.rulesByHost.get(hostRuleIndex) == null) {
+                this.rulesByHost.set(hostRuleIndex, new Set());
+            }
+            this.rulesByHost.get(hostRuleIndex).add(paramRule);
+        }
     },
 
-    onBeforeMessageSend(_, msg) {
-        return this.cleanMessage(msg);
-    },
-
-    onBeforeMessageEdit(_cid, _mid, msg) {
-        return this.cleanMessage(msg);
-    },
-
-    async createRules() {
-        const res = await fetch(CLEAR_URLS_JSON_URL)
-            .then(res => res.json()) as ClearUrlsData;
-
-        this.rules = [];
-
-        for (const [name, provider] of Object.entries(res.providers)) {
-            const urlPattern = new RegExp(provider.urlPattern, "i");
-
-            const rules = provider.rules?.map(rule => new RegExp(rule, "i"));
-            const rawRules = provider.rawRules?.map(rule => new RegExp(rule, "i"));
-            const exceptions = provider.exceptions?.map(ex => new RegExp(ex, "i"));
-
-            this.rules.push({
-                name,
-                urlPattern,
-                rules,
-                rawRules,
-                exceptions,
-            });
+    removeParam(rule: string | RegExp, param: string, parent: URLSearchParams) {
+        if (param === rule || rule instanceof RegExp && rule.test(param)) {
+            parent.delete(param);
         }
     },
 
@@ -103,44 +99,51 @@ export default definePlugin({
         }
 
         // Cheap way to check if there are any search params
-        if (url.searchParams.entries().next().done) return match;
+        if (url.searchParams.entries().next().done) {
+            // If there are none, we don't need to modify anything
+            return match;
+        }
 
-        // Check rules for each provider that matches
-        this.rules.forEach(({ urlPattern, exceptions, rawRules, rules }) => {
-            if (!urlPattern.test(url.href) || exceptions?.some(ex => ex.test(url.href))) return;
-
-            const toDelete: string[] = [];
-
-            if (rules) {
-                // Add matched params to delete list
-                url.searchParams.forEach((_, param) => {
-                    if (rules.some(rule => rule.test(param))) {
-                        toDelete.push(param);
-                    }
-                });
-            }
-
-            // Delete matched params from list
-            toDelete.forEach(param => url.searchParams.delete(param));
-
-            // Match and remove any raw rules
-            let cleanedUrl = url.href;
-            rawRules?.forEach(rawRule => {
-                cleanedUrl = cleanedUrl.replace(rawRule, "");
+        // Check all universal rules
+        this.universalRules.forEach(rule => {
+            url.searchParams.forEach((_value, param, parent) => {
+                this.removeParam(rule, param, parent);
             });
-            url = new URL(cleanedUrl);
+        });
+
+        // Check rules for each hosts that match
+        this.hostRules.forEach((regex, hostRuleName) => {
+            if (!regex.test(url.hostname)) return;
+            this.rulesByHost.get(hostRuleName).forEach(rule => {
+                url.searchParams.forEach((_value, param, parent) => {
+                    this.removeParam(rule, param, parent);
+                });
+            });
         });
 
         return url.toString();
     },
 
-    cleanMessage(msg: MessageObject) {
+    onSend(msg: MessageObject) {
         // Only run on messages that contain URLs
-        if (/http(s)?:\/\//.test(msg.content)) {
+        if (msg.content.match(/http(s)?:\/\//)) {
             msg.content = msg.content.replace(
                 /(https?:\/\/[^\s<]+[^<.,:;"'>)|\]\s])/g,
                 match => this.replacer(match)
             );
         }
+    },
+
+    start() {
+        this.createRules();
+        this.preSend = addPreSendListener((_, msg) => this.onSend(msg));
+        this.preEdit = addPreEditListener((_cid, _mid, msg) =>
+            this.onSend(msg)
+        );
+    },
+
+    stop() {
+        removePreSendListener(this.preSend);
+        removePreEditListener(this.preEdit);
     },
 });

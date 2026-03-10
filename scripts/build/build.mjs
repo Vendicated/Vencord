@@ -17,43 +17,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// @ts-check
-
+import esbuild from "esbuild";
 import { readdir } from "fs/promises";
-import { join, resolve } from "path";
+import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, commonRendererPlugins, watch, buildOrWatchAll, stringifyValues } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
 
-const defines = stringifyValues({
+const defines = {
     IS_STANDALONE,
     IS_DEV,
     IS_REPORTER,
-    IS_ANTI_CRASH_TEST,
     IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
-    IS_USERSCRIPT: false,
-    VERSION,
+    VERSION: JSON.stringify(VERSION),
     BUILD_TIMESTAMP
-});
+};
 
-if (defines.IS_STANDALONE === "false") {
+if (defines.IS_STANDALONE === false)
     // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
-}
 
 /**
- * @type {import("esbuild").BuildOptions}
+ * @type {esbuild.BuildOptions}
  */
 const nodeCommonOpts = {
     ...commonOpts,
-    define: defines,
     format: "cjs",
     platform: "node",
     target: ["esnext"],
-    // @ts-expect-error this is never undefined
-    external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external]
+    external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
+    define: defines
 };
 
 const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
@@ -78,10 +73,6 @@ const globNativesPlugin = {
             let code = "";
             let natives = "\n";
             let i = 0;
-            /**
-             * @type {string[]}
-             */
-            const watchFiles = [];
             for (const dir of pluginDirs) {
                 const dirPath = join("src", dir);
                 if (!await exists(dirPath)) continue;
@@ -90,8 +81,6 @@ const globNativesPlugin = {
                     const fileName = file.name;
                     const nativePath = join(dirPath, fileName, "native.ts");
                     const indexNativePath = join(dirPath, fileName, "native/index.ts");
-
-                    watchFiles.push(resolve(nativePath), resolve(indexNativePath));
 
                     if (!(await exists(nativePath)) && !(await exists(indexNativePath)))
                         continue;
@@ -107,114 +96,114 @@ const globNativesPlugin = {
             code += `export default {${natives}};`;
             return {
                 contents: code,
-                resolveDir: "./src",
-                watchDirs: pluginDirs.map(d => resolve("src", d)),
-                watchFiles,
+                resolveDir: "./src"
             };
         });
     }
 };
 
-/** @type {import("esbuild").BuildOptions[]} */
-const buildConfigs = ([
+await Promise.all([
     // Discord Desktop main & renderer & preload
-    {
+    esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/patcher.js",
-        footer: { js: "//# sourceURL=file:///VencordPatcher\n" + sourceMapFooter("patcher") },
+        footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
-        plugins: [
-            // @ts-ignore this is never undefined
-            ...nodeCommonOpts.plugins,
-            globNativesPlugin
-        ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: "true",
-            IS_VESKTOP: "false"
-        }
-    },
-    {
+            IS_DISCORD_DESKTOP: true,
+            IS_VESKTOP: false
+        },
+        plugins: [
+            ...nodeCommonOpts.plugins,
+            globNativesPlugin
+        ]
+    }),
+    esbuild.build({
         ...commonOpts,
         entryPoints: ["src/Vencord.ts"],
         outfile: "dist/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=file:///VencordRenderer\n" + sourceMapFooter("renderer") },
+        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
             globPlugins("discordDesktop"),
-            ...commonRendererPlugins
+            ...commonOpts.plugins
         ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: "true",
-            IS_VESKTOP: "false"
+            IS_DISCORD_DESKTOP: true,
+            IS_VESKTOP: false
         }
-    },
-    {
+    }),
+    esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/preload.js",
-        footer: { js: "//# sourceURL=file:///VencordPreload\n" + sourceMapFooter("preload") },
+        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: "true",
-            IS_VESKTOP: "false"
+            IS_DISCORD_DESKTOP: true,
+            IS_VESKTOP: false
         }
-    },
+    }),
 
     // Vencord Desktop main & renderer & preload
-    {
+    esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/vencordDesktopMain.js",
-        footer: { js: "//# sourceURL=file:///VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
+        footer: { js: "//# sourceURL=VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
         sourcemap,
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true
+        },
         plugins: [
             ...nodeCommonOpts.plugins,
             globNativesPlugin
-        ],
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true"
-        }
-    },
-    {
+        ]
+    }),
+    esbuild.build({
         ...commonOpts,
         entryPoints: ["src/Vencord.ts"],
         outfile: "dist/vencordDesktopRenderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=file:///VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
+        footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
-            globPlugins("vesktop"),
-            ...commonRendererPlugins
+            globPlugins("vencordDesktop"),
+            ...commonOpts.plugins
         ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true"
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true
         }
-    },
-    {
+    }),
+    esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/vencordDesktopPreload.js",
-        footer: { js: "//# sourceURL=file:///VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
+        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true"
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true
         }
-    }
-]);
-
-await buildOrWatchAll(buildConfigs);
+    }),
+]).catch(err => {
+    console.error("Build failed");
+    console.error(err.message);
+    // make ci fail
+    if (!commonOpts.watch)
+        process.exitCode = 1;
+});

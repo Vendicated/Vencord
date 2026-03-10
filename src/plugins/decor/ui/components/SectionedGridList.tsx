@@ -4,15 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { cl } from "@plugins/decor/ui";
 import { classes } from "@utils/misc";
-import { findCssClassesLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
-import { JSX } from "react";
 
+import { cl } from "../";
 import Grid, { GridProps } from "./Grid";
 
-const ScrollerClasses = findCssClassesLazy("managedReactiveScroller", "thin");
+const ScrollerClasses = findByPropsLazy("managedReactiveScroller");
 
 type Section<SectionT, ItemT> = SectionT & {
     items: Array<ItemT>;

@@ -88,15 +88,14 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
     });
 
     return (
-        <section>
-            <Forms.FormTitle tag="h2">{title}</Forms.FormTitle>
+        <Forms.FormSection title={title} tag="h1">
             <code>
                 {traceEnd && (
-                    <div style={{ color: "var(--text-strong)", marginBottom: 5, userSelect: "text" }}>
+                    <div style={{ color: "var(--header-primary)", marginBottom: 5, userSelect: "text" }}>
                         Trace ended at: {(new Date(traceEnd)).toTimeString()}
                     </div>
                 )}
-                <div style={{ color: "var(--text-strong)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
+                <div style={{ color: "var(--header-primary)", display: "grid", gridTemplateColumns: "repeat(3, auto) 1fr", gap: "2px 10px", userSelect: "text" }}>
                     <span>Start</span>
                     <span>Interval</span>
                     <span>Delta</span>
@@ -106,7 +105,7 @@ function TimingSection({ title, logs, traceEnd }: TimingSectionProps) {
                     ))}
                 </div>
             </code>
-        </section>
+        </Forms.FormSection>
     );
 }
 
@@ -118,16 +117,15 @@ function ServerTrace({ trace }: ServerTraceProps) {
     const lines = trace.split("\n");
 
     return (
-        <section>
-            <Forms.FormTitle tag="h3">Server Trace</Forms.FormTitle>
+        <Forms.FormSection title="Server Trace" tag="h2">
             <code>
-                <Flex flexDirection="column" gap="5px" style={{ color: "var(--text-strong)", userSelect: "text" }}>
-                    {lines.map((line, idx) => (
-                        <span key={idx}>{line}</span>
+                <Flex flexDirection="column" style={{ color: "var(--header-primary)", gap: 5, userSelect: "text" }}>
+                    {lines.map(line => (
+                        <span>{line}</span>
                     ))}
                 </Flex>
             </code>
-        </section>
+        </Forms.FormSection>
     );
 }
 

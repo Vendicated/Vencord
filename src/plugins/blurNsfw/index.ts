@@ -17,23 +17,21 @@
 */
 
 import { Settings } from "@api/Settings";
-import { managedStyleRootNode } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import { createAndAppendStyle } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
 
 let style: HTMLStyleElement;
 
 function setCss() {
     style.textContent = `
-        .vc-nsfw-img [class*=imageContainer],
-        .vc-nsfw-img [class*=wrapperPaused] {
+        .vc-nsfw-img [class^=imageWrapper] img,
+        .vc-nsfw-img [class^=wrapperPaused] video {
             filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
             transition: filter 0.2s;
-
-            &:hover {
-                filter: blur(0);
-            }
+        }
+        .vc-nsfw-img [class^=imageWrapper]:hover img,
+        .vc-nsfw-img [class^=wrapperPaused]:hover video {
+            filter: unset;
         }
         `;
 }
@@ -45,27 +43,27 @@ export default definePlugin({
 
     patches: [
         {
-            find: "}renderStickersAccessories(",
-            replacement: [
-                {
-                    match: /(\.renderReactions\(\i\).+?className:)/,
-                    replace: '$&(this.props?.channel?.nsfw?"vc-nsfw-img ":"")+'
-                }
-            ]
+            find: ".embedWrapper,embed",
+            replacement: [{
+                match: /\.embedWrapper(?=.+?channel_id:(\i)\.id)/g,
+                replace: "$&+($1.nsfw?' vc-nsfw-img':'')"
+            }]
         }
     ],
 
     options: {
         blurAmount: {
             type: OptionType.NUMBER,
-            description: "Blur Amount (in pixels)",
+            description: "Blur Amount",
             default: 10,
             onChange: setCss
         }
     },
 
     start() {
-        style = createAndAppendStyle("VcBlurNsfw", managedStyleRootNode);
+        style = document.createElement("style");
+        style.id = "VcBlurNsfw";
+        document.head.appendChild(style);
 
         setCss();
     },

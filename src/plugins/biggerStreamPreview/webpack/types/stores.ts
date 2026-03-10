@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FluxStore } from "@vencord/discord-types";
+import { FluxStore } from "@webpack/types";
 
 export interface ApplicationStreamPreviewStore extends FluxStore {
     getIsPreviewLoading: (guildId: string | bigint | null, channelId: string | bigint, ownerId: string | bigint) => boolean;

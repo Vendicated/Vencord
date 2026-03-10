@@ -24,7 +24,7 @@ import { join } from "path";
 
 import { DATA_DIR } from "./constants";
 import { crxToZip } from "./crxToZip";
-import { fetchBuffer } from "./http";
+import { get } from "./simpleGet";
 
 const extensionCacheDir = join(DATA_DIR, "ExtensionCache");
 
@@ -67,16 +67,18 @@ export async function installExt(id: string) {
     try {
         await access(extDir, fsConstants.F_OK);
     } catch (err) {
-        const url = `https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&x=id%3D${id}%26uc&prodversion=${process.versions.chrome}`;
-
-        const buf = await fetchBuffer(url, {
+        const url = id === "fmkadmapgofadopljbjfkapdkoienihi"
+            // React Devtools v4.25
+            // v4.27 is broken in Electron, see https://github.com/facebook/react/issues/25843
+            // Unfortunately, Google does not serve old versions, so this is the only way
+            ? "https://raw.githubusercontent.com/Vendicated/random-files/f6f550e4c58ac5f2012095a130406c2ab25b984d/fmkadmapgofadopljbjfkapdkoienihi.zip"
+            : `https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&x=id%3D${id}%26uc&prodversion=32`;
+        const buf = await get(url, {
             headers: {
-                "User-Agent": `Electron ${process.versions.electron} ~ Vencord (https://github.com/Vendicated/Vencord)`
+                "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)"
             }
         });
-
-        await extract(crxToZip(buf), extDir)
-            .catch(err => console.error(`Failed to extract extension ${id}`, err));
+        await extract(crxToZip(buf), extDir).catch(console.error);
     }
 
     session.defaultSession.loadExtension(extDir);

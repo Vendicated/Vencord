@@ -20,7 +20,6 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { WebpackRequire } from "@vencord/discord-types/webpack";
 
 const settings = definePluginSettings({
     disableAnalytics: {
@@ -49,7 +48,7 @@ export default definePlugin({
             },
         },
         {
-            find: ".METRICS_V2",
+            find: ".METRICS,",
             replacement: [
                 {
                     match: /this\._intervalId=/,
@@ -62,23 +61,14 @@ export default definePlugin({
             ]
         },
         {
-            find: ".BetterDiscord||null!=",
+            find: ".installedLogHooks)",
             replacement: {
-                // Make hasClientMods return false
-                match: /(?=let \i=window;)/,
-                replace: "return false;"
+                // if getDebugLogging() returns false, the hooks don't get installed.
+                match: "getDebugLogging(){",
+                replace: "getDebugLogging(){return false;"
             }
-        }
+        },
     ],
-
-    // The TRACK event takes an optional `resolve` property that is called when the tracking event was submitted to the server.
-    // A few spots in Discord await this callback before continuing (most notably the Voice Debug Logging toggle).
-    // Since we NOOP the AnalyticsActionHandlers module, there is no handler for the TRACK event, so we have to handle it ourselves
-    flux: {
-        TRACK(event) {
-            event?.resolve?.();
-        }
-    },
 
     startAt: StartAt.Init,
     start() {
@@ -91,9 +81,9 @@ export default definePlugin({
         Object.defineProperty(Function.prototype, "g", {
             configurable: true,
 
-            set(this: WebpackRequire, globalObj: WebpackRequire["g"]) {
+            set(v: any) {
                 Object.defineProperty(this, "g", {
-                    value: globalObj,
+                    value: v,
                     configurable: true,
                     enumerable: true,
                     writable: true
@@ -102,11 +92,11 @@ export default definePlugin({
                 // Ensure this is most likely the Sentry WebpackInstance.
                 // Function.g is a very generic property and is not uncommon for another WebpackInstance (or even a React component: <g></g>) to include it
                 const { stack } = new Error();
-                if (this.c != null || !stack?.includes("http") || !String(this).includes("exports:{}")) {
+                if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || !String(this).includes("exports:{}") || this.c != null) {
                     return;
                 }
 
-                const assetPath = stack.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];
+                const assetPath = stack?.match(/\/assets\/.+?\.js/)?.[0];
                 if (!assetPath) {
                     return;
                 }
@@ -116,8 +106,7 @@ export default definePlugin({
                 srcRequest.send();
 
                 // Final condition to see if this is the Sentry WebpackInstance
-                // This is matching window.DiscordSentry=, but without `window` to avoid issues on some proxies
-                if (!srcRequest.responseText.includes(".DiscordSentry=")) {
+                if (!srcRequest.responseText.includes("window.DiscordSentry=")) {
                     return;
                 }
 

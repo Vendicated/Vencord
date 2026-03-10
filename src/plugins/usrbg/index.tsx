@@ -17,9 +17,12 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { LinkButton } from "@components/Button";
+import { enableStyle } from "@api/Styles";
+import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+
+import style from "./index.css?managed";
 
 const API_URL = "https://usrbg.is-hardly.online/users";
 
@@ -54,9 +57,16 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ':"SHOULD_LOAD");',
+            find: ".NITRO_BANNER,",
             replacement: {
-                match: /\i(?:\?)?.getPreviewBanner\(\i,\i,\i\)(?=.{0,100}"COMPLETE")/,
+                match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
+                replace: "&&$self.shouldShowBadge(arguments[0])$&"
+            }
+        },
+        {
+            find: ".banner)==null",
+            replacement: {
+                match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
 
             }
@@ -70,14 +80,6 @@ export default definePlugin({
                     replace: "$1.style=$self.getVoiceBackgroundStyles($1);"
                 }
             ]
-        },
-        {
-            find: '"VideoBackground-web"',
-            predicate: () => settings.store.voiceBackground,
-            replacement: {
-                match: /backgroundColor:.{0,25},\{style:(?=\i\?)/,
-                replace: "$&$self.userHasBackground(arguments[0]?.userId)?null:",
-            }
         }
     ],
 
@@ -85,14 +87,12 @@ export default definePlugin({
 
     settingsAboutComponent: () => {
         return (
-            <LinkButton href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner" variant="primary">
-                Get your own USRBG banner
-            </LinkButton>
+            <Link href="https://github.com/AutumnVN/usrbg#how-to-request-your-own-usrbg-banner">CLICK HERE TO GET YOUR OWN BANNER</Link>
         );
     },
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
-        if (className.includes("tile")) {
+        if (className.includes("tile_")) {
             if (this.userHasBackground(participantUserId)) {
                 return {
                     backgroundImage: `url(${this.getImageUrl(participantUserId)})`,
@@ -109,6 +109,10 @@ export default definePlugin({
         if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
     },
 
+    shouldShowBadge({ displayProfile, user }: any) {
+        return displayProfile?.banner && (!this.userHasBackground(user.id) || settings.store.nitroFirst);
+    },
+
     userHasBackground(userId: string) {
         return !!this.data?.users[userId];
     },
@@ -122,6 +126,8 @@ export default definePlugin({
     },
 
     async start() {
+        enableStyle(style);
+
         const res = await fetch(API_URL);
         if (res.ok) {
             this.data = await res.json();

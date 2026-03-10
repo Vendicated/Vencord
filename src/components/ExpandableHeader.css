@@ -1,0 +1,12 @@
+.vc-expandableheader-center-flex {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+}
+
+.vc-expandableheader-btn {
+    all: unset;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+}

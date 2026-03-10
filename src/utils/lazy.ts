@@ -20,9 +20,9 @@ export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
     let tries = 0;
     let cache: T;
     return () => {
-        if (cache === undefined && attempts > tries++) {
+        if (!cache && attempts > tries++) {
             cache = factory();
-            if (cache === undefined && attempts === tries)
+            if (!cache && attempts === tries)
                 console.error("Lazy factory failed:", factory);
         }
         return cache;

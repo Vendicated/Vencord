@@ -32,7 +32,7 @@ function toggleHoverControls(value: boolean) {
 export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
-    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000, Devs.nin0dev],
+    authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
     options: {
         hoverControls: {
             description: "Show controls on hover",
@@ -44,19 +44,14 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Open Spotify URIs instead of Spotify URLs. Will only work if you have Spotify installed and might not work on all platforms",
             default: false
-        },
-        previousButtonRestartsTrack: {
-            type: OptionType.BOOLEAN,
-            description: "Restart currently playing track when pressing the previous button if playtime is >3s",
-            default: true
         }
     },
     patches: [
         {
-            find: ".DISPLAY_NAME_STYLES_COACHMARK),",
+            find: '"AccountConnected"',
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
-                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,occluded:)/,
+                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
                 // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
                 replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             }
@@ -75,20 +70,21 @@ export default definePlugin({
                 replace: "false",
             }]
         },
+        // Discord doesn't give you the repeat kind, only a boolean
         {
             find: 'repeat:"off"!==',
-            replacement: [
-                {
-                    // Discord doesn't give you shuffle state and the repeat kind, only a boolean
-                    match: /repeat:"off"!==(\i),/,
-                    replace: "shuffle:arguments[2]?.shuffle_state??false,actual_repeat:$1,$&"
-                },
-                {
-                    match: /(?<=artists.filter\(\i=>).{0,10}\i\.id\)&&/,
-                    replace: ""
-                }
-            ]
+            replacement: {
+                match: /repeat:"off"!==(.{1,3}),/,
+                replace: "actual_repeat:$1,$&"
+            }
         },
+        {
+            find: "artists.filter",
+            replacement: {
+                match: /(?<=artists.filter\(\i=>).{0,10}\i\.id\)&&/,
+                replace: ""
+            }
+        }
     ],
 
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),

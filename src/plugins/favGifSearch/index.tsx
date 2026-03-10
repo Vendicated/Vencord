@@ -20,21 +20,22 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
 
 interface SearchBarComponentProps {
-    ref?: React.RefObject<any>;
+    ref?: React.MutableRefObject<any>;
     autoFocus: boolean;
+    className: string;
     size: string;
     onChange: (query: string) => void;
     onClear: () => void;
     query: string;
     placeholder: string;
-    className?: string;
 }
 
 type TSearchBarComponent =
-    React.FC<SearchBarComponentProps>;
+    React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
 
 interface Gif {
     format: number;
@@ -57,6 +58,9 @@ interface Instance {
     },
     forceUpdate: () => void;
 }
+
+
+const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchBarFullRow");
 
 export const settings = definePluginSettings({
     searchOption: {
@@ -91,8 +95,8 @@ export default definePlugin({
             replacement: [
                 {
                     // https://regex101.com/r/07gpzP/1
-                    // ($1 renderHeaderContent=function { ... switch (x) ... case FAVORITES:return) ($2) ($3 case default: ... return r.jsx(($<searchComp>), {...props}))
-                    match: /(renderHeaderContent\(\).{1,150}FAVORITES:return)(.{1,150});(case.{1,200}default:.{0,50}?return\(0,\i\.jsx\)\((?<searchComp>\i\..{1,10}),)/,
+                    // ($1 renderHeaderContent=function { ... switch (x) ... case FAVORITES:return) ($2) ($3 case default:return r.jsx(($<searchComp>), {...props}))
+                    match: /(renderHeaderContent\(\).{1,150}FAVORITES:return)(.{1,150});(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\..{1,10}),)/,
                     replace: "$1 this.state.resultType === 'Favorites' ? $self.renderSearchBar(this, $<searchComp>) : $2;$3"
                 },
                 {
@@ -114,7 +118,7 @@ export default definePlugin({
     renderSearchBar(instance: Instance, SearchBarComponent: TSearchBarComponent) {
         this.instance = instance;
         return (
-            <ErrorBoundary noop>
+            <ErrorBoundary noop={true}>
                 <SearchBar instance={instance} SearchBarComponent={SearchBarComponent} />
             </ErrorBoundary>
         );
@@ -132,7 +136,7 @@ export default definePlugin({
 
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
-    const ref = useRef<HTMLElement>(null);
+    const ref = useRef<{ containerRef?: React.MutableRefObject<HTMLDivElement>; } | null>(null);
 
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
@@ -147,10 +151,10 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
 
 
         // scroll back to top
-        ref.current
-            ?.closest("#gif-picker-tab-panel")
-            ?.querySelector('[class*="scrollerBase"]')
-            ?.scrollTo(0, 0);
+        ref.current?.containerRef?.current
+            .closest("#gif-picker-tab-panel")
+            ?.querySelector("[class|=\"content\"]")
+            ?.firstElementChild?.scrollTo(0, 0);
 
 
         const result =
@@ -177,8 +181,8 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         <SearchBarComponent
             ref={ref}
             autoFocus={true}
-            size="md"
-            className=""
+            className={containerClasses.searchBar}
+            size={SearchBarComponent.Sizes.MEDIUM}
             onChange={onChange}
             onClear={() => {
                 setQuery("");

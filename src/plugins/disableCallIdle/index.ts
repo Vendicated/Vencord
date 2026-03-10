@@ -16,29 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+migratePluginSettings("DisableCallIdle", "DisableDMCallIdle");
 export default definePlugin({
     name: "DisableCallIdle",
     description: "Disables automatically getting kicked from a DM voice call after 3 minutes and being moved to an AFK voice channel.",
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: "this.idleTimeout.start(",
+            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
             replacement: {
-                match: /this\.idleTimeout\.(start|stop)/g,
-                replace: "$self.noop"
+                match: /,?(?=\i\(this,"idleTimeout",new \i\.\i\))/,
+                replace: ";return;"
             }
         },
         {
             find: "handleIdleUpdate(){",
             replacement: {
-                match: "handleIdleUpdate(){",
-                replace: "handleIdleUpdate(){return;"
+                match: /(?<=_initialize\(\){)/,
+                replace: "return;"
             }
         }
-    ],
-
-    noop() { }
+    ]
 });

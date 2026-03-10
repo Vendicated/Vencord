@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { AvatarDecoration } from "@plugins/decor";
-import { getUsersDecorations } from "@plugins/decor/lib/api";
-import { DECORATION_FETCH_COOLDOWN, SKU_ID } from "@plugins/decor/lib/constants";
 import { debounce } from "@shared/debounce";
 import { proxyLazy } from "@utils/lazy";
-import { User } from "@vencord/discord-types";
 import { useEffect, useState, zustandCreate } from "@webpack/common";
+import { User } from "discord-types/general";
+
+import { AvatarDecoration } from "../../";
+import { getUsersDecorations } from "../api";
+import { DECORATION_FETCH_COOLDOWN, SKU_ID } from "../constants";
 
 interface UserDecorationData {
     asset: string | null;
@@ -94,39 +95,24 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate((set: any,
 } as UsersDecorationsState)));
 
 export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | null | undefined {
-    try {
-        const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
+    const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
 
-        useEffect(() => {
-            const destructor = (() => {
-                try {
-                    return useUsersDecorationsStore.subscribe(
-                        state => {
-                            if (!user) return;
-                            const newDecorAvatarDecoration = state.getAsset(user.id);
-                            if (!newDecorAvatarDecoration) return;
-                            if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
-                        }
-                    );
-                } catch {
-                    return () => { };
-                }
-            })();
+    useEffect(() => {
+        const destructor = useUsersDecorationsStore.subscribe(
+            state => {
+                if (!user) return;
+                const newDecorAvatarDecoration = state.getAsset(user.id);
+                if (!newDecorAvatarDecoration) return;
+                if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
+            }
+        );
 
-            try {
-                if (user) {
-                    const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
-                    fetchUserDecorAvatarDecoration(user.id);
-                }
-            } catch { }
+        if (user) {
+            const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
+            fetchUserDecorAvatarDecoration(user.id);
+        }
+        return destructor;
+    }, []);
 
-            return destructor;
-        }, []);
-
-        return decorAvatarDecoration ? { asset: decorAvatarDecoration, skuId: SKU_ID } : null;
-    } catch (e) {
-        console.error(e);
-    }
-
-    return null;
+    return decorAvatarDecoration ? { asset: decorAvatarDecoration, skuId: SKU_ID } : null;
 }

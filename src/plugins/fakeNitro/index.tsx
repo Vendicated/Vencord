@@ -16,19 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
-import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
+import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, Patch } from "@utils/types";
-import type { Emoji, Message, Sticker } from "@vencord/discord-types";
-import { StickerFormatType } from "@vencord/discord-types/enums";
-import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import type { Emoji } from "@webpack/types";
+import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
+
+const StickerStore = findStoreLazy("StickersStore") as {
+    getPremiumPacks(): StickerPack[];
+    getAllGuildStickers(): Map<string, Sticker[]>;
+    getStickerById(id: string): Sticker | undefined;
+};
+
+const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 
 const BINARY_READ_OPTIONS = findByPropsLazy("readerFactory");
 
@@ -63,6 +71,41 @@ const enum EmojiIntentions {
 
 const IS_BYPASSEABLE_INTENTION = `[${EmojiIntentions.CHAT},${EmojiIntentions.GUILD_STICKER_RELATED_EMOJI}].includes(fakeNitroIntention)`;
 
+const enum StickerType {
+    PNG = 1,
+    APNG = 2,
+    LOTTIE = 3,
+    // don't think you can even have gif stickers but the docs have it
+    GIF = 4
+}
+
+interface BaseSticker {
+    available: boolean;
+    description: string;
+    format_type: number;
+    id: string;
+    name: string;
+    tags: string;
+    type: number;
+}
+interface GuildSticker extends BaseSticker {
+    guild_id: string;
+}
+interface DiscordSticker extends BaseSticker {
+    pack_id: string;
+}
+type Sticker = GuildSticker | DiscordSticker;
+
+interface StickerPack {
+    id: string;
+    name: string;
+    sku_id: string;
+    description: string;
+    cover_sticker_id: string;
+    banner_asset_id: string;
+    stickers: Sticker[];
+}
+
 const enum FakeNoticeType {
     Sticker,
     Emoji
@@ -84,7 +127,7 @@ const settings = definePluginSettings({
         description: "Size of the emojis when sending",
         type: OptionType.SLIDER,
         default: 48,
-        markers: [32, 48, 56, 64, 96, 128, 160, 256, 512]
+        markers: [32, 48, 64, 128, 160, 256, 512]
     },
     transformEmojis: {
         description: "Whether to transform fake emojis into real ones",
@@ -151,47 +194,17 @@ const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, 
 const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
 const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
 
-function makeBypassPatches(): Omit<Patch, "plugin"> {
-    const mapping: Array<{ func: string, predicate?: () => boolean; }> = [
-        { func: "canUseCustomStickersEverywhere", predicate: () => settings.store.enableStickerBypass },
-        { func: "canUseHighVideoUploadQuality", predicate: () => settings.store.enableStreamQualityBypass },
-        { func: "canStreamQuality", predicate: () => settings.store.enableStreamQualityBypass },
-        { func: "canUseClientThemes" },
-        { func: "canUsePremiumAppIcons" }
-    ];
-
-    return {
-        find: "canUseCustomStickersEverywhere:",
-        replacement: mapping.map(({ func, predicate }) => ({
-            match: new RegExp(String.raw`(?<=${func}:)\i`),
-            replace: "() => true",
-            predicate
-        }))
-    };
-}
-
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.sadan],
-    description: "Allows you to send fake emojis/stickers, use nitro themes, and stream in nitro quality",
+    authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
+    description: "Allows you to stream in nitro quality, send fake emojis/stickers, use client themes and custom Discord notifications.",
     dependencies: ["MessageEventsAPI"],
 
     settings,
 
     patches: [
-        // General bypass patches
-        makeBypassPatches(),
-        // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
-            find: '.getByName("fork_and_knife")',
-            predicate: () => settings.store.enableEmojiBypass,
-            replacement: {
-                match: ".CHAT",
-                replace: ".STATUS"
-            }
-        },
-        {
-            find: ".GUILD_SUBSCRIPTION_UNAVAILABLE;",
+            find: ".PREMIUM_LOCKED;",
             group: true,
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
@@ -212,7 +225,7 @@ export default definePlugin({
                 },
                 {
                     // Disallow the emoji for premium locked if the intention doesn't allow it
-                    match: /!(\i\.\i\.canUseEmojisEverywhere\(\i\))/,
+                    match: /!\i\.\i\.canUseEmojisEverywhere\(\i\)/,
                     replace: m => `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
                 },
                 {
@@ -230,6 +243,15 @@ export default definePlugin({
                 replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
             }
         },
+        // Allow stickers to be sent everywhere
+        {
+            find: "canUseCustomStickersEverywhere:function",
+            predicate: () => settings.store.enableStickerBypass,
+            replacement: {
+                match: /canUseCustomStickersEverywhere:function\(\i\){/,
+                replace: "$&return true;"
+            },
+        },
         // Make stickers always available
         {
             find: '"SENDABLE"',
@@ -239,13 +261,35 @@ export default definePlugin({
                 replace: "true?"
             }
         },
+        // Allow streaming with high quality
+        {
+            find: "canUseHighVideoUploadQuality:function",
+            predicate: () => settings.store.enableStreamQualityBypass,
+            replacement: [
+                "canUseHighVideoUploadQuality",
+                "canStreamQuality",
+            ].map(func => {
+                return {
+                    match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
+                    replace: "$&return true;"
+                };
+            })
+        },
         // Remove boost requirements to stream with high quality
         {
-            find: "#{intl::STREAM_FPS_OPTION}",
+            find: "STREAM_FPS_OPTION.format",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: {
                 match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
+            }
+        },
+        // Allow client themes to be changeable
+        {
+            find: "canUseClientThemes:function",
+            replacement: {
+                match: /canUseClientThemes:function\(\i\){/,
+                replace: "$&return true;"
             }
         },
         {
@@ -253,8 +297,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
-                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /CONNECTION_OPEN:function\((\i)\){/,
+                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -271,16 +315,6 @@ export default definePlugin({
                 replace: (_, rest, backgroundGradientPresetId, originalCall, theme) => `${rest}$self.handleGradientThemeSelect(${backgroundGradientPresetId},${theme},()=>${originalCall});`
             }
         },
-        // Allow users to use custom client themes
-        {
-            find: "customUserThemeSettings:{",
-            // Discord has two separate modules for treatments 1 and 2
-            all: true,
-            replacement: {
-                match: /(?<=\i=)\(0,\i\.\i\)\(\i\.\i\.TIER_2\)(?=,|;)/g,
-                replace: "true"
-            }
-        },
         {
             find: '["strong","em","u","text","inlineCode","s","spoiler"]',
             replacement: [
@@ -293,13 +327,13 @@ export default definePlugin({
                 {
                     // Patch the rendered message content to add fake nitro emojis or remove sticker links
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
-                    match: /(?=return{hasSpoilerEmbeds:\i,hasBailedAst:\i,content:(\i))/,
+                    match: /(?=return{hasSpoilerEmbeds:\i,content:(\i)})/,
                     replace: (_, content) => `${content}=$self.patchFakeNitroEmojisOrRemoveStickersLinks(${content},arguments[2]?.formatInline);`
                 }
             ]
         },
         {
-            find: "}renderStickersAccessories(",
+            find: "}renderEmbeds(",
             replacement: [
                 {
                     // Call our function to decide whether the embed should be ignored or not
@@ -316,13 +350,13 @@ export default definePlugin({
                 {
                     // Filter attachments to remove fake nitro stickers or emojis
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments\(\i\){.+?{attachments:(\i).+?;/,
+                    match: /renderAttachments\(\i\){let{attachments:(\i).+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
         },
         {
-            find: "#{intl::STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION}",
+            find: ".Messages.STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION.format",
             predicate: () => settings.store.transformStickers,
             replacement: [
                 {
@@ -347,7 +381,7 @@ export default definePlugin({
             }
         },
         {
-            find: "#{intl::EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION}",
+            find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
@@ -355,9 +389,17 @@ export default definePlugin({
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
+        // Allow using custom app icons
+        {
+            find: "canUsePremiumAppIcons:function",
+            replacement: {
+                match: /canUsePremiumAppIcons:function\(\i\){/,
+                replace: "$&return true;"
+            }
+        },
         // Separate patch for allowing using custom app icons
         {
-            find: "getCurrentDesktopIcon(),",
+            find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -369,6 +411,14 @@ export default definePlugin({
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
+            }
+        },
+        // Allow using custom notification sounds
+        {
+            find: "canUseCustomNotificationSounds:function",
+            replacement: {
+                match: /canUseCustomNotificationSounds:function\(\i\){/,
+                replace: "$&return true;"
             }
         }
     ],
@@ -394,15 +444,24 @@ export default definePlugin({
             if (premiumType !== 2) {
                 proto.appearance ??= AppearanceSettingsActionCreators.create();
 
-                const protoStoreAppearenceSettings = UserSettingsProtoStore.settings.appearance;
+                if (UserSettingsProtoStore.settings.appearance?.theme != null) {
+                    const appearanceSettingsDummy = AppearanceSettingsActionCreators.create({
+                        theme: UserSettingsProtoStore.settings.appearance.theme
+                    });
 
-                const appearanceSettingsOverwrite = AppearanceSettingsActionCreators.create({
-                    ...proto.appearance,
-                    theme: protoStoreAppearenceSettings?.theme,
-                    clientThemeSettings: protoStoreAppearenceSettings?.clientThemeSettings
-                });
+                    proto.appearance.theme = appearanceSettingsDummy.theme;
+                }
 
-                proto.appearance = appearanceSettingsOverwrite;
+                if (UserSettingsProtoStore.settings.appearance?.clientThemeSettings?.backgroundGradientPresetId?.value != null) {
+                    const clientThemeSettingsDummy = ClientThemeSettingsActionsCreators.create({
+                        backgroundGradientPresetId: {
+                            value: UserSettingsProtoStore.settings.appearance.clientThemeSettings.backgroundGradientPresetId.value
+                        }
+                    });
+
+                    proto.appearance.clientThemeSettings ??= clientThemeSettingsDummy;
+                    proto.appearance.clientThemeSettings.backgroundGradientPresetId = clientThemeSettingsDummy.backgroundGradientPresetId;
+                }
             }
         } catch (err) {
             new Logger("FakeNitro").error(err);
@@ -471,7 +530,7 @@ export default definePlugin({
         return array.filter(item => item != null);
     },
 
-    ensureChildrenIsArray(child: ReactElement<any>) {
+    ensureChildrenIsArray(child: ReactElement) {
         if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
     },
 
@@ -481,7 +540,7 @@ export default definePlugin({
 
         let nextIndex = content.length;
 
-        const transformLinkChild = (child: ReactElement<any>) => {
+        const transformLinkChild = (child: ReactElement) => {
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
@@ -491,11 +550,10 @@ export default definePlugin({
                     } catch { }
 
                     const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
-                    const isAnimated = fakeNitroMatch[2] === "gif" || url?.searchParams.get("animated") === "true";
 
                     return Parser.defaultRules.customEmoji.react({
                         jumboable: !inline && content.length === 1 && typeof content[0].type !== "string",
-                        animated: isAnimated,
+                        animated: fakeNitroMatch[2] === "gif",
                         emojiId: fakeNitroMatch[1],
                         name: emojiName,
                         fake: true
@@ -508,15 +566,15 @@ export default definePlugin({
 
                 const gifMatch = child.props.href.match(fakeNitroGifStickerRegex);
                 if (gifMatch) {
-                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
-                    if (StickersStore.getStickerById(gifMatch[1])) return null;
+                    // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
+                    if (StickerStore.getStickerById(gifMatch[1])) return null;
                 }
             }
 
             return child;
         };
 
-        const transformChild = (child: ReactElement<any>) => {
+        const transformChild = (child: ReactElement) => {
             if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
                 if (!Array.isArray(child.props.children)) {
@@ -532,7 +590,7 @@ export default definePlugin({
             return child;
         };
 
-        const modifyChild = (child: ReactElement<any>) => {
+        const modifyChild = (child: ReactElement) => {
             const newChild = transformChild(child);
 
             if (newChild?.type === "ul" || newChild?.type === "ol") {
@@ -559,7 +617,7 @@ export default definePlugin({
             return newChild;
         };
 
-        const modifyChildren = (children: Array<ReactElement<any>>) => {
+        const modifyChildren = (children: Array<ReactElement>) => {
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
@@ -597,7 +655,7 @@ export default definePlugin({
                     url = new URL(item);
                 } catch { }
 
-                const stickerName = StickersStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
+                const stickerName = StickerStore.getStickerById(imgMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 1,
                     id: imgMatch[1],
@@ -610,9 +668,9 @@ export default definePlugin({
 
             const gifMatch = item.match(fakeNitroGifStickerRegex);
             if (gifMatch) {
-                if (!StickersStore.getStickerById(gifMatch[1])) continue;
+                if (!StickerStore.getStickerById(gifMatch[1])) continue;
 
-                const stickerName = StickersStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
+                const stickerName = StickerStore.getStickerById(gifMatch[1])?.name ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: 2,
                     id: gifMatch[1],
@@ -626,38 +684,32 @@ export default definePlugin({
     },
 
     shouldIgnoreEmbed(embed: Message["embeds"][number], message: Message) {
-        try {
-            const contentItems = message.content.split(/\s/);
-            if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
+        const contentItems = message.content.split(/\s/);
+        if (contentItems.length > 1 && !settings.store.transformCompoundSentence) return false;
 
-            switch (embed.type) {
-                case "image": {
-                    const url = embed.url ?? embed.image?.url;
-                    if (!url) return false;
-                    if (
-                        !settings.store.transformCompoundSentence
-                        && !contentItems.some(item => item === url || item.match(hyperLinkRegex)?.[1] === url)
-                    ) return false;
+        switch (embed.type) {
+            case "image": {
+                if (
+                    !settings.store.transformCompoundSentence
+                    && !contentItems.some(item => item === embed.url! || item.match(hyperLinkRegex)?.[1] === embed.url!)
+                ) return false;
 
-                    if (settings.store.transformEmojis) {
-                        if (fakeNitroEmojiRegex.test(url)) return true;
-                    }
-
-                    if (settings.store.transformStickers) {
-                        if (fakeNitroStickerRegex.test(url)) return true;
-
-                        const gifMatch = url.match(fakeNitroGifStickerRegex);
-                        if (gifMatch) {
-                            // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
-                            if (StickersStore.getStickerById(gifMatch[1])) return true;
-                        }
-                    }
-
-                    break;
+                if (settings.store.transformEmojis) {
+                    if (fakeNitroEmojiRegex.test(embed.url!)) return true;
                 }
+
+                if (settings.store.transformStickers) {
+                    if (fakeNitroStickerRegex.test(embed.url!)) return true;
+
+                    const gifMatch = embed.url!.match(fakeNitroGifStickerRegex);
+                    if (gifMatch) {
+                        // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
+                        if (StickerStore.getStickerById(gifMatch[1])) return true;
+                    }
+                }
+
+                break;
             }
-        } catch (e) {
-            new Logger("FakeNitro").error("Error in shouldIgnoreEmbed:", e);
         }
 
         return false;
@@ -669,8 +721,8 @@ export default definePlugin({
 
             const match = attachment.url.match(fakeNitroGifStickerRegex);
             if (match) {
-                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickersStore contains the id of the fake sticker
-                if (StickersStore.getStickerById(match[1])) return false;
+                // There is no way to differentiate a regular gif attachment from a fake nitro animated sticker, so we check if the StickerStore contains the id of the fake sticker
+                if (StickerStore.getStickerById(match[1])) return false;
             }
 
             return true;
@@ -700,16 +752,14 @@ export default definePlugin({
         }
     },
 
-    getStickerLink({ format_type, id }: Sticker) {
-        const ext = format_type === StickerFormatType.GIF ? "gif" : "png";
-        return `https://media.discordapp.net/stickers/${id}.${ext}?size=${settings.store.stickerSize}`;
+    getStickerLink(stickerId: string) {
+        return `https://media.discordapp.net/stickers/${stickerId}.png?size=${settings.store.stickerSize}`;
     },
 
     async sendAnimatedSticker(stickerLink: string, stickerId: string, channelId: string) {
+        const { parseURL } = importApngJs();
 
-        const { frames, width, height } = await fetch(stickerLink)
-            .then(res => res.arrayBuffer())
-            .then(parseAPNG);
+        const { frames, width, height } = await parseURL(stickerLink);
 
         const gif = GIFEncoder();
         const resolution = settings.store.stickerSize;
@@ -758,7 +808,7 @@ export default definePlugin({
 
         gif.finish();
 
-        const file = new File([gif.bytesView() as Uint8Array<ArrayBuffer>], `${stickerId}.gif`, { type: "image/gif" });
+        const file = new File([gif.bytesView()], `${stickerId}.gif`, { type: "image/gif" });
         UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), DraftType.ChannelMessage);
     },
 
@@ -770,6 +820,7 @@ export default definePlugin({
 
         let isUsableTwitchSubEmote = false;
         if (e.managed && e.guildId) {
+            // @ts-ignore outdated type
             const myRoles = GuildMemberStore.getSelfMember(e.guildId)?.roles ?? [];
             isUsableTwitchSubEmote = e.roles.some(r => myRoles.includes(r));
         }
@@ -801,7 +852,7 @@ export default definePlugin({
                             however you do not have permissions to embed links in the current channel.
                             Are you sure you want to send this message? Your FakeNitro items will appear as a link only.
                         </Forms.FormText>
-                        <Forms.FormText>
+                        <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
                             You can disable this notice in the plugin settings.
                         </Forms.FormText>
                     </div>,
@@ -818,7 +869,7 @@ export default definePlugin({
             });
         }
 
-        this.preSend = addMessagePreSendListener(async (channelId, messageObj, extra) => {
+        this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
 
             let hasBypass = false;
@@ -827,7 +878,7 @@ export default definePlugin({
                 if (!s.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickersStore.getStickerById(extra.stickers?.[0]!);
+                const sticker = StickerStore.getStickerById(extra.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -839,9 +890,16 @@ export default definePlugin({
                 if (sticker.available !== false && (canUseStickers || sticker.guild_id === guildId))
                     break stickerBypass;
 
-                const link = this.getStickerLink(sticker);
+                // [12/12/2023]
+                // Work around an annoying bug where getStickerLink will return StickerType.GIF,
+                // but will give us a normal non animated png for no reason
+                // TODO: Remove this workaround when it's not needed anymore
+                let link = this.getStickerLink(sticker.id);
+                if (sticker.format_type === StickerType.GIF && link.includes(".png")) {
+                    link = link.replace(".png", ".gif");
+                }
 
-                if (sticker.format_type === StickerFormatType.APNG) {
+                if (sticker.format_type === StickerType.APNG) {
                     if (!hasAttachmentPerms(channelId)) {
                         Alerts.show({
                             title: "Hold on!",
@@ -862,7 +920,6 @@ export default definePlugin({
 
                     const url = new URL(link);
                     url.searchParams.set("name", sticker.name);
-                    url.searchParams.set("lossless", "true");
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
@@ -882,7 +939,6 @@ export default definePlugin({
                     const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
-                    url.searchParams.set("lossless", "true");
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
@@ -901,7 +957,7 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        this.preEdit = addMessagePreEditListener(async (channelId, __, messageObj) => {
+        this.preEdit = addPreEditListener(async (channelId, __, messageObj) => {
             if (!s.enableEmojiBypass) return;
 
             let hasBypass = false;
@@ -916,7 +972,6 @@ export default definePlugin({
                 const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
-                url.searchParams.set("lossless", "true");
 
                 const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
@@ -934,7 +989,7 @@ export default definePlugin({
     },
 
     stop() {
-        removeMessagePreSendListener(this.preSend);
-        removeMessagePreEditListener(this.preEdit);
+        removePreSendListener(this.preSend);
+        removePreEditListener(this.preEdit);
     }
 });

@@ -17,9 +17,8 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { Button } from "@components/Button";
-import { openInviteModal } from "@utils/discord";
 import { OptionType } from "@utils/types";
+import { Button } from "@webpack/common";
 
 import { authorize, getToken } from "./auth";
 import { openBlockModal } from "./components/BlockedUserModal";
@@ -28,6 +27,7 @@ import { cl } from "./utils";
 export const settings = definePluginSettings({
     authorize: {
         type: OptionType.COMPONENT,
+        description: "Authorize with ReviewDB",
         component: () => (
             <Button onClick={() => authorize()}>
                 Authorize with ReviewDB
@@ -56,12 +56,13 @@ export const settings = definePluginSettings({
     },
     buttons: {
         type: OptionType.COMPONENT,
+        description: "ReviewDB buttons",
         component: () => (
             <div className={cl("button-grid")} >
                 <Button onClick={openBlockModal}>Manage Blocked Users</Button>
 
                 <Button
-                    variant="positive"
+                    color={Button.Colors.GREEN}
                     onClick={() => {
                         VencordNative.native.openExternal("https://github.com/sponsors/mantikafasi");
                     }}
@@ -69,7 +70,7 @@ export const settings = definePluginSettings({
                     Support ReviewDB development
                 </Button>
 
-                <Button variant="link" onClick={async () => {
+                <Button onClick={async () => {
                     let url = "https://reviewdb.mantikafasi.dev";
                     const token = await getToken();
                     if (token)
@@ -81,7 +82,9 @@ export const settings = definePluginSettings({
                 </Button>
 
 
-                <Button variant="link" onClick={() => openInviteModal("eWPBSbvznt")}>
+                <Button onClick={() => {
+                    VencordNative.native.openExternal("https://discord.gg/eWPBSbvznt");
+                }}>
                     ReviewDB Support Server
                 </Button>
             </div >

@@ -5,18 +5,55 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Devs, IS_MAC } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
-import { Activity, ActivityAssets, ActivityButton } from "@vencord/discord-types";
-import { ActivityFlags, ActivityStatusDisplayType, ActivityType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.AppleMusicRichPresence as PluginNative<typeof import("./native")>;
 
+interface ActivityAssets {
+    large_image?: string;
+    large_text?: string;
+    small_image?: string;
+    small_text?: string;
+}
+
+interface ActivityButton {
+    label: string;
+    url: string;
+}
+
+interface Activity {
+    state: string;
+    details?: string;
+    timestamps?: {
+        start?: number;
+        end?: number;
+    };
+    assets?: ActivityAssets;
+    buttons?: Array<string>;
+    name: string;
+    application_id: string;
+    metadata?: {
+        button_urls?: Array<string>;
+    };
+    type: number;
+    flags: number;
+}
+
+const enum ActivityType {
+    PLAYING = 0,
+    LISTENING = 2,
+}
+
+const enum ActivityFlag {
+    INSTANCE = 1 << 0,
+}
+
 export interface TrackData {
     name: string;
-    album?: string;
-    artist?: string;
+    album: string;
+    artist: string;
 
     appleMusicLink?: string;
     songLink?: string;
@@ -24,8 +61,8 @@ export interface TrackData {
     albumArtwork?: string;
     artistArtwork?: string;
 
-    playerPosition?: number;
-    duration?: number;
+    playerPosition: number;
+    duration: number;
 }
 
 const enum AssetImageType {
@@ -52,25 +89,6 @@ const settings = definePluginSettings({
             { label: "Playing", value: ActivityType.PLAYING, default: true },
             { label: "Listening", value: ActivityType.LISTENING }
         ],
-    },
-    statusDisplayType: {
-        description: "Show the track / artist name in the member list",
-        type: OptionType.SELECT,
-        options: [
-            {
-                label: "Don't show (shows generic listening message)",
-                value: "off",
-                default: true
-            },
-            {
-                label: "Show artist name",
-                value: "artist"
-            },
-            {
-                label: "Show track name",
-                value: "track"
-            }
-        ]
     },
     refreshInterval: {
         type: OptionType.SLIDER,
@@ -102,7 +120,7 @@ const settings = definePluginSettings({
     stateString: {
         type: OptionType.STRING,
         description: "Activity state format string",
-        default: "{artist} · {album}"
+        default: "{artist}"
     },
     largeImageType: {
         type: OptionType.SELECT,
@@ -137,8 +155,8 @@ const settings = definePluginSettings({
 function customFormat(formatStr: string, data: TrackData) {
     return formatStr
         .replaceAll("{name}", data.name)
-        .replaceAll("{album}", data.album ?? "")
-        .replaceAll("{artist}", data.artist ?? "");
+        .replaceAll("{album}", data.album)
+        .replaceAll("{artist}", data.artist);
 }
 
 function getImageAsset(type: AssetImageType, data: TrackData) {
@@ -155,7 +173,7 @@ export default definePlugin({
     name: "AppleMusicRichPresence",
     description: "Discord rich presence for your Apple Music!",
     authors: [Devs.RyanCaoDev],
-    hidden: !IS_MAC,
+    hidden: !navigator.platform.startsWith("Mac"),
     reporterTestable: ReporterTestable.None,
 
     settingsAboutComponent() {
@@ -194,16 +212,14 @@ export default definePlugin({
 
         const assets: ActivityAssets = {};
 
-        const isRadio = Number.isNaN(trackData.duration) && (trackData.playerPosition === 0);
-
         if (settings.store.largeImageType !== AssetImageType.Disabled) {
             assets.large_image = largeImageAsset;
-            if (!isRadio) assets.large_text = customFormat(settings.store.largeTextString, trackData);
+            assets.large_text = customFormat(settings.store.largeTextString, trackData);
         }
 
         if (settings.store.smallImageType !== AssetImageType.Disabled) {
             assets.small_image = smallImageAsset;
-            if (!isRadio) assets.small_text = customFormat(settings.store.smallTextString, trackData);
+            assets.small_text = customFormat(settings.store.smallTextString, trackData);
         }
 
         const buttons: ActivityButton[] = [];
@@ -227,25 +243,20 @@ export default definePlugin({
 
             name: customFormat(settings.store.nameString, trackData),
             details: customFormat(settings.store.detailsString, trackData),
-            state: isRadio ? undefined : customFormat(settings.store.stateString, trackData),
+            state: customFormat(settings.store.stateString, trackData),
 
-            timestamps: (trackData.playerPosition && trackData.duration && settings.store.enableTimestamps) ? {
+            timestamps: (settings.store.enableTimestamps ? {
                 start: Date.now() - (trackData.playerPosition * 1000),
                 end: Date.now() - (trackData.playerPosition * 1000) + (trackData.duration * 1000),
-            } : undefined,
+            } : undefined),
 
             assets,
 
-            buttons: !isRadio && buttons.length ? buttons.map(v => v.label) : undefined,
-            metadata: !isRadio && buttons.length ? { button_urls: buttons.map(v => v.url) } : undefined,
+            buttons: buttons.length ? buttons.map(v => v.label) : undefined,
+            metadata: { button_urls: buttons.map(v => v.url) || undefined, },
 
             type: settings.store.activityType,
-            status_display_type: {
-                "off": ActivityStatusDisplayType.NAME,
-                "artist": ActivityStatusDisplayType.STATE,
-                "track": ActivityStatusDisplayType.DETAILS
-            }[settings.store.statusDisplayType],
-            flags: ActivityFlags.INSTANCE,
+            flags: ActivityFlag.INSTANCE,
         };
     }
 });

@@ -16,97 +16,99 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./style.css";
-
-import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
-import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findStoreLazy } from "@webpack";
+import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
-import { VoiceChannelIndicator } from "./components";
+import { VoiceChannelSection } from "./components/VoiceChannelSection";
+
+const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 const settings = definePluginSettings({
     showInUserProfileModal: {
         type: OptionType.BOOLEAN,
-        description: "Show a user's Voice Channel indicator in their profile next to the name",
+        description: "Show a user's voice channel in their profile modal",
         default: true,
-        restartNeeded: true
     },
-    showInMemberList: {
+    showVoiceChannelSectionHeader: {
         type: OptionType.BOOLEAN,
-        description: "Show a user's Voice Channel indicator in the member and DMs list",
+        description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
         default: true,
-        restartNeeded: true
-    },
-    showInMessages: {
-        type: OptionType.BOOLEAN,
-        description: "Show a user's Voice Channel indicator in messages",
-        default: true,
-        restartNeeded: true
     }
+});
+
+interface UserProps {
+    user: User;
+}
+
+const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
+    const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
+    if (!channelId) return null;
+
+    const channel = ChannelStore.getChannel(channelId);
+    if (!channel) return null;
+
+    const guild = GuildStore.getGuild(channel.guild_id);
+
+    if (!guild) return null; // When in DM call
+
+    const result = `${guild.name} | ${channel.name}`;
+
+    return (
+        <VoiceChannelSection
+            channel={channel}
+            label={result}
+            showHeader={settings.store.showVoiceChannelSectionHeader}
+        />
+    );
 });
 
 export default definePlugin({
     name: "UserVoiceShow",
-    description: "Shows an indicator when a user is in a Voice Channel",
-    authors: [Devs.Nuckyz, Devs.LordElias],
-    dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
+    description: "Shows whether a User is currently in a voice channel somewhere in their profile",
+    authors: [Devs.LordElias],
     settings,
 
+    patchModal({ user }: UserProps) {
+        if (!settings.store.showInUserProfileModal)
+            return null;
+
+        return (
+            <div className="vc-uvs-modal-margin">
+                <VoiceChannelField user={user} />
+            </div>
+        );
+    },
+
+    patchPopout: ({ user }: UserProps) => {
+        const isSelfUser = user.id === UserStore.getCurrentUser().id;
+        return (
+            <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
+                <VoiceChannelField user={user} />
+            </div>
+        );
+    },
+
     patches: [
-        // User Popout, User Profile Modal, Direct Messages Side Profile
+        // above message box
         {
-            find: "#{intl::USER_PROFILE_PRONOUNS}",
+            find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /(?<=children:\[\i," ",\i)(?=\])/,
-                replace: ",$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id,isProfile:true})"
-            },
-            predicate: () => settings.store.showInUserProfileModal
+                match: /(?<=,)(?=!\i&&!\i&&.{0,50}setNote:)/,
+                replace: "$self.patchPopout(arguments[0]),",
+            }
         },
-        // To use without the MemberList decorator API
-        /* // Guild Members List
+        // below username
         {
-            find: ".lostPermission)",
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
             replacement: {
-                match: /\.lostPermission\).+?(?=avatar:)/,
-                replace: "$&children:[$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})],"
-            },
-            predicate: () => settings.store.showVoiceChannelIndicator
-        },
-        // Direct Messages List
-        {
-            find: "PrivateChannel.renderAvatar",
-            replacement: {
-                match: /#{intl::CLOSE_DM}.+?}\)(?=])/,
-                replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
-            },
-            predicate: () => settings.store.showVoiceChannelIndicator
-        }, */
-        // Friends List
-        {
-            find: "null!=this.peopleListItemRef.current",
-            replacement: {
-                match: /\.isProvisional.{0,50}?className:\i\.\i,children:\[(?<=isFocused:(\i).+?)/,
-                replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,isActionButton:true,shouldHighlight:$1}),"
-            },
-            predicate: () => settings.store.showInMemberList
+                match: /\.body.+?displayProfile:\i}\),/,
+                replace: "$&$self.patchModal(arguments[0]),",
+            }
         }
     ],
-
-    start() {
-        if (settings.store.showInMemberList) {
-            addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
-        }
-        if (settings.store.showInMessages) {
-            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} />);
-        }
-    },
-
-    stop() {
-        removeMemberListDecorator("UserVoiceShow");
-        removeMessageDecoration("UserVoiceShow");
-    },
-
-    VoiceChannelIndicator
 });

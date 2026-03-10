@@ -22,32 +22,27 @@ import "./settings";
 
 import { debounce } from "@shared/debounce";
 import { IpcEvents } from "@shared/IpcEvents";
-import { BrowserWindow, ipcMain, nativeTheme, shell, systemPreferences } from "electron";
+import { BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
 import monacoHtml from "file://monacoWin.html?minify&base64";
-import { FSWatcher, mkdirSync, readFileSync, watch, writeFileSync } from "fs";
+import { FSWatcher, mkdirSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile } from "fs/promises";
 import { join, normalize } from "path";
 
-import { registerCspIpcHandlers } from "./csp/manager";
 import { getThemeInfo, stripBOM, UserThemeHeader } from "./themes";
-import { ALLOWED_PROTOCOLS, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR } from "./utils/constants";
+import { ALLOWED_PROTOCOLS, QUICKCSS_PATH, THEMES_DIR } from "./utils/constants";
 import { makeLinksOpenExternally } from "./utils/externalLinks";
-
-const RENDERER_CSS_PATH = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
 mkdirSync(THEMES_DIR, { recursive: true });
 
-registerCspIpcHandlers();
-
 export function ensureSafePath(basePath: string, path: string) {
-    const normalizedBasePath = normalize(basePath + "/");
+    const normalizedBasePath = normalize(basePath);
     const newPath = join(basePath, path);
     const normalizedPath = normalize(newPath);
     return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
 }
 
 function readCss() {
-    return readFile(QUICK_CSS_PATH, "utf-8").catch(() => "");
+    return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
 }
 
 async function listThemes(): Promise<UserThemeHeader[]> {
@@ -74,7 +69,7 @@ function getThemeData(fileName: string) {
     return readFile(safePath, "utf-8");
 }
 
-ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICK_CSS_PATH));
+ipcMain.handle(IpcEvents.OPEN_QUICKCSS, () => shell.openPath(QUICKCSS_PATH));
 
 ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
     try {
@@ -91,57 +86,37 @@ ipcMain.handle(IpcEvents.OPEN_EXTERNAL, (_, url) => {
 
 ipcMain.handle(IpcEvents.GET_QUICK_CSS, () => readCss());
 ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
-    writeFileSync(QUICK_CSS_PATH, css)
+    writeFileSync(QUICKCSS_PATH, css)
 );
 
+ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
-ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => {
-    let accentColor = systemPreferences.getAccentColor?.() ?? "";
+ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({
+    // win & mac only
+    "os-accent-color": `#${systemPreferences.getAccentColor?.() || ""}`
+}));
 
-    if (accentColor.length && accentColor[0] !== "#") {
-        accentColor = `#${accentColor}`;
-    }
 
-    return {
-        "os-accent-color": accentColor
-    };
-});
-
-ipcMain.handle(IpcEvents.OPEN_THEMES_FOLDER, () => shell.openPath(THEMES_DIR));
-ipcMain.handle(IpcEvents.OPEN_SETTINGS_FOLDER, () => shell.openPath(SETTINGS_DIR));
-
-ipcMain.handle(IpcEvents.INIT_FILE_WATCHERS, ({ sender }) => {
+export function initIpc(mainWindow: BrowserWindow) {
     let quickCssWatcher: FSWatcher | undefined;
-    let rendererCssWatcher: FSWatcher | undefined;
 
-    open(QUICK_CSS_PATH, "a+").then(fd => {
+    open(QUICKCSS_PATH, "a+").then(fd => {
         fd.close();
-        quickCssWatcher = watch(QUICK_CSS_PATH, { persistent: false }, debounce(async () => {
-            sender.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
+        quickCssWatcher = watch(QUICKCSS_PATH, { persistent: false }, debounce(async () => {
+            mainWindow.webContents.postMessage(IpcEvents.QUICK_CSS_UPDATE, await readCss());
         }, 50));
     }).catch(() => { });
 
     const themesWatcher = watch(THEMES_DIR, { persistent: false }, debounce(() => {
-        sender.postMessage(IpcEvents.THEME_UPDATE, void 0);
+        mainWindow.webContents.postMessage(IpcEvents.THEME_UPDATE, void 0);
     }));
 
-    if (IS_DEV) {
-        rendererCssWatcher = watch(RENDERER_CSS_PATH, { persistent: false }, async () => {
-            sender.postMessage(IpcEvents.RENDERER_CSS_UPDATE, await readFile(RENDERER_CSS_PATH, "utf-8"));
-        });
-    }
-
-    sender.once("destroyed", () => {
+    mainWindow.once("closed", () => {
         quickCssWatcher?.close();
         themesWatcher.close();
-        rendererCssWatcher?.close();
     });
-});
-
-ipcMain.on(IpcEvents.GET_MONACO_THEME, e => {
-    e.returnValue = nativeTheme.shouldUseDarkColors ? "vs-dark" : "vs-light";
-});
+}
 
 ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
     const title = "Vencord QuickCSS Editor";
@@ -167,11 +142,3 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
 
     await win.loadURL(`data:text/html;base64,${monacoHtml}`);
 });
-
-ipcMain.handle(IpcEvents.GET_RENDERER_CSS, () => readFile(RENDERER_CSS_PATH, "utf-8"));
-
-if (IS_DISCORD_DESKTOP) {
-    ipcMain.on(IpcEvents.PRELOAD_GET_RENDERER_JS, e => {
-        e.returnValue = readFileSync(join(__dirname, "renderer.js"), "utf-8");
-    });
-}

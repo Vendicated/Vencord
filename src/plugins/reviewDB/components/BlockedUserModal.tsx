@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Auth } from "@plugins/reviewDB/auth";
-import { ReviewDBUser } from "@plugins/reviewDB/entities";
-import { fetchBlocks, unblockUser } from "@plugins/reviewDB/reviewDbApi";
-import { cl } from "@plugins/reviewDB/utils";
 import { Logger } from "@utils/Logger";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Forms, Tooltip, useState } from "@webpack/common";
+
+import { Auth } from "../auth";
+import { ReviewDBUser } from "../entities";
+import { fetchBlocks, unblockUser } from "../reviewDbApi";
+import { cl } from "../utils";
 
 function UnblockButton(props: { onClick?(): void; }) {
     return (
@@ -38,7 +39,7 @@ function BlockedUser({ user, isBusy, setIsBusy }: { user: ReviewDBUser; isBusy: 
 
     return (
         <div className={cl("block-modal-row")}>
-            <img className={cl("block-modal-avatar")} src={user.profilePhoto} alt="" />
+            <img src={user.profilePhoto} alt="" />
             <Forms.FormText className={cl("block-modal-username")}>{user.username}</Forms.FormText>
             <UnblockButton
                 onClick={isBusy ? undefined : async () => {

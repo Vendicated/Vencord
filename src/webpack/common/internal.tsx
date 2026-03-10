@@ -16,29 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Logger } from "@utils/Logger";
-import { LazyComponent, LazyComponentWrapper } from "@utils/react";
-import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "@webpack";
-import { ComponentType } from "react";
+import { LazyComponent } from "@utils/react";
 
-const logger = new Logger("Webpack");
+// eslint-disable-next-line path-alias/no-relative
+import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
 
-export function waitForComponent<T extends ComponentType<any> = ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[], fallbackValue: ComponentType<any> | null = null) {
+export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForComponent", Array.isArray(filter) ? filter : [filter]]);
 
-    let myValue: T | null = null;
+    let myValue: T = function () {
+        throw new Error(`Vencord could not find the ${name} Component`);
+    } as any;
 
-    const lazyComponent = LazyComponent(() => {
-        if (myValue) return myValue;
-
-        const error = new Error(`Vencord could not find the ${name} Component`);
-        logger.error(error);
-
-        if (IS_DEV) throw error;
-
-        return fallbackValue!;
-    }) as LazyComponentWrapper<T>;
-
+    const lazyComponent = LazyComponent(() => myValue) as T;
     waitFor(filter, (v: any) => {
         myValue = v;
         Object.assign(lazyComponent, v);

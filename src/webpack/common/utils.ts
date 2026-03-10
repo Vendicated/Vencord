@@ -16,16 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type * as t from "@vencord/discord-types";
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
-import type * as TSPattern from "ts-pattern";
+import { canonicalizeMatch } from "@utils/patches";
+import type { Channel } from "discord-types/general";
+
+// eslint-disable-next-line path-alias/no-relative
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
+import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
-    // Importing this directly causes all webpack commons to be imported, which can easily cause circular dependencies.
-    // For this reason, use a non import access here.
-    Vencord.Api.PluginManager.subscribeAllPluginsFluxEvents(m);
+    // Non import call to avoid circular dependency
+    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
 
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
@@ -34,7 +36,7 @@ waitFor(["dispatch", "subscribe"], m => {
     m.subscribe("CONNECTION_OPEN", cb);
 });
 
-export let ComponentDispatch: any;
+export let ComponentDispatch;
 waitFor(["dispatchToLastSubscribed"], m => ComponentDispatch = m);
 
 export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
@@ -46,19 +48,11 @@ export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
-
-export const { match, P }: { match: typeof TSPattern["match"], P: typeof TSPattern["P"]; } = mapMangledModuleLazy("@ts-pattern/matcher", {
-    match: filters.byCode("return new"),
-    P: filters.byProps("when")
-});
+export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
-export const i18n = mapMangledModuleLazy(['defaultLocale:"en-US"', /initialLocale:\i/], {
-    t: m => m?.[Symbol.toStringTag] === "IntlMessagesProxy",
-    intl: m => m != null && Object.getPrototypeOf(m)?.withFormatters != null
-}, true);
+export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
@@ -69,15 +63,10 @@ export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
 const ToastType = {
-    MESSAGE: "message",
-    SUCCESS: "success",
-    FAILURE: "failure",
-    CUSTOM: "custom",
-    CLIP: "clip",
-    LINK: "link",
-    FORWARD: "forward",
-    BOOKMARK: "bookmark",
-    CLOCK: "clock"
+    MESSAGE: 0,
+    SUCCESS: 1,
+    FAILURE: 2,
+    CUSTOM: 3
 };
 const ToastPosition = {
     TOP: 0,
@@ -90,7 +79,7 @@ export interface ToastData {
     /**
      * Toasts.Type
      */
-    type: string,
+    type: number,
     options?: ToastOptions;
 }
 
@@ -113,7 +102,7 @@ export const Toasts = {
     ...{} as {
         show(data: ToastData): void;
         pop(): void;
-        create(message: string, type: string, options?: ToastOptions): ToastData;
+        create(message: string, type: number, options?: ToastOptions): ToastData;
     }
 };
 
@@ -138,56 +127,46 @@ export const UserUtils = {
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
-    promptToUpload: findByCodeLazy("Unexpected mismatch between files and file metadata") as (files: File[], channel: t.Channel, draftType: Number) => void
+    promptToUpload: findByCodeLazy(".ATTACHMENT_TOO_MANY_ERROR_TITLE,") as (files: File[], channel: Channel, draftType: Number) => void
 };
 
-export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
-    fetchAssetIds: filters.byCode('.startsWith("http:")', ".dispatch({"),
-    getAssetFromImageURL: filters.byCode("].serialize(", ":null"),
-    getAssetImage: filters.byCode("getAssetImage: size must === ["),
-    getAssets: filters.byCode(".assets")
+export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
+    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
+};
+
+export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
+    copy: filters.byCode(".copy("),
+    SUPPORTS_COPY: e => typeof e === "boolean"
 });
 
-export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("transitionTo - Transitioning to", {
+export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transitioning to ", {
     transitionTo: filters.byCode("transitionTo -"),
     transitionToGuild: filters.byCode("transitionToGuild -"),
     back: filters.byCode("goBack()"),
     forward: filters.byCode("goForward()"),
 });
-export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
-    transitionToChannel: filters.byCode(".preload"),
-    transitionToThread: filters.byCode('"Thread must have a parent ID."')
-});
 
 export let SettingsRouter: any;
-waitFor(["openUserSettings", "USER_SETTINGS_MODAL_KEY"], m => SettingsRouter = m);
+waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
 export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
-export const { zustandCreate } = mapMangledModuleLazy(["useSyncExternalStoreWithSelector:", "Object.assign"], {
-    zustandCreate: filters.byCode(/=>(\i)\?\i\(\1/)
-});
+export const zustandCreate = findByCodeLazy("will be removed in v4");
 
-export const { zustandPersist } = mapMangledModuleLazy(".onRehydrateStorage)?", {
-    zustandPersist: filters.byCode(/(\(\i,\i\))=>.+?\i\1/)
-});
+export const zustandPersist = findByCodeLazy("[zustand persist middleware]");
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
 export const UserProfileActions = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 export const InviteActions = findByPropsLazy("resolveInvite");
-export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
+// TODO: type
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
-    openExpressionPicker: filters.byCode(/setState\({activeView:(?:(?!null)\i),activeViewType:/),
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    toggleMultiExpressionPicker: filters.byCode(".EMOJI,"),
-    toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
-    setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
-    setSearchQuery: filters.byCode("searchQuery:"),
-    useExpressionPickerStore: filters.byCode(/\(\i,\i=\i\)=>/)
+    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {
@@ -201,12 +180,3 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
     getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
     useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
 });
-
-export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
-    calendarFormat: filters.byCode('<-1?"sameElse":'),
-    dateFormat: filters.byCode('<2?"nextDay":"sameElse";'),
-    isSameDay: filters.byCode(/Math\.abs\(\i-\i\)/),
-    diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
-});
-
-export const MessageTypeSets: t.MessageTypeSets = findByPropsLazy("REPLYABLE", "FORWARDABLE");

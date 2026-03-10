@@ -20,17 +20,17 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "NoMosaic",
     authors: [Devs.AutumnVN],
-    description: "Removes Discord image mosaic",
+    description: "Removes Discord new image mosaic",
     tags: ["image", "mosaic", "media"],
 
     settings,
 
     patches: [
         {
-            find: '"PLAINTEXT_PREVIEW":"OTHER"',
+            find: '=>"IMAGE"===',
             replacement: {
-                match: /=>"IMAGE"===\i\|\|"VIDEO"===\i(?:\|\|("VISUAL_PLACEHOLDER"===\i))?;/,
-                replace: (_, visualPlaceholderPred) => visualPlaceholderPred != null ? `=>${visualPlaceholderPred};` : "=>false;"
+                match: /=>"IMAGE"===\i\|\|"VIDEO"===\i;/,
+                replace: "=>false;"
             }
         },
         {

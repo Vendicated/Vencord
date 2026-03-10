@@ -19,7 +19,7 @@
 import { useTimer } from "@utils/react";
 import { findComponentByCodeLazy } from "@webpack";
 
-import { cl } from ".";
+import { cl } from "./utils";
 
 interface VoiceMessageProps {
     src: string;

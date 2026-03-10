@@ -6,14 +6,13 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu } from "@webpack/common";
+import { Flex, Menu } from "@webpack/common";
 
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
-    DuckDuckGo: "https://duckduckgo.com/?q=",
+    DuckDuckGo: "https://duckduckgo.com/",
     Brave: "https://search.brave.com/search?q=",
     Bing: "https://www.bing.com/search?q=",
     Yahoo: "https://search.yahoo.com/search?p=",
@@ -21,13 +20,7 @@ const DefaultEngines = {
     GitHub: "https://github.com/search?q=",
     Reddit: "https://www.reddit.com/search?q=",
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
-    Startpage: "https://www.startpage.com/sp/search?query="
 } as const;
-
-const enum ReplacementEngineValue {
-    OFF = "off",
-    CUSTOM = "custom",
-}
 
 const settings = definePluginSettings({
     customEngineName: {
@@ -39,15 +32,6 @@ const settings = definePluginSettings({
         description: "The URL of your Engine",
         type: OptionType.STRING,
         placeholder: "https://google.com/search?q="
-    },
-    replacementEngine: {
-        description: "Replace with a specific search engine instead of adding a menu",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Off", value: ReplacementEngineValue.OFF, default: true },
-            { label: "Custom Engine", value: ReplacementEngineValue.CUSTOM },
-            ...Object.keys(DefaultEngines).map(engine => ({ label: engine, value: engine }))
-        ]
     }
 });
 
@@ -56,31 +40,13 @@ function search(src: string, engine: string) {
 }
 
 function makeSearchItem(src: string) {
-    const { customEngineName, customEngineURL, replacementEngine } = settings.store;
+    let Engines = {};
 
-    const hasCustomEngine = Boolean(customEngineName && customEngineURL);
-    const hasValidReplacementEngine = replacementEngine !== ReplacementEngineValue.OFF && !(replacementEngine === ReplacementEngineValue.CUSTOM && !hasCustomEngine);
-
-    const Engines = { ...DefaultEngines };
-
-    if (hasCustomEngine) {
-        Engines[customEngineName!] = customEngineURL;
+    if (settings.store.customEngineName && settings.store.customEngineURL) {
+        Engines[settings.store.customEngineName] = settings.store.customEngineURL;
     }
 
-    if (hasValidReplacementEngine) {
-        const name = replacementEngine === ReplacementEngineValue.CUSTOM && hasCustomEngine
-            ? customEngineName
-            : replacementEngine;
-
-        return (
-            <Menu.MenuItem
-                label={`Search with ${name}`}
-                key="search-custom-engine"
-                id="vc-search-custom-engine"
-                action={() => search(src, Engines[name!])}
-            />
-        );
-    }
+    Engines = { ...Engines, ...DefaultEngines };
 
     return (
         <Menu.MenuItem
@@ -95,7 +61,7 @@ function makeSearchItem(src: string) {
                         key={key}
                         id={key}
                         label={
-                            <Flex gap="0.5em" alignItems="center">
+                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
                                 <img
                                     style={{
                                         borderRadius: "50%"
@@ -103,7 +69,7 @@ function makeSearchItem(src: string) {
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={`https://icons.duckduckgo.com/ip3/${new URL(Engines[engine]).hostname}.ico`}
+                                    src={`https://www.google.com/s2/favicons?domain=${Engines[engine]}&sz=64`}
                                 />
                                 {engine}
                             </Flex>
@@ -129,7 +95,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) 
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
-    description: "Replaces the Google search with different Engine(s)",
+    description: "Replaces the Google search with different Engines",
     authors: [Devs.Moxxie, Devs.Ethan],
 
     settings,

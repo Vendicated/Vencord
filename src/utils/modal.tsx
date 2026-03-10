@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -47,9 +47,9 @@ export interface ModalOptions {
     onCloseCallback?: (() => void);
 }
 
-type RenderFunction = (props: ModalProps) => ReactNode | Promise<ReactNode>;
+type RenderFunction = (props: ModalProps) => ReactNode;
 
-interface Modals {
+export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     ModalRoot: ComponentType<PropsWithChildren<{
         transitionState: ModalTransitionState;
         size?: ModalSize;
@@ -99,16 +99,27 @@ interface Modals {
         hideOnFullscreen?: boolean;
         className?: string;
     }>;
-}
+};
 
-// TODO: move to new modal api
-export const Modals: Modals = mapMangledModuleLazy(".MODAL_ROOT_LEGACY,", {
-    ModalRoot: filters.componentByCode('.MODAL,"aria-labelledby":'),
-    ModalHeader: filters.componentByCode(",id:"),
-    ModalContent: filters.componentByCode("scrollbarType:"),
-    ModalFooter: filters.componentByCode(".HORIZONTAL_REVERSE,"),
-    ModalCloseButton: filters.componentByCode(".withCircleBackground")
-});
+export type ImageModal = ComponentType<{
+    className?: string;
+    src: string;
+    placeholder: string;
+    original: string;
+    width?: number;
+    height?: number;
+    animated?: boolean;
+    responsive?: boolean;
+    renderLinkComponent(props: any): ReactNode;
+    renderForwardComponent(props: any): ReactNode;
+    maxWidth?: number;
+    maxHeight?: number;
+    shouldAnimate?: boolean;
+    onClose?(): void;
+    shouldHideMediaOptions?: boolean;
+}>;
+
+export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE", "responsive") as ImageModal;
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
@@ -116,61 +127,35 @@ export const ModalContent = LazyComponent(() => Modals.ModalContent);
 export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
 export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
-export type MediaModalItem = {
-    url: string;
-    type: "IMAGE" | "VIDEO";
-    original?: string;
-    alt?: string;
-    width?: number;
-    height?: number;
-    animated?: boolean;
-    maxWidth?: number;
-    maxHeight?: number;
-} & Record<PropertyKey, any>;
+const ModalAPI = findByPropsLazy("openModalLazy");
 
-export type MediaModalProps = {
-    location?: string;
-    contextKey?: string;
-    onCloseCallback?: () => void;
-    className?: string;
-    items: MediaModalItem[];
-    startingIndex?: number;
-    onIndexChange?: (...args: any[]) => void;
-    fit?: string;
-    shouldRedactExplicitContent?: boolean;
-    shouldHideMediaOptions?: boolean;
-};
-
-// Modal key: "Media Viewer Modal"
-export const openMediaModal: (props: MediaModalProps) => void = findByCodeLazy("hasMediaOptions", "shouldHideMediaOptions");
-
-interface ModalAPI {
-    /**
-     * Wait for the render promise to resolve, then open a modal with it.
-     * This is equivalent to render().then(openModal)
-     * You should use the Modal components exported by this file
-     */
-    openModalLazy: (render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }) => Promise<string>;
-    /**
-     * Open a Modal with the given render function.
-     * You should use the Modal components exported by this file
-     */
-    openModal: (render: RenderFunction, options?: ModalOptions, contextKey?: string) => string;
-    /**
-     * Close a modal by its key
-     */
-    closeModal: (modalKey: string, contextKey?: string) => void;
-    /**
-     * Close all open modals
-     */
-    closeAllModals: () => void;
+/**
+ * Wait for the render promise to resolve, then open a modal with it.
+ * This is equivalent to render().then(openModal)
+ * You should use the Modal components exported by this file
+ */
+export function openModalLazy(render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }): Promise<string> {
+    return ModalAPI.openModalLazy(render, options);
 }
 
-export const ModalAPI: ModalAPI = mapMangledModuleLazy(".modalKey?", {
-    openModalLazy: filters.byCode(".modalKey?"),
-    openModal: filters.byCode(",instant:"),
-    closeModal: filters.byCode(".onCloseCallback()"),
-    closeAllModals: filters.byCode(".getState();for")
-});
+/**
+ * Open a Modal with the given render function.
+ * You should use the Modal components exported by this file
+ */
+export function openModal(render: RenderFunction, options?: ModalOptions, contextKey?: string): string {
+    return ModalAPI.openModal(render, options, contextKey);
+}
 
-export const { openModalLazy, openModal, closeModal, closeAllModals } = ModalAPI;
+/**
+ * Close a modal by its key
+ */
+export function closeModal(modalKey: string, contextKey?: string): void {
+    return ModalAPI.closeModal(modalKey, contextKey);
+}
+
+/**
+ * Close all open modals
+ */
+export function closeAllModals(): void {
+    return ModalAPI.closeAllModals();
+}

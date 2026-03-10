@@ -8,7 +8,6 @@ vencord_installer
 .DS_Store
 
 yarn.lock
-bun.lock
 package-lock.json
 
 *.log
@@ -22,4 +21,4 @@ lerna-debug.log*
 src/userplugins
 
 ExtensionCache/
-/settings
+settings/

@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { cl } from "@plugins/shikiCodeblocks.desktop/utils/misc";
+import { Clipboard } from "@webpack/common";
 
+import { cl } from "../utils/misc";
 import { CopyButton } from "./CopyButton";
 
 export interface ButtonRowProps {
@@ -26,14 +27,20 @@ export interface ButtonRowProps {
 }
 
 export function ButtonRow({ content, theme }: ButtonRowProps) {
-    return <div className={cl("btns")}>
-        <CopyButton
-            content={content}
-            className={cl("btn")}
-            style={{
-                backgroundColor: theme.accentBgColor,
-                color: theme.accentFgColor,
-            }}
-        />
-    </div>;
+    const buttons: JSX.Element[] = [];
+
+    if (Clipboard.SUPPORTS_COPY) {
+        buttons.push(
+            <CopyButton
+                content={content}
+                className={cl("btn")}
+                style={{
+                    backgroundColor: theme.accentBgColor,
+                    color: theme.accentFgColor,
+                }}
+            />
+        );
+    }
+
+    return <div className={cl("btns")}>{buttons}</div>;
 }

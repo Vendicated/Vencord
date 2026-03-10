@@ -7,12 +7,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { ImageIcon } from "@components/Icons";
-import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild, openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { GuildRoleStore, Menu, PermissionStore } from "@webpack/common";
+import { Clipboard, GuildStore, Menu, PermissionStore } from "@webpack/common";
 
 const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
 
@@ -80,30 +79,16 @@ export default definePlugin({
             const guild = getCurrentGuild();
             if (!guild) return;
 
-            const role = GuildRoleStore.getRole(guild.id, id);
+            const role = GuildStore.getRole(guild.id, id);
             if (!role) return;
 
             if (role.colorString) {
-                children.unshift(
+                children.push(
                     <Menu.MenuItem
                         id="vc-copy-role-color"
                         label="Copy Role Color"
-                        action={() => copyToClipboard(role.colorString!)}
+                        action={() => Clipboard.copy(role.colorString!)}
                         icon={AppearanceIcon}
-                    />
-                );
-            }
-
-            if (PermissionStore.getGuildPermissionProps(guild).canManageRoles) {
-                children.unshift(
-                    <Menu.MenuItem
-                        id="vc-edit-role"
-                        label="Edit Role"
-                        action={async () => {
-                            await GuildSettingsActions.open(guild.id, "ROLES");
-                            GuildSettingsActions.selectRole(id);
-                        }}
-                        icon={PencilIcon}
                     />
                 );
             }
@@ -114,15 +99,25 @@ export default definePlugin({
                         id="vc-view-role-icon"
                         label="View Role Icon"
                         action={() => {
-                            openImageModal({
-                                url: `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`,
-                                height: 128,
-                                width: 128
-                            });
+                            openImageModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
                         }}
                         icon={ImageIcon}
                     />
 
+                );
+            }
+
+            if (PermissionStore.getGuildPermissionProps(guild).canManageRoles) {
+                children.push(
+                    <Menu.MenuItem
+                        id="vc-edit-role"
+                        label="Edit Role"
+                        action={async () => {
+                            await GuildSettingsActions.open(guild.id, "ROLES");
+                            GuildSettingsActions.selectRole(id);
+                        }}
+                        icon={PencilIcon}
+                    />
                 );
             }
         }

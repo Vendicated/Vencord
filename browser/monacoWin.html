@@ -24,12 +24,12 @@
 
         <script>
             const script = document.createElement("script");
-            script.src = new URL("/vendor/monaco/index.js", baseUrl);
+            script.src = new URL("/dist/monaco/index.js", baseUrl);
 
             const style = document.createElement("link");
             style.type = "text/css";
             style.rel = "stylesheet";
-            style.href = new URL("/vendor/monaco/index.css", baseUrl);
+            style.href = new URL("/dist/monaco/index.css", baseUrl);
 
             document.body.append(style, script);
         </script>
