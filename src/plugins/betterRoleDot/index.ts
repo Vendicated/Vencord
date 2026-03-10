@@ -18,8 +18,8 @@
 
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { copyWithToast } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Clipboard, Toasts } from "@webpack/common";
 
 export default definePlugin({
     name: "BetterRoleDot",
@@ -29,7 +29,8 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".dotBorderBase",
+            // Class used in this module is dotBorderBase
+            find: "M0 4C0 1.79086 1.79086 0 4 0H16C18.2091 0 20 1.79086 20 4V16C20 18.2091 18.2091 20 16 20H4C1.79086 20 0 18.2091 0 16V4Z",
             replacement: {
                 match: /,viewBox:"0 0 20 20"/,
                 replace: "$&,onClick:()=>$self.copyToClipBoard(arguments[0].color),style:{cursor:'pointer'}",
@@ -47,7 +48,7 @@ export default definePlugin({
         },
 
         {
-            find: ".ADD_ROLE_A11Y_LABEL",
+            find: "#{intl::ADD_ROLE_A11Y_LABEL}",
             all: true,
             predicate: () => Settings.plugins.BetterRoleDot.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot.bothStyles,
             noWarn: true,
@@ -84,15 +85,6 @@ export default definePlugin({
     },
 
     copyToClipBoard(color: string) {
-        Clipboard.copy(color);
-        Toasts.show({
-            message: "Copied to Clipboard!",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
+        copyWithToast(color);
     },
 });

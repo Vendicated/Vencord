@@ -5,19 +5,20 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { disableStyle, enableStyle } from "@api/Styles";
+import { buildPluginMenuEntries, buildThemeMenuEntries } from "@plugins/vencordToolbox/menu";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitFor } from "@webpack";
-import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
-import type { HTMLAttributes, ReactElement } from "react";
+import { findCssClassesLazy } from "@webpack";
+import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
+import type { HTMLAttributes, ReactNode } from "react";
 
-type SettingsEntry = { section: string, label: string; };
+import fullHeightStyle from "./fullHeightContext.css?managed";
 
 const cl = classNameFactory("");
-let Classes: Record<string, string>;
-waitFor(["animating", "baseLayer", "bg", "layer", "layers"], m => Classes = m);
+const Classes = findCssClassesLazy("animating", "baseLayer", "bg", "layer", "layers");
 
 const settings = definePluginSettings({
     disableFade: {
@@ -29,7 +30,8 @@ const settings = definePluginSettings({
     organizeMenu: {
         description: "Organizes the settings cog context menu into categories",
         type: OptionType.BOOLEAN,
-        default: true
+        default: true,
+        restartNeeded: true
     },
     eagerLoad: {
         description: "Removes the loading delay when opening the menu for the first time",
@@ -78,13 +80,22 @@ export default definePlugin({
     authors: [Devs.Kyuuhachi],
     settings,
 
+    start() {
+        if (settings.store.organizeMenu)
+            enableStyle(fullHeightStyle);
+    },
+
+    stop() {
+        disableStyle(fullHeightStyle);
+    },
+
     patches: [
         {
             find: "this.renderArtisanalHack()",
             replacement: [
-                { // Fade in on layer
-                    match: /(?<=\((\i),"contextType",\i\.\i\);)/,
-                    replace: "$1=$self.Layer;",
+                {
+                    match: /class (\i)(?= extends \i\.PureComponent.+?static contextType=.+?jsx\)\(\1,\{mode:)/,
+                    replace: "var $1=$self.Layer;class VencordPatchedOldFadeLayer",
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
@@ -98,8 +109,8 @@ export default definePlugin({
             find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
-                    match: /\(0,\i\.useTransition\)\((\i)/,
-                    replace: "(_cb=>_cb(void 0,$1))||$&"
+                    match: /(?=\(0,\i\.\i\)\((\i),\{from:\{position:"absolute")/,
+                    replace: "(_cb=>_cb(void 0,$1))||"
                 },
                 {
                     match: /\i\.animated\.div/,
@@ -108,31 +119,56 @@ export default definePlugin({
             ],
             predicate: () => settings.store.disableFade
         },
-        { // Load menu TOC eagerly
-            find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
+        { // Disable fade animations for settings menu
+            find: '"data-mana-component":"layer-modal"',
+            replacement: [
+                {
+                    match: /(\i)\.animated\.div(?=,\{"data-mana-component":"layer-modal")/,
+                    replace: '"div"'
+                },
+                {
+                    match: /(?<="data-mana-component":"layer-modal"[^}]*?)style:\i,/,
+                    replace: "style:{},"
+                }
+            ],
+            predicate: () => settings.store.disableFade
+        },
+        { // Disable initial and exit delay for settings menu
+            find: "headerId:void 0,headerIdIsManaged:!1",
             replacement: {
-                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
-                replace: "$&(async ()=>$2)(),"
+                match: /let (\i)=300/,
+                replace: "let $1=0"
+            },
+            predicate: () => settings.store.disableFade
+        },
+        { // Load menu TOC eagerly
+            find: "handleOpenSettingsContextMenu=",
+            replacement: {
+                match: /(?=handleOpenSettingsContextMenu=.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)))/,
+                replace: "_vencordBetterSettingsEagerLoad=(async ()=>$1)();"
             },
             predicate: () => settings.store.eagerLoad
         },
         { // Settings cog context menu
-            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
-            replacement: {
-                match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                replace: "$1$self.wrapMenu($2)"
-            }
-        }
+            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
+            predicate: () => settings.store.organizeMenu,
+            replacement: [
+                {
+                    match: /children:\[(\i),(?<=\1=.{0,30}\.openUserSettings.+?)/,
+                    replace: "children:[$self.transformSettingsEntries($1),",
+                },
+            ]
+        },
     ],
 
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
     //
-    // Thus, we sanity check webpack modules & do this really hacky try catch to hopefully prevent hard crashes if something goes wrong.
-    // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
-    // not in children
+    // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
-        if (!FocusLock || !ComponentDispatch || !Classes) {
+        try {
+            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch, Classes.layer].forEach(e => e.test);
+        } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;
         }
@@ -140,46 +176,34 @@ export default definePlugin({
         return <Layer {...props} />;
     },
 
-    wrapMenu(list: SettingsEntry[]) {
-        if (!settings.store.organizeMenu) return list;
-
-        const items = [{ label: null as string | null, items: [] as SettingsEntry[] }];
+    transformSettingsEntries(list) {
+        const items: ReactNode[] = [];
 
         for (const item of list) {
-            if (item.section === "HEADER") {
-                items.push({ label: item.label, items: [] });
-            } else if (item.section === "DIVIDER") {
-                items.push({ label: i18n.Messages.OTHER_OPTIONS, items: [] });
+            const { key, props } = item;
+            if (!props) continue;
+
+            if (key === "vencord_plugins" || key === "vencord_themes") {
+                const children = key === "vencord_plugins"
+                    ? buildPluginMenuEntries()
+                    : buildThemeMenuEntries();
+
+                items.push(
+                    <Menu.MenuItem key={key} label={props.label} id={props.label} {...props}>
+                        {children}
+                    </Menu.MenuItem>
+                );
+            } else if (key.endsWith("_section") && props.label) {
+                items.push(
+                    <Menu.MenuItem key={key} label={props.label} id={props.label}>
+                        {this.transformSettingsEntries(props.children)}
+                    </Menu.MenuItem>
+                );
             } else {
-                items.at(-1)!.items.push(item);
+                items.push(item);
             }
         }
 
-        return {
-            filter(predicate: (item: SettingsEntry) => boolean) {
-                for (const category of items) {
-                    category.items = category.items.filter(predicate);
-                }
-                return this;
-            },
-            map(render: (item: SettingsEntry) => ReactElement) {
-                return items
-                    .filter(a => a.items.length > 0)
-                    .map(({ label, items }) => {
-                        const children = items.map(render);
-                        if (label) {
-                            return (
-                                <Menu.MenuItem
-                                    id={label.replace(/\W/, "_")}
-                                    label={label}
-                                    children={children}
-                                    action={children[0].props.action}
-                                />);
-                        } else {
-                            return children;
-                        }
-                    });
-            }
-        };
+        return items;
     }
 });

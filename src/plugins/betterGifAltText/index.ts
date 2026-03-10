@@ -26,7 +26,7 @@ export default definePlugin({
         "Change GIF alt text from simply being 'GIF' to containing the gif tags / filename",
     patches: [
         {
-            find: '"onCloseImage",',
+            find: ".modalContext})};",
             replacement: {
                 match: /(return.{0,10}\.jsx.{0,50}isWindowFocused)/,
                 replace:
@@ -34,9 +34,9 @@ export default definePlugin({
             },
         },
         {
-            find: ".Messages.GIF,",
+            find: "#{intl::GIF}",
             replacement: {
-                match: /alt:(\i)=(\i\.\i\.Messages\.GIF)(?=,[^}]*\}=(\i))/,
+                match: /alt:(\i)=(\i\.\i\.string\(\i\.\i#{intl::GIF}\))(?=,[^}]*\}=(\i))/,
                 replace:
                     // rename prop so we can always use default value
                     "alt_$$:$1=$self.altify($3)||$2",

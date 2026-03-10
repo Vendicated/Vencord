@@ -6,10 +6,9 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
-import { Message, User } from "discord-types/general";
-import { Channel } from "discord-types/general/index.js";
 
 const enum ReferencedMessageState {
     Loaded,
@@ -37,18 +36,26 @@ export default definePlugin({
     authors: [Devs.newwares],
     patches: [
         {
-            find: "Messages.REPLY_QUOTE_MESSAGE_NOT_LOADED",
+            // Same find as in ReplyTimestamp
+            find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
             replacement: {
-                match: /Messages\.REPLY_QUOTE_MESSAGE_NOT_LOADED/,
+                match: /#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}\)/,
                 replace: "$&,onMouseEnter:()=>$self.fetchReply(arguments[0])"
             }
         },
         {
             find: "ReferencedMessageStore",
-            replacement: {
-                match: /constructor\(\)\{\i\(this,"_channelCaches",new Map\)/,
-                replace: "$&;$self.setReplyStore(this);"
-            }
+            replacement: [
+                {
+                    match: /constructor\(\)\{\i\(this,"_channelCaches",new Map\)/,
+                    replace: "$&;$self.setReplyStore(this);",
+                    noWarn: true // TODO: remove legacy compatibility code in the future
+                },
+                {
+                    match: /_channelCaches=new Map;/,
+                    replace: "$&_=$self.setReplyStore(this);"
+                }
+            ]
         }
     ],
 

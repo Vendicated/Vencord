@@ -19,7 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
+import { ChannelRouter, ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
 export interface LogoutEvent {
     type: "LOGOUT";
@@ -40,15 +40,20 @@ interface PreviousChannel {
 let isSwitchingAccount = false;
 let previousCache: PreviousChannel | undefined;
 
-function attemptToNavigateToChannel(guildId: string | null, channelId: string) {
-    if (!ChannelStore.hasChannel(channelId)) return;
-    NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}`);
-}
-
 export default definePlugin({
     name: "KeepCurrentChannel",
     description: "Attempt to navigate to the channel you were in before switching accounts or loading Discord.",
     authors: [Devs.Nuckyz],
+
+    patches: [
+        {
+            find: '"Switching accounts"',
+            replacement: {
+                match: /goHomeAfterSwitching:\i/,
+                replace: "goHomeAfterSwitching:!1"
+            }
+        }
+    ],
 
     flux: {
         LOGOUT(e: LogoutEvent) {
@@ -59,8 +64,13 @@ export default definePlugin({
             if (!isSwitchingAccount) return;
             isSwitchingAccount = false;
 
-            if (previousCache?.channelId)
-                attemptToNavigateToChannel(previousCache.guildId, previousCache.channelId);
+            if (previousCache?.channelId) {
+                if (ChannelStore.hasChannel(previousCache.channelId)) {
+                    ChannelRouter.transitionToChannel(previousCache.channelId);
+                } else {
+                    NavigationRouter.transitionToGuild("@me");
+                }
+            }
         },
 
         async CHANNEL_SELECT({ guildId, channelId }: ChannelSelectEvent) {
@@ -84,7 +94,7 @@ export default definePlugin({
 
             await DataStore.set("KeepCurrentChannel_previousData", previousCache);
         } else if (previousCache.channelId) {
-            attemptToNavigateToChannel(previousCache.guildId, previousCache.channelId);
+            ChannelRouter.transitionToChannel(previousCache.channelId);
         }
     }
 });
