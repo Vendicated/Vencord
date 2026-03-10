@@ -297,6 +297,19 @@ export function migratePluginToSettings(deleteOldSettings: boolean, newName: str
     }
 }
 
+export function migrateSettingToPlugin(newName: string, oldName: string, settingName: string) {
+    const { plugins } = SettingsStore.plain;
+    const newPlugin = plugins[newName];
+    const oldPlugin = plugins[oldName];
+
+    if (newPlugin && oldPlugin?.enabled && oldPlugin?.[settingName]) {
+        logger.info(`Migrating setting ${settingName} from ${oldName} to seperate plugin ${newName}`);
+        delete oldPlugin[settingName];
+        newPlugin.enabled = true;
+        SettingsStore.markAsChanged();
+    }
+}
+
 export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, ...settings: string[]) {
     const { plugins } = SettingsStore.plain;
 

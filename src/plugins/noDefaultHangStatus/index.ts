@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { migrateSettingToPlugin } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+migrateSettingToPlugin("NoDefaultHangStatus", "EquicordHelper", "noDefaultHangStatus");
 export default definePlugin({
     name: "NoDefaultHangStatus",
     description: "Disable the default hang status when joining voice channels",
