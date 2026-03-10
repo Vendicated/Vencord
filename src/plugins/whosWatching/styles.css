@@ -1,0 +1,11 @@
+.vc-whos-watching-user-avatar {
+    border-radius: 8px;
+    width: 16px;
+    height: 16px;
+}
+
+.vc-whos-watching-spectating-header {
+    margin-top: 8px;
+    margin-bottom: 0;
+    text-transform: uppercase;
+}
