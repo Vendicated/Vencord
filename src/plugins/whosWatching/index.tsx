@@ -43,7 +43,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
         <div className={cl("content")}>
             {userIds.length ?
                 (
-                    <div className={cl("spectators")}>
+                    <div className={cl("spectating")}>
                         <Heading>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Heading>
                         <Flex flexDirection="column" gap="6" >
                             {users.map(user => (
@@ -128,12 +128,12 @@ export default definePlugin({
         return (
             <div className={cl("screenshare-panel")}>
                 <div {...props}>{props.children}</div>
-                <div className={classes(cl("spectators-panel"), Margins.top8)}>
-                    <HeadingSecondary className={cl("spectators-header")}>
+                <div className={classes(cl("spectating-panel"), Margins.top8)}>
+                    <HeadingSecondary className={cl("spectating-header")}>
                         {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                     </HeadingSecondary>
                     {users.length ?
-                        <div className={cl("spectators-users")}>
+                        <div className={cl("spectating-users")}>
                             <UserSummaryItem
                                 users={users}
                                 count={userIds.length}
