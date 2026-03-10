@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -27,8 +29,8 @@ interface WatchingProps {
 
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findCssClassesLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar", "avatar");
-const cl = classNameFactory("vc-whosWatching-");
+const AvatarStyles = findCssClassesLazy("moreUsers", "clickableAvatar", "avatar");
+const cl = classNameFactory("vc-whos-watching-");
 
 function getUsername(user: User): string {
     return RelationshipStore.getNickname(user.id) || user.globalName || user.username;
@@ -41,18 +43,22 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
         <div className={cl("content")}>
             {userIds.length ?
                 (
-                    <>
+                    <div className={cl("spectators")}>
                         <Heading>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Heading>
-                        <Flex flexDirection="column" style={{ gap: 6 }} >
+                        <Flex flexDirection="column" gap="6" >
                             {users.map(user => (
-                                <Flex key={user.id} flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
-                                    <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} alt="" />
+                                <Flex key={user.id} flexDirection="row" gap="6" alignContent="center">
+                                    <img className={cl("user-avatar")} src={user.getAvatarURL(guildId)} alt="" />
                                     {getUsername(user)}
                                 </Flex>
                             ))}
-                            {missingUsers > 0 && <span className={cl("more-users")}>{`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}</span>}
+                            {missingUsers > 0 &&
+                                <span className={cl("more-users")}>
+                                    {`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}
+                                </span>
+                            }
                         </Flex>
-                    </>
+                    </div>
                 )
                 : (
                     <span className={cl("no-viewers")}>
@@ -120,14 +126,14 @@ export default definePlugin({
         }
 
         return (
-            <>
+            <div className={cl("screenshare-panel")}>
                 <div {...props}>{props.children}</div>
                 <div className={classes(cl("spectators-panel"), Margins.top8)}>
-                    <HeadingSecondary style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
+                    <HeadingSecondary className={cl("spectators-header")}>
                         {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                     </HeadingSecondary>
                     {users.length ?
-                        <>
+                        <div className={cl("spectators-users")}>
                             <UserSummaryItem
                                 users={users}
                                 count={userIds.length}
@@ -150,13 +156,13 @@ export default definePlugin({
                                     </Clickable>
                                 )}
                             />
-                        </>
+                        </div>
                         : <Paragraph>
                             No spectators
                         </Paragraph>
                     }
                 </div>
-            </>
+            </div>
         );
     }),
     component: function ({ OriginalComponent }) {
