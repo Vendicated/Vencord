@@ -21,14 +21,14 @@
     gap: 1.5rem;
 }
 
-.vc-pindms-modal-content [class^="defaultContainer"] {
+.vc-pindms-modal-content [class*="defaultContainer"] {
     display: none;
 }
 
 .vc-pindms-collapse-icon {
     width: 16px;
     height: 16px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     transform: rotate(90deg)
 }
 

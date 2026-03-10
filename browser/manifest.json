@@ -36,7 +36,7 @@
 
     "web_accessible_resources": [
         {
-            "resources": ["dist/*", "third-party/*"],
+            "resources": ["dist/*", "vendor/*"],
             "matches": ["*://*.discord.com/*"]
         }
     ],
