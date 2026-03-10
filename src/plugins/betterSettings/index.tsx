@@ -161,9 +161,6 @@ export default definePlugin({
         },
     ],
 
-    buildPluginMenuEntries,
-    buildThemeMenuEntries,
-
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
     //
