@@ -22,9 +22,9 @@ function parseHeaders(headers) {
         return result;
 
     const headersArr = headers.trim().split("\n");
-    for (var i = 0; i < headersArr.length; i++) {
-        var row = headersArr[i];
-        var index = row.indexOf(":")
+    for (let i = 0; i < headersArr.length; i++) {
+        const row = headersArr[i];
+        const index = row.indexOf(":")
             , key = row.slice(0, index).trim().toLowerCase()
             , value = row.slice(index + 1).trim();
 
@@ -36,7 +36,7 @@ function parseHeaders(headers) {
 function blobTo(to, blob) {
     if (to === "arrayBuffer" && blob.arrayBuffer) return blob.arrayBuffer();
     return new Promise((resolve, reject) => {
-        var fileReader = new FileReader();
+        const fileReader = new FileReader();
         fileReader.onload = event => resolve(event.target.result);
         if (to === "arrayBuffer") fileReader.readAsArrayBuffer(blob);
         else if (to === "text") fileReader.readAsText(blob, "utf-8");
@@ -52,7 +52,7 @@ function GM_fetch(url, opt) {
         options.data = options.body;
         options.responseType = "blob";
         options.onload = resp => {
-            var blob = resp.response;
+            const blob = resp.response;
             resp.blob = () => Promise.resolve(blob);
             resp.arrayBuffer = () => blobTo("arrayBuffer", blob);
             resp.text = () => blobTo("text", blob);
