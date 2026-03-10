@@ -3,7 +3,8 @@
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
-        "skipLibCheck": true,
+        "skipLibCheck": false,
+        "allowJs": true,
         "lib": [
             "DOM",
             "DOM.Iterable",
@@ -13,7 +14,7 @@
             "esnext.symbol"
         ],
         "module": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "strict": true,
         "noImplicitAny": false,
         "target": "ESNEXT",
@@ -25,10 +26,13 @@
             "@api/*": ["./api/*"],
             "@components/*": ["./components/*"],
             "@utils/*": ["./utils/*"],
+            "@plugins/*": ["./plugins/*"],
             "@shared/*": ["./shared/*"],
-            "@webpack/types": ["./webpack/common/types"],
             "@webpack/common": ["./webpack/common"],
-            "@webpack": ["./webpack/webpack"]
+            "@webpack/common/*": ["./webpack/common/*"],
+            "@webpack": ["./webpack/webpack"],
+            "@webpack/patcher": ["./webpack/patchWebpack"],
+            "@webpack/wreq.d": ["./webpack/wreq.d"],
         },
 
         "plugins": [
@@ -37,7 +41,8 @@
                 "transform": "typescript-transform-paths",
                 "afterDeclarations": true
             }
-        ]
+        ],
+        "outDir": "who-fucking-cares-dude"
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"],
 }

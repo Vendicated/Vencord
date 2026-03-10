@@ -16,11 +16,73 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { MapValue } from "type-fest/source/entry";
+import { generateTextCss } from "@components/BaseText";
+import { generateMarginCss } from "@components/margins";
+import { classNameFactory as _classNameFactory, classNameToSelector, createAndAppendStyle } from "@utils/css";
 
-export type Style = MapValue<typeof VencordStyles>;
+// Backwards compat for Vesktop
+/** @deprecated Import this from `@utils/css` instead */
+export const classNameFactory = _classNameFactory;
+
+export interface Style {
+    name: string;
+    source: string;
+    classNames: Record<string, string>;
+    dom: HTMLStyleElement | null;
+}
 
 export const styleMap = window.VencordStyles ??= new Map();
+
+export const vencordRootNode = document.createElement("vencord-root");
+/**
+ * Houses all Vencord core styles. This includes all imported css files
+ */
+export const coreStyleRootNode = document.createElement("vencord-styles");
+/**
+ * Houses all plugin specific managed styles
+ */
+export const managedStyleRootNode = document.createElement("vencord-managed-styles");
+/**
+ * Houses the user's themes and quick css
+ */
+export const userStyleRootNode = document.createElement("vencord-user-styles");
+
+vencordRootNode.style.display = "none";
+vencordRootNode.append(coreStyleRootNode, managedStyleRootNode, userStyleRootNode);
+
+export function initStyles() {
+    const osValuesNode = createAndAppendStyle("vencord-os-theme-values", coreStyleRootNode);
+    createAndAppendStyle("vencord-text", coreStyleRootNode).textContent = generateTextCss();
+    const rendererCssNode = createAndAppendStyle("vencord-css-core", coreStyleRootNode);
+    const vesktopCssNode = IS_VESKTOP ? createAndAppendStyle("vesktop-css-core", coreStyleRootNode) : null;
+    createAndAppendStyle("vencord-margins", coreStyleRootNode).textContent = generateMarginCss();
+
+    VencordNative.native.getRendererCss().then(css => rendererCssNode.textContent = css);
+    if (IS_DEV) {
+        VencordNative.native.onRendererCssUpdate(newCss => {
+            rendererCssNode.textContent = newCss;
+        });
+    }
+
+    if (IS_VESKTOP && VesktopNative.app.getRendererCss) {
+        VesktopNative.app.getRendererCss().then(css => vesktopCssNode!.textContent = css);
+        VesktopNative.app.onRendererCssUpdate(newCss => {
+            vesktopCssNode!.textContent = newCss;
+        });
+    }
+
+    VencordNative.themes.getSystemValues().then(values => {
+        const variables = Object.entries(values)
+            .filter(([, v]) => !!v)
+            .map(([k, v]) => `--${k}: ${v};`)
+            .join("");
+        osValuesNode.textContent = `:root{${variables}}`;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.documentElement.append(vencordRootNode);
+}, { once: true });
 
 export function requireStyle(name: string) {
     const style = styleMap.get(name);
@@ -50,7 +112,7 @@ export function enableStyle(name: string) {
     }
     compileStyle(style);
 
-    document.head.appendChild(style.dom);
+    managedStyleRootNode.appendChild(style.dom);
     return true;
 }
 
@@ -132,31 +194,4 @@ export const compileStyle = (style: Style) => {
         });
 };
 
-/**
- * @param name The classname
- * @param prefix A prefix to add each class, defaults to `""`
- * @return A css selector for the classname
- * @example
- * classNameToSelector("foo bar") // => ".foo.bar"
- */
-export const classNameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
 
-type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false | null | undefined | 0 | "";
-/**
- * @param prefix The prefix to add to each class, defaults to `""`
- * @returns A classname generator function
- * @example
- * const cl = classNameFactory("plugin-");
- *
- * cl("base", ["item", "editable"], { selected: null, disabled: true })
- * // => "plugin-base plugin-item plugin-editable plugin-disabled"
- */
-export const classNameFactory = (prefix: string = "") => (...args: ClassNameFactoryArg[]) => {
-    const classNames = new Set<string>();
-    for (const arg of args) {
-        if (arg && typeof arg === "string") classNames.add(arg);
-        else if (Array.isArray(arg)) arg.forEach(name => classNames.add(name));
-        else if (arg && typeof arg === "object") Object.entries(arg).forEach(([name, value]) => value && classNames.add(name));
-    }
-    return Array.from(classNames, name => prefix + name).join(" ");
-};

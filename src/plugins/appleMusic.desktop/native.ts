@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { execFile } from "child_process";
 import { promisify } from "util";
 
@@ -11,36 +12,10 @@ import type { TrackData } from ".";
 
 const exec = promisify(execFile);
 
-// function exec(file: string, args: string[] = []) {
-//     return new Promise<{ code: number | null, stdout: string | null, stderr: string | null; }>((resolve, reject) => {
-//         const process = spawn(file, args, { stdio: [null, "pipe", "pipe"] });
-
-//         let stdout: string | null = null;
-//         process.stdout.on("data", (chunk: string) => { stdout ??= ""; stdout += chunk; });
-//         let stderr: string | null = null;
-//         process.stderr.on("data", (chunk: string) => { stdout ??= ""; stderr += chunk; });
-
-//         process.on("exit", code => { resolve({ code, stdout, stderr }); });
-//         process.on("error", err => reject(err));
-//     });
-// }
-
 async function applescript(cmds: string[]) {
     const { stdout } = await exec("osascript", cmds.map(c => ["-e", c]).flat());
     return stdout;
 }
-
-function makeSearchUrl(type: string, query: string) {
-    const url = new URL("https://tools.applemediaservices.com/api/apple-media/music/US/search.json");
-    url.searchParams.set("types", type);
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("term", query);
-    return url;
-}
-
-const requestOptions: RequestInit = {
-    headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; rv:125.0) Gecko/20100101 Firefox/125.0" },
-};
 
 interface RemoteData {
     appleMusicLink?: string,
@@ -58,21 +33,37 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
     }
 
     try {
-        const [songData, artistData] = await Promise.all([
-            fetch(makeSearchUrl("songs", artist + " " + album + " " + name), requestOptions).then(r => r.json()),
-            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]), requestOptions).then(r => r.json())
-        ]);
+        const dataUrl = new URL("https://itunes.apple.com/search");
+        dataUrl.searchParams.set("term", `${name} ${artist} ${album}`);
+        dataUrl.searchParams.set("media", "music");
+        dataUrl.searchParams.set("entity", "song");
 
-        const appleMusicLink = songData?.songs?.data[0]?.attributes.url;
-        const songLink = songData?.songs?.data[0]?.id ? `https://song.link/i/${songData?.songs?.data[0]?.id}` : undefined;
+        const songData = await fetch(dataUrl, {
+            headers: {
+                "user-agent": VENCORD_USER_AGENT,
+            },
+        })
+            .then(r => r.json())
+            .then(data => data.results.find(song => song.collectionName === album) || data.results[0]);
 
-        const albumArtwork = songData?.songs?.data[0]?.attributes.artwork.url.replace("{w}", "512").replace("{h}", "512");
-        const artistArtwork = artistData?.artists?.data[0]?.attributes.artwork.url.replace("{w}", "512").replace("{h}", "512");
+        const artistArtworkURL = await fetch(songData.artistViewUrl)
+            .then(r => r.text())
+            .then(data => {
+                const match = data.match(/<meta property="og:image" content="(.+?)">/);
+                return match ? match[1].replace(/[0-9]+x.+/, "220x220bb-60.png") : undefined;
+            })
+            .catch(() => void 0);
 
         cachedRemoteData = {
             id,
-            data: { appleMusicLink, songLink, albumArtwork, artistArtwork }
+            data: {
+                appleMusicLink: songData.trackViewUrl,
+                songLink: `https://song.link/i/${new URL(songData.trackViewUrl).searchParams.get("i")}`,
+                albumArtwork: (songData.artworkUrl100).replace("100x100", "512x512"),
+                artistArtwork: artistArtworkURL
+            }
         };
+
         return cachedRemoteData.data;
     } catch (e) {
         console.error("[AppleMusicRichPresence] Failed to fetch remote data:", e);
