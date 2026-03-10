@@ -70,7 +70,7 @@ export default definePlugin({
     commands: [
         {
             name: "refresh",
-            description: "Refreshes Discord application commands locally",
+            description: "Refreshes the specified applications commands locally",
             options: [
                 {
                     name: "user",
