@@ -17,7 +17,7 @@ import { Paragraph } from "@components/Paragraph";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { TextArea, TextInput, useState } from "@webpack/common";
 
-import { parseTagArguments, registerTagCommand } from ".";
+import { parseTagArguments } from ".";
 import { addTag, getTag, Tag } from "./settings";
 
 export function openCreateTagModal(initialValue: Tag = { name: "", message: "" }) {
@@ -120,7 +120,6 @@ function Modal({ initialValue, modalProps }: { initialValue: Tag; modalProps: Mo
                         onClick={() => {
                             const tag = { name, message };
                             addTag(tag);
-                            registerTagCommand(tag);
                             modalProps.onClose();
                         }}
                         disabled={!name || !message || hasReservedEphemeral}
