@@ -18,7 +18,8 @@
 
 import "./styles.css";
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage } from "@api/Commands";
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -26,7 +27,7 @@ import definePlugin from "@utils/types";
 import { openCreateTagModal } from "./CreateTagModal";
 import { getTag, getTags, removeTag, settings, Tag } from "./settings";
 
-const MessageTagsMarker = Symbol("MessageTags");
+const CustomCommandsMarker = Symbol("CustomCommands");
 const ArgumentRegex = /{{(.+?)}}/g;
 
 export function parseTagArguments(message: string) {
@@ -79,16 +80,17 @@ export function registerTagCommand(tag: Tag) {
             const doSend = ephemeral ? sendBotMessage : sendMessage;
             doSend(ctx.channel.id, { content: response });
         },
-        [MessageTagsMarker]: true,
-    }, "CustomTags");
+        [CustomCommandsMarker]: true,
+    }, "CustomCommands");
 }
 
 
-
+migratePluginSettings("CustomCommands", "MessageTags");
 export default definePlugin({
-    name: "MessageTags",
-    description: "Allows you to create custom slash commands",
-    authors: [Devs.Luna, Devs.Ven],
+    name: "CustomCommands",
+    description: "Allows you to create custom slash commands / tags",
+    tags: ["MessageTags"],
+    authors: [Devs.Ven, Devs.Luna,],
     settings,
 
     async start() {
@@ -101,7 +103,7 @@ export default definePlugin({
     commands: [
         {
             name: "tags",
-            description: "Manage all the tags for yourself",
+            description: "Manage all custom commands",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
                 {
@@ -145,7 +147,6 @@ export default definePlugin({
                                 content: `A Tag with the name **${name}** does not exist!`
                             });
 
-                        unregisterCommand(name);
                         removeTag(name);
 
                         sendBotMessage(ctx.channel.id, {

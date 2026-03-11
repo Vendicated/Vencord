@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { unregisterCommand } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
+import { registerTagCommand } from ".";
 import { SettingsTagList } from "./SettingsTagList";
 
 export const settings = definePluginSettings({
@@ -34,9 +36,13 @@ export function getTag(name: string) {
 }
 
 export function addTag(tag: Tag) {
+    unregisterCommand(tag.name);
+
     settings.store.tagsList[tag.name] = tag;
+    registerTagCommand(tag);
 }
 
 export function removeTag(name: string) {
     delete settings.store.tagsList[name];
+    unregisterCommand(name);
 }
