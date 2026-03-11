@@ -32,9 +32,10 @@ let LayoutTypes = {
     SECTION: 1,
     SIDEBAR_ITEM: 2,
     PANEL: 3,
-    PANE: 4
+    CATEGORY: 5,
+    CUSTOM: 19,
 };
-waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL"], v => LayoutTypes = v);
+waitFor(["SECTION", "SIDEBAR_ITEM", "PANEL", "CUSTOM"], v => LayoutTypes = v);
 
 const FallbackSectionTypes = {
     HEADER: "HEADER",
@@ -135,14 +136,6 @@ export default definePlugin({
             ]
         },
         {
-            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
-            replacement: {
-                // Skip the check Discord performs to make sure the section being selected in the user settings context menu is valid
-                match: /null!=\(\i=Object.values\(\i\.\i\).{0,50}?&&(?=\(0,\i\.openUserSettings\)\(\i,\{section:\i)/,
-                replace: ""
-            }
-        },
-        {
             find: ".buildLayout().map",
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,
@@ -165,36 +158,21 @@ export default definePlugin({
             key: key + "_panel",
             type: LayoutTypes.PANEL,
             useTitle: () => panelTitle,
+            buildLayout: () => [{
+                type: LayoutTypes.CATEGORY,
+                key: key + "_category",
+                buildLayout: () => [{
+                    type: LayoutTypes.CUSTOM,
+                    key: key + "_custom",
+                    Component: Component,
+                    useSearchTerms: () => [title]
+                }]
+            }]
         };
-
-        const render = {
-            // FIXME
-            StronglyDiscouragedCustomComponent: () => <Component />,
-            render: () => <Component />,
-        };
-
-        // FIXME
-        if (LayoutTypes.PANE) {
-            panel.buildLayout = () => [
-                {
-                    key: key + "_pane",
-                    type: LayoutTypes.PANE,
-                    useTitle: () => panelTitle,
-                    buildLayout: () => [],
-                    ...render
-                }
-            ];
-        } else {
-            Object.assign(panel, render);
-            panel.buildLayout = () => [];
-        }
 
         return ({
             key,
             type: LayoutTypes.SIDEBAR_ITEM,
-            // FIXME
-            legacySearchKey: title.toUpperCase(),
-            getLegacySearchKey: () => title.toUpperCase(),
             useTitle: () => title,
             icon: () => <Icon width={20} height={20} />,
             buildLayout: () => [panel]
