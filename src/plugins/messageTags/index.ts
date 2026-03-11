@@ -16,81 +16,85 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
-import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import { sendMessage } from "@utils/discord";
+import definePlugin from "@utils/types";
 
-const EMOTE = "<:luna:1035316192220553236>";
-const DATA_KEY = "MessageTags_TAGS";
+import { openCreateTagModal } from "./CreateTagModal";
+import { getTag, getTags, removeTag, settings, Tag } from "./settings";
+
 const MessageTagsMarker = Symbol("MessageTags");
+const ArgumentRegex = /{{(.+?)}}/g;
 
-interface Tag {
-    name: string;
-    message: string;
+export function parseTagArguments(message: string) {
+    const args = [] as { name: string, defaultValue: string | null; }[];
+
+    for (const [, value] of message.matchAll(ArgumentRegex)) {
+        const [name, defaultValue] = value.split("=").map(s => s.trim());
+
+        if (!name) continue;
+        if (args.some(arg => arg.name === name)) continue;
+
+        args.push({ name: name.toLowerCase(), defaultValue: defaultValue ?? null });
+    }
+
+    return args;
 }
 
-function getTags() {
-    return settings.store.tagsList;
-}
+export function registerTagCommand(tag: Tag) {
+    const tagArguments = parseTagArguments(tag.message);
 
-function getTag(name: string) {
-    return settings.store.tagsList[name] ?? null;
-}
-
-function addTag(tag: Tag) {
-    settings.store.tagsList[tag.name] = tag;
-}
-
-function removeTag(name: string) {
-    delete settings.store.tagsList[name];
-}
-
-function createTagCommand(tag: Tag) {
     registerCommand({
         name: tag.name,
         description: tag.name,
-        inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-        execute: async (_, ctx) => {
-            if (!getTag(tag.name)) {
-                sendBotMessage(ctx.channel.id, {
-                    content: `${EMOTE} The tag **${tag.name}** does not exist anymore! Please reload ur Discord to fix :)`
-                });
-                return { content: `/${tag.name}` };
+        inputType: ApplicationCommandInputType.BUILT_IN,
+        options: [
+            ...tagArguments.map(arg => ({
+                name: arg.name,
+                description: arg.name,
+                type: ApplicationCommandOptionType.STRING,
+                required: arg.defaultValue === null
+            })),
+            {
+                name: "ephemeral",
+                description: "Whether the response should only be visible to you",
+                type: ApplicationCommandOptionType.BOOLEAN,
+                required: false
             }
+        ],
 
-            if (settings.store.clyde) sendBotMessage(ctx.channel.id, {
-                content: `${EMOTE} The tag **${tag.name}** has been sent!`
-            });
-            return { content: tag.message.replaceAll("\\n", "\n") };
+        execute: async (args, ctx) => {
+            const ephemeral = findOption(args, "ephemeral", false);
+
+            const response = tag.message
+                .replace(ArgumentRegex, (fullMatch, value: string) => {
+                    const [argName, defaultValue] = value.split("=").map(s => s.trim());
+                    return findOption(args, argName, null) ?? defaultValue ?? fullMatch;
+                })
+                .replaceAll("\\n", "\n");
+
+            const doSend = ephemeral ? sendBotMessage : sendMessage;
+            doSend(ctx.channel.id, { content: response });
         },
         [MessageTagsMarker]: true,
     }, "CustomTags");
 }
 
-const settings = definePluginSettings({
-    clyde: {
-        name: "Clyde message on send",
-        description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
-        type: OptionType.BOOLEAN,
-        default: true
-    },
-    tagsList: {
-        type: OptionType.CUSTOM,
-        default: {} as Record<string, Tag>,
-    }
-});
+
 
 export default definePlugin({
     name: "MessageTags",
-    description: "Allows you to save messages and to use them with a simple command.",
-    authors: [Devs.Luna],
+    description: "Allows you to create custom slash commands",
+    authors: [Devs.Luna, Devs.Ven],
     settings,
 
     async start() {
         const tags = getTags();
         for (const tagName in tags) {
-            createTagCommand(tags[tagName]);
+            registerTagCommand(tags[tagName]);
         }
     },
 
@@ -104,131 +108,62 @@ export default definePlugin({
                     name: "create",
                     description: "Create a new tag",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
-                    options: [
-                        {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
-                            type: ApplicationCommandOptionType.STRING,
-                            required: true
-                        },
-                        {
-                            name: "message",
-                            description: "The message that you will send when using this tag",
-                            type: ApplicationCommandOptionType.STRING,
-                            required: true
-                        }
-                    ]
                 },
                 {
                     name: "list",
-                    description: "List all tags from yourself",
+                    description: "List all your tags",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: []
                 },
                 {
                     name: "delete",
-                    description: "Remove a tag from your yourself",
+                    description: "Remove a tag by name",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
                             name: "tag-name",
-                            description: "The name of the tag to trigger the response",
+                            description: "The name of the tag",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
                     ]
                 },
-                {
-                    name: "preview",
-                    description: "Preview a tag without sending it publicly",
-                    type: ApplicationCommandOptionType.SUB_COMMAND,
-                    options: [
-                        {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
-                            type: ApplicationCommandOptionType.STRING,
-                            required: true
-                        }
-                    ]
-                }
             ],
 
             async execute(args, ctx) {
-
                 switch (args[0].name) {
                     case "create": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
-                        const message: string = findOption(args[0].options, "message", "");
-
-                        if (getTag(name))
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} A Tag with the name **${name}** already exists!`
-                            });
-
-                        const tag = {
-                            name: name,
-                            message: message
-                        };
-
-                        createTagCommand(tag);
-                        addTag(tag);
-
-                        sendBotMessage(ctx.channel.id, {
-                            content: `${EMOTE} Successfully created the tag **${name}**!`
-                        });
-                        break; // end 'create'
+                        openCreateTagModal();
+                        break;
                     }
+
                     case "delete": {
                         const name: string = findOption(args[0].options, "tag-name", "");
 
                         if (!getTag(name))
                             return sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} A Tag with the name **${name}** does not exist!`
+                                content: `A Tag with the name **${name}** does not exist!`
                             });
 
                         unregisterCommand(name);
                         removeTag(name);
 
                         sendBotMessage(ctx.channel.id, {
-                            content: `${EMOTE} Successfully deleted the tag **${name}**!`
+                            content: `Successfully deleted the tag **${name}**!`
                         });
-                        break; // end 'delete'
+
+                        break;
                     }
+
                     case "list": {
-                        sendBotMessage(ctx.channel.id, {
-                            embeds: [
-                                {
-                                    title: "All Tags:",
-                                    description: Object.values(getTags())
-                                        .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
-                                        .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
-                                    // @ts-expect-error
-                                    color: 0xd77f7f,
-                                    type: "rich",
-                                }
-                            ]
-                        });
-                        break; // end 'list'
-                    }
-                    case "preview": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
-                        const tag = getTag(name);
-
-                        if (!tag)
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} A Tag with the name **${name}** does not exist!`
-                            });
+                        const content = Object.values(getTags())
+                            .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
+                            .join("\n");
 
                         sendBotMessage(ctx.channel.id, {
-                            content: tag.message.replaceAll("\\n", "\n")
+                            content: content || "Woops! There are no tags yet, use `/tags create` to create one!",
                         });
-                        break; // end 'preview'
-                    }
 
-                    default: {
-                        sendBotMessage(ctx.channel.id, {
-                            content: "Invalid sub-command"
-                        });
                         break;
                     }
                 }
