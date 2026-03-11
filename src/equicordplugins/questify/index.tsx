@@ -1388,8 +1388,8 @@ export default definePlugin({
                 },
                 {
                     // Prevent SearchableSelect from force-scrolling into view, causing the dropdown to close.
-                    match: /(?<=\.scrollIntoView\()/,
-                    replace: "{block:\"nearest\",inline:\"nearest\"}"
+                    match: /(&&\i.current\?\.scrollIntoView\(\))/,
+                    replace: ""
                 },
                 {
                     // Passes a popoutClassName and optionClassName to the popout handler.
@@ -1418,6 +1418,14 @@ export default definePlugin({
                     replace: ",...arguments[0]"
                 }
             ]
+        },
+        {
+            // Prevent the new version of SearchableSelect from force-scrolling into view.
+            find: '"data-mana-component":"combobox",',
+            replacement: {
+                match: /\i.current\?\.scrollIntoView\({.{0,50}?}\)/,
+                replace: ""
+            }
         },
         {
             // Formats the Orbs balance on the Quests page with locale string formatting.
