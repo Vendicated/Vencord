@@ -34,7 +34,7 @@ import { React, TextInput, useState } from "@webpack/common";
 
 const cl = classNameFactory("vc-textReplace-");
 
-type Rule = Record<"find" | "replace" | "onlyIfIncludes", string>;
+type Rule = Record<"find" | "replace" | "onlyIfIncludes" | "id", string>;
 
 interface TextReplaceProps {
     title: string;
@@ -46,7 +46,8 @@ interface TextReplaceProps {
 const makeEmptyRule: () => Rule = () => ({
     find: "",
     replace: "",
-    onlyIfIncludes: ""
+    onlyIfIncludes: "",
+    id: crypto.randomUUID()
 });
 const makeEmptyRuleArray = () => [makeEmptyRule()];
 
@@ -123,7 +124,7 @@ function Input({ initialValue, onChange, placeholder }: {
             value={value}
             onChange={setValue}
             spellCheck={false}
-            onBlur={() => value !== initialValue && onChange(value)}
+            onBlur={() => value !== initialValue && setTimeout(() => onChange(value), 0)}
         />
     );
 }
@@ -168,7 +169,7 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
                 {rulesArray.map((rule, index) =>
                     <ExpandableSection
-                        key={`${rule.find}-${index}`}
+                        key={rule.id}
                         renderContent={() => (
                             <>
                                 <div className={cl("input-grid")}>
@@ -271,6 +272,11 @@ export default definePlugin({
     authors: [Devs.AutumnVN, Devs.TheKodeToad],
 
     settings,
+
+    start() {
+        settings.store.regexRules.forEach(rule => rule.id ??= crypto.randomUUID());
+        settings.store.stringRules.forEach(rule => rule.id ??= crypto.randomUUID());
+    },
 
     onBeforeMessageSend(channelId, msg) {
         // Channel used for sharing rules, applying rules here would be messy
