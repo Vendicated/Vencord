@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Heading, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
-import { EquicordDevs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getIntlMessage, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
@@ -25,10 +27,47 @@ interface WatchingProps {
     guildId?: string;
 }
 
-const cl = classNameFactory("whosWatching-");
+const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
+const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+const AvatarStyles = findCssClassesLazy("moreUsers", "clickableAvatar", "avatar");
+const cl = classNameFactory("vc-whos-watching-");
 
-function getUsername(user: any): string {
+function getUsername(user: User): string {
     return RelationshipStore.getNickname(user.id) || user.globalName || user.username;
+}
+
+function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
+    let missingUsers = 0;
+    const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
+    return (
+        <div className={cl("content")}>
+            {userIds.length ?
+                (
+                    <div className={cl("spectating")}>
+                        <Heading>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Heading>
+                        <Flex flexDirection="column" gap="6" >
+                            {users.map(user => (
+                                <Flex key={user.id} flexDirection="row" gap="6" alignContent="center">
+                                    <img className={cl("user-avatar")} src={user.getAvatarURL(guildId)} alt="" />
+                                    {getUsername(user)}
+                                </Flex>
+                            ))}
+                            {missingUsers > 0 &&
+                                <span className={cl("more-users")}>
+                                    {`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}
+                                </span>
+                            }
+                        </Flex>
+                    </div>
+                )
+                : (
+                    <span className={cl("no-viewers")}>
+                        No spectators
+                    </span>
+                )
+            }
+        </div>
+    );
 }
 
 const settings = definePluginSettings({
@@ -40,53 +79,23 @@ const settings = definePluginSettings({
     },
 });
 
-function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
-    // Missing Users happen when UserStore.getUser(id) returns null
-    // The client should automatically cache spectators, so this might not be possible but it's better to be sure just in case
-    let missingUsers = 0;
-    const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
-    return (
-        <div className={cl("content")}>
-            {userIds.length ?
-                (<>
-                    <Heading>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Heading>
-                    <Flex flexDirection="column" style={{ gap: 6 }} >
-                        {users.map(user => (
-                            <Flex key={user.id} flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
-                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} alt="" />
-                                {getUsername(user)}
-                            </Flex>
-                        ))}
-                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}</span>}
-                    </Flex>
-                </>)
-                : (<span className={cl("no_viewers")}>No spectators</span>)}
-        </div>
-    );
-}
-
-const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
-
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findCssClassesLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar", "avatar");
-
 export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
-    authors: [EquicordDevs.Fres],
+    authors: [EquicordDevs.Fres, Devs.thororen],
     settings,
     patches: [
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /jsx\)\((\i\.\i),{mask:/,
-                replace: "jsx)($self.component({OriginalComponent:$1}),{mask:"
+                match: /\((\i\.\i)(?=,{mask:\i\.\i\.Masks\.STATUS_SCREENSHARE)/,
+                replace: "($self.component({OriginalComponent:$1})"
             }
         },
         {
             find: "this.renderEmbeddedActivity()",
             replacement: {
-                match: /"div"(?=.{0,50}this.renderActions)/,
+                match: /"div"(?=.{0,40}?,this.renderActions\(\))/,
                 replace: "$self.WrapperComponent"
             }
         }
@@ -95,8 +104,8 @@ export default definePlugin({
         const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
         if (!stream) return <div {...props}>{props.children}</div>;
 
-        const userIds: string[] = ApplicationStreamingStore.getViewerIds(stream);
         let missingUsers = 0;
+        const userIds: string[] = ApplicationStreamingStore.getViewerIds(stream);
         const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
 
         function renderMoreUsers(_label: string, count: number) {
@@ -117,14 +126,14 @@ export default definePlugin({
         }
 
         return (
-            <>
+            <div className={cl("screenshare-panel")}>
                 <div {...props}>{props.children}</div>
-                <div className={classes(cl("spectators_panel"), Margins.top8)}>
-                    <HeadingSecondary style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
+                <div className={classes(cl("spectating-panel"), Margins.top8)}>
+                    <HeadingSecondary className={cl("spectating-header")}>
                         {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                     </HeadingSecondary>
                     {users.length ?
-                        <>
+                        <div className={cl("spectating-users")}>
                             <UserSummaryItem
                                 users={users}
                                 count={userIds.length}
@@ -147,20 +156,20 @@ export default definePlugin({
                                     </Clickable>
                                 )}
                             />
-                        </>
-                        : <Paragraph>No spectators</Paragraph>
+                        </div>
+                        : <Paragraph>
+                            No spectators
+                        </Paragraph>
                     }
                 </div>
-            </>
+            </div>
         );
     }),
     component: function ({ OriginalComponent }) {
-        return ErrorBoundary.wrap((props: any) => {
-            const stream = useStateFromStores(
-                [ApplicationStreamingStore],
-                () => ApplicationStreamingStore.getCurrentUserActiveStream()
-            );
+        return ErrorBoundary.wrap(props => {
+            const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
             if (!stream) return null;
+
             const viewers = ApplicationStreamingStore.getViewerIds(stream);
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
                 {({ onMouseEnter, onMouseLeave }) => (

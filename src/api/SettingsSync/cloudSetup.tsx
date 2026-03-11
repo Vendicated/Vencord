@@ -96,19 +96,22 @@ export async function authorizeCloud() {
                 const res = await fetch(location, {
                     headers: { Accept: "application/json" }
                 });
-                const { secret } = await res.json();
-                if (secret) {
-                    logger.info("Authorized with secret");
-                    await setAuthorization(secret);
+                const data = await res.json();
+                if (data.secret) {
+                    logger.info("Authorized with cloud");
+                    await setAuthorization(data.secret);
                     showNotification({
                         title: "Cloud Integration",
                         body: "Cloud integrations enabled!"
                     });
                     Settings.cloud.authenticated = true;
                 } else {
+                    logger.error("OAuth callback returned no secret", data);
                     showNotification({
                         title: "Cloud Integration",
-                        body: "Setup failed (no secret returned?)."
+                        body: data.error
+                            ? `Setup failed: ${data.error}`
+                            : "Setup failed (no secret returned)."
                     });
                     Settings.cloud.authenticated = false;
                 }
