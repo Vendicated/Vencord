@@ -138,7 +138,7 @@ export default definePlugin({
                     replace: "...$1.props,$&"
                 },
                 {
-                    match: /(?<=__unsupportedReactNodeAsText:\i,forceOpen:.{0,40}?)children:(?=.{0,5}\$\{(\i)\.id\})/,
+                    match: /(?<=__unsupportedReactNodeAsText:\i,forceOpen:.{0,70}?)children:(?=.{0,5}\$\{(\i)\.id\})/,
                     replace: "children:$1.component?$self.renderBadgeComponent({...$1}) :"
                 },
                 // handle onClick and onContextMenu
