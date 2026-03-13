@@ -97,7 +97,7 @@ export default definePlugin({
             ]
         },
         ...[
-            '"Message Username"', // Messages
+            '"role-icon-children"', // Messages
             "#{intl::COLLECTIBLES_NAMEPLATE_PREVIEW_A11Y}", // Nameplate preview
             "#{intl::COLLECTIBLES_PROFILE_PREVIEW_A11Y}", // Avatar preview
         ].map(find => ({

@@ -206,7 +206,7 @@ export default definePlugin({
         },
         // Force Role Icon
         {
-            find: "Message Username",
+            find: '"role-icon-children"',
             predicate: () => settings.store.forceRoleIcon,
             replacement: {
                 match: /(?<=\}\):null\].{0,150}\?2:)0(?=\})/,

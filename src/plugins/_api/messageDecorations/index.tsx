@@ -30,7 +30,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"Message Username"',
+            find: '"role-icon-children"',
             replacement: {
                 match: /#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,
                 replace: "$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"
