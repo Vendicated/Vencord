@@ -18,11 +18,12 @@
 
 import "./styles.css";
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
+import { ChoicesOption, CommandArgument, CommandContext, Message } from "@vencord/discord-types";
 
 import { openCreateTagModal } from "./CreateTagModal";
 import { getTag, getTags, removeTag, settings, Tag } from "./settings";
@@ -84,6 +85,77 @@ export function registerTagCommand(tag: Tag) {
     }, "CustomCommands");
 }
 
+async function execute(args: CommandArgument[], ctx: CommandContext): Promise<Message | undefined> {
+    switch (args[0].name) {
+        case "create": {
+            openCreateTagModal();
+            break;
+        }
+
+        case "delete": {
+            const name: string = findOption(args[0].options, "tag-name", "");
+
+            if (!getTag(name))
+                return sendBotMessage(ctx.channel.id, {
+                    content: `A Tag with the name **${name}** does not exist!`
+                });
+
+            removeTag(name);
+
+            sendBotMessage(ctx.channel.id, {
+                content: `Successfully deleted the tag **${name}**!`
+            });
+
+            break;
+        }
+
+        case "list": {
+            const content = Object.values(getTags())
+                .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
+                .join("\n");
+
+            sendBotMessage(ctx.channel.id, {
+                content: content || "Woops! There are no tags yet, use `/tags create` to create one!",
+            });
+
+            break;
+        }
+    }
+}
+
+export function updateCommandChoices() {
+    unregisterCommand("tags delete");
+
+    const choices: Array<ChoicesOption> = Object.keys(getTags()).map(name => ({
+        name,
+        label: name,
+        value: name,
+    }));
+
+    registerCommand({
+        name: "tags",
+        description: "Manage all custom commands",
+        inputType: ApplicationCommandInputType.BUILT_IN,
+        options: [
+            {
+                name: "delete",
+                description: "Remove a tag by name",
+                type: ApplicationCommandOptionType.SUB_COMMAND,
+                options: [
+                    {
+                        name: "tag-name",
+                        description: "The name of the tag",
+                        type: ApplicationCommandOptionType.STRING,
+                        required: true,
+                        choices,
+                    }
+                ]
+            },
+        ],
+        execute,
+    }, "CustomCommands");
+}
+
 
 migratePluginSettings("CustomCommands", "MessageTags");
 export default definePlugin({
@@ -98,6 +170,7 @@ export default definePlugin({
         for (const tagName in tags) {
             registerTagCommand(tags[tagName]);
         }
+        updateCommandChoices();
     },
 
     commands: [
@@ -131,44 +204,7 @@ export default definePlugin({
                     ]
                 },
             ],
-
-            async execute(args, ctx) {
-                switch (args[0].name) {
-                    case "create": {
-                        openCreateTagModal();
-                        break;
-                    }
-
-                    case "delete": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
-
-                        if (!getTag(name))
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `A Tag with the name **${name}** does not exist!`
-                            });
-
-                        removeTag(name);
-
-                        sendBotMessage(ctx.channel.id, {
-                            content: `Successfully deleted the tag **${name}**!`
-                        });
-
-                        break;
-                    }
-
-                    case "list": {
-                        const content = Object.values(getTags())
-                            .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
-                            .join("\n");
-
-                        sendBotMessage(ctx.channel.id, {
-                            content: content || "Woops! There are no tags yet, use `/tags create` to create one!",
-                        });
-
-                        break;
-                    }
-                }
-            }
+            execute,
         }
     ]
 });
