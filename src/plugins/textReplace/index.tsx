@@ -205,16 +205,14 @@ function TextReplace({ title, description, rulesArray, isRegex = false }: TextRe
                                         onChange={e => onChange(e, index, "onlyIfIncludes")}
                                     />
                                 </div>
-                                <Flex flexDirection="row" style={{ gap: "0.5em" }}>
-                                    <div style={{ flex: 0.9 }}>
-                                        <Select
-                                            options={scopeOptions}
-                                            isSelected={e => e === rule.scope}
-                                            select={e => onChange(e, index, "scope")}
-                                            serialize={e => e}
-                                        />
-                                    </div>
-                                </Flex>
+                                <div style={{ marginTop: "0.25em" }}>
+                                    <Select
+                                        options={scopeOptions}
+                                        isSelected={e => e === rule.scope}
+                                        select={e => onChange(e, index, "scope")}
+                                        serialize={e => e}
+                                    />
+                                </div>
                                 {isRegex && renderFindError(rule.find)}
                                 <Button
                                     className={cl("delete-button")}
