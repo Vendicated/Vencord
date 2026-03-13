@@ -206,7 +206,7 @@ export default definePlugin({
         },
         // Force Role Icon
         {
-            find: "Message Username",
+            find: "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",
             predicate: () => settings.store.forceRoleIcon,
             replacement: {
                 match: /(?<=\}\):null\].{0,150}\?2:)0(?=\})/,

@@ -170,7 +170,9 @@ export const settings = definePluginSettings({
         component: () => (
             <section>
                 <HeadingSecondary>Youtube Music</HeadingSecondary>
-                <MaskedLink href="https://github.com/pear-devs/pear-desktop">Pear Desktop</MaskedLink> is required for these settings
+                <Paragraph>
+                    Install <MaskedLink href="https://github.com/pear-devs/pear-desktop">Pear Desktop</MaskedLink> from here, then go to Plugins &rarr; API Server &rarr; Enabled
+                </Paragraph>
             </section>
         )
     },
