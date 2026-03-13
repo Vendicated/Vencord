@@ -84,7 +84,6 @@ export function registerTagCommand(tag: Tag) {
     }, "CustomCommands");
 }
 
-
 migratePluginSettings("CustomCommands", "MessageTags");
 export default definePlugin({
     name: "CustomCommands",
