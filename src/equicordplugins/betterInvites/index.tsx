@@ -46,7 +46,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "onlineCount})})]",
+            find: ".onlineCount,memberCount:",
             replacement: [
                 {
                     // make the button clickable
