@@ -42,6 +42,12 @@ export function getScheduledMessages(): ScheduledMessage[] {
     return [...scheduledMessages];
 }
 
+export function getScheduledMessagesForChannel(channelId?: string): ScheduledMessage[] {
+    const messages = getScheduledMessages();
+    if (!channelId) return messages;
+    return messages.filter(message => message.channelId === channelId);
+}
+
 export function getChannelDisplayInfo(channelId: string): { name: string; avatar: string; } {
     const channel = ChannelStore.getChannel(channelId);
     if (!channel) return { name: "Unknown", avatar: "" };
@@ -405,6 +411,51 @@ export async function addScheduledMessage(
     scheduledMessages.sort((a, b) => a.scheduledTime - b.scheduledTime);
     await saveScheduledMessages();
     createPhantomMessage(newMessage);
+
+    return { success: true };
+}
+
+export async function updateScheduledMessageTime(id: string, scheduledTime: number): Promise<{ success: boolean; error?: string; }> {
+    const message = scheduledMessages.find(entry => entry.id === id);
+    if (!message) {
+        return { success: false, error: "Scheduled message not found" };
+    }
+
+    if (scheduledTime <= Date.now()) {
+        return { success: false, error: "Please select a future date and time" };
+    }
+
+    const minuteStart = Math.floor(scheduledTime / 60000) * 60000;
+    const count = scheduledMessages.filter(entry =>
+        entry.id !== id
+        && entry.channelId === message.channelId
+        && entry.scheduledTime >= minuteStart
+        && entry.scheduledTime < minuteStart + 60000
+    ).length;
+
+    if (count >= settings.store.maxMessagesPerMinute) {
+        return { success: false, error: `Maximum of ${settings.store.maxMessagesPerMinute} messages per channel per minute reached` };
+    }
+
+    removePhantomMessage(message);
+    message.scheduledTime = scheduledTime;
+    scheduledMessages.sort((left, right) => left.scheduledTime - right.scheduledTime);
+    await saveScheduledMessages();
+    await createPhantomMessage(message);
+    return { success: true };
+}
+
+export async function sendScheduledMessageNow(id: string): Promise<{ success: boolean; error?: string; }> {
+    const message = scheduledMessages.find(entry => entry.id === id);
+    if (!message) {
+        return { success: false, error: "Scheduled message not found" };
+    }
+
+    await removeScheduledMessage(id);
+    const sent = await sendScheduledMessage(message);
+    if (!sent) {
+        return { success: false, error: "Failed to send scheduled message" };
+    }
 
     return { success: true };
 }
