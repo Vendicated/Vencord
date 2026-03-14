@@ -5,14 +5,14 @@
  */
 
 import { BaseText } from "@components/BaseText";
-import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, isBookmarkFolder, isTabSelected, navigateToBookmark, openedTabs, settings, switchChannel, useBookmarks } from "@equicordplugins/channelTabs/util";
+import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, getDiscordFolderIcon, isBookmarkFolder, isTabSelected, navigateToBookmark, openedTabs, settings, switchChannel, UseBookmarkMethods, useBookmarks } from "@equicordplugins/channelTabs/util";
 import { CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, NitroIcon, QuestIcon, ShopIcon } from "@equicordplugins/channelTabs/util/icons";
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
 import { findComponentByCodeLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Menu, React, ReadStateStore, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Menu, React, ReadStateStore, ReadStateUtils, SelectedChannelStore, SelectedGuildStore, TextInput, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 import { NotificationDot } from "./ChannelTab";
 import { BookmarkContextMenu, EditModal } from "./ContextMenus";
@@ -44,15 +44,28 @@ function FolderIcon({ fill }: { fill: string; }) {
 }
 
 function BookmarkIcon({ bookmark }: { bookmark: Bookmark | BookmarkFolder; }) {
-    if (isBookmarkFolder(bookmark)) return (
-        <svg
-            height={16}
-            width={16}
-            viewBox="0 0 24 24"
-        >
-            <FolderIcon fill={bookmark.iconColor} />
-        </svg>
-    );
+    if (isBookmarkFolder(bookmark)) {
+        const IconComponent = getDiscordFolderIcon(bookmark.iconName);
+
+        const fill = bookmark.iconName === "CircleShieldIcon" ? "var(--background-base-low)" : bookmark.iconColor;
+        const customIconSize = 16;
+
+        return IconComponent
+            ? <IconComponent
+                height={customIconSize}
+                width={customIconSize}
+                color={bookmark.iconColor}
+                fill={fill}
+                style={{ transform: "scale(0.6666667)", transformOrigin: "center" }}
+            />
+            : <svg
+                height={16}
+                width={16}
+                viewBox="0 0 24 24"
+            >
+                <FolderIcon fill={bookmark.iconColor} />
+            </svg>;
+    }
 
     // Handle special synthetic pages
     const { channelId } = bookmark;
@@ -205,19 +218,22 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
     );
 }
 
-function FolderBookmarkItem({ bookmark, folderIndex, bookmarkIndex, methods, isCurrentChannel }: {
+function FolderBookmarkItem({ bookmark, bookmarks, folderIndex, bookmarkIndex, methods, isCurrentChannel, searchActive }: {
     bookmark: Bookmark;
+    bookmarks: (Bookmark | BookmarkFolder)[];
     folderIndex: number;
     bookmarkIndex: number;
-    methods: any;
+    methods: UseBookmarkMethods;
     isCurrentChannel?: boolean;
+    searchActive?: boolean;
 }) {
     const { bookmarkNotificationDot } = settings.use(["bookmarkNotificationDot"]);
     const ref = useRef<HTMLDivElement>(null);
 
     // drag implementation for folder items
-    const [, drag] = useDrag(() => ({
+    const [{ isDragging }, drag] = useDrag(() => ({
         type: "vc_Bookmark",
+        canDrag: () => !searchActive,
         item: () => ({
             index: bookmarkIndex, // index within folder
             folderIndex: folderIndex, // the folder its in
@@ -227,17 +243,68 @@ function FolderBookmarkItem({ bookmark, folderIndex, bookmarkIndex, methods, isC
         collect: monitor => ({
             isDragging: !!monitor.isDragging()
         }),
-    }), [bookmark, folderIndex, bookmarkIndex]);
+    }), [bookmark, folderIndex, bookmarkIndex, searchActive]);
 
-    // combine drag ref
-    drag(ref);
+    const [dropSide, setDropSide] = useState<"before" | "after" | null>(null);
+
+    const [{ isOver: isReorderOver, canDrop: canReorderDrop }, drop] = useDrop(() => ({
+        accept: "vc_Bookmark",
+        canDrop: item => !searchActive && item.isFromFolder && item.folderIndex === folderIndex,
+        hover: (item, monitor) => {
+            if (!ref.current || searchActive || !item.isFromFolder || item.folderIndex !== folderIndex) return;
+
+            const dragIndex = item.index;
+            const hoverIndex = bookmarkIndex;
+            if (dragIndex === hoverIndex) {
+                setDropSide(null);
+                return;
+            }
+
+            const hoverBoundingRect = ref.current.getBoundingClientRect();
+            const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+            const clientOffset = monitor.getClientOffset();
+            if (!clientOffset) return;
+
+            const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+            const nextDropSide = hoverClientX < hoverMiddleX ? "before" : "after";
+            setDropSide(nextDropSide);
+
+            if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX
+                || dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
+                return;
+            }
+
+            const folder = bookmarks[folderIndex];
+            if (!isBookmarkFolder(folder)) return;
+
+            const newBookmarks = [...folder.bookmarks];
+            const moved = newBookmarks.splice(dragIndex, 1)[0];
+            newBookmarks.splice(hoverIndex, 0, moved);
+            methods.editBookmark(folderIndex, { bookmarks: newBookmarks });
+            item.index = hoverIndex;
+        },
+        collect: monitor => ({
+            isOver: monitor.isOver({ shallow: true }),
+            canDrop: monitor.canDrop()
+        })
+    }), [bookmarkIndex, bookmarks, folderIndex, methods, searchActive]);
+
+    useEffect(() => {
+        if (!isReorderOver && dropSide) setDropSide(null);
+    }, [dropSide, isReorderOver]);
+
+    drag(drop(ref));
 
     return (
         <div
             ref={ref}
             className={classes(
                 cl("bookmark", "folder-item", "hoverable"),
-                isCurrentChannel && cl("bookmark-active")
+                isCurrentChannel && cl("bookmark-active"),
+                isDragging && cl("bookmark-dragging"),
+                isReorderOver && canReorderDrop && cl("bookmark-drop-target"),
+                isReorderOver && canReorderDrop && dropSide === "before" && cl("bookmark-drop-before"),
+                isReorderOver && canReorderDrop && dropSide === "after" && cl("bookmark-drop-after")
             )}
             onClick={() => navigateToBookmark(bookmark)}
             onContextMenu={e => {
@@ -258,7 +325,9 @@ function FolderBookmarkItem({ bookmark, folderIndex, bookmarkIndex, methods, isC
                                         modalKey={key}
                                         bookmark={bookmark}
                                         onSave={name => {
-                                            const folder = methods.bookmarks[folderIndex] as BookmarkFolder;
+                                            const folder = bookmarks[folderIndex];
+                                            if (!isBookmarkFolder(folder)) return;
+
                                             const newBookmarks = [...folder.bookmarks];
                                             newBookmarks[bookmarkIndex].name = name;
                                             methods.editBookmark(folderIndex, { bookmarks: newBookmarks });
@@ -307,16 +376,17 @@ function FolderBookmarkItem({ bookmark, folderIndex, bookmarkIndex, methods, isC
     );
 }
 
-function Bookmark(props: BookmarkProps & { isExpanded?: boolean; onToggleFolder?: () => void; isCurrentChannel?: boolean; }) {
-    const { bookmarks, index, methods, isExpanded, onToggleFolder, isCurrentChannel } = props;
+function Bookmark(props: BookmarkProps & { isExpanded?: boolean; onToggleFolder?: () => void; isCurrentChannel?: boolean; searchActive?: boolean; }) {
+    const { bookmarks, index, methods, isExpanded, onToggleFolder, isCurrentChannel, searchActive } = props;
     const bookmark = bookmarks[index];
     const { bookmarkNotificationDot } = settings.use(["bookmarkNotificationDot"]);
 
     const ref = useRef<HTMLDivElement>(null);
+    const [dropSide, setDropSide] = useState<"before" | "after" | null>(null);
 
-    const [, drag] = useDrag(() => ({
+    const [{ isDragging }, drag] = useDrag(() => ({
         type: "vc_Bookmark",
-        canDrag: () => !isBookmarkFolder(bookmark), // Don't allow dragging folders
+        canDrag: () => !isBookmarkFolder(bookmark) && !searchActive,
         item: () => {
             // find current index dynamically instead of using stale closure
             const currentIndex = bookmarks.findIndex(b =>
@@ -334,22 +404,30 @@ function Bookmark(props: BookmarkProps & { isExpanded?: boolean; onToggleFolder?
         collect: monitor => ({
             isDragging: !!monitor.isDragging()
         }),
-    }), [bookmarks, bookmark, index]);
+    }), [bookmarks, bookmark, index, searchActive]);
 
-    const [, drop] = useDrop(() => ({
+    const [{ isOver: isReorderOver, canDrop: canReorderDrop }, drop] = useDrop(() => ({
         accept: "vc_Bookmark",
+        canDrop: item => !searchActive && !item.isFromFolder,
         hover: (item, monitor) => {
-            if (!ref.current) return;
+            if (!ref.current || searchActive || item.isFromFolder) return;
 
             const dragIndex = item.index;
             const hoverIndex = index;
-            if (dragIndex === hoverIndex) return;
+            if (dragIndex === hoverIndex) {
+                setDropSide(null);
+                return;
+            }
 
-            const hoverBoundingRect = ref.current?.getBoundingClientRect();
-            const hoverMiddleX =
-                (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+            const hoverBoundingRect = ref.current.getBoundingClientRect();
+            const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
             const clientOffset = monitor.getClientOffset();
+            if (!clientOffset) return;
+
             const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+            const nextDropSide = hoverClientX < hoverMiddleX ? "before" : "after";
+            setDropSide(nextDropSide);
+
             if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX
                 || dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
                 return;
@@ -358,7 +436,15 @@ function Bookmark(props: BookmarkProps & { isExpanded?: boolean; onToggleFolder?
             methods.moveDraggedBookmarks(dragIndex, hoverIndex);
             item.index = hoverIndex;
         },
-    }), []);
+        collect: monitor => ({
+            isOver: monitor.isOver({ shallow: true }),
+            canDrop: monitor.canDrop()
+        }),
+    }), [index, methods, searchActive]);
+
+    useEffect(() => {
+        if (!isReorderOver && dropSide) setDropSide(null);
+    }, [dropSide, isReorderOver]);
 
     // separate drop zone for folders to accept tabs and bookmarks (prevents duplicates)
     const [{ isOver: isFolderDropTarget }, folderDrop] = useDrop(() => ({
@@ -416,9 +502,14 @@ function Bookmark(props: BookmarkProps & { isExpanded?: boolean; onToggleFolder?
         <div
             className={classes(
                 cl("bookmark", "hoverable", { wider: settings.store.widerTabsAndBookmarks }),
+                isBookmarkFolder(bookmark) && cl("bookmark-folder"),
                 isFolderDropTarget && cl("folder-drop-target"),
                 isExpanded && cl("folder-expanded"),
-                isCurrentChannel && cl("bookmark-active")
+                isCurrentChannel && cl("bookmark-active"),
+                isDragging && cl("bookmark-dragging"),
+                isReorderOver && canReorderDrop && cl("bookmark-drop-target"),
+                isReorderOver && canReorderDrop && dropSide === "before" && cl("bookmark-drop-before"),
+                isReorderOver && canReorderDrop && dropSide === "after" && cl("bookmark-drop-after")
             )}
             ref={ref}
             onClick={e => {
@@ -485,6 +576,9 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
     const { guildId, channelId, userId } = props;
     const [bookmarks, methods] = useBookmarks(userId);
     const [expandedFolders, setExpandedFolders] = useState<Set<number>>(new Set());
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     // make setting reactive to changes
     const { bookmarksIndependentFromTabs } = settings.use(["bookmarksIndependentFromTabs"]);
@@ -497,6 +591,14 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
     const channelMatchesActiveTab = activeTab &&
         activeTab.channelId === currentChannelId &&
         (activeTab.guildId || "@me") === currentGuildId;
+
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const searchActive = normalizedSearchQuery.length > 0;
+
+    useEffect(() => {
+        if (!isSearchOpen) return;
+        searchInputRef.current?.focus();
+    }, [isSearchOpen]);
 
     const toggleFolder = (folderIndex: number) => {
         setExpandedFolders(prev => {
@@ -523,8 +625,9 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
 
     const [{ isOver }, dropRef] = useDrop(() => ({
         accept: ["vc_ChannelTab", "vc_Bookmark"],
+        canDrop: () => !searchActive,
         drop: (item: any, monitor) => {
-            if (!bookmarks) return;
+            if (!bookmarks || searchActive) return;
 
             // check if a nested drop zone (like a folder) already handled this
             if (monitor.didDrop()) {
@@ -557,7 +660,9 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
         collect: monitor => ({
             isOver: monitor.isOver({ shallow: true })
         })
-    }), [bookmarks, methods]);
+    }), [bookmarks, methods, searchActive]);
+
+    const matchesSearch = (value?: string) => value?.toLowerCase().includes(normalizedSearchQuery) ?? false;
 
     return (
         <div className={cl("bookmark-container")}>
@@ -570,51 +675,120 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
                 </BaseText>}
                 {Array.isArray(bookmarks) && bookmarks.length > 0 &&
                     bookmarks.flatMap((bookmark, i) => {
-                        const items = [
+                        if (!isBookmarkFolder(bookmark)) {
+                            if (searchActive && !matchesSearch(bookmark.name)) return [];
+
+                            return [
+                                <Bookmark
+                                    key={i}
+                                    index={i}
+                                    bookmarks={bookmarks}
+                                    methods={methods}
+                                    searchActive={searchActive}
+                                    isExpanded={false}
+                                    isCurrentChannel={
+                                        bookmarksIndependentFromTabs &&
+                                        !channelMatchesActiveTab &&
+                                        bookmark.channelId === currentChannelId &&
+                                        (bookmark.guildId || "@me") === currentGuildId
+                                    }
+                                />
+                            ];
+                        }
+
+                        const folderMatches = searchActive ? matchesSearch(bookmark.name) : false;
+                        const visibleFolderBookmarks = bookmark.bookmarks
+                            .map((childBookmark, childIndex) => ({ childBookmark, childIndex }))
+                            .filter(({ childBookmark }) => !searchActive || folderMatches || matchesSearch(childBookmark.name));
+
+                        if (searchActive && !folderMatches && !visibleFolderBookmarks.length) return [];
+
+                        const isExpanded = searchActive
+                            ? visibleFolderBookmarks.length > 0
+                            : expandedFolders.has(i);
+
+                        const folderItems = [
                             <Bookmark
                                 key={i}
                                 index={i}
                                 bookmarks={bookmarks}
                                 methods={methods}
-                                isExpanded={expandedFolders.has(i)}
-                                onToggleFolder={() => toggleFolder(i)}
-                                isCurrentChannel={
-                                    bookmarksIndependentFromTabs &&
-                                    !channelMatchesActiveTab && (
-                                        !isBookmarkFolder(bookmark) &&
-                                        bookmark.channelId === currentChannelId &&
-                                        (bookmark.guildId || "@me") === currentGuildId
-                                    )
-                                }
+                                searchActive={searchActive}
+                                isExpanded={isExpanded}
+                                onToggleFolder={searchActive ? undefined : () => toggleFolder(i)}
+                                isCurrentChannel={false}
                             />
                         ];
 
-                        // if folder is expanded, render its bookmarks
-                        if (isBookmarkFolder(bookmark) && expandedFolders.has(i)) {
-                            bookmark.bookmarks.forEach((childBookmark, childIndex) => {
-                                items.push(
+                        if (isExpanded) {
+                            visibleFolderBookmarks.forEach(({ childBookmark, childIndex }) => {
+                                folderItems.push(
                                     <FolderBookmarkItem
                                         key={`${i}-${childIndex}`}
                                         bookmark={childBookmark}
+                                        bookmarks={bookmarks}
                                         folderIndex={i}
                                         bookmarkIndex={childIndex}
                                         methods={methods}
+                                        searchActive={searchActive}
                                         isCurrentChannel={
                                             bookmarksIndependentFromTabs &&
-                                            !channelMatchesActiveTab && (
-                                                childBookmark.channelId === currentChannelId &&
-                                                (childBookmark.guildId || "@me") === currentGuildId
-                                            )
+                                            !channelMatchesActiveTab &&
+                                            childBookmark.channelId === currentChannelId &&
+                                            (childBookmark.guildId || "@me") === currentGuildId
                                         }
                                     />
                                 );
                             });
                         }
 
-                        return items;
+                        return folderItems;
                     })
                 }
             </HorizontalScroller>
+
+            <div className={classes(cl("bookmark-search-shell"), isSearchOpen && cl("bookmark-search-shell-open"))}>
+                <div className={cl("bookmark-search-field")}>
+                    <TextInput
+                        inputRef={searchInputRef}
+                        inputClassName={cl("bookmark-search-input")}
+                        style={{ width: "100%" }}
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                        placeholder="Search bookmarks"
+                        onBlur={() => {
+                            if (!searchQuery.trim()) setIsSearchOpen(false);
+                        }}
+                        onKeyDown={e => {
+                            if (e.key !== "Escape") return;
+                            if (searchQuery.trim()) {
+                                setSearchQuery("");
+                            } else {
+                                setIsSearchOpen(false);
+                            }
+                        }}
+                    />
+                </div>
+                <Tooltip text="Search bookmarks" position="left">
+                    {p => <button
+                        className={classes(cl("button"), cl("bookmark-search-button"))}
+                        {...p}
+                        onClick={() => {
+                            if (isSearchOpen && !searchQuery.trim()) {
+                                setIsSearchOpen(false);
+                                return;
+                            }
+
+                            setIsSearchOpen(true);
+                        }}
+                    >
+                        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+                            <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                    </button>}
+                </Tooltip>
+            </div>
 
             <Tooltip text={isCurrentChannelBookmarked ? "Remove from Bookmarks" : "Add to Bookmarks"} position="left" >
                 {p => <button className={cl("button")} {...p} onClick={() => {
